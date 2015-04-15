@@ -1,0 +1,67 @@
+/*
+ * This file is part of the repicea-simulation library.
+ *
+ * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+package repicea.simulation.processsystem;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.security.InvalidParameterException;
+
+import javax.swing.AbstractButton;
+import javax.swing.JSlider;
+import javax.swing.text.JTextComponent;
+
+import repicea.gui.CommonGuiUtility;
+import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.permissions.REpiceaGUIPermissionProvider;
+
+class SystemComponentMouseAdapter extends MouseAdapter {
+
+	private final REpiceaGUIPermissionProvider readWriteProvider;
+	
+	
+	SystemComponentMouseAdapter(REpiceaGUIPermissionProvider readWriteProvider) {
+		if (readWriteProvider instanceof ShowableObjectWithParent && readWriteProvider instanceof Component) {
+			this.readWriteProvider = readWriteProvider;
+		} else {
+			throw new InvalidParameterException("The component must implement the ShowableObjectWithParent interface");
+		} 
+	}
+	
+	
+	
+	
+	@Override
+	public void mouseClicked(MouseEvent arg0) {
+		if (arg0.getClickCount() >= 2) {
+			ShowableObjectWithParent showable = (ShowableObjectWithParent) readWriteProvider;
+			SystemManagerDialog systemManagerDialog = (SystemManagerDialog) CommonGuiUtility.getParentComponent((Component) readWriteProvider, SystemManagerDialog.class);
+			boolean isEnablingGranted = readWriteProvider.getGUIPermission().isEnablingGranted();
+			if (!isEnablingGranted) {
+				Container internalDlg = (Container) showable.getGuiInterface(systemManagerDialog);
+				CommonGuiUtility.enableThoseComponents(internalDlg, JTextComponent.class, isEnablingGranted);
+				CommonGuiUtility.enableThoseComponents(internalDlg, JSlider.class, isEnablingGranted);
+				CommonGuiUtility.enableThoseComponents(internalDlg, AbstractButton.class, isEnablingGranted);
+			}
+			showable.showInterface(systemManagerDialog);
+		}
+	}
+
+}

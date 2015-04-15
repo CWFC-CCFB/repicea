@@ -1,0 +1,108 @@
+/*
+ * This file is part of the repicea-simulation library.
+ *
+ * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+package repicea.simulation.processsystem;
+
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.geom.Path2D;
+
+@SuppressWarnings("serial")
+public abstract class AbstractProcessorLinkLine extends AbstractPermissionProviderButton {
+	
+	protected final SystemPanel panel;
+	private final AnchorProvider fatherAnchor;
+	private AnchorProvider sonAnchor;
+	
+	protected AbstractProcessorLinkLine(SystemPanel panel, AnchorProvider fatherAnchor, AnchorProvider sonAnchor) {
+		super(panel.getListManager().getGUIPermission());
+		this.panel = panel;
+		this.fatherAnchor = fatherAnchor;
+		setSonAnchor(sonAnchor);
+	}
+
+	protected void setSonAnchor(AnchorProvider sonAnchor) {this.sonAnchor = sonAnchor;}
+	
+	
+	protected void setStroke(Graphics2D g2) {
+		if (isSelected()) {
+			g2.setStroke(UISetup.BoldStroke);
+		} else {
+			g2.setStroke(UISetup.DefaultStroke);
+		}
+	}
+	
+	protected void draw(Graphics g) {
+		Graphics2D g2 = (Graphics2D) g;
+		Point fatherLocation = fatherAnchor.getRightAnchor();
+		Point sonLocation = sonAnchor.getLeftAnchor();
+		if (sonLocation != null) {
+			int midX = (int) ((fatherLocation.x + sonLocation.x) * .5);
+			int midY = (int) ((fatherLocation.y + sonLocation.y) * .5);
+			setLocation(midX - getSize().width / 2, midY - getSize().height / 2);
+			setStroke(g2);
+			int controlX1 = midX;
+			int controlX2 = midX;
+			int controlY1 = fatherLocation.y;
+			int controlY2 = sonLocation.y;
+			if (sonLocation.x - fatherLocation.x < 50) {
+				controlX1 = fatherLocation.x + 50;
+				controlX2 = sonLocation.x - 50;
+				int offset = 50;
+				if (fatherLocation.y > sonLocation.y) {
+					offset = -50;
+				}
+				controlY1 = fatherLocation.y + offset;
+				controlY2 = sonLocation.y - offset;
+			}
+			Path2D.Double curve = new Path2D.Double();
+			curve.moveTo(fatherLocation.x, fatherLocation.y);
+			curve.curveTo(controlX1, controlY1,
+					controlX2, controlY2,
+					sonLocation.x, sonLocation.y);
+			g2.draw(curve);
+			g2.setStroke(UISetup.DefaultStroke);		// to the default value
+
+		}
+	}
+
+	protected AnchorProvider getFatherAnchor() {return fatherAnchor;}
+	protected AnchorProvider getSonAnchor() {return sonAnchor;}
+	
+	protected boolean contains(Object button) {
+		return getFatherAnchor().equals(button) || getSonAnchor().equals(button);
+	}
+	
+	@Override
+	protected void finalize() {}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AbstractProcessorLinkLine) {
+			AbstractProcessorLinkLine thatLinkLine = (AbstractProcessorLinkLine) obj;
+			if (getFatherAnchor().equals(thatLinkLine.getFatherAnchor())) {
+				if (getSonAnchor().equals(thatLinkLine.getSonAnchor())) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+}
