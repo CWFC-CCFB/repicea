@@ -21,4 +21,8 @@ by a GNU Lesser General Public License.
 
 This library includes the JavaDBF library (copyright anil@linuxense.com) and requires the 
 ucanaccess library version 2.0.3 (http://ucanaccess.sourceforge.net/site.html) to work properly. 
+
+This library also requires the Apache Commons Mathematics Library (http://commons.apache.org/proper/commons-math/), 
+which is protected by an Apache License.
+
 All these libraries  are protected by a GNU Lesser General Public License. 
