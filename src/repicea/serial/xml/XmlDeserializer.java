@@ -74,7 +74,7 @@ public class XmlDeserializer {
 
 	/**
 	 * Constructor.
-	 * @param filename the file from which the object is deserialized
+	 * @param is an InputStream instance from which the object is deserialized
 	 * @throws FileNotFoundException
 	 */
 	public XmlDeserializer(InputStream is) {
