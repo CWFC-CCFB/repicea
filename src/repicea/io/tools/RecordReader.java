@@ -205,7 +205,7 @@ public abstract class RecordReader implements Serializable {
 								throw new NullPointerException("A null value has been found at line " + lineNumber + " in the DBF file : field " + impFieldElem.getFieldName());
 							}
 						} else {																// the field is then optional
-							if (iFieldIndex < 0 || rowObjects[iFieldIndex] == null) {			// if the field has not been specified or the selected field contains a null value
+							if (iFieldIndex < 0 || rowObjects[iFieldIndex] == null || rowObjects[iFieldIndex].toString().isEmpty()) {			// if the field has not been specified or the selected field contains a null value
 								oArray[i] = null;
 							} else {
 								oArray[i] = rowObjects[iFieldIndex].toString().trim();
@@ -220,7 +220,7 @@ public abstract class RecordReader implements Serializable {
 		} catch (Exception e) {
 			String message; 
 			if (e instanceof VariableValueException) {
-				message = "Values of variables are inconsistent at line : " + lineCounter;
+				message = "Values of variables are inconsistent at line : " + lineCounter + ": " + e.getMessage();
 			} else if (e instanceof FileNotFoundException) {
 				message = "Could not find file : " + importFieldManager.getFileSpecifications()[0];
 			} else {
