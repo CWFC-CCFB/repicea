@@ -43,7 +43,6 @@ import javax.swing.event.ChangeListener;
 
 import repicea.app.Logger;
 import repicea.console.TriggerSettings.Encoding;
-import repicea.console.TriggerSettings.Language;
 import repicea.console.TriggerTask.TaskID;
 import repicea.gui.AutomatedHelper;
 import repicea.gui.REpiceaFrame;
@@ -53,6 +52,7 @@ import repicea.gui.UIControlManager.CommonMenuTitle;
 import repicea.multiprocess.IndependentProcess.StateValue;
 import repicea.net.BrowserCaller;
 import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.Language;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
@@ -159,7 +159,7 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		try {
 			Method callHelp = BrowserCaller.class.getMethod("openUrl", String.class);
 			String url = "http://www.inra.fr/capsis/help_" 
-					+ caller.getSettings().getLanguage().getLanguageCode() 
+					+ caller.getSettings().getLanguage().getCode() 
 					+ "/quebecmrnf/capsisstarter";
 			AutomatedHelper helper = new AutomatedHelper(callHelp, new Object[]{url});
 			UIControlManager.setHelpMethod(getClass(), helper);
@@ -170,10 +170,9 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 	}
 
 	protected void createUI() {
-		String completeJREVersion = System.getProperty("java.version");
-		String jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
-		String revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
-		setTitle(caller.getTitle() + " - JRE " + jreVersion + " Revision " + revision);
+		setTitle(caller.getTitle() 
+				+ " - JRE " + caller.getSettings().getJreVersion()
+				+ " Revision " + caller.getSettings().getRevision());
 		getContentPane().setLayout(new BorderLayout());
 		scrollPane = logger.getGuiInterface();
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
@@ -210,8 +209,7 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		int maximum;
 		int majorTickSpacing;
 		int minorTickSpacing;
-		String osArch = System.getProperty("os.arch");
-		if (osArch.endsWith("64")) {
+		if (caller.getSettings().getArchitecture().endsWith("64")) {
 			minimum = 1024;
 			maximum = 8 * 1024;
 			majorTickSpacing = 1024;
@@ -226,7 +224,7 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		slider.setMaximum(maximum);
 		slider.setMinorTickSpacing(minorTickSpacing);
 		slider.setMajorTickSpacing(majorTickSpacing);
-		slider.setValue(caller.settings.getMaxMemoryJVM());
+		slider.setValue(caller.settings.getAllocatedMemoryJVM());
 		@SuppressWarnings("unchecked")
 		Hashtable<Integer, JLabel> valueTable = slider.createStandardLabels(majorTickSpacing, minimum);
 		for (JLabel label : valueTable.values()) {
@@ -238,9 +236,9 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		
 		languageMenu = new JMenu(MessageID.LanguageMenuTitle.toString());
 		menuBar.add(languageMenu);
-		languageFr = new LanguageRadioButtonMenuItem(Language.FRENCH, caller);
+		languageFr = new LanguageRadioButtonMenuItem(Language.French, caller);
 		languageMenu.add(languageFr);
-		languageEn = new LanguageRadioButtonMenuItem(Language.ENGLISH, caller);
+		languageEn = new LanguageRadioButtonMenuItem(Language.English, caller);
 		languageMenu.add(languageEn);
 		ButtonGroup languageButtons = new ButtonGroup();
 		languageButtons.add(languageFr);
@@ -432,7 +430,7 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		if (e.getSource().equals(slider)) {
-			caller.settings.setMaxMemoryJVM(slider.getValue());
+			caller.settings.setAllocatedMemoryJVM(slider.getValue());
 			updateCurrentMemoryLabel();
 		}
 		

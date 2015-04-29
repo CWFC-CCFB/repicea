@@ -18,46 +18,14 @@
  */
 package repicea.console;
 
-import java.io.Serializable;
-
 import repicea.serial.Memorizable;
 import repicea.serial.MemorizerPackage;
 import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.Language;
 
 public class TriggerSettings implements Memorizable {
 
 	
-	@SuppressWarnings("serial")
-	public static class Language implements Serializable {
-
-		public static final Language ENGLISH = new Language("English", "en");
-		public static final Language FRENCH = new Language("Fran\u00E7ais", "fr");
-
-		private String longName;
-		private String capsisCode;
-
-		private Language(String longName, String capsisCode) {
-			this.longName = longName;
-			this.capsisCode = capsisCode;
-		}
-
-		@Override
-		public String toString() {return longName;}
-		public String getLanguageCode() {return capsisCode;}
-
-		@Override
-		public boolean equals(Object obj) {
-			if (obj instanceof Language) {
-				Language otherLanguage = (Language) obj;
-				if (longName.equals(otherLanguage.longName) && capsisCode.equals(otherLanguage.capsisCode)) {
-					return true;
-				}
-			} 
-			return false;
-		}
-	}
-
-
 	public static enum Encoding {
 		US_ASCII("US-ASCII"),
 		ISO_8859_1("ISO-8859-1"),
@@ -81,35 +49,58 @@ public class TriggerSettings implements Memorizable {
 
 	
 	private final Trigger caller;
-	private int maxMemoryJVM;
+	private int allocatedMemoryJVM;
 	private Language language;
 	private Encoding encoding;
-
+	private final String jreVersion;
+	private final String revision;
+	private final String architecture;
+	private final int maxAllowedMemoryJVM;
+	private final int minAllowedMemoryJVM;
+	
 	protected TriggerSettings(Trigger caller) {
 		this.caller = caller;
 		String languageString = caller.getSettingMemory().getProperty("language", "en");
 		if (languageString.equals("fr")) {
-			language = Language.FRENCH;
+			language = Language.French;
 		} else {
-			language = Language.ENGLISH;  
+			language = Language.English;  
 		}
-		maxMemoryJVM = caller.getSettingMemory().getProperty("memory", 512);
+		
+		String completeJREVersion = System.getProperty("java.version");
+		jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
+		revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
+
+		architecture = System.getProperty("os.arch");
+		if (architecture.endsWith("64")) {
+			minAllowedMemoryJVM = 1024;
+			maxAllowedMemoryJVM = 8 * 1024;
+		} else {
+			minAllowedMemoryJVM = 256;
+			maxAllowedMemoryJVM = 2 * 1024;
+		}
+		
+		setAllocatedMemoryJVM(caller.getSettingMemory().getProperty("memory", 512));
 		encoding = Encoding.valueOf(caller.getSettingMemory().getProperty("encoding", "UTF_8"));
 	}
 
 	
-	public int getMaxMemoryJVM() {return maxMemoryJVM;}
-	protected void setMaxMemoryJVM(int maxMemoryJVM) {this.maxMemoryJVM = maxMemoryJVM;}
+	public int getAllocatedMemoryJVM() {return allocatedMemoryJVM;}
+	protected void setAllocatedMemoryJVM(int allocatedMemoryJVM) {
+		if (allocatedMemoryJVM < minAllowedMemoryJVM) {
+			this.allocatedMemoryJVM = minAllowedMemoryJVM;
+		} else if (allocatedMemoryJVM > maxAllowedMemoryJVM) {
+			
+		} else {
+			this.allocatedMemoryJVM = allocatedMemoryJVM;
+		}
+	}
 	
 	public Language getLanguage() {return language;}
 	
 	protected void setLanguage(Language language) {
 		this.language = language;
-		if (language.equals(Language.ENGLISH)) {
-			REpiceaTranslator.setCurrentLanguage(REpiceaTranslator.Language.English);
-		} else if (language.equals(Language.FRENCH)) {
-			REpiceaTranslator.setCurrentLanguage(REpiceaTranslator.Language.French);
-		}
+		REpiceaTranslator.setCurrentLanguage(language);
 	}
 	
 	protected void setEncoding(Encoding encoding) {
@@ -127,7 +118,7 @@ public class TriggerSettings implements Memorizable {
 	@Override
 	public MemorizerPackage getMemorizerPackage() {
 		MemorizerPackage mp = new MemorizerPackage();
-		mp.add(maxMemoryJVM);
+		mp.add(allocatedMemoryJVM);
 		mp.add(language);
 		mp.add(encoding);
 		return mp;
@@ -136,16 +127,19 @@ public class TriggerSettings implements Memorizable {
 
 	@Override
 	public void unpackMemorizerPackage(MemorizerPackage wasMemorized) {
-		maxMemoryJVM = (Integer) wasMemorized.get(0);
+		setAllocatedMemoryJVM((Integer) wasMemorized.get(0));
 		language = (Language) wasMemorized.get(1);
 		encoding = (Encoding) wasMemorized.get(2);
 	}
 
 
 	protected void recordSettings() {
-		caller.getSettingMemory().setProperty("language", getLanguage().getLanguageCode());
-		caller.getSettingMemory().setProperty("memory", getMaxMemoryJVM());
+		caller.getSettingMemory().setProperty("language", getLanguage().getCode());
+		caller.getSettingMemory().setProperty("memory", getAllocatedMemoryJVM());
 		caller.getSettingMemory().setProperty("encoding", getEncoding().name());
 	}
 	
+	protected String getJreVersion() {return jreVersion;}
+	protected String getRevision() {return revision;}
+	protected String getArchitecture() {return architecture;}
 }

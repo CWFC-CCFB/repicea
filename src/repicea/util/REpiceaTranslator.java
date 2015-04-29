@@ -24,7 +24,6 @@ import java.util.Map;
 
 import javax.swing.UIManager;
 
-
 /**
  * The REpiceaTranslator class handles the translation to another language.
  * @author Mathieu Fortin - November 2014
@@ -41,16 +40,18 @@ public class REpiceaTranslator {
 	}
 
 	public static enum Language {
-		English(Locale.ENGLISH, "en"),
-		French(Locale.FRANCE, "fr");
+		English(Locale.ENGLISH, "English", "en"),
+		French(Locale.FRANCE, "Fran\u00E7ais", "fr");
 		
 		private static Map<String, Language> CodeMap;
 		
 		Locale locale;
 		String code;
+		String longName;
 		
-		Language(Locale locale, String code) {
+		Language(Locale locale, String longName, String code) {
 			this.locale = locale;
+			this.longName = longName;
 			this.code = code;
 		}
 		
@@ -58,9 +59,7 @@ public class REpiceaTranslator {
 		 * Returns the locale associated with the language.
 		 * @return a Locale instance
 		 */
-		public Locale getLocale() {
-			return locale;
-		}
+		public Locale getLocale() {return locale;}
 
 		/**
 		 * This method returns the two-character code associated with the Language instance.
