@@ -55,7 +55,7 @@ public class SerialClonerTest {
 		xmlCloner.cloneThisObject(fakeInstance);
 		long elapsedTimeXml = System.currentTimeMillis() - start;
 		System.out.println("Time for xml cloner: " + elapsedTimeXml + " msec.");
-		Assert.assertTrue(elapsedTimeXml < elapsedTimeBasic * .1);
+		Assert.assertTrue(elapsedTimeXml < elapsedTimeBasic * .3);
 	}
 	
 	

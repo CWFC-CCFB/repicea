@@ -39,15 +39,6 @@ public final class GaussianDistribution<N extends Number> extends AbstractMathem
 	
 	private N lowerCholTriangle;
 		
-//	/**
-//	 * This constructor creates a standard Gaussian function with mean 0 and variance 1.
-//	 */
-//	public GaussianDistribution() {
-//		setMean(new Matrix(1,1));
-//		Matrix sigma2 = new Matrix(1,1);
-//		sigma2.m_afData[0][0] = 1d;
-//		setVariance(sigma2);
-//	}
 
 	/**
 	 * This constructor creates a Gaussian function with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 
@@ -176,23 +167,32 @@ public final class GaussianDistribution<N extends Number> extends AbstractMathem
 	}
 
 //	@Override
-//	public double getQuantile(double... values) {
-//		if (values.length != getMean().m_iRows) {
+//	public List<double[]> getQuantile(List<double[]> probabilities) {
+//		if (probabilities == null || probabilities.isEmpty()) {
+//			throw new InvalidParameterException("The probabilities parameter is null or empty!");
+//		} else if (isMultivariate() && probabilities.size() != ((Matrix) getMean()).m_iRows) {
 //			throw new InvalidParameterException("The number of values does not correspond to the dimension of the distribution!");
 //		} else {
-//			if (values.length == 1) {
-//				double standardizedValue = (values[0] - getMean().m_afData[0][0]) / Math.sqrt(getVariance().m_afData[0][0]);
-//				return GaussianUtility.getCumulativeProbability(standardizedValue);
-//			} else if (values.length == 2) {
-//				double std1 = Math.sqrt(getVariance().m_afData[0][0]);
-//				double standardizedValue1 = (values[0] - getMean().m_afData[0][0]) / std1;
-//				double std2 = Math.sqrt(getVariance().m_afData[1][1]);
-//				double standardizedValue2 = (values[1] - getMean().m_afData[1][0]) / std2;
-//				double correlation = getVariance().m_afData[0][1] / (std1 * std2);
-//				return GaussianUtility.getBivariateCumulativeProbability(standardizedValue1, standardizedValue2, correlation);
-//			}
+//			List<double[]> output = new ArrayList<double[]>();
+//			if (!isMultivariate()) {
+//				double[] probabilityLevels = probabilities.get(0);
+//				double[] quantiles = new double[probabilityLevels.length];
+//				for (int i = 0; i < probabilityLevels.length; i++) {
+//					double standardizedValue = (values[0] - getMean().m_afData[0][0]) / Math.sqrt(getVariance().m_afData[0][0]);
+//				}
+////				return GaussianUtility.getCumulativeProbability(standardizedValue);
+////			} else if (values.length == 2) {
+////				double std1 = Math.sqrt(getVariance().m_afData[0][0]);
+////				double standardizedValue1 = (values[0] - getMean().m_afData[0][0]) / std1;
+////				double std2 = Math.sqrt(getVariance().m_afData[1][1]);
+////				double standardizedValue2 = (values[1] - getMean().m_afData[1][0]) / std2;
+////				double correlation = getVariance().m_afData[0][1] / (std1 * std2);
+////				return GaussianUtility.getBivariateCumulativeProbability(standardizedValue1, standardizedValue2, correlation);
+////			}
+////		}
+////		return -1;
 //		}
-//		return -1;
+//		return null;
 //	}
 
 	

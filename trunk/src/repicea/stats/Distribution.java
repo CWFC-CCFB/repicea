@@ -60,9 +60,11 @@ public interface Distribution<N extends Number> extends CentralMomentsGettable<N
 	
 	
 //	/**
-//	 * This method returns the quantile of the distribution.
-//	 * @param values a array of doubles
-//	 * @return a double
+//	 * This method returns the quantiles of the distribution. Each array contains the quantile of a single 
+//	 * dimension. For instance, the array {0.025,0.975} would return the 95% quantiles of the first dimension only.
+//	 * @param probabilities a List of arrays of doubles corresponding to the probabilities
+//	 * @return a List of array of doubles corresponding to the quantiles
 //	 */
-//	public double getQuantile(double... values);
+//	public List<double[]> getQuantile(List<double[]> probabilities);
+
 }
