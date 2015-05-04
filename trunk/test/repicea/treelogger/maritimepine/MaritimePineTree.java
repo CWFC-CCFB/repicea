@@ -28,16 +28,6 @@ class MaritimePineTree implements MaritimePineBasicTree {
 	}
 
 	@Override
-	public double getStumpVolumeM3() {
-		return 3;
-	}
-
-	@Override
-	public double getFineWoodyDebrisVolumeM3() {
-		return 2;
-	}
-
-	@Override
 	public double getDbhCmStandardDeviation() {
 		return 10;
 	}

@@ -46,20 +46,6 @@ public interface MaritimePineBasicTree extends LoggableTree, DbhCmProvider {
 		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 	
-//	public static final String PINE = "pine";
-
-	/**
-	 * This method returns the stump volume (m3) of the tree.
-	 * @return a double
-	 */
-	public double getStumpVolumeM3();
-
-	/**
-	 * This method returns the volume (m3) of fine woody debris.
-	 * @return a double
-	 */
-	public double getFineWoodyDebrisVolumeM3();
-	
 	
 	/**
 	 * This method returns the standard deviation of the dbh.

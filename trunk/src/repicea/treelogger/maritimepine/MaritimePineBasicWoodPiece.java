@@ -35,28 +35,22 @@ public class MaritimePineBasicWoodPiece extends WoodPiece {
 	
 	protected MaritimePineBasicWoodPiece(MaritimePineBasicTreeLogCategory logCategory, MaritimePineBasicTree tree) {
 		super(logCategory, tree);
-		if (logCategory.logGrade == Grade.Stump) {
-			setVolumeM3(tree.getStumpVolumeM3());
-		} else if (logCategory.logGrade == Grade.Crown) {
-			setVolumeM3(tree.getFineWoodyDebrisVolumeM3());
+		double mqd = tree.getDbhCm();
+		double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
+
+		// Assumption of a normal distribution for stem distribution
+		double energyWoodProportion = GaussianUtility.getCumulativeProbability((20d - mqd)/dbhStandardDeviation);
+		if (logCategory.logGrade == Grade.IndustryWood) {
+			setVolumeM3(energyWoodProportion * tree.getCommercialVolumeM3());
 		} else {
-			double mqd = tree.getDbhCm();
-			double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
-			
-			// Assumption of a normal distribution for stem distribution
-			double energyWoodProportion = GaussianUtility.getCumulativeProbability((20d - mqd)/dbhStandardDeviation);
-			if (logCategory.logGrade == Grade.IndustryWood) {
-				setVolumeM3(energyWoodProportion * tree.getCommercialVolumeM3());
+			double lowQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation) - energyWoodProportion;
+			double potentialHighQualitySawlogProportion = 1 - GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation, true);
+			lowQualitySawlogProportion += LowQualityPercentageWithinHighQualityGrade * potentialHighQualitySawlogProportion;
+			if (logCategory.logGrade == Grade.SawlogLowQuality) {
+				setVolumeM3(lowQualitySawlogProportion * tree.getCommercialVolumeM3());
 			} else {
-				double lowQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation) - energyWoodProportion;
-				double potentialHighQualitySawlogProportion = 1 - GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation, true);
-				lowQualitySawlogProportion += LowQualityPercentageWithinHighQualityGrade * potentialHighQualitySawlogProportion;
-				if (logCategory.logGrade == Grade.SawlogLowQuality) {
-					setVolumeM3(lowQualitySawlogProportion * tree.getCommercialVolumeM3());
-				} else {
-					double highQualitySawlogProportion = potentialHighQualitySawlogProportion * (1 - LowQualityPercentageWithinHighQualityGrade); 
-					setVolumeM3(highQualitySawlogProportion * tree.getCommercialVolumeM3());
-				}
+				double highQualitySawlogProportion = potentialHighQualitySawlogProportion * (1 - LowQualityPercentageWithinHighQualityGrade); 
+				setVolumeM3(highQualitySawlogProportion * tree.getCommercialVolumeM3());
 			}
 		}
 	}
