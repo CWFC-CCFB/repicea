@@ -137,20 +137,6 @@ public class GaussianUtility {
 	 * WILMOTT magazine. 70-76. </a> 
 	 */
 	public static double getCumulativeProbability(double x) {
-		return GaussianUtility.getCumulativeProbability(x, false);
-	}
-	
-	
-	/**
-	 * This method returns the cumulative probability or the complementary probability of a standard normal 
-	 * distribution for quantile x. The algorithm was translated from West's code.
-	 * @param x the quantile
-	 * @param complementary a boolean true to obtain the complementary probability or false to get the cumulative probability
-	 * @return the probability (a double)
-	 * @see <a href=http://www.wilmott.com/pdfs/090721_west.pdf> West, G. Better approximations to cumulative normal functions.
-	 * WILMOTT magazine. 70-76. </a> 
-	 */
-	public static double getCumulativeProbability(double x, boolean complementary) {
 		double cumnorm = Double.NaN;
 		double xAbs = Math.abs(x);
 		if (xAbs > 37) {
@@ -186,6 +172,24 @@ public class GaussianUtility {
 			cumnorm = 1 - cumnorm;
 		}
 		return cumnorm;
+	}
+	
+	
+	/**
+	 * This method returns the cumulative probability or the complementary probability of a standard normal 
+	 * distribution for quantile x. The algorithm was translated from West's code.
+	 * @param x the quantile
+	 * @param complementary a boolean true to obtain the complementary probability or false to get the cumulative probability
+	 * @return the probability (a double)
+	 * @see <a href=http://www.wilmott.com/pdfs/090721_west.pdf> West, G. Better approximations to cumulative normal functions.
+	 * WILMOTT magazine. 70-76. </a> 
+	 */
+	public static double getCumulativeProbability(double x, boolean complementary) {
+		if (complementary) {
+			return 1d - getCumulativeProbability(x);
+		} else {
+			return getCumulativeProbability(x);
+		}
 	}
 	
 	

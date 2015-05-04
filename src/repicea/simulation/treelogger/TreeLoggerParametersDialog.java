@@ -237,19 +237,6 @@ public abstract class TreeLoggerParametersDialog<P extends TreeLogCategory>
 		cancel.setEnabled(getTreeLoggerParameters().getGUIPermission().isEnablingGranted());
 	}
 		
-//	private void refreshTitle() {
-////		if (params.getFilename() != null && !params.getFilename().isEmpty() && TreeLoggerParameters.TreeLoggerFileFilter.accept(new File(params.getFilename()))) {
-////			String title;
-////			if (params.getFilename().length() > 45) {
-////				title = "..." + params.getFilename().subSequence(params.getFilename().length() - 45, params.getFilename().length());
-////			} else {
-////				title = params.getFilename();
-////			}
-////			setTitle(UIControlManager.getTitle(getClass()) + " - " + title);
-////		} else {
-////			setTitle(UIControlManager.getTitle(getClass()));
-////		}
-//	}
 
 	@Override
 	public void okAction() {

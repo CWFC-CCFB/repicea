@@ -22,6 +22,7 @@ import java.util.List;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
+import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
  * The MaritimePineBasicTreeLogger class is a simple tree logger which considers
@@ -33,17 +34,17 @@ public class MaritimePineBasicTreeLogger extends TreeLogger<MaritimePineBasicTre
 
 	@Override
 	protected void logThisTree(MaritimePineBasicTree tree) {
-		List<MaritimePineBasicTreeLogCategory> logCategories = params.getSpeciesLogCategories(MaritimePineBasicTree.PINE);
+		List<MaritimePineBasicTreeLogCategory> logCategories = params.getSpeciesLogCategories(MaritimePineBasicTree.Species.MaritimePine.toString());
 		for (MaritimePineBasicTreeLogCategory logCategory : logCategories) {
 			boolean toBeSawn = true;
-			if (logCategories.indexOf(logCategory) == 2 && tree.getStumpVolumeM3() <= 0) {
+			if (logCategory.logGrade == Grade.Stump && tree.getStumpVolumeM3() <= 0) {
 				toBeSawn = false;
 			} 
-			if (logCategories.indexOf(logCategory) == 3 && tree.getFineWoodyDebrisVolumeM3() <= 0) {
+			if (logCategory.logGrade == Grade.Crown && tree.getFineWoodyDebrisVolumeM3() <= 0) {
 				toBeSawn = false;
 			} 
 			if (toBeSawn) {
-				addWoodPiece(tree, new MaritimePineBasicWoodPiece(logCategory, tree));
+				addWoodPiece(tree, new MaritimePineBasicWoodPiece(logCategory, tree));	
 			}
 		}
 

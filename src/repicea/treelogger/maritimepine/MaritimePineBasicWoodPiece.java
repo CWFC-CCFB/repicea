@@ -18,9 +18,9 @@
  */
 package repicea.treelogger.maritimepine;
 
-import repicea.simulation.treelogger.TreeLogCategory;
 import repicea.simulation.treelogger.WoodPiece;
-import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.MessageID;
+import repicea.stats.distributions.GaussianUtility;
+import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
  * The MaritimePineBasicWoodPiece is a simple class that represents 
@@ -31,18 +31,34 @@ import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Mes
 @SuppressWarnings("serial")
 public class MaritimePineBasicWoodPiece extends WoodPiece {
 
-	protected MaritimePineBasicWoodPiece(TreeLogCategory logCategory, MaritimePineBasicTree tree) {
+	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
+	
+	protected MaritimePineBasicWoodPiece(MaritimePineBasicTreeLogCategory logCategory, MaritimePineBasicTree tree) {
 		super(logCategory, tree);
-		double eligibleVolumeM3;
-		if (logCategory.getName().equals(MessageID.Stump.toString())) {
-			eligibleVolumeM3 = tree.getStumpVolumeM3();
-		} else if (logCategory.getName().equals(MessageID.FWD.toString())) {
-			eligibleVolumeM3 = tree.getStumpVolumeM3();
+		if (logCategory.logGrade == Grade.Stump) {
+			setVolumeM3(tree.getStumpVolumeM3());
+		} else if (logCategory.logGrade == Grade.Crown) {
+			setVolumeM3(tree.getStumpVolumeM3());
 		} else {
-			eligibleVolumeM3 = tree.getCommercialVolumeM3();
+			double mqd = tree.getDbhCm();
+			double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
+			
+			// Assumption of a normal distribution for stem distribution
+			double energyWoodProportion = GaussianUtility.getCumulativeProbability((20d - mqd)/dbhStandardDeviation);
+			if (logCategory.logGrade == Grade.IndustryWood) {
+				setVolumeM3(energyWoodProportion * tree.getCommercialVolumeM3());
+			} else {
+				double lowQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation) - energyWoodProportion;
+				double potentialHighQualitySawlogProportion = 1 - GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation, true);
+				lowQualitySawlogProportion += LowQualityPercentageWithinHighQualityGrade * potentialHighQualitySawlogProportion;
+				if (logCategory.logGrade == Grade.SawlogLowQuality) {
+					setVolumeM3(lowQualitySawlogProportion * tree.getCommercialVolumeM3());
+				} else {
+					double highQualitySawlogProportion = potentialHighQualitySawlogProportion * (1 - LowQualityPercentageWithinHighQualityGrade); 
+					setVolumeM3(highQualitySawlogProportion * tree.getCommercialVolumeM3());
+				}
+			}
 		}
-		double volumeM3 = eligibleVolumeM3 * ((MaritimePineBasicTreeLogCategory) logCategory).getVolumeProportion();
-		setVolumeM3(volumeM3);
 	}
 
 }
