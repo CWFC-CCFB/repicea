@@ -40,11 +40,7 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 	public static enum MessageID implements TextableEnum {
 		WoodProducts("Wood products", "Produits bois"),
 		ProductType("Product type", "Type de produit"),
-		IndustryWood("Particle", "Bois industrie"),
-		SawlogLowQuality("Sawlog low quality", "Sciage basse qualit\u00E9"),
-		SawlogHighQuality("Sawlog high quality", "Sciage haute qualit\u00E9"),
-		Stump("Stump", "Souche"),
-		Crown("Crown", "Houppier");
+		;
 
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -66,8 +62,9 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 		IndustryWood("Particle", "Bois industrie"),
 		SawlogLowQuality("Sawlog low quality", "Sciage basse qualit\u00E9"),
 		SawlogHighQuality("Sawlog high quality", "Sciage haute qualit\u00E9"),
-		Stump("Stump", "Souche"),
-		Crown("Crown", "Houppier");
+//		Stump("Stump", "Souche"),
+//		Crown("Crown", "Houppier")
+		;
 
 		Grade(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -97,11 +94,11 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 		String species = MaritimePineBasicTree.Species.MaritimePine.toString();
 		getLogCategories().clear();
 		getLogCategories().put(species, categories);
-		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Stump, species, -1));
+//		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Stump, species, -1));
 		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogHighQuality, species, 25));
 		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogLowQuality, species, 16));
 		categories.add(new MaritimePineBasicTreeLogCategory(Grade.IndustryWood, species, 10));
-		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Crown, species, -1));
+//		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Crown, species, -1));
 	}
 
 	@Override
