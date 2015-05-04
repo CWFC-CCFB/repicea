@@ -38,7 +38,7 @@ public class MaritimePineBasicWoodPiece extends WoodPiece {
 		if (logCategory.logGrade == Grade.Stump) {
 			setVolumeM3(tree.getStumpVolumeM3());
 		} else if (logCategory.logGrade == Grade.Crown) {
-			setVolumeM3(tree.getStumpVolumeM3());
+			setVolumeM3(tree.getFineWoodyDebrisVolumeM3());
 		} else {
 			double mqd = tree.getDbhCm();
 			double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
