@@ -40,11 +40,11 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 	public static enum MessageID implements TextableEnum {
 		WoodProducts("Wood products", "Produits bois"),
 		ProductType("Product type", "Type de produit"),
-		ShortLived("Particle", "Bois d'industrie"),
-		LongLived("Sawing", "Bois d'oeuvre"),
+		IndustryWood("Particle", "Bois industrie"),
+		SawlogLowQuality("Sawlog low quality", "Sciage basse qualit\u00E9"),
+		SawlogHighQuality("Sawlog high quality", "Sciage haute qualit\u00E9"),
 		Stump("Stump", "Souche"),
-		FWD("Fine wood debris", "Branches fines"),
-		Proportion("Splitting", "R\u00E9partition");
+		Crown("Crown", "Houppier");
 
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -60,8 +60,30 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 			return REpiceaTranslator.getString(this);
 		}
 	}
-
 	
+	
+	public static enum Grade implements TextableEnum {
+		IndustryWood("Particle", "Bois industrie"),
+		SawlogLowQuality("Sawlog low quality", "Sciage basse qualit\u00E9"),
+		SawlogHighQuality("Sawlog high quality", "Sciage haute qualit\u00E9"),
+		Stump("Stump", "Souche"),
+		Crown("Crown", "Houppier");
+
+		Grade(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+		
+		@Override
+		public String toString() {
+			return REpiceaTranslator.getString(this);
+		}
+	}
+
 	private transient MaritimePineBasicTreeLoggerParametersDialog guiInterface;
 
 	protected MaritimePineBasicTreeLoggerParameters() {
@@ -72,18 +94,18 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 	@Override
 	protected void initializeDefaultLogCategories() {
 		List<MaritimePineBasicTreeLogCategory> categories = new ArrayList<MaritimePineBasicTreeLogCategory>();
+		String species = MaritimePineBasicTree.Species.MaritimePine.toString();
 		getLogCategories().clear();
-		getLogCategories().put(MaritimePineBasicTree.PINE, categories);
-		categories.add(new MaritimePineBasicTreeLogCategory(MessageID.ShortLived.toString(), MaritimePineBasicTree.PINE, .3));
-		categories.add(new MaritimePineBasicTreeLogCategory(MessageID.LongLived.toString(), MaritimePineBasicTree.PINE, .7));
-		categories.add(new MaritimePineBasicTreeLogCategory(MessageID.Stump.toString(), MaritimePineBasicTree.PINE, 1d));
-		categories.add(new MaritimePineBasicTreeLogCategory(MessageID.FWD.toString(), MaritimePineBasicTree.PINE, 1d));
+		getLogCategories().put(species, categories);
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Stump, species, -1));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogHighQuality, species, 25));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogLowQuality, species, 16));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.IndustryWood, species, 10));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Crown, species, -1));
 	}
 
 	@Override
-	public boolean isCorrect() {
-		return true;
-	}
+	public boolean isCorrect() {return true;}
 
 	@Override
 	public MaritimePineBasicTreeLoggerParametersDialog getGuiInterface(Container parent) {
@@ -95,7 +117,7 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 	
 	public static void main(String[] args) {
 		MaritimePineBasicTreeLoggerParameters params = new MaritimePineBasicTreeLoggerParameters();
-		params.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(false));
+		params.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(true));
 		params.showInterface(null);
 		params.showInterface(null);
 	}

@@ -19,8 +19,8 @@
 package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.TreeLogCategory;
-import repicea.simulation.treelogger.TreeLogCategoryPanel;
 import repicea.simulation.treelogger.WoodPiece;
+import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
  * The MaritimePineBasicTreeLogCategory class is the log category for 
@@ -31,15 +31,10 @@ import repicea.simulation.treelogger.WoodPiece;
 @SuppressWarnings("serial")
 public class MaritimePineBasicTreeLogCategory extends TreeLogCategory {
 
-	static class CarbonAccountingToolDefaultLogCategoryPanel extends TreeLogCategoryPanel<MaritimePineBasicTreeLogCategory> {
-		private CarbonAccountingToolDefaultLogCategoryPanel(MaritimePineBasicTreeLogCategory logCategory) {
-			super(logCategory);
-		}
-	}
-
-	private double volumeProportionToBeProcessedInThisCategory;
-
-	private transient CarbonAccountingToolDefaultLogCategoryPanel guiInterface;
+	protected final Double smallEndDiameter;
+	
+	private transient MaritimePineBasicTreeLogCategoryPanel guiInterface;
+	protected final Grade logGrade;
 	
 	/**
 	 * Constructor.
@@ -47,10 +42,15 @@ public class MaritimePineBasicTreeLogCategory extends TreeLogCategory {
 	 * @param species the species name
 	 * @param merchantableVolumeProportion the proportion of the merchantable volume that falls into this category
 	 */
-	protected MaritimePineBasicTreeLogCategory(String str, String species, double volumeProportionToBeProcessedInThisCategory) {
-		super(str);
-		this.volumeProportionToBeProcessedInThisCategory = volumeProportionToBeProcessedInThisCategory;
+	protected MaritimePineBasicTreeLogCategory(Grade logGrade, String species, double smallEndDiameter) {
+		super(logGrade.toString());
 		setSpecies(species);
+		this.logGrade = logGrade;
+		if (smallEndDiameter == -1) {
+			this.smallEndDiameter = Double.NaN;
+		} else {
+			this.smallEndDiameter = smallEndDiameter;
+		}
 	}
 
 		
@@ -59,9 +59,9 @@ public class MaritimePineBasicTreeLogCategory extends TreeLogCategory {
 	 * @see capsis.extension.treelogger.TreeLogCategory#getTreeLogCategoryPanel()
 	 */
 	@Override
-	public CarbonAccountingToolDefaultLogCategoryPanel getGuiInterface() {
+	public MaritimePineBasicTreeLogCategoryPanel getGuiInterface() {
 		if (guiInterface == null) {
-			guiInterface = new CarbonAccountingToolDefaultLogCategoryPanel(this);
+			guiInterface = new MaritimePineBasicTreeLogCategoryPanel(this);
 		}
 		return guiInterface;
 	}
@@ -69,12 +69,5 @@ public class MaritimePineBasicTreeLogCategory extends TreeLogCategory {
 	@Override
 	public double getYieldFromThisPiece(WoodPiece piece) throws Exception {return 1d;}
 
-
-	protected void setVolumeProportion(double d) {
-		volumeProportionToBeProcessedInThisCategory = d;
-	}
-
-
-	protected double getVolumeProportion() {return volumeProportionToBeProcessedInThisCategory;}
 
 }
