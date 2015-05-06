@@ -2,6 +2,14 @@ package repicea.treelogger.maritimepine;
 
 class MaritimePineTree implements MaritimePineBasicTree {
 
+	private final double dbhCm;
+	private final double standardDeviationCm;
+	
+	protected MaritimePineTree(double dbhCm, double standardDeviationCm) {
+		this.dbhCm = dbhCm;
+		this.standardDeviationCm = standardDeviationCm;
+	}
+	
 	@Override
 	public double getNumber() {
 		return 100;
@@ -24,12 +32,12 @@ class MaritimePineTree implements MaritimePineBasicTree {
 
 	@Override
 	public double getDbhCm() {
-		return 30;
+		return dbhCm;
 	}
 
 	@Override
 	public double getDbhCmStandardDeviation() {
-		return 10;
+		return standardDeviationCm;
 	}
 
 }

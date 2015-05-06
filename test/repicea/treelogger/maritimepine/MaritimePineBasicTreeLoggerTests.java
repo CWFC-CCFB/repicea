@@ -7,16 +7,17 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.simulation.treelogger.WoodPiece;
+import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 public class MaritimePineBasicTreeLoggerTests {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
-	public void TestWithSimpleTree() {
+	public void TestWithSimpleTreeWithStandardDeviation() {
 		MaritimePineBasicTreeLogger treeLogger = new MaritimePineBasicTreeLogger();
 		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
 		Collection trees = new ArrayList<MaritimePineTree>();
-		MaritimePineTree tree = new MaritimePineTree();
+		MaritimePineTree tree = new MaritimePineTree(30,10);
 		trees.add(tree);
 		treeLogger.init(trees);
 		treeLogger.run();
@@ -27,4 +28,22 @@ public class MaritimePineBasicTreeLoggerTests {
 		}
 		Assert.assertEquals("Comparing bole volume", 1d, sum, 1E-8); 
 	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void TestWithSimpleTreeWithNoStandardDeviation() {
+		MaritimePineBasicTreeLogger treeLogger = new MaritimePineBasicTreeLogger();
+		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
+		Collection trees = new ArrayList<MaritimePineTree>();
+		MaritimePineTree tree = new MaritimePineTree(29,0);
+		trees.add(tree);
+		treeLogger.init(trees);
+		treeLogger.run();
+		Collection<WoodPiece> woodPieces = treeLogger.getWoodPieces().get(tree);
+		Assert.assertTrue(woodPieces.size() == 1);
+		WoodPiece woodPiece = woodPieces.iterator().next();
+		MaritimePineBasicTreeLogCategory logCategory = (MaritimePineBasicTreeLogCategory) woodPiece.getLogCategory();
+		Assert.assertTrue(logCategory.logGrade == Grade.SawlogLowQuality);
+	}
+
 }

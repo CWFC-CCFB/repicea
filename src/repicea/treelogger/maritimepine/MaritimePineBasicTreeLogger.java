@@ -22,6 +22,8 @@ import java.util.List;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
+import repicea.stats.distributions.GaussianUtility;
+import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
  * The MaritimePineBasicTreeLogger class is a simple tree logger which considers
@@ -31,14 +33,18 @@ import repicea.simulation.treelogger.TreeLogger;
  */
 public class MaritimePineBasicTreeLogger extends TreeLogger<MaritimePineBasicTreeLoggerParameters, MaritimePineBasicTree> {
 
+	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
+
 	@Override
 	protected void logThisTree(MaritimePineBasicTree tree) {
 		List<MaritimePineBasicTreeLogCategory> logCategories = params.getSpeciesLogCategories(MaritimePineBasicTree.Species.MaritimePine.toString());
+		MaritimePineBasicWoodPiece piece;
 		for (MaritimePineBasicTreeLogCategory logCategory : logCategories) {
-			addWoodPiece(tree, new MaritimePineBasicWoodPiece(logCategory, tree));	
+			piece = producePiece(tree, logCategory);
+			if (piece != null) {
+				addWoodPiece(tree, piece);	
+			} 
 		}
-
-		
 	}
 
 	@Override
@@ -58,4 +64,56 @@ public class MaritimePineBasicTreeLogger extends TreeLogger<MaritimePineBasicTre
 		}
 	}
 
+	
+	private MaritimePineBasicWoodPiece producePiece(MaritimePineBasicTree tree, MaritimePineBasicTreeLogCategory logCategory) {
+		double mqd = tree.getDbhCm();
+		double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
+		MaritimePineBasicWoodPiece piece = null;
+		double energyWoodProportion;
+		double highQualitySawlogProportion;
+		double lowQualitySawlogProportion;
+
+		if (dbhStandardDeviation > 0) {
+			// Assumption of a normal distribution for stem distribution
+			energyWoodProportion = GaussianUtility.getCumulativeProbability((20d - mqd)/dbhStandardDeviation);
+			lowQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation) - energyWoodProportion;
+			double potentialHighQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation, true);
+			lowQualitySawlogProportion += LowQualityPercentageWithinHighQualityGrade * potentialHighQualitySawlogProportion;
+			highQualitySawlogProportion = potentialHighQualitySawlogProportion * (1 - LowQualityPercentageWithinHighQualityGrade); 
+		} else {	// no standard deviation
+			if (mqd < 20) {
+				energyWoodProportion = 1d;
+				lowQualitySawlogProportion = 0d;
+				highQualitySawlogProportion = 0d;
+			} else  if (mqd < 30) {
+				energyWoodProportion = 0d;
+				lowQualitySawlogProportion = 1d;
+				highQualitySawlogProportion = 0d;
+			} else {
+				energyWoodProportion = 0d;
+				lowQualitySawlogProportion = LowQualityPercentageWithinHighQualityGrade;
+				highQualitySawlogProportion = 1 - LowQualityPercentageWithinHighQualityGrade;
+			}
+		}
+		
+		if (logCategory.logGrade == Grade.IndustryWood) {
+			if (energyWoodProportion > 0) {
+				piece = new MaritimePineBasicWoodPiece(logCategory, tree, energyWoodProportion * tree.getCommercialVolumeM3());
+			} 
+ 		} else {
+			if (logCategory.logGrade == Grade.SawlogLowQuality) {
+				if (lowQualitySawlogProportion > 0) {
+					piece = new MaritimePineBasicWoodPiece(logCategory, tree, lowQualitySawlogProportion * tree.getCommercialVolumeM3());
+				}
+			} else {
+				if (highQualitySawlogProportion > 0) {
+					piece = new MaritimePineBasicWoodPiece(logCategory, tree, highQualitySawlogProportion * tree.getCommercialVolumeM3());
+				}
+			}
+		}
+
+		return piece;
+	}
+	
+	
 }
