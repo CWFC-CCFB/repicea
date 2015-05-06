@@ -19,8 +19,6 @@
 package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.WoodPiece;
-import repicea.stats.distributions.GaussianUtility;
-import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
  * The MaritimePineBasicWoodPiece is a simple class that represents 
@@ -31,30 +29,18 @@ import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Gra
 @SuppressWarnings("serial")
 public class MaritimePineBasicWoodPiece extends WoodPiece {
 
-	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
 	
-	protected MaritimePineBasicWoodPiece(MaritimePineBasicTreeLogCategory logCategory, MaritimePineBasicTree tree) {
+	/**
+	 * Constructor.
+	 * @param logCategory a MaritimePineBasicTreeLogCategory instance
+	 * @param tree a MaritimePineBasicTree instance
+	 * @param volumeM3 the volume without any expansion factor
+	 */
+	protected MaritimePineBasicWoodPiece(MaritimePineBasicTreeLogCategory logCategory, MaritimePineBasicTree tree, double volumeM3) {
 		super(logCategory, tree);
-		double mqd = tree.getDbhCm();
-		double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
-
-		if (dbhStandardDeviation > 0) {
-			// Assumption of a normal distribution for stem distribution
-			double energyWoodProportion = GaussianUtility.getCumulativeProbability((20d - mqd)/dbhStandardDeviation);
-			if (logCategory.logGrade == Grade.IndustryWood) {
-				setVolumeM3(energyWoodProportion * tree.getCommercialVolumeM3());
-			} else {
-				double lowQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation) - energyWoodProportion;
-				double potentialHighQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation, true);
-				lowQualitySawlogProportion += LowQualityPercentageWithinHighQualityGrade * potentialHighQualitySawlogProportion;
-				if (logCategory.logGrade == Grade.SawlogLowQuality) {
-					setVolumeM3(lowQualitySawlogProportion * tree.getCommercialVolumeM3());
-				} else {
-					double highQualitySawlogProportion = potentialHighQualitySawlogProportion * (1 - LowQualityPercentageWithinHighQualityGrade); 
-					setVolumeM3(highQualitySawlogProportion * tree.getCommercialVolumeM3());
-				}
-			}
-		} 
+		setVolumeM3(volumeM3);
 	}
 
+	
+		
 }
