@@ -21,8 +21,8 @@ package repicea.simulation.allometrycalculator;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
-
-import repicea.util.ObjectUtility;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * This calculator provides the basic allometric features, such as the basal area, the mean quadratic diameter, etc.
@@ -217,51 +217,99 @@ public class AllometryCalculator {
 			boolean height,
 			boolean weighted) {		
 		
-		double dom = 0;
+		List<AllometryCalculableTree> copyList = new ArrayList<AllometryCalculableTree>();
+		copyList.addAll(trees);
+		Collections.sort(copyList, new DbhComparator());
+
+		double domFeature = 0;
+		double numberRepresentedByThisTree;
 		double numberAdd;
 		double numberTreesSoFar = 0;
 		double areaFactor = 10000d / plotArea;
-		double[][] values = new double[2][trees.size()];
 		double weightingFactor;
-		int iter = 0;
-		if (!trees.isEmpty()) {
-			for (AllometryCalculableTree t : trees) {
-				if (t.getNumber() > 0) {
-					if (weighted) {
-						weightingFactor = t.getPlotWeight();
-					} else {
-						weightingFactor = 1d;
-					}
-					if (height) {
-						values[0][iter] = t.getHeightM();
-					} else {
-						values[0][iter] = t.getDbhCm();
-					}
-					values[1][iter] = t.getNumber() * areaFactor * weightingFactor;
-					iter++;
-				}
-			}
-			double denum = (double) 1 / numberOfTreesPerHectareForDominance;
-			int pointer = -1;
-			while (ObjectUtility.isThereAnyElementDifferentFrom(values[0],-1d) && numberTreesSoFar < numberOfTreesPerHectareForDominance) {
-				pointer = ObjectUtility.findMaxInAnArrayOfDouble(values[0]);
 
-				if (numberTreesSoFar + values[1][pointer] <= numberOfTreesPerHectareForDominance) {
-					numberAdd = values[1][pointer];
+		while (!copyList.isEmpty() && numberTreesSoFar < numberOfTreesPerHectareForDominance) {
+			AllometryCalculableTree tree = copyList.get(copyList.size() - 1);	// we pick the last element of the list, ie the largest tree
+			if (tree.getNumber() > 0) {
+				if (weighted) {
+					weightingFactor = tree.getPlotWeight();
 				} else {
-					numberAdd = numberOfTreesPerHectareForDominance
-							- numberTreesSoFar; // add the remaining part
+					weightingFactor = 1d;
 				}
-
+				
+				numberRepresentedByThisTree = tree.getNumber() * areaFactor * weightingFactor;
+				
+				if (numberTreesSoFar + numberRepresentedByThisTree <= numberOfTreesPerHectareForDominance) {
+					numberAdd = numberRepresentedByThisTree;
+				} else {
+					numberAdd = numberOfTreesPerHectareForDominance - numberTreesSoFar; // add the remaining part
+				}
+				
+				if (height) {
+					domFeature += tree.getHeightM() * numberAdd;
+				} else {
+					domFeature += tree.getSquaredDbhCm() * numberAdd;
+				}
+				
 				numberTreesSoFar += numberAdd;
-
-				dom += values[0][pointer] * numberAdd * denum;
-
-				values[0][pointer] = -1d;
-			} 
+			}
 		}
-		return dom;
 
+		if (numberTreesSoFar > 0) {
+			domFeature /= numberTreesSoFar;
+			if (height) {
+				return domFeature;
+			} else {
+				return Math.sqrt(domFeature);	// dominant mean diameter is actually the quadratic diameter
+			}
+		} else {
+			return 0d;		// there is no tree at all
+		}
+		
+//		double dom = 0;
+//		double numberAdd;
+//		double numberTreesSoFar = 0;
+//		double areaFactor = 10000d / plotArea;
+//		double[][] values = new double[2][trees.size()];
+//		double weightingFactor;
+//		int iter = 0;
+//		if (!trees.isEmpty()) {
+//			for (AllometryCalculableTree t : trees) {
+//				if (t.getNumber() > 0) {
+//					if (weighted) {
+//						weightingFactor = t.getPlotWeight();
+//					} else {
+//						weightingFactor = 1d;
+//					}
+//					if (height) {
+//						values[0][iter] = t.getHeightM();
+//					} else {
+//						values[0][iter] = t.getDbhCm();
+//					}
+//					values[1][iter] = t.getNumber() * areaFactor * weightingFactor;
+//					iter++;
+//				}
+//			}
+//			double denum = (double) 1 / numberOfTreesPerHectareForDominance;
+//			int pointer = -1;
+//			while (ObjectUtility.isThereAnyElementDifferentFrom(values[0],-1d) && numberTreesSoFar < numberOfTreesPerHectareForDominance) {
+//				pointer = ObjectUtility.findMaxInAnArrayOfDouble(values[0]);
+//
+//				if (numberTreesSoFar + values[1][pointer] <= numberOfTreesPerHectareForDominance) {
+//					numberAdd = values[1][pointer];
+//				} else {
+//					numberAdd = numberOfTreesPerHectareForDominance
+//							- numberTreesSoFar; // add the remaining part
+//				}
+//
+//				numberTreesSoFar += numberAdd;
+//
+//				dom += values[0][pointer] * numberAdd * denum;
+//
+//				values[0][pointer] = -1d;
+//			} 
+//		}
+//		return dom;
 	}
 
 	private void checkCollection(Collection<? extends LightAllometryCalculableTree> trees) {

@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.predictor;
+package repicea.simulation.allometrycalculator;
 
 import java.util.Comparator;
 
