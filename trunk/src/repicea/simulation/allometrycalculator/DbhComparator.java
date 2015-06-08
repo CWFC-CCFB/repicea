@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-foresttools library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
  *
@@ -21,14 +21,19 @@ package repicea.simulation.allometrycalculator;
 import java.util.Comparator;
 
 import repicea.simulation.covariateproviders.treelevel.DbhCmProvider;
+import repicea.simulation.covariateproviders.treelevel.HeightMProvider;
 
 /**
- * The DbhComparator class implements the Comparator interface for DbhCmProvider instances.
+ * The DbhComparator class implements the Comparator interface for DbhCmProvider instances. It includes
+ * a HeightComparator instance for the multi-species case. Thereby it ensures that trees are first sorted
+ * by diameter and then if several species have similar diameter, they are further sorted by height.
  * @author Mathieu Fortin - May 2014
  */
 public class DbhComparator implements Comparator<DbhCmProvider> {
 
 	private final boolean ascending;
+	
+	private final HeightComparator heightComparator;
 	
 	/**
 	 * General constructor.
@@ -36,6 +41,7 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 	 */
 	public DbhComparator(boolean ascending) {
 		this.ascending = ascending;
+		heightComparator = new HeightComparator(ascending);
 	}
 	
 	/**
@@ -51,7 +57,7 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 			if (arg0.getDbhCm() < arg1.getDbhCm()) {
 				return -1;
 			} else if (arg0.getDbhCm() == arg1.getDbhCm()) {
-				return 0;
+				return compareForHeight(arg0, arg1);
 			} else {
 				return 1;
 			}
@@ -59,11 +65,18 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 			if (arg0.getDbhCm() < arg1.getDbhCm()) {
 				return 1;
 			} else if (arg0.getDbhCm() == arg1.getDbhCm()) {
-				return 0;
+				return compareForHeight(arg0, arg1);
 			} else {
 				return -1;
 			}
 		}
 	}
-
+	
+	private int compareForHeight(DbhCmProvider arg0, DbhCmProvider arg1) {
+		if (arg0 instanceof HeightMProvider && arg1 instanceof HeightMProvider) {
+			return heightComparator.compare((HeightMProvider) arg0, (HeightMProvider) arg1); 
+		} else {
+			return 0;
+		}
+	}
 }
