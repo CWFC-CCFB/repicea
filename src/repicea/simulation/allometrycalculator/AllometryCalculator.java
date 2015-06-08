@@ -30,6 +30,9 @@ import java.util.List;
  */
 public class AllometryCalculator {
 	
+	public final static double NumberOfTreesHaForDominantFeatures = 100d;
+	
+	
 	/**
 	 * This method returns the mean quadratic diameter for a collection of trees. 
 	 * @param trees a Collection object that should contain instances of LightAllometryCalculableTree 
@@ -165,38 +168,34 @@ public class AllometryCalculator {
 	/**
 	 * This method returns the dominant height for the trees contained in the trees collection. 
 	 * @param trees the Collection object that contains instances of AllometryCalculableTree
-	 * @param plotArea the area over which the trees were measured in m2 (double)
-	 * @param numberOfTreesPerHectareForDominance the number of trees per hectare that serve to calculate the dominant height (double)
+	 * @param plotAreaHa the area over which the trees were measured in ha (double)
 	 * @param weighted true to enable the plot weighting or false otherwise
 	 * @return the dominant height in m (double)
 	 */
 	public double getDominantHeightM(Collection<? extends AllometryCalculableTree> trees,
-			double plotArea,
-			double numberOfTreesPerHectareForDominance,
+			double plotAreaHa,
 			boolean weighted) {
 		
 		checkCollection(trees);
 
-		return getDominantFeature(trees, plotArea, numberOfTreesPerHectareForDominance, true, weighted);
+		return getDominantFeature(trees, plotAreaHa, true, weighted);
 	}
 	
 	
 	/**
 	 * This method returns the dominant diameter for the trees contained in the trees collection. 
 	 * @param trees the Collection object that contains instances of AllometryCalculableTree
-	 * @param plotArea the area over which the trees were measured in m2 (double)
-	 * @param numberOfTreesPerHectareForDominance the number of trees per hectare that serve to calculate the dominant height (double)
+	 * @param plotAreaHa the area over which the trees were measured in ha (double)
 	 * @param weighted true to enable the plot weighting or false otherwise
 	 * @return the dominant diameter in cm (double)
 	 */
 	public double getDominantDiameterCM(Collection<? extends AllometryCalculableTree> trees,
-			double plotArea,
-			double numberOfTreesPerHectareForDominance,
+			double plotAreaHa,
 			boolean weighted) {
 		
 		checkCollection(trees);
 
-		return getDominantFeature(trees, plotArea, numberOfTreesPerHectareForDominance, false, weighted);
+		return getDominantFeature(trees, plotAreaHa, false, weighted);
 	}
 
 	
@@ -205,15 +204,13 @@ public class AllometryCalculator {
 	/**
 	 * This method returns a dominant feature defined by the method parameter.
 	 * @param trees collection of AllometryCalculableTree instances
-	 * @param plotArea the plot area in m2 (double)
-	 * @param numberOfTreesPerHectareForDominance = the number of trees per hectare the dominance is based on
+	 * @param plotAreaHa the plot area in ha (double)
 	 * @param height true to get the dominant height or false to get the dominant diameter
 	 * @param weighted true to weight the dominant feature by the plot weight or false to use a default weight of 1.0
 	 * @return the dominant feature (double)
 	 */
 	private double getDominantFeature(Collection<? extends AllometryCalculableTree> trees,
-			double plotArea,
-			double numberOfTreesPerHectareForDominance,
+			double plotAreaHa,
 			boolean height,
 			boolean weighted) {		
 		
@@ -225,11 +222,16 @@ public class AllometryCalculator {
 		double numberRepresentedByThisTree;
 		double numberAdd;
 		double numberTreesSoFar = 0;
-		double areaFactor = 10000d / plotArea;
+		double areaFactor = 1d / plotAreaHa;
 		double weightingFactor;
+		double numberOfTreesPerHectareForDominance = NumberOfTreesHaForDominantFeatures;
 
+		if (plotAreaHa < 0.5) {
+			numberOfTreesPerHectareForDominance = (NumberOfTreesHaForDominantFeatures * plotAreaHa - 1) / plotAreaHa;
+		} 		
+		
 		while (!copyList.isEmpty() && numberTreesSoFar < numberOfTreesPerHectareForDominance) {
-			AllometryCalculableTree tree = copyList.get(copyList.size() - 1);	// we pick the last element of the list, ie the largest tree
+			AllometryCalculableTree tree = copyList.remove(copyList.size() - 1);	// we remove the last element of the list, ie the largest tree
 			if (tree.getNumber() > 0) {
 				if (weighted) {
 					weightingFactor = tree.getPlotWeight();
@@ -317,4 +319,14 @@ public class AllometryCalculator {
 			throw new InvalidParameterException("Collection trees is null!");
 		}
 	}
+	
+//	/**
+//	 * This method sets the number of trees per hectare on which the dominant features are calculated. By default,
+//	 * this number is set to 100 trees per hectare.
+//	 * @param numberOfTreesHaForDominantFeatures a double 
+//	 */
+//	public static void setNumberOfTreesHaForDominantFeatures(double numberOfTreesHaForDominantFeatures) {
+//		NumberOfTreesHaForDominantFeatures = numberOfTreesHaForDominantFeatures;
+//	}
+	
 }
