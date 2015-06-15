@@ -102,6 +102,7 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 	 */
 	@Override
 	public synchronized double predictEventProbability(MatapediaStand stand, MatapediaTree tree, Object... parms) {
+		
 		double etaValue = fixedEffectsPrediction(stand, tree);
 		eta.setVariableValue(0, etaValue);
 		double prob;
@@ -114,6 +115,11 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 		} else {
 			eta.setVariableValue(1, 0d);
 			prob = ghq.getOneDimensionIntegral(linkFunction, eta, 1, defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot).getDistribution().getStandardDeviation().m_afData[0][0]);
+		}
+		
+		if (parms != null && parms.length > 0 && parms[0] instanceof Double) {
+			double timeStep = (Double) parms[0];
+			prob = 1 - Math.pow (1 - prob, timeStep / 5d);		// correction in case of 6-yr growth step
 		}
 		return prob;
 	}
