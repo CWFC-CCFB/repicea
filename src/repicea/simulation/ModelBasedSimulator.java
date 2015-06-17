@@ -177,7 +177,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * This method generates a stand-specific vector of model parameters using matrix Omega.
 	 * @param subject a MonteCarloSimulationCompliantObject object
 	 */
-	private synchronized void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
+	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		Matrix parametersForThisRealization = defaultBeta.getRandomDeviate();
 		simulatedParameters.put(subject.getMonteCarloRealizationId(), parametersForThisRealization);
 	}
@@ -208,7 +208,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * @param subject a subject that implements the MonteCarloSimulationCompliantObject interface
 	 * @return a vector of parameters
 	 */
-	protected final Matrix getParametersForThisRealization(MonteCarloSimulationCompliantObject subject) {
+	protected final synchronized Matrix getParametersForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		if (isParametersVariabilityEnabled) {
 			if (!rememberRandomDeviates) {
 				simulatedParameters.clear();
@@ -227,7 +227,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * This method generates a subject-specific random effects vector using matrix G.
 	 * @param subject a MonteCarloSimulationCompliantObject instance
 	 */
-	private synchronized void setSpecificRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
+	private void setSpecificRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		GaussianEstimate randomEffectEstimate = null;
 		if (blupsLibrary.get(subjectLevel) != null) {
@@ -266,7 +266,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * @param subject a MonteCarloSimulationCompliantObject object
 	 * @return a Matrix object
 	 */
-	protected final Matrix getRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
+	protected final synchronized Matrix getRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		if (isRandomEffectsVariabilityEnabled) {
 			if (!rememberRandomDeviates) {

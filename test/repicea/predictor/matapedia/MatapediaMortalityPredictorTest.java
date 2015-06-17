@@ -95,7 +95,7 @@ public class MatapediaMortalityPredictorTest {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void testInStochasticModeWithRandomEffectOnly() throws IOException {
-		int nbReal = 50000;
+		int nbReal = 100000;
 		
 		MatapediaMortalityPredictor stochasticPredictor = new MatapediaMortalityPredictor(false, true, false);
 		MatapediaMortalityPredictor deterministicPredictor = new MatapediaMortalityPredictor(false, false, false);
