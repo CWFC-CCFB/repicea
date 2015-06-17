@@ -89,9 +89,6 @@ public class MatapediaMortalityPredictorTest {
 	}
 
 	
-	/*
-	 * No need for this test since the model no longer implement random effects.
-	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void testInStochasticModeWithRandomEffectOnly() throws IOException {
