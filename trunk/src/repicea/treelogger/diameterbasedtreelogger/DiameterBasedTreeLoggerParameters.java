@@ -23,7 +23,6 @@ import java.awt.Window;
 
 import repicea.simulation.treelogger.TreeLogger;
 import repicea.simulation.treelogger.TreeLoggerParameters;
-import repicea.treelogger.europeanbeech.EuropeanBeechBasicTreeLogger;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -53,7 +52,7 @@ public abstract class DiameterBasedTreeLoggerParameters extends TreeLoggerParame
 	private transient DiameterBasedTreeLoggerParametersDialog guiInterface;
 
 	protected DiameterBasedTreeLoggerParameters(Class<? extends TreeLogger<?,?>> clazz) {
-		super(EuropeanBeechBasicTreeLogger.class);
+		super(clazz);
 		initializeDefaultLogCategories();
 	}
 
