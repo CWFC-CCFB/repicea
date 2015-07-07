@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.treelogger.europeanbeech;
 
 import java.util.ArrayList;
@@ -13,9 +31,11 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class EuropeanBeechBasicTreeLoggerParameters extends DiameterBasedTreeLoggerParameters {
 
 	public static enum Grade implements TextableEnum {
+		EnergyWood("Energy wood", "Bois \u00E9nergie"),
 		IndustryWood("Particle", "Bois industrie"),
 		SawlogLowQuality("Sawlog low quality", "Sciage basse qualit\u00E9"),
-		SawlogHighQuality("Sawlog high quality", "Sciage haute qualit\u00E9"),
+		SawlogRegularQuality("Sawlog regular quality", "Sciage moyenne qualit\u00E9"),
+		VeneerQuality("Veneer quality", "Qualit\u00E9 placage"),
 		;
 
 		Grade(String englishText, String frenchText) {
@@ -43,9 +63,11 @@ public class EuropeanBeechBasicTreeLoggerParameters extends DiameterBasedTreeLog
 		String species = getSpeciesName();
 		getLogCategories().clear();
 		getLogCategories().put(species, categories);
-		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.SawlogHighQuality, species, 25));
-		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.SawlogLowQuality, species, 16));
-		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.IndustryWood, species, 10));
+		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.VeneerQuality, species, 47.5));	// not small end but dbh in this case
+		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.SawlogRegularQuality, species, 37.5));
+		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.SawlogLowQuality, species, 27.5));
+		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.IndustryWood, species, 17.5));
+		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.EnergyWood, species, 5));
 	}
 	
 	
