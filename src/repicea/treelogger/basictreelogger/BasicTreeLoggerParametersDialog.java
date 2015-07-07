@@ -38,13 +38,10 @@ import repicea.simulation.treelogger.TreeLoggerParameters;
 import repicea.simulation.treelogger.TreeLoggerParametersDialog;
 
 @SuppressWarnings("serial")
-public class BasicTreeLoggerParametersDialog 
-							extends TreeLoggerParametersDialog<BasicLogCategory> 
-							implements PropertyChangeListener {
+public class BasicTreeLoggerParametersDialog extends TreeLoggerParametersDialog<BasicLogCategory> implements PropertyChangeListener {
 
 	static {
-		UIControlManager.setTitle(BasicTreeLoggerParametersDialog.class, 
-				"Basic Tree Logger", "Module de billonnage de base");
+		UIControlManager.setTitle(BasicTreeLoggerParametersDialog.class, "Basic Tree Logger", "Module de billonnage de base");
 	}
 
 	protected REpiceaSlider shortLivedSlider;

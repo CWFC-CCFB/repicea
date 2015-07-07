@@ -18,8 +18,7 @@
  */
 package repicea.treelogger.maritimepine;
 
-import repicea.simulation.covariateproviders.treelevel.DbhCmProvider;
-import repicea.simulation.treelogger.LoggableTree;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTree;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -28,7 +27,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * the MaritimePineBasicTreeLogger.
  * @author Mathieu Fortin - November 2014
  */
-public interface MaritimePineBasicTree extends LoggableTree, DbhCmProvider {
+public interface MaritimePineBasicTree extends DiameterBasedTree {
 
 	public static enum Species implements TextableEnum {
 		MaritimePine("Maritime pine", "Pin maritime");
@@ -46,10 +45,4 @@ public interface MaritimePineBasicTree extends LoggableTree, DbhCmProvider {
 		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 	
-	
-	/**
-	 * This method returns the standard deviation of the dbh.
-	 * @return a double
-	 */
-	public double getDbhCmStandardDeviation();
 }

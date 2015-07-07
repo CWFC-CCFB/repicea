@@ -30,7 +30,6 @@ import repicea.simulation.covariateproviders.standlevel.SpruceBudwormDefoliatedP
  * @author Mathieu Fortin - November 2012
  */
 public interface MatapediaStand extends MonteCarloSimulationCompliantObject,
-//										InterventionResultProvider,
 										SpruceBudwormDefoliatedProvider,
 										DateYrProvider {
 	
@@ -47,7 +46,7 @@ public interface MatapediaStand extends MonteCarloSimulationCompliantObject,
 	 * This method returns the MatapediaTree instances in this stand.
 	 * @return a Collection of MatapediaTree instances
 	 */
-	public Collection<MatapediaTree> getMatapediaTrees();
+	public Collection<? extends MatapediaTree> getMatapediaTrees();
 	
 	
 	

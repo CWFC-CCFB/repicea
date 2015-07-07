@@ -18,11 +18,12 @@
  */
 package repicea.treelogger.maritimepine;
 
-import java.util.List;
-
 import repicea.simulation.treelogger.LoggableTree;
-import repicea.simulation.treelogger.TreeLogger;
 import repicea.stats.distributions.GaussianUtility;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTree;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogger;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedWoodPiece;
 import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
@@ -31,24 +32,10 @@ import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Gra
  *
  * @author Mathieu Fortin - November 2014
  */
-public class MaritimePineBasicTreeLogger extends TreeLogger<MaritimePineBasicTreeLoggerParameters, MaritimePineBasicTree> {
+public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 
 	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
 
-	@Override
-	protected void logThisTree(MaritimePineBasicTree tree) {
-		List<MaritimePineBasicTreeLogCategory> logCategories = params.getSpeciesLogCategories(MaritimePineBasicTree.Species.MaritimePine.toString());
-		MaritimePineBasicWoodPiece piece;
-		for (MaritimePineBasicTreeLogCategory logCategory : logCategories) {
-			piece = producePiece(tree, logCategory);
-			if (piece != null) {
-				addWoodPiece(tree, piece);	
-			} 
-		}
-	}
-
-	@Override
-	public void setTreeLoggerParameters() {}
 
 	@Override
 	public MaritimePineBasicTreeLoggerParameters createDefaultTreeLoggerParameters() {
@@ -64,11 +51,11 @@ public class MaritimePineBasicTreeLogger extends TreeLogger<MaritimePineBasicTre
 		}
 	}
 
-	
-	private MaritimePineBasicWoodPiece producePiece(MaritimePineBasicTree tree, MaritimePineBasicTreeLogCategory logCategory) {
+	@Override
+	protected DiameterBasedWoodPiece producePiece(DiameterBasedTree tree, DiameterBasedTreeLogCategory logCategory) {
 		double mqd = tree.getDbhCm();
 		double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
-		MaritimePineBasicWoodPiece piece = null;
+		DiameterBasedWoodPiece piece = null;
 		double energyWoodProportion;
 		double highQualitySawlogProportion;
 		double lowQualitySawlogProportion;
@@ -96,18 +83,18 @@ public class MaritimePineBasicTreeLogger extends TreeLogger<MaritimePineBasicTre
 			}
 		}
 		
-		if (logCategory.logGrade == Grade.IndustryWood) {
+		if (logCategory.getGrade() == Grade.IndustryWood) {
 			if (energyWoodProportion > 0) {
-				piece = new MaritimePineBasicWoodPiece(logCategory, tree, energyWoodProportion * tree.getCommercialVolumeM3());
+				piece = new DiameterBasedWoodPiece(logCategory, tree, energyWoodProportion * tree.getCommercialVolumeM3());
 			} 
  		} else {
-			if (logCategory.logGrade == Grade.SawlogLowQuality) {
+			if (logCategory.getGrade() == Grade.SawlogLowQuality) {
 				if (lowQualitySawlogProportion > 0) {
-					piece = new MaritimePineBasicWoodPiece(logCategory, tree, lowQualitySawlogProportion * tree.getCommercialVolumeM3());
+					piece = new DiameterBasedWoodPiece(logCategory, tree, lowQualitySawlogProportion * tree.getCommercialVolumeM3());
 				}
 			} else {
 				if (highQualitySawlogProportion > 0) {
-					piece = new MaritimePineBasicWoodPiece(logCategory, tree, highQualitySawlogProportion * tree.getCommercialVolumeM3());
+					piece = new DiameterBasedWoodPiece(logCategory, tree, highQualitySawlogProportion * tree.getCommercialVolumeM3());
 				}
 			}
 		}

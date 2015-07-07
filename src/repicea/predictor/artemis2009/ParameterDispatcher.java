@@ -261,7 +261,7 @@ public class ParameterDispatcher {
 			// cases have been ordered from most frequent to least one based on dataset VPTest and a 10-step simulation (optimizing)
 			switch(iCase) {
 			case 31: // 38 799 occurences
-				oXVector.m_afData[0][pointer] = Math.log(stand.getTimeStepYr());
+				oXVector.m_afData[0][pointer] = Math.log(stand.getGrowthStepLengthYr());
 				pointer ++;
 				break;
 			case 14: // 36 918 occurences
@@ -323,7 +323,7 @@ public class ParameterDispatcher {
 				pointer += dummyEssence.m_iCols;
 				break;
 			case 33: // 6420 occurences
-				fTmp = (Math.log(stand.getTimeStepYr())*dummyTBE);
+				fTmp = (Math.log(stand.getGrowthStepLengthYr())*dummyTBE);
 				for (int ii = 0; ii < dummyEssence.m_iCols; ii++) {
 					oXVector.m_afData[0][ii + pointer] = dummyEssence.m_afData[0][ii]*fTmp;
 				}
@@ -341,7 +341,7 @@ public class ParameterDispatcher {
 				pointer += dummyEssence.m_iCols;
 				break;
 			case 32: // 5600 occurences
-				oXVector.m_afData[0][pointer] = Math.log(stand.getTimeStepYr())*dummyTBE;
+				oXVector.m_afData[0][pointer] = Math.log(stand.getGrowthStepLengthYr())*dummyTBE;
 				pointer ++;
 				break;
 			case 10: // 5340 occurences
