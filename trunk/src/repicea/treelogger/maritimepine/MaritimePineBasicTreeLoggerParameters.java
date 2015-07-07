@@ -18,13 +18,12 @@
  */
 package repicea.treelogger.maritimepine;
 
-import java.awt.Container;
-import java.awt.Window;
 import java.util.ArrayList;
 import java.util.List;
 
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
-import repicea.simulation.treelogger.TreeLoggerParameters;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLoggerParameters;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -35,28 +34,8 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @author Mathieu Fortin - November 2014
  */
 @SuppressWarnings("serial")
-public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<MaritimePineBasicTreeLogCategory> {
+public class MaritimePineBasicTreeLoggerParameters extends DiameterBasedTreeLoggerParameters {
 
-	public static enum MessageID implements TextableEnum {
-		WoodProducts("Wood products", "Produits bois"),
-		ProductType("Product type", "Type de produit"),
-		;
-
-		MessageID(String englishText, String frenchText) {
-			setText(englishText, frenchText);
-		}
-
-		@Override
-		public void setText(String englishText, String frenchText) {
-			REpiceaTranslator.setString(this, englishText, frenchText);
-		}
-		
-		@Override
-		public String toString() {
-			return REpiceaTranslator.getString(this);
-		}
-	}
-	
 	
 	public static enum Grade implements TextableEnum {
 		IndustryWood("Particle", "Bois industrie"),
@@ -81,17 +60,15 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 		}
 	}
 
-	private transient MaritimePineBasicTreeLoggerParametersDialog guiInterface;
 
 	protected MaritimePineBasicTreeLoggerParameters() {
 		super(MaritimePineBasicTreeLogger.class);
-		initializeDefaultLogCategories();
 	}
 
 	@Override
 	protected void initializeDefaultLogCategories() {
-		List<MaritimePineBasicTreeLogCategory> categories = new ArrayList<MaritimePineBasicTreeLogCategory>();
-		String species = MaritimePineBasicTree.Species.MaritimePine.toString();
+		List<DiameterBasedTreeLogCategory> categories = new ArrayList<DiameterBasedTreeLogCategory>();
+		String species = getSpeciesName();
 		getLogCategories().clear();
 		getLogCategories().put(species, categories);
 //		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Stump, species, -1));
@@ -102,16 +79,10 @@ public class MaritimePineBasicTreeLoggerParameters extends TreeLoggerParameters<
 	}
 
 	@Override
-	public boolean isCorrect() {return true;}
-
-	@Override
-	public MaritimePineBasicTreeLoggerParametersDialog getGuiInterface(Container parent) {
-		if (guiInterface == null) {
-			guiInterface = new MaritimePineBasicTreeLoggerParametersDialog((Window) parent, this);
-		}
-		return guiInterface;
+	protected String getSpeciesName() {
+		return MaritimePineBasicTree.Species.MaritimePine.toString();
 	}
-	
+
 	public static void main(String[] args) {
 		MaritimePineBasicTreeLoggerParameters params = new MaritimePineBasicTreeLoggerParameters();
 		params.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(true));

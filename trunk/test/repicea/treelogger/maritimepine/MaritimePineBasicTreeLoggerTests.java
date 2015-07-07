@@ -43,7 +43,7 @@ public class MaritimePineBasicTreeLoggerTests {
 		Assert.assertTrue(woodPieces.size() == 1);
 		WoodPiece woodPiece = woodPieces.iterator().next();
 		MaritimePineBasicTreeLogCategory logCategory = (MaritimePineBasicTreeLogCategory) woodPiece.getLogCategory();
-		Assert.assertTrue(logCategory.logGrade == Grade.SawlogLowQuality);
+		Assert.assertTrue(logCategory.getGrade() == Grade.SawlogLowQuality);
 	}
 
 }

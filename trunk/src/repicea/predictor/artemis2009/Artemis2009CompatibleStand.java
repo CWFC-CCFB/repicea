@@ -25,6 +25,7 @@ import repicea.simulation.covariateproviders.standlevel.BasalAreaM2HaProvider;
 import repicea.simulation.covariateproviders.standlevel.DateYrProvider;
 import repicea.simulation.covariateproviders.standlevel.ElevationMProvider;
 import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesProvider;
+import repicea.simulation.covariateproviders.standlevel.GrowthStepLengthYrProvider;
 import repicea.simulation.covariateproviders.standlevel.InterventionResultProvider;
 import repicea.simulation.covariateproviders.standlevel.MeanAnnualPrecipitationMmProvider;
 import repicea.simulation.covariateproviders.standlevel.MeanAnnualTemperatureCProvider;
@@ -43,7 +44,8 @@ public interface Artemis2009CompatibleStand extends PotentialVegetationProvider,
 													GeographicalCoordinatesProvider,
 													StemDensityHaProvider,
 													AreaHaProvider,
-													MonteCarloSimulationCompliantObject {
+													MonteCarloSimulationCompliantObject,
+													GrowthStepLengthYrProvider {
 	
 	
 	/**
@@ -52,12 +54,6 @@ public interface Artemis2009CompatibleStand extends PotentialVegetationProvider,
 	 */
 	public boolean isGoingToBeDefoliated();
 	
-	/**
-	 * This method returns the time step of the model.
-	 * @return an integer
-	 */
-	public int getTimeStepYr();
-
 	/**
 	 * This method returns true if the stand has just been read from a file and is not the result of an
 	 * evolution.
