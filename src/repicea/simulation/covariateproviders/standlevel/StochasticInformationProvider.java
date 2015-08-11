@@ -25,6 +25,13 @@ package repicea.simulation.covariateproviders.standlevel;
 public interface StochasticInformationProvider {
 
 	/**
+	 * This method returns the number of realizations to be made.
+	 * @return an integer
+	 */
+	public int getNumberRealizations();
+
+	
+	/**
 	 * This method returns true if the instance is running in stochastic mode or false it is in deterministic mode.
 	 * @return a boolean
 	 */
