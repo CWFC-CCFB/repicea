@@ -6,7 +6,7 @@ import repicea.util.ObjectUtility;
 
 public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 
-	private static final String APP_URL = "https://svn.code.sf.net/p/lerfobforesttools/code/trunk";
+	private static final String APP_URL = "https://svn.code.sf.net/p/repiceasource/svn/trunk";
 	private static String Version_Filename = ObjectUtility.getRootPath(REpiceaJARSVNAppVersion.class) + "revision";
 	
 	public REpiceaJARSVNAppVersion() {
