@@ -8,7 +8,7 @@ import repicea.util.ObjectUtility;
 public class REpiceaJARSVNAppVersionCompiler extends AbstractAppVersionCompiler {
 
 	private static final String APP_URL = "https://svn.code.sf.net/p/repiceasource/svn/trunk";
-	private static String Version_Filename = ObjectUtility.getTrueRootPath(REpiceaJARSVNAppVersionCompiler.class) + "revision.csv";
+	private static String Version_Filename = ObjectUtility.getTrueRootPath(REpiceaJARSVNAppVersionCompiler.class) + REpiceaJARSVNAppVersion.ShortFilename;
 	
 	public REpiceaJARSVNAppVersionCompiler() {
 		super();

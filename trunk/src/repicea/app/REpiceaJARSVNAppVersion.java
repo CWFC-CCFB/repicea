@@ -25,11 +25,11 @@ package repicea.app;
 public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 
 	private static REpiceaJARSVNAppVersion SINGLETON;
-	
-	private static final String FilenamePath = "revision.csv";
+
+	protected static final String ShortFilename = "repicea_revision.csv";
 	
 	private REpiceaJARSVNAppVersion() {
-		super(FilenamePath);
+		super(ShortFilename);
 	}
 
 	/**
