@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2015 Mathieu Fortin for Rouge Epicea.
  *
@@ -18,8 +18,10 @@
  */
 package repicea.app;
 
-import repicea.util.ObjectUtility;
-
+/**
+ * This class retrieves information on the version and other features of the repicea.jar application. 
+ * @author Mathieu Fortin - August 2015
+ */
 public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 
 	private static REpiceaJARSVNAppVersion SINGLETON;
@@ -31,7 +33,7 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 	}
 
 	/**
-	 * This method returns the singleton instance of REpiceaJARSVNAppVersion class which can be requested
+	 * This method returns the singleton instance of this class which can be requested
 	 * to return the revision number of this version.
 	 * @return the singleton instance of the REpiceaJARSVNAppVersion class
 	 */
@@ -43,9 +45,9 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 	}
 	
 	
-	public static void main(String[] args) {
-		String version = REpiceaJARSVNAppVersion.getInstance().getRevision();
-		System.out.println(version);
-	}
+//	public static void main(String[] args) {
+//		String version = REpiceaJARSVNAppVersion.getInstance().getRevision();
+//		System.out.println(version);
+//	}
 	
 }
