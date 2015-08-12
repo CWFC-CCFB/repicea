@@ -28,8 +28,10 @@ import repicea.io.javacsv.CSVReader;
 public abstract class AbstractAppVersion {
 
 	private String revision; 
+	private final String appName;
 	
-	protected AbstractAppVersion(String csvRevisionFilename) {
+	protected AbstractAppVersion(String appName, String csvRevisionFilename) {
+		this.appName = appName;
 		try {
 			CSVReader reader = new CSVReader(csvRevisionFilename);
 			Object[] record = reader.nextRecord();
@@ -44,5 +46,11 @@ public abstract class AbstractAppVersion {
 	 * @return a String
 	 */
 	public final String getRevision() {return "Revision " + revision.trim();}
+	
+	/**
+	 * This method returns the application name.
+	 * @return a String
+	 */
+	public final String getName() {return appName;}
 	
 }
