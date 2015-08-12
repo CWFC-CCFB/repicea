@@ -29,10 +29,12 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 	private static REpiceaJARSVNAppVersion SINGLETON;
 
 	private static final String AppName = "repicea";
-	protected static final String ShortFilename = ObjectUtility.getRelativePackagePath(REpiceaJARSVNAppVersion.class) + AppName + "_revision.csv";
+	
+	protected static final String ShortFilename = AppName + "_revision.csv";
+	protected static final String CompleteFilename = ObjectUtility.getRelativePackagePath(REpiceaJARSVNAppVersion.class) + ShortFilename;
 	
 	private REpiceaJARSVNAppVersion() {
-		super(AppName, ShortFilename);
+		super(AppName, CompleteFilename);
 	}
 
 	/**
