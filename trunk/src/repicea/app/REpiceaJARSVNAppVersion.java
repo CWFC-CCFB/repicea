@@ -43,9 +43,9 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 	}
 	
 	
-	public static void main(String[] args) {
-		String version = REpiceaJARSVNAppVersion.getInstance().getRevision();
-		int u = 0;
-	}
+//	public static void main(String[] args) {
+//		String version = REpiceaJARSVNAppVersion.getInstance().getRevision();
+//		int u = 0;
+//	}
 	
 }
