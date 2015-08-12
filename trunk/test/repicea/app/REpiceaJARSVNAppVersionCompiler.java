@@ -1,5 +1,6 @@
 package repicea.app;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.util.ObjectUtility;
@@ -7,7 +8,7 @@ import repicea.util.ObjectUtility;
 public class REpiceaJARSVNAppVersionCompiler extends AbstractAppVersionCompiler {
 
 	private static final String APP_URL = "https://svn.code.sf.net/p/repiceasource/svn/trunk";
-	private static String Version_Filename = ObjectUtility.getRootPath(REpiceaJARSVNAppVersionCompiler.class) + "revision.csv";
+	private static String Version_Filename = ObjectUtility.getTrueRootPath(REpiceaJARSVNAppVersionCompiler.class) + "revision.csv";
 	
 	public REpiceaJARSVNAppVersionCompiler() {
 		super();
@@ -16,6 +17,10 @@ public class REpiceaJARSVNAppVersionCompiler extends AbstractAppVersionCompiler 
 	@Test
 	public void createRevisionFile() {
 		REpiceaJARSVNAppVersionCompiler compiler = new REpiceaJARSVNAppVersionCompiler();
-		compiler.createRevisionFile(APP_URL, Version_Filename);
+		try {
+			compiler.createRevisionFile(APP_URL, Version_Filename);
+		} catch (Exception e) {
+			Assert.fail("Failed to compile revision number");
+		}
 	}
 }

@@ -186,7 +186,7 @@ public final class ObjectUtility {
 	 * @return a String instance
 	 */
 	@SuppressWarnings("rawtypes")
-	public static String getRootPath(Class anyClass) {
+	public static String getBinPath(Class anyClass) {
 		String binPath;
 		try {
 			binPath = anyClass.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
@@ -200,13 +200,31 @@ public final class ObjectUtility {
 
 	
 	/**
+	 * This method returns the root path of the application. 
+	 * @param anyClass any class of the system
+	 * @return a String instance
+	 */
+	@SuppressWarnings("rawtypes")
+	public static String getTrueRootPath(Class anyClass) {
+		try {
+			String binPath = getBinPath(anyClass);
+			binPath = binPath.substring(0, binPath.length() - 1); // to remove the last separator
+			int lastPathSeparator = binPath.lastIndexOf(PathSeparator);
+			return binPath.substring(0, lastPathSeparator).concat(PathSeparator);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	
+	/**
 	 * This method returns the path of a particular class. 
 	 * @param anyClass any class of the system
 	 * @return a String instance
 	 */
 	@SuppressWarnings("rawtypes")
 	public static String getPackagePath(Class anyClass) {
-		String binPath = getRootPath(anyClass);
+		String binPath = getBinPath(anyClass);
 		if (binPath == null) {
 			return null;
 		} else {
