@@ -24,7 +24,7 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 
 	private static REpiceaJARSVNAppVersion SINGLETON;
 	
-	private static final String FilenamePath = ObjectUtility.getRootPath(REpiceaJARSVNAppVersion.class) + "revision";
+	private static final String FilenamePath = ObjectUtility.getRootPath(REpiceaJARSVNAppVersion.class) + "revision.csv";
 	
 	private REpiceaJARSVNAppVersion() {
 		super(FilenamePath);
@@ -43,9 +43,9 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 	}
 	
 	
-//	public static void main(String[] args) {
-//		String version = REpiceaJARSVNAppVersion.getInstance().getRevision();
-//		int u = 0;
-//	}
+	public static void main(String[] args) {
+		String version = REpiceaJARSVNAppVersion.getInstance().getRevision();
+		int u = 0;
+	}
 	
 }

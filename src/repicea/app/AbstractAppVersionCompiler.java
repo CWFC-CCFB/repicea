@@ -20,13 +20,17 @@ package repicea.app;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.List;
+
+import repicea.io.FormatField;
+import repicea.io.javacsv.CSVField;
+import repicea.io.javacsv.CSVWriter;
 
 
 /**
@@ -38,7 +42,9 @@ public abstract class AbstractAppVersionCompiler {
 
 	protected static final String REVISION_STRING = "Revision";
 	
-	protected AbstractAppVersionCompiler(String appSVN, String versionFilename) {
+	protected AbstractAppVersionCompiler() {}
+	
+	protected final void createRevisionFile(String appSVN, String csvVersionFilename) {
 		URL svnUrl;
 		try {
 			svnUrl = new URL(appSVN);
@@ -56,19 +62,19 @@ public abstract class AbstractAppVersionCompiler {
 			}
 			System.out.println(REVISION_STRING + ": " + revision);
 			in.close();
-			File file = new File(versionFilename);
-			if (file.exists()) {
-				file.delete();
-			}
-			OutputStream out = new FileOutputStream(file);
-			out.write(revision.getBytes());
-			out.flush();
-			out.close();
+			File file = new File(csvVersionFilename);
+			CSVWriter writer = new CSVWriter(file, false);
+			List<FormatField> formatFields = new ArrayList<FormatField>();
+			formatFields.add(new CSVField(REVISION_STRING));
+			writer.setFields(formatFields);
+			writer.addRecord(new Object[]{revision});
+			writer.close();
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
-
+	
+	
 }

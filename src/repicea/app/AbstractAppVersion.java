@@ -18,12 +18,7 @@
  */
 package repicea.app;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStreamReader;
+import repicea.io.javacsv.CSVReader;
 
 /**
  * This class retrieves the revision that defines the version of the application.
@@ -32,30 +27,16 @@ import java.io.InputStreamReader;
  */
 public abstract class AbstractAppVersion {
 
-	private final String revision; 
+	private String revision; 
 	
-	protected AbstractAppVersion(String revisionFilename) {
-		File file = new File(revisionFilename);
-		if (!file.exists()) {
-			revision = "unknown";
-		} else {
-			String line = null;
-			try {
-				BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(file)));
-				line = in.readLine();
-				in.close();
-			} catch (FileNotFoundException e) {
-				e.printStackTrace();
-			} catch (IOException e) {
-				e.printStackTrace();
-			} finally {
-				if (line != null) {
-					revision = line;
-				} else {
-					revision = "unknown";
-				}
-			}
-		} 
+	protected AbstractAppVersion(String csvRevisionFilename) {
+		try {
+			CSVReader reader = new CSVReader(csvRevisionFilename);
+			Object[] record = reader.nextRecord();
+			revision = record[reader.getHeader().getIndexOfThisField(AbstractAppVersionCompiler.REVISION_STRING)].toString();
+		} catch (Exception e) {
+			revision = "Unknown";
+		}
 	}
 
 	/**
