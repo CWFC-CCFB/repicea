@@ -18,6 +18,8 @@
  */
 package repicea.app;
 
+import repicea.util.ObjectUtility;
+
 /**
  * This class retrieves information on the version and other features of the repicea.jar application. 
  * @author Mathieu Fortin - August 2015
@@ -27,7 +29,7 @@ public class REpiceaJARSVNAppVersion extends AbstractAppVersion {
 	private static REpiceaJARSVNAppVersion SINGLETON;
 
 	private static final String AppName = "repicea";
-	protected static final String ShortFilename = AppName + "_revision.csv";
+	protected static final String ShortFilename = ObjectUtility.getRelativePackagePath(REpiceaJARSVNAppVersion.class) + AppName + "_revision.csv";
 	
 	private REpiceaJARSVNAppVersion() {
 		super(AppName, ShortFilename);
