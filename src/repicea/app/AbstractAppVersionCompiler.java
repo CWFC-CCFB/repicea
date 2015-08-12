@@ -41,40 +41,33 @@ import repicea.io.javacsv.CSVWriter;
 public abstract class AbstractAppVersionCompiler {
 
 	protected static final String REVISION_STRING = "Revision";
-	
+
 	protected AbstractAppVersionCompiler() {}
-	
-	protected final void createRevisionFile(String appSVN, String csvVersionFilename) {
-		URL svnUrl;
-		try {
-			svnUrl = new URL(appSVN);
-			URLConnection connection = svnUrl.openConnection();
-			BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-			String inputLine;
-			String revision = ""; 
-			while ((inputLine = in.readLine()) != null) {
-				if (inputLine.contains(REVISION_STRING)) {
-					int index = inputLine.indexOf(REVISION_STRING) + REVISION_STRING.length() + 1;
-					int finalIndex = inputLine.indexOf(" ", index) - 1;
-					revision = inputLine.substring(index, finalIndex);
-					break;
-				}
+
+	protected final void createRevisionFile(String appSVN, String csvVersionFilename) throws MalformedURLException, IOException {
+		URL svnUrl = new URL(appSVN);
+		URLConnection connection = svnUrl.openConnection();
+		BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+		String inputLine;
+		String revision = ""; 
+		while ((inputLine = in.readLine()) != null) {
+			if (inputLine.contains(REVISION_STRING)) {
+				int index = inputLine.indexOf(REVISION_STRING) + REVISION_STRING.length() + 1;
+				int finalIndex = inputLine.indexOf(" ", index) - 1;
+				revision = inputLine.substring(index, finalIndex);
+				break;
 			}
-			System.out.println(REVISION_STRING + ": " + revision);
-			in.close();
-			File file = new File(csvVersionFilename);
-			CSVWriter writer = new CSVWriter(file, false);
-			List<FormatField> formatFields = new ArrayList<FormatField>();
-			formatFields.add(new CSVField(REVISION_STRING));
-			writer.setFields(formatFields);
-			writer.addRecord(new Object[]{revision});
-			writer.close();
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
 		}
+//		System.out.println(REVISION_STRING + ": " + revision);
+		in.close();
+		File file = new File(csvVersionFilename);
+		CSVWriter writer = new CSVWriter(file, false);
+		List<FormatField> formatFields = new ArrayList<FormatField>();
+		formatFields.add(new CSVField(REVISION_STRING));
+		writer.setFields(formatFields);
+		writer.addRecord(new Object[]{revision});
+		writer.close();
 	}
-	
-	
+
+
 }
