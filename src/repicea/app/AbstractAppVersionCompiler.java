@@ -34,11 +34,11 @@ import java.net.URLConnection;
  * to a JUnit test series (which are not exported as JAR).
  * @author Mathieu Fortin - August 2015
  */
-public abstract class AbstractAppVersion {
+public abstract class AbstractAppVersionCompiler {
 
 	protected static final String REVISION_STRING = "Revision";
 	
-	protected AbstractAppVersion(String appSVN, String versionFilename) {
+	protected AbstractAppVersionCompiler(String appSVN, String versionFilename) {
 		URL svnUrl;
 		try {
 			svnUrl = new URL(appSVN);
