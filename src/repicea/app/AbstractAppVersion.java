@@ -62,6 +62,6 @@ public abstract class AbstractAppVersion {
 	 * This method returns the revision number.
 	 * @return a String
 	 */
-	public final String getRevision() {return "Revision: " + revision.trim();}
+	public final String getRevision() {return "Revision " + revision.trim();}
 	
 }
