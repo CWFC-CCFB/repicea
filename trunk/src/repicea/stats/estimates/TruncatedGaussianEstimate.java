@@ -56,7 +56,7 @@ public class TruncatedGaussianEstimate extends GaussianEstimate {
 	 * @param lowerBound a Matrix instance
 	 */
 	public void setLowerBound(Matrix lowerBound) {
-		if (upperBound != null && upperBound.subtract(lowerBound).anyElementLargerThan(0)) {
+		if (upperBound != null && lowerBound.subtract(upperBound).anyElementLargerThan(0)) {
 			throw new InvalidParameterException("The lower bound is larger than the upper bound !");
 		} else {
 			this.lowerBound = lowerBound;
