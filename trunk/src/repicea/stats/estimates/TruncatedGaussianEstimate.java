@@ -34,7 +34,22 @@ public class TruncatedGaussianEstimate extends GaussianEstimate {
 
 	private Matrix lowerBound;
 	private Matrix upperBound;
-	
+
+	/**
+	 * Basic constructor with mean 0 and variance 1.
+	 */
+	public TruncatedGaussianEstimate() {
+		super();
+	}
+
+	/**
+	 * Constructor 2 with user specified mean and variance.
+	 * @param mean a Matrix instance
+	 * @param variance a Matrix instance
+	 */
+	public TruncatedGaussianEstimate(Matrix mean, Matrix variance) {
+		super(mean, variance);
+	}
 	
 	/**
 	 * This method sets the lower bound of the truncated distribution. Setting the lower bound to null simply removes the bound.
@@ -53,7 +68,7 @@ public class TruncatedGaussianEstimate extends GaussianEstimate {
 	 * @param upperBound a Matrix instance
 	 */
 	public void setUpperBound(Matrix upperBound) {
-		if (lowerBound != null && upperBound.subtract(lowerBound).anyElementLargerThan(0)) {
+		if (lowerBound != null && lowerBound.subtract(upperBound).anyElementLargerThan(0)) {
 			throw new InvalidParameterException("The upper bound is smaller than the lower bound !");
 		} else {
 			this.upperBound = upperBound;
