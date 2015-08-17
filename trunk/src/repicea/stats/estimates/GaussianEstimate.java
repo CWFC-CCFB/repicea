@@ -28,7 +28,7 @@ import repicea.stats.distributions.GaussianDistribution;
  * This class contains the elements related to the random effects, i.e. the best linear unbiased predictors (blups) as well as their variances.
  * @author Mathieu Fortin - October 2011
  */
-public class GaussianEstimate extends Estimate<Matrix, GaussianDistribution<Matrix>> implements CentralMomentsSettable<Matrix>, Serializable {
+public class GaussianEstimate extends Estimate<Matrix, GaussianDistribution> implements CentralMomentsSettable<Matrix>, Serializable {
 
 	private static final long serialVersionUID = 20120725L;
 	
@@ -37,7 +37,7 @@ public class GaussianEstimate extends Estimate<Matrix, GaussianDistribution<Matr
 	 * Common constructor. By default the Gaussian distribution that supports this estimate has a mean 0 and a variance 1.
 	 */
 	public GaussianEstimate() {
-		super(new GaussianDistribution<Matrix>(new Matrix(1,1), new Matrix(1,1,1,0)));
+		super(new GaussianDistribution(new Matrix(1,1), new Matrix(1,1,1,0)));
 		estimatorType = EstimatorType.LikelihoodBased;
 	}
 	

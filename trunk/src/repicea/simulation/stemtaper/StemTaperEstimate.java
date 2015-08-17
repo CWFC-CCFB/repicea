@@ -35,7 +35,7 @@ import repicea.stats.integral.TrapezoidalRule;
  * @author Mathieu Fortin - March 2012
  */
 @SuppressWarnings({ "rawtypes", "serial" })
-public abstract class StemTaperEstimate extends HybridEstimate<Matrix> {
+public abstract class StemTaperEstimate extends HybridEstimate {
 		
 	private List<Double> heights;
 	private Estimate<Matrix, ?> volumeEstimate;

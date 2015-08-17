@@ -18,28 +18,26 @@
  */
 package repicea.stats.distributions;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.Distribution;
-import repicea.stats.StatisticalUtility;
-import repicea.stats.distributions.GaussianDistribution.FunctionParameter;
-import repicea.stats.distributions.GaussianDistribution.FunctionVariable;
 
 /**
  * This class implements the Gaussian probability density function.
  * @author Mathieu Fortin - August 2012
  */
-public final class GaussianDistribution<N extends Number> extends AbstractMathematicalFunction<FunctionParameter, N, FunctionVariable, N> implements Distribution<N>, CentralMomentsSettable<N> {
+//public final class GaussianDistribution<N extends Number> extends AbstractMathematicalFunction<FunctionParameter, N, FunctionVariable, N> implements Distribution<N>, CentralMomentsSettable<N> {
+@SuppressWarnings("serial")
+public class GaussianDistribution extends StandardGaussianDistribution implements CentralMomentsSettable<Matrix> {
 
-	private static final long serialVersionUID = 20120825L;
 
-	protected static enum FunctionParameter {Mu, Sigma2}
-	protected static enum FunctionVariable {yVector}
-	
-	private N lowerCholTriangle;
+//	protected static enum FunctionParameter {Mu, Sigma2}
+//	protected static enum FunctionVariable {yVector}
+
+//	private N mu;
+//	private N sigma2;
+//	private N lowerCholTriangle;
 		
-
 	/**
 	 * This constructor creates a Gaussian function with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 
 	 * positive definite.
@@ -47,118 +45,69 @@ public final class GaussianDistribution<N extends Number> extends AbstractMathem
 	 * @param sigma2 the variance of the function
 	 * @throws UnsupportedOperationException if the matrix sigma2 is not positive definite
 	 */
-	public GaussianDistribution(N mu, N sigma2) {
+	public GaussianDistribution(Matrix mu, Matrix sigma2) {
 		setMean(mu);
 		setVariance(sigma2);
 	}
 	
-	
-	private N getY() {
-		return getVariableValue(FunctionVariable.yVector);
-	}
-	
-	@Override
-	public Double getValue() {
-		N y = getY();
-		if (y instanceof Matrix) {
-			Matrix yMat = (Matrix) y;
-			Matrix variance = (Matrix) getVariance();
-			Matrix mean = (Matrix) getMean();
-			if (yMat == null || !yMat.isTheSameDimension(mean)) {
-				throw new UnsupportedOperationException("Vector y is either null or its dimensions are different from those of mu!");
-			} else {
-				if (!isMultivariate()) {
-					double diff =  yMat.m_afData[0][0] - mean.m_afData[0][0];
-					return 1d / Math.sqrt(2 * Math.PI * variance.m_afData[0][0]) * Math.exp(- 0.5 * diff * diff / variance.m_afData[0][0]); 
-				} else {
-					int k = yMat.m_iRows;
-					Matrix residuals = yMat.subtract(mean);
-					Matrix invSigma2 = variance.getInverseMatrix();
-					return 1d / (Math.pow(2 * Math.PI, 0.5 * k) * Math.sqrt(variance.getDeterminant())) * Math.exp(- 0.5 * residuals.transpose().multiply(invSigma2).multiply(residuals).getSumOfElements());
-				}
-			}
-		} else {
-			double yValue = (Double) y;
-			double mean = (Double) getMean();
-			double variance = (Double) getVariance();
-			double diff =  yValue - mean;
-			return 1d / Math.sqrt(2 * Math.PI * variance) * Math.exp(- 0.5 * diff * diff / variance); 
-		}
-	}
-
-	
-	@Override
-	public Matrix getGradient() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	
-	@Override
-	public Matrix getHessian() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public boolean isMultivariate() {
-		return getMean() instanceof Matrix && ((Matrix) getMean()).m_iRows > 1;
+		return getMean().m_iRows > 1;
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public N getRandomRealization() {
-		if (getStandardDeviation() instanceof Matrix) {
-			Matrix mean = (Matrix) getMean();
-			Matrix standardDeviation = (Matrix) getStandardDeviation();
-			Matrix normalStandardDeviates = StatisticalUtility.drawRandomVector(standardDeviation.m_iRows, Distribution.Type.GAUSSIAN);
-			return (N) mean.add(standardDeviation.multiply(normalStandardDeviates));
-		} else {
-			double mean = (Double) getMean();
-			double standardDeviation = (Double) getStandardDeviation();
-			double deviate = StatisticalUtility.getRandom().nextGaussian();
-			return (N) ((Double) (mean + standardDeviation * deviate));
-		}
-	}
+//	@SuppressWarnings("unchecked")
+//	@Override
+//	public N getRandomRealization() {
+//		if (getStandardDeviation() instanceof Matrix) {
+//			Matrix mean = (Matrix) getMean();
+//			Matrix standardDeviation = (Matrix) getStandardDeviation();
+//			Matrix normalStandardDeviates = StatisticalUtility.drawRandomVector(standardDeviation.m_iRows, Distribution.Type.GAUSSIAN);
+//			return (N) mean.add(standardDeviation.multiply(normalStandardDeviates));
+//		} else {
+//			double mean = (Double) getMean();
+//			double standardDeviation = (Double) getStandardDeviation();
+//			double deviate = StatisticalUtility.getRandom().nextGaussian();
+//			return (N) ((Double) (mean + standardDeviation * deviate));
+//		}
+//	}
 
-	/**
-	 * This method returns the lower triangle of the Cholesky decomposition of the variance-covariance matrix.
-	 * @return a Matrix instance
-	 */
-	@SuppressWarnings("unchecked")
-	public N getStandardDeviation() {
-		if (lowerCholTriangle == null) {
-			if (getVariance() instanceof Matrix) {
-				lowerCholTriangle = (N) ((Matrix) getVariance()).getLowerCholTriangle();
-			} else {
-				lowerCholTriangle = (N) ((Double) Math.sqrt(getVariance().doubleValue()));
-			}
-		}
-		return lowerCholTriangle;
-	}
+//	/**
+//	 * This method returns the lower triangle of the Cholesky decomposition of the variance-covariance matrix.
+//	 * @return a Matrix instance
+//	 */
+//	@SuppressWarnings("unchecked")
+//	public N getStandardDeviation() {
+//		if (lowerCholTriangle == null) {
+//			if (getVariance() instanceof Matrix) {
+//				lowerCholTriangle = (N) ((Matrix) getVariance()).getLowerCholTriangle();
+//			} else {
+//				lowerCholTriangle = (N) ((Double) Math.sqrt(getVariance().doubleValue()));
+//			}
+//		}
+//		return lowerCholTriangle;
+//	}
 	
-	@Override
-	public N getMean() {
-		return getParameterValue(FunctionParameter.Mu);
-	}
-
-	@Override
-	public N getVariance() {
-		return getParameterValue(FunctionParameter.Sigma2);
-	}
+//	@Override
+//	public N getMean() {
+//		return mu;
+//	}
+//
+//	@Override
+//	public N getVariance() {
+//		return sigma2;
+//	}
 
 	@Override
 	public Type getType() {return Distribution.Type.GAUSSIAN;}
 
 	@Override
-	public void setMean(N mean) {
-		setParameterValue(FunctionParameter.Mu, mean);
+	public void setMean(Matrix mean) {
+		super.setMean(mean);
 	}
 
 	@Override
-	public void setVariance(N variance) {
-		setParameterValue(FunctionParameter.Sigma2, variance);
-		lowerCholTriangle = null;
+	public void setVariance(Matrix variance) {
+		super.setVariance(variance);
 	}
 
 	@Override

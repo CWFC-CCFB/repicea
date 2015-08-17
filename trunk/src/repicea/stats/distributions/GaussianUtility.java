@@ -18,6 +18,8 @@
  */
 package repicea.stats.distributions;
 
+import repicea.math.Matrix;
+
 /**
  * The Gaussian class implements common static methods that are related to the density or
  * the cumulative probability of the Gaussian distribution.
@@ -191,7 +193,29 @@ public class GaussianUtility {
 			return getCumulativeProbability(x);
 		}
 	}
-	
-	
-	
+
+	/**
+	 * This method returns the result of the probability density function of the distribution parameter.
+	 * @param yValues a single double value or a Matrix instance
+	 * @param distribution a GaussianDistribution instance
+	 * @return a double
+	 */
+	public static double getProbabilityDensity(Matrix yValues, GaussianDistribution distribution) {
+		Matrix variance = distribution.getVariance();
+		Matrix mean = distribution.getMean();
+		if (yValues == null || !yValues.isTheSameDimension(mean)) {
+			throw new UnsupportedOperationException("Vector y is either null or its dimensions are different from those of mu!");
+		} else {
+			if (!distribution.isMultivariate()) {
+				double diff =  yValues.m_afData[0][0] - mean.m_afData[0][0];
+				return 1d / Math.sqrt(2 * Math.PI * variance.m_afData[0][0]) * Math.exp(- 0.5 * diff * diff / variance.m_afData[0][0]); 
+			} else {
+				int k = yValues.m_iRows;
+				Matrix residuals = yValues.subtract(mean);
+				Matrix invSigma2 = variance.getInverseMatrix();
+				return 1d / (Math.pow(2 * Math.PI, 0.5 * k) * Math.sqrt(variance.getDeterminant())) * Math.exp(- 0.5 * residuals.transpose().multiply(invSigma2).multiply(residuals).getSumOfElements());
+			}
+		}
+	}
+
 }
