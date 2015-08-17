@@ -59,7 +59,7 @@ public class StandardGaussianDistribution implements Distribution<Matrix> {
 	
 	@Override
 	public boolean isMultivariate() {
-		return false;
+		return getMu().m_iRows > 1;
 	}
 	
 	@Override
@@ -76,16 +76,16 @@ public class StandardGaussianDistribution implements Distribution<Matrix> {
 	 */
 	public Matrix getStandardDeviation() {
 		if (lowerCholTriangle == null) {
-			lowerCholTriangle = getVariance().getLowerCholTriangle();
+			lowerCholTriangle = getSigma2().getLowerCholTriangle();
 		}
 		return lowerCholTriangle;
 	}
 	
 	@Override
-	public Matrix getMean() {return mu;}
+	public Matrix getMean() {return getMu();}
 
 	@Override
-	public Matrix getVariance() {return sigma2;}
+	public Matrix getVariance() {return getSigma2();}
 
 	@Override
 	public Type getType() {return Distribution.Type.GAUSSIAN;}
@@ -99,9 +99,37 @@ public class StandardGaussianDistribution implements Distribution<Matrix> {
 		lowerCholTriangle = null;
 	}
 
+	protected Matrix getMu() {return mu;}
+	
+	protected Matrix getSigma2() {return sigma2;}
+	
+	
 	@Override
 	public boolean isParametric() {return true;}
 
+	
+	/**
+	 * This method returns the result of the probability density function of the distribution parameter.
+	 * @param yValues a single double value or a Matrix instance
+	 * @return a double
+	 */
+	public double getProbabilityDensity(Matrix yValues) {
+		if (yValues == null || !yValues.isTheSameDimension(getMu())) {
+			throw new UnsupportedOperationException("Vector y is either null or its dimensions are different from those of mu!");
+		} else {
+			if (!isMultivariate()) {
+				double diff =  yValues.m_afData[0][0] - getMu().m_afData[0][0];
+				return 1d / Math.sqrt(2 * Math.PI * sigma2.m_afData[0][0]) * Math.exp(- 0.5 * diff * diff / getSigma2().m_afData[0][0]); 
+			} else {
+				int k = yValues.m_iRows;
+				Matrix residuals = yValues.subtract(getMu());
+				Matrix invSigma2 = getSigma2().getInverseMatrix();
+				return 1d / (Math.pow(2 * Math.PI, 0.5 * k) * Math.sqrt(getSigma2().getDeterminant())) * Math.exp(- 0.5 * residuals.transpose().multiply(invSigma2).multiply(residuals).getSumOfElements());
+			}
+		}
+	}
+
+	
 //	@Override
 //	public List<double[]> getQuantile(List<double[]> probabilities) {
 //		if (probabilities == null || probabilities.isEmpty()) {
