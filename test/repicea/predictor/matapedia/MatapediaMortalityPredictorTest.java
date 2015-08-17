@@ -10,6 +10,7 @@ import java.util.List;
 
 import org.junit.Test;
 
+import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.stats.distributions.NonparametricDistribution;
 import repicea.util.ObjectUtility;
@@ -102,15 +103,16 @@ public class MatapediaMortalityPredictorTest {
 		
 		for (int treeID = 0; treeID < 10; treeID++) {
 			MatapediaTreeImpl tree = trees.get(treeID*10);
-			NonparametricDistribution<Double> dist = new NonparametricDistribution<Double>();
-			double result;
+			NonparametricDistribution dist = new NonparametricDistribution();
+			Matrix resultWrapper;
 			for (int i = 0; i < nbReal; i++) {
 				stand.setMonteCarloRealizationId(i);
-				result = stochasticPredictor.predictEventProbability(stand, tree);
-				dist.addRealization(result);
+				resultWrapper = new Matrix(1,1);
+				resultWrapper.m_afData[0][0] = stochasticPredictor.predictEventProbability(stand, tree);
+				dist.addRealization(resultWrapper);
 			}
 			double meanDeterministic = deterministicPredictor.predictEventProbability(stand, tree);
-			double meanStochastic = dist.getMean();
+			double meanStochastic = dist.getMean().m_afData[0][0];
 
 			System.out.println("Deterministic : " + meanDeterministic + "; Stochastic : " + meanStochastic);			
 			assertEquals(meanDeterministic, meanStochastic, 0.002);

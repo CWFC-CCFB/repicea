@@ -15,7 +15,7 @@ public class DistributionTest {
 	@Test
 	public void stochasticSimulationFromGaussianDistribution() {
 		int nbReal = 1000000;
-		NonparametricDistribution<Matrix> npDist = new NonparametricDistribution<Matrix>(); 
+		NonparametricDistribution npDist = new NonparametricDistribution(); 
 		Matrix mean = new Matrix(2,1);
 		mean.m_afData[0][0] = 2d;
 		mean.m_afData[1][0] = 3d;
@@ -56,7 +56,7 @@ public class DistributionTest {
 		
 		TruncatedGaussianDistribution distribution = new TruncatedGaussianDistribution();
 		distribution.setUpperBoundValue(new Matrix(1,1));
-		MonteCarloEstimate<Matrix> estimate = new MonteCarloEstimate<Matrix>();
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		
 		for (int i = 0; i < nbReal; i++) {
 			estimate.addRealization(distribution.getRandomRealization());

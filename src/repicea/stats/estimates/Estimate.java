@@ -18,6 +18,7 @@
  */
 package repicea.stats.estimates;
 
+import repicea.math.Matrix;
 import repicea.stats.Distribution;
 import repicea.stats.RandomVariable;
 
@@ -26,7 +27,7 @@ import repicea.stats.RandomVariable;
  * @author Mathieu Fortin - March 2012
  * @param <D> a Distribution derived instance which represents the assumed distribution for the estimate
  */
-public abstract class Estimate<N extends Number, D extends Distribution<N>> extends RandomVariable<N,D> {
+public abstract class Estimate<D extends Distribution> extends RandomVariable<D> {
 	
 	private static final long serialVersionUID = 20120825L;
 	
@@ -55,7 +56,7 @@ public abstract class Estimate<N extends Number, D extends Distribution<N>> exte
 	 * is useful for Monte Carlo simulations.
 	 * @return a deviate from the underlying distribution as a Matrix instance
 	 */
-	public N getRandomDeviate() {
+	public Matrix getRandomDeviate() {
 		return getDistribution().getRandomRealization();
 	}
 

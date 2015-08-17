@@ -27,7 +27,7 @@ import repicea.stats.distributions.TruncatedGaussianDistribution;
  * @author Mathieu Fortin - August 2015
  */
 @SuppressWarnings("serial")
-public class TruncatedGaussianEstimate extends Estimate<Matrix, TruncatedGaussianDistribution> {
+public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistribution> {
 
 
 	/**

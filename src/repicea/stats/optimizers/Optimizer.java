@@ -54,7 +54,7 @@ public interface Optimizer {
 	 */
 	public boolean optimize(StatisticalModel<? extends StatisticalDataStructure> model) throws OptimizationException;
 	public boolean isConvergenceAchieved();
-	public Estimate<Matrix, ?> getParameters();
+	public Estimate<?> getParameters();
 	public Matrix getCorrelationMatrix();
 
 	/**

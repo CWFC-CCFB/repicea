@@ -38,7 +38,7 @@ import repicea.stats.integral.TrapezoidalRule;
 public abstract class StemTaperEstimate extends HybridEstimate {
 		
 	private List<Double> heights;
-	private Estimate<Matrix, ?> volumeEstimate;
+	private Estimate<?> volumeEstimate;
 
 	/**
 	 * Constructor 1.
@@ -107,7 +107,7 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	 * in the heights member.
 	 * @return an Estimate instance 
 	 */
-	public Estimate<Matrix, ?> getVolumeEstimate() {
+	public Estimate<?> getVolumeEstimate() {
 		return getVolumeEstimate(null);
 	}
 	
@@ -118,7 +118,7 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	 * all along the heights, by default)
 	 * @return an Estimate instance 
 	 */
-	public Estimate<Matrix, ?> getVolumeEstimate(StemTaperSegmentList segments) {
+	public Estimate<?> getVolumeEstimate(StemTaperSegmentList segments) {
 		if (segments == null) {	// means it has to be integrated all along the sections
 			if (volumeEstimate == null) {
 				segments = getDefaultSegments();
@@ -143,8 +143,7 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	 * @param segments a StemTaperSegmentList instance
 	 * @return an Estimate instance 
 	 */
-	@SuppressWarnings("unchecked")
-	private Estimate<Matrix, ?> getVolumeEstimateForTheseSegments(StemTaperSegmentList segments) {
+	private Estimate<?> getVolumeEstimateForTheseSegments(StemTaperSegmentList segments) {
 		if (!heights.containsAll(segments.getHeights())) {
 			throw new InvalidParameterException("There is a mismatch between the requested sections and the heights that have been computed!");
 		}
@@ -157,7 +156,7 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 
 		Estimate result;
 		if (getEstimatorType() == EstimatorType.MonteCarlo) {
-			result = new MonteCarloEstimate<Matrix>();
+			result = new MonteCarloEstimate();
 		} else {
 			result = new GaussianEstimate();
 			((GaussianEstimate) result).setMean(null);

@@ -20,6 +20,7 @@ package repicea.stats.estimates;
 
 import java.io.Serializable;
 
+import repicea.math.Matrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.UnknownDistribution;
 
@@ -27,7 +28,7 @@ import repicea.stats.distributions.UnknownDistribution;
  * The Estimate class is the general class for all estimates.
  * @author Mathieu Fortin - July 2011
  */
-public class SimpleEstimate<N extends Number> extends Estimate<N, UnknownDistribution<N>> implements CentralMomentsSettable<N>, Serializable {
+public class SimpleEstimate extends Estimate<UnknownDistribution> implements CentralMomentsSettable, Serializable {
 
 	private static final long serialVersionUID = 20110912L;
 	
@@ -35,18 +36,18 @@ public class SimpleEstimate<N extends Number> extends Estimate<N, UnknownDistrib
 	 * Public constructor 1 for derived classes.
 	 */
 	public SimpleEstimate() {
-		super(new UnknownDistribution<N>());
+		super(new UnknownDistribution());
 		estimatorType = EstimatorType.Unknown;
 	}
 	
 
 	@Override
-	public void setMean(N mean) {
+	public void setMean(Matrix mean) {
 		getDistribution().setMean(mean);
 	}
 	
 	@Override
-	public void setVariance(N variance) {
+	public void setVariance(Matrix variance) {
 		getDistribution().setVariance(variance);
 	}
 	

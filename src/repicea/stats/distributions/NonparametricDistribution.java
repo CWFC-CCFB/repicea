@@ -31,17 +31,17 @@ import repicea.stats.StatisticalUtility;
  * are derived from an array of matrices that represents the observations.
  * @author Mathieu Fortin - August 2012
  */
-public class NonparametricDistribution<N extends Number> implements Distribution<N>, Serializable {
+public class NonparametricDistribution implements Distribution, Serializable {
 
 	private static final long serialVersionUID = 20120826L;
 	
-	private final List<N> observations;
+	private final List<Matrix> observations;
 
 	/**
 	 * Constructor.
 	 */
 	public NonparametricDistribution() {
-		observations = new ArrayList<N>();
+		observations = new ArrayList<Matrix>();
 	}
 	
 	/**
@@ -54,66 +54,45 @@ public class NonparametricDistribution<N extends Number> implements Distribution
 	 * This method sets a given observation of the nonparametric distribution.
 	 * @param value the value of the observation
 	 */
-	public void addRealization(N value) {observations.add(value);}
+	public void addRealization(Matrix value) {observations.add(value);}
 	
 	/**
 	 * This method returns the array that contains all the observations of this distribution.
 	 * @return an array of Matrix instances
 	 */
-	public List<N> getRealizations() {return observations;}
+	public List<Matrix> getRealizations() {return observations;}
 	
-	@SuppressWarnings("unchecked")
 	@Override
-	public N getMean() {
+	public Matrix getMean() {
 		if (observations == null || observations.isEmpty()) {
 			return null;
 		} else {
-			if (observations.get(0) instanceof Matrix) {
-				Matrix sum = null;
-				for (N mat : observations) {
-					if (sum == null) {
-						sum = ((Matrix) mat).getDeepClone();
-					} else {
-						sum = sum.add((Matrix) mat);
-					}
+			Matrix sum = null;
+			for (Matrix mat : observations) {
+				if (sum == null) {
+					sum = ((Matrix) mat).getDeepClone();
+				} else {
+					sum = sum.add((Matrix) mat);
 				}
-				return (N) sum.scalarMultiply(1d / observations.size());
-			} else {
-				double sum = 0;
-				for (N mat : observations) {
-					sum += mat.doubleValue();
-				}
-				return (N) ((Double) (sum / observations.size()));
 			}
+			return (Matrix) sum.scalarMultiply(1d / observations.size());
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public N getVariance() {
-		if (getMean() instanceof Matrix) {
-			Matrix mean = (Matrix) getMean();
-			Matrix sse = null;
-			Matrix error;
-			for (N mat : observations) {
-				error = ((Matrix) mat).subtract(mean);
-				if (sse == null) {
-					sse = error.multiply(error.transpose());
-				} else {
-					sse = sse.add(error.multiply(error.transpose()));
-				}
+	public Matrix getVariance() {
+		Matrix mean = (Matrix) getMean();
+		Matrix sse = null;
+		Matrix error;
+		for (Matrix mat : observations) {
+			error = ((Matrix) mat).subtract(mean);
+			if (sse == null) {
+				sse = error.multiply(error.transpose());
+			} else {
+				sse = sse.add(error.multiply(error.transpose()));
 			}
-			return (N) sse.scalarMultiply(1d / (observations.size()-1));
-		} else {
-			double mean = (Double) getMean();
-			double sse = 0;
-			double error;
-			for (N mat : observations) {
-				error = ((Double) mat) - mean;
-				sse += error * error;
-			}
-			return (N) ((Double) (sse / (observations.size()-1)));
 		}
+		return sse.scalarMultiply(1d / (observations.size()-1));
 	}
 
 	@Override
@@ -136,7 +115,7 @@ public class NonparametricDistribution<N extends Number> implements Distribution
 	}
 
 	@Override
-	public N getRandomRealization() {
+	public Matrix getRandomRealization() {
 		int observationIndex = (int) (StatisticalUtility.getRandom().nextDouble() * getNumberOfRealizations());
 		return getRealizations().get(observationIndex);
 	}

@@ -30,7 +30,7 @@ import repicea.stats.distributions.ChiSquaredDistribution.FunctionParameter;
  * The ChiSquareDistribution class represents a univariate Chi Square distribution with a given degrees of freedom.
  * @author Mathieu Fortin - November 2012
  */
-public final class ChiSquaredDistribution extends AbstractMathematicalFunction<FunctionParameter, Double, Integer, Double> implements Distribution<Double>, CentralMomentsSettable<Double> {
+public final class ChiSquaredDistribution extends AbstractMathematicalFunction<FunctionParameter, Matrix, Integer, Matrix> implements Distribution, CentralMomentsSettable {
 
 	private static final long serialVersionUID = 20121114L;
 
@@ -62,8 +62,12 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 			throw new InvalidParameterException("The variance estimate must be larger than 0!");
 		}
 		double var = 2d / (2 + degreesOfFreedom) * estimate * estimate;
-		setMean(estimate);
-		setVariance(var);
+		Matrix mean = new Matrix(1,1);
+		mean.m_afData[0][0] = estimate;
+		setMean(mean);
+		Matrix variance = new Matrix(1,1);
+		variance.m_afData[0][0] = var;
+		setVariance(variance);
 	}
 
 
@@ -81,8 +85,12 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 		if (var < 0) {
 			throw new InvalidParameterException("The variance must be larger than 0!");
 		}
-		setMean(estimate);
-		setVariance(var);
+		Matrix mean = new Matrix(1,1);
+		mean.m_afData[0][0] = estimate;
+		setMean(mean);
+		Matrix variance = new Matrix(1,1);
+		variance.m_afData[0][0] = var;
+		setVariance(variance);
 	}
 
 	/**
@@ -94,12 +102,12 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 	}
 	
 	@Override
-	public Double getMean() {
+	public Matrix getMean() {
 		return getParameterValue(FunctionParameter.Mu);
 	}
 
 	@Override
-	public Double getVariance() {
+	public Matrix getVariance() {
 		return getParameterValue(FunctionParameter.Sigma2);
 	}
 
@@ -114,7 +122,7 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 	public Type getType() {return Type.CHI_SQUARE;}
 
 	@Override
-	public Double getRandomRealization() {
+	public Matrix getRandomRealization() {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -139,12 +147,12 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 
 
 	@Override
-	public void setMean(Double mean) {
+	public void setMean(Matrix mean) {
 		setParameterValue(FunctionParameter.Mu, mean);
 	}
 
 	@Override
-	public void setVariance(Double variance) {
+	public void setVariance(Matrix variance) {
 		setParameterValue(FunctionParameter.Sigma2, variance);
 	}
 

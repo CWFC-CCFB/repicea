@@ -25,7 +25,7 @@ import repicea.stats.distributions.ChiSquaredDistribution;
  * of the estimate is assumed to be a Chi Square.
  * @author Mathieu Fortin - November 2012
  */
-public class VarianceEstimate extends Estimate<Double, ChiSquaredDistribution> {
+public class VarianceEstimate extends Estimate<ChiSquaredDistribution> {
 
 	private static final long serialVersionUID = 20121114L;
 
