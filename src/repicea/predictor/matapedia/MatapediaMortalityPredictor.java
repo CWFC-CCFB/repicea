@@ -114,7 +114,7 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 			prob = linkFunction.getValue();
 		} else {
 			eta.setVariableValue(1, 0d);
-			prob = ghq.getOneDimensionIntegral(linkFunction, eta, 1, defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot).getDistribution().getStandardDeviation().m_afData[0][0]);
+			prob = ghq.getOneDimensionIntegral(linkFunction, eta, 1, ((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation().m_afData[0][0]);
 		}
 		
 		if (parms != null && parms.length > 0 && parms[0] instanceof Double) {
