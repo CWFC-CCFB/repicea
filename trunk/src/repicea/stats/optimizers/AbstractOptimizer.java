@@ -30,7 +30,7 @@ abstract class AbstractOptimizer implements Optimizer {
 
 	protected boolean convergenceAchieved;
 	
-	protected Estimate<Matrix, GaussianDistribution> betaVector;
+	protected Estimate<GaussianDistribution> betaVector;
 	
 	private boolean verboseEnabled;
 	
@@ -46,7 +46,7 @@ abstract class AbstractOptimizer implements Optimizer {
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}
 
 	@Override
-	public Estimate<Matrix, GaussianDistribution> getParameters() {return betaVector;}
+	public Estimate<GaussianDistribution> getParameters() {return betaVector;}
 
 	public Matrix getCorrelationMatrix() {
 		Matrix std;

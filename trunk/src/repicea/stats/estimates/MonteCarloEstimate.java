@@ -20,13 +20,14 @@ package repicea.stats.estimates;
 
 import java.util.List;
 
+import repicea.math.Matrix;
 import repicea.stats.distributions.NonparametricDistribution;
 
 /**
  * This estimate contains the realizations of a Monte Carlo simulations.
  * @author Mathieu Fortin - October 2011
  */
-public class MonteCarloEstimate<N extends Number> extends Estimate<N, NonparametricDistribution<N>> {
+public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	
 	private static final long serialVersionUID = 20110912L;
 	
@@ -34,15 +35,15 @@ public class MonteCarloEstimate<N extends Number> extends Estimate<N, Nonparamet
 	 * Constructor.
 	 */
 	public MonteCarloEstimate() {
-		super(new NonparametricDistribution<N>());
+		super(new NonparametricDistribution());
 		estimatorType = EstimatorType.MonteCarlo;
 	}
 	
 	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
 	
-	public void addRealization(N value) {getDistribution().addRealization(value);}
+	public void addRealization(Matrix value) {getDistribution().addRealization(value);}
 	
-	public List<N> getRealizations() {return getDistribution().getRealizations();}
+	public List<Matrix> getRealizations() {return getDistribution().getRealizations();}
 	
 //	/**
 //	 * This method returns a list of double in case of univariate distribution or null otherwise

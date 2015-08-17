@@ -134,11 +134,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 
 	protected Matrix oXVector;
 
-	protected Estimate<Matrix,?> defaultBeta;
+	protected GaussianEstimate defaultBeta;
 	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
-	protected final Map<HierarchicalLevel, Estimate<Matrix,?>> defaultRandomEffects;
-	protected final Map<HierarchicalLevel, Map<Integer, Estimate<Matrix,?>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
+	protected final Map<HierarchicalLevel, GaussianEstimate> defaultRandomEffects;
+	protected final Map<HierarchicalLevel, Map<Integer, Estimate<?>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
 	private final Map<HierarchicalLevel, Map<Long, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	protected final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
@@ -163,11 +163,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 		this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
-		defaultRandomEffects = new HashMap<HierarchicalLevel, Estimate<Matrix,?>>();
+		defaultRandomEffects = new HashMap<HierarchicalLevel, GaussianEstimate>();
 				
 		simulatedParameters = new HashMap<Integer, Matrix>();
 		simulatedRandomEffects = new HashMap<HierarchicalLevel, Map<Long, Matrix>>();
-		blupsLibrary = new HashMap<HierarchicalLevel, Map<Integer, Estimate<Matrix,?>>>();
+		blupsLibrary = new HashMap<HierarchicalLevel, Map<Integer, Estimate<?>>>();
 		simulatedResidualError = new HashMap<Long, GaussianErrorTermList>();
 		intervalLists = new HashMap<Long, IntervalNestedInPlotDefinition>();
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
@@ -230,12 +230,12 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 */
 	private void setSpecificRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
-		Estimate<Matrix,?> randomEffectEstimate = null;
+		Estimate<?> randomEffectEstimate = null;
 		if (blupsLibrary.get(subjectLevel) != null) {
 			randomEffectEstimate = blupsLibrary.get(subjectLevel).get(subject.getSubjectId()); // get the reference Blups
  		}
 		
-		Estimate<Matrix, ?> estimatedBlups;
+		Estimate<?> estimatedBlups;
 		
 		if (randomEffectEstimate != null) {
 			estimatedBlups = randomEffectEstimate;

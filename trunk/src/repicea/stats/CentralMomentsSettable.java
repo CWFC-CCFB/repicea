@@ -18,24 +18,26 @@
  */
 package repicea.stats;
 
+import repicea.math.Matrix;
+
 
 /**
  * The CentralMomentsSettable interface ensures the mean and the variance can be set.
  * @author Mathieu Fortin - August 2012
  */
-public interface CentralMomentsSettable<N extends Number> {
+public interface CentralMomentsSettable {
 
 	
 	/**
 	 * This method sets the mean vector of the random variable.
-	 * @param mean a Number instance
+	 * @param mean a Matrix instance
 	 */
-	public void setMean(N mean);
+	public void setMean(Matrix mean);
 	
 	/**
 	 * This method sets the variance-covariance matrix of the random variable.
-	 * @param variance a Number instance
+	 * @param variance a Matrix instance
 	 */
-	public void setVariance(N variance);
+	public void setVariance(Matrix variance);
 
 }

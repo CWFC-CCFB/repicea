@@ -23,7 +23,7 @@ import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 
 @SuppressWarnings("serial")
-public class StandardGaussianDistribution implements Distribution<Matrix> {
+public class StandardGaussianDistribution implements Distribution {
 
 	private static StandardGaussianDistribution Singleton;
 	

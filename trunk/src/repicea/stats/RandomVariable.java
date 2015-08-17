@@ -20,6 +20,8 @@ package repicea.stats;
 
 import java.io.Serializable;
 
+import repicea.math.Matrix;
+
 /**
  * The RandomVariable class ensures the instance can provide its two first central moments (i.e. mean and variance) as
  * well as a distribution. The parameter D sets the distribution of the random variables (see the repicea.stats.distributions 
@@ -27,7 +29,7 @@ import java.io.Serializable;
  * @author Mathieu Fortin - May 2012
  * @param <D> a Distribution derived instance
  */
-public abstract class RandomVariable<N extends Number, D extends Distribution<N>> implements CentralMomentsGettable<N>, Serializable {
+public abstract class RandomVariable<D extends Distribution> implements CentralMomentsGettable, Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
@@ -46,12 +48,12 @@ public abstract class RandomVariable<N extends Number, D extends Distribution<N>
 	}
 	
 	@Override
-	public N getMean() {
+	public Matrix getMean() {
 		return getDistribution().getMean();
 	}
 
 	@Override
-	public N getVariance() {
+	public Matrix getVariance() {
 		return getDistribution().getVariance();
 	}
 	

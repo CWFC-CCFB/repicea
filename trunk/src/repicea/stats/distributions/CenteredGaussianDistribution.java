@@ -35,7 +35,7 @@ import repicea.stats.StatisticalUtility.TypeMatrixR;
  * @author Mathieu Fortin - August 2014
  */
 @SuppressWarnings("serial")
-public final class CenteredGaussianDistribution implements Distribution<Matrix> {
+public final class CenteredGaussianDistribution implements Distribution {
 	
 	private final GaussianDistribution underlyingDistribution;
 	private final double correlationParameter;

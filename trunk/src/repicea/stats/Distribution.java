@@ -20,14 +20,15 @@ package repicea.stats;
 
 import java.io.Serializable;
 
+import repicea.math.Matrix;
+
 
 
 /**
  * The Distribution interface provides the basic function for a probability density (or mass) function.
  * @author Mathieu Fortin - August 2012
- *
  */
-public interface Distribution<N extends Number> extends CentralMomentsGettable<N>, Serializable {
+public interface Distribution extends CentralMomentsGettable, Serializable {
 
 	public enum Type {GAUSSIAN, UNIFORM, NONPARAMETRIC, UNKNOWN, CHI_SQUARE}
 	
@@ -56,7 +57,7 @@ public interface Distribution<N extends Number> extends CentralMomentsGettable<N
 	 * This method draws a random realization from the distribution.
 	 * @return the observation in a Matrix instance
 	 */
-	public N getRandomRealization();
+	public Matrix getRandomRealization();
 	
 	
 //	/**

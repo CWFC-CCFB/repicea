@@ -28,24 +28,24 @@ import repicea.stats.Distribution;
  * @author Mathieu Fortin - August 2012
  */
 @SuppressWarnings("serial")
-public class UnknownDistribution<N extends Number> implements Distribution<N>, CentralMomentsSettable<N> {
+public class UnknownDistribution implements Distribution, CentralMomentsSettable {
 
-	private N mean;
-	private N variance;
+	private Matrix mean;
+	private Matrix variance;
 	
 	
 	@Override
 	public boolean isMultivariate() {
-		return mean instanceof Matrix && ((Matrix) mean).m_iRows > 1;
+		return ((Matrix) mean).m_iRows > 1;
 	}
 
 	@Override
-	public N getMean() {
+	public Matrix getMean() {
 		return mean;
 	}
 
 	@Override
-	public N getVariance() {
+	public Matrix getVariance() {
 		return variance;
 	}
 
@@ -55,12 +55,12 @@ public class UnknownDistribution<N extends Number> implements Distribution<N>, C
 	}
 
 	@Override
-	public void setMean(N mean) {
+	public void setMean(Matrix mean) {
 		this.mean = mean;
 	}
 
 	@Override
-	public void setVariance(N variance) {
+	public void setVariance(Matrix variance) {
 		this.variance = variance;
 	}
 
@@ -70,7 +70,7 @@ public class UnknownDistribution<N extends Number> implements Distribution<N>, C
 	}
 
 	@Override
-	public N getRandomRealization() {
+	public Matrix getRandomRealization() {
 		return null;
 	}
 

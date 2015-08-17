@@ -155,7 +155,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 				System.out.println("BIC            : " + formatter.format(BIC));
 			}
 			
-			Estimate<Matrix,?> parameterEstimates = optimizer.getParameters();
+			Estimate<?> parameterEstimates = optimizer.getParameters();
 			
 			Matrix report;
 			boolean varianceAvailable = false;

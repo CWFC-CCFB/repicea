@@ -32,8 +32,8 @@ import repicea.stats.distributions.NonparametricDistribution;
  * the constructor.
  * @author Mathieu Fortin - June 2014
  */
-@SuppressWarnings({ "rawtypes", "serial" })
-public class HybridEstimate extends Estimate<Matrix, Distribution<Matrix>> implements CentralMomentsSettable<Matrix> {
+@SuppressWarnings({"serial" })
+public class HybridEstimate extends Estimate<Distribution> implements CentralMomentsSettable {
 
 	private final Distribution alternateDistribution;
 	
@@ -50,7 +50,7 @@ public class HybridEstimate extends Estimate<Matrix, Distribution<Matrix>> imple
 	 * @param isMonteCarlo a boolean 
 	 */
 	public HybridEstimate(int numberOfRealizations, boolean isMonteCarlo) {
-		super(new NonparametricDistribution<Matrix>());
+		super(new NonparametricDistribution());
 		alternateDistribution = new GaussianDistribution(null, null);
 		if (isMonteCarlo) {
 			estimatorType = EstimatorType.MonteCarlo;
@@ -59,9 +59,8 @@ public class HybridEstimate extends Estimate<Matrix, Distribution<Matrix>> imple
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
-	public Distribution<Matrix> getDistribution() {
+	public Distribution getDistribution() {
 		if (estimatorType == EstimatorType.MonteCarlo) {
 			return super.getDistribution();
 		} else {
@@ -77,7 +76,6 @@ public class HybridEstimate extends Estimate<Matrix, Distribution<Matrix>> imple
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	protected List<Matrix> getRealizations() {
 		if (getEstimatorType() == EstimatorType.MonteCarlo) {
 			return ((NonparametricDistribution) getDistribution()).getRealizations();
@@ -108,7 +106,6 @@ public class HybridEstimate extends Estimate<Matrix, Distribution<Matrix>> imple
 	 * This method records the realization of a particular Monte Carlo iteration
 	 * @param realization the realization as a Matrix instance
 	 */
-	@SuppressWarnings("unchecked")
 	public void addRealization(Matrix realization) {
 		if (getEstimatorType() == EstimatorType.MonteCarlo) {
 			((NonparametricDistribution) getDistribution()).addRealization(realization);

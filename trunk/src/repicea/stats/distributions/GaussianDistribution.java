@@ -26,7 +26,7 @@ import repicea.stats.CentralMomentsSettable;
  * @author Mathieu Fortin - August 2012
  */
 @SuppressWarnings("serial")
-public class GaussianDistribution extends StandardGaussianDistribution implements CentralMomentsSettable<Matrix> {
+public class GaussianDistribution extends StandardGaussianDistribution implements CentralMomentsSettable {
 		
 	/**
 	 * This constructor creates a Gaussian function with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 

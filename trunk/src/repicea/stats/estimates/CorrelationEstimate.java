@@ -18,13 +18,15 @@
  */
 package repicea.stats.estimates;
 
+import repicea.math.Matrix;
+
 
 /**
  * The CorrelationEstimate class represents a Pearson's correlation
  * estimate.
  * @author Mathieu Fortin - November 2012
  */
-public class CorrelationEstimate extends SimpleEstimate<Double> {
+public class CorrelationEstimate extends SimpleEstimate {
 	
 	private static final long serialVersionUID = 20110912L;
 	private int sampleSize;
@@ -36,7 +38,9 @@ public class CorrelationEstimate extends SimpleEstimate<Double> {
 	 */
 	public CorrelationEstimate(double mean, int sampleSize) {
 		super();
-		setMean(mean);
+		Matrix meanMat = new Matrix(1,1);
+		meanMat.m_afData[0][0] = mean;
+		setMean(meanMat);
 		this.sampleSize = sampleSize;
 	}
 	
@@ -45,7 +49,7 @@ public class CorrelationEstimate extends SimpleEstimate<Double> {
 	 * @return a double
 	 */
 	public double getStudentT() {
-		double mean = getMean();
+		double mean = getMean().m_afData[0][0];
 		return mean * Math.sqrt((double) (sampleSize - 2)/(1 - mean * mean));
 	}
 	

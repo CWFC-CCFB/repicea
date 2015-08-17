@@ -18,24 +18,26 @@
  */
 package repicea.stats;
 
+import repicea.math.Matrix;
+
 
 /**
  * The CentralMomentsGettable interface ensures the mean and the variance are available.
  * @author Mathieu Fortin - August 2012
  */
-public interface CentralMomentsGettable<N extends Number> {
+public interface CentralMomentsGettable {
 
 	/**
 	 * This method returns the first central moment, i.e. the mean vector, of the random variable.
-	 * @return a Number instance
+	 * @return a Matrix instance
 	 */
-	public N getMean();
+	public Matrix getMean();
 	
 	/**
 	 * This method returns the second central moment, i.e. the variance-covariance matrix, of the random variable.
 	 * @return a Number instance
 	 */
-	public N getVariance();
+	public Matrix getVariance();
 
 
 }
