@@ -1,11 +1,11 @@
 package repicea.stats.distributions;
 
 import org.junit.Assert;
-
 import org.junit.Test;
 
 import repicea.math.Matrix;
 import repicea.stats.estimates.GaussianEstimate;
+import repicea.stats.estimates.MonteCarloEstimate;
 
 public class DistributionTest {
 
@@ -13,8 +13,8 @@ public class DistributionTest {
 	 * This test uses a Multivariate Gaussian distribution as a reference and compute a Monte Carlo estimator. The mean and the variances are then compared.
 	 */
 	@Test
-	public void StochasticSimulationFromGaussianDistribution() {
-		int nbReal = 100000;
+	public void stochasticSimulationFromGaussianDistribution() {
+		int nbReal = 1000000;
 		NonparametricDistribution<Matrix> npDist = new NonparametricDistribution<Matrix>(); 
 		Matrix mean = new Matrix(2,1);
 		mean.m_afData[0][0] = 2d;
@@ -47,5 +47,28 @@ public class DistributionTest {
 
 	}
 	
-	
+	/*
+	 * This test uses a univariate truncated Gaussian distribution as a reference and compute a Monte Carlo estimator. The mean and the variances are then compared.
+	 */
+	@Test
+	public void stochasticSimulationFromTruncatedGaussianDistribution() {
+		int nbReal = 1000000;
+		
+		TruncatedGaussianDistribution distribution = new TruncatedGaussianDistribution();
+		distribution.setUpperBoundValue(new Matrix(1,1));
+		MonteCarloEstimate<Matrix> estimate = new MonteCarloEstimate<Matrix>();
+		
+		for (int i = 0; i < nbReal; i++) {
+			estimate.addRealization(distribution.getRandomRealization());
+		}
+		
+		Matrix simulatedMean = estimate.getMean();
+		Matrix simulatedVariance = estimate.getVariance();
+		Matrix expectedMean = distribution.getMean();
+		Matrix expectedVariance = distribution.getVariance();
+		Assert.assertEquals("Testing the means", expectedMean.m_afData[0][0], simulatedMean.m_afData[0][0], 1E-3);
+		Assert.assertEquals("Testing the variances", expectedVariance.m_afData[0][0], simulatedVariance.m_afData[0][0], 1E-3);
+
+	}
+
 }

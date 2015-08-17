@@ -25,5 +25,15 @@ public class GaussianTest {
 		double biv00 = GaussianUtility.getBivariateCumulativeProbability(x1, x2, true, true, rho);
 		assertEquals(0.026762827968218002, biv00, 1E-10);
 	}
+	
+	@Test
+	public void quantileTests() {
+		for (int i = 1; i < 20; i++) {
+			double expectedCDFValue = i * .05;
+			double quantile = GaussianUtility.getQuantile(expectedCDFValue);
+			double cdfValue = GaussianUtility.getCumulativeProbability(quantile);
+			assertEquals(expectedCDFValue, cdfValue, 1E-9);
+		}
+	}
 
 }
