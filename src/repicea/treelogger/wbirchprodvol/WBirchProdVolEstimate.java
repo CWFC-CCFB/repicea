@@ -18,12 +18,11 @@
  */
 package repicea.treelogger.wbirchprodvol;
 
-import repicea.math.Matrix;
 import repicea.stats.estimates.HybridEstimate;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolPredictor.Version;
 
 @SuppressWarnings("serial")
-public class WBirchProdVolEstimate extends HybridEstimate<Matrix> {
+public class WBirchProdVolEstimate extends HybridEstimate {
 	
 	private final Version version;
 	

@@ -30,14 +30,14 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 
 /**
- * The MultivariateStandardGaussianWithCovarianceStructureDistribution class is designed for dealing with univariate or multivariate 
+ * The CenteredGaussianDistribution class is designed for dealing with univariate or multivariate 
  * error terms in linear and non linear model. It assumes a constant variance that is represented by the variance parameter in the constructor.
  * @author Mathieu Fortin - August 2014
  */
 @SuppressWarnings("serial")
 public final class CenteredGaussianDistribution implements Distribution<Matrix> {
 	
-	private final GaussianDistribution<Matrix> underlyingDistribution;
+	private final GaussianDistribution underlyingDistribution;
 	private final double correlationParameter;
 	private final TypeMatrixR type;
 	private final boolean isStructured;
@@ -54,7 +54,7 @@ public final class CenteredGaussianDistribution implements Distribution<Matrix> 
 	 * @param type a TypeMatrixR enum
 	 */
 	public CenteredGaussianDistribution(Matrix variance, double correlationParameter, TypeMatrixR type) {
-		underlyingDistribution = new GaussianDistribution<Matrix>(new Matrix(variance.m_iRows,1), variance);
+		underlyingDistribution = new GaussianDistribution(new Matrix(variance.m_iRows,1), variance);
 		this.correlationParameter = correlationParameter;
 		this.type = type;
 		if (this.correlationParameter != 0 && this.type != null) {

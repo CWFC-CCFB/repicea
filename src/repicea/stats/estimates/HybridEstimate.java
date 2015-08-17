@@ -33,7 +33,7 @@ import repicea.stats.distributions.NonparametricDistribution;
  * @author Mathieu Fortin - June 2014
  */
 @SuppressWarnings({ "rawtypes", "serial" })
-public class HybridEstimate<N extends Number> extends Estimate<N, Distribution<N>> implements CentralMomentsSettable<N> {
+public class HybridEstimate extends Estimate<Matrix, Distribution<Matrix>> implements CentralMomentsSettable<Matrix> {
 
 	private final Distribution alternateDistribution;
 	
@@ -50,8 +50,8 @@ public class HybridEstimate<N extends Number> extends Estimate<N, Distribution<N
 	 * @param isMonteCarlo a boolean 
 	 */
 	public HybridEstimate(int numberOfRealizations, boolean isMonteCarlo) {
-		super(new NonparametricDistribution<N>());
-		alternateDistribution = new GaussianDistribution<N>(null, null);
+		super(new NonparametricDistribution<Matrix>());
+		alternateDistribution = new GaussianDistribution(null, null);
 		if (isMonteCarlo) {
 			estimatorType = EstimatorType.MonteCarlo;
 		} else {
@@ -61,7 +61,7 @@ public class HybridEstimate<N extends Number> extends Estimate<N, Distribution<N
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public Distribution<N> getDistribution() {
+	public Distribution<Matrix> getDistribution() {
 		if (estimatorType == EstimatorType.MonteCarlo) {
 			return super.getDistribution();
 		} else {
@@ -86,10 +86,8 @@ public class HybridEstimate<N extends Number> extends Estimate<N, Distribution<N
 		}
 	}
 
-
-	@SuppressWarnings("unchecked")
 	@Override
-	public void setMean(N mean) {
+	public void setMean(Matrix mean) {
 		if (getEstimatorType() == EstimatorType.LikelihoodBased) {
 			((GaussianDistribution) getDistribution()).setMean(mean);
 		} else {
@@ -97,10 +95,8 @@ public class HybridEstimate<N extends Number> extends Estimate<N, Distribution<N
 		}
 	}
 
-
-	@SuppressWarnings("unchecked")
 	@Override
-	public void setVariance(N variance) {
+	public void setVariance(Matrix variance) {
 		if (getEstimatorType() == EstimatorType.LikelihoodBased) {
 			((GaussianDistribution) getDistribution()).setVariance(variance);
 		} else {
@@ -113,7 +109,7 @@ public class HybridEstimate<N extends Number> extends Estimate<N, Distribution<N
 	 * @param realization the realization as a Matrix instance
 	 */
 	@SuppressWarnings("unchecked")
-	public void addRealization(N realization) {
+	public void addRealization(Matrix realization) {
 		if (getEstimatorType() == EstimatorType.MonteCarlo) {
 			((NonparametricDistribution) getDistribution()).addRealization(realization);
 		} else {
