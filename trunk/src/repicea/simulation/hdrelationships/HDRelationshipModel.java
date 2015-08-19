@@ -217,7 +217,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	}
 
 	protected Enum<?> getErrorGroup(Tree tree) {
-		Enum<?> errorGroup = tree.getErrorGroup();
+		Enum<?> errorGroup = tree.getHDRelationshipTreeErrorGroup();
 		if (errorGroup == null) {
 			return ErrorTermGroup.Default;
 		} else {
