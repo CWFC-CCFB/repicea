@@ -19,8 +19,7 @@
 package repicea.simulation.hdrelationships;
 
 import repicea.simulation.MonteCarloSimulationCompliantObject;
-import repicea.simulation.covariateproviders.standlevel.TreeStatusCollectionsProvider;
 
-public abstract interface HDRelationshipStand extends MonteCarloSimulationCompliantObject, TreeStatusCollectionsProvider {
+public abstract interface HDRelationshipStand extends MonteCarloSimulationCompliantObject {
 
 }

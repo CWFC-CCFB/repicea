@@ -19,13 +19,13 @@
 package repicea.simulation.hdrelationships;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulator;
-import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.StatusClass;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
@@ -156,7 +156,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 * This method computes the best linear unbiased predictors of the random effects
 	 * @param stand a HeightableStand instance
 	 */
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void predictHeightRandomEffects(Stand stand) {
 		boolean originalIsParameterVariabilityEnabled = isParametersVariabilityEnabled;
 		isParametersVariabilityEnabled = false; // temporarily disabled for the prediction of the random effects
@@ -170,8 +170,9 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		
 		// put all the trees for which the height is available in a Vector
 		List<HDRelationshipTree> heightableTrees = new ArrayList<HDRelationshipTree>();
-		if (!stand.getTrees(StatusClass.alive).isEmpty()) {
-			for (Object tree : stand.getTrees(StatusClass.alive)) {
+		Collection trees = getTreesFromStand(stand);
+		if (trees != null && !trees.isEmpty()) {
+			for (Object tree : trees) {
 				if (tree instanceof HDRelationshipTree) {
 					double height = ((HDRelationshipTree) tree).getHeightM();
 					if (height > 1.3) {
@@ -215,7 +216,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		isParametersVariabilityEnabled = originalIsParameterVariabilityEnabled; // set the parameter variability to its original value;
 	}
 
-	private Enum<?> getErrorGroup(Tree tree) {
+	protected Enum<?> getErrorGroup(Tree tree) {
 		Enum<?> errorGroup = tree.getErrorGroup();
 		if (errorGroup == null) {
 			return ErrorTermGroup.Default;
@@ -224,6 +225,12 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		}
 	}
 	
+	/**
+	 * This method selects the trees from which the blups must be calculated.
+	 * @param stand a Stand instance
+	 * @return return a Collection of Tree instances
+	 */
+	protected abstract Collection<Tree> getTreesFromStand(Stand stand);
 	
 	/**
 	 * This method computes the fixed effect prediction and put the prediction, the Z vector,
