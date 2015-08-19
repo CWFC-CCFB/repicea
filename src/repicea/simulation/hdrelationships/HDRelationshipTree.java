@@ -29,6 +29,6 @@ public abstract interface HDRelationshipTree extends MonteCarloSimulationComplia
 	 * have a correlation structure that differs from that of broadleaved species.
 	 * @return an Enum that defines the group
 	 */
-	public Enum<?> getErrorGroup();
+	public Enum<?> getHDRelationshipTreeErrorGroup();
 	
 }
