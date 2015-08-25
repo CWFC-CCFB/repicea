@@ -97,7 +97,7 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	protected final DragGestureRecognizer createLinkRecognizer;
 	protected final JLabel label;
 	private final SystemPanel panel;
-	private transient ProcessorInternalDialog guiInterface;
+	protected transient ProcessorInternalDialog guiInterface;
 	
 	protected ProcessorButton(SystemPanel panel, Processor process, REpiceaGUIPermission permission) {
 		super(permission);
