@@ -86,15 +86,19 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		setCancelOnClose(false);
 		caller = callerButton.getOwner();
 		
-		processorTextField = new JTextField();
-		processorTextField.setColumns(25);
-		processorTextField.setText(getCaller().getName());
-		processorTextField.setPreferredSize(new Dimension(100, processorTextField.getFontMetrics(processorTextField.getFont()).getHeight() + 2));
-
+		initializeComponents();
+		
 		initUI();
 		pack();
 	}
 
+	protected void initializeComponents() {
+		processorTextField = new JTextField();
+		processorTextField.setColumns(25);
+		processorTextField.setText(getCaller().getName());
+		processorTextField.setPreferredSize(new Dimension(100, processorTextField.getFontMetrics(processorTextField.getFont()).getHeight() + 2));
+	}
+	
 	protected Processor getCaller() {return caller;}
 
 	@Override
