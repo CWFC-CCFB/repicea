@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
  *
@@ -42,7 +42,7 @@ import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
-public class ProcessorInternalDialog extends REpiceaDialog {// implements ActionListener {
+public class ProcessorInternalDialog extends REpiceaDialog {
 
 
 	public static enum MessageID implements TextableEnum {
@@ -72,8 +72,6 @@ public class ProcessorInternalDialog extends REpiceaDialog {// implements Action
 
 	protected JTextField processorTextField;
 	
-//	private final JButton close;
-
 	private JPanel bottomComponent;
 
 
@@ -87,7 +85,6 @@ public class ProcessorInternalDialog extends REpiceaDialog {// implements Action
 		super(parent);
 		setCancelOnClose(false);
 		caller = callerButton.getOwner();
-//		close = UIControlManager.createCommonButton(CommonControlID.Close);
 		
 		processorTextField = new JTextField();
 		processorTextField.setColumns(25);
@@ -96,9 +93,6 @@ public class ProcessorInternalDialog extends REpiceaDialog {// implements Action
 
 		initUI();
 		pack();
-//		close.setDefaultCapable(true);
-//		getRootPane().setDefaultButton(close);
-//		close.requestFocusInWindow();
 	}
 
 	protected Processor getCaller() {return caller;}
@@ -108,34 +102,15 @@ public class ProcessorInternalDialog extends REpiceaDialog {// implements Action
 		setTitle(MessageID.ProcessorTitle.toString());
 
 		setLayout(new BorderLayout());
-		
-		
+				
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		getContentPane().add(mainPanel, BorderLayout.WEST);
 		
-		JPanel upperPart = new JPanel();
-		upperPart.setLayout(new BoxLayout(upperPart, BoxLayout.Y_AXIS));
-
-		JPanel processorNameSubPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-		processorNameSubPanel.add(new JLabel(REpiceaTranslator.getString(MessageID.ProcessorName)));
-		processorNameSubPanel.add(Box.createHorizontalStrut(5));
-		processorNameSubPanel.add(processorTextField);
-		processorNameSubPanel.add(Box.createHorizontalStrut(5));
-
-		Component verticalStrut = Box.createVerticalStrut(10);
-		upperPart.add(verticalStrut);
-		upperPart.add(processorNameSubPanel);
-		upperPart.add(Box.createVerticalStrut(10));
-
-		mainPanel.add(upperPart);
+		mainPanel.add(createUpperPartPanel());
 		
 		bottomComponent = new JPanel();
 		mainPanel.add(bottomComponent);
-		
-//		JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//		controlPanel.add(close);
-//		getContentPane().add(controlPanel, BorderLayout.SOUTH);
 	}
 
 
@@ -151,13 +126,11 @@ public class ProcessorInternalDialog extends REpiceaDialog {// implements Action
 	@Override
 	public void listenTo() {
 		processorTextField.addCaretListener(getCaller());
-//		close.addActionListener(this);
 	}
 
 	@Override
 	public void doNotListenToAnymore() {
 		processorTextField.removeCaretListener(getCaller());
-//		close.removeActionListener(this);
 	}
 
 	@Override
@@ -183,12 +156,25 @@ public class ProcessorInternalDialog extends REpiceaDialog {// implements Action
 		super.setVisible(bool);
 	}
 
-//	@Override
-//	public void actionPerformed(ActionEvent arg0) {
-//		if (arg0.getSource().equals(close)) {
-//			okAction();
-//		}
-//		
-//	}
+	/**
+	 * This panel contains the information that are always displayed. Typically, the processor name appears in this panel.
+	 * @return a JPanel instance
+	 */
+	protected JPanel createUpperPartPanel() {
+		JPanel upperPart = new JPanel();
+		upperPart.setLayout(new BoxLayout(upperPart, BoxLayout.Y_AXIS));
 
+		JPanel processorNameSubPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+		processorNameSubPanel.add(new JLabel(REpiceaTranslator.getString(MessageID.ProcessorName)));
+		processorNameSubPanel.add(Box.createHorizontalStrut(5));
+		processorNameSubPanel.add(processorTextField);
+		processorNameSubPanel.add(Box.createHorizontalStrut(5));
+
+		Component verticalStrut = Box.createVerticalStrut(10);
+		upperPart.add(verticalStrut);
+		upperPart.add(processorNameSubPanel);
+		upperPart.add(Box.createVerticalStrut(10));
+		return upperPart;
+	}
+	
 }
