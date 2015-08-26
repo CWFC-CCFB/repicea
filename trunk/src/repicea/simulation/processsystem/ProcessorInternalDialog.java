@@ -21,15 +21,12 @@ package repicea.simulation.processsystem;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.FlowLayout;
 import java.awt.Window;
 
 import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
 import javax.swing.JTextField;
@@ -38,6 +35,7 @@ import javax.swing.text.JTextComponent;
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaPanel;
+import repicea.gui.UIControlManager;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -51,7 +49,10 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		ProcessorIntake("Processor intake", "Intrant au processeur"),
 		ProcessorYield("Processor yield", "Rendement du processeur"),
 		SendToAnotherOutletLabel("Send to another outlet", "Envoyer vers un autre d\u00E9bouch\u00E9"),
-		AvailableOutlets("Available outlets", "D\u00E9bouch\u00E9s disponibles");
+		AvailableOutlets("Available outlets", "D\u00E9bouch\u00E9s disponibles"),
+		GeneralFeatures("General features", "Caract\u00E9ristiques g\u00E9n\u00E9rales"),
+		SpecificFeatures("Specific features", "Caract\u00E9ristiques sp\u00E9cifiques"),
+		;
 
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -63,9 +64,7 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		}
 
 		@Override
-		public String toString() {
-			return REpiceaTranslator.getString(this);
-		}
+		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 	
 	private final Processor caller;
@@ -118,8 +117,11 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	}
 
 
-	private void setBottomComponent(JComponent bottomPanel) {
+	private void setBottomComponent(JPanel bottomPanel) {
 		bottomComponent.removeAll();
+		if (bottomPanel.getComponents().length > 0) {
+			bottomPanel.setBorder(UIControlManager.getTitledBorder(MessageID.SpecificFeatures.toString()));
+		}
 		bottomComponent.add(bottomPanel);
 		pack();
 		validate();
@@ -167,9 +169,12 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	protected JPanel createUpperPartPanel() {
 		JPanel upperPart = new JPanel();
 		upperPart.setLayout(new BoxLayout(upperPart, BoxLayout.Y_AXIS));
-
-		JPanel processorNameSubPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-		processorNameSubPanel.add(new JLabel(REpiceaTranslator.getString(MessageID.ProcessorName)));
+		upperPart.setBorder(UIControlManager.getTitledBorder(MessageID.GeneralFeatures.toString()));
+		
+		JPanel processorNameSubPanel = new JPanel();
+		processorNameSubPanel.setLayout(new BoxLayout(processorNameSubPanel, BoxLayout.X_AXIS));
+		processorNameSubPanel.add(Box.createHorizontalStrut(5));
+		processorNameSubPanel.add(UIControlManager.getLabel(MessageID.ProcessorName));
 		processorNameSubPanel.add(Box.createHorizontalStrut(5));
 		processorNameSubPanel.add(processorTextField);
 		processorNameSubPanel.add(Box.createHorizontalStrut(5));
