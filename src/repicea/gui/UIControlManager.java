@@ -34,12 +34,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.KeyStroke;
+import javax.swing.border.Border;
+import javax.swing.border.TitledBorder;
 
 import repicea.app.GenericTaskFactory;
 import repicea.gui.icons.IconFactory;
@@ -528,4 +531,15 @@ public class UIControlManager {
 	}
 	
 
+	/**
+	 * This static method returns a Border instance with a title. 
+	 * @param title the title to appear in the Border instance
+	 * @return a TitledBorder instance
+	 */
+	public static TitledBorder getTitledBorder(String title) {
+		Border border = BorderFactory.createEtchedBorder();
+		TitledBorder titledBorder = BorderFactory.createTitledBorder(border, title);
+		return titledBorder;
+	}
+	
  }
