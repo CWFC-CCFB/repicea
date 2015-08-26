@@ -108,21 +108,22 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 				
 		JPanel mainPanel = new JPanel();
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		getContentPane().add(mainPanel, BorderLayout.WEST);
+		getContentPane().add(mainPanel, BorderLayout.NORTH);
 		
 		mainPanel.add(createUpperPartPanel());
 		
 		bottomComponent = new JPanel();
+		bottomComponent.setLayout(new BorderLayout());
 		mainPanel.add(bottomComponent);
 	}
 
 
 	private void setBottomComponent(JPanel bottomPanel) {
 		bottomComponent.removeAll();
-		if (bottomPanel.getComponents().length > 0) {
+		if (bottomPanel.getComponents().length > 0 && bottomPanel.getBorder() == null) {
 			bottomPanel.setBorder(UIControlManager.getTitledBorder(MessageID.SpecificFeatures.toString()));
 		}
-		bottomComponent.add(bottomPanel);
+		bottomComponent.add(bottomPanel, BorderLayout.CENTER);
 		pack();
 		validate();
 		repaint();
@@ -171,13 +172,9 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		upperPart.setLayout(new BoxLayout(upperPart, BoxLayout.Y_AXIS));
 		upperPart.setBorder(UIControlManager.getTitledBorder(MessageID.GeneralFeatures.toString()));
 		
-		JPanel processorNameSubPanel = new JPanel();
-		processorNameSubPanel.setLayout(new BoxLayout(processorNameSubPanel, BoxLayout.X_AXIS));
-		processorNameSubPanel.add(Box.createHorizontalStrut(5));
-		processorNameSubPanel.add(UIControlManager.getLabel(MessageID.ProcessorName));
-		processorNameSubPanel.add(Box.createHorizontalStrut(5));
-		processorNameSubPanel.add(processorTextField);
-		processorNameSubPanel.add(Box.createHorizontalStrut(5));
+		JPanel processorNameSubPanel = UIControlManager.createSimpleHorizontalPanel(UIControlManager.getLabel(MessageID.ProcessorName),
+				processorTextField, 
+				5);
 
 		Component verticalStrut = Box.createVerticalStrut(10);
 		upperPart.add(verticalStrut);
