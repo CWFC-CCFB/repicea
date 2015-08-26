@@ -18,9 +18,11 @@
  */
 package repicea.gui;
 
+import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Event;
+import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -35,11 +37,13 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.KeyStroke;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
@@ -542,4 +546,22 @@ public class UIControlManager {
 		return titledBorder;
 	}
 	
+	/**
+	 * This static method creates an horizontal JPanel with a label and a control. 
+	 * @param text
+	 * @param control
+	 * @param margin 
+	 * @return a JPanel instance
+	 */
+	public static JPanel createSimpleHorizontalPanel(JLabel label, Component control, int margin) {
+		JPanel panel = new JPanel(new BorderLayout());
+		JPanel subPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		subPanel.add(Box.createHorizontalStrut(margin));
+		subPanel.add(label);
+		subPanel.add(Box.createHorizontalStrut(margin));
+		panel.add(subPanel, BorderLayout.WEST);
+		panel.add(control, BorderLayout.CENTER);
+		panel.add(Box.createHorizontalStrut(margin), BorderLayout.EAST);
+		return panel;
+	}
  }
