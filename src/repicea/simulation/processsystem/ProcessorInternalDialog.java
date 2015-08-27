@@ -23,16 +23,11 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Window;
 
-import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JComboBox;
 import javax.swing.JPanel;
-import javax.swing.JSlider;
 import javax.swing.JTextField;
-import javax.swing.text.JTextComponent;
 
-import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaPanel;
 import repicea.gui.UIControlManager;
@@ -152,38 +147,34 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		processorTextField.removeCaretListener(getCaller());
 	}
 
-	private void checkComponentPermissions(JPanel panel) {
-		SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
-		boolean isEnablingGranted = dlg.getCaller().getGUIPermission().isEnablingGranted();
-		if (!isEnablingGranted) {
-			CommonGuiUtility.enableThoseComponents(panel, JTextComponent.class, isEnablingGranted);
-			CommonGuiUtility.enableThoseComponents(panel, AbstractButton.class, isEnablingGranted);
-			CommonGuiUtility.enableThoseComponents(panel, JComboBox.class, isEnablingGranted);
-			CommonGuiUtility.enableThoseComponents(panel, JSlider.class, isEnablingGranted);
-		}
-	}
-
+//	private void checkComponentPermissions(JPanel panel) {
+//		boolean isEnablingGranted = this.getCaller().getGuiInterface().getGUIPermission().isEnablingGranted();
+////		SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+////		boolean isEnablingGranted = dlg.getCaller().getGUIPermission().isEnablingGranted();
+//		if (!isEnablingGranted) {
+//			CommonGuiUtility.enableThoseComponents(panel, JTextComponent.class, isEnablingGranted);
+//			CommonGuiUtility.enableThoseComponents(panel, AbstractButton.class, isEnablingGranted);
+//			CommonGuiUtility.enableThoseComponents(panel, JComboBox.class, isEnablingGranted);
+//			CommonGuiUtility.enableThoseComponents(panel, JSlider.class, isEnablingGranted);
+//		}
+//	}
 
 	@Override
-	public void setVisible(boolean bool) {
-		if (!isVisible() && bool) {
-			setTopComponent();
-			checkComponentPermissions(topComponent);
-			REpiceaPanel featurePanel = caller.getProcessFeaturesPanel();
-			if (featurePanel != null) {
-				if (caller.hasSubProcessors()) {
-					setBottomComponent(new JPanel());
-				} else {
-					setBottomComponent(featurePanel);
-				}
-				checkComponentPermissions(bottomComponent);
+	public void refreshInterface() {
+		setTopComponent();
+		REpiceaPanel featurePanel = caller.getProcessFeaturesPanel();
+		if (featurePanel != null) {
+			if (caller.hasSubProcessors()) {
+				setBottomComponent(new JPanel());
+			} else {
+				setBottomComponent(featurePanel);
 			}
-			pack();
-			validate();
-			repaint();
 		}
-		super.setVisible(bool);
+		pack();
+		validate();
+		repaint();
 	}
+	
 
 	/**
 	 * This panel contains the information that are always displayed. Typically, the processor name appears in this panel.
