@@ -162,7 +162,11 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		return about;
 	}
 	
-	protected SystemManager getCaller() {return caller;}
+	/**
+	 * This method returns the SystemManager instance behind this dialog.
+	 * @return a SystemManager instance.
+	 */
+	public SystemManager getCaller() {return caller;}
 	
 	@Override
 	protected void initUI() {
