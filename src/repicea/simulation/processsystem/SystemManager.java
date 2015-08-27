@@ -139,7 +139,7 @@ public class SystemManager implements ListManager<Processor>,
 	 * This method returns the list of primary processors, ie. those who are the sons of no one.
 	 * @return a List of Processor instances
 	 */
-	public List<Processor> getPrimaryProcessor() {
+	public List<Processor> getPrimaryProcessors() {
 		List<Processor> primaryProcessors = new ArrayList<Processor>();
 		for (Processor processor : processors) {
 			boolean isSonOfSomeOne = false;
