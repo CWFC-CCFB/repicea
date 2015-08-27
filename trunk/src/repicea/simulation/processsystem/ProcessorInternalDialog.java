@@ -72,7 +72,7 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	protected JTextField processorTextField;
 	
 	private JPanel bottomComponent;
-
+	protected JPanel topComponent;
 
 
 	/**
@@ -110,7 +110,9 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
 		getContentPane().add(mainPanel, BorderLayout.NORTH);
 		
-		mainPanel.add(createUpperPartPanel());
+		topComponent = new JPanel();
+		topComponent.setLayout(new BoxLayout(topComponent, BoxLayout.Y_AXIS));
+		mainPanel.add(topComponent);
 		
 		bottomComponent = new JPanel();
 		bottomComponent.setLayout(new BorderLayout());
@@ -118,7 +120,7 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	}
 
 
-	private void setBottomComponent(JPanel bottomPanel) {
+	protected void setBottomComponent(JPanel bottomPanel) {
 		bottomComponent.removeAll();
 		if (bottomPanel.getComponents().length > 0 && bottomPanel.getBorder() == null) {
 			bottomPanel.setBorder(UIControlManager.getTitledBorder(MessageID.SpecificFeatures.toString()));
@@ -167,20 +169,17 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	 * This panel contains the information that are always displayed. Typically, the processor name appears in this panel.
 	 * @return a JPanel instance
 	 */
-	protected JPanel createUpperPartPanel() {
-		JPanel upperPart = new JPanel();
-		upperPart.setLayout(new BoxLayout(upperPart, BoxLayout.Y_AXIS));
-		upperPart.setBorder(UIControlManager.getTitledBorder(MessageID.GeneralFeatures.toString()));
+	protected void setUpperPartPanel() {
+		topComponent.removeAll();
 		
 		JPanel processorNameSubPanel = UIControlManager.createSimpleHorizontalPanel(UIControlManager.getLabel(MessageID.ProcessorName),
 				processorTextField, 
 				5);
 
 		Component verticalStrut = Box.createVerticalStrut(10);
-		upperPart.add(verticalStrut);
-		upperPart.add(processorNameSubPanel);
-		upperPart.add(Box.createVerticalStrut(10));
-		return upperPart;
+		topComponent.add(verticalStrut);
+		topComponent.add(processorNameSubPanel);
+		topComponent.add(Box.createVerticalStrut(10));
 	}
 	
 }
