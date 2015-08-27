@@ -25,10 +25,12 @@ import java.awt.event.MouseEvent;
 import java.security.InvalidParameterException;
 
 import javax.swing.AbstractButton;
+import javax.swing.JComboBox;
 import javax.swing.JSlider;
 import javax.swing.text.JTextComponent;
 
 import repicea.gui.CommonGuiUtility;
+import repicea.gui.Refreshable;
 import repicea.gui.ShowableObjectWithParent;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
 
@@ -53,12 +55,17 @@ class SystemComponentMouseAdapter extends MouseAdapter {
 		if (arg0.getClickCount() >= 2) {
 			ShowableObjectWithParent showable = (ShowableObjectWithParent) readWriteProvider;
 			SystemManagerDialog systemManagerDialog = (SystemManagerDialog) CommonGuiUtility.getParentComponent((Component) readWriteProvider, SystemManagerDialog.class);
-			boolean isEnablingGranted = readWriteProvider.getGUIPermission().isEnablingGranted();
+			boolean overallEnabling = systemManagerDialog.getCaller().getGUIPermission().isEnablingGranted();
+			boolean isEnablingGranted = readWriteProvider.getGUIPermission().isEnablingGranted() && overallEnabling;
 			if (!isEnablingGranted) {
 				Container internalDlg = (Container) showable.getGuiInterface(systemManagerDialog);
+				if (internalDlg instanceof Refreshable) {
+					((Refreshable) internalDlg).refreshInterface();
+				}
 				CommonGuiUtility.enableThoseComponents(internalDlg, JTextComponent.class, isEnablingGranted);
 				CommonGuiUtility.enableThoseComponents(internalDlg, JSlider.class, isEnablingGranted);
 				CommonGuiUtility.enableThoseComponents(internalDlg, AbstractButton.class, isEnablingGranted);
+				CommonGuiUtility.enableThoseComponents(internalDlg, JComboBox.class, isEnablingGranted);
 			}
 			showable.showInterface(systemManagerDialog);
 		}
