@@ -57,11 +57,11 @@ class SystemComponentMouseAdapter extends MouseAdapter {
 			SystemManagerDialog systemManagerDialog = (SystemManagerDialog) CommonGuiUtility.getParentComponent((Component) readWriteProvider, SystemManagerDialog.class);
 			boolean overallEnabling = systemManagerDialog.getCaller().getGUIPermission().isEnablingGranted();
 			boolean isEnablingGranted = readWriteProvider.getGUIPermission().isEnablingGranted() && overallEnabling;
+			Container internalDlg = (Container) showable.getGuiInterface(systemManagerDialog);
+			if (internalDlg instanceof Refreshable) {
+				((Refreshable) internalDlg).refreshInterface();
+			}
 			if (!isEnablingGranted) {
-				Container internalDlg = (Container) showable.getGuiInterface(systemManagerDialog);
-				if (internalDlg instanceof Refreshable) {
-					((Refreshable) internalDlg).refreshInterface();
-				}
 				CommonGuiUtility.enableThoseComponents(internalDlg, JTextComponent.class, isEnablingGranted);
 				CommonGuiUtility.enableThoseComponents(internalDlg, JSlider.class, isEnablingGranted);
 				CommonGuiUtility.enableThoseComponents(internalDlg, AbstractButton.class, isEnablingGranted);
