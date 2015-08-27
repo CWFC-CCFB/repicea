@@ -72,7 +72,7 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	protected JTextField processorTextField;
 	
 	private JPanel bottomComponent;
-	protected JPanel topComponent;
+	private JPanel topComponent;
 
 
 	/**
@@ -126,9 +126,19 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 			bottomPanel.setBorder(UIControlManager.getTitledBorder(MessageID.SpecificFeatures.toString()));
 		}
 		bottomComponent.add(bottomPanel, BorderLayout.CENTER);
-		pack();
-		validate();
-		repaint();
+		
+//		SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+//		boolean isEnablingGranted = dlg.getCaller().getGUIPermission().isEnablingGranted();
+//		if (!isEnablingGranted) {
+//			CommonGuiUtility.enableThoseComponents(bottomComponent, JTextComponent.class, isEnablingGranted);
+//			CommonGuiUtility.enableThoseComponents(bottomComponent, AbstractButton.class, isEnablingGranted);
+//			CommonGuiUtility.enableThoseComponents(bottomComponent, JComboBox.class, isEnablingGranted);
+//			CommonGuiUtility.enableThoseComponents(bottomComponent, JSlider.class, isEnablingGranted);
+//		}
+
+//		pack();
+//		validate();
+//		repaint();
 	}
 
 
@@ -142,25 +152,35 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		processorTextField.removeCaretListener(getCaller());
 	}
 
+	private void checkComponentPermissions(JPanel panel) {
+		SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+		boolean isEnablingGranted = dlg.getCaller().getGUIPermission().isEnablingGranted();
+		if (!isEnablingGranted) {
+			CommonGuiUtility.enableThoseComponents(panel, JTextComponent.class, isEnablingGranted);
+			CommonGuiUtility.enableThoseComponents(panel, AbstractButton.class, isEnablingGranted);
+			CommonGuiUtility.enableThoseComponents(panel, JComboBox.class, isEnablingGranted);
+			CommonGuiUtility.enableThoseComponents(panel, JSlider.class, isEnablingGranted);
+		}
+	}
+
+
 	@Override
 	public void setVisible(boolean bool) {
 		if (!isVisible() && bool) {
+			setTopComponent();
+			checkComponentPermissions(topComponent);
 			REpiceaPanel featurePanel = caller.getProcessFeaturesPanel();
 			if (featurePanel != null) {
 				if (caller.hasSubProcessors()) {
 					setBottomComponent(new JPanel());
 				} else {
-					SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
-					boolean isEnablingGranted = dlg.getCaller().getGUIPermission().isEnablingGranted();
-					if (!isEnablingGranted) {
-						CommonGuiUtility.enableThoseComponents(featurePanel, JTextComponent.class, isEnablingGranted);
-						CommonGuiUtility.enableThoseComponents(featurePanel, AbstractButton.class, isEnablingGranted);
-						CommonGuiUtility.enableThoseComponents(featurePanel, JComboBox.class, isEnablingGranted);
-						CommonGuiUtility.enableThoseComponents(featurePanel, JSlider.class, isEnablingGranted);
-					}
 					setBottomComponent(featurePanel);
 				}
+				checkComponentPermissions(bottomComponent);
 			}
+			pack();
+			validate();
+			repaint();
 		}
 		super.setVisible(bool);
 	}
@@ -169,9 +189,10 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 	 * This panel contains the information that are always displayed. Typically, the processor name appears in this panel.
 	 * @return a JPanel instance
 	 */
-	protected void setUpperPartPanel() {
+	protected JPanel setTopComponent() {
 		topComponent.removeAll();
-		
+		topComponent.setBorder(UIControlManager.getTitledBorder(MessageID.GeneralFeatures.toString()));
+
 		JPanel processorNameSubPanel = UIControlManager.createSimpleHorizontalPanel(UIControlManager.getLabel(MessageID.ProcessorName),
 				processorTextField, 
 				5);
@@ -180,6 +201,7 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		topComponent.add(verticalStrut);
 		topComponent.add(processorNameSubPanel);
 		topComponent.add(Box.createVerticalStrut(10));
+		return topComponent;
 	}
 	
 }
