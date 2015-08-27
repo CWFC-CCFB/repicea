@@ -45,7 +45,7 @@ public class ProcessSystemTest {
 			Assert.fail();
 		}
 
-		List<Processor> primaryProcessors = manager.getPrimaryProcessor();
+		List<Processor> primaryProcessors = manager.getPrimaryProcessors();
 		ProcessUnit<FakeEnum> inputUnit = new ProcessUnit<FakeEnum>();
 		inputUnit.getAmountMap().put(FakeEnum.class1, 100d);
 		inputUnit.getAmountMap().put(FakeEnum.class2, 100d);
