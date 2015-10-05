@@ -173,7 +173,13 @@ public abstract class ModelBasedSimulator implements Serializable {
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
 	}
 	
-
+	/**
+	 * This method reads all the parameters in .csv files and stores the estimates into members defaultBeta, defaultResidualError,
+	 * and defaultRandomEffects.
+	 */
+	protected abstract void init();
+	
+	
 	/**
 	 * This method generates a stand-specific vector of model parameters using matrix Omega.
 	 * @param subject a MonteCarloSimulationCompliantObject object

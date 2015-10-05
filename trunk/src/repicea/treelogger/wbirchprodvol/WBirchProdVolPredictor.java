@@ -75,8 +75,8 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 	
 	
 	
-	
-	private void init() {
+	@Override
+	protected void init() {
 		try {
 			String path = ObjectUtility.getRelativePackagePath(getClass());
 			String betaFilename = path + "0_beta.csv";

@@ -44,7 +44,8 @@ public class HonerTotalVolumePredictor extends ModelBasedSimulator {
 		init();
 	}
 	
-	private void init() {
+	@Override
+	protected final void init() {
 		Matrix mat = new Matrix(3,1);
 		betaMap.put(HonerTotalVolumeTreeSpecies.SAB, mat);
 		mat.m_afData[0][0] = 2.139;

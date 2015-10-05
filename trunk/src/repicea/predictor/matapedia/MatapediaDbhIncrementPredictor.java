@@ -48,7 +48,8 @@ public class MatapediaDbhIncrementPredictor extends ModelBasedSimulator implemen
 		oXVector = new Matrix(1,15);
 	}
 
-	private void init() {
+	@Override
+	protected final void init() {
 		try {
 			String path = ObjectUtility.getRelativePackagePath(getClass());
 			String betaFilename = path + "0_AccroissementBeta.csv";
