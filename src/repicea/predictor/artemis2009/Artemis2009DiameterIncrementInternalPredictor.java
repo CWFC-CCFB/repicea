@@ -99,4 +99,11 @@ class Artemis2009DiameterIncrementInternalPredictor extends ModelBasedSimulator 
 		return variancesMap.get(tree.getSubjectId());
 	}
 
+	/*
+	 * Useless for this class (non-Javadoc)
+	 * @see repicea.simulation.ModelBasedSimulator#init()
+	 */
+	@Override
+	protected void init() {}
+
 }

@@ -31,17 +31,14 @@ public class Artemis2009DiameterIncrementPredictor extends ModelBasedSimulator {
 	protected static final String ModuleName = "accroissement"; 
 
 	private Map<String, Artemis2009DiameterIncrementInternalPredictor> internalPredictors;
-//	private final List<Integer> simulationDates;
 
 	public Artemis2009DiameterIncrementPredictor(boolean isParametersVariabilityEnabled, boolean isOtherRandomEffectsVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isOtherRandomEffectsVariabilityEnabled, isOtherRandomEffectsVariabilityEnabled);
-//		this.simulationDates = simulationDates;
-//		Collections.sort(this.simulationDates);
 		init();
 	}
 
-	
-	protected void init() {
+	@Override
+	protected final void init() {
 		internalPredictors = new HashMap<String, Artemis2009DiameterIncrementInternalPredictor>();
 		ParameterDispatcher pd = ParameterDispatcher.getInstance();
 		Index<Integer, String> vegpotIndex = pd.getVegpotIndex();
