@@ -26,14 +26,8 @@ public class WBirchProdVolEstimate extends HybridEstimate {
 	
 	private final Version version;
 	
-	protected WBirchProdVolEstimate(Version version) {
-		super();
-		this.version = version;
-	}
-	
-
-	protected WBirchProdVolEstimate(int numberOfMonteCarloRealizations, boolean isStochastic, Version version) {
-		super(numberOfMonteCarloRealizations, isStochastic);
+	protected WBirchProdVolEstimate(Version version, boolean isMonteCarlo) {
+		super(isMonteCarlo);
 		this.version = version;
 	}
 

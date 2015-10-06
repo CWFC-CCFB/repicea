@@ -37,9 +37,9 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	/**
 	 * Constructor. 
 	 */
-	public WBirchProdVolTreeLogger(boolean isParameterVariabilityEnabled) {
+	public WBirchProdVolTreeLogger(boolean isParameterVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super();
-		wbp = new WBirchProdVolPredictor(isParameterVariabilityEnabled);
+		wbp = new WBirchProdVolPredictor(isParameterVariabilityEnabled, isResidualVariabilityEnabled);
 	}
 	
 
@@ -127,7 +127,7 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	 * @throws IOException
 	 */
 	public static void main (String[] args) throws IOException {
-		WBirchProdVolTreeLogger log = new WBirchProdVolTreeLogger(false);
+		WBirchProdVolTreeLogger log = new WBirchProdVolTreeLogger(false, false);
 		log.setTreeLoggerParameters();
 	}
 

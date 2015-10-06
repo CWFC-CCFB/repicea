@@ -41,7 +41,7 @@ public class HybridEstimate extends Estimate<Distribution> implements CentralMom
 	 * Constructor 1 for default likelihood based estimate.
 	 */
 	public HybridEstimate() {
-		this(0, false);
+		this(false);
 	}
 
 	/**
@@ -49,7 +49,7 @@ public class HybridEstimate extends Estimate<Distribution> implements CentralMom
 	 * @param numberOfRealizations the number of realizations (an integer)
 	 * @param isMonteCarlo a boolean 
 	 */
-	public HybridEstimate(int numberOfRealizations, boolean isMonteCarlo) {
+	public HybridEstimate(boolean isMonteCarlo) {
 		super(new NonparametricDistribution());
 		alternateDistribution = new GaussianDistribution(null, null);
 		if (isMonteCarlo) {

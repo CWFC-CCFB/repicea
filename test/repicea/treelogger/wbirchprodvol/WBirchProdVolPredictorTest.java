@@ -19,7 +19,7 @@ public class WBirchProdVolPredictorTest {
 	@Test
 	public void testFixedEffectPredictions() {
 		List<WBirchProdVolStandImpl> stands = readStands();
-		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false);
+		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, false);
 		int nbTrees = 0;
 		int nbMatches = 0;
 		int nbMatches2 = 0;
