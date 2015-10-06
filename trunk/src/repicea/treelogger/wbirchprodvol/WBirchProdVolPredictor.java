@@ -18,65 +18,77 @@
  */
 package repicea.treelogger.wbirchprodvol;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
+import java.util.HashMap;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulator;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.covariateproviders.treelevel.ABCDQualityProvider.ABCDQuality;
+import repicea.stats.Distribution.Type;
+import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.util.ObjectUtility;
 
 @SuppressWarnings("serial")
 public class WBirchProdVolPredictor extends ModelBasedSimulator {
 	
-	private final static Matrix LinearVector = new Matrix(5,1);
-	static {
-		LinearVector.m_afData[0][0] = 0d;
-		LinearVector.m_afData[1][0] = 1d;
-		LinearVector.m_afData[2][0] = -1d;
-		LinearVector.m_afData[3][0] = -1d;
-		LinearVector.m_afData[4][0] = -1d;
-	}
 
 	public static enum Version {
 		/**
 		 * For A,B,C qualities with dbh > 29 and h20Pred >= 5
 		 */
-		Full, 
+		Full(new double[]{0d, 1d, -1d, -1d, -1d, 0d}), 
 		/**
 		 * For A and B qualities whose dbh <= 29 or h20Pred < 5
 		 */
-		FullTruncated,
+		FullTruncated(new double[]{0d, 1d, 0d, -1d}),
 		/**
 		 * For C quality whose dbh <= 29 or h20Pred < 5 and D quality
 		 */
-		DClass, 
+		DClass(new double[]{0d, 1d, -1d, 0d}), 
 		/**
 		 * For no quality trees
 		 */
-		NCClass}
+		NCClass(new double[]{0d, 1d, -1d, 0d});
+		
+		Matrix linearVector;
+		int indexLastZero;
+
+		Version(double[] linear) {
+			linearVector = new Matrix(linear);
+			for (int i = linearVector.m_iCols - 1; i >= 0; i--) {
+				if (linearVector.m_afData[i][0] == 0d) {
+					indexLastZero = i;
+					break;
+				}
+			}
+		}
+		
+		private Matrix getLinearCombination() {return linearVector;}
+		private int getIndexLastZero() {return indexLastZero;}
+	}
 	
 	private double sigma2Res;
 	private Matrix weightExponentCoefficients;
 	private Matrix corrMatrix;
+	private Map<Version,Map<Double, Matrix>> cholMatrices;
 
 	/**
 	 * Constructor.
 	 * @param isParametersVariabilityEnabled a boolean instance
 	 */
-	protected WBirchProdVolPredictor(boolean isParametersVariabilityEnabled) {		// the residual variability is switch to off at the moment
+	protected WBirchProdVolPredictor(boolean isParametersVariabilityEnabled, boolean isResidualVariabilityEnabled) {		
 		super(isParametersVariabilityEnabled, false, false);
+		cholMatrices = new HashMap<Version,Map<Double, Matrix>>();
 		init();
 	}
 
 	
-	
-	
 	@Override
-	protected void init() {
+	protected final void init() {
 		try {
 			String path = ObjectUtility.getRelativePackagePath(getClass());
 			String betaFilename = path + "0_beta.csv";
@@ -89,27 +101,41 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 			corrMatrix = ParameterLoader.loadMatrixFromFile(rMatrixFilename);
 			Matrix varParms = ParameterLoader.loadVectorFromFile(varParmsFilename).get();
 			sigma2Res = varParms.m_afData[varParms.m_iRows - 1][0];
-			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0); 
+			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0).matrixDiagonal(); 
 
 			defaultBeta = new GaussianEstimate(beta, omega);
 		} catch (Exception e) {
 			System.out.println("Unable to load parameters!");
 		}
 	}
-
-	protected Matrix getVMatrixForThisTree(WBirchProdVolTree tree) {
+	
+	protected final Matrix getCholMatrixForThisTree(WBirchProdVolTree tree, Version version) {
 		double dbhCm = tree.getDbhCm();
-		Matrix weightMat = weightExponentCoefficients.powMatrix(dbhCm).matrixDiagonal();  
-		Matrix vMat = weightMat.multiply(corrMatrix).multiply(weightMat).scalarMultiply(sigma2Res);
+		Matrix linearVector = version.getLinearCombination();
+
+		if (!cholMatrices.containsKey(version)) {
+			cholMatrices.put(version, new HashMap<Double, Matrix>());
+		}
 		
-		Matrix outputMat = new Matrix(6,6);
-		outputMat.setSubMatrix(vMat, 0, 0);
-		Matrix linearCombination = LinearVector.transpose().multiply(vMat);
-		outputMat.setSubMatrix(linearCombination, 5, 0);
-		outputMat.setSubMatrix(linearCombination.transpose(), 0, 5);
-		outputMat.setSubMatrix(linearCombination.multiply(LinearVector), 5, 5);
-		
-		return outputMat;
+		Map<Double, Matrix> subMap = cholMatrices.get(version);
+
+		if (!subMap.containsKey(dbhCm)) {
+			int dim = linearVector.m_iRows;
+			int indexCombination = version.getIndexLastZero();
+			Matrix weightMat = weightExponentCoefficients.powMatrix(dbhCm);  
+			Matrix vMat = weightMat.multiply(corrMatrix).multiply(weightMat).scalarMultiply(sigma2Res).getSubMatrix(0, 0, dim-2, dim-2);
+			Matrix outputMat = new Matrix(dim, dim);
+			outputMat.setSubMatrix(vMat, 0, 0);
+			Matrix linearCombination = linearVector.transpose().multiply(vMat);
+			
+			outputMat.setSubMatrix(linearCombination, indexCombination, 0);
+			outputMat.setSubMatrix(linearCombination.transpose(), 0, indexCombination);
+			outputMat.setSubMatrix(linearCombination.multiply(linearCombination), indexCombination, indexCombination);
+			
+			subMap.put(dbhCm, outputMat.getLowerCholTriangle());
+		}
+
+		return subMap.get(dbhCm);
 	}
 	
 	private double getH20Prediction(WBirchProdVolStand stand, WBirchProdVolTree tree, Matrix beta) {
@@ -197,7 +223,7 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 	 * This method returns the predictions for each log grade (dm3)
 	 * @param stand a WBirchProdVolStand instance
 	 * @param tree a WBirchProdVolTree instance
-	 * @return a Matrix instance
+	 * @return a WBirchProdVolEstimate instance
 	 */
 	protected WBirchProdVolEstimate getLogGradeVolumePredictions(WBirchProdVolStand stand, WBirchProdVolTree tree) {
 		Matrix modelParameters = getParametersForThisRealization(stand);
@@ -206,7 +232,7 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 		double pulpVol = getPulpPrediction(stand, tree, modelParameters, h20Pred, merVol);
 		
 		Version version;
-		if (tree.getClass().getName().equals("repicea.treelogger.wbirchprodvol.WBirchProdVolTreeImpl")) {
+		if (tree.getClass().getName().equals("repicea.treelogger.wbirchprodvol.WBirchProdVolTreeImpl")) { // for test purpose
 			try {
 				Method methodH20 = tree.getClass().getDeclaredMethod("getH20Obs", new Class[]{});
 				double h20Obs = (Double) methodH20.invoke(tree, new Object[]{});
@@ -219,35 +245,47 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 			version = getVersion(tree, h20Pred);
 		}
 		
-		Matrix pred;
+		Matrix logGradePred;
 		if (version == Version.Full) {
-			pred = new Matrix(6,1);
+			logGradePred = new Matrix(6,1);
 			double sawlogVol = getSawlogPrediction(stand, tree, modelParameters, merVol, pulpVol);
 			double lowGradeVeneer = getLowGradeVeneerPrediction(stand, tree, modelParameters, merVol, pulpVol, sawlogVol);
 			double veneer = merVol - pulpVol - sawlogVol - lowGradeVeneer;
-			pred.m_afData[0][0] = h20Pred;
-			pred.m_afData[1][0] = merVol;
-			pred.m_afData[2][0] = pulpVol;
-			pred.m_afData[3][0] = sawlogVol;
-			pred.m_afData[4][0] = lowGradeVeneer;
-			pred.m_afData[5][0] = veneer;
+			logGradePred.m_afData[0][0] = h20Pred;
+			logGradePred.m_afData[1][0] = merVol;
+			logGradePred.m_afData[2][0] = pulpVol;
+			logGradePred.m_afData[3][0] = sawlogVol;
+			logGradePred.m_afData[4][0] = lowGradeVeneer;
+			logGradePred.m_afData[5][0] = veneer;
 		} else {
-			pred = new Matrix(4,1);
-			pred.m_afData[0][0] = h20Pred;
-			pred.m_afData[1][0] = merVol;
+			logGradePred = new Matrix(4,1);
+			logGradePred.m_afData[0][0] = h20Pred;
+			logGradePred.m_afData[1][0] = merVol;
 			if (version == Version.FullTruncated) {
 				double sawlogVol = getSawlogPrediction(stand, tree, modelParameters, merVol, pulpVol);
-				pred.m_afData[2][0] = pulpVol + (merVol - pulpVol - sawlogVol);
-				pred.m_afData[3][0] = sawlogVol;
+				logGradePred.m_afData[2][0] = pulpVol + (merVol - pulpVol - sawlogVol);
+				logGradePred.m_afData[3][0] = sawlogVol;
 			} else {
 				double lastProduct = merVol - pulpVol;
-				pred.m_afData[2][0] = pulpVol;
-				pred.m_afData[3][0] = lastProduct;
+				logGradePred.m_afData[2][0] = pulpVol;
+				logGradePred.m_afData[3][0] = lastProduct;
 			}
 		}
 		
-		WBirchProdVolEstimate estimate = new WBirchProdVolEstimate(version);
-		estimate.setMean(pred);
+		if (isResidualVariabilityEnabled) {
+			Matrix cholMatrix = getCholMatrixForThisTree(tree, version);
+			Matrix randomDeviate = cholMatrix.multiply(StatisticalUtility.drawRandomVector(cholMatrix.m_iRows, Type.GAUSSIAN));
+			logGradePred = logGradePred.add(randomDeviate);
+		}
+		
+		boolean isStochastic = isParametersVariabilityEnabled || isResidualVariabilityEnabled;
+		WBirchProdVolEstimate estimate = new WBirchProdVolEstimate(version, isStochastic);
+		if (isStochastic) {
+			estimate.addRealization(logGradePred);
+		} else {
+			estimate.setMean(logGradePred);
+		}
+		
 		return estimate;
 	}
 	
@@ -275,12 +313,4 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 	}
 	
 	
-	
-	
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args) throws IOException {
-		WBirchProdVolPredictor lll = new WBirchProdVolPredictor(false);
-		int u = 0;
-	}
 }

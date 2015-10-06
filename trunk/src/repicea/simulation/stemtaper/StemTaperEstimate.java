@@ -55,8 +55,8 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	 * @param isMonteCarlo a boolean 
 	 * @param computedHeights a List instance containing the heights (m) of the cross sections
 	 */
-	public StemTaperEstimate(int numberOfRealizations, boolean isMonteCarlo, List<Double> computedHeights) {
-		super(numberOfRealizations, isMonteCarlo);
+	public StemTaperEstimate(boolean isMonteCarlo, List<Double> computedHeights) {
+		super(isMonteCarlo);
 		heights = computedHeights;
 	}
 
