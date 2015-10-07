@@ -24,7 +24,6 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
-import repicea.treelogger.wbirchprodvol.WBirchProdVolPredictor.Version;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 
 public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerParameters, WBirchProdVolLoggableTree> {
@@ -46,22 +45,10 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	@Override
 	protected void logThisTree(WBirchProdVolLoggableTree tree) {
 		WBirchProdVolStand stand = tree.getStand();
-
-		WBirchProdVolEstimate estimate  = wbp.getLogGradeVolumePredictions(stand, tree);
-		Matrix predictedVolumes = estimate.getMean();
-		Version version = estimate.getVersion();
-		
+		Matrix predictedVolumes = wbp.getLogGradeVolumePredictions(stand, tree);
 		List<WBirchProdVolTreeLogCategory> logCategory = getTreeLoggerParameters().getLogCategoryList();
-		
-		addThisWoodPiece(logCategory.get(ProductID.PulpAndPaper.ordinal()), predictedVolumes.m_afData[2][0], tree);
-		if (version == Version.Full) {
-			addThisWoodPiece(logCategory.get(ProductID.Sawlog.ordinal()), predictedVolumes.m_afData[3][0], tree);
-			addThisWoodPiece(logCategory.get(ProductID.LowGradeVeneer.ordinal()), predictedVolumes.m_afData[4][0], tree);
-			addThisWoodPiece(logCategory.get(ProductID.Veneer.ordinal()), predictedVolumes.m_afData[5][0], tree);
-		} else if (version == Version.FullTruncated || version == Version.DClass) {
-			addThisWoodPiece(logCategory.get(ProductID.Sawlog.ordinal()), predictedVolumes.m_afData[3][0], tree);
-		} else {
-			addThisWoodPiece(logCategory.get(ProductID.LowGradeSawlog.ordinal()), predictedVolumes.m_afData[3][0], tree);
+		for (ProductID productID : ProductID.values()) {
+			addThisWoodPiece(logCategory.get(productID.ordinal()), predictedVolumes.m_afData[productID.getIndex()][0], tree);
 		}
 	}
 	

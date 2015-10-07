@@ -11,6 +11,7 @@ import org.junit.Test;
 
 import repicea.io.javacsv.CSVReader;
 import repicea.math.Matrix;
+import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.util.ObjectUtility;
 
 public class WBirchProdVolPredictorTest {
@@ -20,12 +21,13 @@ public class WBirchProdVolPredictorTest {
 	public void testFixedEffectPredictions() {
 		List<WBirchProdVolStandImpl> stands = readStands();
 		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, false);
+		predictor.isTestPurpose = true;
 		int nbTrees = 0;
 		int nbMatches = 0;
 		int nbMatches2 = 0;
 		for (WBirchProdVolStandImpl stand : stands) {
 			for (WBirchProdVolTreeImpl tree : stand.getTrees().values()) {
-				Matrix pred = predictor.getLogGradeVolumePredictions(stand, tree).getMean();
+				Matrix pred = predictor.getLogGradeVolumePredictions(stand, tree);
 				//		Matrix variances = predictor.getVMatrixForThisTree(tree);
 				Matrix predRef = tree.getPredRef();
 				Assert.assertEquals("Number of elements", predRef.m_iRows, pred.m_iRows);
@@ -33,11 +35,7 @@ public class WBirchProdVolPredictorTest {
 					Assert.assertEquals("Comparing tree " + tree.getSubjectId() + " in plot " + stand.getSubjectId(), predRef.m_afData[i][0], pred.m_afData[i][0], 1E-6);
 					nbMatches2++;
 				}
-				if (predRef.m_iRows == 4) {
-					nbMatches += 3;
-				} else {
-					nbMatches += 5;
-				}
+				nbMatches += 5;
 				nbTrees++;
 			}
 		}
@@ -110,7 +108,50 @@ public class WBirchProdVolPredictorTest {
 	}
 
 	
+	@Test
+	public void testMonteCarloPredictions() {
+		Matrix meanRef = new Matrix(7,1);
+		meanRef.m_afData[0][0] = 6.4262054572822125;
+		meanRef.m_afData[1][0] = 358.8726980631341;
+		meanRef.m_afData[2][0] = 212.9874983502981;
+		meanRef.m_afData[3][0] = 145.88519971283398;
+		meanRef.m_afData[4][0] = 0d;
+		meanRef.m_afData[5][0] = 0d;
+		meanRef.m_afData[6][0] = 0d;
+		
+		Matrix stdRef = new Matrix(7,1);
+		stdRef.m_afData[0][0] = 0.14005679329726609;
+		stdRef.m_afData[1][0] = 48.39343575836749;
+		stdRef.m_afData[2][0] = 70.46323093748266;
+		stdRef.m_afData[3][0] = 68.00699931625708;
+		stdRef.m_afData[4][0] = 0d;
+		stdRef.m_afData[5][0] = 0d;
+		stdRef.m_afData[6][0] = 0d;
 	
+		int nbRealizations = 100000;
+		List<WBirchProdVolStandImpl> stands = readStands();
+		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, true);
+		WBirchProdVolStand stand = stands.get(0);
+		WBirchProdVolTree tree = ((WBirchProdVolStandImpl) stand).getTrees().values().iterator().next();
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		Matrix pred;
+		for (int i = 0; i < nbRealizations; i++) {
+			stand.setMonteCarloRealizationId(i);
+			pred = predictor.getLogGradeVolumePredictions(stand, tree);
+			estimate.addRealization(pred);
+		}
+		
+		Matrix mean = estimate.getMean();
+		Matrix relDiff = mean.subtract(meanRef).elementWiseDivide(meanRef).getAbsoluteValue();
+		Assert.assertTrue("Difference in terms of mean", !relDiff.anyElementLargerThan(5E-3));
+		
+		Matrix variance = estimate.getVariance();
+		Matrix std = variance.diagonalVector().elementwisePower(0.5);
+		
+		relDiff = std.subtract(stdRef).elementWiseDivide(stdRef).getAbsoluteValue();
+		Assert.assertTrue("Difference in terms of std", !relDiff.anyElementLargerThan(5E-3));
+	}
+
 	
 	
 }

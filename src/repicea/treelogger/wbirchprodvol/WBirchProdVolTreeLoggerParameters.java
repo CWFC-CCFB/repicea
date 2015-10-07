@@ -34,21 +34,26 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class WBirchProdVolTreeLoggerParameters extends TreeLoggerParameters<WBirchProdVolTreeLogCategory> {
 
 	protected static enum ProductID implements TextableEnum {
-		Veneer("veneer", "d\u00E9roulage"),
-		LowGradeVeneer("low grade veneer", "d\u00E9roulable"),
-		Sawlog("sawlog", "sciage"),
-		LowGradeSawlog("low grade sawlog", "sciable"),
-		PulpAndPaper("pulp", "p\u00E2te"),
+		Veneer("veneer", "d\u00E9roulage", 5),
+		LowGradeVeneer("low grade veneer", "d\u00E9roulable", 4),
+		Sawlog("sawlog", "sciage", 3),
+		LowGradeSawlog("low grade sawlog", "sciable", 6),
+		PulpAndPaper("pulp", "p\u00E2te", 2),
 		;
 
-		ProductID(String englishText, String frenchText) {
+		int index;
+		
+		ProductID(String englishText, String frenchText, int index) {
 			setText(englishText, frenchText);
+			this.index = index;
 		}
 		
 		@Override
 		public void setText(String englishText, String frenchText) {
 			REpiceaTranslator.setString(this, englishText, frenchText);
 		}
+		
+		protected int getIndex() {return index;}
 		
 		@Override
 		public String toString() {return REpiceaTranslator.getString(this);}
