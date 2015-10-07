@@ -1,5 +1,6 @@
 package repicea.treelogger.wbirchprodvol;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -9,9 +10,13 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.io.FormatField;
+import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVReader;
+import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.stats.estimates.MonteCarloEstimate;
+import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 import repicea.util.ObjectUtility;
 
 public class WBirchProdVolPredictorTest {
@@ -42,7 +47,7 @@ public class WBirchProdVolPredictorTest {
 		System.out.println("Successfully compared " + nbTrees + " trees.");
 	}
 	
-	private static List<WBirchProdVolStandImpl> readStands() {
+	protected static List<WBirchProdVolStandImpl> readStands() {
 		List<WBirchProdVolStandImpl> standList = new ArrayList<WBirchProdVolStandImpl>();
 		String filename = ObjectUtility.getPackagePath(WBirchProdVolPredictorTest.class) + "pred-simul.csv";
 		Map<String, WBirchProdVolStandImpl> standMap = new HashMap<String, WBirchProdVolStandImpl>();
@@ -152,6 +157,45 @@ public class WBirchProdVolPredictorTest {
 		Assert.assertTrue("Difference in terms of std", !relDiff.anyElementLargerThan(5E-3));
 	}
 
-	
+	public void testMonteCarloPredictions2() throws IOException {
+		String filePath = ObjectUtility.getPackagePath(getClass()) + "MCSimul.csv";
+		int nbRealizations = 10000;
+		List<WBirchProdVolStandImpl> stands = readStands();
+		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(true, true);
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		WBirchProdVolStandImpl stand = stands.get(0);
+		for (int i = 0; i < nbRealizations; i++) {
+			Matrix sumProd = new Matrix(7,1);
+			stand.setMonteCarloRealizationId(i);
+			for (WBirchProdVolTree tree : stand.getTrees().values()) {
+				sumProd = sumProd.add(predictor.getLogGradeVolumePredictions(stand, tree).scalarMultiply(0.001));
+			}
+			estimate.addRealization(sumProd);
+		}
+		CSVWriter writer = new CSVWriter(new File(filePath), false);
+		
+		
+		List<FormatField> fields = new ArrayList<FormatField>();
+		fields.add(new CSVField("h20"));
+		fields.add(new CSVField("merch"));
+		fields.add(new CSVField(ProductID.PulpAndPaper.name()));
+		fields.add(new CSVField(ProductID.Sawlog.name()));
+		fields.add(new CSVField(ProductID.LowGradeVeneer.name()));
+		fields.add(new CSVField(ProductID.Veneer.name()));
+		fields.add(new CSVField(ProductID.LowGradeSawlog.name()));
+		
+		writer.setFields(fields);
+		Object[] record;
+		for (Matrix mat : estimate.getRealizations()) {
+			record = new Object[mat.m_iRows];
+			for (int i = 0; i < mat.m_iRows; i++) {
+				record[i] = mat.m_afData[i][0];
+			}
+			writer.addRecord(record);
+		}
+		writer.close();
+		
+	}
+
 	
 }

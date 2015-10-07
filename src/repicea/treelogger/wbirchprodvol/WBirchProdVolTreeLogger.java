@@ -72,30 +72,6 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 		return stlp;
 	}
 
-//	@Override
-//	public void init(Collection<WBirchProdVolLoggableTree> loggableTrees) {
-//		Collection<WBirchProdVolLoggableTree> validLoggableTrees = getValidLoggableTreesFromACollection(loggableTrees);
-//		super.init(validLoggableTrees);
-//	}
-
-//	/**
-//	 * This method extracts a collection of TreePetroLoggable objects from a collection of LoggableTree instances.
-//	 * @param trees a Collection of LoggableTree-derived instances
-//	 * @return a Collection of PetroLoggableTree instances
-//	 */
-//	private Collection<WBirchProdVolLoggableTree> getValidLoggableTreesFromACollection(Collection<? extends LoggableTree> loggableTrees) {
-//		Collection<WBirchProdVolLoggableTree> validLoggableTrees = new ArrayList<WBirchProdVolLoggableTree>();
-//		for (LoggableTree t : loggableTrees) {
-//			if (t instanceof WBirchProdVolLoggableTree) {
-//				WBirchProdVolLoggableTree tree = (WBirchProdVolLoggableTree) t;
-//				if (isEligible(tree)) {	
-//					validLoggableTrees.add(tree);
-//				}
-//			}
-//		}
-//		return validLoggableTrees;
-//	}
-
 
 	@Override
 	public WBirchProdVolLoggableTree getEligible(LoggableTree t) {
