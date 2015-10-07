@@ -3,7 +3,7 @@ package repicea.treelogger.wbirchprodvol;
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
 
-class WBirchProdVolTreeImpl implements WBirchProdVolTree {
+class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 
 	private final int treeID;
 	private final double dbhCm;
@@ -70,5 +70,31 @@ class WBirchProdVolTreeImpl implements WBirchProdVolTree {
 
 	@Override
 	public WBirchProdVolTreeSpecies getWBirchProdVolTreeSpecies() {return WBirchProdVolTreeSpecies.WhiteBirch;}
+
+
+	@Override
+	public double getNumber() {return 1d;}
+
+
+	@Override
+	public TreeStatusPriorToLogging getTreeStatusPriorToLogging() {
+		return TreeStatusPriorToLogging.Alive;
+	}
+
+
+	@Override
+	public double getCommercialVolumeM3() {
+		return predRef.m_afData[1][0];
+	}
+
+
+	@Override
+	public String getSpeciesName() {
+		return getWBirchProdVolTreeSpecies().toString();
+	}
+
+
+	@Override
+	public WBirchProdVolStand getStand() {return this.stand;}
 
 }
