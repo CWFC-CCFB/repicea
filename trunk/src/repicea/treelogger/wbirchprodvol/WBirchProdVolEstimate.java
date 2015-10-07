@@ -26,7 +26,7 @@ public class WBirchProdVolEstimate extends HybridEstimate {
 	
 	private final Version version;
 	
-	protected WBirchProdVolEstimate(Version version, boolean isMonteCarlo) {
+	private WBirchProdVolEstimate(Version version, boolean isMonteCarlo) {
 		super(isMonteCarlo);
 		this.version = version;
 	}
