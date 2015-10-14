@@ -124,49 +124,14 @@ public class REpiceaTranslator {
 	 * @return the message or an empty string if the title has not been registered
 	 */
 	public static String getString(TextableEnum messageID) {
-		/*
-		 * This file is part of the repicea-util library.
-		 *
-		 * Copyright (C) 2009-2014 Mathieu Fortin for Rouge Epicea.
-		 *
-		 * This library is free software; you can redistribute it and/or
-		 * modify it under the terms of the GNU Lesser General Public
-		 * License as published by the Free Software Foundation; either
-		 * version 3 of the License, or (at your option) any later version.
-		 *
-		 * This library is distributed with the hope that it will be useful,
-		 * but WITHOUT ANY WARRANTY; without even the implied
-		 * warranty of MERCHANTABILITY or FITNESS FOR A
-		 * PARTICULAR PURPOSE. See the GNU Lesser General Public
-		 * License for more details.
-		 *
-		 * Please see the license at http://www.gnu.org/copyleft/lesser.html.
-		 */
-		String message = strings.get(currentLanguage).get(messageID);
-		if (message == null) {
-			message = "";
-		}
-		return message;
+		return REpiceaTranslator.getTranslation(messageID, getCurrentLanguage());
+//		String message = strings.get(currentLanguage).get(messageID);
+//		if (message == null) {
+//			message = "";
+//		}
+//		return message;
 	}
 	
-	/*
-	 * This file is part of the repicea-util library.
-	 *
-	 * Copyright (C) 2009-2014 Mathieu Fortin for Rouge Epicea.
-	 *
-	 * This library is free software; you can redistribute it and/or
-	 * modify it under the terms of the GNU Lesser General Public
-	 * License as published by the Free Software Foundation; either
-	 * version 3 of the License, or (at your option) any later version.
-	 *
-	 * This library is distributed with the hope that it will be useful,
-	 * but WITHOUT ANY WARRANTY; without even the implied
-	 * warranty of MERCHANTABILITY or FITNESS FOR A
-	 * PARTICULAR PURPOSE. See the GNU Lesser General Public
-	 * License for more details.
-	 *
-	 * Please see the license at http://www.gnu.org/copyleft/lesser.html.
-	 */
 	/**
 	 * This method sets the current language of the UIControlManager. By default, the current language is set to
 	 * Language.English.
@@ -192,4 +157,19 @@ public class REpiceaTranslator {
 	public static Language getCurrentLanguage() {return currentLanguage;}
 
 
+	/**
+	 * This method returns the translation of a particular TextableEnum instance.
+	 * @param textableEnum a TextableEnum instance
+	 * @param language a Language instance
+	 * @return a String which is empty if the translation does not exist
+	 */
+	public static String getTranslation(TextableEnum textableEnum, Language language) {
+		if (strings.containsKey(language)) {
+			if (strings.get(language).containsKey(textableEnum)) {
+				return strings.get(language).get(textableEnum);
+			}
+		}
+		return "";
+	}
+	
 }
