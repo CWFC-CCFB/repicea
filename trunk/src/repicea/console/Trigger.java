@@ -92,6 +92,23 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 	}
 
 	
+	@Override
+	protected void decideWhatToDo(String taskName, Exception failureReason) {
+		super.decideWhatToDo(taskName, failureReason);
+		addTask(new TriggerTask(TaskID.ExpandInterface, this));
+	}
 
+	protected void startEmbeddedApplication() {
+		getSettings().recordSettings();
+		JavaProcessWrapper javaProcessWrapper = createProcessWrapper();
+		if (guiInterface != null) {
+			guiInterface.javaProcessWrapper = javaProcessWrapper;
+			guiInterface.checkEnabledFeatures(true);
+			logger.clear();
+			javaProcessWrapper.addPropertyChangeListener(guiInterface.javaProcessWrapper);
+		}
+	}
 
+	
+	
 }

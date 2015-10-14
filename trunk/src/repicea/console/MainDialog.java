@@ -344,15 +344,19 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		return result;
 	}
 	
+	protected void checkEnabledFeatures(boolean embeddedApplicationStarting) {
+		mntmStart.setEnabled(!embeddedApplicationStarting);
+		setMenuEnabled(!embeddedApplicationStarting);
+	}
 	
 	protected void startAction() {
-		mntmStart.setEnabled(false);
-		setMenuEnabled(false);
-		logger.clear();
-		javaProcessWrapper = caller.createProcessWrapper();
-		javaProcessWrapper.getInternalProcess().addPropertyChangeListener(this);
+//		caller.getSettings().recordSettings();
+//		checkEnabledFeatures(true);
+//		logger.clear();
+//		javaProcessWrapper = caller.createProcessWrapper();
+//		javaProcessWrapper.getInternalProcess().addPropertyChangeListener(this);
 		caller.addTask(new TriggerTask(TaskID.ReduceInterface, caller));
-		caller.addTask(javaProcessWrapper);
+		caller.addTask(new TriggerTask(TaskID.StartEmbeddedApplication, caller));
 		caller.addTask(new TriggerTask(TaskID.ExpandInterface, caller));
 	}
 
