@@ -154,7 +154,7 @@ public class WBirchProdVolPredictorTest {
 		Matrix std = variance.diagonalVector().elementwisePower(0.5);
 		
 		relDiff = std.subtract(stdRef).elementWiseDivide(stdRef).getAbsoluteValue();
-		Assert.assertTrue("Difference in terms of std", !relDiff.anyElementLargerThan(5E-3));
+		Assert.assertTrue("Difference in terms of std", !relDiff.anyElementLargerThan(1E-2));
 	}
 
 	public void testMonteCarloPredictions2() throws IOException {

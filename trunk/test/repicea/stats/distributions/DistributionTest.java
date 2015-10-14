@@ -41,7 +41,7 @@ public class DistributionTest {
 		Matrix simulatedVariances = npDist.getVariance();
 		Matrix diff = simulatedVariances.subtract(variance);
 		sse = diff.elementWiseMultiply(diff).getSumOfElements();
-		System.out.println("Squared differentce of the variances = " + sse);
+		System.out.println("Squared difference of the variances = " + sse);
 
 		Assert.assertEquals("Testing the variances", 0d, sse, 1E-4);
 
