@@ -98,7 +98,7 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 		addTask(new TriggerTask(TaskID.ExpandInterface, this));
 	}
 
-	protected void startEmbeddedApplication() {
+	protected void startEmbeddedApplication() throws Exception {
 		getSettings().recordSettings();
 		JavaProcessWrapper javaProcessWrapper = createProcessWrapper();
 		if (guiInterface != null) {
@@ -107,6 +107,7 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 			logger.clear();
 			javaProcessWrapper.addPropertyChangeListener(guiInterface.javaProcessWrapper);
 		}
+		javaProcessWrapper.doThisJob();
 	}
 
 	
