@@ -117,9 +117,6 @@ class Artemis2009CompatibleStandImpl implements Artemis2009CompatibleStand {
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Plot;}
 
 	@Override
-	public void setMonteCarloRealizationId(int i) {monteCarloRealizationId = i;}
-
-	@Override
 	public int getMonteCarloRealizationId() {return monteCarloRealizationId;}
 
 	@Override

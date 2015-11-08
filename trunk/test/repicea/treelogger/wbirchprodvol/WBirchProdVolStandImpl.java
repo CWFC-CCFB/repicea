@@ -24,8 +24,7 @@ class WBirchProdVolStandImpl implements WBirchProdVolStand {
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Plot;}
 
-	@Override
-	public void setMonteCarloRealizationId(int i) {monteCarloId = i;}
+	protected void setMonteCarloRealizationId(int i) {monteCarloId = i;}
 
 	@Override
 	public int getMonteCarloRealizationId() {return monteCarloId;}

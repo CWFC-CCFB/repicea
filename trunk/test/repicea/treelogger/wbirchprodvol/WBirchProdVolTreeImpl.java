@@ -58,9 +58,6 @@ class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Tree;}
 
 	@Override
-	public void setMonteCarloRealizationId(int i) {stand.setMonteCarloRealizationId(i);}
-
-	@Override
 	public int getMonteCarloRealizationId() {return stand.getMonteCarloRealizationId();}
 
 	protected Matrix getPredRef() {return predRef;}
