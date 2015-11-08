@@ -31,8 +31,7 @@ public class MatapediaStandImpl implements MatapediaStand {
 		return HierarchicalLevel.Plot;
 	}
 
-	@Override
-	public void setMonteCarloRealizationId(int i) {
+	protected void setMonteCarloRealizationId(int i) {
 		monteCarloRealization = i;
 	}
 

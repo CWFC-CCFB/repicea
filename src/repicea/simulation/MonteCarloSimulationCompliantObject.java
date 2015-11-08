@@ -37,11 +37,11 @@ public interface MonteCarloSimulationCompliantObject {
 	public HierarchicalLevel getHierarchicalLevel();
 	
 	
-	/**
-	 * This method sets the MonteCarlo id of the subject. Some instances might have a different implementation of this and might not have to use this method.
-	 * @param i the MonteCarlo id
-	 */
-	public void setMonteCarloRealizationId(int i);
+//	/**
+//	 * This method sets the MonteCarlo id of the subject. Some instances might have a different implementation of this and might not have to use this method.
+//	 * @param i the MonteCarlo id
+//	 */
+//	public void setMonteCarloRealizationId(int i);
 
 	
 	/**

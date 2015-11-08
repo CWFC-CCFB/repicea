@@ -29,8 +29,6 @@ public class MatapediaTreeImpl implements MatapediaTree {
 		return HierarchicalLevel.Tree;
 	}
 
-	@Override
-	public void setMonteCarloRealizationId(int i) {}
 
 	@Override
 	public int getMonteCarloRealizationId() {

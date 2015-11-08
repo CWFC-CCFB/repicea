@@ -141,7 +141,7 @@ public class WBirchProdVolPredictorTest {
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		Matrix pred;
 		for (int i = 0; i < nbRealizations; i++) {
-			stand.setMonteCarloRealizationId(i);
+			((WBirchProdVolStandImpl) stand).setMonteCarloRealizationId(i);
 			pred = predictor.getLogGradeVolumePredictions(stand, tree);
 			estimate.addRealization(pred);
 		}

@@ -55,8 +55,8 @@ class Artemis2009CompatibleTreeImpl implements Artemis2009CompatibleTree {
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Tree;}
 
-	@Override
-	public void setMonteCarloRealizationId(int i) {stand.setMonteCarloRealizationId(i);}
+//	@Override
+//	public void setMonteCarloRealizationId(int i) {stand.setMonteCarloRealizationId(i);}
 
 	@Override
 	public int getMonteCarloRealizationId() {return stand.getMonteCarloRealizationId();}

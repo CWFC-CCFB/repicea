@@ -72,11 +72,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject {
 
-		private int monteCarloRealization;
+		private final int monteCarloRealization;
 		private int subjectID;
 		
 		protected IntervalNestedInPlotDefinition(MonteCarloSimulationCompliantObject stand, int date) {
-			setMonteCarloRealizationId(stand.getMonteCarloRealizationId());
+			monteCarloRealization = stand.getMonteCarloRealizationId();
 			subjectID = getSubjectID(stand, date);
 		}
 		
@@ -91,10 +91,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 			return HierarchicalLevel.IntervalNestedInPlot;
 		}
 
-		@Override
-		public void setMonteCarloRealizationId(int i) {
-			monteCarloRealization = i;
-		}
 
 		@Override
 		public int getMonteCarloRealizationId() {

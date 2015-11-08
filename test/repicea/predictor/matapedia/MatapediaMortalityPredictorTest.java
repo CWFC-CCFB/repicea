@@ -106,7 +106,7 @@ public class MatapediaMortalityPredictorTest {
 			NonparametricDistribution dist = new NonparametricDistribution();
 			Matrix resultWrapper;
 			for (int i = 0; i < nbReal; i++) {
-				stand.setMonteCarloRealizationId(i);
+				((MatapediaStandImpl) stand).setMonteCarloRealizationId(i);
 				resultWrapper = new Matrix(1,1);
 				resultWrapper.m_afData[0][0] = stochasticPredictor.predictEventProbability(stand, tree);
 				dist.addRealization(resultWrapper);
