@@ -170,10 +170,10 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 	
 	
 	private final boolean closeTabEnabled;
-	private REpiceaPopupMenu popupMenu;
-	private final JMenuItem closeButton;
-	private final JMenuItem closeAllButton;
-	private final JMenuItem closeOtherButton;
+	protected final REpiceaPopupMenu popupMenu;
+	protected final JMenuItem closeButton;
+	protected final JMenuItem closeAllButton;
+	protected final JMenuItem closeOtherButton;
 	
 	/**
 	 * General constructor.
@@ -184,7 +184,7 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 		closeButton = new JMenuItem(MessageID.CloseButtonLabel.toString());
 		closeAllButton = new JMenuItem(MessageID.CloseAllButton.toString());
 		closeOtherButton = new JMenuItem(MessageID.CloseOtherButtonLabel.toString());
-		setPopupMenu();
+		popupMenu = setPopupMenu();
 	}
 
 	public void showPopMenu(Point point) {
@@ -244,8 +244,8 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 		setTitleAt(index, title);
 	}
 	
-	protected void setPopupMenu() {
-		popupMenu = new REpiceaPopupMenu(this, closeButton, closeAllButton, closeOtherButton);
+	protected REpiceaPopupMenu setPopupMenu() {
+		return new REpiceaPopupMenu(this, closeButton, closeAllButton, closeOtherButton);
 	}
 
 	@Override
