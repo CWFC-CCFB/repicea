@@ -31,6 +31,11 @@ import javax.swing.JPopupMenu;
 @SuppressWarnings("serial")
 public class REpiceaPopupMenu extends JPopupMenu {
 
+	/**
+	 * Constructor.
+	 * @param listener the parent container that should be listening to the JMenuItem instances
+	 * @param items a series of JMenuItem instances to be displayed in the popup menu
+	 */
 	public REpiceaPopupMenu(ActionListener listener, JMenuItem... items) {
 		if (items == null) {
 			throw new InvalidParameterException("The items argument must be non null!");
