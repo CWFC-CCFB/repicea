@@ -74,9 +74,6 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod {
 					height = getUpperBound();
 				}
 				output.add(height);
-//				if (i > 0 && i < numberOfSections - 1) {
-//					output.add(height);
-//				}
 				i++;
 			}
 			return output;

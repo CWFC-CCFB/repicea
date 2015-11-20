@@ -67,8 +67,9 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 		linkFunction = new LinkFunction(Type.CLogLog);
 		eta = new LinearStatisticalExpression();
 		linkFunction.setParameterValue(LFParameter.Eta, eta);
-		eta.setParameterValue(0, 1d);
-		eta.setParameterValue(1, 1d);
+		eta.setParameterValue(0, 0d);		// random parameter
+		eta.setVariableValue(0, 1d);		// variable that multiplies the random parameter
+		eta.setParameterValue(1, 1d);		// paramter that multiplies the xBeta
 		ghq = new GaussHermiteQuadrature(NumberOfPoints.N15);
 	}
 
@@ -104,17 +105,17 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 	public synchronized double predictEventProbability(MatapediaStand stand, MatapediaTree tree, Object... parms) {
 		
 		double etaValue = fixedEffectsPrediction(stand, tree);
-		eta.setVariableValue(0, etaValue);
+		eta.setVariableValue(1, etaValue);
 		double prob;
 		
 		if (isRandomEffectsVariabilityEnabled) { 
 			IntervalNestedInPlotDefinition interval = getIntervalNestedInPlotDefinition(stand, stand.getDateYr());
 			Matrix randomEffects = getRandomEffectsForThisSubject(interval);
-			eta.setVariableValue(1, randomEffects.m_afData[0][0]);
+			eta.setParameterValue(0, randomEffects.m_afData[0][0]);
 			prob = linkFunction.getValue();
 		} else {
-			eta.setVariableValue(1, 0d);
-			prob = ghq.getOneDimensionIntegral(linkFunction, eta, 1, ((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation().m_afData[0][0]);
+			eta.setParameterValue(0, 0d);
+			prob = ghq.getOneDimensionIntegral(linkFunction, eta, 0, ((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation().m_afData[0][0]);
 		}
 		
 		if (parms != null && parms.length > 0 && parms[0] instanceof Double) {
