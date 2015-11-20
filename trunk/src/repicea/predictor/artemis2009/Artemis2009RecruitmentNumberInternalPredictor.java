@@ -21,10 +21,10 @@ package repicea.predictor.artemis2009;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math.special.Gamma;
-
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulator;
+import repicea.stats.distributions.GammaFunction;
+//import org.apache.commons.math.special.Gamma;
 
 @SuppressWarnings("serial")
 class Artemis2009RecruitmentNumberInternalPredictor extends ModelBasedSimulator {
@@ -68,13 +68,13 @@ class Artemis2009RecruitmentNumberInternalPredictor extends ModelBasedSimulator 
 			double fTmp3 = 1.0;
 			double constant = 0.0;
 			
-			constant = Gamma.logGamma(fTmp2);
+			constant = GammaFunction.logGamma(fTmp2);
 
 			int recruitNumber = 0;													// number of recruits
 
 			while ((threshold > prob)&&(recruitNumber<80)) {						// maximum number of recruits is set to 80
-				prob += Math.exp(Gamma.logGamma(recruitNumber + fTmp2) 
-						- Gamma.logGamma(recruitNumber + 1.0) - constant)* fTmp3 	// fTmp3 replaces : * Math.pow(fTmp,fTreeFreq)
+				prob += Math.exp(GammaFunction.logGamma(recruitNumber + fTmp2) 
+						- GammaFunction.logGamma(recruitNumber + 1.0) - constant)* fTmp3 	// fTmp3 replaces : * Math.pow(fTmp,fTreeFreq)
 						/ (Math.pow(1+fTmp,recruitNumber + fTmp2));
 				fTmp3 *= fTmp;
 				recruitNumber++;
