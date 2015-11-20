@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
 import repicea.stats.AbstractStatisticalExpression;
 
 /**
@@ -119,29 +120,85 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 	}
 
 	/**
-	 * This method makes it possible to integrate an AbstractStatisticalExpression through Gauss-Hermite quadrature.
+	 * This method makes it possible to integrate an AbstractStatisticalExpression through Gauss-Hermite quadrature. 
 	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param functionWithTheVariableToChange the AbstractStatisticalExpression with the variable that changes
-	 * @param variableIndex the index of the variable over which the integration is made
+	 * @param functionWithParameterToChange the AbstractStatisticalExpression with the parameter that changes
+	 * @param parameterIndex the index of the parameter over which the integration is made
 	 * @param standardDeviation the standard deviation of this variable
 	 * @return the approximation of the integral
 	 */
 	public double getOneDimensionIntegral(EvaluableFunction<Double> functionToEvaluate,
-											AbstractStatisticalExpression functionWithTheVariableToChange,
-											Integer variableIndex, 
+											AbstractStatisticalExpression functionWithParameterToChange,
+											Integer parameterIndex, 
 											double standardDeviation) {
-		double originalValue = functionWithTheVariableToChange.getVariableValue(variableIndex);
-		double sum = 0;
-		double value;
-		for (int i = 0; i < getXValues().size(); i++) {
-			double tmp = getXValues().get(i) * standardDeviation * Math.sqrt(2d);
-			functionWithTheVariableToChange.setVariableValue(variableIndex, originalValue + tmp);
-			value = 1d / Math.sqrt(Math.PI) * functionToEvaluate.getValue() * getWeights().get(i);
-			sum += value;
+		if (parameterIndex < 0) {
+			throw new InvalidParameterException("The index must be positive!");
+		} else {
+			double originalValue = functionWithParameterToChange.getParameterValue(parameterIndex);
+			double sum = 0;
+			double value;
+			for (int i = 0; i < getXValues().size(); i++) {
+				double tmp = getXValues().get(i) * standardDeviation * Math.sqrt(2d);
+				functionWithParameterToChange.setParameterValue(parameterIndex, originalValue + tmp);
+				value = 1d / Math.sqrt(Math.PI) * functionToEvaluate.getValue() * getWeights().get(i);
+				sum += value;
+			}
+			functionWithParameterToChange.setParameterValue(parameterIndex, originalValue);
+			return sum;
 		}
-		functionWithTheVariableToChange.setVariableValue(variableIndex, originalValue);
-		return sum;
 	}
+	
+	/**
+	 * This method returns the value of a multi-dimension integral
+	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
+	 * @param functionWithParametersToChange the AbstractStatisticalExpression with the parameters that change
+	 * @param parameterIndices the indices of the parameters over which the integration is made
+	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
+	 * @return the approximation of the integral
+	 */
+	public double getMultiDimensionIntegral(EvaluableFunction<Double> functionToEvaluate,
+											AbstractStatisticalExpression functionWithParametersToChange,
+											List<Integer> parameterIndices, 
+											Matrix lowerCholeskyTriangle) {
+		if (!lowerCholeskyTriangle.isSquare() || parameterIndices.size() != lowerCholeskyTriangle.m_iRows) {
+			throw new InvalidParameterException("The indices are not compatible with the lower Cholesky triangle!");
+		} else {
+			Integer parameterIndex = parameterIndices.get(0);
+			if (parameterIndices.size() == 1) {
+				return getOneDimensionIntegral(functionToEvaluate, functionWithParametersToChange, parameterIndex, lowerCholeskyTriangle.m_afData[0][0]);
+			} else {
+				List<Integer> remainingIndices = parameterIndices.subList(1, parameterIndices.size());
+				double originalValue = functionWithParametersToChange.getParameterValue(parameterIndices.get(0));
+				double sum = 0;
+				double value;
+				for (int i = 0; i < getXValues().size(); i++) {
+					double tmp = getXValues().get(i) * lowerCholeskyTriangle.m_afData[0][0] * Math.sqrt(2d);
+					functionWithParametersToChange.setParameterValue(parameterIndex, originalValue + tmp);
+					List<Double> originalValues = new ArrayList<Double>();
+					for (Integer index : remainingIndices) {
+						double original = functionWithParametersToChange.getParameterValue(index);
+						originalValues.add(original);
+						int indexInCholesky = parameterIndices.indexOf(index);
+						functionWithParametersToChange.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.m_afData[indexInCholesky][0]);
+					}
+					Matrix subCholesky = lowerCholeskyTriangle.getSubMatrix(1, lowerCholeskyTriangle.m_iRows - 1, 1, lowerCholeskyTriangle.m_iCols - 1);
+					value = 1d / Math.sqrt(Math.PI) * getMultiDimensionIntegral(functionToEvaluate,
+							functionWithParametersToChange,
+							remainingIndices, 
+							subCholesky) * getWeights().get(i);
+					sum += value;
+					for (int j = 0; j < remainingIndices.size(); j++) {
+						functionWithParametersToChange.setParameterValue(remainingIndices.get(j), originalValues.get(j));
+					}
+				}
+				functionWithParametersToChange.setParameterValue(parameterIndex, originalValue);
+				return sum;
+				
+			}
+		}
+	}
+	
+	
 	
 	
 }

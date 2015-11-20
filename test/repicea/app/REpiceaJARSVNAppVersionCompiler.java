@@ -1,8 +1,5 @@
 package repicea.app;
 
-import org.junit.Assert;
-import org.junit.Test;
-
 import repicea.util.ObjectUtility;
 
 public class REpiceaJARSVNAppVersionCompiler extends AbstractAppVersionCompiler {
@@ -14,13 +11,15 @@ public class REpiceaJARSVNAppVersionCompiler extends AbstractAppVersionCompiler 
 		super();
 	}
 	
-	@Test
-	public void createRevisionFile() {
+	public static void main(String args[]) {
 		REpiceaJARSVNAppVersionCompiler compiler = new REpiceaJARSVNAppVersionCompiler();
 		try {
 			compiler.createRevisionFile(APP_URL, Version_Filename);
+			System.out.println("Revision file successfully updated!");
 		} catch (Exception e) {
-			Assert.fail("Failed to compile revision number");
+			System.out.println("Error while updating revision file!");
 		}
 	}
+	
+	
 }

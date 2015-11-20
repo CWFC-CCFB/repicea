@@ -9,13 +9,10 @@ import java.util.Random;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.stats.Distribution;
 import repicea.stats.LinearStatisticalExpression;
-import repicea.stats.integral.CompositeSimpsonRule;
-import repicea.stats.integral.GaussHermiteQuadrature;
-import repicea.stats.integral.GaussLegendreQuadrature;
+import repicea.stats.StatisticalUtility;
 import repicea.stats.integral.GaussQuadrature.NumberOfPoints;
-import repicea.stats.integral.NumericalIntegrationMethod;
-import repicea.stats.integral.TrapezoidalRule;
 import repicea.stats.model.glm.LinkFunction;
 import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
@@ -75,6 +72,73 @@ public class NumericalIntegrationTest {
 
 	}
 
+	
+	@Test
+    public void TestWithTwoDimensionGaussHermiteQuadratureAndStatisticalFunction() throws Exception {
+		GaussHermiteQuadrature ghq5 = new GaussHermiteQuadrature(NumberOfPoints.N5);
+		GaussHermiteQuadrature ghq10 = new GaussHermiteQuadrature(NumberOfPoints.N10);
+		GaussHermiteQuadrature ghq15 = new GaussHermiteQuadrature(NumberOfPoints.N15);
+		
+		Matrix matG = new Matrix(2,2);
+		matG.m_afData[0][0] = 1d;
+		matG.m_afData[1][0] = .2;
+		matG.m_afData[0][1] = .2;
+		matG.m_afData[1][1] = .5d;
+		Matrix chol = matG.getLowerCholTriangle();
+		
+		
+		LinkFunction linkFunction = new LinkFunction(Type.Logit);
+		LinearStatisticalExpression eta = new LinearStatisticalExpression();
+		linkFunction.setParameterValue(LFParameter.Eta, eta);
+		double xBeta = -1;
+		eta.setParameterValue(0, 1d);
+		eta.setVariableValue(0, xBeta);
+		eta.setParameterValue(1, 0d);
+		eta.setVariableValue(1, 1d);
+		eta.setParameterValue(2, .3);
+		eta.setVariableValue(2, 1d);
+		
+		double mean = 0;
+		int nbIter = 1000000;
+		double factor = 1d / nbIter;
+		double oriVal1 = eta.getParameterValue(1);
+		double oriVal2 = eta.getParameterValue(2);
+		for (int i = 0; i < nbIter; i++) {
+			Matrix u = chol.multiply(StatisticalUtility.drawRandomVector(chol.m_iRows, Distribution.Type.GAUSSIAN));
+			eta.setParameterValue(1, oriVal1 + u.m_afData[0][0]);
+			eta.setParameterValue(2, oriVal2 + u.m_afData[1][0]);
+			mean += linkFunction.getValue() * factor;
+		}
+		
+		System.out.println("Simulated mean =  " + mean);
+
+
+		eta.setParameterValue(1, oriVal1);
+		eta.setParameterValue(2, oriVal2);
+
+		List<Integer> indices = new ArrayList<Integer>();
+		indices.add(1);
+		indices.add(2);
+		double sum = ghq5.getMultiDimensionIntegral(linkFunction, eta, indices, chol);
+		
+		System.out.println("Mean with 5 points =  " + sum);
+		assertEquals(mean, sum, 1E-3);
+
+		
+		sum = ghq10.getMultiDimensionIntegral(linkFunction, eta, indices, chol);
+		
+		System.out.println("Mean with 10 points =  " + sum);
+		assertEquals(mean, sum, 1E-3);
+
+
+		sum = ghq15.getMultiDimensionIntegral(linkFunction, eta, indices, chol);
+		
+		System.out.println("Mean with 15 points =  " + sum);
+		assertEquals(mean, sum, 1E-3);
+
+	}
+
+	
 	@Test
     public void TestWithGaussHermiteQuadratureAndStatisticalFunction() throws Exception {
 		GaussHermiteQuadrature ghq5 = new GaussHermiteQuadrature(NumberOfPoints.N5);
@@ -88,6 +152,8 @@ public class NumericalIntegrationTest {
 		double xBeta = -1.5;
 		eta.setParameterValue(0, 1d);
 		eta.setVariableValue(0, xBeta);
+		eta.setParameterValue(1, 0d);
+		eta.setVariableValue(1, 1d);		// intercept random effect
 		
 		double mean = 0;
 		int nbIter = 1000000;
@@ -101,24 +167,24 @@ public class NumericalIntegrationTest {
 
 		System.out.println("Simulated mean =  " + mean);
 
-		double sum = ghq5.getOneDimensionIntegral(linkFunction, eta, (Integer) 0, stdDev);
+		double sum = ghq5.getOneDimensionIntegral(linkFunction, eta, (Integer) 1, stdDev);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
-		sum = ghq10.getOneDimensionIntegral(linkFunction, eta, (Integer) 0, stdDev);
+		sum = ghq10.getOneDimensionIntegral(linkFunction, eta, (Integer) 1, stdDev);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 		
-		sum = ghq15.getOneDimensionIntegral(linkFunction, eta, (Integer) 0, stdDev);
+		sum = ghq15.getOneDimensionIntegral(linkFunction, eta, (Integer) 1, stdDev);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 	}
 
-	
+
 	
 	@Test
     public void TestWithGaussLegendreQuadratureBetweenMinus1AndPlus1() throws Exception {
