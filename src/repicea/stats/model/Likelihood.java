@@ -18,12 +18,40 @@
  */
 package repicea.stats.model;
 
-import repicea.math.DerivableMathematicalFunction;
-import repicea.math.EvaluableFunction;
+import repicea.stats.AbstractStatisticalExpression;
 
 
 /**
  * The Likelihood interface provides the basic services for all Likelihood classes
  * @author Mathieu Fortin - June 2011
  */
-public interface Likelihood extends EvaluableFunction<Double>, DerivableMathematicalFunction {}
+@SuppressWarnings("serial")
+public abstract class Likelihood extends AbstractStatisticalExpression {
+	
+	
+	
+	protected abstract AbstractStatisticalExpression getInnerExpression();
+	
+	@Override
+	public void setParameterValue(Integer parameterIndex, Double parameterValue) {
+		getInnerExpression().setParameterValue(parameterIndex, parameterValue);
+	} 
+
+	@Override
+	public Double getParameterValue(Integer parameterIndex) {
+		return getInnerExpression().getParameterValue(parameterIndex);
+	}
+	
+	@Override
+	public void setVariableValue(Integer variableIndex, Double variableValue) {
+		getInnerExpression().setVariableValue(variableIndex, variableValue);
+	}
+
+	@Override
+	public Double getVariableValue(Integer variableIndex) {
+		return getInnerExpression().getVariableValue(variableIndex);
+	}
+
+	
+	
+}

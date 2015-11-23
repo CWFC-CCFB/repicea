@@ -20,7 +20,7 @@ package repicea.stats.model;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataStructure;
-import repicea.stats.optimizers.Optimizer;
+import repicea.stats.estimators.Estimator;
 
 /**
  * This interface defines the services provided by a statistical model.
@@ -76,7 +76,7 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	 * This method returns the optimizer of the log-likelihood function.
 	 * @return an Optimizer instance
 	 */
-	public Optimizer getOptimizer();
+	public Estimator getOptimizer();
 	
 	/**
 	 * This method returns the data structure.

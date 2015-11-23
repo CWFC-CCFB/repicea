@@ -404,7 +404,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		if (!glm.getOptimizer().isConvergenceAchieved()) {
 			glm.optimize();
 		}
-		glm.setParameters(glm.getOptimizer().getParameters().getMean());
+		glm.setParameters(glm.getOptimizer().getParameterEstimates().getMean());
 		this.copula = copula;
 		this.copula.initialize(this, getDataStructure());
 	}

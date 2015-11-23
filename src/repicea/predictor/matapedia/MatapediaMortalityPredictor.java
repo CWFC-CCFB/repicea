@@ -18,6 +18,9 @@
  */
 package repicea.predictor.matapedia;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.simulation.LogisticModelBasedSimulator;
@@ -53,6 +56,7 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 	private final LinkFunction linkFunction;
 	private final LinearStatisticalExpression eta;
 	private final GaussHermiteQuadrature ghq;
+	private final List<Integer> indicesForGaussianQuad;
 	
 	/**
 	 * Constructor.
@@ -71,6 +75,8 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 		eta.setVariableValue(0, 1d);		// variable that multiplies the random parameter
 		eta.setParameterValue(1, 1d);		// paramter that multiplies the xBeta
 		ghq = new GaussHermiteQuadrature(NumberOfPoints.N15);
+		indicesForGaussianQuad = new ArrayList<Integer>();
+		indicesForGaussianQuad.add(0);
 	}
 
 	protected void init() {
@@ -115,7 +121,10 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 			prob = linkFunction.getValue();
 		} else {
 			eta.setParameterValue(0, 0d);
-			prob = ghq.getOneDimensionIntegral(linkFunction, eta, 0, ((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation().m_afData[0][0]);
+			prob = ghq.getIntegralApproximation(linkFunction, 
+					eta, 
+					indicesForGaussianQuad, 
+					((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation());
 		}
 		
 		if (parms != null && parms.length > 0 && parms[0] instanceof Double) {

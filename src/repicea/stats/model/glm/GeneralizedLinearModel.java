@@ -19,6 +19,7 @@
 package repicea.stats.model.glm;
 
 
+import repicea.math.LogFunctionEmbedder;
 import repicea.math.Matrix;
 import repicea.math.MatrixUtility;
 import repicea.stats.LinearStatisticalExpression;
@@ -26,14 +27,13 @@ import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.estimators.Estimator;
+import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.Likelihood;
+import repicea.stats.model.LogLikelihood;
 import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
-import repicea.stats.model.glm.LogLikelihoodGLM.LLKGLMParameter;
-import repicea.stats.model.glm.LogLikelihoodGLM.LLKGLMVariable;
-import repicea.stats.optimizers.NewtonRaphsonOptimizer;
-import repicea.stats.optimizers.Optimizer;
 
 /**
  * This class implements generalized linear models. 
@@ -46,11 +46,13 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	 * This class defines the log likelihood function of the model.
 	 * @author Mathieu Fortin - August 2011
 	 */
-	protected static class OverallLogLikelihood extends ModelLogLikelihood {
+	@SuppressWarnings("serial")
+	protected static class OverallLogLikelihood extends LogLikelihood {
 
 		private GeneralizedLinearModel model;
 		
 		protected OverallLogLikelihood(GeneralizedLinearModel generalizedLinearModel) {
+			super(generalizedLinearModel.individualLLK);
 			this.model = generalizedLinearModel;
 			init();
 		}
@@ -92,11 +94,6 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 			return loglikelihood;
 		}
 		
-		@Override
-		public Likelihood getLikelihoodFunction() {		// not needed
-			return null;
-		}
-		
 		protected GeneralizedLinearModel getModel() {return model;}
 		
 	}
@@ -105,7 +102,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	protected Matrix matrixX;		// reference
 	protected Matrix y;				// reference
 
-	protected LogLikelihoodGLM individualLLK;
+	protected LogLikelihood individualLLK;
 	protected LinearStatisticalExpression le;
 	
 
@@ -175,7 +172,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	 */
 	protected void setObservationInLogLikelihoodFunction(int i) {
 		le.setX(matrixX.getSubMatrix(i, i, 0, matrixX.m_iCols - 1));
-		individualLLK.setVariableValue(LLKGLMVariable.Response, y.m_afData[i][0]);
+		((LikelihoodGLM) individualLLK.getOriginalFunction()).setObservedValue(y.m_afData[i][0] == 1d);
 	}
 
 	@Override
@@ -190,8 +187,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 		LinkFunction lf = new LinkFunction(linkFunctionType);
 		lf.setParameterValue(LFParameter.Eta, le);
 		
-		individualLLK = new LogLikelihoodGLM();
-		individualLLK.setParameterValue(LLKGLMParameter.Predicted, lf);
+		individualLLK = new LogLikelihood(new LikelihoodGLM(lf));
+//		individualLLK.setParameterValue(LLKGLMParameter.Predicted, lf);
 		setOverallLLK();
 	}
 
@@ -209,8 +206,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	public Matrix getParameters() {return le.getBeta();}
 
 	@Override
-	protected Optimizer instantiateDefaultOptimizer() {
-		return new NewtonRaphsonOptimizer();
+	protected Estimator instantiateDefaultOptimizer() {
+		return new MaximumLikelihoodEstimator();
 	}
 
 	@Override
@@ -226,9 +223,9 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 		if (getOptimizer().isConvergenceAchieved()) {
 			int nbObs = getDataStructure().getNumberOfObservations();
 			Matrix pred = new Matrix(getDataStructure().getNumberOfObservations(),2);
-			Matrix beta = getOptimizer().getParameters().getMean().getSubMatrix(0, matrixX.m_iCols - 1, 0, 0);
+			Matrix beta = getOptimizer().getParameterEstimates().getMean().getSubMatrix(0, matrixX.m_iCols - 1, 0, 0);
 			Matrix linearPred = matrixX.multiply(beta);
-			Matrix omega = getOptimizer().getParameters().getVariance().getSubMatrix(0, matrixX.m_iCols - 1, 0, matrixX.m_iCols - 1);
+			Matrix omega = getOptimizer().getParameterEstimates().getVariance().getSubMatrix(0, matrixX.m_iCols - 1, 0, matrixX.m_iCols - 1);
 			for (int i = 0; i < nbObs; i++) {
 				pred.m_afData[i][0] = linearPred.m_afData[i][0];
 				Matrix x_i = matrixX.getSubMatrix(i, i, 0, matrixX.m_iCols - 1);
@@ -246,10 +243,10 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 		if (getOptimizer().isConvergenceAchieved()) {
 			int nbObs = getDataStructure().getNumberOfObservations();
 			Matrix pred = new Matrix(getDataStructure().getNumberOfObservations(),1);
-			setParameters(getOptimizer().getParameters().getMean());
+			setParameters(getOptimizer().getParameterEstimates().getMean());
 			for (int i = 0; i < nbObs; i++) {
 				setObservationInLogLikelihoodFunction(i);
-				pred.m_afData[i][0] = individualLLK.getPredicted().getValue();
+				pred.m_afData[i][0] = ((LikelihoodGLM) individualLLK.getOriginalFunction()).getPrediction();
 			}
 			return pred;
 		} else {

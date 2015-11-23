@@ -25,9 +25,9 @@ import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimates.Estimate;
-import repicea.stats.optimizers.MaximumLikelihoodOptimizer;
-import repicea.stats.optimizers.Optimizer;
-import repicea.stats.optimizers.Optimizer.OptimizationException;
+import repicea.stats.estimators.Estimator;
+import repicea.stats.estimators.Estimator.EstimatorException;
+import repicea.stats.estimators.MaximumLikelihoodEstimator;
 
 /**
  * The AbstractStatisticalModel class implements the StatisticalModel interface. It contains the
@@ -38,11 +38,7 @@ import repicea.stats.optimizers.Optimizer.OptimizationException;
  */
 public abstract class AbstractStatisticalModel<D extends StatisticalDataStructure> implements StatisticalModel<D> {
 
-	
-	
-	protected static abstract class ModelLogLikelihood implements LogLikelihood{}
-	
-	private Optimizer optimizer;
+	private Estimator optimizer;
 	private D dataStructure;
 	
 	private double convergenceCriterion;
@@ -51,7 +47,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	/**
 	 * The complete model likelihood.
 	 */
-	protected ModelLogLikelihood overallLLK;
+	protected LogLikelihood overallLLK;
 	private String modelDefinition;
 
 	/**
@@ -85,10 +81,10 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	 * This method sets the optimizer for the model.
 	 * @param optimizer an Optimizer instance
 	 */
-	public void setOptimizer(Optimizer optimizer) {this.optimizer = optimizer;}
+	public void setOptimizer(Estimator optimizer) {this.optimizer = optimizer;}
 	
 	@Override
-	public Optimizer getOptimizer() {
+	public Estimator getOptimizer() {
 		if (optimizer == null) {
 			setOptimizer(instantiateDefaultOptimizer());
 		}
@@ -103,7 +99,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	 * This method defines the default optimizer which is to be specific to the derived classes.
 	 * @return an Optimizer instance 
 	 */
-	protected abstract Optimizer instantiateDefaultOptimizer();
+	protected abstract Estimator instantiateDefaultOptimizer();
 
 	/**
 	 * This method sets the convergence criterion.
@@ -126,12 +122,12 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	public void optimize() {
 		System.out.println("Optimization using the " + getOptimizer().toString() + " algorithm.");
 		try {
-			if (getOptimizer().optimize(this)) {
+			if (getOptimizer().doEstimation(this)) {
 				System.out.println("Convergence achieved!");
 			} else {
 				System.out.println("Unable to reach convergence.");
 			}
-		} catch (OptimizationException e) {
+		} catch (EstimatorException e) {
 			System.out.println("An error occured while optimizing the log likelihood function.");
 			e.printStackTrace();
 		}
@@ -143,8 +139,8 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 		} else {
 			System.out.println(toString());
 			System.out.println("Model definition : " + getModelDefinition());
-			if (optimizer instanceof MaximumLikelihoodOptimizer) {
-				double maximumLogLikelihood = ((MaximumLikelihoodOptimizer) optimizer).getMaximumLogLikelihood();
+			if (optimizer instanceof MaximumLikelihoodEstimator) {
+				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) optimizer).getMaximumLogLikelihood();
 				double AIC = - 2 * maximumLogLikelihood + 2 * getParameters().getNumberOfElements(); 
 				double BIC = - 2 * maximumLogLikelihood + getParameters().getNumberOfElements() * Math.log(dataStructure.getNumberOfObservations());
 				NumberFormat formatter = NumberFormat.getInstance();
@@ -155,7 +151,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 				System.out.println("BIC            : " + formatter.format(BIC));
 			}
 			
-			Estimate<?> parameterEstimates = optimizer.getParameters();
+			Estimate<?> parameterEstimates = optimizer.getParameterEstimates();
 			
 			Matrix report;
 			boolean varianceAvailable = false;

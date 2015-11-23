@@ -119,19 +119,19 @@ public class NumericalIntegrationTest {
 		List<Integer> indices = new ArrayList<Integer>();
 		indices.add(1);
 		indices.add(2);
-		double sum = ghq5.getMultiDimensionIntegral(linkFunction, eta, indices, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, eta, indices, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 		
-		sum = ghq10.getMultiDimensionIntegral(linkFunction, eta, indices, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, eta, indices, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 
-		sum = ghq15.getMultiDimensionIntegral(linkFunction, eta, indices, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, eta, indices, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
@@ -167,17 +167,22 @@ public class NumericalIntegrationTest {
 
 		System.out.println("Simulated mean =  " + mean);
 
-		double sum = ghq5.getOneDimensionIntegral(linkFunction, eta, (Integer) 1, stdDev);
+		List<Integer> indices = new ArrayList<Integer>();
+		indices.add(1);
+		Matrix chol = new Matrix(1,1);
+		chol.m_afData[0][0] = stdDev;
+		
+		double sum = ghq5.getIntegralApproximation(linkFunction, eta, indices, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
-		sum = ghq10.getOneDimensionIntegral(linkFunction, eta, (Integer) 1, stdDev);
+		sum = ghq10.getIntegralApproximation(linkFunction, eta, indices, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 		
-		sum = ghq15.getOneDimensionIntegral(linkFunction, eta, (Integer) 1, stdDev);
+		sum = ghq15.getIntegralApproximation(linkFunction, eta, indices, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);

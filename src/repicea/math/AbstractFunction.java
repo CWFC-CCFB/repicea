@@ -68,7 +68,7 @@ abstract class AbstractFunction<ParameterID extends Serializable,
 	 * @param parameterName the name of the parameter to be retrieved
 	 * @return the parameter object
 	 */
-	protected ParameterClass getParameterValue(ParameterID parameterName) {
+	public ParameterClass getParameterValue(ParameterID parameterName) {
 		int index = parameterNames.indexOf(parameterName);
 		return parameterValues.get(index);
 	}
@@ -88,7 +88,7 @@ abstract class AbstractFunction<ParameterID extends Serializable,
 		}
 	}
 	
-	protected VariableClass getVariableValue(VariableID variableName) {
+	public VariableClass getVariableValue(VariableID variableName) {
 		int index = variableNames.indexOf(variableName);
 		return variableValues.get(index);
 	}
