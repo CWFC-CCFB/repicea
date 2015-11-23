@@ -47,7 +47,7 @@ public final class LinkFunction extends AbstractMathematicalFunction<LinkFunctio
 	 */
 	public LinkFunction(Type type) {
 		if (type == null) {
-			throw new InvalidParameterException("The type of the link function cannot be null!");
+			this.type = Type.Logit;
 		}
 		this.type = type;
 	}

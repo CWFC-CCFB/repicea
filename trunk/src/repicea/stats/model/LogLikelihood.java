@@ -18,6 +18,8 @@
  */
 package repicea.stats.model;
 
+import repicea.math.LogFunctionEmbedder;
+
 
 /**
  * The LogLikelihood interface provides the basic services for all LogLikelihood classes. A 
@@ -25,12 +27,10 @@ package repicea.stats.model;
  * derivatives.
  * @author Mathieu Fortin - June 2011
  */
-public interface LogLikelihood extends Likelihood {
+@SuppressWarnings("serial")
+public class LogLikelihood extends LogFunctionEmbedder {
 	
-	/**
-	 * The method returns the original likelihood function.
-	 * @return a Likelihood instance
-	 */
-	public Likelihood getLikelihoodFunction();
-	
+	public LogLikelihood(Likelihood originalFunction) {
+		super(originalFunction);
+	}
 }

@@ -23,9 +23,9 @@ import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
+import repicea.stats.estimators.Estimator;
+import repicea.stats.estimators.OLSEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
-import repicea.stats.optimizers.OLSOptimizer;
-import repicea.stats.optimizers.Optimizer;
 
 /**
  * The LinearModel is a traditional model fitted with an Ordinary Least Squares estimator.
@@ -58,7 +58,7 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 
 	@Override
 	public Matrix getParameters() {
-		return getOptimizer().getParameters().getMean();
+		return getOptimizer().getParameterEstimates().getMean();
 	}
 	
 	/**
@@ -67,8 +67,8 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	 * @return a Matrix with a single element
 	 */
 	public double getResidualVariance() {
-		if (getOptimizer() instanceof OLSOptimizer) {
-			return ((OLSOptimizer) getOptimizer()).getResidualVariance().getMean().m_afData[0][0];
+		if (getOptimizer() instanceof OLSEstimator) {
+			return ((OLSEstimator) getOptimizer()).getResidualVariance().getMean().m_afData[0][0];
 		} else {
 			return -1d;
 		}
@@ -96,8 +96,8 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	 * @see repicea.stats.model.AbstractStatisticalModel#instantiateDefaultOptimizer()
 	 */
 	@Override
-	protected Optimizer instantiateDefaultOptimizer() {
-		return new OLSOptimizer();
+	protected Estimator instantiateDefaultOptimizer() {
+		return new OLSEstimator();
 	}
 
 	@Override

@@ -16,26 +16,25 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.optimizers;
+package repicea.math.optimizer;
 
+import java.util.List;
+
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
-import repicea.stats.data.StatisticalDataStructure;
-import repicea.stats.estimates.GaussianEstimate;
-import repicea.stats.model.LogLikelihood;
-import repicea.stats.model.StatisticalModel;
 
 /**
  * The NewtonRaphsonOptimizer class implements the Optimizer interface. It optimizes a log-likelihood function using the
  * Newton-Raphson algorithm. The vector of parameter changes is estimated as - inv(d2LLK/d2Beta) * dLLK/dBeta.
  * @author Mathieu Fortin - June 2011
  */
-public class NewtonRaphsonOptimizer extends AbstractOptimizer implements MaximumLikelihoodOptimizer {
+public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 
 	protected int maxNumberOfIterations = 20;
 	protected double gradientCriterion = 1E-3;
-	private double maximumLogLikelihood;
 	private int iterationID;
 	
+	public NewtonRaphsonOptimizer() {}
 
 	/**
 	 * This method optimize the log-likelihood function using the Newton-Raphson optimisation step.
@@ -45,14 +44,13 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimisation
 	 * @throws OptimisationException if the inner optimisation is not successful
 	 */
-	protected double runInnerOptimisation(StatisticalModel<?> model, 
+	protected double runInnerOptimisation(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, 
+			List<Integer> indicesOfParametersToOptimize,
 			Matrix originalBeta, 
 			Matrix optimisationStep,
 			double previousLogLikelihood,
-			Optimizer.LineSearchMethod lineSearchMethod) throws OptimizationException {
+			AbstractOptimizer.LineSearchMethod lineSearchMethod) throws OptimizationException {
 		
-		LogLikelihood llk = model.getLogLikelihood();
-
 		int numberSubIter = 0;
 		int maxNumberOfSubiterations = (Integer) lineSearchMethod.getParameter();
 		
@@ -60,8 +58,9 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 		double currentLlkValue;
 		
 		do {
-			model.setParameters(originalBeta.add(optimisationStep.scalarMultiply(scalingFactor - numberSubIter * .1)));
-			currentLlkValue = llk.getValue();
+			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor - numberSubIter * .1));
+			setParameters(function, indicesOfParametersToOptimize, newBeta);
+			currentLlkValue = function.getValue();
 			if (isVerboseEnabled()) {
 				System.out.println("    Subiteration : " + numberSubIter + "; Log-likelihood : " + currentLlkValue);
 			}
@@ -76,15 +75,11 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 	}
 	
 	@Override
-	public boolean optimize(StatisticalModel<? extends StatisticalDataStructure> model) throws OptimizationException {
-		double convergenceCriterion = model.getConvergenceCriterion();
+	public boolean optimize(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
 
-		LogLikelihood llk = model.getLogLikelihood();
-		
-		double llkValue0 = llk.getValue();
-		Matrix gradient = llk.getGradient();
-		Matrix hessian = llk.getHessian();
-	
+		double llkValue0 = function.getValue();
+		Matrix gradient = function.getGradient();
+		Matrix hessian = function.getHessian();
 				
 		iterationID = 0;
 		
@@ -94,18 +89,23 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 		if (Math.abs(gconv) < convergenceCriterion) {
 			convergenceAchieved = true;
 		}
-		
+		Matrix currentBeta = null;
 		try {
 			while (!convergenceAchieved && iterationID <= maxNumberOfIterations) {
 				iterationID++;
 				Matrix optimisationStep = hessian.getInverseMatrix().multiply(gradient).scalarMultiply(-1d);
 				
-				Matrix originalBeta = model.getParameters().getDeepClone();
+				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
 
-				llkValue0 = runInnerOptimisation(model, originalBeta, optimisationStep, llkValue0, LineSearchMethod.TEN_EQUAL);		// if it does not throw an Exception, it means the inner optimisation was successful. 
-				gradient = llk.getGradient();
-				hessian = llk.getHessian();
-
+				llkValue0 = runInnerOptimisation(function, 
+						indicesOfParametersToOptimize, 
+						originalBeta, 
+						optimisationStep, 
+						llkValue0, 
+						LineSearchMethod.TEN_EQUAL);		// if it does not throw an Exception, it means the inner optimisation was successful. 
+				gradient = function.getGradient();
+				hessian = function.getHessian();
+				currentBeta = extractParameters(function, indicesOfParametersToOptimize);
 				gconv = calculateConvergence(gradient, hessian, llkValue0);
 				
 				if (gconv < 0) {
@@ -116,7 +116,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 					convergenceAchieved = true;
 				}
 
-				System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + llkValue0 + "; df : " + gconv + "; parms : " + model.getParameters().toString());
+				System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + llkValue0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
 			}  
 
 			if (iterationID > maxNumberOfIterations && !convergenceAchieved) {
@@ -127,16 +127,33 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 				System.out.println("A least one element of the gradient vector is larger than 1E-3.");
 			}
 
-			maximumLogLikelihood = llkValue0;
+			optimalValue = llkValue0;
 			return convergenceAchieved;
 		} catch (OptimizationException e) {
 			throw e;
 		} finally {
-			betaVector = new GaussianEstimate(model.getParameters(), hessian.getInverseMatrix().scalarMultiply(-1d));
+			betaVector = currentBeta;
+			hessianMatrix = hessian;
 		}
 	}
 
+	
+	private Matrix extractParameters(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) {
+		Matrix beta = new Matrix(indicesOfParametersToOptimize.size(),1);
+		for (Integer index : indicesOfParametersToOptimize) {
+			beta.m_afData[index][0] = function.getParameterValue(index);
+		}
+		return beta;
+	}
 
+	private void setParameters(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize, Matrix newBeta) {
+		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
+			int index = indicesOfParametersToOptimize.get(i);
+			function.setParameterValue(index, newBeta.m_afData[i][0]);
+		}
+	}
+	
+	
 	/**
 	 * This method returns a double that is the convergence indicator based on the gradient, the hessian and the value of the log-likelihood function.
 	 * @param gradient a Matrix instance
@@ -149,26 +166,19 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer implements Maximum
 	}
 
 
-	@Override
-	public double getMaximumLogLikelihood() {
-		if (convergenceAchieved) {
-			return maximumLogLikelihood;
-		} else {
-			return 0;
-		}
-	}
 
 	/**
 	 * This method returns the number of iterations to reach convergence. It returns -1 if 
 	 * convergence could not be reached.
 	 * @return an integer
 	 */
-	protected int getNumberOfIterations() {
+	public int getNumberOfIterations() {
 		if (convergenceAchieved) {
 			return iterationID;
 		} else {
 			return -1;
 		}
 	}
+
 	
 }

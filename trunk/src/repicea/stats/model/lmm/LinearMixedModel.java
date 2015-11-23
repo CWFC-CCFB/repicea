@@ -23,18 +23,19 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.estimators.Estimator;
+import repicea.stats.estimators.Estimator.EstimatorException;
+import repicea.stats.estimators.GLSEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.Likelihood;
 import repicea.stats.model.lm.LinearModel;
-import repicea.stats.optimizers.GLSOptimizer;
-import repicea.stats.optimizers.Optimizer;
-import repicea.stats.optimizers.Optimizer.OptimizationException;
 import repicea.util.ObjectUtility;
 
 /**
@@ -168,7 +169,7 @@ public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStati
 	 * This method evaluates the model parameters with an ordinary least squares estimator.
 	 * @throws OptimizationException
 	 */
-	public void evaluateParametersUnderOLS() throws OptimizationException {
+	public void evaluateParametersUnderOLS() throws EstimatorException {
 		String modelDefinitionWithoutRandomEffect = ObjectUtility.extractSequences(getModelDefinition(), "(", ")").get(0);
 		LinearModel lm = new LinearModel(getDataStructure().getDataSet(), modelDefinitionWithoutRandomEffect);
 		lm.optimize();
@@ -238,8 +239,8 @@ public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStati
 	}
 
 	@Override
-	protected Optimizer instantiateDefaultOptimizer() {
-		return new GLSOptimizer();
+	protected Estimator instantiateDefaultOptimizer() {
+		return new GLSEstimator();
 	}
 
 
