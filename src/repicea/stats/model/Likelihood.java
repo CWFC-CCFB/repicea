@@ -22,13 +22,14 @@ import repicea.stats.AbstractStatisticalExpression;
 
 
 /**
- * The Likelihood interface provides the basic services for all Likelihood classes
+ * The Likelihood class provides the basic services for all Likelihood classes
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
 public abstract class Likelihood extends AbstractStatisticalExpression {
 	
-	
+	protected double observedValue;
+
 	
 	protected abstract AbstractStatisticalExpression getInnerExpression();
 	
@@ -52,6 +53,9 @@ public abstract class Likelihood extends AbstractStatisticalExpression {
 		return getInnerExpression().getVariableValue(variableIndex);
 	}
 
-	
+	protected void setObservedValue(double observedValue) {
+		this.observedValue = observedValue;
+	}
+
 	
 }

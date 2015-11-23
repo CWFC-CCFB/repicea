@@ -47,7 +47,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	/**
 	 * The complete model likelihood.
 	 */
-	protected LogLikelihood overallLLK;
+	protected CompositeLogLikelihood overallLLK;
 	private String modelDefinition;
 
 	/**
@@ -69,7 +69,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 
 
 	@Override
-	public LogLikelihood getLogLikelihood() {return overallLLK;}
+	public CompositeLogLikelihood getCompleteLogLikelihood() {return overallLLK;}
 	
 	/**
 	 * This method sets the log-likelihood function of the model. It is to be defined in the derived class, since the 
