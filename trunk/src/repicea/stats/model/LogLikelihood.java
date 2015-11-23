@@ -33,4 +33,7 @@ public class LogLikelihood extends LogFunctionEmbedder {
 	public LogLikelihood(Likelihood originalFunction) {
 		super(originalFunction);
 	}
+	
+	@Override
+	public Likelihood getOriginalFunction() {return (Likelihood) super.getOriginalFunction();}
 }

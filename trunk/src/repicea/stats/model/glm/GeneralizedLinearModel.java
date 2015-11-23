@@ -19,9 +19,7 @@
 package repicea.stats.model.glm;
 
 
-import repicea.math.LogFunctionEmbedder;
 import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
 import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
@@ -30,7 +28,7 @@ import repicea.stats.data.StatisticalDataException;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
-import repicea.stats.model.Likelihood;
+import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.LogLikelihood;
 import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
@@ -42,61 +40,61 @@ import repicea.stats.model.glm.LinkFunction.Type;
 public class GeneralizedLinearModel extends AbstractStatisticalModel<HierarchicalStatisticalDataStructure> {
 
 	
-	/**
-	 * This class defines the log likelihood function of the model.
-	 * @author Mathieu Fortin - August 2011
-	 */
-	@SuppressWarnings("serial")
-	protected static class OverallLogLikelihood extends LogLikelihood {
-
-		private GeneralizedLinearModel model;
-		
-		protected OverallLogLikelihood(GeneralizedLinearModel generalizedLinearModel) {
-			super(generalizedLinearModel.individualLLK);
-			this.model = generalizedLinearModel;
-			init();
-		}
-
-		protected void init() {
-			
-		}
-		
-		@Override
-		public Matrix getGradient() {
-			int numberParameters = getModel().le.getNumberOfParameters();
-			Matrix gradient = new Matrix(numberParameters, 1);
-			for (int i = 0; i < getModel().matrixX.m_iRows; i++) {
-				getModel().setObservationInLogLikelihoodFunction(i);
-				Matrix tmp = getModel().individualLLK.getGradient();
-				MatrixUtility.add(gradient, tmp);		// report the result in Matrix gradient
-			}
-			return gradient;
-		}
-
-		@Override
-		public Matrix getHessian() {
-			int numberParameters = getModel().le.getNumberOfParameters();
-			Matrix hessian = new Matrix(numberParameters, numberParameters);
-			for (int i = 0; i < getModel().matrixX.m_iRows; i++) {
-				getModel().setObservationInLogLikelihoodFunction(i);
-				MatrixUtility.add(hessian, getModel().individualLLK.getHessian());		// report the result in Matrix hessian
-			}
-			return hessian;
-		}
-
-		@Override
-		public Double getValue() {
-			double loglikelihood = 0;
-			for (int i = 0; i < getModel().matrixX.m_iRows; i++) {
-				getModel().setObservationInLogLikelihoodFunction(i);
-				loglikelihood += getModel().individualLLK.getValue();
-			}
-			return loglikelihood;
-		}
-		
-		protected GeneralizedLinearModel getModel() {return model;}
-		
-	}
+//	/**
+//	 * This class defines the log likelihood function of the model.
+//	 * @author Mathieu Fortin - August 2011
+//	 */
+//	@SuppressWarnings("serial")
+//	protected static class OverallLogLikelihood extends LogLikelihood {
+//
+//		private GeneralizedLinearModel model;
+//		
+//		protected OverallLogLikelihood(GeneralizedLinearModel generalizedLinearModel) {
+//			super(generalizedLinearModel.individualLLK);
+//			this.model = generalizedLinearModel;
+//			init();
+//		}
+//
+//		protected void init() {
+//			
+//		}
+//		
+//		@Override
+//		public Matrix getGradient() {
+//			int numberParameters = getModel().le.getNumberOfParameters();
+//			Matrix gradient = new Matrix(numberParameters, 1);
+//			for (int i = 0; i < getModel().matrixX.m_iRows; i++) {
+//				getModel().setObservationInLogLikelihoodFunction(i);
+//				Matrix tmp = getModel().individualLLK.getGradient();
+//				MatrixUtility.add(gradient, tmp);		// report the result in Matrix gradient
+//			}
+//			return gradient;
+//		}
+//
+//		@Override
+//		public Matrix getHessian() {
+//			int numberParameters = getModel().le.getNumberOfParameters();
+//			Matrix hessian = new Matrix(numberParameters, numberParameters);
+//			for (int i = 0; i < getModel().matrixX.m_iRows; i++) {
+//				getModel().setObservationInLogLikelihoodFunction(i);
+//				MatrixUtility.add(hessian, getModel().individualLLK.getHessian());		// report the result in Matrix hessian
+//			}
+//			return hessian;
+//		}
+//
+//		@Override
+//		public Double getValue() {
+//			double loglikelihood = 0;
+//			for (int i = 0; i < getModel().matrixX.m_iRows; i++) {
+//				getModel().setObservationInLogLikelihoodFunction(i);
+//				loglikelihood += getModel().individualLLK.getValue();
+//			}
+//			return loglikelihood;
+//		}
+//		
+//		protected GeneralizedLinearModel getModel() {return model;}
+//		
+//	}
 	
 	protected LinkFunction.Type linkFunctionType;
 	protected Matrix matrixX;		// reference
@@ -166,14 +164,14 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	
 	
 	
-	/**
-	 * This method sets the variable and parameter in the individual log-likelihood function to the observation i.
-	 * @param i the index of the observation
-	 */
-	protected void setObservationInLogLikelihoodFunction(int i) {
-		le.setX(matrixX.getSubMatrix(i, i, 0, matrixX.m_iCols - 1));
-		((LikelihoodGLM) individualLLK.getOriginalFunction()).setObservedValue(y.m_afData[i][0] == 1d);
-	}
+//	/**
+//	 * This method sets the variable and parameter in the individual log-likelihood function to the observation i.
+//	 * @param i the index of the observation
+//	 */
+//	protected void setObservationInLogLikelihoodFunction(int i) {
+//		le.setX(matrixX.getSubMatrix(i, i, 0, matrixX.m_iCols - 1));
+//		((LikelihoodGLM) individualLLK.getOriginalFunction()).setObservedValue(y.m_afData[i][0] == 1d);
+//	}
 
 	@Override
 	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
@@ -211,7 +209,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 
 	@Override
-	protected void setOverallLLK() {overallLLK = new OverallLogLikelihood(this);}
+	protected void setOverallLLK() {overallLLK = new CompositeLogLikelihood(this);}
 
 	@Override
 	public String toString() {
@@ -267,4 +265,5 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	protected HierarchicalStatisticalDataStructure getDataStructureFromDataSet(DataSet dataSet) {
 		return new GenericHierarchicalStatisticalDataStructure(dataSet);
 	}
+
 }

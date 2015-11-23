@@ -32,7 +32,7 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	 * This method returns the model log-likelihood function.
 	 * @return a LogLikelihood instance
 	 */
-	public LogLikelihood getLogLikelihood();
+	public CompositeLogLikelihood getCompleteLogLikelihood();
 	public void setParameters(Matrix beta);
 	public Matrix getParameters();
 	
