@@ -6,6 +6,8 @@ import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.math.MatrixUtility;
+import repicea.math.optimizer.NewtonRaphsonOptimizer;
+import repicea.math.optimizer.OptimizerListener;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.model.CompositeLogLikelihood;
@@ -13,27 +15,27 @@ import repicea.stats.model.IndividualLikelihood;
 import repicea.stats.model.IndividualLogLikelihood;
 
 @SuppressWarnings("serial")
-public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
+public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements OptimizerListener {
 
 	private final static double VERY_SMALL = 1E-8;
 
 	protected double llk;
-//	protected boolean llkUptoDate;
+	protected boolean llkUptoDate;
 	
 	protected Map<List<Integer>, Double> additionalLlkTerm;
-//	protected boolean additionalLlkTermUptoDate;
+	protected boolean additionalLlkTermUptoDate;
 	
 	protected Matrix gradientVector;
-//	protected boolean gradientVectorUptoDate;
+	protected boolean gradientVectorUptoDate;
 	
 	protected Map<List<Integer>, Matrix> additionalGradients;
-//	protected boolean additionalGradientTermUptoDate;
+	protected boolean additionalGradientTermUptoDate;
 	
 	protected Matrix hessianMatrix;
-//	protected boolean hessianMatrixUptoDate;
+	protected boolean hessianMatrixUptoDate;
 	
 	protected Map<List<Integer>, Matrix> additionalHessians;
-//	protected boolean additionalHessianTermUptoDate;
+	protected boolean additionalHessianTermUptoDate;
 
 	protected final HierarchicalStatisticalDataStructure hierarchicalStructure;
 	protected final CopulaExpression copulaExpression;
@@ -48,14 +50,14 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 		this.copulaExpression = copulaExpression;
 	}
 			
-//	protected void reset() {
-//		llkUptoDate = false;
-//		additionalLlkTermUptoDate = false;
-//		gradientVectorUptoDate = false;
-//		additionalGradientTermUptoDate = false;
-//		hessianMatrixUptoDate = false;
-//		additionalHessianTermUptoDate = false;
-//	}
+	protected void reset() {
+		llkUptoDate = false;
+		additionalLlkTermUptoDate = false;
+		gradientVectorUptoDate = false;
+		additionalGradientTermUptoDate = false;
+		hessianMatrixUptoDate = false;
+		additionalHessianTermUptoDate = false;
+	}
 	
 
 //	private IndividualLogLikelihood getIndividualLLK() {return getOriginalFunction();}
@@ -65,7 +67,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 			
 	@Override
 	public Matrix getGradient() {
-//		if (!gradientVectorUptoDate) {
+		if (!gradientVectorUptoDate) {
 			Matrix gradient = new Matrix(getTotalNumberOfParameters(), 1);
 			gradient.setSubMatrix(super.getGradient(),0,0);		// get the gradient under the assumption of independence
 			
@@ -74,14 +76,14 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 			}
 			
 			gradientVector = gradient;
-//			gradientVectorUptoDate = true;
-//		}
+			gradientVectorUptoDate = true;
+		}
 		return gradientVector;
 	}
 
 	@Override
 	public Matrix getHessian() {
-//		if (!hessianMatrixUptoDate) {
+		if (!hessianMatrixUptoDate) {
 			Matrix hessian = new Matrix(getTotalNumberOfParameters(), getTotalNumberOfParameters());
 			hessian.setSubMatrix(super.getHessian(), 0, 0); 	// get the hessian under the assumption of independence
 			
@@ -90,21 +92,21 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 			}
 			
 			hessianMatrix = hessian;
-//			hessianMatrixUptoDate = true;
-//		}
+			hessianMatrixUptoDate = true;
+		}
 		return hessianMatrix;
 	}
 
 	@Override
 	public Double getValue() {
-//		if (!llkUptoDate) {
+		if (!llkUptoDate) {
 			double logLikelihood = super.getValue();
 			for (Double additionalTerm : getAdditionalLikelihoodTerm().values()) {
 				logLikelihood += Math.log(additionalTerm);
 			}
 			llk = logLikelihood;
-//			llkUptoDate = true;
-//		}
+			llkUptoDate = true;
+		}
 		return llk;
 	}
 	
@@ -112,7 +114,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 	private Map<List<Integer>, Double> getAdditionalLikelihoodTerm() {
 		Map<List<Integer>, Double> results = new HashMap<List<Integer>, Double>();
 		
-//		if (!additionalLlkTermUptoDate) {
+		if (!additionalLlkTermUptoDate) {
 			
 			int indexFirstObservation;
 			double likelihoodFirst;
@@ -157,14 +159,14 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 				results.put(index, additionalTerm);
 			}
 			additionalLlkTerm = results;
-//			additionalLlkTermUptoDate = true;
-//		}
+			additionalLlkTermUptoDate = true;
+		}
 		return additionalLlkTerm;
 	}
 	
 	
 	private Map<List<Integer>, Matrix> getAdditionalGradients() {
-//		if (!additionalGradientTermUptoDate) {
+		if (!additionalGradientTermUptoDate) {
 			Map<List<Integer>, Matrix> additionalGradients = new HashMap<List<Integer>, Matrix>();
 			
 			int indexFirstObservation;
@@ -186,7 +188,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 
 			for (DataBlock db : map.values()) {
 				List<Integer> index = db.getIndices();
-				Matrix additionalGradient = new Matrix(getTotalNumberOfParameters(),1);		// TODO FP check that change
+				Matrix additionalGradient = new Matrix(getTotalNumberOfParameters(),1);	
 				double inverseAdditionalLikelihoodTerm = 1d / getAdditionalLikelihoodTerm().get(index);			
 
 				for (int i = 0; i < index.size() - 1; i++) {
@@ -235,15 +237,15 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 			}
 
 			this.additionalGradients = additionalGradients;
-//			additionalGradientTermUptoDate = true;
-//		}
+			additionalGradientTermUptoDate = true;
+		}
 		
 		return additionalGradients;
 	}
 
 	
 	private Map<List<Integer>,Matrix> getAdditionalHessians() {
-//		if (!additionalHessianTermUptoDate) {
+		if (!additionalHessianTermUptoDate) {
 			Map<List<Integer>,Matrix> additionalHessians = new HashMap<List<Integer>, Matrix>();
 			
 			Matrix additionalGradient;
@@ -328,8 +330,8 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 				additionalHessians.put(index, additionalHessian);
 			}
 			this.additionalHessians = additionalHessians;
-//			additionalHessianTermUptoDate = true;
-//		}
+			additionalHessianTermUptoDate = true;
+		}
 		return additionalHessians;
 	}
 	
@@ -353,6 +355,13 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood {
 			index -= getIndividualLikelihood().getNumberOfParameters();
 			copulaExpression.setParameterValue(index, value);
 		} 
+	}
+
+	@Override
+	public void optimizerDidThis(String actionString) {
+		if (OptimizerListener.optimizationStarted.equals(actionString) || NewtonRaphsonOptimizer.InnerIterationStarted.equals(actionString)) {
+			reset();
+		}
 	}
 
 }
