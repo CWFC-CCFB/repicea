@@ -25,12 +25,10 @@ import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.simulation.LogisticModelBasedSimulator;
 import repicea.simulation.ParameterLoader;
-import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.integral.GaussHermiteQuadrature;
 import repicea.stats.integral.GaussQuadrature.NumberOfPoints;
 import repicea.stats.model.glm.LinkFunction;
-import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
 
@@ -54,7 +52,7 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 	private final static double offset5Years = Math.log(5d);		
 	
 	private final LinkFunction linkFunction;
-	private final LinearStatisticalExpression eta;
+//	private final LinearStatisticalExpression eta;
 	private final GaussHermiteQuadrature ghq;
 	private final List<Integer> indicesForGaussianQuad;
 	
@@ -69,11 +67,10 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 		init();
 		oXVector = new Matrix(1, defaultBeta.getMean().m_iRows);
 		linkFunction = new LinkFunction(Type.CLogLog);
-		eta = new LinearStatisticalExpression();
-		linkFunction.setParameterValue(LFParameter.Eta, eta);
-		eta.setParameterValue(0, 0d);		// random parameter
-		eta.setVariableValue(0, 1d);		// variable that multiplies the random parameter
-		eta.setParameterValue(1, 1d);		// paramter that multiplies the xBeta
+//		eta = linkFunction.getOriginalFunction();
+		linkFunction.setParameterValue(0, 0d);		// random parameter
+		linkFunction.setVariableValue(0, 1d);		// variable that multiplies the random parameter
+		linkFunction.setParameterValue(1, 1d);		// paramter that multiplies the xBeta
 		ghq = new GaussHermiteQuadrature(NumberOfPoints.N15);
 		indicesForGaussianQuad = new ArrayList<Integer>();
 		indicesForGaussianQuad.add(0);
@@ -111,18 +108,17 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 	public synchronized double predictEventProbability(MatapediaStand stand, MatapediaTree tree, Object... parms) {
 		
 		double etaValue = fixedEffectsPrediction(stand, tree);
-		eta.setVariableValue(1, etaValue);
+		linkFunction.setVariableValue(1, etaValue);
 		double prob;
 		
 		if (isRandomEffectsVariabilityEnabled) { 
 			IntervalNestedInPlotDefinition interval = getIntervalNestedInPlotDefinition(stand, stand.getDateYr());
 			Matrix randomEffects = getRandomEffectsForThisSubject(interval);
-			eta.setParameterValue(0, randomEffects.m_afData[0][0]);
+			linkFunction.setParameterValue(0, randomEffects.m_afData[0][0]);
 			prob = linkFunction.getValue();
 		} else {
-			eta.setParameterValue(0, 0d);
+			linkFunction.setParameterValue(0, 0d);
 			prob = ghq.getIntegralApproximation(linkFunction, 
-					eta, 
 					indicesForGaussianQuad, 
 					((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation());
 		}

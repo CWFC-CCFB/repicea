@@ -28,7 +28,6 @@ import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.model.StatisticalModel;
 import repicea.stats.model.glm.LinkFunction;
-import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
 
@@ -115,8 +114,7 @@ public class CopulaLibrary {
 		@Override
 		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
-			linkFunction = new LinkFunction(Type.Logit);
-			linkFunction.setParameterValue(LFParameter.Eta, getOriginalFunction());
+			linkFunction = new LinkFunction(Type.Logit, getOriginalFunction());
 		}
 
 	}
@@ -141,8 +139,7 @@ public class CopulaLibrary {
 			Matrix beta = new Matrix(1,1,parameter,0);
 			setBeta(beta);
 		
-			linkFunction = new LinkFunction(linkFunctionType);
-			linkFunction.setParameterValue(LFParameter.Eta, getOriginalFunction());
+			linkFunction = new LinkFunction(linkFunctionType, getOriginalFunction());
 		}
 		
 		
