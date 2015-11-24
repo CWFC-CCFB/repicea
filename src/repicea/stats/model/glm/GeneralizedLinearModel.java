@@ -20,7 +20,6 @@ package repicea.stats.model.glm;
 
 
 import repicea.math.Matrix;
-import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -30,7 +29,6 @@ import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.IndividualLogLikelihood;
-import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
 
 /**
@@ -107,9 +105,9 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 	
 	protected void initializeLinkFunction(Type linkFunctionType) {
-		LinearStatisticalExpression le = new LinearStatisticalExpression();
+//		LinearStatisticalExpression le = new LinearStatisticalExpression();
 		LinkFunction lf = new LinkFunction(linkFunctionType);
-		lf.setParameterValue(LFParameter.Eta, le);
+//		lf.setParameterValue(LFParameter.Eta, le);
 		
 		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(lf));
 		setCompleteLLK();

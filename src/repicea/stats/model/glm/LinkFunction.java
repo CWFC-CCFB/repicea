@@ -21,7 +21,7 @@ package repicea.stats.model.glm;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.stats.LinearStatisticalExpression;
 
@@ -32,10 +32,10 @@ import repicea.stats.LinearStatisticalExpression;
  * @author Mathieu Fortin - May 2012
  */
 @SuppressWarnings("serial")
-public final class LinkFunction extends AbstractMathematicalFunction<LinkFunction.LFParameter, LinearStatisticalExpression, LinkFunction.VariableID, Serializable> implements Serializable {
+public final class LinkFunction extends AbstractMathematicalFunctionWrapper implements Serializable {
 	
-	protected static enum VariableID {}		// no variable in this expression
-	public static enum LFParameter {Eta}
+//	protected static enum VariableID {}		// no variable in this expression
+//	public static enum LFParameter {Eta}
 	public static enum Type {Logit, Log, CLogLog}
 	
 	private Type type;
@@ -46,12 +46,24 @@ public final class LinkFunction extends AbstractMathematicalFunction<LinkFunctio
 	 * @throws InvalidParameterException if type is null
 	 */
 	public LinkFunction(Type type) {
+		this(type, new LinearStatisticalExpression());
+	}
+
+	/**
+	 * Public constructor.
+	 * @param type a Type enum variable that defines the type of link function
+	 * @throws InvalidParameterException if type is null
+	 */
+	public LinkFunction(Type type, LinearStatisticalExpression eta) {
+		super(eta);
 		if (type == null) {
 			this.type = Type.Logit;
 		}
 		this.type = type;
 	}
 
+	@Override
+	public LinearStatisticalExpression getOriginalFunction() {return (LinearStatisticalExpression) super.getOriginalFunction();}
 	
 	/**
 	 * Provides the type of link function.
@@ -62,7 +74,7 @@ public final class LinkFunction extends AbstractMathematicalFunction<LinkFunctio
 	@Override
 	public Double getValue() {
 		double output;
-		double parameterEta = getEtaParameter().getValue();
+		double parameterEta = getOriginalFunction().getValue();
 		switch (type) {
 		case Logit:
 			output = Math.exp(parameterEta) / (1 + Math.exp(parameterEta));
@@ -78,31 +90,21 @@ public final class LinkFunction extends AbstractMathematicalFunction<LinkFunctio
 		}
 	}
 
-	/**
-	 * This method is a shortcut to ensure optimality. It avoids checking for this index of the eta 
-	 * parameters. 
-	 * @return a LinearStatisticalExpression instance
-	 */
-	private LinearStatisticalExpression getEtaParameter() {
-		return parameterValues.get(0);
-	}
-	
 	@Override
 	public Matrix getGradient() {
 		double value;
 		double der;
-		LinearStatisticalExpression eta = getEtaParameter();
 		switch (type) {
 		case Logit:
 			value = getValue();
 			der = value - value * value;
-			return eta.getGradient().scalarMultiply(der);
+			return getOriginalFunction().getGradient().scalarMultiply(der);
 		case Log:
 			value = getValue();
-			return eta.getGradient().scalarMultiply(value);
+			return getOriginalFunction().getGradient().scalarMultiply(value);
 		case CLogLog:
-			double exp_eta = Math.exp(eta.getValue());
-			return eta.getGradient().scalarMultiply(Math.exp(-exp_eta) * exp_eta); 
+			double exp_eta = Math.exp(getOriginalFunction().getValue());
+			return getOriginalFunction().getGradient().scalarMultiply(Math.exp(-exp_eta) * exp_eta); 
 		default:
 			return null;
 		}
@@ -111,7 +113,7 @@ public final class LinkFunction extends AbstractMathematicalFunction<LinkFunctio
 
 	@Override
 	public Matrix getHessian() {
-		LinearStatisticalExpression eta = getEtaParameter();
+		LinearStatisticalExpression eta = getOriginalFunction();
 		double expEta = Math.exp(eta.getValue());
 		Matrix gradientProduct = eta.getGradient().multiply(eta.getGradient().transpose());
 		

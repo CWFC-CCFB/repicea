@@ -2,7 +2,6 @@ package repicea.stats.model.glm;
 
 import repicea.math.Matrix;
 import repicea.stats.model.IndividualLikelihood;
-import repicea.stats.model.glm.LinkFunction.LFParameter;
 
 @SuppressWarnings("serial")
 public class LikelihoodGLM extends IndividualLikelihood {
@@ -10,7 +9,7 @@ public class LikelihoodGLM extends IndividualLikelihood {
 	protected final LinkFunction linkFunction;
 	
 	public LikelihoodGLM(LinkFunction linkFunction) {
-		super(linkFunction.getParameterValue(LFParameter.Eta));
+		super(linkFunction.getOriginalFunction());
 		this.linkFunction = linkFunction;
 	}
 

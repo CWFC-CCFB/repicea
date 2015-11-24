@@ -10,11 +10,9 @@ import org.junit.Test;
 
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
-import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.integral.GaussQuadrature.NumberOfPoints;
 import repicea.stats.model.glm.LinkFunction;
-import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
 
 public class NumericalIntegrationTest {
@@ -88,50 +86,50 @@ public class NumericalIntegrationTest {
 		
 		
 		LinkFunction linkFunction = new LinkFunction(Type.Logit);
-		LinearStatisticalExpression eta = new LinearStatisticalExpression();
-		linkFunction.setParameterValue(LFParameter.Eta, eta);
+//		LinearStatisticalExpression eta = new LinearStatisticalExpression();
+//		linkFunction.setParameterValue(LFParameter.Eta, eta);
 		double xBeta = -1;
-		eta.setParameterValue(0, 1d);
-		eta.setVariableValue(0, xBeta);
-		eta.setParameterValue(1, 0d);
-		eta.setVariableValue(1, 1d);
-		eta.setParameterValue(2, .3);
-		eta.setVariableValue(2, 1d);
+		linkFunction.setParameterValue(0, 1d);
+		linkFunction.setVariableValue(0, xBeta);
+		linkFunction.setParameterValue(1, 0d);
+		linkFunction.setVariableValue(1, 1d);
+		linkFunction.setParameterValue(2, .3);
+		linkFunction.setVariableValue(2, 1d);
 		
 		double mean = 0;
 		int nbIter = 1000000;
 		double factor = 1d / nbIter;
-		double oriVal1 = eta.getParameterValue(1);
-		double oriVal2 = eta.getParameterValue(2);
+		double oriVal1 = linkFunction.getParameterValue(1);
+		double oriVal2 = linkFunction.getParameterValue(2);
 		for (int i = 0; i < nbIter; i++) {
 			Matrix u = chol.multiply(StatisticalUtility.drawRandomVector(chol.m_iRows, Distribution.Type.GAUSSIAN));
-			eta.setParameterValue(1, oriVal1 + u.m_afData[0][0]);
-			eta.setParameterValue(2, oriVal2 + u.m_afData[1][0]);
+			linkFunction.setParameterValue(1, oriVal1 + u.m_afData[0][0]);
+			linkFunction.setParameterValue(2, oriVal2 + u.m_afData[1][0]);
 			mean += linkFunction.getValue() * factor;
 		}
 		
 		System.out.println("Simulated mean =  " + mean);
 
 
-		eta.setParameterValue(1, oriVal1);
-		eta.setParameterValue(2, oriVal2);
+		linkFunction.setParameterValue(1, oriVal1);
+		linkFunction.setParameterValue(2, oriVal2);
 
 		List<Integer> indices = new ArrayList<Integer>();
 		indices.add(1);
 		indices.add(2);
-		double sum = ghq5.getIntegralApproximation(linkFunction, eta, indices, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 		
-		sum = ghq10.getIntegralApproximation(linkFunction, eta, indices, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, indices, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 
-		sum = ghq15.getIntegralApproximation(linkFunction, eta, indices, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, indices, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
@@ -147,13 +145,11 @@ public class NumericalIntegrationTest {
 		
 		Random random = new Random();
 		LinkFunction linkFunction = new LinkFunction(Type.Logit);
-		LinearStatisticalExpression eta = new LinearStatisticalExpression();
-		linkFunction.setParameterValue(LFParameter.Eta, eta);
 		double xBeta = -1.5;
-		eta.setParameterValue(0, 1d);
-		eta.setVariableValue(0, xBeta);
-		eta.setParameterValue(1, 0d);
-		eta.setVariableValue(1, 1d);		// intercept random effect
+		linkFunction.setParameterValue(0, 1d);
+		linkFunction.setVariableValue(0, xBeta);
+		linkFunction.setParameterValue(1, 0d);
+		linkFunction.setVariableValue(1, 1d);		// intercept random effect
 		
 		double mean = 0;
 		int nbIter = 1000000;
@@ -172,17 +168,17 @@ public class NumericalIntegrationTest {
 		Matrix chol = new Matrix(1,1);
 		chol.m_afData[0][0] = stdDev;
 		
-		double sum = ghq5.getIntegralApproximation(linkFunction, eta, indices, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
-		sum = ghq10.getIntegralApproximation(linkFunction, eta, indices, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, indices, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 		
-		sum = ghq15.getIntegralApproximation(linkFunction, eta, indices, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, indices, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
