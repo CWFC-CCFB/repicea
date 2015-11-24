@@ -45,90 +45,90 @@ import repicea.util.ObjectUtility;
 public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStatisticalDataStructure> {
 	
 	
-	protected static class ModelLogLikelihood extends AbstractStatisticalModel.ModelLogLikelihood {
-		
-		final LinearMixedModel model;
-		final InternalLogLikelihood llk;
-		
-		ModelLogLikelihood(LinearMixedModel model) {
-			this.model = model;
-			llk = new InternalLogLikelihood();
-			llk.setParameterValue(InternalLogLikelihood.ParameterID.MatrixV, model.getMatrixVFunction());
-		}
-		
-	
-		/*
-		 * Useless for this class (non-Javadoc)
-		 * @see repicea.stats.model.LogLikelihood#getLikelihoodFunction()
-		 */
-		@Override
-		public IndividualLikelihood getLikelihoodFunction() {return null;}
-
-		@Override
-		public Double getValue() {
-			double llkValue = 0;
-			Matrix residuals = model.getResiduals();
-			Map<String, DataBlock> dataBlocks = model.getDataStructure().getHierarchicalStructure();
-			for (String subject : dataBlocks.keySet()) {
-				DataBlock db = dataBlocks.get(subject);
-				model.matrixVFunction.setDataBlock(db);
-				Matrix r_i = residuals.getSubMatrix(db.getIndices(), null);
-				llk.setVariableValue(InternalLogLikelihood.VariableID.Residuals, r_i);
-				Matrix matrixX_i = model.getDataStructure().getMatrixX().getSubMatrix(db.getIndices(), null);
-				llk.setVariableValue(InternalLogLikelihood.VariableID.MatrixX, matrixX_i);
-
-				llkValue += llk.getValue();
-			}
-			
-			// profile the likelihood
-			return -.5 * (llkValue + (model.getDataStructure().getNumberOfObservations() - model.le.getNumberOfParameters()) * Math.log(2* Math.PI));
-		}
-	
-
-		@Override
-		public Matrix getGradient() {
-			Matrix gradient = null;
-			Matrix residuals = model.getResiduals();
-			Map<String, DataBlock> dataBlocks = model.getDataStructure().getHierarchicalStructure();
-			for (String subject : dataBlocks.keySet()) {
-				DataBlock db = dataBlocks.get(subject);
-				model.matrixVFunction.setDataBlock(db);
-				Matrix r_i = residuals.getSubMatrix(db.getIndices(), null);
-				llk.setVariableValue(InternalLogLikelihood.VariableID.Residuals, r_i);
-				Matrix X_i = model.getDataStructure().getMatrixX().getSubMatrix(db.getIndices(), null);
-				llk.setVariableValue(InternalLogLikelihood.VariableID.MatrixX, X_i);
-
-				if (gradient == null) {
-					gradient = llk.getGradient();
-				} else {
-					gradient = gradient.add(llk.getGradient());
-				}
-			}
-			return gradient.scalarMultiply(-.5);
-		}
-
-		@Override
-		public Matrix getHessian() {
-			Matrix hessian = null;
-			Matrix residuals = model.getResiduals();
-			Map<String, DataBlock> dataBlocks = model.getDataStructure().getHierarchicalStructure();
-			for (String subject : dataBlocks.keySet()) {
-				DataBlock db = dataBlocks.get(subject);
-				model.matrixVFunction.setDataBlock(db);
-				Matrix r_i = residuals.getSubMatrix(db.getIndices(), null);
-				llk.setVariableValue(InternalLogLikelihood.VariableID.Residuals, r_i);
-				Matrix X_i = model.getDataStructure().getMatrixX().getSubMatrix(db.getIndices(), null);
-				llk.setVariableValue(InternalLogLikelihood.VariableID.MatrixX, X_i);
-
-				if (hessian == null) {
-					hessian = llk.getHessian();
-				} else {
-					hessian = hessian.add(llk.getHessian());
-				}
-			}
-			return hessian;
-		}
-	}
+//	protected static class ModelLogLikelihood extends AbstractStatisticalModel.ModelLogLikelihood {
+//		
+//		final LinearMixedModel model;
+//		final InternalLogLikelihood llk;
+//		
+//		ModelLogLikelihood(LinearMixedModel model) {
+//			this.model = model;
+//			llk = new InternalLogLikelihood();
+//			llk.setParameterValue(InternalLogLikelihood.ParameterID.MatrixV, model.getMatrixVFunction());
+//		}
+//		
+//	
+//		/*
+//		 * Useless for this class (non-Javadoc)
+//		 * @see repicea.stats.model.LogLikelihood#getLikelihoodFunction()
+//		 */
+//		@Override
+//		public IndividualLikelihood getLikelihoodFunction() {return null;}
+//
+//		@Override
+//		public Double getValue() {
+//			double llkValue = 0;
+//			Matrix residuals = model.getResiduals();
+//			Map<String, DataBlock> dataBlocks = model.getDataStructure().getHierarchicalStructure();
+//			for (String subject : dataBlocks.keySet()) {
+//				DataBlock db = dataBlocks.get(subject);
+//				model.matrixVFunction.setDataBlock(db);
+//				Matrix r_i = residuals.getSubMatrix(db.getIndices(), null);
+//				llk.setVariableValue(InternalLogLikelihood.VariableID.Residuals, r_i);
+//				Matrix matrixX_i = model.getDataStructure().getMatrixX().getSubMatrix(db.getIndices(), null);
+//				llk.setVariableValue(InternalLogLikelihood.VariableID.MatrixX, matrixX_i);
+//
+//				llkValue += llk.getValue();
+//			}
+//			
+//			// profile the likelihood
+//			return -.5 * (llkValue + (model.getDataStructure().getNumberOfObservations() - model.le.getNumberOfParameters()) * Math.log(2* Math.PI));
+//		}
+//	
+//
+//		@Override
+//		public Matrix getGradient() {
+//			Matrix gradient = null;
+//			Matrix residuals = model.getResiduals();
+//			Map<String, DataBlock> dataBlocks = model.getDataStructure().getHierarchicalStructure();
+//			for (String subject : dataBlocks.keySet()) {
+//				DataBlock db = dataBlocks.get(subject);
+//				model.matrixVFunction.setDataBlock(db);
+//				Matrix r_i = residuals.getSubMatrix(db.getIndices(), null);
+//				llk.setVariableValue(InternalLogLikelihood.VariableID.Residuals, r_i);
+//				Matrix X_i = model.getDataStructure().getMatrixX().getSubMatrix(db.getIndices(), null);
+//				llk.setVariableValue(InternalLogLikelihood.VariableID.MatrixX, X_i);
+//
+//				if (gradient == null) {
+//					gradient = llk.getGradient();
+//				} else {
+//					gradient = gradient.add(llk.getGradient());
+//				}
+//			}
+//			return gradient.scalarMultiply(-.5);
+//		}
+//
+//		@Override
+//		public Matrix getHessian() {
+//			Matrix hessian = null;
+//			Matrix residuals = model.getResiduals();
+//			Map<String, DataBlock> dataBlocks = model.getDataStructure().getHierarchicalStructure();
+//			for (String subject : dataBlocks.keySet()) {
+//				DataBlock db = dataBlocks.get(subject);
+//				model.matrixVFunction.setDataBlock(db);
+//				Matrix r_i = residuals.getSubMatrix(db.getIndices(), null);
+//				llk.setVariableValue(InternalLogLikelihood.VariableID.Residuals, r_i);
+//				Matrix X_i = model.getDataStructure().getMatrixX().getSubMatrix(db.getIndices(), null);
+//				llk.setVariableValue(InternalLogLikelihood.VariableID.MatrixX, X_i);
+//
+//				if (hessian == null) {
+//					hessian = llk.getHessian();
+//				} else {
+//					hessian = hessian.add(llk.getHessian());
+//				}
+//			}
+//			return hessian;
+//		}
+//	}
 
 	
 	private final LinearStatisticalExpression le;		// beta and X vector

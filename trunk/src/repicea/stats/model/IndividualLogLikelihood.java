@@ -29,7 +29,7 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public class IndividualLogLikelihood extends LogFunctionWrapper {
+public class IndividualLogLikelihood extends LogFunctionWrapper implements LikelihoodCompatible<Double> {
 	
 	public IndividualLogLikelihood(IndividualLikelihood originalFunction) {
 		super(originalFunction);
@@ -40,11 +40,21 @@ public class IndividualLogLikelihood extends LogFunctionWrapper {
 	
 	
 	public double getPrediction() {return getOriginalFunction().getPrediction();}
-	
+
+	@Override
 	public void setBeta(Matrix beta) {
 		getOriginalFunction().setBeta(beta);
 	}
 
+	@Override
 	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+
+	@Override
+	public void setX(Matrix x) {getOriginalFunction().setX(x);}
+
+	@Override
+	public void setY(Double y) {
+		getOriginalFunction().setY(y);
+	}
 	
 }
