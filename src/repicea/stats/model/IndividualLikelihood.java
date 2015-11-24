@@ -28,7 +28,7 @@ import repicea.stats.AbstractStatisticalExpression;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper {
+public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements LikelihoodCompatible<Double> {
 
 	protected double observedValue;
 
@@ -39,13 +39,9 @@ public abstract class IndividualLikelihood extends AbstractMathematicalFunctionW
 	@Override
 	public AbstractStatisticalExpression getOriginalFunction() {return (AbstractStatisticalExpression) super.getOriginalFunction();}
 	
-
-	/**
-	 * This method sets the observed value;
-	 * @param observedValue a double
-	 */
-	public void setObservedValue(double observedValue) {
-		this.observedValue = observedValue;
+	@Override
+	public void setY(Double y) {
+		this.observedValue = y;
 	}
 
 	/**
@@ -61,31 +57,18 @@ public abstract class IndividualLikelihood extends AbstractMathematicalFunctionW
 	public abstract double getPrediction();
 	
 	
-	/**
-	 * This method sets the vector of explanatory variables. The method essentially
-	 * relies on the setVariableValue() of the AbstractMathematicalFunction class.
-	 * @param x a Matrix instance 
-	 * @throws IllegalArgumentException if the parameter x is not a row vector
-	 */
+	@Override
 	public void setX(Matrix x) {
 		getOriginalFunction().setX(x);
 	}
 	
-	/**
-	 * This method sets the vector of parameters. The method essentially relies on
-	 * the setParameterValue() of the AbstractMathematicalFunction class.
-	 * @param beta a Matrix instance
-	 * @throws IllegalArgumentException if beta is not a column vector
-	 */
-	protected void setBeta(Matrix beta) {
+	@Override
+	public void setBeta(Matrix beta) {
 		getOriginalFunction().setBeta(beta);
 	}
 	
-	/**
-	 * This method returns the vector of parameters.
-	 * @return a Matrix instance
-	 */
-	protected Matrix getBeta() {
+	@Override
+	public Matrix getBeta() {
 		return getOriginalFunction().getBeta();
 	}
 

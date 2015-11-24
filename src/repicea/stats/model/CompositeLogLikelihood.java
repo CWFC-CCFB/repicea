@@ -52,7 +52,7 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 
 	protected void setValuesInLikelihoodFunction(int index) {
 		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
-		getOriginalFunction().getOriginalFunction().setObservedValue(yValues.m_afData[index][0]);
+		getOriginalFunction().getOriginalFunction().setY(yValues.m_afData[index][0]);
 	}
 
 	/**
