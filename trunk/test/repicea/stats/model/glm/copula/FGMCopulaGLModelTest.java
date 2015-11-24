@@ -35,8 +35,8 @@ public class FGMCopulaGLModelTest {
 			copulaModel.doEstimation();
 			double actual = copula.getValue();
 			assertEquals(expectedCopulaValue, actual, 1E-5);
-//			double actualLlk = copulaModel.getLogLikelihood().getValue();
-//			assertEquals(expectedLlk, actualLlk, 1E-5);
+			double actualLlk = copulaModel.getCompleteLogLikelihood().getValue();
+			assertEquals(expectedLlk, actualLlk, 1E-5);
 		} catch (StatisticalDataException e) {
 			e.printStackTrace();
 			throw e;

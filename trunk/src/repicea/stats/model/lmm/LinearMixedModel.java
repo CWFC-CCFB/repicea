@@ -34,7 +34,7 @@ import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.Estimator.EstimatorException;
 import repicea.stats.estimators.GLSEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
-import repicea.stats.model.Likelihood;
+import repicea.stats.model.IndividualLikelihood;
 import repicea.stats.model.lm.LinearModel;
 import repicea.util.ObjectUtility;
 
@@ -62,7 +62,7 @@ public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStati
 		 * @see repicea.stats.model.LogLikelihood#getLikelihoodFunction()
 		 */
 		@Override
-		public Likelihood getLikelihoodFunction() {return null;}
+		public IndividualLikelihood getLikelihoodFunction() {return null;}
 
 		@Override
 		public Double getValue() {

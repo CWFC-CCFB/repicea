@@ -1,11 +1,11 @@
 package repicea.stats.model.glm;
 
 import repicea.math.Matrix;
-import repicea.stats.model.Likelihood;
+import repicea.stats.model.IndividualLikelihood;
 import repicea.stats.model.glm.LinkFunction.LFParameter;
 
 @SuppressWarnings("serial")
-public class LikelihoodGLM extends Likelihood {
+public class LikelihoodGLM extends IndividualLikelihood {
 
 	protected final LinkFunction linkFunction;
 	
