@@ -19,6 +19,7 @@
 package repicea.math.optimizer;
 
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
@@ -29,6 +30,7 @@ import repicea.math.Matrix;
  */
 public abstract class AbstractOptimizer {
 
+	
 	public static enum LineSearchMethod {
 		TEN_EQUAL(10),	
 		SINGLE_TRIAL(0);
@@ -54,6 +56,8 @@ public abstract class AbstractOptimizer {
 		}
 	}
 	
+	private final CopyOnWriteArrayList<OptimizerListener> listeners;
+
 	protected double convergenceCriterion;
 	protected boolean convergenceAchieved;
 	protected double optimalValue;
@@ -68,9 +72,19 @@ public abstract class AbstractOptimizer {
 	 */
 	public AbstractOptimizer() {
 		verboseEnabled = false;
+		listeners = new CopyOnWriteArrayList<OptimizerListener>();
 	}
 	
+	protected void addOptimizerListener(OptimizerListener listener) {
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
 
+	protected void removeOptimizerListener(OptimizerListener listener) {
+		listeners.remove(listener);
+	}
+	
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}
 
 	public Matrix getParametersAtMaximum() {return betaVector;}
@@ -125,4 +139,10 @@ public abstract class AbstractOptimizer {
 	 */
 	public abstract boolean optimize(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
 
+	protected void fireOptimizerEvent(String actionString) {
+		for (OptimizerListener listener : listeners) {
+			listener.optimizerDidThis(actionString);
+		}
+	}
+	
 }

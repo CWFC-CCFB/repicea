@@ -22,13 +22,8 @@ import java.security.InvalidParameterException;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
-import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -46,8 +41,6 @@ import repicea.stats.model.glm.GeneralizedLinearModel;
  */
 public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	
-	private final static double VERY_SMALL = 1E-8;
-
 	@SuppressWarnings("rawtypes")
 	protected static class LikelihoodValue implements Comparable {
 
@@ -75,320 +68,6 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	}
 	
 	
-	protected static class OverallLogLikelihood extends GeneralizedLinearModel.OverallLogLikelihood {
-
-		protected double llk;
-		protected boolean llkUptoDate;
-		
-		protected Map<List<Integer>, Double> additionalLlkTerm;
-		protected boolean additionalLlkTermUptoDate;
-		
-		protected Matrix gradientVector;
-		protected boolean gradientVectorUptoDate;
-		
-		protected Map<List<Integer>, Matrix> additionalGradients;
-		protected boolean additionalGradientTermUptoDate;
-		
-		protected Matrix hessianMatrix;
-		protected boolean hessianMatrixUptoDate;
-		
-		protected Map<List<Integer>, Matrix> additionalHessians;
-		protected boolean additionalHessianTermUptoDate;
-
-		
-		protected OverallLogLikelihood(FGMCopulaGLModel copulaGLModel) {
-			super(copulaGLModel);
-		}
-				
-		protected void init() {
-			llkUptoDate = false;
-			additionalLlkTermUptoDate = false;
-			gradientVectorUptoDate = false;
-			additionalGradientTermUptoDate = false;
-			hessianMatrixUptoDate = false;
-			additionalHessianTermUptoDate = false;
-		}
-		
-		@Override
-		protected FGMCopulaGLModel getModel() {
-			return (FGMCopulaGLModel) super.getModel(); 
-		}
-
-		@Override
-		public Matrix getGradient() {
-			if (!gradientVectorUptoDate) {
-				int numberParameters = getModel().getParameters().getNumberOfElements();
-				Matrix gradient = new Matrix(numberParameters, 1);
-				gradient.setSubMatrix(super.getGradient(),0,0);		// get the gradient under the assumption of independence
-				
-				for (Matrix additionalGradient : getAdditionalGradients().values()) {
-//					gradient = gradient.add(additionalGradient);			// get the additional part of the gradient on both the beta vector and the copula parameters
-					MatrixUtility.add(gradient, additionalGradient);			// get the additional part of the gradient on both the beta vector and the copula parameters
-				}
-				
-				gradientVector = gradient;
-				gradientVectorUptoDate = true;
-			}
-			return gradientVector;
-		}
-
-		@Override
-		public Matrix getHessian() {
-			if (!hessianMatrixUptoDate) {
-				int numberParameters = getModel().getParameters().getNumberOfElements();
-				Matrix hessian = new Matrix(numberParameters, numberParameters);
-				hessian.setSubMatrix(super.getHessian(), 0, 0); 	// get the hessian under the assumption of independence
-				
-				for (Matrix additionalHessian : getAdditionalHessians().values()) {
-//					hessian = hessian.add(additionalHessian);
-					MatrixUtility.add(hessian, additionalHessian);
-				}
-				
-				hessianMatrix = hessian;
-				hessianMatrixUptoDate = true;
-			}
-			return hessianMatrix;
-		}
-
-		@Override
-		public Double getValue() {
-			if (!llkUptoDate) {
-				double logLikelihood = super.getValue();
-				for (Double additionalTerm : getAdditionalLikelihoodTerm().values()) {
-					logLikelihood += Math.log(additionalTerm);
-				}
-				llk = logLikelihood;
-				llkUptoDate = true;
-			}
-			return llk;
-		}
-		
-		
-		private Map<List<Integer>, Double> getAdditionalLikelihoodTerm() {
-			Map<List<Integer>, Double> results = new HashMap<List<Integer>, Double>();
-			
-			if (!additionalLlkTermUptoDate) {
-				
-				int indexFirstObservation;
-				double likelihoodFirst;
-				double observedFirst;
-				
-				int indexSecondObservation;
-				double likelihoodSecond;
-				double observedSecond;
-				
-				double sumObserved;
-				double multiplyingFactor;
-				
-				Map<String, DataBlock> map = getModel().getDataStructure().getHierarchicalStructure();
-				for (DataBlock db : map.values()) {
-					List<Integer> index = db.getIndices();
-					double additionalTerm = 1d;
-
-					for (int i = 0; i < index.size() - 1; i++) {
-						indexFirstObservation = index.get(i);
-						getModel().setObservationInLogLikelihoodFunction(indexFirstObservation);
-						likelihoodFirst = Math.exp(getModel().individualLLK.getValue());
-						observedFirst = getModel().individualLLK.getObserved();
-						for (int j = i + 1; j < index.size(); j++) {
-							indexSecondObservation = index.get(j);
-							getModel().setObservationInLogLikelihoodFunction(indexSecondObservation);
-							likelihoodSecond = Math.exp(getModel().individualLLK.getValue());
-							observedSecond = getModel().individualLLK.getObserved();
-
-							sumObserved = observedFirst + observedSecond;
-
-							multiplyingFactor = 1d;
-							if (Math.abs(sumObserved - 1) < VERY_SMALL) {
-								multiplyingFactor = -1d;
-							}
-
-							getModel().copula.setX(indexFirstObservation, indexSecondObservation);
-							double copulaValue = getModel().copula.getValue();
-
-							additionalTerm += multiplyingFactor * copulaValue * (1 - likelihoodFirst) * (1 - likelihoodSecond);
-						}
-					}
-					results.put(index, additionalTerm);
-				}
-				additionalLlkTerm = results;
-				additionalLlkTermUptoDate = true;
-			}
-			return additionalLlkTerm;
-		}
-		
-		
-		private Map<List<Integer>, Matrix> getAdditionalGradients() {
-			if (!additionalGradientTermUptoDate) {
-				Map<List<Integer>, Matrix> additionalGradients = new HashMap<List<Integer>, Matrix>();
-				
-				int indexFirstObservation;
-				double likelihoodFirst;
-				Matrix du_dbetaFirst;
-				double observedFirst;
-				
-				int indexSecondObservation;
-				double likelihoodSecond;
-				Matrix du_dbetaSecond;
-				double observedSecond;
-				
-				double sumObserved;
-				double multiplyingFactor;
-
-				Matrix tmp;
-
-				Map<String, DataBlock> map = getModel().getDataStructure().getHierarchicalStructure();
-
-				for (DataBlock db : map.values()) {
-					List<Integer> index = db.getIndices();
-					Matrix additionalGradient = new Matrix(getModel().getParameters().m_iRows,1);
-					double inverseAdditionalLikelihoodTerm = 1d / getAdditionalLikelihoodTerm().get(index);			
-
-					for (int i = 0; i < index.size() - 1; i++) {
-
-						indexFirstObservation = index.get(i);
-						getModel().setObservationInLogLikelihoodFunction(indexFirstObservation);
-						likelihoodFirst = Math.exp(getModel().individualLLK.getValue());
-						observedFirst = getModel().individualLLK.getObserved();
-						du_dbetaFirst = getModel().individualLLK.getLikelihoodFunction().getGradient();
-
-						for (int j = i + 1; j < index.size(); j++) {
-
-							indexSecondObservation = index.get(j);
-							getModel().setObservationInLogLikelihoodFunction(indexSecondObservation);
-							likelihoodSecond = Math.exp(getModel().individualLLK.getValue());
-							observedSecond = getModel().individualLLK.getObserved();
-							du_dbetaSecond = getModel().individualLLK.getLikelihoodFunction().getGradient();
-
-							sumObserved = observedFirst + observedSecond;
-
-							multiplyingFactor = 1d;
-							if (Math.abs(sumObserved - 1) < VERY_SMALL) {
-								multiplyingFactor = -1d;
-							}
-
-							getModel().copula.setX(indexFirstObservation, indexSecondObservation);
-							double copulaValue = getModel().copula.getValue();
-
-							Matrix expansion1 = du_dbetaFirst.scalarMultiply((1 - likelihoodSecond) * -1d).add(
-									du_dbetaSecond.scalarMultiply((1 - likelihoodFirst) * -1d)).scalarMultiply(copulaValue * multiplyingFactor * inverseAdditionalLikelihoodTerm);
-
-							Matrix expansion2 = getModel().copula.getGradient().scalarMultiply((1 - likelihoodFirst) * 
-									(1 - likelihoodSecond) * 
-									multiplyingFactor * 
-									inverseAdditionalLikelihoodTerm);
-
-							tmp = expansion1.matrixStack(expansion2, true);
-
-							MatrixUtility.add(additionalGradient, tmp);
-
-						}
-					}
-
-					additionalGradients.put(index, additionalGradient);
-
-				}
-
-				this.additionalGradients = additionalGradients;
-				additionalGradientTermUptoDate = true;
-			}
-			
-			return additionalGradients;
-		}
-
-		
-		private Map<List<Integer>,Matrix> getAdditionalHessians() {
-			if (!additionalHessianTermUptoDate) {
-				Map<List<Integer>,Matrix> additionalHessians = new HashMap<List<Integer>, Matrix>();
-				
-				Matrix additionalGradient;
-					
-				int indexFirstObservation;
-				double likelihoodFirst;
-				Matrix du_dbetaFirst;
-				Matrix d2u_d2betaFirst;
-				double observedFirst;
-
-				int indexSecondObservation;
-				double likelihoodSecond;
-				Matrix du_dbetaSecond;
-				Matrix d2u_d2betaSecond;
-				double observedSecond;
-
-				double sumObserved;
-				double multiplyingFactor;
-
-				Matrix tmp;
-
-				Map<String, DataBlock> map = getModel().getDataStructure().getHierarchicalStructure();
-				for (DataBlock db : map.values()) {
-					List<Integer> index = db.getIndices();
-					Matrix additionalHessian = new Matrix(getModel().getParameters().m_iRows, getModel().getParameters().m_iRows);
-
-					double inverseAdditionalLikelihoodTerm = 1d / getAdditionalLikelihoodTerm().get(index);		
-					additionalGradient = additionalGradients.get(index);
-
-					additionalHessian.setSubMatrix(additionalGradient.multiply(additionalGradient.transpose()).scalarMultiply(-1d), 0, 0);	// first term corresponding to -1 * d1 ^ 2
-
-					for (int i = 0; i < index.size() - 1; i++) {
-
-						indexFirstObservation = index.get(i);
-						getModel().setObservationInLogLikelihoodFunction(indexFirstObservation);
-						likelihoodFirst = Math.exp(getModel().individualLLK.getValue());
-						observedFirst = getModel().individualLLK.getObserved();
-						du_dbetaFirst = getModel().individualLLK.getLikelihoodFunction().getGradient();
-						d2u_d2betaFirst = getModel().individualLLK.getLikelihoodFunction().getHessian();
-
-						for (int j = i + 1; j < index.size(); j++) {
-
-							indexSecondObservation = index.get(j);
-							getModel().setObservationInLogLikelihoodFunction(indexSecondObservation);
-							likelihoodSecond = Math.exp(getModel().individualLLK.getValue());
-							observedSecond = getModel().individualLLK.getObserved();
-							du_dbetaSecond = getModel().individualLLK.getLikelihoodFunction().getGradient();
-							d2u_d2betaSecond = getModel().individualLLK.getLikelihoodFunction().getHessian();
-
-							sumObserved = observedFirst + observedSecond;
-
-							multiplyingFactor = 1d;
-							if (Math.abs(sumObserved - 1) < VERY_SMALL) {
-								multiplyingFactor = -1d;
-							}
-
-							getModel().copula.setX(indexFirstObservation, indexSecondObservation);
-							double copulaValue = getModel().copula.getValue();
-							Matrix copulaGradient = getModel().copula.getGradient();
-							Matrix copulaHessian = getModel().copula.getHessian();
-
-							Matrix gradientMultipliedTemp = du_dbetaFirst.multiply(du_dbetaSecond.transpose());
-
-							Matrix expansion11 = d2u_d2betaFirst.scalarMultiply((1 - likelihoodSecond) * -1d).add(
-									d2u_d2betaSecond.scalarMultiply((1 - likelihoodFirst) * -1d)).add(							
-											gradientMultipliedTemp.add(gradientMultipliedTemp.transpose())).scalarMultiply(
-													copulaValue * multiplyingFactor * inverseAdditionalLikelihoodTerm);
-
-
-							Matrix expansion12 = du_dbetaFirst.scalarMultiply((1 - likelihoodSecond) * -1d).add(
-									du_dbetaSecond.scalarMultiply((1 - likelihoodFirst) * -1d)).multiply(copulaGradient.transpose()).scalarMultiply(multiplyingFactor * inverseAdditionalLikelihoodTerm);
-
-							Matrix expansion22 = copulaHessian.scalarMultiply((1 - likelihoodFirst) * (1 - likelihoodSecond) * multiplyingFactor * inverseAdditionalLikelihoodTerm);
-
-							tmp = expansion11.matrixStack(expansion12, false).matrixStack(expansion12.transpose().matrixStack(expansion22, false), true);
-
-							MatrixUtility.add(additionalHessian, tmp);
-
-						}
-					}
-
-					additionalHessians.put(index, additionalHessian);
-				}
-				this.additionalHessians = additionalHessians;
-				additionalHessianTermUptoDate = true;
-			}
-			return additionalHessians;
-		}
-		
-	}
 	
 	
 	private CopulaExpression copula;
@@ -407,21 +86,20 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		glm.setParameters(glm.getEstimator().getParameterEstimates().getMean());
 		this.copula = copula;
 		this.copula.initialize(this, getDataStructure());
+		setCompleteLLK();
 	}
 	
-	private Matrix getCovarianceParameters() {return copula.getBeta();}
-	
 	@Override
-	public Matrix getParameters() {return le.getBeta().matrixStack(getCovarianceParameters(), true);}
+	public Matrix getParameters() {return individualLLK.getBeta().matrixStack(copula.getBeta(), true);}
 	
 
 	@Override
 	public void setParameters(Matrix beta) {
-		((FGMCopulaGLModel.OverallLogLikelihood) getLogLikelihood()).init();
+//		((FGMCopulaGLModel.OverallLogLikelihood) getLogLikelihood()).init();
 		if (beta == null) {
-			le.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
 		} else {
-			le.setBeta(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
+			individualLLK.setBeta(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
 			copula.setBeta(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
 		}
 	}
@@ -443,7 +121,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 			Matrix beta = originalParameters.getDeepClone();
 			beta.m_afData[parameterName][0] = value;
 			setParameters(beta);
-			llk = getLogLikelihood().getValue();
+			llk = getCompleteLogLikelihood().getValue();
 			likelihoodValues.add(new LikelihoodValue(beta, llk));
 			System.out.println("Parameter value : " + value + "; Log-likelihood : " + llk);
 		}
@@ -466,7 +144,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	}
 	
 	@Override
-	protected void setCompleteLLK() {completeLLK = new OverallLogLikelihood(this);}
+	protected void setCompleteLLK() {completeLLK = new FGMCompositeLogLikelihood(individualLLK,	matrixX, y,	getDataStructure(),	copula);}
 	
 	@Override
 	public String toString() {
@@ -504,4 +182,6 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		return new GenericHierarchicalSpatialDataStructure(dataSet);
 	}
 
+	
+	
 }

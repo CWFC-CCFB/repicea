@@ -77,6 +77,12 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	@Override
 	public boolean optimize(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
 
+		if (function instanceof OptimizerListener) {
+			addOptimizerListener((OptimizerListener) function);
+		}
+		
+		fireOptimizerEvent(OptimizerListener.optimizationStarted);
+		
 		double llkValue0 = function.getValue();
 		Matrix gradient = function.getGradient();
 		Matrix hessian = function.getHessian();
@@ -128,12 +134,18 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			}
 
 			optimalValue = llkValue0;
+
+			fireOptimizerEvent(OptimizerListener.optimizationEnded);
+
 			return convergenceAchieved;
 		} catch (OptimizationException e) {
 			throw e;
 		} finally {
 			betaVector = currentBeta;
 			hessianMatrix = hessian;
+			if (function instanceof OptimizerListener) {
+				removeOptimizerListener((OptimizerListener) function);
+			}
 		}
 	}
 

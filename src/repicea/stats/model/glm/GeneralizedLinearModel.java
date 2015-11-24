@@ -29,7 +29,7 @@ import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.CompositeLogLikelihood;
-import repicea.stats.model.LogLikelihood;
+import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.glm.LinkFunction.LFParameter;
 import repicea.stats.model.glm.LinkFunction.Type;
 
@@ -43,8 +43,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	protected Matrix matrixX;		// reference
 	protected Matrix y;				// reference
 
-	protected LogLikelihood individualLLK;
-	protected LinearStatisticalExpression le;
+	protected IndividualLogLikelihood individualLLK;
 	
 
 	/**
@@ -56,8 +55,6 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	 */
 	public GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingBeta) {
 		super(dataSet);
-		this.linkFunctionType = linkFunctionType;
-		// first initialize the model structure
 
 		// then define the model effects and retrieve matrix X and vector y
 		try {
@@ -67,6 +64,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 			e.printStackTrace();
 		}
 		initializeLinkFunction(linkFunctionType);
+		this.linkFunctionType = linkFunctionType;
+		// first initialize the model structure
 		setParameters(startingBeta);
 	}
 
@@ -81,14 +80,6 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 
 	/**
-	 * This method returns the type of the link function.
-	 * @return a LinkFunction.Type enum variable
-	 */
-	public LinkFunction.Type getLinkFunctionType() {
-		return linkFunctionType;
-	}
-	
-	/**
 	 * Constructor for derived class.
 	 */
 	protected GeneralizedLinearModel(GeneralizedLinearModel glm) {
@@ -97,10 +88,16 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 		this.y = glm.y;
 
 		this.individualLLK = glm.individualLLK;
-		this.le = glm.le;
-		
-		setCompleteLLK();
 	}
+
+	/**
+	 * This method returns the type of the link function.
+	 * @return a LinkFunction.Type enum variable
+	 */
+	public LinkFunction.Type getLinkFunctionType() {
+		return linkFunctionType;
+	}
+	
 
 	@Override
 	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
@@ -110,11 +107,11 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 	
 	protected void initializeLinkFunction(Type linkFunctionType) {
-		le = new LinearStatisticalExpression();
+		LinearStatisticalExpression le = new LinearStatisticalExpression();
 		LinkFunction lf = new LinkFunction(linkFunctionType);
 		lf.setParameterValue(LFParameter.Eta, le);
 		
-		individualLLK = new LogLikelihood(new LikelihoodGLM(lf));
+		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(lf));
 		setCompleteLLK();
 	}
 
@@ -122,22 +119,19 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	@Override
 	public void setParameters(Matrix beta) {
 		if (beta == null) {
-			le.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
 		} else {
-			le.setBeta(beta);
+			individualLLK.setBeta(beta);
 		}
 	}
 		
 	@Override
-	public Matrix getParameters() {return le.getBeta();}
+	public Matrix getParameters() {return individualLLK.getBeta();}
 
 	@Override
 	protected Estimator instantiateDefaultEstimator() {
 		return new MaximumLikelihoodEstimator();
 	}
-
-	@Override
-	protected void setCompleteLLK() {completeLLK = new CompositeLogLikelihood(individualLLK, matrixX, y);}
 
 	@Override
 	public String toString() {
@@ -187,5 +181,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	protected HierarchicalStatisticalDataStructure getDataStructureFromDataSet(DataSet dataSet) {
 		return new GenericHierarchicalStatisticalDataStructure(dataSet);
 	}
+
+	@Override
+	protected void setCompleteLLK() {completeLLK = new CompositeLogLikelihood(individualLLK, matrixX, y);}
 
 }

@@ -120,7 +120,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	
 	@Override
 	public void doEstimation() {
-		System.out.println("Optimization using the " + getEstimator().toString() + " algorithm.");
+		System.out.println("Optimization using " + getEstimator().toString() + ".");
 		try {
 			if (getEstimator().doEstimation(this)) {
 				System.out.println("Convergence achieved!");

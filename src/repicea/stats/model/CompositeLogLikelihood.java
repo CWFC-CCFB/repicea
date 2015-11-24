@@ -11,14 +11,14 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	private Matrix yValues;
 	private Matrix xValues;
 	
-	public CompositeLogLikelihood(LogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
+	public CompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
 		super(innerLogLikelihoodFunction);
 		this.xValues = xValues;
 		this.yValues = yValues;
 	}
 		
 	@Override
-	public LogLikelihood getOriginalFunction() {return (LogLikelihood) super.getOriginalFunction();}
+	public IndividualLogLikelihood getOriginalFunction() {return (IndividualLogLikelihood) super.getOriginalFunction();}
 	
 	@Override
 	public Double getValue() {
@@ -69,7 +69,8 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	}
 		
 	public void setBeta(Matrix beta) {
-		getOriginalFunction().getOriginalFunction().setBeta(beta);
+		getOriginalFunction().setBeta(beta);
 	}
 
+	public Matrix getBeta() {return getOriginalFunction().getBeta();}
 }
