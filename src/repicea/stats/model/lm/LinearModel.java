@@ -58,7 +58,7 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 
 	@Override
 	public Matrix getParameters() {
-		return getOptimizer().getParameterEstimates().getMean();
+		return getEstimator().getParameterEstimates().getMean();
 	}
 	
 	/**
@@ -67,8 +67,8 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	 * @return a Matrix with a single element
 	 */
 	public double getResidualVariance() {
-		if (getOptimizer() instanceof OLSEstimator) {
-			return ((OLSEstimator) getOptimizer()).getResidualVariance().getMean().m_afData[0][0];
+		if (getEstimator() instanceof OLSEstimator) {
+			return ((OLSEstimator) getEstimator()).getResidualVariance().getMean().m_afData[0][0];
 		} else {
 			return -1d;
 		}
@@ -89,14 +89,14 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	 * @see repicea.stats.model.AbstractStatisticalModel#setOverallLLK()
 	 */
 	@Override
-	protected void setOverallLLK() {}
+	protected void setCompleteLLK() {}
 
 	/*
 	 * Useless for this class (non-Javadoc)
 	 * @see repicea.stats.model.AbstractStatisticalModel#instantiateDefaultOptimizer()
 	 */
 	@Override
-	protected Estimator instantiateDefaultOptimizer() {
+	protected Estimator instantiateDefaultEstimator() {
 		return new OLSEstimator();
 	}
 

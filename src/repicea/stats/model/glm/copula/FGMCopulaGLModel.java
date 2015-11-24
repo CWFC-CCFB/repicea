@@ -401,10 +401,10 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	 */
 	public FGMCopulaGLModel(GeneralizedLinearModel glm, CopulaExpression copula) throws StatisticalDataException {
 		super(glm);
-		if (!glm.getOptimizer().isConvergenceAchieved()) {
-			glm.optimize();
+		if (!glm.getEstimator().isConvergenceAchieved()) {
+			glm.doEstimation();
 		}
-		glm.setParameters(glm.getOptimizer().getParameterEstimates().getMean());
+		glm.setParameters(glm.getEstimator().getParameterEstimates().getMean());
 		this.copula = copula;
 		this.copula.initialize(this, getDataStructure());
 	}
@@ -466,7 +466,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	}
 	
 	@Override
-	protected void setOverallLLK() {overallLLK = new OverallLogLikelihood(this);}
+	protected void setCompleteLLK() {completeLLK = new OverallLogLikelihood(this);}
 	
 	@Override
 	public String toString() {
@@ -481,7 +481,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	@Override
 	public void getSummary() {
 		super.getSummary();
-		if (getOptimizer().isConvergenceAchieved()) {
+		if (getEstimator().isConvergenceAchieved()) {
 			NumberFormat formatter = NumberFormat.getInstance();
 			formatter.setMaximumFractionDigits(4);
 			SpearmanCorrelationCoefficient scc = new SpearmanCorrelationCoefficient();

@@ -156,7 +156,7 @@ public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStati
 		rMatrix.setSigma2(1d);
 		vComponents.add(rMatrix);
 		matrixVFunction = new MatrixVFunction(vComponents);
-		setOverallLLK();
+		setCompleteLLK();
 	}
 	
 	/**
@@ -172,7 +172,7 @@ public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStati
 	public void evaluateParametersUnderOLS() throws EstimatorException {
 		String modelDefinitionWithoutRandomEffect = ObjectUtility.extractSequences(getModelDefinition(), "(", ")").get(0);
 		LinearModel lm = new LinearModel(getDataStructure().getDataSet(), modelDefinitionWithoutRandomEffect);
-		lm.optimize();
+		lm.doEstimation();
 		le.setBeta(lm.getParameters());
 		Matrix covParms = new Matrix(matrixVFunction.getNumberOfParameters(), 1);
 		covParms.m_afData[covParms.m_iRows - 1][0] = lm.getResidualVariance();
@@ -234,12 +234,12 @@ public class LinearMixedModel extends AbstractStatisticalModel<HierarchicalStati
 	}
 	
 	@Override
-	protected void setOverallLLK() {
-		overallLLK = new ModelLogLikelihood(this);
+	protected void setCompleteLLK() {
+		completeLLK = new ModelLogLikelihood(this);
 	}
 
 	@Override
-	protected Estimator instantiateDefaultOptimizer() {
+	protected Estimator instantiateDefaultEstimator() {
 		return new GLSEstimator();
 	}
 

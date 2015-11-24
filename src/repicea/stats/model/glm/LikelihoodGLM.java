@@ -1,10 +1,6 @@
 package repicea.stats.model.glm;
 
-import java.security.InvalidParameterException;
-
 import repicea.math.Matrix;
-import repicea.stats.AbstractStatisticalExpression;
-import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.model.Likelihood;
 import repicea.stats.model.glm.LinkFunction.LFParameter;
 
@@ -12,18 +8,14 @@ import repicea.stats.model.glm.LinkFunction.LFParameter;
 public class LikelihoodGLM extends Likelihood {
 
 	protected final LinkFunction linkFunction;
-	protected final LinearStatisticalExpression eta;
 	
 	public LikelihoodGLM(LinkFunction linkFunction) {
-		if (linkFunction == null || linkFunction.getParameterValue(LFParameter.Eta) == null) {
-			throw new InvalidParameterException("The link function is null or the eta parameter has not been set!");
-		} else {
-			this.linkFunction = linkFunction;
-			eta = linkFunction.getParameterValue(LFParameter.Eta);
-		}
+		super(linkFunction.getParameterValue(LFParameter.Eta));
+		this.linkFunction = linkFunction;
 	}
-	
-	protected double getPrediction() {return linkFunction.getValue();}
+
+	@Override
+	public double getPrediction() {return linkFunction.getValue();}
 	
 	
 	@Override
@@ -56,11 +48,5 @@ public class LikelihoodGLM extends Likelihood {
 		}
 	}
 
-	@Override
-	protected AbstractStatisticalExpression getInnerExpression() {return eta;}
-	
-	
-	
-	
 
 }

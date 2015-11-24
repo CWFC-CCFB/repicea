@@ -18,7 +18,7 @@
  */
 package repicea.stats.model;
 
-import repicea.math.LogFunctionEmbedder;
+import repicea.math.LogFunctionWrapper;
 
 
 /**
@@ -28,7 +28,7 @@ import repicea.math.LogFunctionEmbedder;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public class LogLikelihood extends LogFunctionEmbedder {
+public class LogLikelihood extends LogFunctionWrapper {
 	
 	public LogLikelihood(Likelihood originalFunction) {
 		super(originalFunction);
@@ -36,4 +36,8 @@ public class LogLikelihood extends LogFunctionEmbedder {
 	
 	@Override
 	public Likelihood getOriginalFunction() {return (Likelihood) super.getOriginalFunction();}
+	
+	
+	public double getPrediction() {return getOriginalFunction().getPrediction();}
+	
 }

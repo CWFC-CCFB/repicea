@@ -1,27 +1,31 @@
 package repicea.stats.model;
 
+import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.MatrixUtility;
-import repicea.stats.AbstractStatisticalExpression;
 
 @SuppressWarnings("serial")
-public class CompositeLogLikelihood extends AbstractStatisticalExpression {
+public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper {
 
 	
-	private final LogLikelihood innerLogLikelihoodFunction;
 	private Matrix yValues;
 	private Matrix xValues;
 	
-	public CompositeLogLikelihood(LogLikelihood innerLogLikelihoodFunction) {
-		this.innerLogLikelihoodFunction = innerLogLikelihoodFunction;
+	public CompositeLogLikelihood(LogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
+		super(innerLogLikelihoodFunction);
+		this.xValues = xValues;
+		this.yValues = yValues;
 	}
 		
+	@Override
+	public LogLikelihood getOriginalFunction() {return (LogLikelihood) super.getOriginalFunction();}
+	
 	@Override
 	public Double getValue() {
 		double loglikelihood = 0;
 		for (int i = 0; i < xValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
-			loglikelihood += innerLogLikelihoodFunction.getValue();
+			loglikelihood += getOriginalFunction().getValue();
 		}
 		return loglikelihood;
 	}
@@ -31,7 +35,7 @@ public class CompositeLogLikelihood extends AbstractStatisticalExpression {
 		Matrix resultingGradient = new Matrix(getNumberOfParameters(), 1);
 		for (int i = 0; i < xValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
-			MatrixUtility.add(resultingGradient, innerLogLikelihoodFunction.getGradient());
+			MatrixUtility.add(resultingGradient, getOriginalFunction().getGradient());
 		}
 		return resultingGradient;
 	}
@@ -41,14 +45,31 @@ public class CompositeLogLikelihood extends AbstractStatisticalExpression {
 		Matrix resultingHessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
 		for (int i = 0; i < xValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
-			MatrixUtility.add(resultingHessian, innerLogLikelihoodFunction.getHessian());
+			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
 		}
 		return resultingHessian;
 	}
 
 	protected void setValuesInLikelihoodFunction(int index) {
-		innerLogLikelihoodFunction.getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
-		innerLogLikelihoodFunction.getOriginalFunction().setObservedValue(yValues.m_afData[index][0]);
+		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
+		getOriginalFunction().getOriginalFunction().setObservedValue(yValues.m_afData[index][0]);
 	}
-	
+
+	/**
+	 * This method returns all the predicted values.
+	 * @return a Matrix instance
+	 */
+	public Matrix getPredictions() {
+		Matrix predictedValues = new Matrix(yValues.m_iRows, 1);
+		for (int i = 0; i < xValues.m_iRows; i++) {
+			setValuesInLikelihoodFunction(i);
+			predictedValues.m_afData[i][0] = getOriginalFunction().getPrediction();
+		}
+		return predictedValues;
+	}
+		
+	public void setBeta(Matrix beta) {
+		getOriginalFunction().getOriginalFunction().setBeta(beta);
+	}
+
 }

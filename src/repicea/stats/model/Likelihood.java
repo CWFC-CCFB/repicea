@@ -18,6 +18,8 @@
  */
 package repicea.stats.model;
 
+import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.Matrix;
 import repicea.stats.AbstractStatisticalExpression;
 
 
@@ -26,36 +28,55 @@ import repicea.stats.AbstractStatisticalExpression;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public abstract class Likelihood extends AbstractStatisticalExpression {
-	
+public abstract class Likelihood extends AbstractMathematicalFunctionWrapper {
+
 	protected double observedValue;
 
-	
-	protected abstract AbstractStatisticalExpression getInnerExpression();
-	
-	@Override
-	public void setParameterValue(Integer parameterIndex, Double parameterValue) {
-		getInnerExpression().setParameterValue(parameterIndex, parameterValue);
-	} 
-
-	@Override
-	public Double getParameterValue(Integer parameterIndex) {
-		return getInnerExpression().getParameterValue(parameterIndex);
+	protected Likelihood(AbstractStatisticalExpression originalFunction) {
+		super(originalFunction);
 	}
 	
 	@Override
-	public void setVariableValue(Integer variableIndex, Double variableValue) {
-		getInnerExpression().setVariableValue(variableIndex, variableValue);
-	}
-
-	@Override
-	public Double getVariableValue(Integer variableIndex) {
-		return getInnerExpression().getVariableValue(variableIndex);
-	}
+	public AbstractStatisticalExpression getOriginalFunction() {return (AbstractStatisticalExpression) super.getOriginalFunction();}
+	
 
 	protected void setObservedValue(double observedValue) {
 		this.observedValue = observedValue;
 	}
 
+	/**
+	 * This method returns the prediction for this observation.
+	 * @return a double
+	 */
+	public abstract double getPrediction();
 	
+	
+	/**
+	 * This method sets the vector of explanatory variables. The method essentially
+	 * relies on the setVariableValue() of the AbstractMathematicalFunction class.
+	 * @param x a Matrix instance 
+	 * @throws IllegalArgumentException if the parameter x is not a row vector
+	 */
+	public void setX(Matrix x) {
+		getOriginalFunction().setX(x);
+	}
+	
+	/**
+	 * This method sets the vector of parameters. The method essentially relies on
+	 * the setParameterValue() of the AbstractMathematicalFunction class.
+	 * @param beta a Matrix instance
+	 * @throws IllegalArgumentException if beta is not a column vector
+	 */
+	public void setBeta(Matrix beta) {
+		getOriginalFunction().setBeta(beta);
+	}
+	
+	/**
+	 * This method returns the vector of parameters.
+	 * @return a Matrix instance
+	 */
+	public Matrix getBeta() {
+		return getOriginalFunction().getBeta();
+	}
+
 }
