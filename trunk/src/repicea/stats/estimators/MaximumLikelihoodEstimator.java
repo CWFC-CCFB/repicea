@@ -26,7 +26,7 @@ import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
-import repicea.stats.model.LogLikelihood;
+import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.StatisticalModel;
 
 /**
@@ -49,7 +49,7 @@ public class MaximumLikelihoodEstimator implements Estimator {
 	public boolean doEstimation(StatisticalModel<? extends StatisticalDataStructure> model) throws EstimatorException {
 		nro.setConvergenceCriterion(model.getConvergenceCriterion());
 		
-		LogLikelihood llk = model.getLogLikelihood();
+		CompositeLogLikelihood llk = model.getCompleteLogLikelihood();
 		List<Integer> indices = new ArrayList<Integer>();
 		for (int i = 0; i < model.getParameters().m_iRows; i++) {
 			indices.add(i);
@@ -86,5 +86,8 @@ public class MaximumLikelihoodEstimator implements Estimator {
 	public Estimate<?> getParameterEstimates() {
 		return parameterEstimate;
 	}
+	
+	@Override
+	public String toString() {return "Maximum likelihood estimator";}
 
 }

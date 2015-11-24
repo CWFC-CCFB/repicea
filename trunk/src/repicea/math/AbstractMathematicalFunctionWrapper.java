@@ -1,11 +1,11 @@
 package repicea.math;
 
 @SuppressWarnings("serial")
-public class LogFunctionEmbedder extends AbstractMathematicalFunction<Integer, Double, Integer, Double> {
+public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathematicalFunction<Integer, Double, Integer, Double> {
 
-	private final AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction;
+	protected final AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction;
 
-	public LogFunctionEmbedder(AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction) {
+	public AbstractMathematicalFunctionWrapper(AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction) {
 		this.originalFunction = originalFunction;
 	}
 
@@ -18,23 +18,13 @@ public class LogFunctionEmbedder extends AbstractMathematicalFunction<Integer, D
 	}
 	
 	@Override
-	public Double getValue() {
-		return Math.log(originalFunction.getValue());
-	}
+	public abstract Double getValue();
 
 	@Override
-	public Matrix getGradient() {
-		return originalFunction.getGradient().scalarMultiply(1d / originalFunction.getValue());
-	}
+	public abstract Matrix getGradient();
 
 	@Override
-	public Matrix getHessian() {
-		double invValue = 1d/originalFunction.getValue();
-		Matrix originalGradient = originalFunction.getGradient();
-		Matrix part1 = originalGradient.multiply(originalGradient.transpose()).scalarMultiply(- invValue * invValue);
-		Matrix part2 = originalFunction.getHessian().scalarMultiply(invValue);
-		return part1.add(part2);
-	}
+	public abstract Matrix getHessian();
 	
 
 	@Override

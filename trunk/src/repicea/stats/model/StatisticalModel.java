@@ -57,7 +57,7 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	/**
 	 * This method computes the parameter estimates.
 	 */
-	public void optimize();
+	public void doEstimation();
 	
 	/**
 	 * This method returns the model definition as entered by the user.
@@ -76,7 +76,7 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	 * This method returns the optimizer of the log-likelihood function.
 	 * @return an Optimizer instance
 	 */
-	public Estimator getOptimizer();
+	public Estimator getEstimator();
 	
 	/**
 	 * This method returns the data structure.

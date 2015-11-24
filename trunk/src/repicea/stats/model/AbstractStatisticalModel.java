@@ -38,7 +38,7 @@ import repicea.stats.estimators.MaximumLikelihoodEstimator;
  */
 public abstract class AbstractStatisticalModel<D extends StatisticalDataStructure> implements StatisticalModel<D> {
 
-	private Estimator optimizer;
+	private Estimator estimator;
 	private D dataStructure;
 	
 	private double convergenceCriterion;
@@ -47,7 +47,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	/**
 	 * The complete model likelihood.
 	 */
-	protected CompositeLogLikelihood overallLLK;
+	protected CompositeLogLikelihood completeLLK;
 	private String modelDefinition;
 
 	/**
@@ -69,26 +69,26 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 
 
 	@Override
-	public CompositeLogLikelihood getCompleteLogLikelihood() {return overallLLK;}
+	public CompositeLogLikelihood getCompleteLogLikelihood() {return completeLLK;}
 	
 	/**
 	 * This method sets the log-likelihood function of the model. It is to be defined in the derived class, since the 
 	 * log-likelihood function depends on the different features of the model.
 	 */
-	protected abstract void setOverallLLK();
+	protected abstract void setCompleteLLK();
 	
 	/**
 	 * This method sets the optimizer for the model.
 	 * @param optimizer an Optimizer instance
 	 */
-	public void setOptimizer(Estimator optimizer) {this.optimizer = optimizer;}
+	public void setOptimizer(Estimator optimizer) {this.estimator = optimizer;}
 	
 	@Override
-	public Estimator getOptimizer() {
-		if (optimizer == null) {
-			setOptimizer(instantiateDefaultOptimizer());
+	public Estimator getEstimator() {
+		if (estimator == null) {
+			setOptimizer(instantiateDefaultEstimator());
 		}
-		return optimizer;
+		return estimator;
 	}
 
 
@@ -99,7 +99,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	 * This method defines the default optimizer which is to be specific to the derived classes.
 	 * @return an Optimizer instance 
 	 */
-	protected abstract Estimator instantiateDefaultOptimizer();
+	protected abstract Estimator instantiateDefaultEstimator();
 
 	/**
 	 * This method sets the convergence criterion.
@@ -119,10 +119,10 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	protected Object getOptimizerParameters() {return optimizerParameters;}
 	
 	@Override
-	public void optimize() {
-		System.out.println("Optimization using the " + getOptimizer().toString() + " algorithm.");
+	public void doEstimation() {
+		System.out.println("Optimization using the " + getEstimator().toString() + " algorithm.");
 		try {
-			if (getOptimizer().doEstimation(this)) {
+			if (getEstimator().doEstimation(this)) {
 				System.out.println("Convergence achieved!");
 			} else {
 				System.out.println("Unable to reach convergence.");
@@ -134,13 +134,13 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	}
 	
 	public void getSummary() {
-		if (!getOptimizer().isConvergenceAchieved()) {
+		if (!getEstimator().isConvergenceAchieved()) {
 			System.out.println("The log-likelihood function has not been or cannot be optimized.");
 		} else {
 			System.out.println(toString());
 			System.out.println("Model definition : " + getModelDefinition());
-			if (optimizer instanceof MaximumLikelihoodEstimator) {
-				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) optimizer).getMaximumLogLikelihood();
+			if (estimator instanceof MaximumLikelihoodEstimator) {
+				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) estimator).getMaximumLogLikelihood();
 				double AIC = - 2 * maximumLogLikelihood + 2 * getParameters().getNumberOfElements(); 
 				double BIC = - 2 * maximumLogLikelihood + getParameters().getNumberOfElements() * Math.log(dataStructure.getNumberOfObservations());
 				NumberFormat formatter = NumberFormat.getInstance();
@@ -151,7 +151,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 				System.out.println("BIC            : " + formatter.format(BIC));
 			}
 			
-			Estimate<?> parameterEstimates = optimizer.getParameterEstimates();
+			Estimate<?> parameterEstimates = estimator.getParameterEstimates();
 			
 			Matrix report;
 			boolean varianceAvailable = false;
