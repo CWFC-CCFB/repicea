@@ -30,6 +30,9 @@ import repicea.math.Matrix;
  */
 public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 
+	public final static String InnerIterationStarted = "InnerIterationStarted";
+//	public final static String OuterIterationStarted = "OuterIterationStarted";
+	
 	protected int maxNumberOfIterations = 20;
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
@@ -58,6 +61,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		double currentLlkValue;
 		
 		do {
+			fireOptimizerEvent(NewtonRaphsonOptimizer.InnerIterationStarted);
 			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor - numberSubIter * .1));
 			setParameters(function, indicesOfParametersToOptimize, newBeta);
 			currentLlkValue = function.getValue();

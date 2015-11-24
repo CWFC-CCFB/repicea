@@ -22,7 +22,6 @@ package repicea.stats.model.glm.copula;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.ParameterBound;
 import repicea.stats.data.HierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -55,16 +54,17 @@ public class CopulaLibrary {
 		public SimpleCopulaExpression(double value, String hierarchicalLevelSpecifications) {
 			super(hierarchicalLevelSpecifications);
 			setBeta(new Matrix(1,1,value,0));
+			setX(new Matrix(1,1,1d,0));
 		}
 		
 		@Override
-		public Double getValue() {return parameterValues.get(0);}
+		public Double getValue() {return getOriginalFunction().getValue();}
 
 		@Override
-		public Matrix getGradient() {return variableValues.getMatrix();}
+		public Matrix getGradient() {return getOriginalFunction().getGradient();}
 
 		@Override
-		public Matrix getHessian() {return new Matrix(1,1);}
+		public Matrix getHessian() {return getOriginalFunction().getHessian();}
 
 		/**
 		 * This method is not necessary for this copula since the parameter is constant
@@ -76,8 +76,7 @@ public class CopulaLibrary {
 		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
 			ParameterBound bound = new ParameterBound(-1d, 1d);
-			setBounds(0, bound);
-			setX(new Matrix(1,1,1,0));
+			getOriginalFunction().setBounds(0, bound);
 		}
 		
 	}
@@ -91,14 +90,11 @@ public class CopulaLibrary {
 	public static class SimpleLogisticCopulaExpression extends CopulaExpression {
 
 		private LinkFunction linkFunction;
-		private LinearStatisticalExpression linearExpression;
 				
 		public SimpleLogisticCopulaExpression(double origin, String hierarchicalLevelSpecifications) throws StatisticalDataException {
 			super(hierarchicalLevelSpecifications);
-		
-			Matrix beta = new Matrix(1,1);
-			beta.m_afData[0][0] = origin;
-			setBeta(beta);
+			setX(new Matrix(1,1,1d,0));
+			setBeta(new Matrix(1,1,origin,0));
 		}
 		
 		@Override
@@ -109,29 +105,18 @@ public class CopulaLibrary {
 
 		@Override
 		public Matrix getHessian() {return linkFunction.getHessian();}
-		
-		@Override
-		public void setX(Matrix x) {linearExpression.setX(x);}
-		
-		@Override
-		public void setBeta(Matrix beta) {linearExpression.setBeta(beta);}
-		
-		@Override
-		public Matrix getBeta() {return linearExpression.getBeta();}
 
 		@Override
 		protected void setX(int indexFirstObservation, int indexSecondObservation) {}
 		
 		@Override
-		public int getNumberOfVariables() {return linearExpression.getNumberOfVariables();}
+		public int getNumberOfVariables() {return getOriginalFunction().getNumberOfVariables();}
 
 		@Override
 		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
-			linearExpression = new LinearStatisticalExpression();
-			linearExpression.setVariableValue(0, 1d);
 			linkFunction = new LinkFunction(Type.Logit);
-			linkFunction.setParameterValue(LFParameter.Eta, linearExpression);
+			linkFunction.setParameterValue(LFParameter.Eta, getOriginalFunction());
 		}
 
 	}
@@ -144,25 +129,20 @@ public class CopulaLibrary {
 	public static class DistanceLinkFunctionCopulaExpression extends CopulaExpression implements DistanceCopula {
 
 		protected LinkFunction linkFunction;
-		protected LinearStatisticalExpression linearExpression;
 		protected Matrix matrixX;
 		protected String distanceFieldsEnumeration;
 		protected HierarchicalSpatialDataStructure data;
 				
-		public DistanceLinkFunctionCopulaExpression(Type linkFunctionType,
-				String hierarchicalLevelSpecifications, 
-				String distanceFieldsEnumeration,
-				double parameter) throws StatisticalDataException {
+		public DistanceLinkFunctionCopulaExpression(Type linkFunctionType,	String hierarchicalLevelSpecifications, 
+				String distanceFieldsEnumeration, double parameter) throws StatisticalDataException {
 			super(hierarchicalLevelSpecifications);
 			this.distanceFieldsEnumeration = distanceFieldsEnumeration;
 			
-			linearExpression = new LinearStatisticalExpression();
 			Matrix beta = new Matrix(1,1,parameter,0);
 			setBeta(beta);
 		
 			linkFunction = new LinkFunction(linkFunctionType);
-			linkFunction.setParameterValue(LFParameter.Eta, linearExpression);
-
+			linkFunction.setParameterValue(LFParameter.Eta, getOriginalFunction());
 		}
 		
 		
@@ -180,29 +160,16 @@ public class CopulaLibrary {
 		public void setX(Matrix x) {}
 		
 		@Override
-		public void setBeta(Matrix beta) {linearExpression.setBeta(beta);}
-		
-		@Override
-		public Matrix getBeta() {return linearExpression.getBeta();}
-		
-		@Override
-		public int getNumberOfParameters() {
-			return getBeta().m_iRows;
-		}
-		
-		
-		
-		@Override
 		protected void setX(int indexFirstObservation, int indexSecondObservation) {
 			double distance = data.getDistancesBetweenObservations().get(indexFirstObservation).get(indexSecondObservation);
-			linearExpression.setVariableValue(0, distance);
+			getOriginalFunction().setVariableValue(0, distance);
 		}
 		
 		@Override
-		public int getNumberOfVariables() {return linearExpression.getNumberOfVariables();}
+		public int getNumberOfVariables() {return getOriginalFunction().getNumberOfVariables();}
 
 		public void setBounds(Integer parameterName, ParameterBound bound) {
-			linearExpression.setBounds(parameterName, bound);
+			getOriginalFunction().setBounds(parameterName, bound);
 		}
 
 
@@ -222,99 +189,99 @@ public class CopulaLibrary {
 	}
 
 	
-	/**
-	 * A copula based on a constant and a function depending on the euclidian distance and the angle between the two observations.
-	 * @author Mathieu Fortin - June 2011
-	 */
-	public static class DistanceAndAngleFunctionCopulaExpression extends CopulaExpression implements DistanceCopula {
-
-		protected Matrix matrixX;
-		protected String distanceFieldsEnumeration;
-		protected HierarchicalSpatialDataStructure data;
-		protected Matrix beta;
-		protected double distance;
-		protected double angle;		// in radians
-		protected Matrix gradient;
-		protected Matrix hessian;
-		
-		public DistanceAndAngleFunctionCopulaExpression(String hierarchicalLevelSpecifications, 
-				String distanceFieldsEnumeration,
-				double parameter1,
-				double parameter2) throws StatisticalDataException {
-			super(hierarchicalLevelSpecifications);
-			this.distanceFieldsEnumeration = distanceFieldsEnumeration;
-			Matrix beta = new Matrix(2,1,0,0);
-			beta.m_afData[0][0] = parameter1;
-			beta.m_afData[1][0] = parameter2;
-			setBeta(beta);
-			gradient = new Matrix(beta.m_iRows,1);
-			hessian = new Matrix(beta.m_iRows, beta.m_iRows);
-		}
-		
-		
-		@Override
-		public Double getValue() {
-			double sinTerm = Math.sin(angle - beta.m_afData[1][0]);
-			double innerTerm = beta.m_afData[0][0] * sinTerm * sinTerm * distance;
-			return Math.exp(innerTerm);
-		}
-
-		@Override
-		public Matrix getGradient() {
-			double sinTerm = Math.sin(angle - beta.m_afData[1][0]);
-			double innerTerm = beta.m_afData[0][0] * sinTerm * sinTerm * distance;
-			double value = Math.exp(innerTerm);
-			gradient.m_afData[0][0] = value * sinTerm * sinTerm * distance;
-			gradient.m_afData[1][0] = value * beta.m_afData[0][0] * 2 * sinTerm * distance * Math.cos(angle - beta.m_afData[1][0]) * -1;
-			return gradient;
-		}
-
-		@Override
-		public Matrix getHessian() {
-			double sinTerm = Math.sin(angle - beta.m_afData[1][0]);
-			double cosTerm = Math.cos(angle - beta.m_afData[1][0]);
-			double innerTerm = beta.m_afData[0][0] * sinTerm * sinTerm * distance;
-			double value = Math.exp(innerTerm);
-			hessian.m_afData[0][0] = value * sinTerm * sinTerm * distance * sinTerm * sinTerm * distance;
-			hessian.m_afData[1][0] = value * 2 * sinTerm * cosTerm * -1 * (sinTerm * sinTerm * distance * beta.m_afData[0][0] + 1);
-			hessian.m_afData[0][1] = hessian.m_afData[1][0];
-			hessian.m_afData[1][1] =  -2 * beta.m_afData[0][0] * distance * value * (-2 * beta.m_afData[0][0] * distance * sinTerm * sinTerm * cosTerm * cosTerm - cosTerm * cosTerm + sinTerm * sinTerm);
-			return hessian;
-		}
-
-		@Deprecated
-		@Override
-		public void setX(Matrix x) {}
-		
-		@Override
-		public void setBeta(Matrix beta) {this.beta = beta;}
-		
-		@Override
-		public Matrix getBeta() {return beta;}
-
-		@Override
-		protected void setX(int indexFirstObservation, int indexSecondObservation) {
-			distance = data.getDistancesBetweenObservations().get(indexFirstObservation).get(indexSecondObservation);
-			angle = data.getAngleBetweenObservations().get(indexFirstObservation).get(indexSecondObservation).m_afData[0][1];		// distance on the horizontal plane
-		}
-		
-		@Override
-		public int getNumberOfVariables() {return 2;}
-
-		@Override
-		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
-			super.initialize(model, data);
-			List<String> distanceFieldNames = ObjectUtility.decomposeUsingToken(distanceFieldsEnumeration, "+");
-			if (!(data instanceof HierarchicalSpatialDataStructure)) {
-				throw new StatisticalDataException("The data are not spatialized.");
-			} else {
-				this.data = (HierarchicalSpatialDataStructure) data;
-				this.data.setDistanceFields(distanceFieldNames);
-				this.data.getDistancesBetweenObservations();
-				this.data.getAngleBetweenObservations();
-			}
-		}
-	}
+//	/**
+//	 * A copula based on a constant and a function depending on the euclidian distance and the angle between the two observations.
+//	 * @author Mathieu Fortin - June 2011
+//	 */
+//	public static class DistanceAndAngleFunctionCopulaExpression extends CopulaExpression implements DistanceCopula {
+//
+//		protected Matrix matrixX;
+//		protected String distanceFieldsEnumeration;
+//		protected HierarchicalSpatialDataStructure data;
+//		protected Matrix beta;
+//		protected double distance;
+//		protected double angle;		// in radians
+//		protected Matrix gradient;
+//		protected Matrix hessian;
+//		
+//		public DistanceAndAngleFunctionCopulaExpression(String hierarchicalLevelSpecifications, 
+//				String distanceFieldsEnumeration,
+//				double parameter1,
+//				double parameter2) throws StatisticalDataException {
+//			super(hierarchicalLevelSpecifications);
+//			this.distanceFieldsEnumeration = distanceFieldsEnumeration;
+//			Matrix beta = new Matrix(2,1,0,0);
+//			beta.m_afData[0][0] = parameter1;
+//			beta.m_afData[1][0] = parameter2;
+//			setBeta(beta);
+//			gradient = new Matrix(beta.m_iRows,1);
+//			hessian = new Matrix(beta.m_iRows, beta.m_iRows);
+//		}
+//		
+//		
+//		@Override
+//		public Double getValue() {
+//			double sinTerm = Math.sin(angle - beta.m_afData[1][0]);
+//			double innerTerm = beta.m_afData[0][0] * sinTerm * sinTerm * distance;
+//			return Math.exp(innerTerm);
+//		}
+//
+//		@Override
+//		public Matrix getGradient() {
+//			double sinTerm = Math.sin(angle - beta.m_afData[1][0]);
+//			double innerTerm = beta.m_afData[0][0] * sinTerm * sinTerm * distance;
+//			double value = Math.exp(innerTerm);
+//			gradient.m_afData[0][0] = value * sinTerm * sinTerm * distance;
+//			gradient.m_afData[1][0] = value * beta.m_afData[0][0] * 2 * sinTerm * distance * Math.cos(angle - beta.m_afData[1][0]) * -1;
+//			return gradient;
+//		}
+//
+//		@Override
+//		public Matrix getHessian() {
+//			double sinTerm = Math.sin(angle - beta.m_afData[1][0]);
+//			double cosTerm = Math.cos(angle - beta.m_afData[1][0]);
+//			double innerTerm = beta.m_afData[0][0] * sinTerm * sinTerm * distance;
+//			double value = Math.exp(innerTerm);
+//			hessian.m_afData[0][0] = value * sinTerm * sinTerm * distance * sinTerm * sinTerm * distance;
+//			hessian.m_afData[1][0] = value * 2 * sinTerm * cosTerm * -1 * (sinTerm * sinTerm * distance * beta.m_afData[0][0] + 1);
+//			hessian.m_afData[0][1] = hessian.m_afData[1][0];
+//			hessian.m_afData[1][1] =  -2 * beta.m_afData[0][0] * distance * value * (-2 * beta.m_afData[0][0] * distance * sinTerm * sinTerm * cosTerm * cosTerm - cosTerm * cosTerm + sinTerm * sinTerm);
+//			return hessian;
+//		}
+//
+//		@Deprecated
+//		@Override
+//		public void setX(Matrix x) {}
+//		
+//		@Override
+//		public void setBeta(Matrix beta) {this.beta = beta;}
+//		
+//		@Override
+//		public Matrix getBeta() {return beta;}
+//
+//		@Override
+//		protected void setX(int indexFirstObservation, int indexSecondObservation) {
+//			distance = data.getDistancesBetweenObservations().get(indexFirstObservation).get(indexSecondObservation);
+//			angle = data.getAngleBetweenObservations().get(indexFirstObservation).get(indexSecondObservation).m_afData[0][1];		// distance on the horizontal plane
+//		}
+//		
+//		@Override
+//		public int getNumberOfVariables() {return 2;}
+//
+//		@Override
+//		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
+//			super.initialize(model, data);
+//			List<String> distanceFieldNames = ObjectUtility.decomposeUsingToken(distanceFieldsEnumeration, "+");
+//			if (!(data instanceof HierarchicalSpatialDataStructure)) {
+//				throw new StatisticalDataException("The data are not spatialized.");
+//			} else {
+//				this.data = (HierarchicalSpatialDataStructure) data;
+//				this.data.setDistanceFields(distanceFieldNames);
+//				this.data.getDistancesBetweenObservations();
+//				this.data.getAngleBetweenObservations();
+//			}
+//		}
+//	}
 
 
 }

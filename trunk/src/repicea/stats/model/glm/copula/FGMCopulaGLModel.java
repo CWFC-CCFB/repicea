@@ -95,7 +95,6 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 
 	@Override
 	public void setParameters(Matrix beta) {
-//		((FGMCopulaGLModel.OverallLogLikelihood) getLogLikelihood()).init();
 		if (beta == null) {
 			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
 		} else {
@@ -121,6 +120,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 			Matrix beta = originalParameters.getDeepClone();
 			beta.m_afData[parameterName][0] = value;
 			setParameters(beta);
+			((FGMCompositeLogLikelihood) getCompleteLogLikelihood()).reset();
 			llk = getCompleteLogLikelihood().getValue();
 			likelihoodValues.add(new LikelihoodValue(beta, llk));
 			System.out.println("Parameter value : " + value + "; Log-likelihood : " + llk);

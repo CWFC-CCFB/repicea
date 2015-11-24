@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import repicea.stats.AbstractStatisticalExpression;
+import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.Matrix;
+import repicea.stats.LinearStatisticalExpression;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.model.StatisticalModel;
@@ -33,17 +35,20 @@ import repicea.stats.model.StatisticalModel;
  * @author Mathieu Fortin - October 2011
  */
 @SuppressWarnings("serial")
-public abstract class CopulaExpression extends AbstractStatisticalExpression {
+public abstract class CopulaExpression extends AbstractMathematicalFunctionWrapper {
 	
 	protected List<String> levels = new ArrayList<String>();
 	
 	protected CopulaExpression(String hierarchicalLevels) {
-		super();
+		super(new LinearStatisticalExpression());
 		StringTokenizer tkz = new StringTokenizer(hierarchicalLevels, "/");
 		for (int i = 0; i < tkz.countTokens(); i++) {
 			levels.add(tkz.nextToken().trim());
 		}
 	}
+
+	@Override
+	public LinearStatisticalExpression getOriginalFunction() {return (LinearStatisticalExpression) super.getOriginalFunction();}
 	
 	protected List<String> getHierarchicalLevelSpecifications() {return levels;}
 	
@@ -53,5 +58,11 @@ public abstract class CopulaExpression extends AbstractStatisticalExpression {
 		data.setHierarchicalStructureLevel(levels);
 	}
 	
+	public void setX(Matrix x) {getOriginalFunction().setX(x);}
+	
+	public void setBeta(Matrix beta) {getOriginalFunction().setBeta(beta);}
+	
+	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+
 	
 }
