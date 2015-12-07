@@ -9,20 +9,20 @@ public class LogFunctionWrapper extends AbstractMathematicalFunctionWrapper {
 
 	@Override
 	public Double getValue() {
-		return Math.log(originalFunction.getValue());
+		return Math.log(getOriginalFunction().getValue());
 	}
 
 	@Override
 	public Matrix getGradient() {
-		return originalFunction.getGradient().scalarMultiply(1d / originalFunction.getValue());
+		return getOriginalFunction().getGradient().scalarMultiply(1d / getOriginalFunction().getValue());
 	}
 
 	@Override
 	public Matrix getHessian() {
-		double invValue = 1d/originalFunction.getValue();
-		Matrix originalGradient = originalFunction.getGradient();
+		double invValue = 1d/getOriginalFunction().getValue();
+		Matrix originalGradient = getOriginalFunction().getGradient();
 		Matrix part1 = originalGradient.multiply(originalGradient.transpose()).scalarMultiply(- invValue * invValue);
-		Matrix part2 = originalFunction.getHessian().scalarMultiply(invValue);
+		Matrix part2 = getOriginalFunction().getHessian().scalarMultiply(invValue);
 		return part1.add(part2);
 	}
 

@@ -336,19 +336,19 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 	}
 	
 	@Override
-	public Double getParameterValue(Integer index) {
+	public double getParameterValue(int index) {
 		if (index < getIndividualLikelihood().getNumberOfParameters()) {
 			return super.getParameterValue(index);
 		} else if (index >= getIndividualLikelihood().getNumberOfParameters()) {
 			index -= getIndividualLikelihood().getNumberOfParameters();
 			return copulaExpression.getParameterValue(index);
 		} else {
-			return null;
+			return Double.NaN;
 		}
 	}
 
 	@Override
-	public void setParameterValue(Integer index, Double value) {
+	public void setParameterValue(int index, double value) {
 		if (index < getIndividualLikelihood().getNumberOfParameters()) {
 			super.setParameterValue(index, value);
 		} else if (index >= getIndividualLikelihood().getNumberOfParameters()) {

@@ -1,9 +1,10 @@
 package repicea.math;
 
+
 @SuppressWarnings("serial")
 public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathematicalFunction {
 
-	protected final AbstractMathematicalFunction originalFunction;
+	private final AbstractMathematicalFunction originalFunction;
 
 	public AbstractMathematicalFunctionWrapper(AbstractMathematicalFunction originalFunction) {
 		this.originalFunction = originalFunction;
@@ -13,9 +14,7 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 	 * This method returns the original function.
 	 * @return an AbstractMathematicalFunction instance
 	 */
-	public AbstractMathematicalFunction getOriginalFunction() {
-		return originalFunction;
-	}
+	public AbstractMathematicalFunction getOriginalFunction() {return originalFunction;}
 	
 	@Override
 	public abstract Double getValue();
@@ -28,29 +27,44 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 	
 
 	@Override
-	public void setParameterValue(Integer parameterName, Double parameterValue) {
-		originalFunction.setParameterValue(parameterName, parameterValue);
+	public void setParameterValue(int parameterIndex, double parameterValue) {
+		getOriginalFunction().setParameterValue(parameterIndex, parameterValue);
 	}
 
 	@Override
-	public Double getParameterValue(Integer parameterName) {
-		return originalFunction.getParameterValue(parameterName);
+	public double getParameterValue(int parameterIndex) {
+		return getOriginalFunction().getParameterValue(parameterIndex);
 	}
 
 	@Override
-	public void setVariableValue(Integer variableName, Double variableValue) {
-		originalFunction.setVariableValue(variableName, variableValue);
+	public void setVariableValue(int variableIndex, double variableValue) {
+		getOriginalFunction().setVariableValue(variableIndex, variableValue);
 	}
 
 	@Override
-	public Double getVariableValue(Integer variableName) {
-		return originalFunction.getVariableValue(variableName);
+	public double getVariableValue(int variableIndex) {
+		return getOriginalFunction().getVariableValue(variableIndex);
 	}
 
 	@Override
-	public int getNumberOfParameters() {return originalFunction.getNumberOfParameters();}
+	public int getNumberOfParameters() {return getOriginalFunction().getNumberOfParameters();}
 
 	@Override
-	public int getNumberOfVariables() {return originalFunction.getNumberOfVariables();}
+	public int getNumberOfVariables() {return getOriginalFunction().getNumberOfVariables();}
+
+	
+	@Override
+	public void setX(Matrix x) {getOriginalFunction().setX(x);}
+	
+	@Override
+	public void setBeta(Matrix beta) {getOriginalFunction().setBeta(beta);}
+	
+	@Override
+	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+
+	@Override
+	public void setBounds(int parameterIndex, ParameterBound bound) {
+		getOriginalFunction().setBounds(parameterIndex, bound);
+	}
 
 }

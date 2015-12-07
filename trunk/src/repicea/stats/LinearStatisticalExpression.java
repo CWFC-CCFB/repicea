@@ -20,6 +20,7 @@ package repicea.stats;
 
 import java.io.Serializable;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 
 /**
@@ -27,7 +28,7 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - October 2011
  */
 @SuppressWarnings("serial")
-public final class LinearStatisticalExpression extends AbstractStatisticalExpression implements Serializable {
+public final class LinearStatisticalExpression extends AbstractMathematicalFunction implements Serializable {
 
 	protected Matrix gradient;
 	protected Matrix hessian;
@@ -60,7 +61,7 @@ public final class LinearStatisticalExpression extends AbstractStatisticalExpres
 	@Override
 	public Matrix getHessian() {
 		if (hessian == null || hessian.m_iCols != getNumberOfVariables()) {				// create a hessian matrix only once or only if the number of variables in x changes
-			hessian = new Matrix(variableValues.size(), getNumberOfVariables());
+			hessian = new Matrix(getNumberOfVariables(), getNumberOfVariables());
 		}
 		return hessian;
 	}

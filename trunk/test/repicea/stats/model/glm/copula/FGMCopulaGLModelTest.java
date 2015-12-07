@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import repicea.stats.ParameterBound;
+import repicea.math.ParameterBound;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.model.glm.GeneralizedLinearModel;
