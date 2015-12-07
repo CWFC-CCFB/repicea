@@ -19,7 +19,6 @@
 package repicea.stats.model;
 
 import repicea.math.LogFunctionWrapper;
-import repicea.math.Matrix;
 
 
 /**
@@ -42,19 +41,6 @@ public class IndividualLogLikelihood extends LogFunctionWrapper implements Likel
 	public double getPrediction() {return getOriginalFunction().getPrediction();}
 
 	@Override
-	public void setBeta(Matrix beta) {
-		getOriginalFunction().setBeta(beta);
-	}
-
-	@Override
-	public Matrix getBeta() {return getOriginalFunction().getBeta();}
-
-	@Override
-	public void setX(Matrix x) {getOriginalFunction().setX(x);}
-
-	@Override
-	public void setY(Double y) {
-		getOriginalFunction().setY(y);
-	}
+	public void setY(Double y) {getOriginalFunction().setY(y);}
 	
 }

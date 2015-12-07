@@ -18,9 +18,8 @@
  */
 package repicea.stats.model;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
-import repicea.math.Matrix;
-import repicea.stats.AbstractStatisticalExpression;
 
 
 /**
@@ -32,12 +31,9 @@ public abstract class IndividualLikelihood extends AbstractMathematicalFunctionW
 
 	protected double observedValue;
 
-	protected IndividualLikelihood(AbstractStatisticalExpression originalFunction) {
+	protected IndividualLikelihood(AbstractMathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
-	
-	@Override
-	public AbstractStatisticalExpression getOriginalFunction() {return (AbstractStatisticalExpression) super.getOriginalFunction();}
 	
 	@Override
 	public void setY(Double y) {
@@ -56,20 +52,5 @@ public abstract class IndividualLikelihood extends AbstractMathematicalFunctionW
 	 */
 	public abstract double getPrediction();
 	
-	
-	@Override
-	public void setX(Matrix x) {
-		getOriginalFunction().setX(x);
-	}
-	
-	@Override
-	public void setBeta(Matrix beta) {
-		getOriginalFunction().setBeta(beta);
-	}
-	
-	@Override
-	public Matrix getBeta() {
-		return getOriginalFunction().getBeta();
-	}
 
 }

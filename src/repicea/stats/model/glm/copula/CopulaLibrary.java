@@ -22,7 +22,7 @@ package repicea.stats.model.glm.copula;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.ParameterBound;
+import repicea.math.ParameterBound;
 import repicea.stats.data.HierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
