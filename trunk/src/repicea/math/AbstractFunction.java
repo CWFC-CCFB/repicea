@@ -31,21 +31,18 @@ import java.io.Serializable;
  * @param <VariableClass> class of the variables
  */
 @SuppressWarnings("serial")
-abstract class AbstractFunction<ParameterID extends Serializable, 
-								ParameterClass extends Serializable, 
-								VariableID extends Serializable, 
-								VariableClass extends Serializable> implements Serializable {
+abstract class AbstractFunction implements Serializable {
 	
-	protected FastArrayList<ParameterID> parameterNames;
-	protected FastArrayList<ParameterClass> parameterValues;
-	protected FastArrayList<VariableID> variableNames;
-	protected FastArrayList<VariableClass> variableValues;
+	protected FastArrayList<Integer> parameterNames;
+	protected FastArrayList<Double> parameterValues;
+	protected FastArrayList<Integer> variableNames;
+	protected FastArrayList<Double> variableValues;
 	
 	protected AbstractFunction() {
-		parameterNames = new FastArrayList<ParameterID>();
-		parameterValues = new FastArrayList<ParameterClass>();
-		variableNames = new FastArrayList<VariableID>();
-		variableValues = new FastArrayList<VariableClass>();
+		parameterNames = new FastArrayList<Integer>();
+		parameterValues = new FastArrayList<Double>();
+		variableNames = new FastArrayList<Integer>();
+		variableValues = new FastArrayList<Double>();
 	}
 
 	/**
@@ -53,7 +50,7 @@ abstract class AbstractFunction<ParameterID extends Serializable,
 	 * @param parameterName the parameter name
 	 * @param parameterValue the parameter value
 	 */
-	public void setParameterValue(ParameterID parameterName, ParameterClass parameterValue) {
+	public void setParameterValue(Integer parameterName, Double parameterValue) {
 		if (!parameterNames.contains(parameterName)) {
 			parameterNames.add(parameterName);
 			parameterValues.add(parameterValue);
@@ -68,7 +65,7 @@ abstract class AbstractFunction<ParameterID extends Serializable,
 	 * @param parameterName the name of the parameter to be retrieved
 	 * @return the parameter object
 	 */
-	public ParameterClass getParameterValue(ParameterID parameterName) {
+	public Double getParameterValue(Integer parameterName) {
 		int index = parameterNames.indexOf(parameterName);
 		return parameterValues.get(index);
 	}
@@ -78,7 +75,7 @@ abstract class AbstractFunction<ParameterID extends Serializable,
 	 * @param variableName the name of the variable 
 	 * @param variableValue its value (VariableClass)
 	 */
-	public void setVariableValue(VariableID variableName, VariableClass variableValue) {
+	public void setVariableValue(Integer variableName, Double variableValue) {
 		if (!variableNames.contains(variableName)) {
 			variableNames.add(variableName);
 			variableValues.add(variableValue);
@@ -88,7 +85,7 @@ abstract class AbstractFunction<ParameterID extends Serializable,
 		}
 	}
 	
-	public VariableClass getVariableValue(VariableID variableName) {
+	public Double getVariableValue(Integer variableName) {
 		int index = variableNames.indexOf(variableName);
 		return variableValues.get(index);
 	}

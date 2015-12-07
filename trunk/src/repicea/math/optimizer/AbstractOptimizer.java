@@ -137,7 +137,7 @@ public abstract class AbstractOptimizer {
 	 * @param model a SimpleMathematicalExpression object
 	 * @param indicesOfParametersToOptimize	a List instance that contains the indices of the parameters to be optimized
 	 */
-	public abstract boolean optimize(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
+	public abstract boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
 
 	protected void fireOptimizerEvent(String actionString) {
 		for (OptimizerListener listener : listeners) {

@@ -1,11 +1,11 @@
 package repicea.math;
 
 @SuppressWarnings("serial")
-public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathematicalFunction<Integer, Double, Integer, Double> {
+public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathematicalFunction {
 
-	protected final AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction;
+	protected final AbstractMathematicalFunction originalFunction;
 
-	public AbstractMathematicalFunctionWrapper(AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction) {
+	public AbstractMathematicalFunctionWrapper(AbstractMathematicalFunction originalFunction) {
 		this.originalFunction = originalFunction;
 	}
 
@@ -13,7 +13,7 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 	 * This method returns the original function.
 	 * @return an AbstractMathematicalFunction instance
 	 */
-	public AbstractMathematicalFunction<Integer, Double, Integer, Double> getOriginalFunction() {
+	public AbstractMathematicalFunction getOriginalFunction() {
 		return originalFunction;
 	}
 	

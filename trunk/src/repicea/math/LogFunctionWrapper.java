@@ -3,7 +3,7 @@ package repicea.math;
 @SuppressWarnings("serial")
 public class LogFunctionWrapper extends AbstractMathematicalFunctionWrapper {
 
-	public LogFunctionWrapper(AbstractMathematicalFunction<Integer, Double, Integer, Double> originalFunction) {
+	public LogFunctionWrapper(AbstractMathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
 

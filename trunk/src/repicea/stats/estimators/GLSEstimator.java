@@ -52,7 +52,7 @@ public class GLSEstimator implements Estimator {
 
 
 	private int covarianceParametersEstimation(LinearMixedModel lmm) throws EstimatorException {
-		AbstractMathematicalFunction<Integer, Double, Integer, Double> llk = lmm.getCompleteLogLikelihood();
+		AbstractMathematicalFunction llk = lmm.getCompleteLogLikelihood();
 		nro.optimize(llk);
 		return nro.getNumberOfIterations();
 	}
