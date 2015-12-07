@@ -20,24 +20,22 @@ package repicea.stats.distributions;
 
 import java.security.InvalidParameterException;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.Distribution;
-import repicea.stats.distributions.ChiSquaredDistribution.FunctionParameter;
 
 /**
  * The ChiSquareDistribution class represents a univariate Chi Square distribution with a given degrees of freedom.
  * @author Mathieu Fortin - November 2012
  */
-public final class ChiSquaredDistribution extends AbstractMathematicalFunction<FunctionParameter, Matrix, Integer, Matrix> implements Distribution, CentralMomentsSettable {
+public final class ChiSquaredDistribution implements Distribution, CentralMomentsSettable {
 
 	private static final long serialVersionUID = 20121114L;
 
-	protected static enum FunctionParameter {Mu, Sigma2}
-
 	private int degreesOfFreedom;
-	
+
+	private Matrix mean;
+	private Matrix variance;
 
 	/**
 	 * Common constructor.
@@ -103,12 +101,12 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 	
 	@Override
 	public Matrix getMean() {
-		return getParameterValue(FunctionParameter.Mu);
+		return mean;
 	}
 
 	@Override
 	public Matrix getVariance() {
-		return getParameterValue(FunctionParameter.Sigma2);
+		return variance;
 	}
 
 
@@ -127,33 +125,16 @@ public final class ChiSquaredDistribution extends AbstractMathematicalFunction<F
 		return null;
 	}
 
-	@Override
-	public Double getValue() {
-		// TODO Auto-generated method stub
-		return 0d;
-	}
-
-	@Override
-	public Matrix getGradient() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Matrix getHessian() {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 
 	@Override
 	public void setMean(Matrix mean) {
-		setParameterValue(FunctionParameter.Mu, mean);
+		this.mean = mean;
 	}
 
 	@Override
 	public void setVariance(Matrix variance) {
-		setParameterValue(FunctionParameter.Sigma2, variance);
+		this.variance = variance;
 	}
 
 }

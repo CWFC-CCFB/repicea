@@ -125,7 +125,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 	 * @param standardDeviation the standard deviation of this variable
 	 * @return the approximation of the integral
 	 */
-	private double getOneDimensionIntegral(AbstractMathematicalFunction<Integer,Double,Integer,Double> functionToEvaluate,
+	private double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
 											Integer parameterIndex, 
 											double standardDeviation) {
 		double originalValue = functionToEvaluate.getParameterValue(parameterIndex);
@@ -148,7 +148,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
-	protected double getMultiDimensionIntegral(AbstractMathematicalFunction<Integer,Double,Integer,Double>  functionToEvaluate,
+	protected double getMultiDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
 												List<Integer> parameterIndices, 
 												Matrix lowerCholeskyTriangle) {
 		Integer parameterIndex = parameterIndices.get(0);
@@ -197,7 +197,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
-	public double getIntegralApproximation(AbstractMathematicalFunction<Integer,Double,Integer,Double> functionToEvaluate,
+	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
 											List<Integer> parameterIndices, 
 											Matrix lowerCholeskyTriangle) {
 		if (!lowerCholeskyTriangle.isSquare() || parameterIndices.size() != lowerCholeskyTriangle.m_iRows) {

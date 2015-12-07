@@ -47,7 +47,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimisation
 	 * @throws OptimisationException if the inner optimisation is not successful
 	 */
-	protected double runInnerOptimisation(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, 
+	protected double runInnerOptimisation(AbstractMathematicalFunction function, 
 			List<Integer> indicesOfParametersToOptimize,
 			Matrix originalBeta, 
 			Matrix optimisationStep,
@@ -79,7 +79,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	}
 	
 	@Override
-	public boolean optimize(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
+	public boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
 
 		if (function instanceof OptimizerListener) {
 			addOptimizerListener((OptimizerListener) function);
@@ -154,7 +154,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	}
 
 	
-	private Matrix extractParameters(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize) {
+	private Matrix extractParameters(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) {
 		Matrix beta = new Matrix(indicesOfParametersToOptimize.size(),1);
 		for (Integer index : indicesOfParametersToOptimize) {
 			beta.m_afData[index][0] = function.getParameterValue(index);
@@ -162,7 +162,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		return beta;
 	}
 
-	private void setParameters(AbstractMathematicalFunction<Integer, Double, Integer, Double> function, List<Integer> indicesOfParametersToOptimize, Matrix newBeta) {
+	private void setParameters(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize, Matrix newBeta) {
 		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
 			int index = indicesOfParametersToOptimize.get(i);
 			function.setParameterValue(index, newBeta.m_afData[i][0]);

@@ -22,7 +22,7 @@ public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
-	public double getIntegralApproximation(AbstractMathematicalFunction<Integer, Double, Integer, Double> functionToEvaluate,
+	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
 											List<Integer> parameterIndices, 
 											Matrix lowerCholeskyTriangle) {
 		if (!lowerCholeskyTriangle.isSquare() || parameterIndices.size() != lowerCholeskyTriangle.m_iRows) {

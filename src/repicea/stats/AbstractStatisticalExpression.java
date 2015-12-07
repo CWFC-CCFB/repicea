@@ -32,7 +32,7 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public abstract class AbstractStatisticalExpression extends AbstractMathematicalFunction<Integer, Double, Integer, Double> implements Serializable {
+public abstract class AbstractStatisticalExpression extends AbstractMathematicalFunction implements Serializable {
 
 	protected Map<Integer, ParameterBound> parameterBounds;
 	
