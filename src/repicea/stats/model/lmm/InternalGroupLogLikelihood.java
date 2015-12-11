@@ -18,34 +18,41 @@
  */
 package repicea.stats.model.lmm;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
-import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.LinearStatisticalExpression;
+import repicea.stats.model.LikelihoodCompatible;
 
 /**
  * The InternalLogLikelihoodProcessor class takes in charge all the calculations behind the log likelihood evaluations. 
  * @author Mathieu Fortin - November 2012
  */
 @SuppressWarnings("serial")
-class InternalGroupLogLikelihood extends IndividualLogLikelihood {
+class InternalGroupLogLikelihood extends AbstractMathematicalFunction implements LikelihoodCompatible {
 
 	protected final MatrixVFunction matrixVFunction;
-
+	protected final LinearStatisticalExpression xBetaExpression;
+	
 	private Matrix matrixX;
-	private Matrix residuals;
+//	private Matrix residuals;
+	private Matrix yVector;
 	
 	private Matrix gradient;
 	private Matrix hessian;
 
-	protected InternalGroupLogLikelihood(MatrixVFunction matrixVFunction) {
+	protected InternalGroupLogLikelihood(MatrixVFunction matrixVFunction, LinearStatisticalExpression xBetaExpression) {
 		this.matrixVFunction = matrixVFunction;
+		this.xBetaExpression = xBetaExpression;
 	}
+	
+	private Matrix getResiduals() {return getYVector().subtract(getPredictionVector());}
 	
 	@Override
 	public Double getValue() {
 		Matrix V = matrixVFunction.getValue();
 		double llk = Math.log(V.getDeterminant());
 		
-		Matrix r = residuals;
+		Matrix r = getResiduals();
 		Matrix invV = V.getInverseMatrix();
 		llk += r.transpose().multiply(invV).multiply(r).m_afData[0][0];
 
@@ -55,7 +62,7 @@ class InternalGroupLogLikelihood extends IndividualLogLikelihood {
 		return llk;
 	}
 
-	protected void setResiduals(Matrix residuals) {this.residuals = residuals;}
+//	protected void setResiduals(Matrix residuals) {this.residuals = residuals;}
 	protected void setXMatrix(Matrix matrixX) {this.matrixX = matrixX;}
 	
 	
@@ -69,7 +76,7 @@ class InternalGroupLogLikelihood extends IndividualLogLikelihood {
 		}
 		
 		Matrix invV = matrixVFunction.getValue().getInverseMatrix();
-		Matrix r = residuals;
+		Matrix r = getResiduals();
 		Matrix X = matrixX;
 		Matrix C = X.transpose().multiply(invV).multiply(X).getInverseMatrix().getLowerCholTriangle();
 		Matrix Xstar = X.multiply(C);
@@ -94,7 +101,7 @@ class InternalGroupLogLikelihood extends IndividualLogLikelihood {
 		}
 		
 		Matrix invV = matrixVFunction.getValue().getInverseMatrix();
-		Matrix r = residuals;
+		Matrix r = getResiduals();
 		Matrix X = matrixX;
 		Matrix C = X.transpose().multiply(invV).multiply(X).getInverseMatrix().getLowerCholTriangle();
 		Matrix Xstar = X.multiply(C);
@@ -118,5 +125,16 @@ class InternalGroupLogLikelihood extends IndividualLogLikelihood {
 //		return hessian.scalarMultiply(-.5);
 		return hessian;
 	}
+
+	@Override
+	public void setYVector(Matrix y) {yVector = y;}
+
+	@Override
+	public Matrix getPredictionVector() {
+		return matrixX.multiply(xBetaExpression.getBeta());
+	}
+
+	@Override
+	public Matrix getYVector() {return yVector;}
 
 }

@@ -52,7 +52,7 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 
 	protected void setValuesInLikelihoodFunction(int index) {
 		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
-		getOriginalFunction().getOriginalFunction().setY(yValues.m_afData[index][0]);
+		getOriginalFunction().getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
 	}
 
 	/**
@@ -63,7 +63,7 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 		Matrix predictedValues = new Matrix(yValues.m_iRows, 1);
 		for (int i = 0; i < xValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
-			predictedValues.m_afData[i][0] = getOriginalFunction().getPrediction();
+			predictedValues.setSubMatrix(getOriginalFunction().getPredictionVector(), i, 0);
 		}
 		return predictedValues;
 	}

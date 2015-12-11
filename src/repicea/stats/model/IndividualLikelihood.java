@@ -20,6 +20,7 @@ package repicea.stats.model;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.Matrix;
 
 
 /**
@@ -27,30 +28,24 @@ import repicea.math.AbstractMathematicalFunctionWrapper;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements LikelihoodCompatible<Double> {
+public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements LikelihoodCompatible {
 
-	protected double observedValue;
+	protected Matrix observedValues;
 
 	protected IndividualLikelihood(AbstractMathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
 	
 	@Override
-	public void setY(Double y) {
-		this.observedValue = y;
+	public void setYVector(Matrix yVector) {
+		this.observedValues = yVector;
 	}
 
-	/**
-	 * This method returns the observed value.
-	 * @return a double
-	 */
-	public double getObservedValue() {return observedValue;}
+	@Override
+	public Matrix getYVector() {return observedValues;}
 	 
-	/**
-	 * This method returns the prediction for this observation.
-	 * @return a double
-	 */
-	public abstract double getPrediction();
+	@Override
+	public abstract Matrix getPredictionVector();
 	
 
 }
