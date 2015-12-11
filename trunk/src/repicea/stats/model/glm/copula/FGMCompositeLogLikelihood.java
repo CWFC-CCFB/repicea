@@ -136,12 +136,12 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 					indexFirstObservation = index.get(i);
 					setValuesInLikelihoodFunction(indexFirstObservation);
 					likelihoodFirst = getIndividualLikelihood().getValue();
-					observedFirst =  getIndividualLikelihood().getObservedValue();
+					observedFirst =  getIndividualLikelihood().getYVector().m_afData[0][0];
 					for (int j = i + 1; j < index.size(); j++) {
 						indexSecondObservation = index.get(j);
 						setValuesInLikelihoodFunction(indexSecondObservation);
 						likelihoodSecond =  getIndividualLikelihood().getValue();
-						observedSecond =  getIndividualLikelihood().getObservedValue();
+						observedSecond =  getIndividualLikelihood().getYVector().m_afData[0][0];
 
 						sumObserved = observedFirst + observedSecond;
 
@@ -196,7 +196,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 					indexFirstObservation = index.get(i);
 					setValuesInLikelihoodFunction(indexFirstObservation);
 					likelihoodFirst =  getIndividualLikelihood().getValue();
-					observedFirst =  getIndividualLikelihood().getObservedValue();
+					observedFirst =  getIndividualLikelihood().getYVector().m_afData[0][0];
 					du_dbetaFirst =  getIndividualLikelihood().getGradient();
 
 					for (int j = i + 1; j < index.size(); j++) {
@@ -204,7 +204,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 						indexSecondObservation = index.get(j);
 						setValuesInLikelihoodFunction(indexSecondObservation);
 						likelihoodSecond =  getIndividualLikelihood().getValue();
-						observedSecond =  getIndividualLikelihood().getObservedValue();
+						observedSecond =  getIndividualLikelihood().getYVector().m_afData[0][0];
 						du_dbetaSecond =  getIndividualLikelihood().getGradient();
 
 						sumObserved = observedFirst + observedSecond;
@@ -282,7 +282,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 					indexFirstObservation = index.get(i);
 					setValuesInLikelihoodFunction(indexFirstObservation);
 					likelihoodFirst =  getIndividualLikelihood().getValue();
-					observedFirst =  getIndividualLikelihood().getObservedValue();
+					observedFirst =  getIndividualLikelihood().getYVector().m_afData[0][0];
 					du_dbetaFirst =  getIndividualLikelihood().getGradient();
 					d2u_d2betaFirst =  getIndividualLikelihood().getHessian();
 
@@ -291,7 +291,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 						indexSecondObservation = index.get(j);
 						setValuesInLikelihoodFunction(indexSecondObservation);
 						likelihoodSecond =  getIndividualLikelihood().getValue();
-						observedSecond =  getIndividualLikelihood().getObservedValue();
+						observedSecond =  getIndividualLikelihood().getYVector().m_afData[0][0];
 						du_dbetaSecond =  getIndividualLikelihood().getGradient();
 						d2u_d2betaSecond =  getIndividualLikelihood().getHessian();
 

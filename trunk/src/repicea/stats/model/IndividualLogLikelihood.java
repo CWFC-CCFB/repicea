@@ -19,6 +19,7 @@
 package repicea.stats.model;
 
 import repicea.math.LogFunctionWrapper;
+import repicea.math.Matrix;
 
 
 /**
@@ -28,7 +29,7 @@ import repicea.math.LogFunctionWrapper;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public class IndividualLogLikelihood extends LogFunctionWrapper implements LikelihoodCompatible<Double> {
+public class IndividualLogLikelihood extends LogFunctionWrapper implements LikelihoodCompatible {
 	
 	public IndividualLogLikelihood(IndividualLikelihood originalFunction) {
 		super(originalFunction);
@@ -37,10 +38,13 @@ public class IndividualLogLikelihood extends LogFunctionWrapper implements Likel
 	@Override
 	public IndividualLikelihood getOriginalFunction() {return (IndividualLikelihood) super.getOriginalFunction();}
 	
-	
-	public double getPrediction() {return getOriginalFunction().getPrediction();}
+	@Override
+	public Matrix getPredictionVector() {return getOriginalFunction().getPredictionVector();}
 
 	@Override
-	public void setY(Double y) {getOriginalFunction().setY(y);}
+	public void setYVector(Matrix y) {getOriginalFunction().setYVector(y);}
+
+	@Override
+	public Matrix getYVector() {return getOriginalFunction().getYVector();}
 	
 }
