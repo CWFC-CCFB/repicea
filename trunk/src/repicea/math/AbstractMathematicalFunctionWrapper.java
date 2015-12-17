@@ -1,12 +1,44 @@
+/*
+ * This file is part of the repicea-statistics library.
+ *
+ * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.math;
 
+import java.security.InvalidParameterException;
 
+/**
+ * The AbstractMathematicalFunctionWrapper class makes it possible to create a function
+ * that is based on a nested AbstractMathematicalFunction instance.
+ *
+ * @author Mathieu Fortin - December 2015
+ */
 @SuppressWarnings("serial")
 public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathematicalFunction {
 
 	private final AbstractMathematicalFunction originalFunction;
 
+	/**
+	 * Constructor.
+	 * @param originalFunction the nested AbstractMathematicalFunction instance
+	 */
 	public AbstractMathematicalFunctionWrapper(AbstractMathematicalFunction originalFunction) {
+		if (originalFunction == null) {
+			throw new InvalidParameterException("The originalFunction parameter cannot be null");
+		}
 		this.originalFunction = originalFunction;
 	}
 

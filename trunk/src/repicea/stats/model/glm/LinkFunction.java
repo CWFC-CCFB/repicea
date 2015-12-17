@@ -34,8 +34,6 @@ import repicea.stats.LinearStatisticalExpression;
 @SuppressWarnings("serial")
 public final class LinkFunction extends AbstractMathematicalFunctionWrapper implements Serializable {
 	
-//	protected static enum VariableID {}		// no variable in this expression
-//	public static enum LFParameter {Eta}
 	public static enum Type {Logit, Log, CLogLog}
 	
 	private Type type;

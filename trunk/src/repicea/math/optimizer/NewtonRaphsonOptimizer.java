@@ -37,7 +37,9 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
 	
-	public NewtonRaphsonOptimizer() {}
+	public NewtonRaphsonOptimizer() {
+		this.convergenceCriterion = 1E-8; // default value
+	}
 
 	/**
 	 * This method optimize the log-likelihood function using the Newton-Raphson optimisation step.
@@ -87,13 +89,13 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		
 		fireOptimizerEvent(OptimizerListener.optimizationStarted);
 		
-		double llkValue0 = function.getValue();
+		double value0 = function.getValue();
 		Matrix gradient = function.getGradient();
 		Matrix hessian = function.getHessian();
 				
 		iterationID = 0;
 		
-		double gconv = calculateConvergence(gradient, hessian, llkValue0);
+		double gconv = calculateConvergence(gradient, hessian, value0);
 		
 		convergenceAchieved = false;
 		if (Math.abs(gconv) < convergenceCriterion) {
@@ -107,16 +109,16 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				
 				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
 
-				llkValue0 = runInnerOptimisation(function, 
+				value0 = runInnerOptimisation(function, 
 						indicesOfParametersToOptimize, 
 						originalBeta, 
 						optimisationStep, 
-						llkValue0, 
+						value0, 
 						LineSearchMethod.TEN_EQUAL);		// if it does not throw an Exception, it means the inner optimisation was successful. 
 				gradient = function.getGradient();
 				hessian = function.getHessian();
 				currentBeta = extractParameters(function, indicesOfParametersToOptimize);
-				gconv = calculateConvergence(gradient, hessian, llkValue0);
+				gconv = calculateConvergence(gradient, hessian, value0);
 				
 				if (gconv < 0) {
 					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5);
@@ -126,7 +128,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 					convergenceAchieved = true;
 				}
 
-				System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + llkValue0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
+				System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
 			}  
 
 			if (iterationID > maxNumberOfIterations && !convergenceAchieved) {
@@ -137,7 +139,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				System.out.println("A least one element of the gradient vector is larger than 1E-3.");
 			}
 
-			optimalValue = llkValue0;
+			optimalValue = value0;
 
 			fireOptimizerEvent(OptimizerListener.optimizationEnded);
 
