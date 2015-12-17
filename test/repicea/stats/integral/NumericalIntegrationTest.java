@@ -16,6 +16,110 @@ import repicea.stats.model.glm.LinkFunction;
 import repicea.stats.model.glm.LinkFunction.Type;
 
 public class NumericalIntegrationTest {
+
+	
+	@Test
+    public void TestWithLaplaceApproximation() throws Exception {
+		
+		Random random = new Random();
+		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
+		double xBeta = -1.5;
+		logit.setParameterValue(0, xBeta);
+		logit.setVariableValue(0, 1d);
+		double mean = 0;
+		int nbIter = 1000000;
+		double factor = 1d / nbIter;
+		double stdDev = 1d;
+		for (int i = 0; i < nbIter; i++) {
+			logit.setParameterValue(0, xBeta + random.nextGaussian() * stdDev);
+			mean += logit.getValue() * factor;
+		}
+
+		Matrix lowerCholeskyTriangle = new Matrix(1,1);
+		lowerCholeskyTriangle.m_afData[0][0] = 1d;
+		
+		System.out.println("Simulated mean =  " + mean);
+
+		logit.setParameterValue(0, xBeta);
+		
+		List<Integer> parameterIndices = new ArrayList<Integer>();
+		parameterIndices.add(0);
+
+		LaplaceApproximation la = new LaplaceApproximation();
+		double sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+
+		System.out.println("Mean with Laplace Approximation =  " + sum);
+		assertEquals(mean, sum, 5E-3);
+
+
+		xBeta = 2.5;
+		logit.setParameterValue(0, xBeta);
+		logit.setVariableValue(0, 1d);
+		mean = 0;
+		for (int i = 0; i < nbIter; i++) {
+			logit.setParameterValue(0, xBeta + random.nextGaussian() * stdDev);
+			mean += logit.getValue() * factor;
+		}
+
+		System.out.println("Simulated mean =  " + mean);
+		logit.setParameterValue(0, xBeta);
+		
+		sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+
+		System.out.println("Mean with Laplace Approximation =  " + sum);
+		assertEquals(mean, sum, 5E-3);
+	}
+
+	
+	@Test
+    public void TestWithAdaptativeGaussHermiteQuadrature() throws Exception {
+		AdaptativeGaussHermiteQuadrature ghq5 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N5);
+		AdaptativeGaussHermiteQuadrature ghq10 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N10);
+		AdaptativeGaussHermiteQuadrature ghq15 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N15);
+		
+		Random random = new Random();
+		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
+		double xBeta = -1.5;
+		logit.setParameterValue(0, xBeta);
+		logit.setVariableValue(0, 1d);
+		double mean = 0;
+		int nbIter = 1000000;
+		double factor = 1d / nbIter;
+		double stdDev = 1d;
+		for (int i = 0; i < nbIter; i++) {
+			logit.setParameterValue(0, xBeta + random.nextGaussian() * stdDev);
+			mean += logit.getValue() * factor;
+		}
+
+		Matrix lowerCholeskyTriangle = new Matrix(1,1);
+		lowerCholeskyTriangle.m_afData[0][0] = 1d;
+		
+		System.out.println("Simulated mean =  " + mean);
+
+		logit.setParameterValue(0, xBeta);
+		
+		
+		List<Integer> parameterIndices = new ArrayList<Integer>();
+		parameterIndices.add(0);
+
+		double sum = ghq5.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		
+		System.out.println("Mean with 5 points =  " + sum);
+		assertEquals(mean, sum, 1E-3);
+
+		sum = ghq10.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		
+		System.out.println("Mean with 10 points =  " + sum);
+		assertEquals(mean, sum, 1E-3);
+
+		sum = ghq15.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		
+		System.out.println("Mean with 15 points =  " + sum);
+		assertEquals(mean, sum, 1E-3);
+
+	}
+
+	
 	
 	@Test
     public void TestWithGaussHermiteQuadrature() throws Exception {
