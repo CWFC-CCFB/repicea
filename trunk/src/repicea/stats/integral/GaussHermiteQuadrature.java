@@ -125,7 +125,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 	 * @param standardDeviation the standard deviation of this variable
 	 * @return the approximation of the integral
 	 */
-	private double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
+	protected double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
 											Integer parameterIndex, 
 											double standardDeviation) {
 		double originalValue = functionToEvaluate.getParameterValue(parameterIndex);

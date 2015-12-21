@@ -19,7 +19,7 @@ public class NumericalIntegrationTest {
 
 	
 	@Test
-    public void TestWithLaplaceApproximation() throws Exception {
+    public void TestWithUnivariateLaplaceApproximation() throws Exception {
 		
 		Random random = new Random();
 		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
@@ -70,7 +70,73 @@ public class NumericalIntegrationTest {
 		assertEquals(mean, sum, 5E-3);
 	}
 
-	
+
+	@Test
+    public void TestWithBivariateLaplaceApproximation() throws Exception {
+		
+		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
+		double xBeta = -1.5;
+		logit.setParameterValue(0, xBeta);
+		logit.setVariableValue(0, 1d);
+		logit.setParameterValue(1, 0d);
+		logit.setVariableValue(1, 1d);
+
+		Matrix gMatrix = new Matrix(2,2);
+		gMatrix.m_afData[0][0] = 1d;
+		gMatrix.m_afData[1][0] = .5;
+		gMatrix.m_afData[0][1] = .5;
+		gMatrix.m_afData[1][1] = .5;
+		
+		Matrix lowerCholeskyTriangle = gMatrix.getLowerCholTriangle();
+		
+		double mean = 0;
+		int nbIter = 1000000;
+		double factor = 1d / nbIter;
+		for (int i = 0; i < nbIter; i++) {
+			Matrix u = lowerCholeskyTriangle.multiply(StatisticalUtility.drawRandomVector(lowerCholeskyTriangle.m_iRows, Distribution.Type.GAUSSIAN));
+			logit.setParameterValue(0, xBeta + u.m_afData[0][0]);
+			logit.setParameterValue(1, u.m_afData[1][0]);
+			mean += logit.getValue() * factor;
+		}
+		
+		System.out.println("Simulated mean =  " + mean);
+
+		logit.setParameterValue(0, xBeta);
+		logit.setParameterValue(1, 0d);
+		
+		List<Integer> parameterIndices = new ArrayList<Integer>();
+		parameterIndices.add(0);
+		parameterIndices.add(1);
+
+		LaplaceApproximation la = new LaplaceApproximation();
+		double sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+
+		System.out.println("Mean with Laplace Approximation =  " + sum);
+		assertEquals(mean, sum, 1E-2);
+
+
+		xBeta = 2.5;
+		logit.setParameterValue(0, xBeta);
+		logit.setParameterValue(1, 0d);
+		
+		mean = 0;
+		for (int i = 0; i < nbIter; i++) {
+			Matrix u = lowerCholeskyTriangle.multiply(StatisticalUtility.drawRandomVector(lowerCholeskyTriangle.m_iRows, Distribution.Type.GAUSSIAN));
+			logit.setParameterValue(0, xBeta + u.m_afData[0][0]);
+			logit.setParameterValue(1, u.m_afData[1][0]);
+			mean += logit.getValue() * factor;
+		}
+
+		System.out.println("Simulated mean =  " + mean);
+		logit.setParameterValue(0, xBeta);
+		logit.setParameterValue(1, 0d);
+		
+		sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+
+		System.out.println("Mean with Laplace Approximation =  " + sum);
+		assertEquals(mean, sum, 1E-2);
+	}
+
 	@Test
     public void TestWithAdaptativeGaussHermiteQuadrature() throws Exception {
 		AdaptativeGaussHermiteQuadrature ghq5 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N5);
@@ -107,11 +173,13 @@ public class NumericalIntegrationTest {
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
+		logit.setParameterValue(0, xBeta);
 		sum = ghq10.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
+		logit.setParameterValue(0, xBeta);
 		sum = ghq15.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		
 		System.out.println("Mean with 15 points =  " + sum);

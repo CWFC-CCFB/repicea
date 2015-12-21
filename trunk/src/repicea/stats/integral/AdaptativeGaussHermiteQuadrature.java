@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
+import repicea.math.ExponentialFunctionWrapper;
 import repicea.math.LogFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
@@ -125,26 +126,56 @@ public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 				}
 			}
 			Matrix matrixG = lowerCholeskyTriangle.multiply(lowerCholeskyTriangle.transpose());
-			Matrix newHessian = findOptimum(functionToEvaluate, parameterIndices, matrixG);
-			Matrix newLowerCholeskyTriangle = newHessian.getInverseMatrix().scalarMultiply(-1d).getLowerCholTriangle();
+			CustomizedLogWrapperFunction functionToBeOptimized = new CustomizedLogWrapperFunction(functionToEvaluate, parameterIndices, matrixG);
 			
-			return super.getMultiDimensionIntegral(functionToEvaluate, parameterIndices, newLowerCholeskyTriangle);
-//			return super.getMultiDimensionIntegral(functionToEvaluate, parameterIndices, lowerCholeskyTriangle);
+			NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
+			try {
+				nro.optimize(functionToBeOptimized, parameterIndices);
+			} catch (OptimizationException e) {
+				e.printStackTrace();
+			}
+
+			Matrix newHessian = nro.getHessianAtMaximum();
+			Matrix varCov = newHessian.getInverseMatrix().scalarMultiply(-1d);
+			Matrix newLowerCholeskyTriangle = varCov.getLowerCholTriangle();
+
+			ExponentialFunctionWrapper efw = new ExponentialFunctionWrapper(functionToBeOptimized);
+			double approximation = super.getMultiDimensionIntegral(efw, parameterIndices, newLowerCholeskyTriangle);
+			approximation *= Math.sqrt(2d) * Math.pow(newHessian.scalarMultiply(-1d).getDeterminant(), -.5);
+			return approximation;
 		}
+	}
+
+	@Override
+	protected double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
+			Integer parameterIndex, 
+			double standardDeviation) {
+		double originalValue = functionToEvaluate.getParameterValue(parameterIndex);
+		double sum = 0;
+		double value;
+		for (int i = 0; i < getXValues().size(); i++) {
+			double z = getXValues().get(i);
+			double tmp =  z * standardDeviation * Math.sqrt(2d);
+			functionToEvaluate.setParameterValue(parameterIndex, originalValue + tmp);
+			value = functionToEvaluate.getValue() * Math.exp(z*z) * getWeights().get(i);
+			sum += value;
+		}
+		functionToEvaluate.setParameterValue(parameterIndex, originalValue);
+		return sum;
 	}
 
 
 
-	private Matrix findOptimum(AbstractMathematicalFunction functionToEvaluate, List<Integer> parameterIndices, Matrix gMatrix) {
-		CustomizedLogWrapperFunction functionToBeOptimized = new CustomizedLogWrapperFunction(functionToEvaluate, parameterIndices, gMatrix);
-		NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
-		try {
-			nro.optimize(functionToBeOptimized, parameterIndices);
-		} catch (OptimizationException e) {
-			e.printStackTrace();
-		}
-		return nro.getHessianAtMaximum();
-	}
+//	private Matrix findOptimum(AbstractMathematicalFunction functionToEvaluate, List<Integer> parameterIndices, Matrix gMatrix) {
+//		CustomizedLogWrapperFunction functionToBeOptimized = new CustomizedLogWrapperFunction(functionToEvaluate, parameterIndices, gMatrix);
+//		NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
+//		try {
+//			nro.optimize(functionToBeOptimized, parameterIndices);
+//		} catch (OptimizationException e) {
+//			e.printStackTrace();
+//		}
+//		return nro.getHessianAtMaximum();
+//	}
 
 	
 	
