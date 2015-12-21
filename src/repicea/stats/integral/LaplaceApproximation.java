@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
@@ -9,6 +27,12 @@ import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 
+/**
+ * The LaplaceApproximation class implements the Laplace approximation for integrals.
+ * 
+ * @author Mathieu Fortin - December 2015
+ *
+ */
 @SuppressWarnings("serial")
 public class LaplaceApproximation  {
 
@@ -48,7 +72,7 @@ public class LaplaceApproximation  {
 		@Override
 		public Matrix getGradient() {
 			Matrix u = getParametersFromNestedFunction().subtract(originalParameterValues);
-			return super.getGradient().subtract(u.transpose().multiply(invG));
+			return super.getGradient().subtract(invG.multiply(u));
 		}
 
 
@@ -103,9 +127,9 @@ public class LaplaceApproximation  {
 				e.printStackTrace();
 			}
 			Matrix newHessian = nro.getHessianAtMaximum();
+			int dimensions = parameterIndices.size();
 			double fOptimal = functionToBeOptimized.getValue();
-			Matrix varCov = newHessian.getInverseMatrix().scalarMultiply(-1d);
-			double approximation = Math.sqrt(2d * Math.PI * varCov.getDeterminant()) * Math.exp(fOptimal); 
+			double approximation = Math.pow(2d * Math.PI, dimensions/2d) * Math.pow(newHessian.scalarMultiply(-1d).getDeterminant(), -.5) * Math.exp(fOptimal); 
 			return approximation;
 		}
 	}
