@@ -223,12 +223,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 
 	protected void setBlupsForThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<? extends StandardGaussianDistribution> blups) {
 		setBlupsForThisSubject(subject.getHierarchicalLevel(), subject.getSubjectId(), blups);
-//		HierarchicalLevel level = subject.getHierarchicalLevel();
-//		if (!blupsLibrary.containsKey(level)) {
-//			blupsLibrary.put(level, new HashMap<Integer, Estimate<? extends StandardGaussianDistribution>>());
-//		}
-//		Map<Integer, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
-//		internalMap.put(subject.getSubjectId(), blups);
 		GaussianEstimate originalRandomEffects = getDefaultRandomEffects(subject.getHierarchicalLevel());
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_AT_THIS_LEVEL_JUST_SET, null, new Object[]{subject, originalRandomEffects, blups}, this));
 	}
@@ -303,18 +297,37 @@ public abstract class ModelBasedSimulator implements Serializable {
 			estimatedBlups = defaultRandomEffects.get(subjectLevel);
 		}
 		
+//		Map<Long, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel);
+//		if (randomEffectsMap == null) {
+//			randomEffectsMap = new HashMap<Long, Matrix>();
+//			simulatedRandomEffects.put(subjectLevel, randomEffectsMap);
+//		}
+//		
+//		Matrix randomDeviates = estimatedBlups.getRandomDeviate();
+//		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
+		Matrix randomDeviates = simulateDeviatesForRandomEffectsOfThisSubject(subject, estimatedBlups);
+		GaussianEstimate originalRandomEffects = getDefaultRandomEffects(subjectLevel);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, null, new Object[]{subject, originalRandomEffects, randomDeviates.getDeepClone()}, this));
+	}
+	
+	/**
+	 * This method simulates random deviates from an estimate and stores them in the simulatedRandomEffects
+	 * member.
+	 * @param subject a MonteCarloSimulationCompliantObject instance
+	 * @param randomEffectsEstimate the estimate from which the random deviates are generated
+	 * @return the random deviates as a Matrix instance
+	 */
+	protected synchronized Matrix simulateDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<?> randomEffectsEstimate) {
+		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		Map<Long, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel);
 		if (randomEffectsMap == null) {
 			randomEffectsMap = new HashMap<Long, Matrix>();
 			simulatedRandomEffects.put(subjectLevel, randomEffectsMap);
 		}
-		
-		Matrix randomDeviates = estimatedBlups.getRandomDeviate();
+		Matrix randomDeviates = randomEffectsEstimate.getRandomDeviate();
 		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
-		GaussianEstimate originalRandomEffects = getDefaultRandomEffects(subjectLevel);
-		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, null, new Object[]{subject, originalRandomEffects, randomDeviates.getDeepClone()}, this));
+		return randomDeviates;
 	}
-	
 	
 	protected final long getSubjectPlusMonteCarloSpecificId(MonteCarloSimulationCompliantObject object) {
 		return getSubjectPlusMonteCarloSpecificId(object.getSubjectId(), object.getMonteCarloRealizationId());
@@ -336,7 +349,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 			if (!rememberRandomDeviates) {
 				simulatedRandomEffects.clear();
 			}
-			if (simulatedRandomEffects.get(subjectLevel) == null ||	!simulatedRandomEffects.get(subjectLevel).containsKey(getSubjectPlusMonteCarloSpecificId(subject))) {		// the null condition is necessary otherwise the second condition could throw an exception
+//			if (simulatedRandomEffects.get(subjectLevel) == null ||	!simulatedRandomEffects.get(subjectLevel).containsKey(getSubjectPlusMonteCarloSpecificId(subject))) {		// the null condition is necessary otherwise the second condition could throw an exception
+			if (!doRandomDeviatesExistForThisSubject(subject)) {
 				setSpecificRandomEffectsForThisSubject(subject);
 			}
 			return simulatedRandomEffects.get(subjectLevel).get(getSubjectPlusMonteCarloSpecificId(subject));
@@ -349,6 +363,10 @@ public abstract class ModelBasedSimulator implements Serializable {
 		} 
 	}
 	
+	protected final boolean doRandomDeviatesExistForThisSubject(MonteCarloSimulationCompliantObject subject) {
+		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
+		return simulatedRandomEffects.get(subjectLevel) != null && simulatedRandomEffects.get(subjectLevel).containsKey(getSubjectPlusMonteCarloSpecificId(subject)); 
+	}
 	
 	/**
 	 * This method returns the residual error or the vector of residual errors associated with the subjectId.
