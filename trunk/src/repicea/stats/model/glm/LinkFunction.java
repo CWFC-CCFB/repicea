@@ -21,6 +21,7 @@ package repicea.stats.model.glm;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.stats.LinearStatisticalExpression;
@@ -39,7 +40,7 @@ public final class LinkFunction extends AbstractMathematicalFunctionWrapper impl
 	private Type type;
 	
 	/**
-	 * Public constructor.
+	 * Public constructor. The default nested function is linear.
 	 * @param type a Type enum variable that defines the type of link function
 	 * @throws InvalidParameterException if type is null
 	 */
@@ -50,9 +51,10 @@ public final class LinkFunction extends AbstractMathematicalFunctionWrapper impl
 	/**
 	 * Public constructor.
 	 * @param type a Type enum variable that defines the type of link function
+	 * @param eta an AbstractMathematicalFunction instance
 	 * @throws InvalidParameterException if type is null
 	 */
-	public LinkFunction(Type type, LinearStatisticalExpression eta) {
+	public LinkFunction(Type type, AbstractMathematicalFunction eta) {
 		super(eta);
 		if (type == null) {
 			this.type = Type.Logit;
@@ -60,9 +62,6 @@ public final class LinkFunction extends AbstractMathematicalFunctionWrapper impl
 		this.type = type;
 	}
 
-	@Override
-	public LinearStatisticalExpression getOriginalFunction() {return (LinearStatisticalExpression) super.getOriginalFunction();}
-	
 	/**
 	 * Provides the type of link function.
 	 * @return a Type enum variable
@@ -111,7 +110,7 @@ public final class LinkFunction extends AbstractMathematicalFunctionWrapper impl
 
 	@Override
 	public Matrix getHessian() {
-		LinearStatisticalExpression eta = getOriginalFunction();
+		AbstractMathematicalFunction eta = getOriginalFunction();
 		double expEta = Math.exp(eta.getValue());
 		Matrix gradientProduct = eta.getGradient().multiply(eta.getGradient().transpose());
 		

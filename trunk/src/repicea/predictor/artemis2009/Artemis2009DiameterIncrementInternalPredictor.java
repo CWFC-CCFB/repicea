@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.ModelBasedSimulator;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
@@ -44,8 +45,9 @@ class Artemis2009DiameterIncrementInternalPredictor extends ModelBasedSimulator 
 	}
 
 	protected void setBeta(Matrix beta, Matrix omega) {
-		defaultBeta = new SASParameterEstimate(beta, omega);
-		oXVector = new Matrix(1, defaultBeta.getMean().m_iRows);
+		GaussianEstimate estimate = new SASParameterEstimate(beta, omega);
+		setDefaultBeta(estimate);
+		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}
 	
 	protected void setEffectList(Matrix effectList) {
@@ -69,9 +71,9 @@ class Artemis2009DiameterIncrementInternalPredictor extends ModelBasedSimulator 
 			double residualErrorTerm = errorTerm.m_afData[index][0];		// last element
 			pred = xBeta + plotRandomEffect + stepRandomEffect + residualErrorTerm;
 		} else {
-			double plotVariance = defaultRandomEffects.get(HierarchicalLevel.Plot).getVariance().m_afData[0][0];
-			double stepVariance = defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot).getVariance().m_afData[0][0];
-			double residualVariance = defaultResidualError.get(ErrorTermGroup.Default).getVariance().m_afData[0][0];
+			double plotVariance = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance().m_afData[0][0];
+			double stepVariance = getDefaultRandomEffects(HierarchicalLevel.INTERVAL_NESTED_IN_PLOT).getVariance().m_afData[0][0];
+			double residualVariance = getDefaultResidualError(ErrorTermGroup.Default).getVariance().m_afData[0][0];
 			double fVarianceLog = plotVariance + stepVariance+ residualVariance;
 			dVarianceUn = (Math.exp(fVarianceLog) - 1) * Math.exp(2d * xBeta + fVarianceLog); // variance on the log scale prior to the bias correction
 			pred = xBeta + fVarianceLog * .5;
@@ -84,14 +86,14 @@ class Artemis2009DiameterIncrementInternalPredictor extends ModelBasedSimulator 
 
 	protected void setRandomEffect(HierarchicalLevel level, Matrix randomEffectVariance) {
 		Matrix mean = new Matrix(randomEffectVariance.m_iRows, 1);
-		defaultRandomEffects.put(level, new GaussianEstimate(mean, randomEffectVariance));
+		setDefaultRandomEffects(level, new GaussianEstimate(mean, randomEffectVariance));
 	}
 
 	
 	protected void setResidualErrorCovariance(double s2_tree, double correlationParameter) {
 		Matrix variance = new Matrix(1,1);
 		variance.m_afData[0][0] = s2_tree;
-		defaultResidualError.put(ErrorTermGroup.Default, new GaussianErrorTermEstimate(variance, correlationParameter, StatisticalUtility.TypeMatrixR.LINEAR_LOG));
+		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(variance, correlationParameter, StatisticalUtility.TypeMatrixR.LINEAR_LOG));
 	}
 
 	

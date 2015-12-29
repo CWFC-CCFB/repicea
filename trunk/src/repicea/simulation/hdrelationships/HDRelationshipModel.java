@@ -20,16 +20,14 @@ package repicea.simulation.hdrelationships;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.ModelBasedSimulator;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
-import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
 
 /**
@@ -56,11 +54,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		}
 	}
 
-	protected final List<Integer> blupEstimationDone;
-
 	protected HDRelationshipModel(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
-		blupEstimationDone = new ArrayList<Integer>();
 	}
 
 
@@ -84,7 +79,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			predictedHeight += blupImplementation(stand, regElement);
 
 			if (observedHeight > 1.3) {			// means that height was already observed
-				double variance = defaultResidualError.get(getErrorGroup(tree)).getVariance().m_afData[0][0];
+				double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
 				double dNormResidual = (observedHeight - predictedHeight) / Math.pow(variance, 0.5);
 				GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, observedHeight - predictedHeight);
 				setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
@@ -136,7 +131,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	protected double residualImplementation(Tree tree) {
 		double residualForThisPrediction = 0d; 
 		if (isResidualVariabilityEnabled) {
-//			Matrix residuals = getResidualErrorForThisSubject(tree, tree.getHeightableTreeSpecies().getSpeciesType());
 			Matrix residuals = getResidualErrorForThisSubject(tree, getErrorGroup(tree));
 			int index = getGaussianErrorTerms(tree).getDistanceIndex().indexOf(tree.getErrorTermIndex());
 			residualForThisPrediction = residuals.m_afData[index][0]; 
@@ -144,8 +138,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			if (doesThisSubjectHaveResidualErrorTerm(tree)) {		// means that height was initially measured
 				setSpecificResiduals(tree, new GaussianErrorTerm(tree, 0d));
 				GaussianErrorTermList list = getGaussianErrorTerms(tree);
-//				Matrix meanResiduals = defaultResidualError.get(tree.getHeightableTreeSpecies().getSpeciesType()).getMean(list);
-				Matrix meanResiduals = defaultResidualError.get(getErrorGroup(tree)).getMean(list);
+				Matrix meanResiduals = getDefaultResidualError(getErrorGroup(tree)).getMean(list);
 				residualForThisPrediction = meanResiduals.m_afData[meanResiduals.m_iRows - 1][0];
 			} 
 		}
@@ -161,7 +154,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		boolean originalIsParameterVariabilityEnabled = isParametersVariabilityEnabled;
 		isParametersVariabilityEnabled = false; // temporarily disabled for the prediction of the random effects
 		
-		Matrix matrixG = defaultRandomEffects.get(HierarchicalLevel.Plot).getVariance();
+		Matrix matrixG = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
 		
 		Matrix blups;
 		Matrix blupsVariance;
@@ -196,8 +189,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 				
 				regElement = fixedEffectsPrediction(stand, t);
 				matZ.setSubMatrix(regElement.Z_tree, i, 0);
-//				double variance = defaultResidualError.get(regElement.species.getSpeciesType()).getVariance().m_afData[0][0];
-				double variance = defaultResidualError.get(getErrorGroup(t)).getVariance().m_afData[0][0];
+				double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
 				matR.m_afData[i][i] = variance;
 				double residual = height - regElement.fixedPred;
 				vectRes.m_afData[i][0] = residual;
@@ -205,12 +197,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			Matrix matV = matZ.multiply(matrixG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
 			blups = matrixG.multiply(matZ.transpose()).multiply(matV.getInverseMatrix()).multiply(vectRes);							// blup_essHD is redefined according to observed values
 			blupsVariance = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matrixG.getInverseMatrix()).getInverseMatrix();			// blup_essHDvar is redefined according to observed values
-			Map<Integer, Estimate<?>> randomEffectsMap = blupsLibrary.get(HierarchicalLevel.Plot);
-			if (randomEffectsMap == null) {
-				randomEffectsMap = new HashMap<Integer, Estimate<?>>();
-				blupsLibrary.put(HierarchicalLevel.Plot, randomEffectsMap);
-			}
-			randomEffectsMap.put(stand.getSubjectId(), new GaussianEstimate(blups, blupsVariance));
+			setBlupsForThisSubject(stand, new GaussianEstimate(blups, blupsVariance));
 		}
 		
 		isParametersVariabilityEnabled = originalIsParameterVariabilityEnabled; // set the parameter variability to its original value;

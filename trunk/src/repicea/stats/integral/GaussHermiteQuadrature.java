@@ -67,7 +67,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 		  			
 	}
 	
-	private NumberOfPoints numberOfPoints;
+	private final NumberOfPoints numberOfPoints;
 	
 	/**
 	 * Constructor.
@@ -78,6 +78,13 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 			throw new InvalidParameterException("The Gauss-Hermite quadrature with this number of points is not implemented!");
 		}
 		this.numberOfPoints = numberOfPoints;
+	}
+	
+	/**
+	 * Constructor. Default Gauss-Hermite quadrature with 5 points.
+	 */
+	public GaussHermiteQuadrature() {
+		this(NumberOfPoints.N5);
 	}
 	
 	@Override
@@ -134,7 +141,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 		for (int i = 0; i < getXValues().size(); i++) {
 			double tmp = getXValues().get(i) * standardDeviation * Math.sqrt(2d);
 			functionToEvaluate.setParameterValue(parameterIndex, originalValue + tmp);
-			value = 1d / Math.sqrt(Math.PI) * functionToEvaluate.getValue() * getWeights().get(i);
+			value = functionToEvaluate.getValue() * getWeights().get(i);
 			sum += value;
 		}
 		functionToEvaluate.setParameterValue(parameterIndex, originalValue);
@@ -170,7 +177,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 					functionToEvaluate.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.m_afData[indexInCholesky][0]);
 				}
 				Matrix subCholesky = lowerCholeskyTriangle.getSubMatrix(1, lowerCholeskyTriangle.m_iRows - 1, 1, lowerCholeskyTriangle.m_iCols - 1);
-				value = 1d / Math.sqrt(Math.PI) * getMultiDimensionIntegral(functionToEvaluate,
+				value = getMultiDimensionIntegral(functionToEvaluate,
 						remainingIndices, 
 						subCholesky) * getWeights().get(i);
 				sum += value;
@@ -183,12 +190,6 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 
 		}
 	}
-
-	
-	
-	
-	
-	
 	
 	/**
 	 * This method returns the value of a multi-dimension integral
@@ -208,7 +209,8 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 					throw new InvalidParameterException("One index is either negative or it exceeds the number of parameters in the function!");
 				}
 			}
-			return getMultiDimensionIntegral(functionToEvaluate, parameterIndices, lowerCholeskyTriangle);
+			int dimensions = lowerCholeskyTriangle.m_iRows;
+			return Math.pow(Math.PI, -dimensions/2d) * getMultiDimensionIntegral(functionToEvaluate, parameterIndices, lowerCholeskyTriangle);
 		}
 	}
 	

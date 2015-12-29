@@ -18,7 +18,6 @@
  */
 package repicea.simulation;
 
-import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
 
 public interface MonteCarloSimulationCompliantObject {
 	

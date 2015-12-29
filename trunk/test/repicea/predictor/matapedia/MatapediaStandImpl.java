@@ -3,7 +3,7 @@ package repicea.predictor.matapedia;
 import java.util.ArrayList;
 import java.util.List;
 
-import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
+import repicea.simulation.HierarchicalLevel;
 
 public class MatapediaStandImpl implements MatapediaStand {
 
@@ -28,7 +28,7 @@ public class MatapediaStandImpl implements MatapediaStand {
 
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {
-		return HierarchicalLevel.Plot;
+		return HierarchicalLevel.PLOT;
 	}
 
 	protected void setMonteCarloRealizationId(int i) {
