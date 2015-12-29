@@ -1,6 +1,6 @@
 package repicea.predictor.matapedia;
 
-import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
+import repicea.simulation.HierarchicalLevel;
 
 public class MatapediaTreeImpl implements MatapediaTree {
 
@@ -26,7 +26,7 @@ public class MatapediaTreeImpl implements MatapediaTree {
 
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {
-		return HierarchicalLevel.Tree;
+		return HierarchicalLevel.TREE;
 	}
 
 

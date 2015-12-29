@@ -19,87 +19,41 @@
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
-import repicea.math.LogFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 
 /**
- * The LaplaceApproximation class implements the Laplace approximation for integrals.
+ * The LaplacianApproximation class implements the Laplace approximation for integrals.
  * 
  * @author Mathieu Fortin - December 2015
  *
  */
 @SuppressWarnings("serial")
-public class LaplaceApproximation  {
-
-	private static class CustomizedLogWrapperFunction extends LogFunctionWrapper {
-
-		private final double mPart;
-		private final Matrix invG;
-		private final Matrix originalParameterValues;
-		private final List<Integer> parameterIndices;
-
-		/**
-		 * Constructor
-		 * @param originalFunction the nested function
-		 * @param gMatrix the variance-covariance matrix of the deviate
-		 */
-		private CustomizedLogWrapperFunction(AbstractMathematicalFunction originalFunction, List<Integer> parameterIndices, Matrix gMatrix) {
-			super(originalFunction);
-			if (!gMatrix.isSymmetric()) {
-				throw new InvalidParameterException("Matrix G is supposed to be symmetric!");
-			}
-			//				this.gMatrix = gMatrix;
-			this.invG = gMatrix.getInverseMatrix();
-			double n = gMatrix.m_iRows;
-			double gDeterminant = gMatrix.getDeterminant();
-			mPart = - 0.5 * n * Math.log(2d * Math.PI) - 0.5 * Math.log(gDeterminant);
-			this.parameterIndices = parameterIndices;
-			originalParameterValues = getParametersFromNestedFunction();
-		}
-
-		@Override
-		public Double getValue() {
-			Matrix u = getParametersFromNestedFunction().subtract(originalParameterValues);
-			return super.getValue() + mPart - 0.5 * u.transpose().multiply(invG).multiply(u).m_afData[0][0]; 
-		}
-
-
-		@Override
-		public Matrix getGradient() {
-			Matrix u = getParametersFromNestedFunction().subtract(originalParameterValues);
-			return super.getGradient().subtract(invG.multiply(u));
-		}
-
-
-		@Override
-		public Matrix getHessian() {
-			return super.getHessian().subtract(invG);
-		}
-
-		private Matrix getParametersFromNestedFunction() {
-			Matrix parameterValues = new Matrix(parameterIndices.size(), 1);
-			for (int i = 0; i < parameterIndices.size(); i++) {
-				parameterValues.m_afData[i][0] = getOriginalFunction().getParameterValue(parameterIndices.get(i));
-			}
-			return parameterValues;
-		}
-
-	}
-
-
+public class LaplacianApproximation extends AdaptativeGaussHermiteQuadrature {
 
 	/**
 	 * Constructor.
 	 */
-	public LaplaceApproximation() {
+	public LaplacianApproximation() {
 		super();
+		weights = new ArrayList<Double>();
+		weights.add(Math.sqrt(2d * Math.PI));
+		xValues = new ArrayList<Double>();
+		xValues.add(0d);
 	}
 
+	@Override
+	public List<Double> getWeights() {return weights;}
+
+	@Override
+	public List<Double> getXValues() {return xValues;}
+	
+	
 	/**
 	 * This method returns the value of a multi-dimension integral
 	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
@@ -119,7 +73,7 @@ public class LaplaceApproximation  {
 				}
 			}
 			Matrix matrixG = lowerCholeskyTriangle.multiply(lowerCholeskyTriangle.transpose());
-			CustomizedLogWrapperFunction functionToBeOptimized = new CustomizedLogWrapperFunction(functionToEvaluate, parameterIndices, matrixG);
+			InternalLogWrapperFunction functionToBeOptimized = new InternalLogWrapperFunction(functionToEvaluate, parameterIndices, matrixG);
 			NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
 			try {
 				nro.optimize(functionToBeOptimized, parameterIndices);
@@ -129,7 +83,7 @@ public class LaplaceApproximation  {
 			Matrix newHessian = nro.getHessianAtMaximum();
 			int dimensions = parameterIndices.size();
 			double fOptimal = functionToBeOptimized.getValue();
-			double approximation = Math.pow(2d * Math.PI, dimensions/2d) * Math.pow(newHessian.scalarMultiply(-1d).getDeterminant(), -.5) * Math.exp(fOptimal); 
+			double approximation = Math.pow(getWeights().get(0), dimensions) * Math.pow(newHessian.scalarMultiply(-1d).getDeterminant(), -.5) * Math.exp(fOptimal); 
 			return approximation;
 		}
 	}

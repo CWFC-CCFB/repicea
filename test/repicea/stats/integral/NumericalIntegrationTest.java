@@ -19,7 +19,7 @@ public class NumericalIntegrationTest {
 
 	
 	@Test
-    public void TestWithUnivariateLaplaceApproximation() throws Exception {
+    public void TestWithUnivariateLaplacianApproximation() throws Exception {
 		
 		Random random = new Random();
 		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
@@ -45,7 +45,7 @@ public class NumericalIntegrationTest {
 		List<Integer> parameterIndices = new ArrayList<Integer>();
 		parameterIndices.add(0);
 
-		LaplaceApproximation la = new LaplaceApproximation();
+		LaplacianApproximation la = new LaplacianApproximation();
 		double sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 
 		System.out.println("Mean with Laplace Approximation =  " + sum);
@@ -72,7 +72,7 @@ public class NumericalIntegrationTest {
 
 
 	@Test
-    public void TestWithBivariateLaplaceApproximation() throws Exception {
+    public void TestWithBivariateLaplacianApproximation() throws Exception {
 		
 		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
 		double xBeta = -1.5;
@@ -108,7 +108,7 @@ public class NumericalIntegrationTest {
 		parameterIndices.add(0);
 		parameterIndices.add(1);
 
-		LaplaceApproximation la = new LaplaceApproximation();
+		LaplacianApproximation la = new LaplacianApproximation();
 		double sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 
 		System.out.println("Mean with Laplace Approximation =  " + sum);
@@ -137,11 +137,15 @@ public class NumericalIntegrationTest {
 		assertEquals(mean, sum, 1E-2);
 	}
 
+	
 	@Test
-    public void TestWithAdaptativeGaussHermiteQuadrature() throws Exception {
+    public void TestWithUnivariateAdaptativeGaussHermiteQuadrature() throws Exception {
 		AdaptativeGaussHermiteQuadrature ghq5 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N5);
 		AdaptativeGaussHermiteQuadrature ghq10 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N10);
 		AdaptativeGaussHermiteQuadrature ghq15 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N15);
+		GaussHermiteQuadrature rghq5 = new GaussHermiteQuadrature(NumberOfPoints.N5);
+		GaussHermiteQuadrature rghq10 = new GaussHermiteQuadrature(NumberOfPoints.N10);
+		GaussHermiteQuadrature rghq15 = new GaussHermiteQuadrature(NumberOfPoints.N15);
 		
 		Random random = new Random();
 		LinkFunction logit = new LinkFunction(LinkFunction.Type.Logit);
@@ -168,22 +172,98 @@ public class NumericalIntegrationTest {
 		List<Integer> parameterIndices = new ArrayList<Integer>();
 		parameterIndices.add(0);
 
+		double sum2 = rghq5.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		double sum = ghq5.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		
-		System.out.println("Mean with 5 points =  " + sum);
+		System.out.println("Mean with 5 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-3);
 
 		logit.setParameterValue(0, xBeta);
+		sum2 = rghq10.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		sum = ghq10.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		
-		System.out.println("Mean with 10 points =  " + sum);
+		System.out.println("Mean with 10 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-3);
 
 		logit.setParameterValue(0, xBeta);
+		sum2 = rghq15.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		sum = ghq15.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
 		
-		System.out.println("Mean with 15 points =  " + sum);
+		System.out.println("Mean with 15 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-3);
+
+	}
+
+	@Test
+    public void TestWithTwoDimensionAdaptativeGaussHermiteQuadratureAndStatisticalFunction() throws Exception {
+		AdaptativeGaussHermiteQuadrature ghq5 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N5);
+		AdaptativeGaussHermiteQuadrature ghq10 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N10);
+		AdaptativeGaussHermiteQuadrature ghq15 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N15);
+		GaussHermiteQuadrature rghq5 = new GaussHermiteQuadrature(NumberOfPoints.N5);
+		GaussHermiteQuadrature rghq10 = new GaussHermiteQuadrature(NumberOfPoints.N10);
+		GaussHermiteQuadrature rghq15 = new GaussHermiteQuadrature(NumberOfPoints.N15);
+
+		Matrix matG = new Matrix(2,2);
+		matG.m_afData[0][0] = 1d;
+		matG.m_afData[1][0] = .2;
+		matG.m_afData[0][1] = .2;
+		matG.m_afData[1][1] = .5d;
+		Matrix chol = matG.getLowerCholTriangle();
+		
+		
+		LinkFunction linkFunction = new LinkFunction(Type.Logit);
+		
+		double xBeta = -1;
+		linkFunction.setParameterValue(0, 1d);
+		linkFunction.setVariableValue(0, xBeta);
+		linkFunction.setParameterValue(1, 1d);
+		linkFunction.setVariableValue(1, 1d);
+		linkFunction.setParameterValue(2, 2d);
+		linkFunction.setVariableValue(2, 1d);
+		
+		double mean = 0;
+		int nbIter = 1000000;
+		double factor = 1d / nbIter;
+		double oriVal1 = linkFunction.getParameterValue(1);
+		double oriVal2 = linkFunction.getParameterValue(2);
+		for (int i = 0; i < nbIter; i++) {
+			Matrix u = chol.multiply(StatisticalUtility.drawRandomVector(chol.m_iRows, Distribution.Type.GAUSSIAN));
+			linkFunction.setParameterValue(1, oriVal1 + u.m_afData[0][0]);
+			linkFunction.setParameterValue(2, oriVal2 + u.m_afData[1][0]);
+			mean += linkFunction.getValue() * factor;
+		}
+		
+		System.out.println("Simulated mean =  " + mean);
+
+		linkFunction.setParameterValue(1, oriVal1);
+		linkFunction.setParameterValue(2, oriVal2);
+
+		List<Integer> indices = new ArrayList<Integer>();
+		indices.add(1);
+		indices.add(2);
+		double sum2 = rghq5.getIntegralApproximation(linkFunction, indices, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
+		
+		System.out.println("Mean with 5 points =  " + sum + " compared with " + sum2);
+		assertEquals(mean, sum, 1E-2);
+
+		linkFunction.setParameterValue(1, oriVal1);
+		linkFunction.setParameterValue(2, oriVal2);
+		
+		sum2 = rghq10.getIntegralApproximation(linkFunction, indices, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, indices, chol);
+		
+		System.out.println("Mean with 10 points =  " + sum + " compared with " + sum2);
+		assertEquals(mean, sum, 1E-2);
+
+		linkFunction.setParameterValue(1, oriVal1);
+		linkFunction.setParameterValue(2, oriVal2);
+
+		sum2 = rghq15.getIntegralApproximation(linkFunction, indices, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, indices, chol);
+		
+		System.out.println("Mean with 15 points =  " + sum + " compared with " + sum2);
+		assertEquals(mean, sum, 1E-2);
 
 	}
 

@@ -3,7 +3,7 @@ package repicea.treelogger.wbirchprodvol;
 import java.util.HashMap;
 import java.util.Map;
 
-import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
+import repicea.simulation.HierarchicalLevel;
 
 class WBirchProdVolStandImpl implements WBirchProdVolStand {
 
@@ -22,7 +22,7 @@ class WBirchProdVolStandImpl implements WBirchProdVolStand {
 	public int getSubjectId() {return plotID.hashCode();}
 
 	@Override
-	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Plot;}
+	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
 
 	protected void setMonteCarloRealizationId(int i) {monteCarloId = i;}
 

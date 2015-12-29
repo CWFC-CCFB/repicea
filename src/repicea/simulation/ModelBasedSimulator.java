@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2016 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,16 +19,21 @@
 package repicea.simulation;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import repicea.math.Matrix;
+import repicea.simulation.ModelBasedSimulatorEvent.ModelBasedSimulatorEventProperty;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
+import repicea.stats.distributions.StandardGaussianDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -88,7 +93,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 
 		@Override
 		public HierarchicalLevel getHierarchicalLevel() {
-			return HierarchicalLevel.IntervalNestedInPlot;
+			return HierarchicalLevel.INTERVAL_NESTED_IN_PLOT;
 		}
 
 
@@ -104,40 +109,32 @@ public abstract class ModelBasedSimulator implements Serializable {
 		
 	}
 	
-	
-	
-	
+		
 	private static final long serialVersionUID = 20100902L;
 	
-	/**
-	 * This enum variable determines the hierarchical level of random effects. 
-	 * @author Mathieu Fortin - January 2012
-	 */
-	public static enum HierarchicalLevel {
-		Plot, 
-		Tree, 
-		IntervalNestedInPlot}
-
 	public static enum ErrorTermGroup {
 		Default
 	}
+	
+	
+	protected final CopyOnWriteArrayList<ModelBasedSimulatorListener> listeners;
 	
 	// set by the constructor
 	protected boolean isRandomEffectsVariabilityEnabled;
 	protected boolean isParametersVariabilityEnabled;
 	protected boolean isResidualVariabilityEnabled;
-	
-
+		
 	protected Matrix oXVector;
 
-	protected GaussianEstimate defaultBeta;
+	private GaussianEstimate defaultBeta;
 	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
-	protected final Map<HierarchicalLevel, GaussianEstimate> defaultRandomEffects;
-	protected final Map<HierarchicalLevel, Map<Integer, Estimate<?>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
+	private final Map<HierarchicalLevel, GaussianEstimate> defaultRandomEffects;
+	private final Map<HierarchicalLevel, Map<Integer, Estimate<? extends StandardGaussianDistribution>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
+	protected final List<Integer> blupEstimationDone;
 	private final Map<HierarchicalLevel, Map<Long, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
-	protected final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
+	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
 	private final Map<Long, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
 	
 	protected boolean rememberRandomDeviates = true; 		// default value
@@ -159,14 +156,18 @@ public abstract class ModelBasedSimulator implements Serializable {
 		this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
+		blupEstimationDone = new ArrayList<Integer>();
+
 		defaultRandomEffects = new HashMap<HierarchicalLevel, GaussianEstimate>();
 				
 		simulatedParameters = new HashMap<Integer, Matrix>();
 		simulatedRandomEffects = new HashMap<HierarchicalLevel, Map<Long, Matrix>>();
-		blupsLibrary = new HashMap<HierarchicalLevel, Map<Integer, Estimate<?>>>();
+		blupsLibrary = new HashMap<HierarchicalLevel, Map<Integer, Estimate<? extends StandardGaussianDistribution>>>();
 		simulatedResidualError = new HashMap<Long, GaussianErrorTermList>();
 		intervalLists = new HashMap<Long, IntervalNestedInPlotDefinition>();
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
+		
+		listeners = new CopyOnWriteArrayList<ModelBasedSimulatorListener>();
 	}
 	
 	/**
@@ -175,6 +176,62 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 */
 	protected abstract void init();
 	
+	protected void setDefaultBeta(GaussianEstimate defaultBeta) {
+		this.defaultBeta = defaultBeta;
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, defaultBeta, this));
+	}
+	
+	protected GaussianEstimate getDefaultBeta() {return defaultBeta;}
+	
+	protected void setDefaultRandomEffects(HierarchicalLevel level, GaussianEstimate estimate) {
+		defaultRandomEffects.put(level, estimate);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, estimate}, this));
+	}
+	
+	protected GaussianEstimate getDefaultRandomEffects(HierarchicalLevel level) {return defaultRandomEffects.get(level);}
+	
+	protected void setDefaultResidualError(Enum<?> enumVar, GaussianErrorTermEstimate estimate) {
+		defaultResidualError.put(enumVar, estimate);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RESIDUAL_ERROR_JUST_SET, null, new Object[]{enumVar, estimate}, this));
+	}
+	
+	protected GaussianErrorTermEstimate getDefaultResidualError(Enum<?> enumVar) {
+		return defaultResidualError.get(enumVar);
+	}
+	
+	protected Map<Integer, Estimate<? extends StandardGaussianDistribution>> getBlupsAtThisLevel(HierarchicalLevel level) {
+		return blupsLibrary.get(level);
+	}
+	
+	protected Estimate<? extends StandardGaussianDistribution> getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
+		HierarchicalLevel level = subject.getHierarchicalLevel();
+		Map<Integer, Estimate<? extends StandardGaussianDistribution>> innerMap = getBlupsAtThisLevel(level);
+		if (innerMap != null) {
+			return innerMap.get(subject.getSubjectId());
+		}
+		return null;
+	}
+
+	@Deprecated
+	protected void setBlupsForThisSubject(HierarchicalLevel level, int subjectID, Estimate<? extends StandardGaussianDistribution> blups) {
+		if (!blupsLibrary.containsKey(level)) {
+			blupsLibrary.put(level, new HashMap<Integer, Estimate<? extends StandardGaussianDistribution>>());
+		}
+		Map<Integer, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
+		internalMap.put(subjectID, blups);
+	}
+
+	protected void setBlupsForThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<? extends StandardGaussianDistribution> blups) {
+		setBlupsForThisSubject(subject.getHierarchicalLevel(), subject.getSubjectId(), blups);
+//		HierarchicalLevel level = subject.getHierarchicalLevel();
+//		if (!blupsLibrary.containsKey(level)) {
+//			blupsLibrary.put(level, new HashMap<Integer, Estimate<? extends StandardGaussianDistribution>>());
+//		}
+//		Map<Integer, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
+//		internalMap.put(subject.getSubjectId(), blups);
+		GaussianEstimate originalRandomEffects = getDefaultRandomEffects(subject.getHierarchicalLevel());
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_AT_THIS_LEVEL_JUST_SET, null, new Object[]{subject, originalRandomEffects, blups}, this));
+	}
 	
 	/**
 	 * This method generates a stand-specific vector of model parameters using matrix Omega.
@@ -183,6 +240,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		Matrix parametersForThisRealization = defaultBeta.getRandomDeviate();
 		simulatedParameters.put(subject.getMonteCarloRealizationId(), parametersForThisRealization);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, null, new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, this));
 	}
 
 	/**
@@ -251,7 +309,10 @@ public abstract class ModelBasedSimulator implements Serializable {
 			simulatedRandomEffects.put(subjectLevel, randomEffectsMap);
 		}
 		
-		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), estimatedBlups.getRandomDeviate());
+		Matrix randomDeviates = estimatedBlups.getRandomDeviate();
+		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
+		GaussianEstimate originalRandomEffects = getDefaultRandomEffects(subjectLevel);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, null, new Object[]{subject, originalRandomEffects, randomDeviates.getDeepClone()}, this));
 	}
 	
 	
@@ -309,9 +370,13 @@ public abstract class ModelBasedSimulator implements Serializable {
 				if (!list.getDistanceIndex().contains(indexable.getErrorTermIndex())) {
 					list.add(new GaussianErrorTerm(indexable));
 				}
-				return defaultResidualError.get(group).getRandomDeviate(list);
+				Matrix randomDeviate = defaultResidualError.get(group).getRandomDeviate(list);
+				fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RESIDUAL_ERROR_DEVIATE_JUST_GENERATED, null, new Object[]{subject, group, randomDeviate.getDeepClone()}, this));
+				return randomDeviate; 
 			} else {
-				return defaultResidualError.get(group).getRandomDeviate();
+				Matrix randomDeviate = defaultResidualError.get(group).getRandomDeviate();
+				fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RESIDUAL_ERROR_DEVIATE_JUST_GENERATED, null, new Object[]{subject, group, randomDeviate.getDeepClone()}, this));
+				return randomDeviate;
 			}
 		} else {
 			return defaultResidualError.get(group).getMean();
@@ -339,17 +404,30 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return getResidualErrorForThisSubject(null, ErrorTermGroup.Default);
 	}
 
+	protected void fireModelBasedSimulatorEvent(ModelBasedSimulatorEvent event) {
+		for (ModelBasedSimulatorListener listener : listeners) {
+			listener.modelBasedSimulatorDidThis(event);
+		}
+	}
 	
-//	/**
-//	 * This method generates a residual errors for this subject.
-//	 * @param subject a MonteCarloSimulationCompliantObject object
-//	 */
-//	private synchronized void setSpecificResidualErrorForThisSubject(MonteCarloSimulationCompliantObject subject) {
-//		simulatedResidualError.put(getSubjectPlusMonteCarloSpecificId(subject), new GaussianErrorTermList());
-////		Matrix residualErrorForThisSubject = defaultResidualError.getRandomDeviate();
-////		simulatedResidualError.put(getSubjectPlusMonteCarloSpecificId(subject), residualErrorForThisSubject);
-//	}
+	/**
+	 * This method adds the listener instance to the list of listeners.
+	 * @param listener a ModelBasedSimulatorListener listener
+	 */
+	public void addModelBasedSimulatorListener(ModelBasedSimulatorListener listener) {
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
 
+	/**
+	 * This method removes the listener instance from the list of listeners.
+	 * @param listener a ModelBasedSimulatorListener listener
+	 */
+	public void removeModelBasedSimulatorListener(ModelBasedSimulatorListener listener) {
+		listeners.remove(listener);
+	}
+	
 	/**
 	 * This method enables the recording of the random deviates. By default, this option is set to true.
 	 * It can be desirable to set this option to false when running large stochastic simulations.
@@ -368,7 +446,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 		simulatedParameters.clear();
 		simulatedRandomEffects.clear();
 		simulatedResidualError.clear();
-		blupsLibrary.clear();	
+		blupsLibrary.clear();
 	}
+	
 }
 

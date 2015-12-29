@@ -33,6 +33,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	public final static String InnerIterationStarted = "InnerIterationStarted";
 //	public final static String OuterIterationStarted = "OuterIterationStarted";
 	
+	protected boolean verbose = false;
 	protected int maxNumberOfIterations = 20;
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
@@ -127,8 +128,9 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				} else if (gconv < convergenceCriterion) {
 					convergenceAchieved = true;
 				}
-
-				System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
+				if (verbose) {
+					System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
+				}
 			}  
 
 			if (iterationID > maxNumberOfIterations && !convergenceAchieved) {
@@ -154,12 +156,12 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			}
 		}
 	}
-
 	
 	private Matrix extractParameters(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) {
 		Matrix beta = new Matrix(indicesOfParametersToOptimize.size(),1);
-		for (Integer index : indicesOfParametersToOptimize) {
-			beta.m_afData[index][0] = function.getParameterValue(index);
+		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
+			int parameterIndex = indicesOfParametersToOptimize.get(i);
+			beta.m_afData[i][0] = function.getParameterValue(parameterIndex);
 		}
 		return beta;
 	}
@@ -198,5 +200,11 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		}
 	}
 
+	/**
+	 * This method enables the verbose, i.e. some messages will be displayed in the console. 
+	 * The default verbose value is false.
+	 * @param verbose a boolean
+	 */
+	public void setVerbose(boolean verbose) {this.verbose = verbose;}
 	
 }

@@ -23,7 +23,6 @@ import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.ExponentialFunctionWrapper;
-import repicea.math.LogFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
@@ -37,65 +36,6 @@ import repicea.math.optimizer.NewtonRaphsonOptimizer;
 @SuppressWarnings("serial")
 public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 	
-	private static class CustomizedLogWrapperFunction extends LogFunctionWrapper {
-
-//		private final Matrix gMatrix;
-		private final double n;
-		private final double gDeterminant;
-		private final Matrix invG;
-		private final Matrix originalParameterValues;
-		private final List<Integer> parameterIndices;
-		
-		/**
-		 * Constructor
-		 * @param originalFunction the nested function
-		 * @param gMatrix the variance-covariance matrix of the deviate
-		 */
-		private CustomizedLogWrapperFunction(AbstractMathematicalFunction originalFunction, List<Integer> parameterIndices, Matrix gMatrix) {
-			super(originalFunction);
-			if (!gMatrix.isSymmetric()) {
-				throw new InvalidParameterException("Matrix G is supposed to be symmetric!");
-			}
-//			this.gMatrix = gMatrix;
-			this.invG = gMatrix.getInverseMatrix();
-			this.n = gMatrix.m_iRows;
-			this.gDeterminant = gMatrix.getDeterminant();
-			this.parameterIndices = parameterIndices;
-			originalParameterValues = getParametersFromNestedFunction();
- 		}
-		
-		@Override
-		public Double getValue() {
-			Matrix u = getParametersFromNestedFunction().subtract(originalParameterValues);
-			return super.getValue() - 0.5 * n * Math.log(2d * Math.PI) 
-					- 0.5 * Math.log(gDeterminant) - 0.5 * u.transpose().multiply(invG).multiply(u).m_afData[0][0]; 
-		}
-		
-		
-		@Override
-		public Matrix getGradient() {
-			Matrix u = getParametersFromNestedFunction().subtract(originalParameterValues);
-			return super.getGradient().subtract(u.transpose().multiply(invG));
-		}
-		
-
-		@Override
-		public Matrix getHessian() {
-			return super.getHessian().subtract(invG);
-		}
-
-		private Matrix getParametersFromNestedFunction() {
-			Matrix parameterValues = new Matrix(parameterIndices.size(), 1);
-			for (int i = 0; i < parameterIndices.size(); i++) {
-				parameterValues.m_afData[i][0] = getOriginalFunction().getParameterValue(parameterIndices.get(i));
-			}
-			return parameterValues;
-		}
-		
-	}
-
-	
-	
 	/**
 	 * Constructor.
 	 * @param numberOfPoints the number of points the integral is based on.
@@ -103,7 +43,13 @@ public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 	public AdaptativeGaussHermiteQuadrature(NumberOfPoints numberOfPoints) {
 		super(numberOfPoints);
 	}
-
+	
+	/**
+	 * Constructor for the LaplaceApproximation class.
+	 */
+	AdaptativeGaussHermiteQuadrature() {
+		super();
+	}
 	
 	
 	/**
@@ -126,7 +72,7 @@ public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 				}
 			}
 			Matrix matrixG = lowerCholeskyTriangle.multiply(lowerCholeskyTriangle.transpose());
-			CustomizedLogWrapperFunction functionToBeOptimized = new CustomizedLogWrapperFunction(functionToEvaluate, parameterIndices, matrixG);
+			InternalLogWrapperFunction functionToBeOptimized = new InternalLogWrapperFunction(functionToEvaluate, parameterIndices, matrixG);
 			
 			NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
 			try {
@@ -141,7 +87,8 @@ public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 
 			ExponentialFunctionWrapper efw = new ExponentialFunctionWrapper(functionToBeOptimized);
 			double approximation = super.getMultiDimensionIntegral(efw, parameterIndices, newLowerCholeskyTriangle);
-			approximation *= Math.sqrt(2d) * Math.pow(newHessian.scalarMultiply(-1d).getDeterminant(), -.5);
+			int dimensions = newHessian.m_iRows;
+			approximation *= Math.pow(2d, (2 * dimensions - 1) * .5) * Math.sqrt(varCov.getDeterminant());
 			return approximation;
 		}
 	}
@@ -164,20 +111,6 @@ public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
 		return sum;
 	}
 
-
-
-//	private Matrix findOptimum(AbstractMathematicalFunction functionToEvaluate, List<Integer> parameterIndices, Matrix gMatrix) {
-//		CustomizedLogWrapperFunction functionToBeOptimized = new CustomizedLogWrapperFunction(functionToEvaluate, parameterIndices, gMatrix);
-//		NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
-//		try {
-//			nro.optimize(functionToBeOptimized, parameterIndices);
-//		} catch (OptimizationException e) {
-//			e.printStackTrace();
-//		}
-//		return nro.getHessianAtMaximum();
-//	}
-
-	
 	
 	
 }

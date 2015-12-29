@@ -495,7 +495,7 @@ public final class Matrix extends Number implements Serializable, DeepCloneable 
 	}
 
 	/**
-	 * This method creates a new matrix that is the stack of this and matrix M2. 
+	 * This method creates a new matrix that is the stack of this and matrix m. 
 	 * @param m the matrix to stack.
 	 * @param stackOver true if the stack is vertically or false if horizontally
 	 * @return the stacked matrix

@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.LogisticModelBasedSimulator;
 import repicea.simulation.ParameterLoader;
 import repicea.stats.estimates.GaussianEstimate;
@@ -65,7 +66,6 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 	public MatapediaMortalityPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualVariabilityEnabled);
 		init();
-		oXVector = new Matrix(1, defaultBeta.getMean().m_iRows);
 		linkFunction = new LinkFunction(Type.CLogLog);
 //		eta = linkFunction.getOriginalFunction();
 		linkFunction.setParameterValue(0, 0d);		// random parameter
@@ -88,8 +88,10 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 			Matrix randomEffectVariance = ParameterLoader.loadVectorFromFile(covParmsFilename).get();
 			
 			Matrix meanRandomEffect = new Matrix(1,1);
-			defaultRandomEffects.put(HierarchicalLevel.IntervalNestedInPlot, new GaussianEstimate(meanRandomEffect, randomEffectVariance));
-			defaultBeta = new SASParameterEstimate(defaultBetaMean, defaultBetaVariance); 
+			setDefaultRandomEffects(HierarchicalLevel.INTERVAL_NESTED_IN_PLOT, new GaussianEstimate(meanRandomEffect, randomEffectVariance));
+			GaussianEstimate estimate = new SASParameterEstimate(defaultBetaMean, defaultBetaVariance);
+			setDefaultBeta(estimate); 
+			oXVector = new Matrix(1, estimate.getMean().m_iRows);
 			
 		} catch (Exception e) {
 			System.out.println("MatapediaMortalityPredictor.init() : Unable to initialize the mortality module!");
@@ -120,7 +122,7 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 			linkFunction.setParameterValue(0, 0d);
 			prob = ghq.getIntegralApproximation(linkFunction, 
 					indicesForGaussianQuad, 
-					((GaussianEstimate) defaultRandomEffects.get(HierarchicalLevel.IntervalNestedInPlot)).getDistribution().getStandardDeviation());
+					getDefaultRandomEffects(HierarchicalLevel.INTERVAL_NESTED_IN_PLOT).getDistribution().getStandardDeviation());
 		}
 		
 		if (parms != null && parms.length > 0 && parms[0] instanceof Double) {

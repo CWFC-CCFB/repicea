@@ -32,7 +32,6 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 
 	private static final long serialVersionUID = 20120725L;
 	
-	
 	/**
 	 * Common constructor. By default the Gaussian distribution that supports this estimate has a mean 0 and a variance 1.
 	 */

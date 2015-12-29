@@ -1,7 +1,7 @@
 package repicea.treelogger.wbirchprodvol;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
+import repicea.simulation.HierarchicalLevel;
 
 class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 
@@ -55,7 +55,7 @@ class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 	public int getSubjectId() {return treeID;}
 
 	@Override
-	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Tree;}
+	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}
 
 	@Override
 	public int getMonteCarloRealizationId() {return stand.getMonteCarloRealizationId();}

@@ -21,6 +21,7 @@ package repicea.predictor.matapedia;
 import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.simulation.GrowthModel;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.ModelBasedSimulator;
 import repicea.simulation.ParameterLoader;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
@@ -59,15 +60,15 @@ public class MatapediaDbhIncrementPredictor extends ModelBasedSimulator implemen
 			Matrix defaultBetaMean = ParameterLoader.loadVectorFromFile(betaFilename).get();
 			Matrix defaultBetaVariance = ParameterLoader.loadVectorFromFile(omegaFilename).get().squareSym();
 			
-			defaultBeta = new SASParameterEstimate(defaultBetaMean, defaultBetaVariance); 
+			setDefaultBeta(new SASParameterEstimate(defaultBetaMean, defaultBetaVariance)); 
 			
 			Matrix covParms =  ParameterLoader.loadVectorFromFile(covparmsFilename).get();
 			Matrix plotRandomEffectVariance = covParms.getSubMatrix(0, 0, 0, 0);
 			GaussianEstimate defRandomEffect = new GaussianEstimate(new Matrix(plotRandomEffectVariance.m_iRows,1), plotRandomEffectVariance);
-			defaultRandomEffects.put(HierarchicalLevel.Tree, defRandomEffect);
+			setDefaultRandomEffects(HierarchicalLevel.TREE, defRandomEffect);
 
 			Matrix residualErrorVariance = covParms.getSubMatrix(1, 1, 0, 0);
-			defaultResidualError.put(ErrorTermGroup.Default, new GaussianErrorTermEstimate(residualErrorVariance));
+			setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(residualErrorVariance));
 		} catch (Exception e) {
 			System.out.println("MatapediaDbhIncrementPredictor.init() : Unable to initialize the diameter increment module!");
 		}

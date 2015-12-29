@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulator.HierarchicalLevel;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.allometrycalculator.AllometryCalculator;
 import repicea.simulation.allometrycalculator.LightAllometryCalculableTree;
 
@@ -114,7 +114,7 @@ class Artemis2009CompatibleStandImpl implements Artemis2009CompatibleStand {
 	public int getSubjectId() {return idString.hashCode();}
 
 	@Override
-	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.Plot;}
+	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
 
 	@Override
 	public int getMonteCarloRealizationId() {return monteCarloRealizationId;}
