@@ -75,6 +75,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		}
 	}
 	
+	
 	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject {
 
 		private final int monteCarloRealization;
@@ -103,7 +104,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		}
 		
 		private static int getSubjectID(MonteCarloSimulationCompliantObject stand, int date) {
-			return (int) (stand.hashCode() * 10000L + date);
+			return (int) (stand.getSubjectId() * 10000L + date);
 		}
 		
 		
@@ -129,10 +130,10 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private GaussianEstimate defaultBeta;
 	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
-	private final Map<HierarchicalLevel, GaussianEstimate> defaultRandomEffects;
-	private final Map<HierarchicalLevel, Map<Integer, Estimate<? extends StandardGaussianDistribution>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
+	private final Map<String, GaussianEstimate> defaultRandomEffects;
+	private final Map<String, Map<Integer, Estimate<? extends StandardGaussianDistribution>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
 	protected final List<Integer> blupEstimationDone;
-	private final Map<HierarchicalLevel, Map<Long, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
+	private final Map<String, Map<Long, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
 	private final Map<Long, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
@@ -158,11 +159,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 		
 		blupEstimationDone = new ArrayList<Integer>();
 
-		defaultRandomEffects = new HashMap<HierarchicalLevel, GaussianEstimate>();
+		defaultRandomEffects = new HashMap<String, GaussianEstimate>();
 				
 		simulatedParameters = new HashMap<Integer, Matrix>();
-		simulatedRandomEffects = new HashMap<HierarchicalLevel, Map<Long, Matrix>>();
-		blupsLibrary = new HashMap<HierarchicalLevel, Map<Integer, Estimate<? extends StandardGaussianDistribution>>>();
+		simulatedRandomEffects = new HashMap<String, Map<Long, Matrix>>();
+		blupsLibrary = new HashMap<String, Map<Integer, Estimate<? extends StandardGaussianDistribution>>>();
 		simulatedResidualError = new HashMap<Long, GaussianErrorTermList>();
 		intervalLists = new HashMap<Long, IntervalNestedInPlotDefinition>();
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
@@ -184,11 +185,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 	protected GaussianEstimate getDefaultBeta() {return defaultBeta;}
 	
 	protected void setDefaultRandomEffects(HierarchicalLevel level, GaussianEstimate estimate) {
-		defaultRandomEffects.put(level, estimate);
+		defaultRandomEffects.put(level.getName(), estimate);
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, estimate}, this));
 	}
 	
-	protected GaussianEstimate getDefaultRandomEffects(HierarchicalLevel level) {return defaultRandomEffects.get(level);}
+	protected GaussianEstimate getDefaultRandomEffects(HierarchicalLevel level) {return defaultRandomEffects.get(level.getName());}
 	
 	protected void setDefaultResidualError(Enum<?> enumVar, GaussianErrorTermEstimate estimate) {
 		defaultResidualError.put(enumVar, estimate);
@@ -200,7 +201,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	}
 	
 	protected Map<Integer, Estimate<? extends StandardGaussianDistribution>> getBlupsAtThisLevel(HierarchicalLevel level) {
-		return blupsLibrary.get(level);
+		return blupsLibrary.get(level.getName());
 	}
 	
 	protected Estimate<? extends StandardGaussianDistribution> getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
@@ -214,8 +215,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 
 	@Deprecated
 	protected void setBlupsForThisSubject(HierarchicalLevel level, int subjectID, Estimate<? extends StandardGaussianDistribution> blups) {
-		if (!blupsLibrary.containsKey(level)) {
-			blupsLibrary.put(level, new HashMap<Integer, Estimate<? extends StandardGaussianDistribution>>());
+		if (!blupsLibrary.containsKey(level.getName())) {
+			blupsLibrary.put(level.getName(), new HashMap<Integer, Estimate<? extends StandardGaussianDistribution>>());
 		}
 		Map<Integer, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
 		internalMap.put(subjectID, blups);
@@ -285,8 +286,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private void setSpecificRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		Estimate<?> randomEffectEstimate = null;
-		if (blupsLibrary.get(subjectLevel) != null) {
-			randomEffectEstimate = blupsLibrary.get(subjectLevel).get(subject.getSubjectId()); // get the reference Blups
+		if (blupsLibrary.get(subjectLevel.getName()) != null) {
+			randomEffectEstimate = blupsLibrary.get(subjectLevel.getName()).get(subject.getSubjectId()); // get the reference Blups
  		}
 		
 		Estimate<?> estimatedBlups;
@@ -294,7 +295,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		if (randomEffectEstimate != null) {
 			estimatedBlups = randomEffectEstimate;
 		} else  {
-			estimatedBlups = defaultRandomEffects.get(subjectLevel);
+			estimatedBlups = defaultRandomEffects.get(subjectLevel.getName());
 		}
 		
 //		Map<Long, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel);
@@ -319,10 +320,10 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 */
 	protected synchronized Matrix simulateDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<?> randomEffectsEstimate) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
-		Map<Long, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel);
+		Map<Long, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
 		if (randomEffectsMap == null) {
 			randomEffectsMap = new HashMap<Long, Matrix>();
-			simulatedRandomEffects.put(subjectLevel, randomEffectsMap);
+			simulatedRandomEffects.put(subjectLevel.getName(), randomEffectsMap);
 		}
 		Matrix randomDeviates = randomEffectsEstimate.getRandomDeviate();
 		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
@@ -353,19 +354,19 @@ public abstract class ModelBasedSimulator implements Serializable {
 			if (!doRandomDeviatesExistForThisSubject(subject)) {
 				setSpecificRandomEffectsForThisSubject(subject);
 			}
-			return simulatedRandomEffects.get(subjectLevel).get(getSubjectPlusMonteCarloSpecificId(subject));
+			return simulatedRandomEffects.get(subjectLevel.getName()).get(getSubjectPlusMonteCarloSpecificId(subject));
 		} else {
-			if (blupsLibrary.get(subjectLevel) != null && blupsLibrary.get(subjectLevel).containsKey(subject.getSubjectId())) {		// the first condition is necessary otherwise the second contidion could throw an exception
-				return blupsLibrary.get(subjectLevel).get(subject.getSubjectId()).getMean();
+			if (blupsLibrary.get(subjectLevel.getName()) != null && blupsLibrary.get(subjectLevel.getName()).containsKey(subject.getSubjectId())) {		// the first condition is necessary otherwise the second contidion could throw an exception
+				return blupsLibrary.get(subjectLevel.getName()).get(subject.getSubjectId()).getMean();
 			} else {
-				return defaultRandomEffects.get(subjectLevel).getMean();
+				return defaultRandomEffects.get(subjectLevel.getName()).getMean();
 			}
 		} 
 	}
 	
 	protected final boolean doRandomDeviatesExistForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
-		return simulatedRandomEffects.get(subjectLevel) != null && simulatedRandomEffects.get(subjectLevel).containsKey(getSubjectPlusMonteCarloSpecificId(subject)); 
+		return simulatedRandomEffects.get(subjectLevel.getName()) != null && simulatedRandomEffects.get(subjectLevel.getName()).containsKey(getSubjectPlusMonteCarloSpecificId(subject)); 
 	}
 	
 	/**

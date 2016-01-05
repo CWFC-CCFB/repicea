@@ -298,7 +298,11 @@ public abstract class RecordReader implements Serializable {
 			if (oArray[i] != null) {								// if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
 				switch(oVecImport.get(i).getFieldType()) {
 				case Double:							// type = float
-					oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
+					if (oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+						oArray[i] = Double.NaN;
+					} else {
+						oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
+					}
 					break;
 				case Integer:
 					oArray[i] = (Integer) ((Double) Double.parseDouble(oArray[i].toString().replace(",","."))).intValue();

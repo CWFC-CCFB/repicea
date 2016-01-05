@@ -18,12 +18,15 @@
  */
 package repicea.simulation;
 
+import java.io.Serializable;
+
 /**
  * The HierarchicalLevel class is used in the ModelBasedSimulator class. It defines the
  * different levels of GaussianEstimate instance.
  * @author Mathieu Fortin - December 2015
  */
-public class HierarchicalLevel {
+@SuppressWarnings("serial")
+public class HierarchicalLevel implements Serializable {
 
 	public static final HierarchicalLevel PLOT = new HierarchicalLevel("plot");
 	public static final HierarchicalLevel TREE = new HierarchicalLevel("tree");
@@ -35,7 +38,9 @@ public class HierarchicalLevel {
 		this.levelName = levelName;
 	}
 	
+	protected String getName() {return levelName;}
+	
 	@Override
-	public String toString() {return levelName;}
+	public String toString() {return getName();}
 	
 }
