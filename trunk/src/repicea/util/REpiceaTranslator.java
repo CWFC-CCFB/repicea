@@ -55,6 +55,9 @@ public class REpiceaTranslator {
 			this.code = code;
 		}
 		
+		@Override
+		public String toString() {return longName;}
+		
 		/**
 		 * Returns the locale associated with the language.
 		 * @return a Locale instance
