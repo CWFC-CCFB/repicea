@@ -72,8 +72,16 @@ public class JavaProcessWrapper extends AbstractGenericTask implements PropertyC
 			System.out.println(option.name() + " = " + internalProcess.getJVMSettings().get(option).toString());
 		}
 		internalProcess.execute();
-		int output;
-		output = internalProcess.get();
+		int output = -1;
+		try {
+			output = internalProcess.get();
+		} catch (Exception e) {
+			if (isCancelled()) {
+				output = 0;
+			} else {
+				throw e;
+			}
+		} 
 		if (output == 0 && atLeastOneMessageReceived) {
 			return;
 		} else {
