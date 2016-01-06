@@ -128,13 +128,13 @@ public class AllometryCalculator {
 	 * @param trees a Collection object that should contains AllometryCalculableTree instances
 	 * @return the total commercial volume in m3 (double)
 	 */
-	public double getCommercialVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
+	public double getCommercialVolumeM3(Collection<? extends AllometryCalculableTree> trees, double dbhLimit) {
 
 		checkCollection(trees);
 
 		double volume = 0;
 		for (AllometryCalculableTree t : trees) {
-			if (t.getDbhCm() >= 9.1) {
+			if (t.getDbhCm() >= dbhLimit) {
 				if (t.getNumber() > 0) {
 					volume += t.getCommercialVolumeM3() * t.getNumber();
 				}
