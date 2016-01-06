@@ -103,9 +103,9 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 		JavaProcessWrapper javaProcessWrapper = createProcessWrapper();
 		if (guiInterface != null) {
 			guiInterface.javaProcessWrapper = javaProcessWrapper;
-			guiInterface.checkEnabledFeatures(true);
 			logger.clear();
-			javaProcessWrapper.addPropertyChangeListener(guiInterface.javaProcessWrapper);
+//			javaProcessWrapper.addPropertyChangeListener(guiInterface.javaProcessWrapper);
+			javaProcessWrapper.getInternalProcess().addPropertyChangeListener(guiInterface);
 		}
 		javaProcessWrapper.doThisJob();
 	}

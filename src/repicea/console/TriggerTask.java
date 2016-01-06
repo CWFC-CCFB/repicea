@@ -75,7 +75,6 @@ class TriggerTask extends AbstractGenericTask {
 			if (gui.getExtendedState() == JFrame.ICONIFIED) {
 				gui.setExtendedState(JFrame.NORMAL);
 			}
-			gui.checkEnabledFeatures(false);
 			break;
 		case StartEmbeddedApplication:
 			trigger.startEmbeddedApplication();

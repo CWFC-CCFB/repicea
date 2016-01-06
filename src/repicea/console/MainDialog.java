@@ -347,14 +347,10 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 	protected void checkEnabledFeatures(boolean embeddedApplicationStarting) {
 		mntmStart.setEnabled(!embeddedApplicationStarting);
 		setMenuEnabled(!embeddedApplicationStarting);
+		mntmStop.setEnabled(embeddedApplicationStarting);
 	}
 	
 	protected void startAction() {
-//		caller.getSettings().recordSettings();
-//		checkEnabledFeatures(true);
-//		logger.clear();
-//		javaProcessWrapper = caller.createProcessWrapper();
-//		javaProcessWrapper.getInternalProcess().addPropertyChangeListener(this);
 		caller.addTask(new TriggerTask(TaskID.ReduceInterface, caller));
 		caller.addTask(new TriggerTask(TaskID.StartEmbeddedApplication, caller));
 		caller.addTask(new TriggerTask(TaskID.ExpandInterface, caller));
@@ -373,12 +369,10 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 			if (arg0.getSource().equals(javaProcessWrapper.getInternalProcess())) {
 				if (arg0.getPropertyName().equals("state")) {
 					if (arg0.getNewValue() == StateValue.STARTED) {
-						mntmStop.setEnabled(true);
+						checkEnabledFeatures(true);
 					} else if (arg0.getNewValue() == StateValue.DONE) {
 						javaProcessWrapper.getInternalProcess().removePropertyChangeListener(this);
-						mntmStart.setEnabled(true);
-						setMenuEnabled(true);
-						mntmStop.setEnabled(false);
+						checkEnabledFeatures(false);
 					}
 				}
 			}
