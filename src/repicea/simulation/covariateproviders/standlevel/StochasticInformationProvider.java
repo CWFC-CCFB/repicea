@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * The StochasticInformationProvider interface provides basic information about the simulation mode.
  * @author Mathieu Fortin - November 2014
  */
-public interface StochasticInformationProvider {
+public interface StochasticInformationProvider<Realization> {
 
 	/**
 	 * This method returns the number of realizations to be made.
@@ -36,6 +36,14 @@ public interface StochasticInformationProvider {
 	 * @return a boolean
 	 */
 	public boolean isStochastic();
+	
+	
+	/**
+	 * This method returns the realization.
+	 * @param realizationID the id of the realization
+	 * @return an instance whose class is defined by the Realization parameter
+	 */
+	public Realization getRealization(int realizationID);
 	
 	
 }

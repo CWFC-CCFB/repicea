@@ -45,19 +45,4 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	
 	public List<Matrix> getRealizations() {return getDistribution().getRealizations();}
 	
-//	/**
-//	 * This method returns a list of double in case of univariate distribution or null otherwise
-//	 * @return a List of Double instance or a null if the distribution is multivariate
-//	 */
-//	public List<Double> getUnivariateRealizations() {
-//		if (getDistribution().isMultivariate()) {
-//			return null;
-//		} else {
-//			List<Double> outputList = new ArrayList<Double>();
-//			for (Matrix mat : getRealizations()) {
-//				outputList.add(mat.m_afData[0][0]);
-//			}
-//			return outputList;
-//		}
-//	}
 }
