@@ -73,11 +73,11 @@ class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 	public double getNumber() {return 1d;}
 
 
-	@Override
+/*	@Override
 	public TreeStatusPriorToLogging getTreeStatusPriorToLogging() {
 		return TreeStatusPriorToLogging.Alive;
 	}
-
+*/
 
 	@Override
 	public double getCommercialVolumeM3() {

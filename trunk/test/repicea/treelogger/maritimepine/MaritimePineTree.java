@@ -15,11 +15,11 @@ class MaritimePineTree implements MaritimePineBasicTree {
 		return 100;
 	}
 
-	@Override
+/*	@Override
 	public TreeStatusPriorToLogging getTreeStatusPriorToLogging() {
 		return TreeStatusPriorToLogging.Alive;
 	}
-
+*/
 	@Override
 	public double getCommercialVolumeM3() {
 		return 1;

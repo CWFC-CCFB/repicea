@@ -29,19 +29,10 @@ import repicea.simulation.covariateproviders.treelevel.SpeciesNameProvider;
  */
 public interface LoggableTree extends CommercialVolumeM3Provider, SpeciesNameProvider {
 
-	public static enum TreeStatusPriorToLogging {Alive, Windthrow, Dead}
-	
 	/**
 	 * This method returns the number of stem represented by this tree record.
 	 * @return a double
 	 */
 	public double getNumber();
 
-	/**
-	 * This method returns the status of the tree before it was harvested
-	 * @return a TreeStatusPriorToLogging instance
-	 */
-	public TreeStatusPriorToLogging getTreeStatusPriorToLogging();
-	
-	
 }
