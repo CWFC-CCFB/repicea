@@ -53,7 +53,7 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	 * @param estimate2 the estimate that is subtracted to the first estimate
 	 * @return a MonteCarloEstimate instance
 	 */
-	public static MonteCarloEstimate computeDifference(MonteCarloEstimate estimate1, MonteCarloEstimate estimate2) {
+	public static MonteCarloEstimate subtract(MonteCarloEstimate estimate1, MonteCarloEstimate estimate2) {
 		if (estimate1.getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
 			throw new InvalidParameterException("The number of realizations is not consistent!");
 		}
@@ -64,6 +64,24 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 		return outputEstimate;
 	}
 	
+	/**
+	 * This method returns a MonteCarloEstimate instance that results from the sum of two 
+	 * MonteCarloEstimate instances with the same number of realizations. 
+	 * @param estimate1 the first estimate
+	 * @param estimate2 the estimate that is added to the first estimate
+	 * @return a MonteCarloEstimate instance
+	 */
+	public static MonteCarloEstimate add(MonteCarloEstimate estimate1, MonteCarloEstimate estimate2) {
+		if (estimate1.getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
+			throw new InvalidParameterException("The number of realizations is not consistent!");
+		}
+		MonteCarloEstimate outputEstimate = new MonteCarloEstimate();
+		for (int i = 0; i < estimate1.getNumberOfRealizations(); i++) {
+			outputEstimate.addRealization(estimate1.getRealizations().get(i).add(estimate2.getRealizations().get(i)));
+		}
+		return outputEstimate;
+	}
+
 	/**
 	 * This method returns a MonteCarloEstimate instance that results from the product of original 
 	 * MonteCarloEstimate instance and a scalar. 

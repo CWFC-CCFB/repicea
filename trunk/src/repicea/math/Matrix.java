@@ -32,7 +32,7 @@ import repicea.util.DeepCloneable;
  * This class implement most of the basic function in linear algebra
  * Authors: Jean-Francois Lavoie and Mathieu Fortin (June 2009)
  */
-public final class Matrix extends Number implements Serializable, DeepCloneable {
+public final class Matrix implements Serializable, DeepCloneable {
 
 	private static final long serialVersionUID = 20100804L;
 		
@@ -1293,27 +1293,4 @@ public final class Matrix extends Number implements Serializable, DeepCloneable 
 		}
 	}
 
-	@Override
-	public double doubleValue() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public float floatValue() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public int intValue() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
-
-	@Override
-	public long longValue() {
-		// TODO Auto-generated method stub
-		return 0;
-	}
 }
