@@ -76,7 +76,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 	}
 	
 	
-	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject {
+	@SuppressWarnings("serial")
+	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject, Serializable {
 
 		private final int monteCarloRealization;
 		private int subjectID;
