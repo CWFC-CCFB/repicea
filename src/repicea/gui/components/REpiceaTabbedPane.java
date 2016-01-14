@@ -237,11 +237,21 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 		super.setTabComponentAt(index, component);
 	}
 	
-	
 	@Override
 	public void insertTab(String title, Icon icon, Component component, String tip, int index) {
 		super.insertTab(title, icon, component, tip, index);
 		setTitleAt(index, title);
+		setToolTipTextAt(index, tip);
+	}
+
+	@Override
+	public void setToolTipTextAt(int index, String tip) {
+		if (getTabComponentAt(index) instanceof TabTitleComponent) {
+			((TabTitleComponent) getTabComponentAt(index)).setToolTipText(tip);
+			super.setToolTipTextAt(index, null);
+		} else {
+			super.setToolTipTextAt(index, tip);
+		}
 	}
 	
 	protected REpiceaPopupMenu setPopupMenu() {
@@ -265,6 +275,7 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 		}
 	}
 
+
 	public static void main(String[] args) {
 		JDialog dialog = new JDialog();
 		dialog.setModal(true);
@@ -273,6 +284,7 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 		for (int i = 0; i < 4; i++) {
 			tabbedPane.addTab("Allo Tab " + i, new JLabel("Allo " + i));
 		}
+		tabbedPane.insertTab("Allo 5", null, new JLabel("Allo 5"), "This is allo 5", 0);
 		dialog.pack();
 		dialog.setVisible(true);
 		System.exit(0);
