@@ -30,24 +30,20 @@ import repicea.stats.distributions.NonparametricDistribution;
  * @author Mathieu Fortin - January 2016
  */
 @SuppressWarnings("serial")
-public class LawOfTotalVarianceMonteCarloEstimate extends Estimate<NonparametricDistribution> {
+public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 
 	private final NonparametricDistribution varianceDistribution;
 		
-	protected LawOfTotalVarianceMonteCarloEstimate() {
-		super(new NonparametricDistribution());
+	public LawOfTotalVarianceMonteCarloEstimate() {
+		super();
 		varianceDistribution = new NonparametricDistribution();
 		estimatorType = EstimatorType.MonteCarlo;
 	}
 
-	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
-	
 	public void addRealization(Matrix value, Matrix variance) {
 		getDistribution().addRealization(value);
 		varianceDistribution.addRealization(variance);
 	}
-	
-	public List<Matrix> getRealizationsOfTheMean() {return getDistribution().getRealizations();}
 	
 	public List<Matrix> getRealizationsOfTheVariance() {return varianceDistribution.getRealizations();}
 

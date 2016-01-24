@@ -34,6 +34,7 @@ public class ServerTask extends AbstractGenericTask {
 	protected ServerTask(ServerTaskID taskID, AbstractServer server) {
 		this.taskID = taskID;
 		this.server = server;
+		setName(taskID.name());
 	}
 	
 	@Override
@@ -43,8 +44,6 @@ public class ServerTask extends AbstractGenericTask {
 			server.startReceiverThread();
 			break;
 		}
-		// TODO Auto-generated method stub
-		
 	}
 
 }

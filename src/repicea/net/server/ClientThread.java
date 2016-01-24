@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.net.SocketWrapper;
+import repicea.net.server.AbstractServer.ServerReply;
 import repicea.util.PropertyChangeEventGeneratingClass;
 
 public abstract class ClientThread extends PropertyChangeEventGeneratingClass implements Runnable, ActionListener {
@@ -68,12 +69,13 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 
 					while (!socketWrapper.isClosed()) {
-						firePropertyChange("status", null, "Connected");
+						firePropertyChange("status", null, "Processing request");
 						processRequest();
 					}
-					
+
+					socketWrapper.writeObject(ServerReply.ClosingConnection);
+					closeSocket();
 					firePropertyChange("status", null, "Disconnected from client: " + clientAddress.getHostAddress());
-					
 				} catch (Exception e) {
 					try {
 						e.printStackTrace();
@@ -81,7 +83,6 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 					} catch (IOException e1) {
 						socketWrapper = null;
 					}
-					firePropertyChange("progressBar", false, true);
 					firePropertyChange("status", null, "Interrupted");
 					firePropertyChange("restartButton", null, true);
 					synchronized (lock) {

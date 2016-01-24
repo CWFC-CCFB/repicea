@@ -18,6 +18,7 @@ public class FakeClient extends BasicClient {
 		try {
 			FakeClient client = new FakeClient(socketAddress);
 			Object result = client.processRequest("46.5;-70;323");
+			int u = 0;
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		}

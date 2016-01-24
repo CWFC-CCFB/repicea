@@ -38,7 +38,9 @@ import repicea.net.server.ServerTask.ServerTaskID;
 
 public abstract class AbstractServer extends AbstractGenericEngine implements PropertyChangeListener {
 
-	protected static enum ServerReply {IAmBusyCallBackLater, CallAccepted}
+	protected static enum ServerReply {IAmBusyCallBackLater, 
+		CallAccepted, 
+		ClosingConnection}
 
 	/**
 	 * This internal class handles the calls and stores these in the queue.
@@ -161,7 +163,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * @param exceptionRuleFilename the filename of the referenceRule if any (optional, can be null)
 	 * @throws Exception
 	 */
-	public AbstractServer(ServerConfiguration configuration) throws Exception {
+	protected AbstractServer(ServerConfiguration configuration) throws Exception {
 		this.configuration = configuration;
 		clientThreads = new ArrayList<ClientThread>();
 		clientQueue = new LinkedBlockingQueue<SocketWrapper>();
