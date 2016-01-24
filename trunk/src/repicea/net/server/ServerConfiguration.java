@@ -18,7 +18,6 @@
  */
 package repicea.net.server;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 
@@ -30,7 +29,7 @@ public class ServerConfiguration implements Serializable {
 	protected final int outerPort;
 	protected final int innerPort;
 	
-	protected ServerConfiguration(int numberOfClientThreads, int outerPort, int innerPort) throws IOException {
+	public ServerConfiguration(int numberOfClientThreads, int outerPort, int innerPort) {
 		if (numberOfClientThreads < 0 || numberOfClientThreads > 10) {
 			throw new InvalidParameterException("Number of client threads should be between 1 and 10");
 		} else {

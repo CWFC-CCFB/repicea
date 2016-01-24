@@ -33,7 +33,11 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import repicea.gui.REpiceaFrame;
+import repicea.gui.UIControlManager;
+import repicea.gui.UIControlManager.CommonControlID;
 import repicea.net.server.gui.InterfaceTask.InterfaceRelatedTask;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * This class is the gui interface of the CapsisServer class.
@@ -43,15 +47,32 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 
 	private static final long serialVersionUID = 20111018L;
 	
+	private static enum MessageID implements TextableEnum {
+		Server("Server", "Serveur");
+
+		MessageID(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
+	}
+	
+	
 	private JMenuBar menuBar;
 	private JMenu fileMenu;
-	private JMenu updaterMenu;
-	private JMenu mnOptions;
+	private JMenu serverMenu;
 	private JMenuItem mntmQuit;
 	private JMenuItem mntmConnect;
 	private JMenuItem mntmDisconnect;
-	private JMenuItem mntmExceptionsRules;
-	private JMenuItem mntmPreferences;
+//	private JMenuItem mntmExceptionsRules;
+//	private JMenu mnOptions;
+//	private JMenuItem mntmPreferences;
 	private JMenuItem mntmShutdown;
 	
 	private JPanel mainPanel;
@@ -68,7 +89,7 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 		
 		this.caller = caller;
 		menuBar = new JMenuBar();
-		fileMenu = new JMenu("File");
+		fileMenu = UIControlManager.createCommonMenu(UIControlManager.CommonMenuTitle.File);
 		menuBar.add(fileMenu);
 		
 		mntmConnect = new JMenuItem("Connect");
@@ -77,27 +98,27 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 		mntmDisconnect = new JMenuItem("Disconnect");
 		fileMenu.add(mntmDisconnect);
 		
-		mntmQuit = new JMenuItem("Quit");
+		mntmQuit = UIControlManager.createCommonMenuItem(CommonControlID.Quit);
 		fileMenu.add(mntmQuit);
 		
-		updaterMenu = new JMenu("Updater");
-		menuBar.add(updaterMenu);
+		serverMenu = new JMenu(MessageID.Server.toString());
+		menuBar.add(serverMenu);
 		
-		mntmShutdown = new JMenuItem("Stop");
-		updaterMenu.add(mntmShutdown);
+		mntmShutdown = UIControlManager.createCommonMenuItem(CommonControlID.Stop);
+		serverMenu.add(mntmShutdown);
 		
-		mnOptions = new JMenu("Options");
-		menuBar.add(mnOptions);
-		
-		mntmExceptionsRules = new JMenuItem("Exceptions rules");
-		mnOptions.add(mntmExceptionsRules);
-		
-		mntmPreferences = new JMenuItem("Preferences");
-		mnOptions.add(mntmPreferences);
+//		mnOptions = new JMenu("Options");
+//		menuBar.add(mnOptions);
+//		
+//		mntmExceptionsRules = new JMenuItem("Exceptions rules");
+//		mnOptions.add(mntmExceptionsRules);
+//		
+//		mntmPreferences = new JMenuItem("Preferences");
+//		mnOptions.add(mntmPreferences);
 		
 		setConnected(false);
 		
-		setResizable(false);
+//		setResizable(false);
 		createUI();
 	}
 
@@ -106,8 +127,8 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 		connected = b;
 		mntmConnect.setEnabled(!b);
 		mntmDisconnect.setEnabled(b);
-		updaterMenu.setEnabled(b);
-		mntmExceptionsRules.setEnabled(b);
+		serverMenu.setEnabled(b);
+//		mntmExceptionsRules.setEnabled(b);
 	}
 
 
@@ -118,7 +139,7 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 //	protected void setIcon() {}
 	
 	private void createUI() {
-		updateTitle(null);
+		setTitle(MessageID.Server.toString() + " - " + "Application");
 		
 		getContentPane().add(menuBar, BorderLayout.NORTH);
 		
@@ -131,13 +152,6 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 		setSize(dim);
 	}
 
-	private void updateTitle(String refPath) {
-		String title = "Updater Server Application ";
-		if (refPath != null && !refPath.isEmpty()) {
-			title = title.concat("- Reference directory : " + refPath);
-		}
-		setTitle(title); // + caller.getReferenceRepository().getRootDirectory().toString());
-	}
 
 
 	@Override
@@ -150,8 +164,6 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 				disconnectAction();
 			} else if (menuItem.equals(mntmQuit)) {
 				cancelAction();
-			} else if (menuItem.equals(mntmExceptionsRules)) {
-				exceptionRulesAction();
 			} else if (menuItem.equals(mntmShutdown)) {
 				shutdownServerAction();
 			}
@@ -189,15 +201,11 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 	
 	private void disconnectAction() {
 		caller.addTask(new InterfaceTask(caller, InterfaceRelatedTask.Disconnect));
-		updateTitle(null);
 		setConnected(false);
 		clientThreadPanels.clear();
 		refreshMainPanel();
 	}
 	
-	private void exceptionRulesAction() {
-		firePropertyChange("exceptionRuleRequest", null, null);
-	}
 
 
 	@Override
@@ -223,9 +231,7 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 	@Override
 	public void propertyChange(PropertyChangeEvent arg0) {
 		String propertyName = arg0.getPropertyName();
-		if (propertyName.equals("referencePath")) {
-			updateTitle(arg0.getNewValue().toString());
-		} else if (propertyName.equals("connected")) {
+		if (propertyName.equals("connected")) {
 			setConnected(true);
 			refreshMainPanel();
 		} 
@@ -250,7 +256,6 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 		mntmDisconnect.removeActionListener(this);
 		mntmQuit.removeActionListener(this);
 		mntmShutdown.removeActionListener(this);
-		mntmExceptionsRules.removeActionListener(this);
 	}
 
 
@@ -260,7 +265,6 @@ public class ServerDialog extends REpiceaFrame implements PropertyChangeListener
 		mntmDisconnect.addActionListener(this);
 		mntmQuit.addActionListener(this);
 		mntmShutdown.addActionListener(this);
-		mntmExceptionsRules.addActionListener(this);
 	}
 	
 }
