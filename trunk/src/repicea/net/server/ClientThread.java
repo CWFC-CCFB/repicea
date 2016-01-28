@@ -79,6 +79,9 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 				} catch (Exception e) {
 					try {
 						e.printStackTrace();
+						if (socketWrapper.isClosed()) {
+							socketWrapper.writeObject(e);
+						}
 						closeSocket();
 					} catch (IOException e1) {
 						socketWrapper = null;
