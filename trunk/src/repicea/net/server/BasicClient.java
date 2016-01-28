@@ -66,10 +66,10 @@ public class BasicClient implements Closeable {
 	}
 
 	
-	protected Object processRequest(String string) {
+	protected Object processRequest(Object obj) {
 		if (open) {
 			try {
-				socketWrapper.writeObject(string);
+				socketWrapper.writeObject(obj);
 				Object reply = socketWrapper.readObject();
 				return reply;
 			} catch (IOException | ClassNotFoundException e) {

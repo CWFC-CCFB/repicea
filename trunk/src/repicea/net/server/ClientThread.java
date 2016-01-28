@@ -68,10 +68,10 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 					clientAddress = socketWrapper.getSocket().getInetAddress();
 					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 
-					while (!socketWrapper.isClosed()) {
-						firePropertyChange("status", null, "Processing request");
-						processRequest();
-					}
+//					while (!socketWrapper.isClosed()) {
+					firePropertyChange("status", null, "Processing request");
+					processRequest();
+//					}
 
 					socketWrapper.writeObject(ServerReply.ClosingConnection);
 					closeSocket();

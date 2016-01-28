@@ -5,6 +5,9 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class FakeClient extends BasicClient {
 
@@ -14,10 +17,24 @@ public class FakeClient extends BasicClient {
 
 	
 	public static void main(String[] args) {
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18000);
+		Random random = new Random();
+//		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18000);
+		InetSocketAddress socketAddress = new InetSocketAddress("rouge-epicea.dyndns.org", 18000);
 		try {
 			FakeClient client = new FakeClient(socketAddress);
-			Object result = client.processRequest("46.5;-70;323");
+
+			List<Double[]> locations = new ArrayList<Double[]>();
+			Double[] location;
+			for (int i = 0; i < 50; i++) {
+				location = new Double[3];
+				location[0] = 46d + random.nextDouble();
+				location[1] = -71d + random.nextDouble();
+				location[2] = 300d + 100d * random.nextDouble();
+				locations.add(location);
+			}
+			
+			Object result = client.processRequest(locations);
+			client.close();
 			int u = 0;
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
