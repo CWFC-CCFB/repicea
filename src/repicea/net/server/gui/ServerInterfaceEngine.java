@@ -70,7 +70,7 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements Show
 	
 	
 	protected void connect() throws IOException {
-		InetAddress localAddress = InetAddress.getLocalHost();
+		InetAddress localAddress = InetAddress.getLoopbackAddress();
 		SocketAddress socketAddress = new InetSocketAddress(localAddress, communicationPort);
 		Socket socket = new Socket();
 		socket.connect(socketAddress, 5000);
