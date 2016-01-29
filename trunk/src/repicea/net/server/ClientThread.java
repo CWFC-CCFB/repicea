@@ -74,8 +74,8 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 //					}
 
 					socketWrapper.writeObject(ServerReply.ClosingConnection);
+					firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
 					closeSocket();
-					firePropertyChange("status", null, "Disconnected from client: " + clientAddress.getHostAddress());
 				} catch (Exception e) {
 					try {
 						e.printStackTrace();

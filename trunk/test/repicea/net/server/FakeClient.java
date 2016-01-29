@@ -36,6 +36,7 @@ public class FakeClient extends BasicClient {
 			Object result = client.processRequest(locations);
 			client.close();
 			int u = 0;
+			System.out.println("Successfully treated.");
 		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		}

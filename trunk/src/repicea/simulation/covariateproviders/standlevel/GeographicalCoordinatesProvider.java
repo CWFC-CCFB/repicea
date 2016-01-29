@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * This interface ensures the plot instance can provide its geographical location.
  * @author Mathieu Fortin - June 2014
  */
-public abstract interface GeographicalCoordinatesProvider {
+public interface GeographicalCoordinatesProvider extends ElevationMProvider {
 
 	/**
 	 * This method returns the latitude of the plot.
@@ -35,6 +35,6 @@ public abstract interface GeographicalCoordinatesProvider {
 	 * @return a double
 	 */
 	public double getLongitude();
-	
+		
 	
 }
