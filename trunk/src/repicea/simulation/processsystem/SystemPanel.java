@@ -112,7 +112,6 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 		registerKeyboardAction(deleteListener, deleteStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 		KeyStroke backSpaceStroke = KeyStroke.getKeyStroke(KeyEvent.VK_BACK_SPACE, 0);
 		registerKeyboardAction(deleteListener, backSpaceStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
-//		refreshInterface();
 	}
 	
 	protected void initUI() {

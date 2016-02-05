@@ -56,8 +56,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	
 	protected static enum MessageID implements TextableEnum {
 		SliderTitle("Output flux", "Flux sortant"),
-		Unnamed("Unnamed", "SansNom"),
-		Burn("Burn","Graver");
+		Unnamed("Unnamed", "SansNom");
 
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);

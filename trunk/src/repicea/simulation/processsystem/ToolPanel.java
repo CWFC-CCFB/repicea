@@ -23,6 +23,7 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,8 +31,10 @@ import javax.swing.AbstractButton;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.Icon;
+import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 
 import repicea.gui.REpiceaPanel;
@@ -43,6 +46,20 @@ import repicea.simulation.processsystem.UISetup.BasicMode;
 @SuppressWarnings("serial")
 public class ToolPanel extends REpiceaPanel implements ActionListener, Resettable, REpiceaGUIPermissionProvider {
 
+	protected class KeyEventHandler implements ActionListener {
+
+		protected final ToolButton button;
+		
+		protected KeyEventHandler(ToolButton button) {
+			this.button = button;
+		}
+		
+		@Override
+		public void actionPerformed(ActionEvent arg0) {
+			button.doClick();
+		}
+		
+	}
 	
 	protected class CreateProcessorButton extends DnDCompatibleButton {
 
@@ -90,9 +107,21 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 
 	}
 
+	private final static List<Integer> keyStrokes = new ArrayList<Integer>();
+	static {
+		keyStrokes.add(KeyEvent.VK_F1);
+		keyStrokes.add(KeyEvent.VK_F2);
+		keyStrokes.add(KeyEvent.VK_F3);
+		keyStrokes.add(KeyEvent.VK_F4);
+		keyStrokes.add(KeyEvent.VK_F5);
+		keyStrokes.add(KeyEvent.VK_F6);
+		keyStrokes.add(KeyEvent.VK_F7);
+		keyStrokes.add(KeyEvent.VK_F8);
+		keyStrokes.add(KeyEvent.VK_F9);
+		keyStrokes.add(KeyEvent.VK_F10);
+	}
 	
-	
-	protected final List<ToolButton> selectableButtons;
+	private final List<ToolButton> selectableButtons;
 	protected final List<DnDCompatibleButton> dndButtons;
 
 	private DnDCompatibleButton createProcessorButton;
@@ -105,10 +134,9 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 	protected ToolPanel(SystemPanel owner) {
 		super();
 		this.owner = owner;
-		
+
 		dndButtons = new ArrayList<DnDCompatibleButton>();
 		selectableButtons = new ArrayList<ToolButton>();
-		 
 		init();
 		createUI();
 	}
@@ -120,12 +148,20 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 
 		simpleSelectionButton = new MoveProcessorButton(getGUIPermission());
 		simpleSelectionButton.setName("simpleSelectionButton");		
-		selectableButtons.add(simpleSelectionButton);
+		addSelectableButton(simpleSelectionButton);
 		simpleSelectionButton.setSelected(true);
 		
 		createLinkButton = new CreateLinkButton(getGUIPermission());
 		createLinkButton.setName("createLinkButton");
-		selectableButtons.add(createLinkButton);
+		addSelectableButton(createLinkButton);
+	}
+	
+	protected void addSelectableButton(ToolButton button) {
+		selectableButtons.add(button);
+		if (selectableButtons.size() <= keyStrokes.size()) {
+			KeyStroke stroke = KeyStroke.getKeyStroke(keyStrokes.get(selectableButtons.size() - 1), 0);
+			registerKeyboardAction(new KeyEventHandler(button), stroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
+		}
 	}
 	
 	
@@ -184,12 +220,15 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource() instanceof SelectableJButton) {
 			SelectableJButton selectedButton = (SelectableJButton) arg0.getSource();
-			for (SelectableJButton button : selectableButtons) {
-				button.setSelected(selectedButton.equals(button));
-			}
+			setSelectedButton(selectedButton);
 		}
 	}
 
+	private void setSelectedButton(SelectableJButton selectedButton) {
+		for (SelectableJButton button : selectableButtons) {
+			button.setSelected(selectedButton.equals(button));
+		}
+	}
 
 	@Override
 	public void reset() {
@@ -206,6 +245,27 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 		return owner.getListManager().getGUIPermission();
 	}
 
+//	@Override
+//	public void keyPressed(KeyEvent arg0) {
+//		if (keyStrokes.contains(arg0.getKeyCode())) {
+//			int index = keyStrokes.indexOf(arg0.getKeyCode());
+//			if (index < selectableButtons.size()) {
+//				selectableButtons.get(index).setSelected(true);
+//			}
+//		}
+//	}
+//
+//
+//	@Override
+//	public void keyReleased(KeyEvent arg0) {
+//		int u = 0;
+//	}
+//
+//
+//	@Override
+//	public void keyTyped(KeyEvent arg0) {
+//		int u = 0;
+//	}
 
 
 }
