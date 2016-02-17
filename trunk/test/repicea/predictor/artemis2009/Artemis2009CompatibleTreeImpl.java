@@ -50,7 +50,7 @@ class Artemis2009CompatibleTreeImpl implements Artemis2009CompatibleTree {
 	public String getSpeciesGroupName() {return speciesGroupName;}
 	
 	@Override
-	public int getSubjectId() {return id;}
+	public String getSubjectId() {return ((Integer) id).toString();}
 
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}

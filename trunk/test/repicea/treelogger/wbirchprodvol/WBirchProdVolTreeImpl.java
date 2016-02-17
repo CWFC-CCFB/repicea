@@ -52,7 +52,7 @@ class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 	public ABCDQuality getABCDQuality() {return quality;}
 
 	@Override
-	public int getSubjectId() {return treeID;}
+	public String getSubjectId() {return ((Integer) treeID).toString();}
 
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}

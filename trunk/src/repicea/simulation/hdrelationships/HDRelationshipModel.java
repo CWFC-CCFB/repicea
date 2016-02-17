@@ -151,56 +151,58 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void predictHeightRandomEffects(Stand stand) {
-		boolean originalIsParameterVariabilityEnabled = isParametersVariabilityEnabled;
-		isParametersVariabilityEnabled = false; // temporarily disabled for the prediction of the random effects
-		
-		Matrix matrixG = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
-		
-		Matrix blups;
-		Matrix blupsVariance;
+		if (!blupEstimationDone.contains(stand.getSubjectId())) {
+			boolean originalIsParameterVariabilityEnabled = isParametersVariabilityEnabled;
+			isParametersVariabilityEnabled = false; // temporarily disabled for the prediction of the random effects
+			
+			Matrix matrixG = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
+			
+			Matrix blups;
+			Matrix blupsVariance;
 
-		RegressionElements regElement;
-		
-		// put all the trees for which the height is available in a Vector
-		List<HDRelationshipTree> heightableTrees = new ArrayList<HDRelationshipTree>();
-		Collection trees = getTreesFromStand(stand);
-		if (trees != null && !trees.isEmpty()) {
-			for (Object tree : trees) {
-				if (tree instanceof HDRelationshipTree) {
-					double height = ((HDRelationshipTree) tree).getHeightM();
-					if (height > 1.3) {
-						heightableTrees.add((HDRelationshipTree) tree);
+			RegressionElements regElement;
+			
+			// put all the trees for which the height is available in a Vector
+			List<HDRelationshipTree> heightableTrees = new ArrayList<HDRelationshipTree>();
+			Collection trees = getTreesFromStand(stand);
+			if (trees != null && !trees.isEmpty()) {
+				for (Object tree : trees) {
+					if (tree instanceof HDRelationshipTree) {
+						double height = ((HDRelationshipTree) tree).getHeightM();
+						if (height > 1.3) {
+							heightableTrees.add((HDRelationshipTree) tree);
+						}
+						
 					}
-					
 				}
-			}
-		}			
+			}			
 
-		if (!heightableTrees.isEmpty()) {
-			// matrices for the blup calculation
-			int nbObs = heightableTrees.size();
-			Matrix matZ = new Matrix(nbObs, matrixG.m_iRows);		// design matrix for random effects 
-			Matrix matR = new Matrix(nbObs, nbObs);					// within-tree variance-covariance matrix  
-			Matrix vectRes = new Matrix(nbObs, 1);						// vector of residuals
+			if (!heightableTrees.isEmpty()) {
+				// matrices for the blup calculation
+				int nbObs = heightableTrees.size();
+				Matrix matZ = new Matrix(nbObs, matrixG.m_iRows);		// design matrix for random effects 
+				Matrix matR = new Matrix(nbObs, nbObs);					// within-tree variance-covariance matrix  
+				Matrix vectRes = new Matrix(nbObs, 1);						// vector of residuals
 
-			for (int i = 0; i < nbObs; i++) {
-				Tree t = (Tree) heightableTrees.get(i);
-				double height = t.getHeightM();
-				
-				regElement = fixedEffectsPrediction(stand, t);
-				matZ.setSubMatrix(regElement.Z_tree, i, 0);
-				double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
-				matR.m_afData[i][i] = variance;
-				double residual = height - regElement.fixedPred;
-				vectRes.m_afData[i][0] = residual;
+				for (int i = 0; i < nbObs; i++) {
+					Tree t = (Tree) heightableTrees.get(i);
+					double height = t.getHeightM();
+					
+					regElement = fixedEffectsPrediction(stand, t);
+					matZ.setSubMatrix(regElement.Z_tree, i, 0);
+					double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
+					matR.m_afData[i][i] = variance;
+					double residual = height - regElement.fixedPred;
+					vectRes.m_afData[i][0] = residual;
+				}
+				Matrix matV = matZ.multiply(matrixG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
+				blups = matrixG.multiply(matZ.transpose()).multiply(matV.getInverseMatrix()).multiply(vectRes);							// blup_essHD is redefined according to observed values
+				blupsVariance = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matrixG.getInverseMatrix()).getInverseMatrix();			// blup_essHDvar is redefined according to observed values
+				setBlupsForThisSubject(stand, new GaussianEstimate(blups, blupsVariance));
 			}
-			Matrix matV = matZ.multiply(matrixG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
-			blups = matrixG.multiply(matZ.transpose()).multiply(matV.getInverseMatrix()).multiply(vectRes);							// blup_essHD is redefined according to observed values
-			blupsVariance = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matrixG.getInverseMatrix()).getInverseMatrix();			// blup_essHDvar is redefined according to observed values
-			setBlupsForThisSubject(stand, new GaussianEstimate(blups, blupsVariance));
+			
+			isParametersVariabilityEnabled = originalIsParameterVariabilityEnabled; // set the parameter variability to its original value;
 		}
-		
-		isParametersVariabilityEnabled = originalIsParameterVariabilityEnabled; // set the parameter variability to its original value;
 	}
 
 	protected Enum<?> getErrorGroup(Tree tree) {

@@ -195,12 +195,13 @@ public class Artemis2009PredictorTests {
 			}
 			List<Artemis2009CompatibleTree> trees = ((Artemis2009CompatibleStandImpl) stand).getTrees();
 			for (Artemis2009CompatibleTree tree : trees) {
-				int treeId = tree.getSubjectId();
+				String treeId = tree.getSubjectId();
 				System.out.println("Comparing probability for tree " + treeId + " in stand " + standId);
 				double mortalityProbability = mortalityPredictor.predictEventProbability(stand, tree);
 				double actual = tree.getNumber() * (1 - mortalityProbability);
 				List<ReferenceTree> innerList = ReferenceTreeMap.get(standId);
-				ReferenceTree refTree = innerList.get(treeId);
+				int treeIndex = Integer.parseInt(treeId);
+				ReferenceTree refTree = innerList.get(treeIndex);
 				double expected = refTree.number;
 				Assert.assertEquals("Comparing probability for tree " + treeId + " in stand " + standId, expected, actual, 1E-8);
 				
