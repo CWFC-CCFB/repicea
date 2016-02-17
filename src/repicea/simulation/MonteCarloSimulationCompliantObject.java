@@ -25,9 +25,9 @@ public interface MonteCarloSimulationCompliantObject {
 	 * This method returns an object that makes it possible to identify
 	 * the subject that implements this interface. This id remains constant 
 	 * throughout the Monte Carlo iterations in case of stochastic implementation.
-	 * @return an integer that defines the subject id and that remains constant throughout the simulation
+	 * @return a String that defines the subject id and that remains constant throughout the simulation
 	 */
-	public int getSubjectId();
+	public String getSubjectId();
 	
 	/**
 	 * This method returns the hierarchical levels of the object.

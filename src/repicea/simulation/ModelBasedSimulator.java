@@ -80,7 +80,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject, Serializable {
 
 		private final int monteCarloRealization;
-		private int subjectID;
+		private final String subjectID;
 		
 		protected IntervalNestedInPlotDefinition(MonteCarloSimulationCompliantObject stand, int date) {
 			monteCarloRealization = stand.getMonteCarloRealizationId();
@@ -89,7 +89,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		
 		
 		@Override
-		public int getSubjectId() {
+		public String getSubjectId() {
 			return subjectID;
 		}
 
@@ -104,8 +104,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 			return monteCarloRealization;
 		}
 		
-		private static int getSubjectID(MonteCarloSimulationCompliantObject stand, int date) {
-			return (int) (stand.getSubjectId() * 10000L + date);
+		private static String getSubjectID(MonteCarloSimulationCompliantObject stand, int date) {
+			return stand.getSubjectId() + date;
 		}
 		
 		
@@ -132,18 +132,18 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
 	private final Map<String, GaussianEstimate> defaultRandomEffects;
-	private final Map<String, Map<Integer, Estimate<? extends StandardGaussianDistribution>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
-	protected final List<Integer> blupEstimationDone;
-	private final Map<String, Map<Long, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
+	private final Map<String, Map<String, Estimate<? extends StandardGaussianDistribution>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
+	protected final List<String> blupEstimationDone;
+	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
-	private final Map<Long, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
+	private final Map<String, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
 	
 	protected boolean rememberRandomDeviates = true; 		// default value
 	
 	protected Random random = new Random();
 	
-	private final Map<Long, IntervalNestedInPlotDefinition> intervalLists;
+	private final Map<String, IntervalNestedInPlotDefinition> intervalLists;
 	
 	/**
 	 * General constructor for all combinations of uncertainty sources.
@@ -158,15 +158,15 @@ public abstract class ModelBasedSimulator implements Serializable {
 		this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
-		blupEstimationDone = new ArrayList<Integer>();
+		blupEstimationDone = new ArrayList<String>();
 
 		defaultRandomEffects = new HashMap<String, GaussianEstimate>();
 				
 		simulatedParameters = new HashMap<Integer, Matrix>();
-		simulatedRandomEffects = new HashMap<String, Map<Long, Matrix>>();
-		blupsLibrary = new HashMap<String, Map<Integer, Estimate<? extends StandardGaussianDistribution>>>();
-		simulatedResidualError = new HashMap<Long, GaussianErrorTermList>();
-		intervalLists = new HashMap<Long, IntervalNestedInPlotDefinition>();
+		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
+		blupsLibrary = new HashMap<String, Map<String, Estimate<? extends StandardGaussianDistribution>>>();
+		simulatedResidualError = new HashMap<String, GaussianErrorTermList>();
+		intervalLists = new HashMap<String, IntervalNestedInPlotDefinition>();
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
 		
 		listeners = new CopyOnWriteArrayList<ModelBasedSimulatorListener>();
@@ -201,13 +201,13 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return defaultResidualError.get(enumVar);
 	}
 	
-	protected Map<Integer, Estimate<? extends StandardGaussianDistribution>> getBlupsAtThisLevel(HierarchicalLevel level) {
+	protected Map<String, Estimate<? extends StandardGaussianDistribution>> getBlupsAtThisLevel(HierarchicalLevel level) {
 		return blupsLibrary.get(level.getName());
 	}
 	
 	protected Estimate<? extends StandardGaussianDistribution> getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel level = subject.getHierarchicalLevel();
-		Map<Integer, Estimate<? extends StandardGaussianDistribution>> innerMap = getBlupsAtThisLevel(level);
+		Map<String, Estimate<? extends StandardGaussianDistribution>> innerMap = getBlupsAtThisLevel(level);
 		if (innerMap != null) {
 			return innerMap.get(subject.getSubjectId());
 		}
@@ -215,11 +215,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 	}
 
 	@Deprecated
-	protected void setBlupsForThisSubject(HierarchicalLevel level, int subjectID, Estimate<? extends StandardGaussianDistribution> blups) {
+	protected void setBlupsForThisSubject(HierarchicalLevel level, String subjectID, Estimate<? extends StandardGaussianDistribution> blups) {
 		if (!blupsLibrary.containsKey(level.getName())) {
-			blupsLibrary.put(level.getName(), new HashMap<Integer, Estimate<? extends StandardGaussianDistribution>>());
+			blupsLibrary.put(level.getName(), new HashMap<String, Estimate<? extends StandardGaussianDistribution>>());
 		}
-		Map<Integer, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
+		Map<String, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
 		internalMap.put(subjectID, blups);
 	}
 
@@ -247,8 +247,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * @return an IntervalDefinition instance
 	 */
 	protected synchronized IntervalNestedInPlotDefinition getIntervalNestedInPlotDefinition(MonteCarloSimulationCompliantObject stand, int date) {
-		int subjectID = IntervalNestedInPlotDefinition.getSubjectID(stand, date);
-		long intervalID = getSubjectPlusMonteCarloSpecificId(subjectID, stand.getMonteCarloRealizationId());
+		String subjectID = IntervalNestedInPlotDefinition.getSubjectID(stand, date);
+		String intervalID = getSubjectPlusMonteCarloSpecificId(subjectID, stand.getMonteCarloRealizationId());
 		IntervalNestedInPlotDefinition intDef = intervalLists.get(intervalID);
 		if (intDef == null) {
 			intDef = new IntervalNestedInPlotDefinition(stand, date);
@@ -321,9 +321,9 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 */
 	protected synchronized Matrix simulateDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<?> randomEffectsEstimate) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
-		Map<Long, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
+		Map<String, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
 		if (randomEffectsMap == null) {
-			randomEffectsMap = new HashMap<Long, Matrix>();
+			randomEffectsMap = new HashMap<String, Matrix>();
 			simulatedRandomEffects.put(subjectLevel.getName(), randomEffectsMap);
 		}
 		Matrix randomDeviates = randomEffectsEstimate.getRandomDeviate();
@@ -331,12 +331,12 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return randomDeviates;
 	}
 	
-	protected final long getSubjectPlusMonteCarloSpecificId(MonteCarloSimulationCompliantObject object) {
+	protected final String getSubjectPlusMonteCarloSpecificId(MonteCarloSimulationCompliantObject object) {
 		return getSubjectPlusMonteCarloSpecificId(object.getSubjectId(), object.getMonteCarloRealizationId());
 	}
 
-	private static long getSubjectPlusMonteCarloSpecificId(int subjectID, int monteCarloRealizationID) {
-		return subjectID * 1000000L + monteCarloRealizationID;
+	private static String getSubjectPlusMonteCarloSpecificId(String subjectID, int monteCarloRealizationID) {
+		return subjectID + monteCarloRealizationID;
 	}
 	
 	/**

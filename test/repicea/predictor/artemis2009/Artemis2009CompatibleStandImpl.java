@@ -111,7 +111,7 @@ class Artemis2009CompatibleStandImpl implements Artemis2009CompatibleStand {
 	public double getAreaHa() {return 0.04;}
 
 	@Override
-	public int getSubjectId() {return idString.hashCode();}
+	public String getSubjectId() {return idString;}
 
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}

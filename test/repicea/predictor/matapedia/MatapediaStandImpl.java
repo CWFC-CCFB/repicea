@@ -9,20 +9,20 @@ public class MatapediaStandImpl implements MatapediaStand {
 
 	private boolean upcomingSBW;
 	private boolean sbwPrevious;
-	private int subjectID;
+	private String subjectID;
 	private int monteCarloRealization;
 	private List<MatapediaTree> trees;
 	
 	public MatapediaStandImpl(boolean upcomingSBW, boolean sbwPrevious, int subjectID, int monteCarloRealization) {
 		this.upcomingSBW = upcomingSBW;
 		this.sbwPrevious = sbwPrevious;
-		this.subjectID = subjectID;
+		this.subjectID = ((Integer) subjectID).toString();
 		setMonteCarloRealizationId(monteCarloRealization);
 		trees = new ArrayList<MatapediaTree>();
 	}
 	
 	@Override
-	public int getSubjectId() {
+	public String getSubjectId() {
 		return subjectID;
 	}
 

@@ -19,7 +19,7 @@ class WBirchProdVolStandImpl implements WBirchProdVolStand {
 	}
 	
 	@Override
-	public int getSubjectId() {return plotID.hashCode();}
+	public String getSubjectId() {return plotID;}
 
 	@Override
 	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
