@@ -199,7 +199,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 						Tree t = (Tree) heightableTrees.get(i);
 						double height = t.getHeightM();
 						
-						regElement = fixedEffectsPrediction(stand, t, defaultBeta);
+						regElement = fixedEffectsPrediction((Stand) s, t, defaultBeta);
 						matX_i.setSubMatrix(oXVector.getSubMatrix(DefaultZeroIndex, getParameterEstimates().getTrueParameterIndices()), i, 0);
 						matZ_i.setSubMatrix(regElement.vectorZ, i, 0);
 						double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
