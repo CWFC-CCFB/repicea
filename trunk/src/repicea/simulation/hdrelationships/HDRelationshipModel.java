@@ -225,7 +225,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 					if (res == null) {
 						res = res_i;
 					} else {
-						res.matrixStack(res_i, true);
+						res = res.matrixStack(res_i, true);
 					}
 					if (matG == null) {
 						matG = matGbck.getDeepClone();
