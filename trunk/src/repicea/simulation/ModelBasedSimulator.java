@@ -542,6 +542,16 @@ public abstract class ModelBasedSimulator implements Serializable {
 		this.rememberRandomDeviates = rememberRandomDeviates;
 	}
 
+	/**
+	 * This method returns the blups for the subject or nothing if there is no blups for this subject
+	 * @param subject a MonteCarloSimulationCompliantObject instance
+	 * @return a GaussianEstimate instance or null
+	 */
+	protected GaussianEstimate getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
+		return getParameterEstimates().getBlupsForThisSubject(subject);
+	}
+
+	
 //	/**
 //	 * This method resets all the map instances that contain the simulated random effects, 
 //	 * the residuals and parameter estimates.
