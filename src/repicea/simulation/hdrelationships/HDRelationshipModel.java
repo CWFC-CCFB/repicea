@@ -192,7 +192,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 					int nbObs = heightableTrees.size();
 					Matrix matZ_i = new Matrix(nbObs, matGbck.m_iRows);		// design matrix for random effects 
 					Matrix matR_i = new Matrix(nbObs, nbObs);					// within-tree variance-covariance matrix  
-					Matrix matX_i = new Matrix(nbObs, defaultBeta.m_iRows);					// within-tree variance-covariance matrix  
+					Matrix matX_i = new Matrix(nbObs, getParameterEstimates().getTrueParameterIndices().size());					// within-tree variance-covariance matrix  
 					Matrix res_i = new Matrix(nbObs, 1);						// vector of residuals
 
 					for (int i = 0; i < nbObs; i++) {

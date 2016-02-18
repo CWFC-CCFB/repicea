@@ -25,7 +25,7 @@ public class ModelBasedSimulatorEvent {
 		public static final ModelBasedSimulatorEventProperty DEFAULT_BETA_JUST_SET = new ModelBasedSimulatorEventProperty("DEFAULT_BETA_JUST_SET");
 		public static final ModelBasedSimulatorEventProperty DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET = new ModelBasedSimulatorEventProperty("DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET");
 		public static final ModelBasedSimulatorEventProperty DEFAULT_RESIDUAL_ERROR_JUST_SET = new ModelBasedSimulatorEventProperty("DEFAULT_RESIDUAL_ERROR_JUST_SET");
-		public static final ModelBasedSimulatorEventProperty BLUPS_JUST_SET = new ModelBasedSimulatorEventProperty("BLUPS_AT_THIS_LEVEL_JUST_SET");
+		public static final ModelBasedSimulatorEventProperty BLUPS_AT_THIS_LEVEL_JUST_SET = new ModelBasedSimulatorEventProperty("BLUPS_AT_THIS_LEVEL_JUST_SET");
 		public static final ModelBasedSimulatorEventProperty PARAMETERS_DEVIATE_JUST_GENERATED = new ModelBasedSimulatorEventProperty("PARAMETERS_DEVIATE_JUST_GENERATED");
 		public static final ModelBasedSimulatorEventProperty RANDOM_EFFECT_DEVIATE_JUST_GENERATED = new ModelBasedSimulatorEventProperty("RANDOM_EFFECT_DEVIATE_JUST_GENERATED");
 		public static final ModelBasedSimulatorEventProperty RESIDUAL_ERROR_DEVIATE_JUST_GENERATED = new ModelBasedSimulatorEventProperty("RESIDUAL_ERROR_DEVIATE_JUST_GENERATED");
