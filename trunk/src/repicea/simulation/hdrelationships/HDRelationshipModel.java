@@ -42,7 +42,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 
 	protected static class RegressionElements {
 		public Matrix vectorZ;
-		public Matrix vectorX;
 		public double fixedPred;
 		public Enum<?> species;
 		
@@ -203,7 +202,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 						double height = t.getHeightM();
 						
 						regElement = fixedEffectsPrediction(stand, t, defaultBeta);
-						matX_i.setSubMatrix(regElement.vectorX, i, 0);
+						matX_i.setSubMatrix(oXVector.getSubMatrix(DefaultZeroIndex, getParameterEstimates().getTrueParameterIndices()), i, 0);
 						matZ_i.setSubMatrix(regElement.vectorZ, i, 0);
 						double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
 						matR_i.m_afData[i][i] = variance;
