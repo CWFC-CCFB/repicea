@@ -489,6 +489,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
 		getParameterEstimates().registerBlups(mean, variance, covariance, subjectList);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, null, new Object[]{subjectList, null, parameterEstimates}, this));	// TODO could return something else in the array
 	}
 	
 	/**
