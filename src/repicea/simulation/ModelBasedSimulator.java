@@ -45,6 +45,11 @@ import repicea.stats.estimates.GaussianEstimate;
 @SuppressWarnings("serial")
 public abstract class ModelBasedSimulator implements Serializable {
 
+	protected static final List<Integer> DefaultZeroIndex = new ArrayList<Integer>();
+	static {
+		DefaultZeroIndex.add(0);
+	}
+	
 	/**
 	 * The SASParameterEstimate class is customized for SAS outputs. The major difference
 	 * is related to how the random deviates are calculated. Since SAS produces false estimates,
@@ -119,8 +124,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	public class ParameterEstimates extends SASParameterEstimate {
 		
-		private final List<Integer> columnIndex = new ArrayList<Integer>();
-		
 		private final int firstBlupIndex;
 		private final boolean sasEstimateDerived;
 		private final Matrix fixedEffectsPart;
@@ -139,7 +142,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 				}
 			}
 			subjectIndex = new HashMap<String, Map<String, List<Integer>>>();
-			columnIndex.add(0);
 		}
 		
 		protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
@@ -170,7 +172,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		protected GaussianEstimate getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 			if (doBlupsExistForThisSubject(subject)) {
 				List<Integer> rowIndices = subjectIndex.get(subject.getHierarchicalLevel().getName()).get(subject.getSubjectId());
-				return new GaussianEstimate(getMean().getSubMatrix(rowIndices, columnIndex), getVariance().getSubMatrix(rowIndices, rowIndices));
+				return new GaussianEstimate(getMean().getSubMatrix(rowIndices, DefaultZeroIndex), getVariance().getSubMatrix(rowIndices, rowIndices));
 			} else {
 				return null;
 			}
@@ -193,6 +195,16 @@ public abstract class ModelBasedSimulator implements Serializable {
 		}
 		
 		protected Matrix getFixedEffectsPart() {return fixedEffectsPart;}
+		
+		/**
+		 * This method returns the indices of the true parameters in case of a SAS implementation. 
+		 * @return a List of Integer which is a copy of the original list to avoid modifications.
+		 */
+		public List<Integer> getTrueParameterIndices() {
+			List<Integer> copyList = new ArrayList<Integer>();
+			copyList.addAll(trueParameterIndices);
+			return copyList;
+		}
 	}
 		
 	public static enum ErrorTermGroup {
