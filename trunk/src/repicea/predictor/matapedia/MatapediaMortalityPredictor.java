@@ -90,7 +90,7 @@ public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulat
 			Matrix meanRandomEffect = new Matrix(1,1);
 			setDefaultRandomEffects(HierarchicalLevel.INTERVAL_NESTED_IN_PLOT, new GaussianEstimate(meanRandomEffect, randomEffectVariance));
 			GaussianEstimate estimate = new SASParameterEstimate(defaultBetaMean, defaultBetaVariance);
-			setDefaultBeta(estimate); 
+			setParameterEstimates(estimate); 
 			oXVector = new Matrix(1, estimate.getMean().m_iRows);
 			
 		} catch (Exception e) {

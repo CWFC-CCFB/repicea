@@ -607,13 +607,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 */
 	public void setSubMatrix(Matrix m, int i, int j) {
 		setSubMatrix(m.m_afData, i, j);
-//		for (int ii = 0; ii < m.m_iRows; ii++) {
-//			for (int jj = 0; jj < m.m_iCols; jj++) {
-//				m_afData[i + ii][j + jj] = m.m_afData[ii][jj];
-//			}
-//		}
 	}
 
+
+	
+	
 	/**
 	 * This method makes a square symmetric matrix from a vector.
 	 * Checks are implemented to make sure the vector has the appropriate
@@ -805,6 +803,27 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 		return oMat;
 	}
+	
+	/**
+	 * This method replaces the elements of the matrix designated through the indices by the values
+	 * in the row vector m.
+	 * @param indices a List of Integer representing the indices
+	 * @param m a Matrix instance
+	 */
+	public void setElements(List<Integer> indices, Matrix m) {
+		if (!m.isRowVector()) {
+			throw new InvalidParameterException("Parameter m must be a row vector!");
+		}
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				if (indices.contains(i * m_iCols + j)) {
+					m_afData[i][j] = m.m_afData[indices.indexOf(i * m_iCols + j)][0];
+				}
+			}
+		}
+	}
+
+
 
 	/**
 	 * This method returns a List of integers, which represent the index of the elements

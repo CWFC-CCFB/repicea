@@ -18,8 +18,15 @@
  */
 package repicea.simulation.hdrelationships;
 
+import java.util.List;
+
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 
 public abstract interface HDRelationshipStand extends MonteCarloSimulationCompliantObject {
-
+	
+	/**
+	 * This method returns all the stands for the random effect blup estimation
+	 * @return a List of HDRelationshipStand instances
+	 */
+	public List<HDRelationshipStand> getAllHDStands();
 }

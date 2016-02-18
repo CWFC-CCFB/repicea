@@ -91,7 +91,7 @@ public class WBirchProdVolPredictor extends ModelBasedSimulator {
 			sigma2Res = varParms.m_afData[varParms.m_iRows - 1][0];
 			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0).matrixDiagonal(); 
 
-			setDefaultBeta(new GaussianEstimate(beta, omega));
+			setParameterEstimates(new GaussianEstimate(beta, omega));
 		} catch (Exception e) {
 			System.out.println("Unable to load parameters!");
 		}

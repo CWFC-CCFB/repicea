@@ -47,7 +47,7 @@ class Artemis2009RecruitDiameterInternalPredictor extends ModelBasedSimulator {
 	
 	protected void setBeta(Matrix beta, Matrix omega) {
 		GaussianEstimate estimate = new SASParameterEstimate(beta, omega);
-		setDefaultBeta(estimate);
+		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}
 	
