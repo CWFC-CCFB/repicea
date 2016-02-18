@@ -162,6 +162,14 @@ public abstract class ModelBasedSimulator implements Serializable {
 					innerMap.put(subjectId, new ArrayList<Integer>());
 				}
 				innerMap.get(subjectId).add(firstBlupIndex + i);
+				
+				GaussianEstimate blupEstimate = getBlupsForThisSubject(subject);
+				Estimate<? extends StandardGaussianDistribution> defaultRandomEffect = ModelBasedSimulator.this.getDefaultRandomEffects(subject.getHierarchicalLevel());
+				ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
+						null, 
+						new Object[]{defaultRandomEffect, blupEstimate.getMean(), levelName, subjectId}, 
+						ModelBasedSimulator.this);
+				fireModelBasedSimulatorEvent(event);
 			}
 		}
 		
@@ -190,7 +198,14 @@ public abstract class ModelBasedSimulator implements Serializable {
 				Map<String, Matrix> innerMap = ModelBasedSimulator.this.simulatedRandomEffects.get(levelName);
 				Map<String, List<Integer>> subjectList = subjectIndex.get(levelName);
 				for (String subjectId : subjectList.keySet()) {
-					innerMap.put(subjectId, simulatedDeviate.getSubMatrix(subjectList.get(subjectId), columnIndex));
+					Matrix randomDeviates = simulatedDeviate.getSubMatrix(subjectList.get(subjectId), columnIndex);
+					innerMap.put(subjectId, randomDeviates);
+					Estimate<? extends StandardGaussianDistribution> defaultRandomEffect = ModelBasedSimulator.this.defaultRandomEffects.get(levelName);
+					ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
+							null, 
+							new Object[]{defaultRandomEffect, randomDeviates.getDeepClone(), levelName, subjectId}, 
+							ModelBasedSimulator.this);
+					fireModelBasedSimulatorEvent(event);
 				}
 			}
 		}
@@ -279,6 +294,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> estimate) {
 		defaultRandomEffects.put(level.getName(), estimate);
+		// TODO set the next line to notify the diameter increment model
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, estimate}, this));
 	}
 	
@@ -356,13 +372,15 @@ public abstract class ModelBasedSimulator implements Serializable {
 		Estimate<? extends StandardGaussianDistribution> originalRandomEffects;
 		if (getParameterEstimates().doBlupsExistForThisSubject(subject)) {
 			getParameterEstimates().simulateBlups(subject);
-			randomDeviates = simulatedRandomEffects.get(subjectLevel).get(subject.getSubjectId());
-			originalRandomEffects = getParameterEstimates().getBlupsForThisSubject(subject);
 		} else {
 			randomDeviates = simulateDeviatesForRandomEffectsOfThisSubject(subject, defaultRandomEffects.get(subjectLevel.getName()));
 			originalRandomEffects = getDefaultRandomEffects(subjectLevel);
+			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
+					null, 
+					new Object[]{originalRandomEffects, randomDeviates.getDeepClone(), subjectLevel.getName(), subject.getSubjectId()},
+					this);
+			fireModelBasedSimulatorEvent(event);
 		}
-		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, null, new Object[]{subject, originalRandomEffects, randomDeviates.getDeepClone()}, this));
 	}
 	
 	/**
@@ -489,7 +507,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
 		getParameterEstimates().registerBlups(mean, variance, covariance, subjectList);
-		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, null, new Object[]{subjectList, null, parameterEstimates}, this));	// TODO could return something else in the array
 	}
 	
 	/**
