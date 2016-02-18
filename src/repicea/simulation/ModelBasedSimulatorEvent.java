@@ -32,11 +32,14 @@ public class ModelBasedSimulatorEvent {
 
 		private String propertyName;
 
-		private ModelBasedSimulatorEventProperty(String propertyName) {
+		protected ModelBasedSimulatorEventProperty(String propertyName) {
 			this.propertyName = propertyName;
 		}
 		
 		public String getPropertyName() {return propertyName;}
+		
+		@Override
+		public String toString() {return getPropertyName();}
 	}
 	
 	private final String propertyName;
