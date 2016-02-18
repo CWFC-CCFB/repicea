@@ -33,6 +33,7 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
+import repicea.stats.distributions.StandardGaussianDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -226,7 +227,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private ParameterEstimates parameterEstimates;
 	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
-	private final Map<String, GaussianEstimate> defaultRandomEffects;
+	private final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
 	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
@@ -251,7 +252,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
-		defaultRandomEffects = new HashMap<String, GaussianEstimate>();
+		defaultRandomEffects = new HashMap<String, Estimate<? extends StandardGaussianDistribution>>();
 				
 		simulatedParameters = new HashMap<Integer, Matrix>();
 		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
@@ -281,7 +282,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, estimate}, this));
 	}
 	
-	protected GaussianEstimate getDefaultRandomEffects(HierarchicalLevel level) {return defaultRandomEffects.get(level.getName());}
+	protected Estimate<? extends StandardGaussianDistribution> getDefaultRandomEffects(HierarchicalLevel level) {return defaultRandomEffects.get(level.getName());}
 	
 	protected void setDefaultResidualError(Enum<?> enumVar, GaussianErrorTermEstimate estimate) {
 		defaultResidualError.put(enumVar, estimate);
@@ -352,7 +353,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		
 		Matrix randomDeviates;
-		GaussianEstimate originalRandomEffects;
+		Estimate<? extends StandardGaussianDistribution> originalRandomEffects;
 		if (getParameterEstimates().doBlupsExistForThisSubject(subject)) {
 			getParameterEstimates().simulateBlups(subject);
 			randomDeviates = simulatedRandomEffects.get(subjectLevel).get(subject.getSubjectId());
