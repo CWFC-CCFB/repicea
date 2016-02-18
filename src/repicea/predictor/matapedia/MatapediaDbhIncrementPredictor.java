@@ -60,7 +60,7 @@ public class MatapediaDbhIncrementPredictor extends ModelBasedSimulator implemen
 			Matrix defaultBetaMean = ParameterLoader.loadVectorFromFile(betaFilename).get();
 			Matrix defaultBetaVariance = ParameterLoader.loadVectorFromFile(omegaFilename).get().squareSym();
 			
-			setDefaultBeta(new SASParameterEstimate(defaultBetaMean, defaultBetaVariance)); 
+			setParameterEstimates(new SASParameterEstimate(defaultBetaMean, defaultBetaVariance)); 
 			
 			Matrix covParms =  ParameterLoader.loadVectorFromFile(covparmsFilename).get();
 			Matrix plotRandomEffectVariance = covParms.getSubMatrix(0, 0, 0, 0);

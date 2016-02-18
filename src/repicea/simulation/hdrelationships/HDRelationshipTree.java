@@ -22,7 +22,9 @@ import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.treelevel.HeightMProvider;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
 
-public abstract interface HDRelationshipTree extends MonteCarloSimulationCompliantObject, IndexableErrorTerm, HeightMProvider {
+public abstract interface HDRelationshipTree extends MonteCarloSimulationCompliantObject, 
+													IndexableErrorTerm, 
+													HeightMProvider {
 
 	/**
 	 * This method returns the error group in case of different error correlation structure. For instance, if coniferous species 
