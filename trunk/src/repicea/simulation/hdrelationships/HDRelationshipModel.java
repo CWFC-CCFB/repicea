@@ -176,7 +176,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			List<MonteCarloSimulationCompliantObject> subjectList = new ArrayList<MonteCarloSimulationCompliantObject>();
 			
 			for (HDRelationshipStand s : stands) {
-				Collection trees = getTreesFromStand(s);
+				Collection trees = getTreesFromStand((Stand) s);
 				heightableTrees.clear();
 				if (trees != null && !trees.isEmpty()) {
 					for (Object tree : trees) {
@@ -266,7 +266,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 * @param stand a Stand instance
 	 * @return return a Collection of Tree instances
 	 */
-	protected abstract Collection<Tree> getTreesFromStand(HDRelationshipStand stand);
+	protected abstract Collection<Tree> getTreesFromStand(Stand stand);
 	
 	/**
 	 * This method computes the fixed effect prediction and put the prediction, the Z vector,
