@@ -214,6 +214,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected final CopyOnWriteArrayList<ModelBasedSimulatorListener> listeners;
 	
+	protected boolean areBlupsEstimated;
+
 	// set by the constructor
 	protected boolean isRandomEffectsVariabilityEnabled;
 	protected boolean isParametersVariabilityEnabled;
@@ -225,8 +227,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
 	private final Map<String, GaussianEstimate> defaultRandomEffects;
-//	private final Map<String, Map<String, Estimate<? extends StandardGaussianDistribution>>> blupsLibrary;	// refers to the subject id only - this map contains the blups and their variances whenever these can be estimated
-//	protected final List<String> blupEstimationDone;
 	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
@@ -251,13 +251,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 		this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
-//		blupEstimationDone = new ArrayList<String>();
-
 		defaultRandomEffects = new HashMap<String, GaussianEstimate>();
 				
 		simulatedParameters = new HashMap<Integer, Matrix>();
 		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
-//		blupsLibrary = new HashMap<String, Map<String, Estimate<? extends StandardGaussianDistribution>>>();
+
 		simulatedResidualError = new HashMap<String, GaussianErrorTermList>();
 		intervalLists = new HashMap<String, IntervalNestedInPlotDefinition>();
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
@@ -294,33 +292,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return defaultResidualError.get(enumVar);
 	}
 	
-//	protected Map<String, Estimate<? extends StandardGaussianDistribution>> getBlupsAtThisLevel(HierarchicalLevel level) {
-//		return blupsLibrary.get(level.getName());
-//	}
-	
-//	protected Estimate<? extends StandardGaussianDistribution> getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
-//		HierarchicalLevel level = subject.getHierarchicalLevel();
-//		Map<String, Estimate<? extends StandardGaussianDistribution>> innerMap = getBlupsAtThisLevel(level);
-//		if (innerMap != null) {
-//			return innerMap.get(subject.getSubjectId());
-//		}
-//		return null;
-//	}
-//
-//	@Deprecated
-//	protected void setBlupsForThisSubject(HierarchicalLevel level, String subjectID, Estimate<? extends StandardGaussianDistribution> blups) {
-//		if (!blupsLibrary.containsKey(level.getName())) {
-//			blupsLibrary.put(level.getName(), new HashMap<String, Estimate<? extends StandardGaussianDistribution>>());
-//		}
-//		Map<String, Estimate<? extends StandardGaussianDistribution>> internalMap = getBlupsAtThisLevel(level);
-//		internalMap.put(subjectID, blups);
-//	}
-
-//	protected void setBlupsForThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<? extends StandardGaussianDistribution> blups) {
-//		setBlupsForThisSubject(subject.getHierarchicalLevel(), subject.getSubjectId(), blups);
-//		GaussianEstimate originalRandomEffects = getDefaultRandomEffects(subject.getHierarchicalLevel());
-//		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_AT_THIS_LEVEL_JUST_SET, null, new Object[]{subject, originalRandomEffects, blups}, this));
-//	}
 	
 	/**
 	 * This method generates a stand-specific vector of model parameters using matrix Omega.
@@ -329,8 +300,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		getParameterEstimates().simulateBlups(subject);
 		Matrix parametersForThisRealization = simulatedParameters.get(subject.getMonteCarloRealizationId());
-//		Matrix subMatrix = parametersForThisRealization.getSubMatrix(0, getDefaultBeta().firstBlupIndex - 1, 0, 0);
-//		simulatedParameters.put(subject.getMonteCarloRealizationId(), parametersForThisRealization);
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, null, new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, this));
 	}
 
@@ -434,7 +403,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 			if (!rememberRandomDeviates) {
 				simulatedRandomEffects.clear();
 			}
-//			if (simulatedRandomEffects.get(subjectLevel) == null ||	!simulatedRandomEffects.get(subjectLevel).containsKey(getSubjectPlusMonteCarloSpecificId(subject))) {		// the null condition is necessary otherwise the second condition could throw an exception
 			if (!doRandomDeviatesExistForThisSubject(subject)) {
 				setSpecificRandomEffectsForThisSubject(subject);
 			}
@@ -443,11 +411,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 			GaussianEstimate blups = getParameterEstimates().getBlupsForThisSubject(subject);
 			if (blups != null) {
 				return blups.getMean();
-//			}
-//			if (blupsLibrary.get(subjectLevel.getName()) != null && blupsLibrary.get(subjectLevel.getName()).containsKey(subject.getSubjectId())) {		// the first condition is necessary otherwise the second contidion could throw an exception
-//				return blupsLibrary.get(subjectLevel.getName()).get(subject.getSubjectId()).getMean();
-//			if (getDefaultBeta().doesBlupsExistForThisSubject(subjectLevel,subject.getSubjectId())) {		// the first condition is necessary otherwise the second contidion could throw an exception
-//				return blupsLibrary.get(subjectLevel.getName()).get(subject.getSubjectId()).getMean();
 			} else {
 				return defaultRandomEffects.get(subjectLevel.getName()).getMean();
 			}

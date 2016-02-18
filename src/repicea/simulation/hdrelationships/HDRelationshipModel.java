@@ -55,8 +55,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		}
 	}
 
-	protected boolean areBlupsEstimated;
-	
 	protected HDRelationshipModel(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
 	}
