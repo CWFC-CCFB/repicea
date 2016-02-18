@@ -277,7 +277,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected ParameterEstimates getParameterEstimates() {return parameterEstimates;}
 	
-	protected void setDefaultRandomEffects(HierarchicalLevel level, GaussianEstimate estimate) {
+	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> estimate) {
 		defaultRandomEffects.put(level.getName(), estimate);
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, estimate}, this));
 	}
