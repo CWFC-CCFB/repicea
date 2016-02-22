@@ -18,6 +18,8 @@
  */
 package repicea.stats.distributions;
 
+import java.security.InvalidParameterException;
+
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
@@ -95,6 +97,9 @@ public class StandardGaussianDistribution implements Distribution {
 	}
 
 	protected void setVariance(Matrix sigma2) {
+		if (!sigma2.isSymmetric()) {
+			throw new InvalidParameterException("The variance-covariance matrix must be symmetric!");
+		}
 		this.sigma2 = sigma2;
 		lowerCholTriangle = null;
 	}
