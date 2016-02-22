@@ -166,7 +166,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 					innerMap.put(subjectId, new ArrayList<Integer>());
 				}
 				for (int j = 0; j < nbBlupsPerSubject; j++) {
-					innerMap.get(subjectId).add(++index);
+					innerMap.get(subjectId).add(index++);
 				}
 			}
 			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
