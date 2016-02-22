@@ -26,6 +26,7 @@ import org.apache.commons.math.random.RandomDataImpl;
 
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
@@ -46,7 +47,7 @@ class Artemis2009RecruitDiameterInternalPredictor extends ModelBasedSimulator {
 
 	
 	protected void setBeta(Matrix beta, Matrix omega) {
-		GaussianEstimate estimate = new SASParameterEstimate(beta, omega);
+		GaussianEstimate estimate = new SASParameterEstimates(beta, omega);
 		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}

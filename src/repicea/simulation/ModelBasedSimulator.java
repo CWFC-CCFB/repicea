@@ -28,8 +28,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulatorEvent.ModelBasedSimulatorEventProperty;
-import repicea.stats.Distribution;
-import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
@@ -50,44 +48,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 	static {
 		DefaultZeroIndex.add(0);
 	}
-	
-	/**
-	 * The SASParameterEstimate class is customized for SAS outputs. The major difference
-	 * is related to how the random deviates are calculated. Since SAS produces false estimates,
-	 * such as 0 for reference class or 1 for offset, the getRandomDeviate() method makes sure
-	 * the false estimate are not accounted for during the simulation of the random deviates.
-	 * @author Mathieu Fortin - September 2012
-	 */
-	public static class SASParameterEstimate extends GaussianEstimate {
-		
-		protected final List<Integer> trueParameterIndices;
-		
-		/**
-		 * Constructor.
-		 * @param mean a vector that corresponds to the mean value
-		 * @param variance a symmetric positive definite matrix 
-		 */
-		public SASParameterEstimate(Matrix mean, Matrix variance) {
-			super(mean, variance);
-			trueParameterIndices = new ArrayList<Integer>();
-			for (int i = 0; i < mean.m_iRows; i++) {
-				if (mean.m_afData[i][0] != 0.0 && mean.m_afData[i][0] != 1.0) { 
-					trueParameterIndices.add(i);
-				}
-			}
-		}
-		
-		@Override
-		public Matrix getRandomDeviate() {
-			Matrix lowerChol = getDistribution().getStandardDeviation();
-			Matrix randomVector = StatisticalUtility.drawRandomVector(lowerChol.m_iRows, Distribution.Type.GAUSSIAN);
-			Matrix oMat = lowerChol.multiply(randomVector);
-			Matrix deviate = getMean().getDeepClone();
-			deviate.addElementsAt(trueParameterIndices, oMat);
-			return deviate;
-		}
-	}
-	
 	
 	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject, Serializable {
 
@@ -122,128 +82,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	}
 
 	
-	public class ParameterEstimates extends SASParameterEstimate {
-		
-		private final int firstBlupIndex;
-		private final boolean sasEstimateDerived;
-		private final Matrix fixedEffectsPart;
-		
-		private final Map<String, Map<String, List<Integer>>> subjectIndex;
-		
-		protected ParameterEstimates(GaussianEstimate estimate) {
-			super(estimate.getMean(), estimate.getVariance());
-			fixedEffectsPart = estimate.getMean();
-			sasEstimateDerived = estimate instanceof SASParameterEstimate;
-			firstBlupIndex = getMean().m_iRows;
-			if (!sasEstimateDerived) {
-				trueParameterIndices.clear();
-				for (int i = 0; i < firstBlupIndex; i++) {
-					trueParameterIndices.add(i);
-				}
-			}
-			subjectIndex = new HashMap<String, Map<String, List<Integer>>>();
-		}
-		
-		protected void registerBlups(Matrix mean, 
-				Matrix variance, 
-				Matrix covariance, 
-				List<MonteCarloSimulationCompliantObject> subjectList) {
-			int nbBlupsPerSubject = mean.m_iRows / subjectList.size();
-			Matrix newMean = getMean().matrixStack(mean, true);
-			Matrix newVariance = getVariance().matrixStack(covariance.transpose(), false).matrixStack(covariance.matrixStack(variance, false), true);
-			setMean(newMean);
-			setVariance(newVariance);
-			int index = firstBlupIndex;
-			for (int i = 0; i < subjectList.size(); i++) {
-				MonteCarloSimulationCompliantObject subject = subjectList.get(i);
-				String levelName = subject.getHierarchicalLevel().getName();
-				if (!subjectIndex.containsKey(levelName)) {
-					subjectIndex.put(levelName, new HashMap<String, List<Integer>>());
-				}
-				Map<String, List<Integer>> innerMap = subjectIndex.get(levelName);
-				String subjectId = subject.getSubjectId();
-				if (!innerMap.containsKey(subjectId)) {
-					innerMap.put(subjectId, new ArrayList<Integer>());
-				}
-				for (int j = 0; j < nbBlupsPerSubject; j++) {
-					innerMap.get(subjectId).add(index++);
-				}
-			}
-			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
-					null, 
-					new Object[]{ModelBasedSimulator.this.defaultRandomEffects, mean, subjectList}, 
-					ModelBasedSimulator.this);
-			fireModelBasedSimulatorEvent(event);
-			
-		}
-		
-		
-		protected boolean doBlupsExistForThisSubject(MonteCarloSimulationCompliantObject subject) {
-			HierarchicalLevel level = subject.getHierarchicalLevel();
-			return subjectIndex.containsKey(level.getName()) && subjectIndex.get(level.getName()).containsKey(subject.getSubjectId());
-		}
-
-		protected GaussianEstimate getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
-			if (doBlupsExistForThisSubject(subject)) {
-				List<Integer> rowIndices = subjectIndex.get(subject.getHierarchicalLevel().getName()).get(subject.getSubjectId());
-				return new GaussianEstimate(getMean().getSubMatrix(rowIndices, DefaultZeroIndex), getVariance().getSubMatrix(rowIndices, rowIndices));
-			} else {
-				return null;
-			}
-		}
-		
-		protected void simulateBlups(MonteCarloSimulationCompliantObject subject) {
-			Matrix simulatedDeviate = getRandomDeviate();
-			ModelBasedSimulator.this.simulatedParameters.put(subject.getMonteCarloRealizationId(), simulatedDeviate.getSubMatrix(0, firstBlupIndex - 1, 0, 0));
-			Matrix parametersForThisRealization = simulatedParameters.get(subject.getMonteCarloRealizationId());
-			fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, 
-					null, 
-					new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, 
-					ModelBasedSimulator.this));
-			List<Integer> columnIndex = new ArrayList<Integer>();
-			for (String levelName : subjectIndex.keySet()) {
-				if (!ModelBasedSimulator.this.simulatedRandomEffects.containsKey(levelName)) {
-					ModelBasedSimulator.this.simulatedRandomEffects.put(levelName, new HashMap<String, Matrix>());
-				}
-				Map<String, Matrix> innerMap = ModelBasedSimulator.this.simulatedRandomEffects.get(levelName);
-				Map<String, List<Integer>> subjectList = subjectIndex.get(levelName);
-				for (String subjectId : subjectList.keySet()) {
-					Matrix randomDeviates = simulatedDeviate.getSubMatrix(subjectList.get(subjectId), columnIndex);
-					innerMap.put(subjectId, randomDeviates);
-					Estimate<? extends StandardGaussianDistribution> defaultRandomEffect = ModelBasedSimulator.this.defaultRandomEffects.get(levelName);
-					ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
-							null, 
-							new Object[]{defaultRandomEffect, randomDeviates.getDeepClone(), levelName, subjectId}, 
-							ModelBasedSimulator.this);
-					fireModelBasedSimulatorEvent(event);
-				}
-			}
-		}
-		
-		protected Matrix getFixedEffectsPart() {return fixedEffectsPart;}
-		
-		/**
-		 * This method returns the indices of the true parameters in case of a SAS implementation. 
-		 * @return a List of Integer which is a copy of the original list to avoid modifications.
-		 */
-		public List<Integer> getTrueParameterIndices() {
-			List<Integer> copyList = new ArrayList<Integer>();
-			copyList.addAll(trueParameterIndices);
-			return copyList;
-		}
-		
-		/**
-		 * This method returns the number of fixed-effect parameters in the model.
-		 * @return an integer
-		 */
-		public int getNumberOfFixedEffectParameters() {
-			return getFixedEffectsPart().m_iRows;
-		}
-	}
-		
-	public static enum ErrorTermGroup {
-		Default
-	}
+	public static enum ErrorTermGroup {Default}
 	
 	
 	protected final CopyOnWriteArrayList<ModelBasedSimulatorListener> listeners;
@@ -257,14 +96,14 @@ public abstract class ModelBasedSimulator implements Serializable {
 		
 	protected Matrix oXVector;
 
-	private ParameterEstimates parameterEstimates;
-	private final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
+	private ModelParameterEstimates parameterEstimates;
+	final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
-	private final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
-	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
+	final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
+	final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
-	private final Map<String, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
+	final Map<String, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
 	
 	protected boolean rememberRandomDeviates = true; 		// default value
 	
@@ -308,11 +147,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 	}
 
 	protected void setParameterEstimates(GaussianEstimate gaussianEstimate) {
-		this.parameterEstimates = new ParameterEstimates(gaussianEstimate);
+		this.parameterEstimates = new ModelParameterEstimates(gaussianEstimate, this);
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, parameterEstimates, this));
 	}
 	
-	protected ParameterEstimates getParameterEstimates() {return parameterEstimates;}
+	protected ModelParameterEstimates getParameterEstimates() {return parameterEstimates;}
 	
 	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> newEstimate) {
 		Estimate<? extends StandardGaussianDistribution> formerEstimate = defaultRandomEffects.get(level.getName());

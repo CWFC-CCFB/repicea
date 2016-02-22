@@ -26,6 +26,7 @@ import java.util.Map;
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.SASParameterEstimates;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -34,18 +35,16 @@ import repicea.stats.estimates.GaussianEstimate;
 class Artemis2009DiameterIncrementInternalPredictor extends ModelBasedSimulator { 
 
 	private final List<Integer> effectList;
-//	private final List<Integer> simulationDates;
 	private final Map<Integer, Double> variancesMap;
 	
 	protected Artemis2009DiameterIncrementInternalPredictor(boolean isParametersVariabilityEnabled,	boolean isOtherRandomEffectsVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isOtherRandomEffectsVariabilityEnabled, isOtherRandomEffectsVariabilityEnabled);
 		effectList = new ArrayList<Integer>();
 		variancesMap = new HashMap<Integer, Double>();
-//		this.simulationDates = simulationDates;
 	}
 
 	protected void setBeta(Matrix beta, Matrix omega) {
-		GaussianEstimate estimate = new SASParameterEstimate(beta, omega);
+		GaussianEstimate estimate = new SASParameterEstimates(beta, omega);
 		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}

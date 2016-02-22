@@ -24,6 +24,7 @@ import repicea.simulation.GrowthModel;
 import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.ModelBasedSimulator;
 import repicea.simulation.ParameterLoader;
+import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.util.ObjectUtility;
@@ -60,7 +61,7 @@ public class MatapediaDbhIncrementPredictor extends ModelBasedSimulator implemen
 			Matrix defaultBetaMean = ParameterLoader.loadVectorFromFile(betaFilename).get();
 			Matrix defaultBetaVariance = ParameterLoader.loadVectorFromFile(omegaFilename).get().squareSym();
 			
-			setParameterEstimates(new SASParameterEstimate(defaultBetaMean, defaultBetaVariance)); 
+			setParameterEstimates(new SASParameterEstimates(defaultBetaMean, defaultBetaVariance)); 
 			
 			Matrix covParms =  ParameterLoader.loadVectorFromFile(covparmsFilename).get();
 			Matrix plotRandomEffectVariance = covParms.getSubMatrix(0, 0, 0, 0);

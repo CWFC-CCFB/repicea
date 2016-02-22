@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.SASParameterEstimates;
 import repicea.stats.distributions.GammaFunction;
 import repicea.stats.estimates.GaussianEstimate;
 //import org.apache.commons.math.special.Gamma;
@@ -42,7 +43,7 @@ class Artemis2009RecruitmentNumberInternalPredictor extends ModelBasedSimulator 
 	}
 	
 	protected void setBeta(Matrix beta, Matrix omega) {
-		GaussianEstimate estimate = new SASParameterEstimate(beta, omega);
+		GaussianEstimate estimate = new SASParameterEstimates(beta, omega);
 		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}

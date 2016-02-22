@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.simulation.LogisticModelBasedSimulator;
+import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
@@ -40,7 +41,7 @@ class Artemis2009RecruitmentOccurrenceInternalPredictor extends LogisticModelBas
 	}
 	
 	protected void setBeta(Matrix beta, Matrix omega) {
-		GaussianEstimate estimate = new SASParameterEstimate(beta, omega);
+		GaussianEstimate estimate = new SASParameterEstimates(beta, omega);
 		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}
