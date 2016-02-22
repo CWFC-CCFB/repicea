@@ -97,7 +97,7 @@ public class StandardGaussianDistribution implements Distribution {
 	}
 
 	protected void setVariance(Matrix sigma2) {
-		if (!sigma2.isSymmetric()) {
+		if (sigma2 != null && !sigma2.isSymmetric()) {
 			throw new InvalidParameterException("The variance-covariance matrix must be symmetric!");
 		}
 		this.sigma2 = sigma2;
