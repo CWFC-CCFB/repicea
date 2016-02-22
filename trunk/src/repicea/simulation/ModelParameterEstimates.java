@@ -63,7 +63,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		int indexFirstBlup = getMean().m_iRows;
 		int nbBlupsPerSubject = mean.m_iRows / subjectList.size();
 		for (int i = 0; i < mean.m_iRows; i++) {
-			estimatedParameterIndices.add(i + estimatedFixedEffectParameterIndices.size());
+			estimatedParameterIndices.add(i + getNumberOfFixedEffectParameters());
 		}
 		Matrix newMean = getMean().matrixStack(mean, true);
 		Matrix newVariance = getVariance().matrixStack(covariance.transpose(), false).matrixStack(covariance.matrixStack(variance, false), true);
