@@ -83,7 +83,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 			Matrix randomVector = StatisticalUtility.drawRandomVector(lowerChol.m_iRows, Distribution.Type.GAUSSIAN);
 			Matrix oMat = lowerChol.multiply(randomVector);
 			Matrix deviate = getMean().getDeepClone();
-			deviate.setElements(trueParameterIndices, oMat);
+			deviate.addElementsAt(trueParameterIndices, oMat);
 //			return StatisticalUtility.performSpecialAdd(getMean(), oMat);
 			return deviate;
 		}
