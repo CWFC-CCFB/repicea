@@ -52,7 +52,7 @@ public class SASParameterEstimates extends GaussianEstimate {
 				estimatedParameterIndices.add(i);
 			}
 		}
-		if (variance.m_iRows != estimatedParameterIndices.size()) {
+		if (variance!= null  && variance.m_iRows != estimatedParameterIndices.size()) {
 			throw new InvalidParameterException("SASParameterEstimates: the variance matrix is not compatible with the vector of parameter estimates");
 		}
 	}
