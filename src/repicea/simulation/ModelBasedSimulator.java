@@ -190,6 +190,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 		protected void simulateBlups(MonteCarloSimulationCompliantObject subject) {
 			Matrix simulatedDeviate = getRandomDeviate();
 			ModelBasedSimulator.this.simulatedParameters.put(subject.getMonteCarloRealizationId(), simulatedDeviate.getSubMatrix(0, firstBlupIndex - 1, 0, 0));
+			Matrix parametersForThisRealization = simulatedParameters.get(subject.getMonteCarloRealizationId());
+			fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, 
+					null, 
+					new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, 
+					ModelBasedSimulator.this));
 			List<Integer> columnIndex = new ArrayList<Integer>();
 			for (String levelName : subjectIndex.keySet()) {
 				if (!ModelBasedSimulator.this.simulatedRandomEffects.containsKey(levelName)) {
@@ -292,10 +297,10 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected ParameterEstimates getParameterEstimates() {return parameterEstimates;}
 	
-	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> estimate) {
-		defaultRandomEffects.put(level.getName(), estimate);
-		// TODO set the next line to notify the diameter increment model
-		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, estimate}, this));
+	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> newEstimate) {
+		Estimate<? extends StandardGaussianDistribution> formerEstimate = defaultRandomEffects.get(level.getName());
+		defaultRandomEffects.put(level.getName(), newEstimate);
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_RANDOM_EFFECT_AT_THIS_LEVEL_JUST_SET, null, new Object[]{level, formerEstimate, newEstimate}, this));
 	}
 	
 	protected Estimate<? extends StandardGaussianDistribution> getDefaultRandomEffects(HierarchicalLevel level) {return defaultRandomEffects.get(level.getName());}
@@ -316,8 +321,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 */
 	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		getParameterEstimates().simulateBlups(subject);
-		Matrix parametersForThisRealization = simulatedParameters.get(subject.getMonteCarloRealizationId());
-		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, null, new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, this));
 	}
 
 	/**
