@@ -150,28 +150,14 @@ public abstract class ModelBasedSimulator implements Serializable {
 			Matrix newVariance = getVariance().matrixStack(covariance.transpose(), false).matrixStack(covariance.matrixStack(variance, false), true);
 			setMean(newMean);
 			setVariance(newVariance);
-			for (int i = 0; i < subjectList.size(); i++) {
-				MonteCarloSimulationCompliantObject subject = subjectList.get(i);
-				String levelName = subject.getHierarchicalLevel().getName();
-				if (!subjectIndex.containsKey(levelName)) {
-					subjectIndex.put(levelName, new HashMap<String, List<Integer>>());
-				}
-				Map<String, List<Integer>> innerMap = subjectIndex.get(levelName);
-				String subjectId = subject.getSubjectId();
-				if (!innerMap.containsKey(subjectId)) {
-					innerMap.put(subjectId, new ArrayList<Integer>());
-				}
-				innerMap.get(subjectId).add(firstBlupIndex + i);
-				
-				GaussianEstimate blupEstimate = getBlupsForThisSubject(subject);
-				Estimate<? extends StandardGaussianDistribution> defaultRandomEffect = ModelBasedSimulator.this.getDefaultRandomEffects(subject.getHierarchicalLevel());
-				ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
-						null, 
-						new Object[]{defaultRandomEffect, blupEstimate.getMean(), levelName, subjectId}, 
-						ModelBasedSimulator.this);
-				fireModelBasedSimulatorEvent(event);
-			}
+			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
+					null, 
+					new Object[]{ModelBasedSimulator.this.defaultRandomEffects, mean, subjectList}, 
+					ModelBasedSimulator.this);
+			fireModelBasedSimulatorEvent(event);
+			
 		}
+		
 		
 		protected boolean doBlupsExistForThisSubject(MonteCarloSimulationCompliantObject subject) {
 			HierarchicalLevel level = subject.getHierarchicalLevel();
@@ -225,6 +211,14 @@ public abstract class ModelBasedSimulator implements Serializable {
 			List<Integer> copyList = new ArrayList<Integer>();
 			copyList.addAll(trueParameterIndices);
 			return copyList;
+		}
+		
+		/**
+		 * This method returns the number of fixed-effect parameters in the model.
+		 * @return an integer
+		 */
+		public int getNumberOfFixedEffectParameters() {
+			return getFixedEffectsPart().m_iRows;
 		}
 	}
 		
@@ -290,6 +284,10 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 */
 	protected abstract void init();
 	
+	protected Map<String, Estimate<? extends StandardGaussianDistribution>> getDefaultRandomEffect() {
+		return defaultRandomEffects;
+	}
+
 	protected void setParameterEstimates(GaussianEstimate gaussianEstimate) {
 		this.parameterEstimates = new ParameterEstimates(gaussianEstimate);
 		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, parameterEstimates, this));
