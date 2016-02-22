@@ -811,7 +811,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 * @param m a Matrix instance
 	 */
 	public void setElements(List<Integer> indices, Matrix m) {
-		if (!m.isRowVector()) {
+		if (!m.isColumnVector()) {
 			throw new InvalidParameterException("Parameter m must be a row vector!");
 		}
 		for (int i = 0; i < m_iRows; i++) {
