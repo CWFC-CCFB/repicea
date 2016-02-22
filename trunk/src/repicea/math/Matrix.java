@@ -823,6 +823,23 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 	}
 
+	/**
+	 * This method add the elements of the parameter matrix to those designated through the indices.
+	 * @param indices a List of Integer representing the indices
+	 * @param m a Matrix instance
+	 */
+	public void addElementsAt(List<Integer> indices, Matrix m) {
+		if (!m.isColumnVector()) {
+			throw new InvalidParameterException("Parameter m must be a row vector!");
+		}
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				if (indices.contains(i * m_iCols + j)) {
+					m_afData[i][j] += m.m_afData[indices.indexOf(i * m_iCols + j)][0];
+				}
+			}
+		}
+	}
 
 
 	/**
