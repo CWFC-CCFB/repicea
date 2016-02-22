@@ -150,6 +150,19 @@ public abstract class ModelBasedSimulator implements Serializable {
 			Matrix newVariance = getVariance().matrixStack(covariance.transpose(), false).matrixStack(covariance.matrixStack(variance, false), true);
 			setMean(newMean);
 			setVariance(newVariance);
+			for (int i = 0; i < subjectList.size(); i++) {
+				MonteCarloSimulationCompliantObject subject = subjectList.get(i);
+				String levelName = subject.getHierarchicalLevel().getName();
+				if (!subjectIndex.containsKey(levelName)) {
+					subjectIndex.put(levelName, new HashMap<String, List<Integer>>());
+				}
+				Map<String, List<Integer>> innerMap = subjectIndex.get(levelName);
+				String subjectId = subject.getSubjectId();
+				if (!innerMap.containsKey(subjectId)) {
+					innerMap.put(subjectId, new ArrayList<Integer>());
+				}
+				innerMap.get(subjectId).add(firstBlupIndex + i);
+			}
 			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
 					null, 
 					new Object[]{ModelBasedSimulator.this.defaultRandomEffects, mean, subjectList}, 
