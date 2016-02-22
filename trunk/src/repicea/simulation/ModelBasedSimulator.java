@@ -84,7 +84,6 @@ public abstract class ModelBasedSimulator implements Serializable {
 			Matrix oMat = lowerChol.multiply(randomVector);
 			Matrix deviate = getMean().getDeepClone();
 			deviate.addElementsAt(trueParameterIndices, oMat);
-//			return StatisticalUtility.performSpecialAdd(getMean(), oMat);
 			return deviate;
 		}
 	}
@@ -145,11 +144,16 @@ public abstract class ModelBasedSimulator implements Serializable {
 			subjectIndex = new HashMap<String, Map<String, List<Integer>>>();
 		}
 		
-		protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
+		protected void registerBlups(Matrix mean, 
+				Matrix variance, 
+				Matrix covariance, 
+				List<MonteCarloSimulationCompliantObject> subjectList) {
+			int nbBlupsPerSubject = mean.m_iRows / subjectList.size();
 			Matrix newMean = getMean().matrixStack(mean, true);
 			Matrix newVariance = getVariance().matrixStack(covariance.transpose(), false).matrixStack(covariance.matrixStack(variance, false), true);
 			setMean(newMean);
 			setVariance(newVariance);
+			int index = firstBlupIndex;
 			for (int i = 0; i < subjectList.size(); i++) {
 				MonteCarloSimulationCompliantObject subject = subjectList.get(i);
 				String levelName = subject.getHierarchicalLevel().getName();
@@ -161,7 +165,9 @@ public abstract class ModelBasedSimulator implements Serializable {
 				if (!innerMap.containsKey(subjectId)) {
 					innerMap.put(subjectId, new ArrayList<Integer>());
 				}
-				innerMap.get(subjectId).add(firstBlupIndex + i);
+				for (int j = 0; j < nbBlupsPerSubject; j++) {
+					innerMap.get(subjectId).add(++index);
+				}
 			}
 			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
 					null, 
