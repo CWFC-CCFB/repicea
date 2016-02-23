@@ -86,7 +86,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		}
 		ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
 				null, 
-				new Object[]{getModel().defaultRandomEffects, newMean, subjectIndex}, 
+				new Object[]{getModel().defaultRandomEffects, subjectList}, 
 				getModel());
 		getModel().fireModelBasedSimulatorEvent(event);
 	}
