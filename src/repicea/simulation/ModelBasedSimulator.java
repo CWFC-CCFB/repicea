@@ -100,7 +100,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	
 	final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
-	final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
+	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
 	final Map<String, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
@@ -234,32 +234,50 @@ public abstract class ModelBasedSimulator implements Serializable {
 		} else {
 			randomDeviates = simulateDeviatesForRandomEffectsOfThisSubject(subject, defaultRandomEffects.get(subjectLevel.getName()));
 			originalRandomEffects = getDefaultRandomEffects(subjectLevel);
-			ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
-					null, 
-					new Object[]{originalRandomEffects, randomDeviates.getDeepClone(), subjectLevel.getName(), subject.getSubjectId()},
-					this);
-			fireModelBasedSimulatorEvent(event);
+			fireRandomEffectDeviateGeneratedEvent(subject, originalRandomEffects, randomDeviates);
 		}
 	}
+	
+	protected ModelBasedSimulatorEvent fireRandomEffectDeviateGeneratedEvent(MonteCarloSimulationCompliantObject subject,
+			Estimate<? extends StandardGaussianDistribution> originalRandomEffects,
+			Matrix randomDeviates) {
+		ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
+				null, 
+				new Object[]{subject, originalRandomEffects, randomDeviates.getDeepClone()},
+				this);
+		return event;
+	}
+	
 	
 	/**
 	 * This method simulates random deviates from an estimate and stores them in the simulatedRandomEffects
 	 * member.
 	 * @param subject a MonteCarloSimulationCompliantObject instance
 	 * @param randomEffectsEstimate the estimate from which the random deviates are generated
-	 * @return the random deviates as a Matrix instance
+	 * @return the random deviates as a Matrix instance (a copy of it)
 	 */
-	protected synchronized Matrix simulateDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<?> randomEffectsEstimate) {
-		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
-		Map<String, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
-		if (randomEffectsMap == null) {
-			randomEffectsMap = new HashMap<String, Matrix>();
-			simulatedRandomEffects.put(subjectLevel.getName(), randomEffectsMap);
-		}
+	protected Matrix simulateDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<?> randomEffectsEstimate) {
+//		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
+//		if (!simulatedRandomEffects.containsKey(subjectLevel.getName())) {
+//			simulatedRandomEffects.put(subjectLevel.getName(), new HashMap<String, Matrix>());
+//		}
+//		Map<String, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
 		Matrix randomDeviates = randomEffectsEstimate.getRandomDeviate();
-		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
-		return randomDeviates;
+//		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
+//		return randomDeviates;
+		setDeviatesForRandomEffectsOfThisSubject(subject, randomDeviates);
+		return randomDeviates.getDeepClone();
 	}
+
+	synchronized void setDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Matrix randomDeviates) {
+		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
+		if (!simulatedRandomEffects.containsKey(subjectLevel.getName())) {
+			simulatedRandomEffects.put(subjectLevel.getName(), new HashMap<String, Matrix>());
+		}
+		Map<String, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
+		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
+	}
+	
 	
 	protected final String getSubjectPlusMonteCarloSpecificId(MonteCarloSimulationCompliantObject object) {
 		return getSubjectPlusMonteCarloSpecificId(object.getSubjectId(), object.getMonteCarloRealizationId());
