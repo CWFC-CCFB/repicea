@@ -32,6 +32,43 @@ import repicea.stats.estimates.GaussianEstimate;
 @SuppressWarnings("serial")
 public class ModelParameterEstimates extends SASParameterEstimates {
 	
+	static class SubjectSkeleton implements MonteCarloSimulationCompliantObject {
+
+		final String subjectId;
+		final HierarchicalLevel level;
+		int monteCarloRealizationId;
+		
+		SubjectSkeleton(String subjectId, HierarchicalLevel level) {
+			this.subjectId = subjectId;
+			this.level = level;
+		}
+		
+		
+		@Override
+		public String getSubjectId() {
+			return subjectId;
+		}
+
+		@Override
+		public HierarchicalLevel getHierarchicalLevel() {
+			return level;
+		}
+
+		@Override
+		public int getMonteCarloRealizationId() {
+			return monteCarloRealizationId;
+		}
+	}
+	
+	static class SubjectRelatedIndices extends ArrayList<Integer> {
+		
+		final SubjectSkeleton skeleton;
+		
+		SubjectRelatedIndices(SubjectSkeleton skeleton) {
+			this.skeleton = skeleton;
+		}
+	}
+	
 	private final ModelBasedSimulator model;
 	
 	private final boolean sasEstimateDerived;
@@ -39,7 +76,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 	private final Matrix fixedEffectsPart;
 	private final List<Integer> estimatedFixedEffectParameterIndices;
 	
-	private final Map<String, Map<String, List<Integer>>> subjectIndex;
+	private final Map<String, Map<String, SubjectRelatedIndices>> subjectIndex;
 	
 	protected ModelParameterEstimates(GaussianEstimate estimate, ModelBasedSimulator model) {
 		super(estimate.getMean(), estimate.getVariance());
@@ -54,7 +91,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		}
 		estimatedFixedEffectParameterIndices = new ArrayList<Integer>();
 		estimatedFixedEffectParameterIndices.addAll(estimatedParameterIndices);
-		subjectIndex = new HashMap<String, Map<String, List<Integer>>>();
+		subjectIndex = new HashMap<String, Map<String, SubjectRelatedIndices>>();
 	}
 	
 	protected ModelBasedSimulator getModel() {return model;}
@@ -73,12 +110,12 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 			MonteCarloSimulationCompliantObject subject = subjectList.get(i);
 			String levelName = subject.getHierarchicalLevel().getName();
 			if (!subjectIndex.containsKey(levelName)) {
-				subjectIndex.put(levelName, new HashMap<String, List<Integer>>());
+				subjectIndex.put(levelName, new HashMap<String, SubjectRelatedIndices>());
 			}
-			Map<String, List<Integer>> innerMap = subjectIndex.get(levelName);
+			Map<String, SubjectRelatedIndices> innerMap = subjectIndex.get(levelName);
 			String subjectId = subject.getSubjectId();
 			if (!innerMap.containsKey(subjectId)) {
-				innerMap.put(subjectId, new ArrayList<Integer>());
+				innerMap.put(subjectId, new SubjectRelatedIndices(new SubjectSkeleton(subjectId, subject.getHierarchicalLevel())));
 			}
 			for (int j = 0; j < nbBlupsPerSubject; j++) {
 				innerMap.get(subjectId).add(indexFirstBlup++);
@@ -116,20 +153,15 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 				new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, 
 				getModel()));
 		for (String levelName : subjectIndex.keySet()) {
-			if (!getModel().simulatedRandomEffects.containsKey(levelName)) {
-				getModel().simulatedRandomEffects.put(levelName, new HashMap<String, Matrix>());
-			}
-			Map<String, Matrix> innerMap = getModel().simulatedRandomEffects.get(levelName);
-			Map<String, List<Integer>> subjectList = subjectIndex.get(levelName);
+			Map<String, SubjectRelatedIndices> subjectList = subjectIndex.get(levelName);
 			for (String subjectId : subjectList.keySet()) {
-				Matrix randomDeviates = simulatedDeviate.getSubMatrix(subjectList.get(subjectId), ModelBasedSimulator.DefaultZeroIndex);
-				innerMap.put(subjectId, randomDeviates);
+				SubjectRelatedIndices indices = subjectList.get(subjectId);
+				SubjectSkeleton skeleton = indices.skeleton;
+				skeleton.monteCarloRealizationId = subject.getMonteCarloRealizationId();
+				Matrix randomDeviates = simulatedDeviate.getSubMatrix(indices, ModelBasedSimulator.DefaultZeroIndex);
+				getModel().setDeviatesForRandomEffectsOfThisSubject(indices.skeleton, randomDeviates);
 				Estimate<? extends StandardGaussianDistribution> defaultRandomEffect = getModel().defaultRandomEffects.get(levelName);
-				ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
-						null, 
-						new Object[]{defaultRandomEffect, randomDeviates.getDeepClone(), levelName, subjectId}, 
-						getModel());
-				getModel().fireModelBasedSimulatorEvent(event);
+				getModel().fireRandomEffectDeviateGeneratedEvent(skeleton, defaultRandomEffect, randomDeviates);
 			}
 		}
 	}
