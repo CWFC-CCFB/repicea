@@ -31,7 +31,8 @@ public class MonteCarloSettings {
 		RecruitsDBH("Recruit DBH module", "Module de diam\u00E8tre des recrues"),
 		HDRelationship("Height module", "Module de hauteur"),
 		Volume("Volume module", "Module de volume"),
-		Harvesting("Harvesting module", "Module de r\u00E9colte");
+		Harvesting("Harvesting module", "Module de r\u00E9colte"),
+		Climate("Climate module", "Module de climat");
 		
 		MonteCarloVarSource(String englishString, String frenchString) {
 			setText(englishString, frenchString);
