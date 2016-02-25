@@ -238,14 +238,14 @@ public abstract class ModelBasedSimulator implements Serializable {
 		}
 	}
 	
-	protected ModelBasedSimulatorEvent fireRandomEffectDeviateGeneratedEvent(MonteCarloSimulationCompliantObject subject,
+	protected void fireRandomEffectDeviateGeneratedEvent(MonteCarloSimulationCompliantObject subject,
 			Estimate<? extends StandardGaussianDistribution> originalRandomEffects,
 			Matrix randomDeviates) {
 		ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.RANDOM_EFFECT_DEVIATE_JUST_GENERATED, 
 				null, 
 				new Object[]{subject, originalRandomEffects, randomDeviates.getDeepClone()},
 				this);
-		return event;
+		fireModelBasedSimulatorEvent(event);
 	}
 	
 	
