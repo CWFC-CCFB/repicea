@@ -25,16 +25,16 @@ package repicea.simulation.covariateproviders.standlevel;
 public interface GeographicalCoordinatesProvider extends ElevationMProvider {
 
 	/**
-	 * This method returns the latitude of the plot.
+	 * This method returns the latitude of the plot in degrees.
 	 * @return a double
 	 */
-	public double getLatitude();
+	public double getLatitudeDeg();
 	
 	/**
-	 * This method returns the longitude of the plot.
+	 * This method returns the longitude of the plot in degrees.
 	 * @return a double
 	 */
-	public double getLongitude();
+	public double getLongitudeDeg();
 		
 	
 }

@@ -99,10 +99,10 @@ class Artemis2009CompatibleStandImpl implements Artemis2009CompatibleStand {
 	public double getElevationM() {return elevationM;}
 
 	@Override
-	public double getLatitude() {return latitude;}
+	public double getLatitudeDeg() {return latitude;}
 
 	@Override
-	public double getLongitude() {return longitude;}
+	public double getLongitudeDeg() {return longitude;}
 
 	@Override
 	public double getNumberOfStemsHa() {return numberOfStemsHa;}
