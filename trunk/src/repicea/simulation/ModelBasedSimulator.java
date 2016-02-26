@@ -284,7 +284,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	}
 
 	private static String getSubjectPlusMonteCarloSpecificId(String subjectID, int monteCarloRealizationID) {
-		return subjectID + monteCarloRealizationID;
+		return subjectID + "_" + monteCarloRealizationID;
 	}
 	
 	/**
