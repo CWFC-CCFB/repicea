@@ -435,11 +435,11 @@ public class ParameterDispatcher {
 				pointer ++;
 				break;
 			case 52: // 0 occurence
-				oXVector.m_afData[0][pointer] = stand.getLatitude();
+				oXVector.m_afData[0][pointer] = stand.getLatitudeDeg();
 				pointer ++;
 				break;
 			case 53: // 0 occurence
-				fTmp = (stand.getLatitude());
+				fTmp = (stand.getLatitudeDeg());
 				for (int ii = 0; ii < dummyEssence.m_iCols; ii++) {
 					oXVector.m_afData[0][ii + pointer] = dummyEssence.m_afData[0][ii]*fTmp;
 				}
