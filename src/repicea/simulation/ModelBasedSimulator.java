@@ -77,7 +77,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 		}
 		
 		private static String getSubjectID(MonteCarloSimulationCompliantObject stand, int date) {
-			return stand.getSubjectId() + date;
+			return stand.getSubjectId() + "_" + date;
 		}
 	}
 
@@ -257,14 +257,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * @return the random deviates as a Matrix instance (a copy of it)
 	 */
 	protected Matrix simulateDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<?> randomEffectsEstimate) {
-//		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
-//		if (!simulatedRandomEffects.containsKey(subjectLevel.getName())) {
-//			simulatedRandomEffects.put(subjectLevel.getName(), new HashMap<String, Matrix>());
-//		}
-//		Map<String, Matrix> randomEffectsMap = simulatedRandomEffects.get(subjectLevel.getName());
 		Matrix randomDeviates = randomEffectsEstimate.getRandomDeviate();
-//		randomEffectsMap.put(getSubjectPlusMonteCarloSpecificId(subject), randomDeviates);
-//		return randomDeviates;
 		setDeviatesForRandomEffectsOfThisSubject(subject, randomDeviates);
 		return randomDeviates.getDeepClone();
 	}
@@ -422,18 +415,5 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return getParameterEstimates().getBlupsForThisSubject(subject);
 	}
 
-	
-//	/**
-//	 * This method resets all the map instances that contain the simulated random effects, 
-//	 * the residuals and parameter estimates.
-//	 */
-//	public synchronized void clear() {
-//		defaultRandomEffects.clear();
-//		simulatedParameters.clear();
-//		simulatedRandomEffects.clear();
-//		simulatedResidualError.clear();
-//		blupsLibrary.clear();
-//	}
-	
 }
 
