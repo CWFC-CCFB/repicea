@@ -18,6 +18,7 @@
  */
 package repicea.simulation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,7 @@ import repicea.stats.estimates.GaussianEstimate;
 @SuppressWarnings("serial")
 public class ModelParameterEstimates extends SASParameterEstimates {
 	
-	static class SubjectSkeleton implements MonteCarloSimulationCompliantObject {
+	static class SubjectSkeleton implements MonteCarloSimulationCompliantObject, Serializable {
 
 		final String subjectId;
 		final HierarchicalLevel level;

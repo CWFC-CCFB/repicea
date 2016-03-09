@@ -18,7 +18,6 @@
  */
 package repicea.predictor.artemis2009;
 
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -81,9 +80,7 @@ class Artemis2009RecruitDiameterInternalPredictor extends ModelBasedSimulator {
 			double randomDeviate = 0d;
 			try {
 				randomDeviate = randomGenerator.nextGamma(shape, scale);
-			} catch (Exception e) {
-				throw new InvalidParameterException("The parameter of the Gamma distribution are inconsistent!");
-			}
+			} catch (Exception e) {}	// happens usually when the shape is close to 0 which means that the random deviate is likely 0.
 			fDiameter = 9.1 + randomDeviate * 0.1;	
 			if (fDiameter > 21) {
 				fDiameter = 21;			// limiter for inconsistent predictions
