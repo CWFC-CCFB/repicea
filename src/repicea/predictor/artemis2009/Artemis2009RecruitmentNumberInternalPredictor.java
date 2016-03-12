@@ -81,9 +81,9 @@ class Artemis2009RecruitmentNumberInternalPredictor extends ModelBasedSimulator 
 						/ (Math.pow(1+fTmp,recruitNumber + fTmp2));
 				fTmp3 *= fTmp;
 				recruitNumber++;
-				if (recruitNumber == 80) {
-					System.out.println("WARNING - Recruits threshold reached!");
-				}
+//				if (recruitNumber == 80) {
+//					System.out.println("WARNING - Recruits threshold reached!");
+//				}
 			}
 			return recruitNumber;
 		} else {

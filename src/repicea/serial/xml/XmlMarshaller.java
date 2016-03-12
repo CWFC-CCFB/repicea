@@ -65,6 +65,7 @@ final class XmlMarshaller {
 		XmlList xmlObj = new XmlList(obj);
 		if (!hasObjectBeenRegistered(obj)) {
 			registerObject(obj);
+//			System.out.println("Serializing this class : " + obj.getClass().getSimpleName());
 			if (xmlObj.isArray) {
 				int length = Array.getLength(obj);
 				for (int i = 0; i < length; i++) {
