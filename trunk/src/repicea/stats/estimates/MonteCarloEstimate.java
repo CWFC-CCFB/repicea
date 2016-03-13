@@ -25,6 +25,8 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.distributions.NonparametricDistribution;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * This estimate contains the realizations of a Monte Carlo simulations.
@@ -34,6 +36,26 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	
 	private static final long serialVersionUID = 20110912L;
 	
+	public enum MessageID implements TextableEnum {
+		Mean("Mean", "Moyenne"),
+		Lower("Lower", "Inf"),
+		Upper("Upper", "Sup"),
+		ProbabilityLevel("Probability level", "Niveau de probabilit\u00E9");
+
+		MessageID(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+		
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
+		
+	}
+
 	/**
 	 * Constructor.
 	 */
