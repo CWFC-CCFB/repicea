@@ -19,6 +19,8 @@
 package repicea.stats.estimates;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
@@ -97,5 +99,31 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 		return outputEstimate;
 	}
 
-	
+	/**
+	 * This method returns the percentile of the Monte Carlo simulated distribution.
+	 * @param percentile a value between 0 and 1
+	 * @return a Matrix instance that contains the percentile values
+	 */
+	public Matrix getPercentile(double percentile) {
+		if (percentile < 0 || percentile > 1) {
+			throw new InvalidParameterException("The percentile must be between 0 and 1!");
+		}
+		List<Matrix> realizations = getRealizations();
+		List<Double> realizationsForThisRow;
+		int nbRows = realizations.get(0).m_iRows;
+		Matrix percentileValues = new Matrix(nbRows,1);
+		for (int i = 0; i < nbRows; i++) {
+			realizationsForThisRow = new ArrayList<Double>();
+			for (int j = 0; j < realizations.size(); j++) {
+				realizationsForThisRow.add(realizations.get(j).m_afData[i][0]);
+			}
+			Collections.sort(realizationsForThisRow);
+			int index = (int) Math.round(percentile * realizations.size()) - 1;
+			if (index < 0) {
+				index = 0;
+			} 
+			percentileValues.m_afData[i][0] = realizationsForThisRow.get(index);
+		}
+		return percentileValues;
+	}
 }
