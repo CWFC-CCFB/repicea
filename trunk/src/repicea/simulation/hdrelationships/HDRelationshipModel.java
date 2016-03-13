@@ -69,9 +69,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 */
 	public double predictHeight(Stand stand, Tree tree) {
 		try {
-			if (!areBlupsEstimated) {
+			if (!areBlupsEstimated()) {
 				predictHeightRandomEffects(stand);
-				areBlupsEstimated = true;
 			}
 			double observedHeight = tree.getHeightM();
 			double predictedHeight; 
@@ -152,7 +151,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void predictHeightRandomEffects(Stand stand) {
-		if (!areBlupsEstimated) {
+		if (!areBlupsEstimated()) {
 			
 			Matrix matGbck = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
 
@@ -247,6 +246,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 				registerBlups(blups, matC22, matC21, subjectList);
 			}
 		}
+		setBlupsEstimated(true);
 	}
 
 	protected Enum<?> getErrorGroup(Tree tree) {

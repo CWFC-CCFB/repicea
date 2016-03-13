@@ -87,7 +87,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	
 	protected final CopyOnWriteArrayList<ModelBasedSimulatorListener> listeners;
 	
-	protected boolean areBlupsEstimated;
+	private boolean areBlupsEstimated;
 
 	// set by the constructor
 	protected boolean isRandomEffectsVariabilityEnabled;
@@ -415,5 +415,8 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return getParameterEstimates().getBlupsForThisSubject(subject);
 	}
 
+	protected boolean areBlupsEstimated() {return areBlupsEstimated;}
+	protected void setBlupsEstimated(boolean bool) {areBlupsEstimated = bool;};
+	
 }
 
