@@ -121,6 +121,7 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 		return outputEstimate;
 	}
 
+	
 	/**
 	 * This method returns the percentile of the Monte Carlo simulated distribution.
 	 * @param percentile a value between 0 and 1

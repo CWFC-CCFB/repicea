@@ -43,7 +43,7 @@ public abstract class DnDCompatibleButton extends SelectableJButton {
 
 	public DnDCompatibleButton(REpiceaGUIPermission permission) {
 		super(permission);
-		if (permission.isDragAndDropGranted()) {
+		if (permission.isDragGranted()) {
 			DragSource ds = new DragSource();
 			ds.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY, new InternalDragGestureImpl());
 		}
