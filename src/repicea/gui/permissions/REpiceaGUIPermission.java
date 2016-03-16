@@ -27,10 +27,16 @@ package repicea.gui.permissions;
 public interface REpiceaGUIPermission {
 
 	/**
-	 * This method returns true if the drag and drop is allowed.
+	 * This method returns true if the drag is allowed for this component.
 	 * @return a boolean
 	 */
-	public boolean isDragAndDropGranted();
+	public boolean isDragGranted();
+
+	/**
+	 * This method returns true if the drop is allowed on this component.
+	 * @return a boolean
+	 */
+	public boolean isDropGranted();
 	
 	/**
 	 * This method returns true if the selection is allowed.

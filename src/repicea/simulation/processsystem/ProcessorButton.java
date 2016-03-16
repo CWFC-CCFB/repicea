@@ -139,12 +139,14 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	 */
 	public Processor getOwner() {return process;}
 		
+	@Override
 	public Point getRightAnchor() {
 		int x = getLocation().x + getSize().width;
 		int y = getLocation().y + getSize().height / 2;
 		return new Point(x,y);
 	}
 
+	@Override
 	public Point getLeftAnchor() {
 		int x = getLocation().x;
 		int y = getLocation().y + getSize().height / 2;
@@ -172,7 +174,7 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	
 	@SuppressWarnings("rawtypes")
 	protected void setDragMode(Enum mode) {
-		if (getGUIPermission().isDragAndDropGranted()) {
+		if (getGUIPermission().isDragGranted()) {
 			buttonMoveRecognizer.setEnabled(false);
 			createLinkRecognizer.setComponent(null);
 			if (mode == BasicMode.MoveProcessor) {

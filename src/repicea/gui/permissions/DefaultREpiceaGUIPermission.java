@@ -27,8 +27,11 @@ public class DefaultREpiceaGUIPermission implements REpiceaGUIPermission {
 	}
 	
 	@Override
-	public boolean isDragAndDropGranted() {return allowed;}
+	public boolean isDragGranted() {return allowed;}
 
+	@Override
+	public boolean isDropGranted() {return allowed;}
+	
 	@Override
 	public boolean isSelectionGranted() {return allowed;}
 

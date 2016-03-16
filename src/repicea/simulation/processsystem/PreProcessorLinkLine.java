@@ -55,7 +55,7 @@ public class PreProcessorLinkLine extends AbstractProcessorLinkLine {
 			if (onGoingAction) {
 				if (e.getSource() instanceof ProcessorButton) {
 					ProcessorButton button = (ProcessorButton) e.getSource();
-					if (!button.equals(PreProcessorLinkLine.this.getFatherAnchor())) {
+					if (!button.equals(PreProcessorLinkLine.this.getFatherAnchor()) && button.getGUIPermission().isDropGranted()) {
 						PreProcessorLinkLine.this.setSonAnchor(button);
 					}
 				}
