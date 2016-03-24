@@ -21,10 +21,11 @@ package repicea.simulation.covariateproviders.standlevel;
 public abstract interface TimeSinceLastCutYrProvider {
 
 	/**
-	 * This method returns the number of years since the last harvesting. It returns -1 if 
+	 * This method returns the number of years since the last harvesting. It should return Double.POSITIVE_INFINITY if 
 	 * the stand or plot has never been harvested.
 	 * @return a double
 	 */
 	public double getTimeSinceLastCutYr();
+	
 	
 }
