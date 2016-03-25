@@ -63,4 +63,13 @@ public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistrib
 	}
 	
 
+//	public static void main(String[] args) {
+//		TruncatedGaussianEstimate estimate = new TruncatedGaussianEstimate();
+//		BasicSerialCloner cloner = new BasicSerialCloner();
+//		MemorizerPackage mp = new MemorizerPackage();
+//		mp.add(estimate);
+//		MemorizerPackage mpCloned = cloner.cloneThisObject(mp);
+//	}
+	
+	
 }

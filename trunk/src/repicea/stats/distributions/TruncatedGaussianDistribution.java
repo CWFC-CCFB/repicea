@@ -1,12 +1,14 @@
 package repicea.stats.distributions;
 
+import java.io.Serializable;
+
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 
 @SuppressWarnings("serial")
 public class TruncatedGaussianDistribution extends StandardGaussianDistribution {
 
-	protected class Bound {
+	protected class Bound implements Serializable {
 		
 		private boolean isCompletelySet;
 		
