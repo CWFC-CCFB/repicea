@@ -244,7 +244,7 @@ public abstract class TreeLoggerParametersDialog<P extends TreeLogCategory>
 		super.okAction();
 	}
 	
-	protected abstract String getTreeLoggerName();
+//	protected abstract String getTreeLoggerName();
 
 	protected JPanel getControlPanel() {
 		if (controlPanel == null) {

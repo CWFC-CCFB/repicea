@@ -64,12 +64,6 @@ public class BasicTreeLoggerParametersDialog extends TreeLoggerParametersDialog<
 		sliderGroup.add(longLivedSlider);
 	}
 
-	@Override
-	protected String getTreeLoggerName() {
-		return getClass().getSimpleName();
-	}
-
-
 	/*
 	 * Useless for this class (non-Javadoc)
 	 * @see repicea.simulation.treelogger.TreeLoggerParametersDialog#settingsAction()
