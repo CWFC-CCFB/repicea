@@ -49,12 +49,6 @@ public class DiameterBasedTreeLoggerParametersDialog extends TreeLoggerParameter
 		super.instantiateVariables(params);
 	}
 
-	@Override
-	protected String getTreeLoggerName() {
-		return getClass().getSimpleName();
-	}
-
-
 	/*
 	 * Useless for this class (non-Javadoc)
 	 * @see repicea.simulation.treelogger.TreeLoggerParametersDialog#settingsAction()

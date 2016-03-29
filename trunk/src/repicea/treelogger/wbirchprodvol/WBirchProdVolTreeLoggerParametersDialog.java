@@ -35,12 +35,6 @@ public class WBirchProdVolTreeLoggerParametersDialog extends TreeLoggerParameter
 		logGradePriorityChangeEnabled = false; 
 	}
 
-
-	@Override
-	protected String getTreeLoggerName() {
-		return "White Birch Tree Logger";
-	}
-
 	@Override
 	protected void initUI() {
 		super.initUI();
