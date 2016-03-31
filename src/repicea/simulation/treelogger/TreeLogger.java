@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -59,6 +59,8 @@ import repicea.gui.genericwindows.DProgressBar;
  * @author Mathieu Fortin - April 2010
  */
 public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extends TreeLogCategory>, Tree extends LoggableTree> implements GenericTask {
+	
+	private static final List<TreeLoggerDescription> AvailableTreeLoggers = new ArrayList<TreeLoggerDescription>();
 	
 	@Deprecated
 	protected TreeLoggerWrapper wrapper;
@@ -336,5 +338,35 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	 */
 	public abstract Tree getEligible(LoggableTree t);
 	
+	/**
+	 * This method makes it possible to determine whether or not this TreeLogger
+	 * class is compatible with the reference object
+	 * @param referent an Object
+	 * @return a boolean
+	 */
+	public abstract boolean matchWith(Object referent);
+		
+	@SuppressWarnings("rawtypes")
+	protected synchronized static void registerTreeLogger(Class<? extends TreeLogger> clazz) {
+		TreeLogger.AvailableTreeLoggers.add(new TreeLoggerDescription(clazz.getName()));
+	}
+	
+	/**
+	 * This method returns the TreeLoggerDescription instances that are compatible with
+	 * the reference object.
+	 * @param referent 
+	 * @return a List of TreeLoggerDescription instances
+	 */
+	@SuppressWarnings("rawtypes")
+	public static List<TreeLoggerDescription> getCompatibleTreeLoggers(Object referent) {
+		List<TreeLoggerDescription> outputList = new ArrayList<TreeLoggerDescription>();		
+		for (TreeLoggerDescription treeLoggerDescription : TreeLogger.AvailableTreeLoggers) {
+			TreeLogger treeLogger = treeLoggerDescription.instantiateTreeLogger(false);
+			if (treeLogger.matchWith(referent)) {
+				outputList.add(treeLoggerDescription);
+			}
+		}
+		return outputList;
+	}
 	
 }

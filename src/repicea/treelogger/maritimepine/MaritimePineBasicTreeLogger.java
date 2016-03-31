@@ -19,6 +19,7 @@
 package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.LoggableTree;
+import repicea.simulation.treelogger.TreeLogger;
 import repicea.stats.distributions.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
@@ -34,6 +35,11 @@ import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Gra
  */
 public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 
+	static {
+		TreeLogger.registerTreeLogger(MaritimePineBasicTreeLogger.class);
+	}
+
+	
 	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
 
 
@@ -100,6 +106,11 @@ public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 		}
 
 		return piece;
+	}
+
+	@Override
+	public boolean matchWith(Object referent) {
+		return referent instanceof MaritimePineBasicTree;
 	}
 	
 	

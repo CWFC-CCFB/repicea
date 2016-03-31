@@ -26,6 +26,10 @@ import repicea.simulation.treelogger.TreeLogger;
 
 public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, LoggableTree> {
 
+	static {
+		TreeLogger.registerTreeLogger(BasicTreeLogger.class);
+	}
+	
 	public BasicTreeLogger() {}
 
 	/*
@@ -55,6 +59,11 @@ public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, Logga
 	@Override
 	public LoggableTree getEligible(LoggableTree t) {
 		return t;
+	}
+
+	@Override
+	public boolean matchWith(Object referent) {
+		return referent instanceof LoggableTree;
 	}
 	
 }
