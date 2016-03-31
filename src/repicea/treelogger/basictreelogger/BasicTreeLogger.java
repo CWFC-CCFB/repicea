@@ -26,10 +26,6 @@ import repicea.simulation.treelogger.TreeLogger;
 
 public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, LoggableTree> {
 
-	static {
-		TreeLogger.registerTreeLogger(BasicTreeLogger.class);
-	}
-	
 	public BasicTreeLogger() {}
 
 	/*

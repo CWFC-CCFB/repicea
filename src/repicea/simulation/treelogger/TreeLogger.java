@@ -60,7 +60,6 @@ import repicea.gui.genericwindows.DProgressBar;
  */
 public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extends TreeLogCategory>, Tree extends LoggableTree> implements GenericTask {
 	
-	private static final List<TreeLoggerDescription> AvailableTreeLoggers = new ArrayList<TreeLoggerDescription>();
 	
 	@Deprecated
 	protected TreeLoggerWrapper wrapper;
@@ -346,27 +345,4 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	 */
 	public abstract boolean isCompatibleWith(Object referent);
 		
-	@SuppressWarnings("rawtypes")
-	protected synchronized static void registerTreeLogger(Class<? extends TreeLogger> clazz) {
-		TreeLogger.AvailableTreeLoggers.add(new TreeLoggerDescription(clazz.getName()));
-	}
-	
-	/**
-	 * This method returns the TreeLoggerDescription instances that are compatible with
-	 * the reference object.
-	 * @param referent 
-	 * @return a List of TreeLoggerDescription instances
-	 */
-	@SuppressWarnings("rawtypes")
-	public static List<TreeLoggerDescription> getCompatibleTreeLoggers(Object referent) {
-		List<TreeLoggerDescription> outputList = new ArrayList<TreeLoggerDescription>();		
-		for (TreeLoggerDescription treeLoggerDescription : TreeLogger.AvailableTreeLoggers) {
-			TreeLogger treeLogger = treeLoggerDescription.instantiateTreeLogger(false);
-			if (treeLogger.isCompatibleWith(referent)) {
-				outputList.add(treeLoggerDescription);
-			}
-		}
-		return outputList;
-	}
-	
 }
