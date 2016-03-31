@@ -34,7 +34,7 @@ public class TreeLoggerManager {
 		TreeLoggerClassNames.add(EuropeanBeechBasicTreeLogger.class.getName());
 		TreeLoggerClassNames.add(MaritimePineBasicTreeLogger.class.getName());
 		TreeLoggerClassNames.add(WBirchProdVolTreeLogger.class.getName());
-		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.petrotreelogger.PetroTreelogger");
+		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.petrotreelogger.PetroTreeLogger");
 		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.sybille.SybilleTreeLogger");
 		TreeLoggerClassNames.add("lerfob.treelogger.mathilde.MathildeTreeLogger");		
 	}
