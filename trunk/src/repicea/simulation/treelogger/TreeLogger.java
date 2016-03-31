@@ -344,7 +344,7 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	 * @param referent an Object
 	 * @return a boolean
 	 */
-	public abstract boolean matchWith(Object referent);
+	public abstract boolean isCompatibleWith(Object referent);
 		
 	@SuppressWarnings("rawtypes")
 	protected synchronized static void registerTreeLogger(Class<? extends TreeLogger> clazz) {
@@ -362,7 +362,7 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 		List<TreeLoggerDescription> outputList = new ArrayList<TreeLoggerDescription>();		
 		for (TreeLoggerDescription treeLoggerDescription : TreeLogger.AvailableTreeLoggers) {
 			TreeLogger treeLogger = treeLoggerDescription.instantiateTreeLogger(false);
-			if (treeLogger.matchWith(referent)) {
+			if (treeLogger.isCompatibleWith(referent)) {
 				outputList.add(treeLoggerDescription);
 			}
 		}
