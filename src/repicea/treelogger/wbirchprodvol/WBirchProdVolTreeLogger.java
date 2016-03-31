@@ -100,7 +100,7 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 
 
 	@Override
-	public boolean matchWith(Object referent) {
+	public boolean isCompatibleWith(Object referent) {
 		return referent instanceof WBirchProdVolLoggableTree;
 	}
 

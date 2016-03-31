@@ -109,7 +109,7 @@ public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 	}
 
 	@Override
-	public boolean matchWith(Object referent) {
+	public boolean isCompatibleWith(Object referent) {
 		return referent instanceof MaritimePineBasicTree;
 	}
 	

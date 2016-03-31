@@ -62,7 +62,7 @@ public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, Logga
 	}
 
 	@Override
-	public boolean matchWith(Object referent) {
+	public boolean isCompatibleWith(Object referent) {
 		return referent instanceof LoggableTree;
 	}
 	
