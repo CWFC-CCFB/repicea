@@ -28,6 +28,10 @@ import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.Produc
 
 public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerParameters, WBirchProdVolLoggableTree> {
 
+	static {
+		TreeLogger.registerTreeLogger(WBirchProdVolTreeLogger.class);
+	}
+	
 	private final static double VERY_SMALL = 1E-6;
 	
 	private WBirchProdVolPredictor wbp;
@@ -92,6 +96,12 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	public static void main (String[] args) throws IOException {
 		WBirchProdVolTreeLogger log = new WBirchProdVolTreeLogger(false, false);
 		log.setTreeLoggerParameters();
+	}
+
+
+	@Override
+	public boolean matchWith(Object referent) {
+		return referent instanceof WBirchProdVolLoggableTree;
 	}
 
 
