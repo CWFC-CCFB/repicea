@@ -32,6 +32,9 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	
 	private WBirchProdVolPredictor wbp;
 
+	public WBirchProdVolTreeLogger() {
+		this(false, false);
+	}
 	
 	/**
 	 * Constructor. 

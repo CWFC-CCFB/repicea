@@ -36,7 +36,6 @@ public class TreeLoggerManager {
 		TreeLoggerClassNames.add(WBirchProdVolTreeLogger.class.getName());
 		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.petrotreelogger.PetroTreelogger");
 		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.sybille.SybilleTreeLogger");
-		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.sybille.SybilleTreeLogger");
 		TreeLoggerClassNames.add("lerfob.treelogger.mathilde.MathildeTreeLogger");		
 	}
 	
