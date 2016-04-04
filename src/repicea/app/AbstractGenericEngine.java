@@ -38,7 +38,8 @@ public abstract class AbstractGenericEngine {
 
 
 	private static enum MessageID implements TextableEnum {
-		ErrorMessage("An error of this type occured while running task ", "Une erreur de ce type est survenu pendant l'ex\u00E9cution de la t\u00E2che ");
+		ErrorMessage("An error of this type occured while running task ", "Une erreur de ce type est survenu pendant l'ex\u00E9cution de la t\u00E2che "),
+		CancelMessage("The task has canceled !", "La t\u00E2che a \u00E9t\u00E9 annul\u00E9e !");
 		
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -119,10 +120,10 @@ public abstract class AbstractGenericEngine {
 
 					currentTask.run();
 
-					if (!currentTask.isCorrectlyTerminated() && !currentTask.isCancelled()) {
+					if (!currentTask.isCorrectlyTerminated() || currentTask.isCancelled()) {
 						Exception exc = currentTask.getFailureReason();
 						exc.printStackTrace();
-						engine.decideWhatToDo(currentTask.getName(), exc);
+						engine.decideWhatToDoInCaseOfFailure(currentTask);
 					} else {
 						engine.tasksDone.add(currentTask.getName());
 					}
@@ -180,7 +181,7 @@ public abstract class AbstractGenericEngine {
 	 * @param taskName the name of the task that failed
 	 * @param failureReason the exception that was thrown
 	 */
-	protected void decideWhatToDo(String taskName, Exception failureReason) {
+	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
 		if (this instanceof UserInterfaceableObject) {
 			UserInterfaceableObject guiObject = (UserInterfaceableObject) this;
 			Component component = guiObject.getGuiInterface();
@@ -189,9 +190,16 @@ public abstract class AbstractGenericEngine {
 				container = (Container) component;
 			}
 			if (container != null && container.isVisible()) {
-				String errorType = failureReason.getClass().getSimpleName();
-				String message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType;
-				CommonGuiUtility.showErrorMessage(message, container);
+				if (task.isCancelled()) {
+					String message = MessageID.CancelMessage.toString();
+					CommonGuiUtility.showErrorMessage(message, container);
+				} else {
+					String taskName = task.getName();
+					Exception failureCause = task.getFailureReason();
+					String errorType = failureCause.getClass().getSimpleName();
+					String message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType;
+					CommonGuiUtility.showErrorMessage(message, container);
+				}
 			}
 		}
 		queue.clear();

@@ -25,6 +25,7 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 import repicea.app.AbstractGenericEngine;
+import repicea.app.GenericTask;
 import repicea.gui.ShowableObject;
 import repicea.net.SocketWrapper;
 import repicea.net.server.gui.InterfaceTask.InterfaceRelatedTask;
@@ -44,9 +45,8 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements Show
 	
 
 	@Override
-	protected void decideWhatToDo(String taskName, Exception failureReason) {
+	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
 		// TODO Auto-generated method stub
-		
 	}
 
 
