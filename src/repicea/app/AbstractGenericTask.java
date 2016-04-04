@@ -99,7 +99,7 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 	public void cancel() {
 		if (!isCancelled) {
 			isCancelled = true;
-			cancel(true);
+//			cancel(true);
 		}
 	}
 	

@@ -122,8 +122,6 @@ public abstract class AbstractGenericEngine {
 					currentTask.run();
 
 					if (!currentTask.isCorrectlyTerminated() || currentTask.hasBeenCancelled()) {
-						Exception exc = currentTask.getFailureReason();
-						exc.printStackTrace();
 						engine.decideWhatToDoInCaseOfFailure(currentTask);
 					} else {
 						engine.tasksDone.add(currentTask.getName());
@@ -197,7 +195,11 @@ public abstract class AbstractGenericEngine {
 				} else {
 					String taskName = task.getName();
 					Exception failureCause = task.getFailureReason();
-					String errorType = failureCause.getClass().getSimpleName();
+					String errorType = "";
+					if (failureCause != null) {
+						errorType = failureCause.getClass().getSimpleName();
+						failureCause.printStackTrace();
+					}
 					String message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType;
 					CommonGuiUtility.showErrorMessage(message, container);
 				}
