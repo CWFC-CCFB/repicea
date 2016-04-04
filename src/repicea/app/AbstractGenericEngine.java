@@ -39,7 +39,7 @@ public abstract class AbstractGenericEngine {
 
 	private static enum MessageID implements TextableEnum {
 		ErrorMessage("An error of this type occured while running task ", "Une erreur de ce type est survenu pendant l'ex\u00E9cution de la t\u00E2che "),
-		CancelMessage("The task has canceled !", "La t\u00E2che a \u00E9t\u00E9 annul\u00E9e !");
+		CancelMessage("The task has been canceled !", "La t\u00E2che a \u00E9t\u00E9 annul\u00E9e !");
 		
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -193,7 +193,7 @@ public abstract class AbstractGenericEngine {
 			if (container != null && container.isVisible()) {
 				if (task.hasBeenCancelled()) {
 					String message = MessageID.CancelMessage.toString();
-					CommonGuiUtility.showErrorMessage(message, container);
+					CommonGuiUtility.showInformationMessage(message, container);
 				} else {
 					String taskName = task.getName();
 					Exception failureCause = task.getFailureReason();

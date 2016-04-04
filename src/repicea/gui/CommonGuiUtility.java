@@ -92,6 +92,55 @@ public class CommonGuiUtility {
 	}
 	
 	/**
+	 * This private class handles an error message as well as the owner of the JOptionPane.showMessageDialog that 
+	 * is to show in the GUI.
+	 * @author Mathieu Fortin - March 2013
+	 */
+	private static class WarningMessage implements Runnable {
+
+		private String message;
+		private Container parent;
+		
+		private WarningMessage(String message, Container parent) {
+			this.message = message;
+			this.parent = parent;
+		}
+		
+		@Override
+		public void run() {
+			JOptionPane.showMessageDialog(parent,
+					message, 
+					UIControlManager.InformationMessageTitle.Warning.toString(), 
+					JOptionPane.WARNING_MESSAGE);
+		}
+	}
+	
+	/**
+	 * This private class handles an error message as well as the owner of the JOptionPane.showMessageDialog that 
+	 * is to show in the GUI.
+	 * @author Mathieu Fortin - March 2013
+	 */
+	private static class InformationMessage implements Runnable {
+
+		private String message;
+		private Container parent;
+		
+		private InformationMessage(String message, Container parent) {
+			this.message = message;
+			this.parent = parent;
+		}
+		
+		@Override
+		public void run() {
+			JOptionPane.showMessageDialog(parent,
+					message, 
+					UIControlManager.InformationMessageTitle.Information.toString(), 
+					JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+
+	/**
 	 * This class provides the result of a file chooser dialog.
 	 * @author Mathieu Fortin - October 2010
 	 */
@@ -338,7 +387,25 @@ public class CommonGuiUtility {
 	public static void showErrorMessage(String message, Container parent) {
 		SwingUtilities.invokeLater(new ErrorMessage(message, parent));
 	}
-	
+
+	/**
+	 * This method causes a JOptionPane.showErrorMessage to be sent on the Event Dispatch Thread.
+	 * @param message the error message to be displayed
+	 * @param parent the Container instance that is the parent of this error message (can be null)
+	 */
+	public static void showInformationMessage(String message, Container parent) {
+		SwingUtilities.invokeLater(new InformationMessage(message, parent));
+	}
+
+	/**
+	 * This method causes a JOptionPane.showErrorMessage to be sent on the Event Dispatch Thread.
+	 * @param message the error message to be displayed
+	 * @param parent the Container instance that is the parent of this error message (can be null)
+	 */
+	public static void showWarningMessage(String message, Container parent) {
+		SwingUtilities.invokeLater(new WarningMessage(message, parent));
+	}
+
 	/**
 	 * This method scans a container for all the instances of a particular class that
 	 * extends the class parameter.
