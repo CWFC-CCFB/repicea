@@ -22,6 +22,7 @@ import java.io.File;
 import java.net.URISyntaxException;
 
 import repicea.app.AbstractGenericEngine;
+import repicea.app.GenericTask;
 import repicea.app.Logger;
 import repicea.app.SettingMemory;
 import repicea.console.TriggerTask.TaskID;
@@ -93,8 +94,8 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 
 	
 	@Override
-	protected void decideWhatToDo(String taskName, Exception failureReason) {
-		super.decideWhatToDo(taskName, failureReason);
+	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
+		super.decideWhatToDoInCaseOfFailure(task);
 		addTask(new TriggerTask(TaskID.ExpandInterface, this));
 	}
 
