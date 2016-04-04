@@ -76,7 +76,7 @@ public class JavaProcessWrapper extends AbstractGenericTask implements PropertyC
 		try {
 			output = internalProcess.get();
 		} catch (Exception e) {
-			if (isCancelled()) {
+			if (hasBeenCancelled()) {
 				output = 0;
 			} else {
 				throw e;
