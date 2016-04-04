@@ -87,7 +87,8 @@ public abstract class AbstractGenericEngine {
 				worker.getFailureReason().printStackTrace();
 				shutdown(1);
 			}
-		}		
+		}
+
 				
 	}
 	
@@ -120,7 +121,7 @@ public abstract class AbstractGenericEngine {
 
 					currentTask.run();
 
-					if (!currentTask.isCorrectlyTerminated() || currentTask.isCancelled()) {
+					if (!currentTask.isCorrectlyTerminated() || currentTask.hasBeenCancelled()) {
 						Exception exc = currentTask.getFailureReason();
 						exc.printStackTrace();
 						engine.decideWhatToDoInCaseOfFailure(currentTask);
@@ -190,7 +191,7 @@ public abstract class AbstractGenericEngine {
 				container = (Container) component;
 			}
 			if (container != null && container.isVisible()) {
-				if (task.isCancelled()) {
+				if (task.hasBeenCancelled()) {
 					String message = MessageID.CancelMessage.toString();
 					CommonGuiUtility.showErrorMessage(message, container);
 				} else {

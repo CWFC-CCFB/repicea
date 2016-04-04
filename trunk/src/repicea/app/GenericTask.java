@@ -39,5 +39,5 @@ public interface GenericTask extends Executable {
 	 * This method returns true if the method cancel() has been called.
 	 * @return a boolean
 	 */
-	public boolean isCancelled();
+	public boolean hasBeenCancelled();
 }

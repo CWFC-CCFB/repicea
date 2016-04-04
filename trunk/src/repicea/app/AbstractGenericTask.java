@@ -102,7 +102,10 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 			cancel(true);
 		}
 	}
-
+	
+	@Override
+	public final boolean hasBeenCancelled() {return isCancelled;}
+	
 	
 	/**
 	 * Compared to the super class, the doInBackground() no longer throws exceptions.
