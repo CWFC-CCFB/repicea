@@ -61,5 +61,4 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 		getDistribution().setMean(mean);
 	}
 	
-
 }

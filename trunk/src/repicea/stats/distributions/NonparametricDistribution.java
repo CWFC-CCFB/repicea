@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -18,12 +18,7 @@
  */
 package repicea.stats.distributions;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import repicea.math.Matrix;
-import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 
 /**
@@ -31,100 +26,21 @@ import repicea.stats.StatisticalUtility;
  * are derived from an array of matrices that represents the observations.
  * @author Mathieu Fortin - August 2012
  */
-public class NonparametricDistribution implements Distribution, Serializable {
+public class NonparametricDistribution extends ObservedDistribution {
 
 	private static final long serialVersionUID = 20120826L;
-	
-	private final List<Matrix> observations;
 
 	/**
 	 * Constructor.
 	 */
 	public NonparametricDistribution() {
-		observations = new ArrayList<Matrix>();
+		super();
 	}
 	
-	/**
-	 * This method returns the number of observation in this nonparametric distribution.
-	 * @return an integer
-	 */
-	public int getNumberOfRealizations() {return observations.size();}
-	
-	/**
-	 * This method sets a given observation of the nonparametric distribution.
-	 * @param value the value of the observation
-	 */
-	public void addRealization(Matrix value) {observations.add(value);}
-	
-	/**
-	 * This method returns the array that contains all the observations of this distribution.
-	 * @return an array of Matrix instances
-	 */
-	public List<Matrix> getRealizations() {return observations;}
-	
-	@Override
-	public Matrix getMean() {
-		if (observations == null || observations.isEmpty()) {
-			return null;
-		} else {
-			Matrix sum = null;
-			for (Matrix mat : observations) {
-				if (sum == null) {
-					sum = ((Matrix) mat).getDeepClone();
-				} else {
-					sum = sum.add((Matrix) mat);
-				}
-			}
-			return (Matrix) sum.scalarMultiply(1d / observations.size());
-		}
-	}
-
-	@Override
-	public Matrix getVariance() {
-		Matrix mean = (Matrix) getMean();
-		Matrix sse = null;
-		Matrix error;
-		for (Matrix mat : observations) {
-			error = ((Matrix) mat).subtract(mean);
-			if (sse == null) {
-				sse = error.multiply(error.transpose());
-			} else {
-				sse = sse.add(error.multiply(error.transpose()));
-			}
-		}
-		return sse.scalarMultiply(1d / (observations.size()-1));
-	}
-
-	@Override
-	public boolean isParametric() {
-		return false;
-	}
-
-	@Override
-	public boolean isMultivariate() {
-		if (observations != null && observations.size() > 0) {
-			return observations.get(0) instanceof Matrix && ((Matrix) observations.get(0)).m_iRows > 1;
-		} else {
-			return false;
-		}
-	}
-
-	@Override
-	public Type getType() {
-		return Type.NONPARAMETRIC;
-	}
 
 	@Override
 	public Matrix getRandomRealization() {
 		int observationIndex = (int) (StatisticalUtility.getRandom().nextDouble() * getNumberOfRealizations());
 		return getRealizations().get(observationIndex);
 	}
-
-//	@Override
-//	public double getQuantile(double... values) {
-//		if (observationsgetM)
-//		// TODO to be implemented
-//		return -1;
-//	}
-
 }

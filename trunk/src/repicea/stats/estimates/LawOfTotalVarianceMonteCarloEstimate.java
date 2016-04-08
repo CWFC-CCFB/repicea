@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2016 Mathieu Fortin for Rouge-Epicea
  *
@@ -18,10 +18,10 @@
  */
 package repicea.stats.estimates;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.NonparametricDistribution;
 
 /**
  * The LawOfTotalVarianceMonteCarloEstimate is a Monte Carlo estimate for random variable.
@@ -32,24 +32,64 @@ import repicea.stats.distributions.NonparametricDistribution;
 @SuppressWarnings("serial")
 public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 
-	private final NonparametricDistribution varianceDistribution;
-		
+	
+	private final List<SampleMeanEstimate> realizations;
+	
+	
+	/**
+	 * Constructor.	
+	 */
 	public LawOfTotalVarianceMonteCarloEstimate() {
 		super();
-		varianceDistribution = new NonparametricDistribution();
-		estimatorType = EstimatorType.MonteCarlo;
+		realizations = new ArrayList<SampleMeanEstimate>();
 	}
 
-	public void addRealization(Matrix value, Matrix variance) {
-		getDistribution().addRealization(value);
-		varianceDistribution.addRealization(variance);
+	/**
+	 * This method is a surrogate for addRealization(Matrix) method.
+	 * @param estimate a SampleEstimate instance
+	 */
+	public void addRealization(SampleMeanEstimate estimate) {
+		realizations.add(estimate);
+		getDistribution().getRealizations().add(estimate.getMean());
 	}
 	
-	public List<Matrix> getRealizationsOfTheVariance() {return varianceDistribution.getRealizations();}
-
+	@Override
+	public void addRealization(Matrix mat) {
+		addRealization(unformatObservation(mat));
+	}
+	
+	
 	@Override
 	public Matrix getVariance() {
-		return super.getVariance().add(varianceDistribution.getMean());
+		MonteCarloEstimate meanOfVariances = new MonteCarloEstimate();
+		MonteCarloEstimate varianceOfMeans = new MonteCarloEstimate();
+		for (SampleMeanEstimate realization : realizations) {
+			meanOfVariances.addRealization(realization.getVariance());
+			varianceOfMeans.addRealization(realization.getMean());
+		}
+			
+		return meanOfVariances.getMean().add(varianceOfMeans.getVariance());
 	}
-	
+
+	private SampleMeanEstimate unformatObservation(Matrix formattedObservation) {
+		SampleMeanEstimate estimate = new SampleMeanEstimate();
+		for (int j = 0; j < formattedObservation.m_iCols; j++) {
+			estimate.addObservation(formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j));
+		}
+		return estimate;
+	}
+
+	@Override
+	public Matrix getMean() {
+		Matrix mean = null;
+		for (SampleMeanEstimate estimate : realizations) {
+			if (mean == null) {
+				mean = estimate.getMean();
+			} else {
+				mean = mean.add(estimate.getMean());
+			}
+		}
+		return mean.scalarMultiply(1d / getNumberOfRealizations());
+	}
+
 }

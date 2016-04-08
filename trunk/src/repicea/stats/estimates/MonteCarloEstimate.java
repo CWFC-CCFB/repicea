@@ -66,7 +66,23 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	
 	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
 	
-	public void addRealization(Matrix value) {getDistribution().addRealization(value);}
+	public void addRealization(Matrix value) {
+		if (checkConformity(value)) {
+			getDistribution().addRealization(value);
+		} else {
+			throw new InvalidParameterException("The matrix is not conform to previous observations!");
+		}
+	}
+	
+	private boolean checkConformity(Matrix value) {
+		List<Matrix> observations = getDistribution().getRealizations();
+		if (observations.isEmpty()) {
+			return true; 
+		} else {
+			Matrix firstObservation = observations.get(0);
+			return (firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols);
+		}
+	}
 	
 	public List<Matrix> getRealizations() {return getDistribution().getRealizations();}
 
