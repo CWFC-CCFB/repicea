@@ -34,7 +34,7 @@ public class MonteCarloEstimateTests {
 		int sampleSize = 100;
 		Random generator = new Random();
 		LawOfTotalVarianceMonteCarloEstimate output = new LawOfTotalVarianceMonteCarloEstimate();
-		for (int i = 0; i < 10000; i++) {
+		for (int i = 0; i < 50000; i++) {
 			double meanForThisRealization = generator.nextGaussian() * outerStd;
 			SampleMeanEstimate estimate = new SampleMeanEstimate();
 			Matrix obs;
@@ -48,7 +48,8 @@ public class MonteCarloEstimateTests {
 		double totalVariance = output.getVariance().m_afData[0][0];
 		double expectedVariance = outerStd * outerStd + innerStd * innerStd / sampleSize;
 		double relativeDifference = (totalVariance - expectedVariance)/expectedVariance; 
-		Assert.assertEquals(0d, relativeDifference, 1E-2);
+		System.out.println("Relative difference of " + relativeDifference);
+		Assert.assertEquals(0d, relativeDifference, 2E-2);
 	}
 	
 }
