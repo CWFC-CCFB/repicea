@@ -67,7 +67,6 @@ public class REpiceaRecordSet extends LinkedBlockingQueue<GExportRecord> {
 		} else {		// the queue is empty
 			return null;
 		}
-		
 	}
 	
 }
