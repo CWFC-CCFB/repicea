@@ -24,9 +24,12 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -182,6 +185,13 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 			}
 			recordSet.add(record);
 		}
+		
+		protected final void addRecordSet(REpiceaRecordSet recordSet) throws Exception {
+			if (saveThread != null && !saveThread.isAlive()) {
+				throw new Exception("The save thread has crashed!"); 
+			}
+			recordSet.addAll(recordSet);
+		}
 	}
 	
 	
@@ -241,9 +251,6 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	
 	private final GExportRecord finalRecordForClosingFile = new GExportRecord();
 	
-//	@SuppressWarnings("rawtypes")
-//	protected final TreeMap<Enum, REpiceaRecordSet> recordSets;
-	
 	private String filename;
 	private boolean isCanceled;
 
@@ -255,6 +262,7 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	protected transient REpiceaExportToolDialog guiInterface;
 	
 	protected boolean multipleSelection;
+	protected boolean saveFileEnabled = true;
 	
 	protected boolean appendFileEnabled = false;			// by default this option is set to false
 
@@ -297,17 +305,20 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	 * @throws Exception if the worker does not terminate correctly
 	 */
 	@SuppressWarnings("rawtypes")
-	protected final void createRecordSet(Enum selectedOption, File file) throws Exception {
+	protected final REpiceaRecordSet createRecordSet(Enum selectedOption, File file) throws Exception {
 		
 		if (!availableExportOptions.contains(selectedOption)) {
 			throw new InvalidParameterException("Export option " + selectedOption.name() + " is not recognized!");
 		}
 		
 		REpiceaRecordSet recordSet = new REpiceaRecordSet();
-		InternalWorkerForSaveMethod saveRecordSetWorker = new InternalWorkerForSaveMethod(file, recordSet);
-		saveRecordSetWorker.start();
 		InternalSwingWorkerForRecordSet buildRecordSetWorker = instantiateInternalSwingWorkerForRecordSet(selectedOption, recordSet);
-		buildRecordSetWorker.addSaveThread(saveRecordSetWorker);
+		InternalWorkerForSaveMethod saveRecordSetWorker = null;
+		if (saveFileEnabled) {
+			saveRecordSetWorker = new InternalWorkerForSaveMethod(file, recordSet);
+			saveRecordSetWorker.start();
+			buildRecordSetWorker.addSaveThread(saveRecordSetWorker);
+		}
 		
 		if (guiInterface != null && guiInterface.isVisible()) {
 			// will be executed in the EventDispatchThread but the window will block because it is model
@@ -317,13 +328,23 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 		}
 		
 		if (!buildRecordSetWorker.isCorrectlyTerminated()) {
+			recordSet.clear();
+		 	saveRecordSetWorker.terminate();
 			throw buildRecordSetWorker.getFailureReason();
+		} else if (buildRecordSetWorker.hasBeenCancelled()) {
+			recordSet.clear();
+		 	saveRecordSetWorker.terminate();
+		 	throw new CancellationException();
 		}
-		saveRecordSetWorker.terminate();
-		saveRecordSetWorker.join();
-		if (saveRecordSetWorker.failure != null) {
-			throw saveRecordSetWorker.failure;
+
+		if (saveFileEnabled) {
+		 	saveRecordSetWorker.terminate();
+			saveRecordSetWorker.join();
+			if (saveRecordSetWorker.failure != null) {
+				throw saveRecordSetWorker.failure;
+			}
 		}
+		return recordSet;
 	}
 	
 
@@ -360,23 +381,23 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 		}
 	}
 
-//	/**
-//	 * This method makes it possible to remove one export option if desired. The method is protected
-//	 * against the removal of all options: the last one will always remain. If the specified export option
-//	 * is not found in the available export option nothing happens.
-//	 * @param exportOption an enum variable that corresponds to the export option to be removed
-//	 */
-//	@SuppressWarnings("rawtypes")
-//	protected void removeExportOption(Enum exportOption) {
-//		if (availableExportOptions.contains(exportOption)) {
-//			if (availableExportOptions.size() > 1) {
-//				if (selectedExportOptions.contains(exportOption)) {
-//					selectedExportOptions.remove(exportOption);
-//				}
-//				availableExportOptions.remove(exportOption);
-//			}
-//		}
-//	}
+	/**
+	 * This method makes it possible to remove one export option if desired. The method is protected
+	 * against the removal of all options: the last one will always remain. If the specified export option
+	 * is not found in the available export option nothing happens.
+	 * @param exportOption an enum variable that corresponds to the export option to be removed
+	 */
+	@SuppressWarnings("rawtypes")
+	protected void removeExportOption(Enum exportOption) {
+		if (availableExportOptions.contains(exportOption)) {
+			if (availableExportOptions.size() > 1) {
+				if (selectedExportOptions.contains(exportOption)) {
+					selectedExportOptions.remove(exportOption);
+				}
+				availableExportOptions.remove(exportOption);
+			}
+		}
+	}
 	
 	
 	@SuppressWarnings("rawtypes")
@@ -456,7 +477,8 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	 * @throws Exception
 	 */
 	@SuppressWarnings("rawtypes")
-	public void exportRecordSets() throws Exception {
+	public Map<Enum, REpiceaRecordSet> exportRecordSets() throws Exception {
+		Map<Enum, REpiceaRecordSet> outputMap = new HashMap<Enum, REpiceaRecordSet>();
 		for (Enum selectedOutputOption : selectedExportOptions) {
 			File file;
 			if (selectedExportOptions.size() == 1) {
@@ -468,8 +490,16 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 				String optionType = selectedOutputOption.name().trim();
 				file = new File(originalFilename + optionType + extension);
 			}
-			createRecordSet(selectedOutputOption, file);
+			outputMap.put(selectedOutputOption, createRecordSet(selectedOutputOption, file));
 		}
+		return outputMap;
 	}
-	
+
+	/**
+	 * This method makes it possible to disable the saving to file. Then the Map that results from exportRecordSets() won't be empty.
+	 * @param bool a boolean
+	 */
+	protected void setSaveFileEnabled(boolean bool) {
+		saveFileEnabled = bool;
+	}
 }

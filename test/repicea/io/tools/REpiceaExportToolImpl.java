@@ -12,8 +12,10 @@ public class REpiceaExportToolImpl extends REpiceaExportTool {
 	public static enum ExportOptions {
 		TheOnlyOne;
 	}
+	@SuppressWarnings("serial")
 	protected static class InternalSwingWorker extends InternalSwingWorkerForRecordSet {
 
+		@SuppressWarnings("rawtypes")
 		protected InternalSwingWorker(Enum exportOption, REpiceaRecordSet recordSet) {
 			super(exportOption, recordSet);
 		}
@@ -24,6 +26,9 @@ public class REpiceaExportToolImpl extends REpiceaExportTool {
 			GExportFieldDetails age = new GExportFieldDetails("Age", 25);
 			for (int i = 0; i < 200000; i++) {
 				GExportRecord record = new GExportRecord();
+				if (isCancelled) {
+					break;
+				}
 				record.addField(people);
 				record.addField(age);
 				addRecord(record);
@@ -32,6 +37,7 @@ public class REpiceaExportToolImpl extends REpiceaExportTool {
 		
 	}
 	
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected List<Enum> defineAvailableExportOptions() {
 		List<Enum> var = new ArrayList<Enum>();
@@ -39,10 +45,7 @@ public class REpiceaExportToolImpl extends REpiceaExportTool {
 		return var;
 	}
 
-	
-	
-	
-	
+	@SuppressWarnings("rawtypes")
 	@Override
 	protected InternalSwingWorkerForRecordSet instantiateInternalSwingWorkerForRecordSet(Enum selectedOption, REpiceaRecordSet recordSet) {
 		return new InternalSwingWorker(selectedOption, recordSet);
