@@ -63,6 +63,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * {@code save();} </br>
  * @author Mathieu Fortin - January 2011
  */
+@Deprecated
 public abstract class ExportTool implements ShowableObjectWithParent, CaretListener, ListSelectionListener {
 	
 	@SuppressWarnings("serial")
@@ -467,7 +468,7 @@ public abstract class ExportTool implements ShowableObjectWithParent, CaretListe
 		}
 	}
 
-	@SuppressWarnings({ "rawtypes", "deprecation"})
+	@SuppressWarnings({ "rawtypes"})
 	@Override
 	public void valueChanged(ListSelectionEvent arg0) {
 		if (arg0.getSource().equals(guiInterface.optionList)) {
