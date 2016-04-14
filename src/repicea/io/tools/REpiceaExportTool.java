@@ -51,7 +51,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 
 
 /**
- * The ExportTool class is an abstract class that can save a file from particular record sets.
+ * The REpiceaExportTool class is an abstract class that can save a file from particular record sets.
  * The UI interface of this class also provides an export option list and a file selection panel. The export options are 
  * defined in the abstract method defineExportOptions() while the record sets are built through the
  * setRecordSet(Enum selectedExportOption) method. By default, the format is dbf, the user can select other format though. </br>
@@ -60,9 +60,8 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * </br>
  * {@code setFilename(myFile);} </br>
  * {@code setSelectedOptions(mySelectedOptions);} </br>
- * {@code createRecordSets();} </br>
- * {@code save();} </br>
- * @author Mathieu Fortin - January 2011
+ * {@code exportRecordSets();} </br>
+ * @author Mathieu Fortin - April 2016
  */
 public abstract class REpiceaExportTool implements ShowableObjectWithParent, CaretListener, ListSelectionListener {
 	
@@ -186,11 +185,11 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 			recordSet.add(record);
 		}
 		
-		protected final void addRecordSet(REpiceaRecordSet recordSet) throws Exception {
+		protected final void addRecordSet(REpiceaRecordSet incomingRecordSet) throws Exception {
 			if (saveThread != null && !saveThread.isAlive()) {
 				throw new Exception("The save thread has crashed!"); 
 			}
-			recordSet.addAll(recordSet);
+			recordSet.addAll(incomingRecordSet);
 		}
 	}
 	
