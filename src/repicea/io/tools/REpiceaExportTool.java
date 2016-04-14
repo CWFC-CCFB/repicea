@@ -72,6 +72,7 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 		private Exception failure;
 		
 		protected InternalWorkerForSaveMethod(File file, REpiceaRecordSet recordSet) {
+			super("Export tool save-to-file thread");
 			this.file = file;
 			this.recordSet = recordSet;
 		}
