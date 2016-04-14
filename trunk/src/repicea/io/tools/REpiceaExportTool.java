@@ -86,17 +86,16 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 		}
 		
 		protected void doThisJob() throws Exception {
-			
+			GExportRecord record;
+			GExportRecord refRecord = null;
 			FormatWriter<? extends FormatHeader<? extends FormatField>> formatWritter = null;
 			try {
 				formatWritter = FormatWriter.createFormatWriter(REpiceaExportTool.this.isAppendFileEnabled(), file.getAbsolutePath());    //using sync mode constructor
 	
-				GExportRecord record;
-				GExportRecord refRecord = null;
 				int nbFields = -1;
 				while (!(record = recordSet.take()).equals(REpiceaExportTool.this.finalRecordForClosingFile)) {
 					if (refRecord == null) {
-						refRecord = recordSet.peek();
+						refRecord = record;
 						nbFields = refRecord.getFieldList().size();
 
 						List<FormatField> aoFields = new ArrayList<FormatField>();
@@ -129,6 +128,7 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 			
 				}
 			} catch (Exception e) {
+				e.printStackTrace();
 				throw e;
 			} finally {
 				if (formatWritter != null) {
