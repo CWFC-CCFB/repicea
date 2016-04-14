@@ -279,7 +279,14 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 			throw new InvalidParameterException("There is no valid export option!");
 		}
 	}
- 
+
+	/**
+	 * This method makes it possible to enable or disable the multiple export.
+	 * @param bool a boolean
+	 */
+	public void setMultipleSelection(boolean bool) {
+		multipleSelection = bool;
+	}
 
 	/**
 	 * General constructor with multiple selection mode set to false.
@@ -374,6 +381,9 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 		for (Enum selectedOption : selectedOptions) {
 			if (availableExportOptions.contains(selectedOption)) {
 				selectedExportOptions.add(selectedOption);
+				if (!multipleSelection && selectedExportOptions.size() > 1) {
+					throw new InvalidParameterException("The export tool was not set for multiple selection!");
+				}
 			} else {
 				selectedExportOptions.clear();
 				throw new Exception("This export option is not compatible!");
