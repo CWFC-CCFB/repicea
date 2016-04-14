@@ -305,7 +305,7 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	 * @throws Exception if the worker does not terminate correctly
 	 */
 	@SuppressWarnings("rawtypes")
-	protected final REpiceaRecordSet createRecordSet(Enum selectedOption, File file) throws Exception {
+	protected final REpiceaRecordSet createRecordSet(Enum selectedOption) throws Exception {
 		
 		if (!availableExportOptions.contains(selectedOption)) {
 			throw new InvalidParameterException("Export option " + selectedOption.name() + " is not recognized!");
@@ -315,7 +315,7 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 		InternalSwingWorkerForRecordSet buildRecordSetWorker = instantiateInternalSwingWorkerForRecordSet(selectedOption, recordSet);
 		InternalWorkerForSaveMethod saveRecordSetWorker = null;
 		if (saveFileEnabled) {
-			saveRecordSetWorker = new InternalWorkerForSaveMethod(file, recordSet);
+			saveRecordSetWorker = new InternalWorkerForSaveMethod(getExportFilename(selectedOption), recordSet);
 			saveRecordSetWorker.start();
 			buildRecordSetWorker.addSaveThread(saveRecordSetWorker);
 		}
@@ -480,20 +480,29 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	public Map<Enum, REpiceaRecordSet> exportRecordSets() throws Exception {
 		Map<Enum, REpiceaRecordSet> outputMap = new HashMap<Enum, REpiceaRecordSet>();
 		for (Enum selectedOutputOption : selectedExportOptions) {
-			File file;
+			outputMap.put(selectedOutputOption, createRecordSet(selectedOutputOption));
+		}
+		return outputMap;
+	}
+	
+	
+	@SuppressWarnings("rawtypes")
+	private File getExportFilename(Enum exportOption) {
+		if (saveFileEnabled) {
 			if (selectedExportOptions.size() == 1) {
-				file = new File(getFilename());
+				return new File(getFilename());
 			} else {
 				int indexOfLastDot = getFilename().lastIndexOf(".");
 				String extension = getFilename().substring(indexOfLastDot, getFilename().length()).trim();
 				String originalFilename = getFilename().substring(0, indexOfLastDot).trim();
-				String optionType = selectedOutputOption.name().trim();
-				file = new File(originalFilename + optionType + extension);
+				String optionType = exportOption.name().trim();
+				return new File(originalFilename + optionType + extension);
 			}
-			outputMap.put(selectedOutputOption, createRecordSet(selectedOutputOption, file));
+		} else {
+			return null;
 		}
-		return outputMap;
 	}
+	
 
 	/**
 	 * This method makes it possible to disable the saving to file. Then the Map that results from exportRecordSets() won't be empty.
