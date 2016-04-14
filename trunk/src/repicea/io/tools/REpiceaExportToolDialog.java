@@ -61,8 +61,8 @@ import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
- * The ExportDBFToolDialog class is the user interface of the ExportDBFTool class.
- * @author Mathieu Fortin - January 2011
+ * The REpiceaExportToolDialog class is the user interface of the REpiceaExportTool class.
+ * @author Mathieu Fortin - January 2016
  */
 public class REpiceaExportToolDialog extends REpiceaDialog implements ActionListener {
 
