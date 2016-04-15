@@ -10,7 +10,7 @@ public class TruncatedGaussianEstimateTests {
 	@Test
 	public void comparingMeanPositiveHalfDistributionTest() {
 		TruncatedGaussianEstimate estimate = new TruncatedGaussianEstimate();
-		estimate.setLowerBound(new Matrix(1,1));
+		estimate.setLowerBoundValue(new Matrix(1,1));
 		double actualMean = 0d;
 		int nbRealizations = 100000;
 		double fact = 1d/nbRealizations;
@@ -23,7 +23,7 @@ public class TruncatedGaussianEstimateTests {
 	@Test
 	public void comparingMeanNegativeHalfDistributionTest() {
 		TruncatedGaussianEstimate estimate = new TruncatedGaussianEstimate();
-		estimate.setUpperBound(new Matrix(1,1));
+		estimate.setUpperBoundValue(new Matrix(1,1));
 		double actualMean = 0d;
 		int nbRealizations = 100000;
 		double fact = 1d/nbRealizations;
