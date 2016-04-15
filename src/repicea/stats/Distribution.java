@@ -21,6 +21,8 @@ package repicea.stats;
 import java.io.Serializable;
 
 import repicea.math.Matrix;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 
 
@@ -30,7 +32,27 @@ import repicea.math.Matrix;
  */
 public interface Distribution extends CentralMomentsGettable, Serializable {
 
-	public enum Type {GAUSSIAN, UNIFORM, NONPARAMETRIC, UNKNOWN, CHI_SQUARE}
+	public enum Type implements TextableEnum {
+		GAUSSIAN("Gaussian", "Gaussienne"), 
+		UNIFORM("Uniform", "Uniforme"), 
+		NONPARAMETRIC("Non parametric", "Non param\u00E9trique"), 
+		UNKNOWN("Unknown", "Inconnue"), 
+		CHI_SQUARE("Chi square", "Chi carr\u00E9");
+
+		
+		Type(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
+	
+	}
 	
 	/**
 	 * This method returns true if the distribution is parametric or false otherwise.
