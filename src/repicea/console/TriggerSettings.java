@@ -55,8 +55,8 @@ public class TriggerSettings implements Memorizable {
 	private final String jreVersion;
 	private final String revision;
 	private final String architecture;
-	private final int maxAllowedMemoryJVM;
-	private final int minAllowedMemoryJVM;
+	protected final int maxAllowedMemoryJVM;
+	protected final int minAllowedMemoryJVM;
 	
 	protected TriggerSettings(Trigger caller) {
 		this.caller = caller;
@@ -74,7 +74,7 @@ public class TriggerSettings implements Memorizable {
 		architecture = System.getProperty("os.arch");
 		if (architecture.endsWith("64")) {
 			minAllowedMemoryJVM = 1024;
-			maxAllowedMemoryJVM = 8 * 1024;
+			maxAllowedMemoryJVM = 16 * 1024;
 		} else {
 			minAllowedMemoryJVM = 256;
 			maxAllowedMemoryJVM = 2 * 1024;
@@ -90,7 +90,7 @@ public class TriggerSettings implements Memorizable {
 		if (allocatedMemoryJVM < minAllowedMemoryJVM) {
 			this.allocatedMemoryJVM = minAllowedMemoryJVM;
 		} else if (allocatedMemoryJVM > maxAllowedMemoryJVM) {
-			
+			this.allocatedMemoryJVM = maxAllowedMemoryJVM;
 		} else {
 			this.allocatedMemoryJVM = allocatedMemoryJVM;
 		}
