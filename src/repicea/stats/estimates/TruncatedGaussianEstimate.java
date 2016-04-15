@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
  *
@@ -19,6 +19,7 @@
 package repicea.stats.estimates;
 
 import repicea.math.Matrix;
+import repicea.stats.distributions.BoundedDistribution;
 import repicea.stats.distributions.TruncatedGaussianDistribution;
 
 /**
@@ -27,7 +28,7 @@ import repicea.stats.distributions.TruncatedGaussianDistribution;
  * @author Mathieu Fortin - August 2015
  */
 @SuppressWarnings("serial")
-public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistribution> {
+public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistribution> implements BoundedDistribution {
 
 
 	/**
@@ -46,19 +47,13 @@ public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistrib
 		super(new TruncatedGaussianDistribution(mu, sigma2));
 	}
 	
-	/**
-	 * This method sets the lower bound of the truncated distribution. Setting the lower bound to null simply removes the bound.
-	 * @param lowerBoundValue a Matrix instance
-	 */
-	public void setLowerBound(Matrix lowerBoundValue) {
+	@Override
+	public void setLowerBoundValue(Matrix lowerBoundValue) {
 		getDistribution().setLowerBoundValue(lowerBoundValue);
 	}
-	
-	/**
-	 * This method sets the upper bound of the truncated distribution. Setting the upper bound to null simply removes the bound.
-	 * @param upperBoundValue a Matrix instance
-	 */
-	public void setUpperBound(Matrix upperBoundValue) {
+
+	@Override
+	public void setUpperBoundValue(Matrix upperBoundValue) {
 		getDistribution().setUpperBoundValue(upperBoundValue);
 	}
 	
