@@ -205,18 +205,18 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		slider.setPaintTicks(true);
 		slider.setSnapToTicks(true);
 		slider.setPaintLabels(true);
-		int minimum;
-		int maximum;
+		int minimum = caller.getSettings().minAllowedMemoryJVM;
+		int maximum = caller.getSettings().maxAllowedMemoryJVM;
 		int majorTickSpacing;
 		int minorTickSpacing;
 		if (caller.getSettings().getArchitecture().endsWith("64")) {
-			minimum = 1024;
-			maximum = 8 * 1024;
-			majorTickSpacing = 1024;
-			minorTickSpacing = 512;
+//			minimum = 1024;
+//			maximum = 8 * 1024;
+			majorTickSpacing = 2*1024;
+			minorTickSpacing = 1024;
 		} else {
-			minimum = 256;
-			maximum = 2 * 1024;
+//			minimum = 256;
+//			maximum = 2 * 1024;
 			majorTickSpacing = 256;
 			minorTickSpacing = 128;
 		}

@@ -42,7 +42,7 @@ import repicea.stats.estimates.GaussianEstimate;
  * @author Mathieu Fortin - October 2011
  */
 @SuppressWarnings("serial")
-public abstract class ModelBasedSimulator implements Serializable {
+public abstract class ModelBasedSimulator extends SensitivityAnalysisParameter<GaussianEstimate> {
 
 	protected static final List<Integer> DefaultZeroIndex = new ArrayList<Integer>();
 	static {
@@ -90,15 +90,11 @@ public abstract class ModelBasedSimulator implements Serializable {
 	private boolean areBlupsEstimated;
 
 	// set by the constructor
-	protected boolean isRandomEffectsVariabilityEnabled;
-	protected boolean isParametersVariabilityEnabled;
-	protected boolean isResidualVariabilityEnabled;
+	protected final boolean isRandomEffectsVariabilityEnabled;
+	protected final boolean isResidualVariabilityEnabled;
 		
 	protected Matrix oXVector;
 
-	private ModelParameterEstimates parameterEstimates;
-	final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
-	
 	final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
 	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
@@ -120,13 +116,12 @@ public abstract class ModelBasedSimulator implements Serializable {
 	protected ModelBasedSimulator(boolean isParametersVariabilityEnabled,
 			boolean isRandomEffectsVariabilityEnabled,
 			boolean isResidualVariabilityEnabled) {
-		this.isParametersVariabilityEnabled = isParametersVariabilityEnabled;
+		super(isParametersVariabilityEnabled);
 		this.isRandomEffectsVariabilityEnabled = isRandomEffectsVariabilityEnabled;
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
 		defaultRandomEffects = new HashMap<String, Estimate<? extends StandardGaussianDistribution>>();
 				
-		simulatedParameters = new HashMap<Integer, Matrix>();
 		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
 
 		simulatedResidualError = new HashMap<String, GaussianErrorTermList>();
@@ -146,13 +141,17 @@ public abstract class ModelBasedSimulator implements Serializable {
 		return defaultRandomEffects;
 	}
 
+	@Override
 	protected void setParameterEstimates(GaussianEstimate gaussianEstimate) {
-		this.parameterEstimates = new ModelParameterEstimates(gaussianEstimate, this);
-		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, parameterEstimates, this));
+		super.setParameterEstimates(new ModelParameterEstimates(gaussianEstimate, this));
+		fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, getParameterEstimates(), this));
 	}
 	
-	protected ModelParameterEstimates getParameterEstimates() {return parameterEstimates;}
-	
+	@Override
+	protected ModelParameterEstimates getParameterEstimates() {
+		return (ModelParameterEstimates) super.getParameterEstimates();
+	}
+
 	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> newEstimate) {
 		Estimate<? extends StandardGaussianDistribution> formerEstimate = defaultRandomEffects.get(level.getName());
 		defaultRandomEffects.put(level.getName(), newEstimate);
@@ -205,6 +204,7 @@ public abstract class ModelBasedSimulator implements Serializable {
 	 * @param subject a subject that implements the MonteCarloSimulationCompliantObject interface
 	 * @return a vector of parameters
 	 */
+	@Override
 	protected final synchronized Matrix getParametersForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		if (isParametersVariabilityEnabled) {
 			if (!rememberRandomDeviates) {
