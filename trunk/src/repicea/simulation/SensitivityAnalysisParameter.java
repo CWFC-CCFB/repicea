@@ -37,7 +37,7 @@ public abstract class SensitivityAnalysisParameter<E extends Estimate> implement
 
 	final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	private E parameterEstimates;
-	protected final boolean isParametersVariabilityEnabled;
+	protected boolean isParametersVariabilityEnabled;
 
 	protected SensitivityAnalysisParameter(boolean isParametersVariabilityEnabled) {
 		this.isParametersVariabilityEnabled = isParametersVariabilityEnabled;
