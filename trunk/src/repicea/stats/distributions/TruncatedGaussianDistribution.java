@@ -6,26 +6,27 @@ import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 
 @SuppressWarnings("serial")
-public class TruncatedGaussianDistribution extends StandardGaussianDistribution {
+public class TruncatedGaussianDistribution extends StandardGaussianDistribution implements BoundedDistribution {
 
-	protected class Bound implements Serializable {
+	protected class Bound extends BasicBound implements Serializable {
 		
 		private boolean isCompletelySet;
 		
-		private Matrix value;
+//		private Matrix value;
 		
 		private Matrix pdfValue;
 		
 		private Matrix cdfValue;
 		
-		private final boolean isUpperBound;
+//		private final boolean isUpperBound;
 		
 		protected Bound(boolean isUpperBound) {
-			this.isUpperBound = isUpperBound;
+			super(isUpperBound);
 		}
-		
+
+		@Override
 		protected void setBoundValue(Matrix value) {
-			this.value = value;
+			super.setBoundValue(value);
 			isCompletelySet = false;
 		}
 		
@@ -44,19 +45,19 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 		}
 
 		private void update() {
-			if (value == null) {
+			if (getBoundValue() == null) {
 				pdfValue = new Matrix(1,1);
 				cdfValue = new Matrix(1,1);
-				if (isUpperBound) {
+				if (isUpperBound()) {
 					cdfValue.m_afData[0][0] = 1d;
 				} else {
 					cdfValue.m_afData[0][0] = 0d;
 				}
 			} else {
 				pdfValue = new Matrix(1,1);
-				pdfValue.m_afData[0][0] = TruncatedGaussianDistribution.this.getProbabilityDensity(value);
+				pdfValue.m_afData[0][0] = TruncatedGaussianDistribution.this.getProbabilityDensity(getBoundValue());
 				cdfValue = new Matrix(1,1);
-				double standardizedValue = (value.m_afData[0][0] - TruncatedGaussianDistribution.this.getMu().m_afData[0][0])/Math.sqrt(TruncatedGaussianDistribution.this.getSigma2().m_afData[0][0]);
+				double standardizedValue = (getBoundValue().m_afData[0][0] - TruncatedGaussianDistribution.this.getMu().m_afData[0][0])/Math.sqrt(TruncatedGaussianDistribution.this.getSigma2().m_afData[0][0]);
 				cdfValue.m_afData[0][0] = GaussianUtility.getCumulativeProbability(standardizedValue);
 			}
 			isCompletelySet = true;
@@ -106,14 +107,14 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 	public Matrix getVariance() {
 		double zFactor = 1/upperBound.getCdfValue().subtract(lowerBound.getCdfValue()).m_afData[0][0];
 		Matrix mult1;
-		if (lowerBound.value != null) {
-			mult1 = lowerBound.getPdfValue().multiply(lowerBound.value);
+		if (lowerBound.getBoundValue() != null) {
+			mult1 = lowerBound.getPdfValue().multiply(lowerBound.getBoundValue());
 		} else {
 			mult1 = lowerBound.getPdfValue();
 		}
 		Matrix mult2;
-		if (upperBound.value != null) {
-			mult2 = upperBound.getPdfValue().multiply(upperBound.value);
+		if (upperBound.getBoundValue() != null) {
+			mult2 = upperBound.getPdfValue().multiply(upperBound.getBoundValue());
 		} else {
 			mult2 = upperBound.getPdfValue();
 		}
@@ -133,18 +134,12 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 		return deviate;
 	}
 
-	/**
-	 * This method sets the lower bound. To remove the bound, just set it to null which is the default value.
-	 * @param lowerBoundValue a Matrix instance
-	 */
+	@Override
 	public void setLowerBoundValue(Matrix lowerBoundValue) {
 		lowerBound.setBoundValue(lowerBoundValue);
 	}
 
-	/**
-	 * This method sets the lower bound. To remove the bound, just set it to null which is the default value.
-	 * @param upperBoundValue a Matrix instance
-	 */
+	@Override
 	public void setUpperBoundValue(Matrix upperBoundValue) {
 		upperBound.setBoundValue(upperBoundValue);
 	}
