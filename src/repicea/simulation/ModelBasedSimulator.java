@@ -90,8 +90,8 @@ public abstract class ModelBasedSimulator extends SensitivityAnalysisParameter<G
 	private boolean areBlupsEstimated;
 
 	// set by the constructor
-	protected final boolean isRandomEffectsVariabilityEnabled;
-	protected final boolean isResidualVariabilityEnabled;
+	protected boolean isRandomEffectsVariabilityEnabled;
+	protected boolean isResidualVariabilityEnabled;
 		
 	protected Matrix oXVector;
 
