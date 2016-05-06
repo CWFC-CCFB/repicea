@@ -139,6 +139,11 @@ public class REpiceaComboBoxOpenButton<P extends ShowableObjectWithParent> exten
 		}
 	}
 
+	@Override
+	public void setEnabled(boolean b) {
+		openButton.setEnabled(b);
+		comboBox.setEnabled(b);
+	}
 //	@Override
 //	public void firePropertyChange(REpiceaAWTProperty propertyName,	Object obj1, Object obj2) {
 //		firePropertyChange(propertyName.name(), obj1, obj2);
