@@ -22,6 +22,7 @@ import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.Image;
 import java.awt.Point;
+import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DragGestureEvent;
 import java.awt.dnd.DragGestureListener;
@@ -40,7 +41,7 @@ import javax.swing.JList;
 public class DragGestureImpl<P> implements DragGestureListener {
 
 	protected static Component DragFromThisComponent;
-	
+	protected static Transferable LocalTransferable;
 	protected DragSourceListener dsl;
 	protected Image icon;
 
@@ -65,11 +66,12 @@ public class DragGestureImpl<P> implements DragGestureListener {
 		}
 		
 		P obj = adaptSourceToTransferable(event);
+		LocalTransferable = new TransferableObject<P>(obj);
 		if (dsl != null && icon != null) {
-			event.startDrag(cursor, icon, new Point(0,0), new TransferableObject<P>(obj), dsl);
+			event.startDrag(cursor, icon, new Point(0,0), LocalTransferable, dsl);
 		} else {
 			try {
-				event.startDrag(cursor, new TransferableObject<P>(obj));
+				event.startDrag(cursor, LocalTransferable);
 			} catch(InvalidDnDOperationException e) {}				
 		}
 	}
