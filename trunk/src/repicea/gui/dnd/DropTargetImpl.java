@@ -36,6 +36,19 @@ import java.util.List;
  */
 public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetListener {
 
+	@SuppressWarnings("serial")
+	protected static class ReferenceDropTargetDropEvent extends DropTargetDropEvent {
+
+		public ReferenceDropTargetDropEvent(DropTargetDropEvent evt) {
+			super(evt.getDropTargetContext(), 
+					evt.getLocation(), 
+					evt.getDropAction(), 
+					evt.getSourceActions(), 
+					false);	// the false avoid serializing the object
+		}
+
+	}
+
 	private AcceptableDropComponent<P> comp;
 	private DataFlavor dataFlavor;
 	private List<Component> acceptedSources;
@@ -101,10 +114,16 @@ public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetLi
 			arg0.rejectDrop();
 			return;
 		}
+		
 		try {
 			arg0.acceptDrop(dragType);
-			Transferable tr = arg0.getTransferable();
-			P obj = (P) tr.getTransferData(dataFlavor);
+			Transferable transferable;
+			if (dragType == DnDConstants.ACTION_REFERENCE || dragType == DnDConstants.ACTION_LINK) {
+				transferable = new ReferenceDropTargetDropEvent(arg0).getTransferable();
+			} else {
+				transferable = arg0.getTransferable();
+			}
+			P obj = (P) transferable.getTransferData(dataFlavor);
 			comp.acceptThisObject(obj, arg0);
 			((Container) comp).validate();
 			return;
