@@ -66,6 +66,7 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	
 	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
 	
+	
 	public void addRealization(Matrix value) {
 		if (checkConformity(value)) {
 			getDistribution().addRealization(value);
@@ -164,5 +165,24 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 			percentileValues.m_afData[i][0] = realizationsForThisRow.get(index);
 		}
 		return percentileValues;
+	}
+	
+
+	/**
+	 * This method returns a subset of the MonteCarloEstimate. For instance, if the estimate is multivariate, it is then possible
+	 * to extract a MonteCarloEstimate with only the first and second variates. 
+	 * @param indices a List of Integer that are the indices of the variates to be extracted.
+	 * @return a MonteCarloEstimate
+	 */
+	public MonteCarloEstimate extractSubEstimate(List<Integer> indices) {
+		MonteCarloEstimate subEstimate = new MonteCarloEstimate();
+		for (Matrix realization : getRealizations()) {
+			if (realization.isColumnVector()) {
+				subEstimate.addRealization(realization.getSubMatrix(indices, null));
+			} else {
+				subEstimate.addRealization(realization.getSubMatrix(null, indices));
+			}
+		}
+		return subEstimate;
 	}
 }
