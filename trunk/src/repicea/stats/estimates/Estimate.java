@@ -60,4 +60,55 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 		return getDistribution().getRandomRealization();
 	}
 
+	
+	/**
+	 * This method returns an difference estimate.
+	 * @param estimate2 an Estimate to be subtracted from this estimate.
+	 * @return an Estimate
+	 */
+	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
+		if (this instanceof MonteCarloEstimate && estimate2 instanceof MonteCarloEstimate) {
+			try {
+				return ((MonteCarloEstimate) this).subtract((MonteCarloEstimate) estimate2);
+			} catch (Exception e) {}
+		}
+		Matrix diff = getMean().subtract(estimate2.getMean());
+		Matrix variance = getVariance().add(estimate2.getVariance());
+		return new GaussianEstimate(diff, variance);
+	}
+	
+	/**
+	 * This method returns an difference estimate.
+	 * @param estimate2 an Estimate to be subtracted from this estimate.
+	 * @return an Estimate
+	 */
+	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
+		if (this instanceof MonteCarloEstimate && estimate2 instanceof MonteCarloEstimate) {
+			try {
+				return ((MonteCarloEstimate) this).add((MonteCarloEstimate) estimate2);
+			} catch (Exception e) {}
+		}
+		Matrix diff = getMean().add(estimate2.getMean());
+		Matrix variance = getVariance().add(estimate2.getVariance());
+		return new GaussianEstimate(diff, variance);
+	}
+
+	
+	/**
+	 * This method returns an difference estimate.
+	 * @param estimate2 an Estimate to be subtracted from this estimate.
+	 * @return an Estimate
+	 */
+	public Estimate<?> getProductEstimate(double scalar) {
+		if (this instanceof MonteCarloEstimate) {
+			try {
+				return ((MonteCarloEstimate) this).multiply(scalar);
+			} catch (Exception e) {}
+		}
+		Matrix diff = getMean().scalarMultiply(scalar);
+		Matrix variance = getVariance().scalarMultiply(scalar * scalar);
+		return new GaussianEstimate(diff, variance);
+	}
+
+	
 }
