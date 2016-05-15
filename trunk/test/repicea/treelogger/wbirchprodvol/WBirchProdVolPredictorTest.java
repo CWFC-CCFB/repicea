@@ -151,7 +151,7 @@ public class WBirchProdVolPredictorTest {
 		Assert.assertTrue("Difference in terms of mean", !relDiff.anyElementLargerThan(5E-3));
 		
 		Matrix variance = estimate.getVariance();
-		Matrix std = variance.diagonalVector().elementwisePower(0.5);
+		Matrix std = variance.diagonalVector().elementWisePower(0.5);
 		
 		relDiff = std.subtract(stdRef).elementWiseDivide(stdRef).getAbsoluteValue();
 		Assert.assertTrue("Difference in terms of std", !relDiff.anyElementLargerThan(1E-2));

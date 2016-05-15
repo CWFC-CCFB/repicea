@@ -738,7 +738,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 * @param power a double
 	 * @return a Matrix instance
 	 */
-	public Matrix elementwisePower(double power) {
+	public Matrix elementWisePower(double power) {
 		Matrix matrix = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < matrix.m_iRows; i++) {
 			for (int j = 0; j < matrix.m_iCols; j++) {

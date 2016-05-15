@@ -23,6 +23,7 @@ import java.io.Serializable;
 import repicea.math.Matrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.distributions.GaussianUtility;
 
 /**
  * This class contains the elements related to the random effects, i.e. the best linear unbiased predictors (blups) as well as their variances.
@@ -60,5 +61,13 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 	public void setMean(Matrix mean) {
 		getDistribution().setMean(mean);
 	}
+	
+	protected Matrix getQuantileForProbability(double probability) {
+		Matrix stdDev = getVariance().diagonalVector().elementWisePower(.5); 
+		double quantile = GaussianUtility.getQuantile(probability);
+		return getMean().add(stdDev.scalarMultiply(quantile));
+	}
+	
+	
 	
 }

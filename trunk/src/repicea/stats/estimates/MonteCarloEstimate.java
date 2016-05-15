@@ -143,7 +143,7 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	 * @param percentile a value between 0 and 1
 	 * @return a Matrix instance that contains the percentile values
 	 */
-	public Matrix getPercentile(double percentile) {
+	protected Matrix getQuantileForProbability(double percentile) {
 		if (percentile < 0 || percentile > 1) {
 			throw new InvalidParameterException("The percentile must be between 0 and 1!");
 		}

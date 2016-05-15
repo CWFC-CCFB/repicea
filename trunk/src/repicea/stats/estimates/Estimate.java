@@ -110,5 +110,26 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 		return new GaussianEstimate(diff, variance);
 	}
 
+	/**
+	 * This method returns the probability of getting a lower valueand upper bound of a confidence intervals at probability
+	 * level 1 - alpha
+	 * @param oneMinusAlpha is 1 minus the probability of Type I error
+	 * @return a ConfidenceInterval instance 
+	 */
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue;
+		Matrix upperBoundValue; 
+		if (this instanceof MonteCarloEstimate) {
+			lowerBoundValue = ((MonteCarloEstimate) this).getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+			upperBoundValue = ((MonteCarloEstimate) this).getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+			return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+		} else if (this instanceof GaussianEstimate) {
+			lowerBoundValue = ((GaussianEstimate) this).getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+			upperBoundValue = ((GaussianEstimate) this).getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+			return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+		} else {
+			return null;
+		}
+	}
 	
 }
