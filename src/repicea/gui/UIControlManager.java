@@ -548,20 +548,43 @@ public class UIControlManager {
 	
 	/**
 	 * This static method creates an horizontal JPanel with a label and a control. 
-	 * @param text
-	 * @param control
-	 * @param margin 
+	 * @param label a JLabel instance
+	 * @param control a Component to be displayed
+	 * @param margin the size of the horizontal strut
+	 * @param expandable a boolean if true the component is located in the CENTER of the BorderLayout. Otherwise, it is put in
+	 * the EAST of the BorderLayout
 	 * @return a JPanel instance
 	 */
-	public static JPanel createSimpleHorizontalPanel(JLabel label, Component control, int margin) {
+	public static JPanel createSimpleHorizontalPanel(JLabel label, Component control, int margin, boolean expandable) {
 		JPanel panel = new JPanel(new BorderLayout());
 		JPanel subPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		subPanel.add(Box.createHorizontalStrut(margin));
 		subPanel.add(label);
 		subPanel.add(Box.createHorizontalStrut(margin));
 		panel.add(subPanel, BorderLayout.WEST);
-		panel.add(control, BorderLayout.CENTER);
+		JPanel centerPanel = new JPanel(new BorderLayout());
+		panel.add(centerPanel, BorderLayout.CENTER);
+		if (expandable) {
+			centerPanel.add(control, BorderLayout.CENTER);
+		} else {
+			centerPanel.add(control, BorderLayout.NORTH);
+		}
 		panel.add(Box.createHorizontalStrut(margin), BorderLayout.EAST);
 		return panel;
 	}
+	
+	
+	/**
+	 * This static method creates an horizontal JPanel with a label and a control. 
+	 * @param labelEnum a TextableEnum instance
+	 * @param control a Component to be displayed
+	 * @param margin the size of the horizontal strut
+	 * @param expandable a boolean if true the component is located in the CENTER of the BorderLayout. Otherwise, it is put in
+	 * the EAST of the BorderLayout
+	 * @return a JPanel instance
+	 */
+	public static JPanel createSimpleHorizontalPanel(TextableEnum labelEnum, Component control, int margin, boolean expandable) {
+		return createSimpleHorizontalPanel(UIControlManager.getLabel(labelEnum), control, margin, expandable);
+	}
+
  }

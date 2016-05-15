@@ -184,9 +184,10 @@ public class ProcessorInternalDialog extends REpiceaDialog {
 		topComponent.removeAll();
 		topComponent.setBorder(UIControlManager.getTitledBorder(MessageID.GeneralFeatures.toString()));
 
-		JPanel processorNameSubPanel = UIControlManager.createSimpleHorizontalPanel(UIControlManager.getLabel(MessageID.ProcessorName),
+		JPanel processorNameSubPanel = UIControlManager.createSimpleHorizontalPanel(MessageID.ProcessorName,
 				processorTextField, 
-				5);
+				5, 
+				true);
 
 		Component verticalStrut = Box.createVerticalStrut(10);
 		topComponent.add(verticalStrut);
