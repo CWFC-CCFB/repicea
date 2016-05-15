@@ -54,15 +54,16 @@ public class ConfidenceInterval {
 	}
 
 	/**
-	 * This method returns the confidence limit of this interval. 
-	 * @return an array of two matrices. The first one is the lower bound and the second, the upper bound.
+	 * This method returns the lower bound of the interval.
+	 * @return a Matrix instance
 	 */
-	public Matrix[] getConfidenceLimits() {
-		Matrix[] limits = new Matrix[2];
-		limits[0] = lowerBound.getBoundValue();
-		limits[1] = upperBound.getBoundValue();
-		return limits;
-	}
+	public Matrix getLowerLimit() {return lowerBound.getBoundValue();}
+	
+	/**
+	 * This method returns the upper bound of the interval.
+	 * @return a Matrix instance
+	 */
+	public Matrix getUpperLimit() {return upperBound.getBoundValue();}
 	
 	/**
 	 * This method returns the probability level of the interval.
