@@ -18,8 +18,6 @@
  */
 package repicea.stats.estimates;
 
-import java.security.InvalidParameterException;
-
 import repicea.math.Matrix;
 import repicea.stats.distributions.BasicBound;
 
@@ -48,12 +46,6 @@ public class ConfidenceInterval {
 	private final double probabilityLevel;
 	
 	protected ConfidenceInterval(Matrix lowerBoundValue, Matrix upperBoundValue, double probabilityLevel) {
-		if (lowerBoundValue.m_iCols != 1 || lowerBoundValue.m_iRows != 1) {
-			throw new InvalidParameterException("Bounds must be univariate");
-		}
-		if (upperBoundValue.m_iCols != 1 || upperBoundValue.m_iRows != 1) {
-			throw new InvalidParameterException("Bounds must be univariate");
-		}
 		lowerBound = new CIBound(false);
 		upperBound = new CIBound(true);
 		lowerBound.setBoundValue(lowerBoundValue);
@@ -63,12 +55,12 @@ public class ConfidenceInterval {
 
 	/**
 	 * This method returns the confidence limit of this interval. 
-	 * @return an array of two doubles. The first one is the lower bound and the second, the upper bound.
+	 * @return an array of two matrices. The first one is the lower bound and the second, the upper bound.
 	 */
-	public double[] getConfidenceLimits() {
-		double[] limits = new double[2];
-		limits[0] = lowerBound.getBoundValue().m_afData[0][0];
-		limits[1] = upperBound.getBoundValue().m_afData[0][0];
+	public Matrix[] getConfidenceLimits() {
+		Matrix[] limits = new Matrix[2];
+		limits[0] = lowerBound.getBoundValue();
+		limits[1] = upperBound.getBoundValue();
 		return limits;
 	}
 	
