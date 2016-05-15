@@ -22,7 +22,7 @@ public class MonteCarloEstimateTests {
 			estimate.addRealization(m);
 		}
 		
-		Matrix percentiles = estimate.getPercentile(0.95);
+		Matrix percentiles = estimate.getQuantileForProbability(0.95);
 		Assert.assertEquals(0.95, percentiles.m_afData[0][0], 1E-3);
 		Assert.assertEquals(0.95 * 2, percentiles.m_afData[1][0], 2E-3);
 	}

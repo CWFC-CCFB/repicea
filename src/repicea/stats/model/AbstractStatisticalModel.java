@@ -156,7 +156,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 			Matrix report;
 			boolean varianceAvailable = false;
 			if (parameterEstimates.getVariance() != null) {
-				Matrix std = parameterEstimates.getVariance().diagonalVector().elementwisePower(0.5);
+				Matrix std = parameterEstimates.getVariance().diagonalVector().elementWisePower(0.5);
 				report = parameterEstimates.getMean().matrixStack(std, false);
 				varianceAvailable = true;
 			} else {

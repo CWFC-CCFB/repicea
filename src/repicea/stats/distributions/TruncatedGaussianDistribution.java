@@ -120,7 +120,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 		}
 		Matrix num1 = mult1.subtract(mult2);
 		Matrix num2 = lowerBound.getPdfValue().subtract(upperBound.getPdfValue());
-		return getSigma2().multiply(num1.scalarMultiply(zFactor).subtract(num2.scalarMultiply(zFactor).elementwisePower(2d)).scalarAdd(1));
+		return getSigma2().multiply(num1.scalarMultiply(zFactor).subtract(num2.scalarMultiply(zFactor).elementWisePower(2d)).scalarAdd(1));
 	}
 
 
