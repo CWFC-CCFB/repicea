@@ -93,13 +93,13 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	 * @param estimate2 the estimate that is subtracted to the first estimate
 	 * @return a MonteCarloEstimate instance
 	 */
-	public static MonteCarloEstimate subtract(MonteCarloEstimate estimate1, MonteCarloEstimate estimate2) {
-		if (estimate1.getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
+	protected MonteCarloEstimate subtract(MonteCarloEstimate estimate2) {
+		if (getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
 			throw new InvalidParameterException("The number of realizations is not consistent!");
 		}
 		MonteCarloEstimate outputEstimate = new MonteCarloEstimate();
-		for (int i = 0; i < estimate1.getNumberOfRealizations(); i++) {
-			outputEstimate.addRealization(estimate1.getRealizations().get(i).subtract(estimate2.getRealizations().get(i)));
+		for (int i = 0; i < getNumberOfRealizations(); i++) {
+			outputEstimate.addRealization(getRealizations().get(i).subtract(estimate2.getRealizations().get(i)));
 		}
 		return outputEstimate;
 	}
@@ -111,13 +111,13 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	 * @param estimate2 the estimate that is added to the first estimate
 	 * @return a MonteCarloEstimate instance
 	 */
-	public static MonteCarloEstimate add(MonteCarloEstimate estimate1, MonteCarloEstimate estimate2) {
-		if (estimate1.getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
+	protected MonteCarloEstimate add(MonteCarloEstimate estimate2) {
+		if (getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
 			throw new InvalidParameterException("The number of realizations is not consistent!");
 		}
 		MonteCarloEstimate outputEstimate = new MonteCarloEstimate();
-		for (int i = 0; i < estimate1.getNumberOfRealizations(); i++) {
-			outputEstimate.addRealization(estimate1.getRealizations().get(i).add(estimate2.getRealizations().get(i)));
+		for (int i = 0; i < getNumberOfRealizations(); i++) {
+			outputEstimate.addRealization(getRealizations().get(i).add(estimate2.getRealizations().get(i)));
 		}
 		return outputEstimate;
 	}
@@ -129,10 +129,10 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	 * @param scalar the multiplication factor
 	 * @return a MonteCarloEstimate instance
 	 */
-	public static MonteCarloEstimate multiply(MonteCarloEstimate estimate1, double scalar) {
+	protected MonteCarloEstimate multiply(double scalar) {
 		MonteCarloEstimate outputEstimate = new MonteCarloEstimate();
-		for (int i = 0; i < estimate1.getNumberOfRealizations(); i++) {
-			outputEstimate.addRealization(estimate1.getRealizations().get(i).scalarMultiply(scalar));
+		for (int i = 0; i < getNumberOfRealizations(); i++) {
+			outputEstimate.addRealization(getRealizations().get(i).scalarMultiply(scalar));
 		}
 		return outputEstimate;
 	}
