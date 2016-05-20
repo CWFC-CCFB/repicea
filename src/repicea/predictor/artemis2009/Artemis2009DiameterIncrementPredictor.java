@@ -23,11 +23,11 @@ import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.util.Index;
 
 @SuppressWarnings("serial")
-public class Artemis2009DiameterIncrementPredictor extends ModelBasedSimulator {
+public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 
 	protected static final String ModuleName = "accroissement"; 
 

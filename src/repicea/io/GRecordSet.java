@@ -26,6 +26,7 @@ import java.util.Vector;
  * the selection of subsets of GExportRecord objects.
  * @author Mathieu Fortin - April 2011
  */
+@Deprecated
 public class GRecordSet extends ArrayList<GExportRecord> {
 
 	private static final long serialVersionUID = 20110410L;

@@ -24,12 +24,12 @@ import java.util.List;
 import org.apache.commons.math.random.RandomDataImpl;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
-class Artemis2009RecruitDiameterInternalPredictor extends ModelBasedSimulator {
+class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
 
 	private List<Integer> effectList;
 	private RandomDataImpl randomGenerator;

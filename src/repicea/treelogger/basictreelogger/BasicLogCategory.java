@@ -43,12 +43,12 @@ public class BasicLogCategory extends TreeLogCategory {
 	
 	/**
 	 * Constructor.
-	 * @param str the name of the category
+	 * @param name the name of the category
 	 * @param species the species name
 	 * @param merchantableVolumeProportion the proportion of the merchantable volume that falls into this category
 	 */
-	public BasicLogCategory(String str, String species, double volumeProportionToBeProcessedInThisCategory) {
-		super(str);
+	public BasicLogCategory(String name, String species, double volumeProportionToBeProcessedInThisCategory) {
+		super(name);
 		this.volumeProportionToBeProcessedInThisCategory = volumeProportionToBeProcessedInThisCategory;
 		setSpecies(species);
 	}

@@ -22,14 +22,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.distributions.GammaFunction;
 import repicea.stats.estimates.GaussianEstimate;
 //import org.apache.commons.math.special.Gamma;
 
 @SuppressWarnings("serial")
-class Artemis2009RecruitmentNumberInternalPredictor extends ModelBasedSimulator {
+class Artemis2009RecruitmentNumberInternalPredictor extends REpiceaPredictor {
 
 	private List<Integer> effectList;
 	

@@ -19,20 +19,17 @@
 package repicea.simulation.treelogger;
 
 import repicea.simulation.covariateproviders.treelevel.CommercialVolumeM3Provider;
+import repicea.simulation.covariateproviders.treelevel.ExpansionFactorProvider;
 import repicea.simulation.covariateproviders.treelevel.SpeciesNameProvider;
 
-
 /**
- * This interface applies at the tree level and only serves to determine the object
- * that are compatible with the tree logger in the repicea-foresttools library.
+ * This interface applies at the tree level and only serves to determine the
+ * object that are compatible with the tree logger in the repicea-foresttools
+ * library.
+ * 
  * @author Mathieu Fortin and Jean-Francois Lavoie - January 2012
  */
-public interface LoggableTree extends CommercialVolumeM3Provider, SpeciesNameProvider {
-
-	/**
-	 * This method returns the number of stem represented by this tree record.
-	 * @return a double
-	 */
-	public double getNumber();
+public interface LoggableTree extends CommercialVolumeM3Provider,
+		SpeciesNameProvider, ExpansionFactorProvider {
 
 }

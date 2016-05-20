@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulatorEvent.ModelBasedSimulatorEventProperty;
+import repicea.simulation.REpiceaPredictorEvent.ModelBasedSimulatorEventProperty;
 import repicea.stats.distributions.StandardGaussianDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -70,7 +70,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		}
 	}
 	
-	private final ModelBasedSimulator model;
+	private final REpiceaPredictor model;
 	
 	private final boolean sasEstimateDerived;
 	
@@ -79,7 +79,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 	
 	private final Map<String, Map<String, SubjectRelatedIndices>> subjectIndex;
 	
-	protected ModelParameterEstimates(GaussianEstimate estimate, ModelBasedSimulator model) {
+	protected ModelParameterEstimates(GaussianEstimate estimate, REpiceaPredictor model) {
 		super(estimate.getMean(), estimate.getVariance());
 		this.model = model;
 		fixedEffectsPart = estimate.getMean();
@@ -95,7 +95,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		subjectIndex = new HashMap<String, Map<String, SubjectRelatedIndices>>();
 	}
 	
-	protected ModelBasedSimulator getModel() {return model;}
+	protected REpiceaPredictor getModel() {return model;}
 	
 	protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
 		int indexFirstBlup = getMean().m_iRows;
@@ -122,7 +122,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 				innerMap.get(subjectId).add(indexFirstBlup++);
 			}
 		}
-		ModelBasedSimulatorEvent event = new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
+		REpiceaPredictorEvent event = new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
 				null, 
 				new Object[]{getModel().defaultRandomEffects, subjectList}, 
 				getModel());
@@ -139,7 +139,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		if (doBlupsExistForThisSubject(subject)) {
 			List<Integer> paramIndices = subjectIndex.get(subject.getHierarchicalLevel().getName()).get(subject.getSubjectId());
 			List<Integer> varianceIndices = getVarianceIndicesForThoseParameterIndices(paramIndices);
-			return new GaussianEstimate(getMean().getSubMatrix(paramIndices, ModelBasedSimulator.DefaultZeroIndex), getVariance().getSubMatrix(varianceIndices, varianceIndices));
+			return new GaussianEstimate(getMean().getSubMatrix(paramIndices, REpiceaPredictor.DefaultZeroIndex), getVariance().getSubMatrix(varianceIndices, varianceIndices));
 		} else {
 			return null;
 		}
@@ -149,7 +149,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 		Matrix simulatedDeviate = getRandomDeviate();
 		getModel().simulatedParameters.put(subject.getMonteCarloRealizationId(), simulatedDeviate.getSubMatrix(0, getNumberOfFixedEffectParameters() - 1, 0, 0));
 		Matrix parametersForThisRealization = getModel().simulatedParameters.get(subject.getMonteCarloRealizationId());
-		getModel().fireModelBasedSimulatorEvent(new ModelBasedSimulatorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, 
+		getModel().fireModelBasedSimulatorEvent(new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.PARAMETERS_DEVIATE_JUST_GENERATED, 
 				null, 
 				new Object[]{subject.getMonteCarloRealizationId(), parametersForThisRealization.getDeepClone()}, 
 				getModel()));
@@ -159,7 +159,7 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 				SubjectRelatedIndices indices = subjectList.get(subjectId);
 				SubjectSkeleton skeleton = indices.skeleton;
 				skeleton.monteCarloRealizationId = subject.getMonteCarloRealizationId();
-				Matrix randomDeviates = simulatedDeviate.getSubMatrix(indices, ModelBasedSimulator.DefaultZeroIndex);
+				Matrix randomDeviates = simulatedDeviate.getSubMatrix(indices, REpiceaPredictor.DefaultZeroIndex);
 				getModel().setDeviatesForRandomEffectsOfThisSubject(indices.skeleton, randomDeviates);
 				Estimate<? extends StandardGaussianDistribution> defaultRandomEffect = getModel().defaultRandomEffects.get(levelName);
 				getModel().fireRandomEffectDeviateGeneratedEvent(skeleton, defaultRandomEffect, randomDeviates);
