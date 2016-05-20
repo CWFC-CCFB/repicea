@@ -24,7 +24,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
@@ -38,7 +38,7 @@ import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
  * @param <Tree> a HDRelationshipTree-derived class
  */
 @SuppressWarnings("serial")
-public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tree extends HDRelationshipTree> extends ModelBasedSimulator {
+public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tree extends HDRelationshipTree> extends REpiceaPredictor {
 
 	protected static class RegressionElements {
 		public Matrix vectorZ;

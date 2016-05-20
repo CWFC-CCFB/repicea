@@ -24,7 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.covariateproviders.treelevel.ABCDQualityProvider.ABCDQuality;
 import repicea.stats.Distribution.Type;
@@ -33,7 +33,7 @@ import repicea.stats.estimates.GaussianEstimate;
 import repicea.util.ObjectUtility;
 
 @SuppressWarnings("serial")
-public class WBirchProdVolPredictor extends ModelBasedSimulator {
+public class WBirchProdVolPredictor extends REpiceaPredictor {
 	
 	protected boolean isTestPurpose = false;
 	

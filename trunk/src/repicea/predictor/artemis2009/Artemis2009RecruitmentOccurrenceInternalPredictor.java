@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.simulation.LogisticModelBasedSimulator;
+import repicea.simulation.REpiceaLogisticPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
-class Artemis2009RecruitmentOccurrenceInternalPredictor extends LogisticModelBasedSimulator<Artemis2009CompatibleStand, Artemis2009CompatibleTree> {
+class Artemis2009RecruitmentOccurrenceInternalPredictor extends REpiceaLogisticPredictor<Artemis2009CompatibleStand, Artemis2009CompatibleTree> {
 
 	private List<Integer> effectList;
 	

@@ -20,14 +20,14 @@ package repicea.simulation.stemtaper;
 
 import java.util.List;
 
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 
 /**
  * This interface is the basis for any stem taper model.
  * @author Mathieu Fortin - April 2014
  */
 @SuppressWarnings("serial")
-public abstract class StemTaperModel extends ModelBasedSimulator {
+public abstract class StemTaperModel extends REpiceaPredictor {
 
 	protected StemTaperModel(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled,	boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);

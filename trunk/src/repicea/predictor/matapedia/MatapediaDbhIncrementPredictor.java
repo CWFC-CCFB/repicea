@@ -22,7 +22,7 @@ import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.simulation.GrowthModel;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
@@ -34,7 +34,7 @@ import repicea.util.ObjectUtility;
  * data of the Matapedia permanent plot network. 
  * @author Mathieu Fortin - September 2012
  */
-public class MatapediaDbhIncrementPredictor extends ModelBasedSimulator implements GrowthModel<MatapediaStand, MatapediaTree>{
+public class MatapediaDbhIncrementPredictor extends REpiceaPredictor implements GrowthModel<MatapediaStand, MatapediaTree>{
 
 	private static final long serialVersionUID = 20120911L;
 

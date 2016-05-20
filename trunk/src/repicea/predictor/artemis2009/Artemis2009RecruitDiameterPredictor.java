@@ -22,11 +22,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.util.Index;
 
 @SuppressWarnings("serial")
-public class Artemis2009RecruitDiameterPredictor extends ModelBasedSimulator {
+public class Artemis2009RecruitDiameterPredictor extends REpiceaPredictor {
 
 	protected static final String ModuleName = "recrutement_g"; 
 

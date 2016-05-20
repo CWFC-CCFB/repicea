@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.LogisticModelBasedSimulator;
+import repicea.simulation.REpiceaLogisticPredictor;
 import repicea.util.Index;
 
 /**
@@ -30,7 +30,7 @@ import repicea.util.Index;
  * @author Mathieu Fortin - August 2014
  */
 @SuppressWarnings("serial")
-public class Artemis2009RecruitmentOccurrencePredictor extends LogisticModelBasedSimulator<Artemis2009CompatibleStand, Artemis2009CompatibleTree> {
+public class Artemis2009RecruitmentOccurrencePredictor extends REpiceaLogisticPredictor<Artemis2009CompatibleStand, Artemis2009CompatibleTree> {
 
 	protected static final String ModuleName = "recrutement_l"; 
 

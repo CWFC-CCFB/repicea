@@ -25,14 +25,14 @@ import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
-class Artemis2009DiameterIncrementInternalPredictor extends ModelBasedSimulator { 
+class Artemis2009DiameterIncrementInternalPredictor extends REpiceaPredictor { 
 
 	private final List<Integer> effectList;
 	private final Map<Integer, Double> variancesMap;

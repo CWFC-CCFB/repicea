@@ -23,7 +23,7 @@ import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.predictor.volume.honertotalvolume.HonerTotalVolumeTree.HonerTotalVolumeTreeSpecies;
-import repicea.simulation.ModelBasedSimulator;
+import repicea.simulation.REpiceaPredictor;
 
 /**
  * The HonerTotalVolumePredictor class implements the volume model developed by Honer 1983.
@@ -31,7 +31,7 @@ import repicea.simulation.ModelBasedSimulator;
  * @author Mathieu Fortin - March 2013
  */
 @SuppressWarnings("serial")
-public class HonerTotalVolumePredictor extends ModelBasedSimulator {
+public class HonerTotalVolumePredictor extends REpiceaPredictor {
 
 	private final Map<HonerTotalVolumeTreeSpecies, Matrix> betaMap;
 		

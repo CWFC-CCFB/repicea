@@ -24,7 +24,7 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.LogisticModelBasedSimulator;
+import repicea.simulation.REpiceaLogisticPredictor;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianEstimate;
@@ -47,7 +47,7 @@ import repicea.util.ObjectUtility;
  * in forestry: an estimator based on Gauss-Hermite quadrature. Canadian Journal of Forest Research
  * 43: 129-138. </a> 
  */
-public final class MatapediaMortalityPredictor extends LogisticModelBasedSimulator<MatapediaStand, MatapediaTree>{
+public final class MatapediaMortalityPredictor extends REpiceaLogisticPredictor<MatapediaStand, MatapediaTree>{
 
 	private static final long serialVersionUID = 20120912L;
 
