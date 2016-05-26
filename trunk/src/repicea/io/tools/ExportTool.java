@@ -36,7 +36,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import repicea.app.AbstractGenericTask;
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatWriter;
@@ -64,7 +64,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @author Mathieu Fortin - January 2011
  */
 @Deprecated
-public abstract class ExportTool implements ShowableObjectWithParent, CaretListener, ListSelectionListener {
+public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretListener, ListSelectionListener {
 	
 	@SuppressWarnings("serial")
 	static final class InternalSwingWorkerForSaveMethod extends AbstractGenericTask {
@@ -446,7 +446,7 @@ public abstract class ExportTool implements ShowableObjectWithParent, CaretListe
 	}
 
 	@Override
-	public ExportToolDialog getGuiInterface(Container parent) {
+	public ExportToolDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new ExportToolDialog(this, (Window) parent);
 		}
@@ -454,8 +454,8 @@ public abstract class ExportTool implements ShowableObjectWithParent, CaretListe
 	}
 
 	@Override
-	public void showInterface(Window parent) {
-		if (!getGuiInterface(parent).isVisible()) {
+	public void showUI(Window parent) {
+		if (!getUI(parent).isVisible()) {
 			guiInterface.setVisible(true);
 		}
 	}

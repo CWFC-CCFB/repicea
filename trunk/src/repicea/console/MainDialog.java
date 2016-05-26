@@ -174,7 +174,7 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 				+ " - JRE " + caller.getSettings().getJreVersion()
 				+ " Revision " + caller.getSettings().getRevision());
 		getContentPane().setLayout(new BorderLayout());
-		scrollPane = logger.getGuiInterface();
+		scrollPane = logger.getUI();
 		getContentPane().add(scrollPane, BorderLayout.CENTER);
 		
 		JMenuBar menuBar = new JMenuBar();

@@ -95,7 +95,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 		importFieldManager.setStratumFieldEnum(defineGroupFieldEnum());
 
 		importFieldManager.setPopupInGuiInterfaceEnabled(isPopUpWindowEnabled);
-		importFieldManager.showInterface(guiOwner);
+		importFieldManager.showUI(guiOwner);
 		
 		if (!importFieldManager.isUserValidated()) {
 			throw new CancellationException();

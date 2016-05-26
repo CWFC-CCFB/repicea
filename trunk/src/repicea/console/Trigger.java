@@ -26,9 +26,9 @@ import repicea.app.GenericTask;
 import repicea.app.Logger;
 import repicea.app.SettingMemory;
 import repicea.console.TriggerTask.TaskID;
-import repicea.gui.ShowableObject;
+import repicea.gui.REpiceaShowableUI;
 
-public abstract class Trigger extends AbstractGenericEngine implements ShowableObject {
+public abstract class Trigger extends AbstractGenericEngine implements REpiceaShowableUI {
 
 	protected File workingDirectory;
 	protected Logger logger = new Logger();
@@ -45,7 +45,7 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 	
 	
 	@Override
-	public MainDialog getGuiInterface() {
+	public MainDialog getUI() {
 		if (guiInterface == null) {
 			guiInterface = new MainDialog(this, logger);
 		}
@@ -53,8 +53,8 @@ public abstract class Trigger extends AbstractGenericEngine implements ShowableO
 	}
 
 	@Override
-	public void showInterface() {
-		getGuiInterface().setVisible(true);
+	public void showUI() {
+		getUI().setVisible(true);
 	}
 	
 	protected void findCurrentLocation() throws URISyntaxException {

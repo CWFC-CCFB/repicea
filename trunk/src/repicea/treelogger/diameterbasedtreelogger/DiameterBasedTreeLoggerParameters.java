@@ -63,7 +63,7 @@ public abstract class DiameterBasedTreeLoggerParameters extends TreeLoggerParame
 	public boolean isCorrect() {return true;}
 
 	@Override
-	public DiameterBasedTreeLoggerParametersDialog getGuiInterface(Container parent) {
+	public DiameterBasedTreeLoggerParametersDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new DiameterBasedTreeLoggerParametersDialog((Window) parent, this);
 		}

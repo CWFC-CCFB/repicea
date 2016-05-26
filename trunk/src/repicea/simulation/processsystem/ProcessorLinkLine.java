@@ -26,21 +26,21 @@ import java.awt.Window;
 
 import javax.swing.JLabel;
 
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.UIControlManager;
 
 @SuppressWarnings("serial")
-public class ProcessorLinkLine extends ValidProcessorLinkLine implements ShowableObjectWithParent {
+public class ProcessorLinkLine extends ValidProcessorLinkLine implements REpiceaShowableUIWithParent {
 
 	private final JLabel label;
 	private transient ProcessorLinkLineSlider guiInterface;
 	
 	protected ProcessorLinkLine(SystemPanel panel, Processor fatherProcessor, Processor sonProcessor) {
-		super(panel, fatherProcessor.getGuiInterface(panel), sonProcessor.getGuiInterface(panel));
+		super(panel, fatherProcessor.getUI(panel), sonProcessor.getUI(panel));
 		label = new JLabel();
 		fatherProcessor.addSubProcessor(sonProcessor);
-		fatherProcessor.getGuiInterface(panel).addComponentListener(this);
-		sonProcessor.getGuiInterface(panel).addComponentListener(this);
+		fatherProcessor.getUI(panel).addComponentListener(this);
+		sonProcessor.getUI(panel).addComponentListener(this);
 		addMouseListener(new SystemComponentMouseAdapter(this));
 		panel.add(label);
 		setLabel();
@@ -73,7 +73,7 @@ public class ProcessorLinkLine extends ValidProcessorLinkLine implements Showabl
 	}
 
 	@Override
-	public ProcessorLinkLineSlider getGuiInterface(Container container) {
+	public ProcessorLinkLineSlider getUI(Container container) {
 		if (guiInterface == null) {
 			guiInterface = new ProcessorLinkLineSlider((Window) container, this);
 		}
@@ -81,9 +81,9 @@ public class ProcessorLinkLine extends ValidProcessorLinkLine implements Showabl
 	}
 
 	@Override
-	public void showInterface(Window window) {
+	public void showUI(Window window) {
 		Point referencePoint = getLocationOnScreen();
-		ProcessorLinkLineSlider dlg = getGuiInterface(window);
+		ProcessorLinkLineSlider dlg = getUI(window);
 		Point currentLocation = new Point(referencePoint.x + 20, referencePoint.y - dlg.getSize().height - 20);
 		UIControlManager.setLocation(dlg, currentLocation);
 		dlg.setVisible(true);

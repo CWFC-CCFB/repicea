@@ -32,11 +32,11 @@ import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
 import repicea.gui.REpiceaPanel;
-import repicea.gui.UserInterfaceableObject;
-import repicea.gui.UserInterfaceableObjectWithParent;
+import repicea.gui.REpiceaUIObject;
+import repicea.gui.REpiceaUIObjectWithParent;
 
 @SuppressWarnings("serial")
-public class Processor implements UserInterfaceableObjectWithParent, UserInterfaceableObject, CaretListener, Serializable {
+public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, CaretListener, Serializable {
 
 	private Point originalLocation;
 	protected transient ProcessorButton guiInterface;
@@ -148,7 +148,7 @@ public class Processor implements UserInterfaceableObjectWithParent, UserInterfa
 	}
 		
 	@Override
-	public ProcessorButton getGuiInterface(Container container) {
+	public ProcessorButton getUI(Container container) {
 		if (guiInterface == null) {
 			guiInterface = new ProcessorButton((SystemPanel) container, this);
 		}
@@ -172,7 +172,7 @@ public class Processor implements UserInterfaceableObjectWithParent, UserInterfa
 	public String toString() {return getName();}
 
 	@Override
-	public ProcessorButton getGuiInterface() {
+	public ProcessorButton getUI() {
 		if (guiInterface == null) {
 			throw new NullPointerException("The getGuiInterface(Container) should be called first!");
 		}
@@ -184,7 +184,7 @@ public class Processor implements UserInterfaceableObjectWithParent, UserInterfa
 		if (evt.getSource() instanceof JTextField) {
 			JTextField txtField = (JTextField) evt.getSource();
 			setName(txtField.getText());
-			getGuiInterface().setLabel();
+			getUI().setLabel();
 		}
 	}
 	

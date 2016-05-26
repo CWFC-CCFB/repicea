@@ -45,15 +45,15 @@ class InterfaceSideRemoteEventConnector extends RemoteEventManager {
 		List<RemoteListener> remoteListeners = getRemoteListeners();
 		for (RemoteListener listener : remoteListeners) {
 			if (listener.isTheOwnerOfThisClass(ClientThread.class)) {
-				ClientThreadPanel panel = engine.getGuiInterface().registerNewClientThreadPanel();
+				ClientThreadPanel panel = engine.getUI().registerNewClientThreadPanel();
 				JButton button = panel.getRestartButton();
 				connectListenerAndObject(button, listener);
 				localListeners.add(panel);
 			} else if (listener.isTheOwnerOfThisClass(AbstractServer.class)) {
-				connectListenerAndObject(engine.getGuiInterface(), listener);
+				connectListenerAndObject(engine.getUI(), listener);
 			}
 		}
-		localListeners.add(engine.getGuiInterface());
+		localListeners.add(engine.getUI());
 		registerListeners(localListeners);
 	}
 

@@ -267,7 +267,7 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 		List<ImportFieldElement> vecOfFieldElements = caller.getFields();
 		ImportFieldElementPanel ifePanel;
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
-			ifePanel = vecOfFieldElements.get(i).getGuiInterface();
+			ifePanel = vecOfFieldElements.get(i).getUI();
 			fieldMatchPanel.add(ifePanel);
 			ifePanel.descriptionLabel.addMouseListener(this);		// then add it again, to avoid having this class listening several time to the same container
 		}
@@ -348,7 +348,7 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 	public void refreshInterface() {
 		List<ImportFieldElement> vecOfFieldElements = caller.getFields();
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
-			vecOfFieldElements.get(i).getGuiInterface().refreshInterface();
+			vecOfFieldElements.get(i).getUI().refreshInterface();
 		}
 		validate();
 	}

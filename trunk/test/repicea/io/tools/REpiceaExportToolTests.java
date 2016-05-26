@@ -52,7 +52,7 @@ public class REpiceaExportToolTests {
 	public static void main(String[] args) {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
 		try {
-			exportTool.showInterface(null);
+			exportTool.showUI(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

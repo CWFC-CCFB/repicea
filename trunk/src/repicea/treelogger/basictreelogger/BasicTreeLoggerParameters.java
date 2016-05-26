@@ -84,7 +84,7 @@ public class BasicTreeLoggerParameters extends TreeLoggerParameters<BasicLogCate
 	}
 
 	@Override
-	public BasicTreeLoggerParametersDialog getGuiInterface(Container parent) {
+	public BasicTreeLoggerParametersDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new BasicTreeLoggerParametersDialog((Window) parent, this);
 		}
@@ -93,7 +93,7 @@ public class BasicTreeLoggerParameters extends TreeLoggerParameters<BasicLogCate
 	
 	public static void main(String[] args) {
 		BasicTreeLoggerParameters params = new BasicTreeLoggerParameters();
-		params.showInterface(null);
+		params.showUI(null);
 	}
 
 }

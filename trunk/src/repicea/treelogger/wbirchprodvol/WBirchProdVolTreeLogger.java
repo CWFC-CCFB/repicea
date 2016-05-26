@@ -64,7 +64,7 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	@Override
 	public void setTreeLoggerParameters() {
 		WBirchProdVolTreeLoggerParameters stlp = createDefaultTreeLoggerParameters();				
-		stlp.showInterface(null);
+		stlp.showUI(null);
 		setTreeLoggerParameters(stlp);
 	}
 

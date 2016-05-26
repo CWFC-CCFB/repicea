@@ -31,7 +31,7 @@ public class ExportDBFToolTest extends ExportTool {
 		ExportDBFToolTest test;
 		try {
 			test = new ExportDBFToolTest();
-			test.showInterface(null);
+			test.showUI(null);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

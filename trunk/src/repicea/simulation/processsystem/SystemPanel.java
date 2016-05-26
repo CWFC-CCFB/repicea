@@ -40,7 +40,7 @@ import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.Resettable;
 import repicea.gui.UIControlManager;
-import repicea.gui.UserInterfaceableObject;
+import repicea.gui.REpiceaUIObject;
 import repicea.gui.dnd.DnDPanel;
 import repicea.simulation.processsystem.UISetup.BasicMode;
 import repicea.util.REpiceaTranslator;
@@ -128,9 +128,9 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 	
 	@Override
 	protected void addManagerComponents() {
-		for (UserInterfaceableObject obj : getListManager().getList()) {
+		for (REpiceaUIObject obj : getListManager().getList()) {
 			Processor process = (Processor) obj;
-			addProcessorButton(process.getGuiInterface(this));
+			addProcessorButton(process.getUI(this));
 			for (Processor subProcess : process.getSubProcessors()) {
 				addLinkLine(new ProcessorLinkLine(this, process, subProcess));
 			}
@@ -153,7 +153,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 	@Override
 	public void acceptThisObject(Processor obj, DropTargetDropEvent arg0) {
 		Point dropLocation = arg0.getLocation();
-		ProcessorButton button = obj.getGuiInterface(this);
+		ProcessorButton button = obj.getUI(this);
 		Point originalLocation = new Point(dropLocation.x - button.getSize().width / 2, dropLocation.y - button.getSize().height / 2);
 		obj.setOriginalLocation(originalLocation);
 		if (addProcessorButton(button)) {		// light implementation to keep the synchronicity with the manager

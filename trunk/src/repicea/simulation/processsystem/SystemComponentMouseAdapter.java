@@ -31,7 +31,7 @@ import javax.swing.text.JTextComponent;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.Refreshable;
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
 
 class SystemComponentMouseAdapter extends MouseAdapter {
@@ -40,7 +40,7 @@ class SystemComponentMouseAdapter extends MouseAdapter {
 	
 	
 	SystemComponentMouseAdapter(REpiceaGUIPermissionProvider readWriteProvider) {
-		if (readWriteProvider instanceof ShowableObjectWithParent && readWriteProvider instanceof Component) {
+		if (readWriteProvider instanceof REpiceaShowableUIWithParent && readWriteProvider instanceof Component) {
 			this.readWriteProvider = readWriteProvider;
 		} else {
 			throw new InvalidParameterException("The component must implement the ShowableObjectWithParent interface");
@@ -53,11 +53,11 @@ class SystemComponentMouseAdapter extends MouseAdapter {
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
 		if (arg0.getClickCount() >= 2) {
-			ShowableObjectWithParent showable = (ShowableObjectWithParent) readWriteProvider;
+			REpiceaShowableUIWithParent showable = (REpiceaShowableUIWithParent) readWriteProvider;
 			SystemManagerDialog systemManagerDialog = (SystemManagerDialog) CommonGuiUtility.getParentComponent((Component) readWriteProvider, SystemManagerDialog.class);
 			boolean overallEnabling = systemManagerDialog.getCaller().getGUIPermission().isEnablingGranted();
 			boolean isEnablingGranted = readWriteProvider.getGUIPermission().isEnablingGranted() && overallEnabling;
-			Container internalDlg = (Container) showable.getGuiInterface(systemManagerDialog);
+			Container internalDlg = (Container) showable.getUI(systemManagerDialog);
 			if (internalDlg instanceof Refreshable) {
 				((Refreshable) internalDlg).refreshInterface();
 			}
@@ -67,7 +67,7 @@ class SystemComponentMouseAdapter extends MouseAdapter {
 				CommonGuiUtility.enableThoseComponents(internalDlg, AbstractButton.class, isEnablingGranted);
 				CommonGuiUtility.enableThoseComponents(internalDlg, JComboBox.class, isEnablingGranted);
 			}
-			showable.showInterface(systemManagerDialog);
+			showable.showUI(systemManagerDialog);
 		}
 	}
 

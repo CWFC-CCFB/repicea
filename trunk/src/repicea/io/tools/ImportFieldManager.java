@@ -36,7 +36,7 @@ import java.util.Vector;
 
 import javax.swing.filechooser.FileFilter;
 
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
@@ -52,7 +52,7 @@ import repicea.util.REpiceaSystem;
  * This class manages a list of ImportFieldElement.
  * @author M.Fortin - June 2010
  */
-public class ImportFieldManager implements Serializable, IOUserInterfaceableObject, ShowableObjectWithParent {
+public class ImportFieldManager implements Serializable, IOUserInterfaceableObject, REpiceaShowableUIWithParent {
 
 	private static final long serialVersionUID = 20100804L;
 
@@ -387,7 +387,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 //	}
 
 	@Override
-	public ImportFieldManagerDialog getGuiInterface(Container parent) {
+	public ImportFieldManagerDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new ImportFieldManagerDialog(this, (Window) parent);
 		}
@@ -396,8 +396,8 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 	
 	@Override
-	public void showInterface(Window parent) {
-		if (!getGuiInterface(parent).isVisible()) {
+	public void showUI(Window parent) {
+		if (!getUI(parent).isVisible()) {
 			guiInterface.setVisible(true);
 		}
 	}

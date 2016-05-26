@@ -59,7 +59,7 @@ public class BasicLogCategory extends TreeLogCategory {
 	 * @see capsis.extension.treelogger.TreeLogCategory#getTreeLogCategoryPanel()
 	 */
 	@Override
-	public CarbonAccountingToolDefaultLogCategoryPanel getGuiInterface() {
+	public CarbonAccountingToolDefaultLogCategoryPanel getUI() {
 		if (guiInterface == null) {
 			guiInterface = new CarbonAccountingToolDefaultLogCategoryPanel(this);
 		}

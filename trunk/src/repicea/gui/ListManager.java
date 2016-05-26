@@ -25,7 +25,7 @@ import java.util.List;
  * @author Mathieu Fortin - February 2014
  * @param <P> the class of the object to be visualized
  */
-public interface ListManager<P extends UserInterfaceableObject> {
+public interface ListManager<P extends REpiceaUIObject> {
 	
 	/**
 	 * This method returns the list of UserInterfaceableObject-derived instance

@@ -62,16 +62,16 @@ class TriggerTask extends AbstractGenericTask {
 			trigger.loadSettings();
 			break;
 		case ShowInterface:
-			trigger.showInterface();
+			trigger.showUI();
 			break;
 		case ReduceInterface:
-			gui = trigger.getGuiInterface();
+			gui = trigger.getUI();
 			if (gui.isVisible()) {
 				gui.setExtendedState(JFrame.ICONIFIED);
 			}
 			break;
 		case ExpandInterface:
-			gui = trigger.getGuiInterface();
+			gui = trigger.getUI();
 			if (gui.getExtendedState() == JFrame.ICONIFIED) {
 				gui.setExtendedState(JFrame.NORMAL);
 			}

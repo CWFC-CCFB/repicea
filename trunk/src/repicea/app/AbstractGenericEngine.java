@@ -25,7 +25,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import repicea.gui.CommonGuiUtility;
-import repicea.gui.UserInterfaceableObject;
+import repicea.gui.REpiceaUIObject;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -181,9 +181,9 @@ public abstract class AbstractGenericEngine {
 	 * @param failureReason the exception that was thrown
 	 */
 	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
-		if (this instanceof UserInterfaceableObject) {
-			UserInterfaceableObject guiObject = (UserInterfaceableObject) this;
-			Component component = guiObject.getGuiInterface();
+		if (this instanceof REpiceaUIObject) {
+			REpiceaUIObject guiObject = (REpiceaUIObject) this;
+			Component component = guiObject.getUI();
 			Container container = null;
 			if (component instanceof Container) {
 				container = (Container) component;

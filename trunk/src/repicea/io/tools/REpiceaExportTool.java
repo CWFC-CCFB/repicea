@@ -37,7 +37,7 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import repicea.app.AbstractGenericTask;
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatWriter;
@@ -63,7 +63,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * {@code exportRecordSets();} </br>
  * @author Mathieu Fortin - April 2016
  */
-public abstract class REpiceaExportTool implements ShowableObjectWithParent, CaretListener, ListSelectionListener {
+public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, CaretListener, ListSelectionListener {
 	
 	final class InternalWorkerForSaveMethod extends Thread {
 
@@ -437,7 +437,7 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	
 
 	@Override
-	public REpiceaExportToolDialog getGuiInterface(Container parent) {
+	public REpiceaExportToolDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new REpiceaExportToolDialog(this, (Window) parent);
 		}
@@ -445,8 +445,8 @@ public abstract class REpiceaExportTool implements ShowableObjectWithParent, Car
 	}
 
 	@Override
-	public void showInterface(Window parent) {
-		if (!getGuiInterface(parent).isVisible()) {
+	public void showUI(Window parent) {
+		if (!getUI(parent).isVisible()) {
 			guiInterface.setVisible(true);
 		}
 	}
