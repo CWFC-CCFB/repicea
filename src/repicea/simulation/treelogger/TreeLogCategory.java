@@ -20,7 +20,7 @@ package repicea.simulation.treelogger;
 
 import java.io.Serializable;
 
-import repicea.gui.UserInterfaceableObject;
+import repicea.gui.REpiceaUIObject;
 
 /**
  * This abstract class ensures that any TreeLogCategory-derived object has
@@ -28,7 +28,7 @@ import repicea.gui.UserInterfaceableObject;
  * returns the yield of the piece.
  * @author Mathieu Fortin - January 2010
  */
-public abstract class TreeLogCategory implements Serializable, UserInterfaceableObject {
+public abstract class TreeLogCategory implements Serializable, REpiceaUIObject {
 
 	private static final long serialVersionUID = 20100804L;
 	

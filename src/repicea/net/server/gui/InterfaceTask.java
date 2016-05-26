@@ -39,7 +39,7 @@ class InterfaceTask extends AbstractGenericTask {
 	public void doThisJob() throws Exception {
 		switch(task) {
 		case ShowInterface:
-			engine.showInterface();
+			engine.showUI();
 			break;
 		case Connect:
 			engine.connect();

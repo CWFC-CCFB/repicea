@@ -28,7 +28,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
-import repicea.gui.UserInterfaceableObject;
+import repicea.gui.REpiceaUIObject;
 
 /**
  * The Logger class includes a JTextArea instance in which any OutputStream can write.
@@ -36,7 +36,7 @@ import repicea.gui.UserInterfaceableObject;
  * a JScrollPane that contains the JTextArea.
  * @author Mathieu Fortin - October 2012
  */
-public class Logger extends OutputStream implements Runnable, UserInterfaceableObject {
+public class Logger extends OutputStream implements Runnable, REpiceaUIObject {
 
 	private JScrollPane guiInterface;
 	private JTextArea textArea;
@@ -118,7 +118,7 @@ public class Logger extends OutputStream implements Runnable, UserInterfaceableO
 	}
 
 	@Override
-	public JScrollPane getGuiInterface() {
+	public JScrollPane getUI() {
 		if (guiInterface == null) {
 			guiInterface = new JScrollPane();
 			guiInterface.setViewportView(textArea);

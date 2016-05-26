@@ -31,14 +31,14 @@ import javax.swing.JLabel;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.dnd.DragGestureMoveComponentHandler;
 import repicea.gui.permissions.REpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
 import repicea.simulation.processsystem.UISetup.BasicMode;
 
 @SuppressWarnings("serial")
-public class ProcessorButton extends SelectableJButton implements AnchorProvider, ShowableObjectWithParent, REpiceaGUIPermissionProvider {
+public class ProcessorButton extends SelectableJButton implements AnchorProvider, REpiceaShowableUIWithParent, REpiceaGUIPermissionProvider {
 
 	
 	protected static class DragGestureButtonMoveHandler extends DragGestureMoveComponentHandler<ProcessorButton> {
@@ -188,7 +188,7 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	}
 
 	@Override
-	public ProcessorInternalDialog getGuiInterface(Container parent) {
+	public ProcessorInternalDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new ProcessorInternalDialog((Window) parent, this);
 		}
@@ -196,8 +196,8 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	}
 
 	@Override
-	public void showInterface(Window window) {
-		ProcessorInternalDialog dlg = getGuiInterface(window);
+	public void showUI(Window window) {
+		ProcessorInternalDialog dlg = getUI(window);
 		dlg.setVisible(true);
 	}
 

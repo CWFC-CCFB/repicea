@@ -408,7 +408,7 @@ public abstract class TreeLoggerParametersDialog<P extends TreeLogCategory>
 			}
 			P logCategory = (P) logCategoryList.getSelectedValue();
 			panLogCategory.removeAll();
-			panLogCategory.add(logCategory.getGuiInterface(), BorderLayout.CENTER);
+			panLogCategory.add(logCategory.getUI(), BorderLayout.CENTER);
 			boolean enabled = getTreeLoggerParameters().getGUIPermission().isEnablingGranted();
 			CommonGuiUtility.enableAllControls(panLogCategory, enabled);
 			panLogCategory.revalidate();

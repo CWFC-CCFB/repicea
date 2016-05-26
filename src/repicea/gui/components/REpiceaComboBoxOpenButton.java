@@ -38,14 +38,14 @@ import javax.swing.border.Border;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaPanel;
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermission;
 
 @SuppressWarnings("serial")
-public class REpiceaComboBoxOpenButton<P extends ShowableObjectWithParent> extends REpiceaPanel implements ActionListener {
+public class REpiceaComboBoxOpenButton<P extends REpiceaShowableUIWithParent> extends REpiceaPanel implements ActionListener {
 
 	protected final JComboBox<P> comboBox;
 	private JButton openButton;
@@ -127,11 +127,11 @@ public class REpiceaComboBoxOpenButton<P extends ShowableObjectWithParent> exten
 		if (evt.getSource().equals(openButton)) {
 			if (comboBox.getSelectedIndex() != -1) {
 				Window window = CommonGuiUtility.getParentWindow(this);
-				Component comp = comboBox.getItemAt(comboBox.getSelectedIndex()).getGuiInterface(window);
+				Component comp = comboBox.getItemAt(comboBox.getSelectedIndex()).getUI(window);
 				for (PropertyChangeListener listener : propertyListeners) {
 					comp.addPropertyChangeListener(listener);
 				}
-				comboBox.getItemAt(comboBox.getSelectedIndex()).showInterface(window);
+				comboBox.getItemAt(comboBox.getSelectedIndex()).showUI(window);
 				for (PropertyChangeListener listener : propertyListeners) {
 					comp.removePropertyChangeListener(listener);
 				}

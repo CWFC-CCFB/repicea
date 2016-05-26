@@ -21,7 +21,7 @@ package repicea.io.tools;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 
-import repicea.gui.UserInterfaceableObject;
+import repicea.gui.REpiceaUIObject;
 import repicea.io.FormatField;
 
 
@@ -31,7 +31,7 @@ import repicea.io.FormatField;
  */
 public final class ImportFieldElement implements Cloneable, 
 										Serializable, 
-										UserInterfaceableObject {
+										REpiceaUIObject {
 
 	private static final long serialVersionUID = 20100804L;
 	
@@ -130,7 +130,7 @@ public final class ImportFieldElement implements Cloneable,
 //	}
 
 	@Override
-	public ImportFieldElementPanel getGuiInterface() {
+	public ImportFieldElementPanel getUI() {
 		if (guiInterface == null) {
 			guiInterface = new ImportFieldElementPanel(this);
 		}

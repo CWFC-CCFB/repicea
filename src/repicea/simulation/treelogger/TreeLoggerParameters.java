@@ -32,7 +32,7 @@ import java.util.TreeMap;
 
 import javax.swing.filechooser.FileFilter;
 
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
@@ -57,7 +57,7 @@ import repicea.util.ExtendedFileFilter;
 public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	implements Memorizable, 
 																						IOUserInterfaceableObject, 
 																						Serializable, 
-																						ShowableObjectWithParent, 
+																						REpiceaShowableUIWithParent, 
 																						PostXmlUnmarshalling,
 																						REpiceaGUIPermissionProvider {
 	
@@ -273,11 +273,11 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 
 	
 	@Override
-	public abstract TreeLoggerParametersDialog<?> getGuiInterface(Container parent);
+	public abstract TreeLoggerParametersDialog<?> getUI(Container parent);
 
 	@Override
-	public void showInterface(Window parent) {
-		getGuiInterface(parent).setVisible(true);
+	public void showUI(Window parent) {
+		getUI(parent).setVisible(true);
 	}
 
 	public String getFilename() {return filename;}

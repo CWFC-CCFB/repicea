@@ -30,7 +30,7 @@ import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.ListManager;
 import repicea.gui.Resettable;
-import repicea.gui.ShowableObjectWithParent;
+import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
@@ -46,7 +46,7 @@ public class SystemManager implements ListManager<Processor>,
 										IOUserInterfaceableObject, 
 										Resettable, 
 										Memorizable, 
-										ShowableObjectWithParent,
+										REpiceaShowableUIWithParent,
 										REpiceaGUIPermissionProvider {
 
 	private final List<Processor> processors;
@@ -87,7 +87,7 @@ public class SystemManager implements ListManager<Processor>,
 
 
 	@Override
-	public SystemManagerDialog getGuiInterface(Container parent) {
+	public SystemManagerDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new SystemManagerDialog((Window) parent, this);
 		}
@@ -95,8 +95,8 @@ public class SystemManager implements ListManager<Processor>,
 	}
 
 	@Override
-	public void showInterface(Window parent) {
-		getGuiInterface(parent).setVisible(true);
+	public void showUI(Window parent) {
+		getUI(parent).setVisible(true);
 	}
 
 	@Override
@@ -221,7 +221,7 @@ public class SystemManager implements ListManager<Processor>,
 		manager.registerObject(unit2);
 		manager.registerObject(unit3);
 		manager.registerObject(unit4);
-		manager.showInterface(null);
+		manager.showUI(null);
 		System.exit(0);
 	}
 

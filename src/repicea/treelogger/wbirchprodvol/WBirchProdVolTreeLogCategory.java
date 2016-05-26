@@ -46,7 +46,7 @@ public class WBirchProdVolTreeLogCategory extends TreeLogCategory {
 	}
 
 	@Override
-	public WBirchProdVolTreeLogCategoryPanel getGuiInterface() {
+	public WBirchProdVolTreeLogCategoryPanel getUI() {
 		if (guiInterface == null) {
 			guiInterface = new WBirchProdVolTreeLogCategoryPanel(this);
 		} 

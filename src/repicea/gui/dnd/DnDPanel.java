@@ -30,7 +30,7 @@ import repicea.gui.CommonGuiUtility;
 import repicea.gui.ListManager;
 import repicea.gui.REpiceaPanel;
 import repicea.gui.Refreshable;
-import repicea.gui.UserInterfaceableObject;
+import repicea.gui.REpiceaUIObject;
 import repicea.gui.components.REpiceaScrollPane;
 
 /**
@@ -39,7 +39,7 @@ import repicea.gui.components.REpiceaScrollPane;
  * @param <D> the class of this object to be received
  */
 @SuppressWarnings("serial")
-public class DnDPanel<D extends UserInterfaceableObject> extends REpiceaScrollPane implements AcceptableDropComponent<D>, Refreshable {
+public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane implements AcceptableDropComponent<D>, Refreshable {
 
 	public static class InternalPanel extends REpiceaPanel {
 		
@@ -113,8 +113,8 @@ public class DnDPanel<D extends UserInterfaceableObject> extends REpiceaScrollPa
 	}
 
 	protected void addManagerComponents() {
-		for (UserInterfaceableObject obj : manager.getList()) {
-			internalPanel.add(obj.getGuiInterface());
+		for (REpiceaUIObject obj : manager.getList()) {
+			internalPanel.add(obj.getUI());
 		}
 	}
 

@@ -52,7 +52,7 @@ public class DiameterBasedTreeLogCategory extends TreeLogCategory {
 	 * @see capsis.extension.treelogger.TreeLogCategory#getTreeLogCategoryPanel()
 	 */
 	@Override
-	public DiameterBasedTreeLogCategoryPanel getGuiInterface() {
+	public DiameterBasedTreeLogCategoryPanel getUI() {
 		if (guiInterface == null) {
 			guiInterface = new DiameterBasedTreeLogCategoryPanel(this);
 		}

@@ -86,8 +86,8 @@ public class MaritimePineBasicTreeLoggerParameters extends DiameterBasedTreeLogg
 	public static void main(String[] args) {
 		MaritimePineBasicTreeLoggerParameters params = new MaritimePineBasicTreeLoggerParameters();
 		params.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(true));
-		params.showInterface(null);
-		params.showInterface(null);
+		params.showUI(null);
+		params.showUI(null);
 	}
 
 }

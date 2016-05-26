@@ -26,11 +26,11 @@ import java.net.SocketAddress;
 
 import repicea.app.AbstractGenericEngine;
 import repicea.app.GenericTask;
-import repicea.gui.ShowableObject;
+import repicea.gui.REpiceaShowableUI;
 import repicea.net.SocketWrapper;
 import repicea.net.server.gui.InterfaceTask.InterfaceRelatedTask;
 
-public class ServerInterfaceEngine extends AbstractGenericEngine implements ShowableObject {
+public class ServerInterfaceEngine extends AbstractGenericEngine implements REpiceaShowableUI {
 
 	
 	private ServerDialog mainDialog;
@@ -51,7 +51,7 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements Show
 
 
 	@Override
-	public ServerDialog getGuiInterface() {
+	public ServerDialog getUI() {
 		if (mainDialog == null) {
 			mainDialog = new ServerDialog(this);
 		}
@@ -59,8 +59,8 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements Show
 	}
 
 	@Override
-	public void showInterface() {
-		getGuiInterface().setVisible(true);
+	public void showUI() {
+		getUI().setVisible(true);
 	}
 
 	@Override
@@ -97,7 +97,7 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements Show
 	@Override
 	public void requestShutdown() {
 		queue.clear();
-		if (getGuiInterface().isConnected()) {
+		if (getUI().isConnected()) {
 			addTask(new InterfaceTask(this, InterfaceRelatedTask.Disconnect));
 		}
 		addTask(finalTask);

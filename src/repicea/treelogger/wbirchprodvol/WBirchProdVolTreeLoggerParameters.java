@@ -88,7 +88,7 @@ public class WBirchProdVolTreeLoggerParameters extends TreeLoggerParameters<WBir
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public TreeLoggerParametersDialog getGuiInterface(Container parent) {
+	public TreeLoggerParametersDialog getUI(Container parent) {
 		if (guiInterface == null) {
 			guiInterface = new WBirchProdVolTreeLoggerParametersDialog((Window) parent, this);
 		}
@@ -102,8 +102,8 @@ public class WBirchProdVolTreeLoggerParameters extends TreeLoggerParameters<WBir
 		WBirchProdVolTreeLoggerParameters stlp = new WBirchProdVolTreeLoggerParameters();
 		stlp.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(false));
 		stlp.initializeDefaultLogCategories();
-		stlp.showInterface(null);
-		stlp.showInterface(null);
+		stlp.showUI(null);
+		stlp.showUI(null);
 		System.exit(0);
 	}
 }
