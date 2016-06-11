@@ -18,6 +18,7 @@
  */
 package repicea.io;
 
+import java.nio.BufferOverflowException;
 import java.util.Iterator;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -27,10 +28,14 @@ import java.util.concurrent.LinkedBlockingQueue;
  * the selection of subsets of GExportRecord objects.
  * @author Mathieu Fortin - April 2011
  */
+@SuppressWarnings("serial")
 public class REpiceaRecordSet extends LinkedBlockingQueue<GExportRecord> {
 
-	private static final long serialVersionUID = 20110410L;
-
+	private static final int MAX_NUMBER_RECORDS = 100000;
+	
+	private Thread saveThread;
+	private final Object lock = new Object();
+	
 	/**
 	 * General constructor for this class.
 	 */
@@ -68,5 +73,56 @@ public class REpiceaRecordSet extends LinkedBlockingQueue<GExportRecord> {
 			return null;
 		}
 	}
+
+	/** 
+	 * This method specifies that the record set is linked to a save thread. There is a protection
+	 * to avoid overfilling the REpiceaRecordSet object. 
+	 * @param saveThread a Thread instance
+	 */
+	public void setSaveThread(Thread saveThread) {
+		this.saveThread = saveThread;
+	}
+	
+	@Override
+	public boolean add(GExportRecord record) {
+		if (saveThread != null && shouldBeLocked()) {
+			synchronized(lock) {
+				try {
+					lock.wait(10000);				// waits 10 seconds if not notify and then throw an exception to avoid a dead lock
+				} catch (InterruptedException e) {
+					throw new BufferOverflowException();
+				}	
+			}
+		}
+		return super.add(record);
+	}
+
+	
+	private boolean shouldBeLocked() {
+		return size() > MAX_NUMBER_RECORDS;
+	}
+	
+	@Override
+	public GExportRecord take() throws InterruptedException {
+		if (saveThread != null) {
+			synchronized(lock) {
+				if (!shouldBeLocked()) {
+					lock.notify();
+				}
+			}
+		}
+		return super.take();
+	}
+	
+//	public static void main(String[] args) {
+//		REpiceaRecordSet recordSet = new REpiceaRecordSet();
+//		
+//		List<GExportRecord> records = new ArrayList<GExportRecord>();
+//		for (int i = 0; i < 1000; i++) {
+//			records.add(new GExportRecord());
+//		}
+//		recordSet.addAll(records);
+//	}
+	
 	
 }

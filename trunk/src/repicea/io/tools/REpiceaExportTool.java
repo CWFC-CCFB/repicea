@@ -75,6 +75,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 			super("Export tool save-to-file thread");
 			this.file = file;
 			this.recordSet = recordSet;
+			this.recordSet.setSaveThread(this);
 		}
 		
 		public void run() {
