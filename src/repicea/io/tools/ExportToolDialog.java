@@ -54,7 +54,7 @@ import repicea.gui.CommonGuiUtility.FileChooserOutput;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
-import repicea.gui.genericwindows.DProgressBar;
+import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.io.GFileFilter;
 import repicea.util.MemoryWatchDog.ExpectedMemoryCapacityException;
 import repicea.util.REpiceaTranslator;
@@ -463,10 +463,11 @@ public class ExportToolDialog extends REpiceaDialog implements ActionListener {
 			jobName += " - " + REpiceaTranslator.getString(MessageID.ProgressMessageExport);
 		}
 		
-		new DProgressBar(owner, 
+		new REpiceaProgressBarDialog(owner, 
 				REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress),
 				jobName,
-				worker);
+				worker,
+				false);
 	}
 
 	@Override
