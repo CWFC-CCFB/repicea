@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 
 import repicea.gui.UIControlManager;
-import repicea.gui.genericwindows.DProgressBar;
+import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
@@ -106,7 +106,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 		String title = REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress);
 		String message = REpiceaTranslator.getString(MessageID.ProgressMessage);
 		
-		new DProgressBar(guiOwner, title, message, groupingRegistryReader);
+		new REpiceaProgressBarDialog(guiOwner, title, message, groupingRegistryReader, false);
 		
 		if (!groupingRegistryReader.isCorrectlyTerminated()) {
 			throw groupingRegistryReader.getFailureReason();

@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.app.GenericTask;
-import repicea.gui.genericwindows.DProgressBar;
+import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 
 /**
  * The TreeLogger abstract class is the class from which a the tree loggers must inherit. Among others,
@@ -173,7 +173,7 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 			loggerTask.addPropertyChangeListener(listener);
 		}
 		if (progressBarEnabled) {
-			new DProgressBar(owner, "title", "message", loggerTask);
+			new REpiceaProgressBarDialog(owner, "title", "message", loggerTask, false);
 		} else {
 			loggerTask.run();
 		}
