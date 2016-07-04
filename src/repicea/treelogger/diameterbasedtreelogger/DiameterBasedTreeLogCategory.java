@@ -35,8 +35,8 @@ public class DiameterBasedTreeLogCategory extends TreeLogCategory {
 	 * @param species the species name
 	 * @param merchantableVolumeProportion the proportion of the merchantable volume that falls into this category
 	 */
-	public DiameterBasedTreeLogCategory(Enum<?> logGrade, String species, double smallEndDiameter) {
-		super(logGrade.toString());
+	public DiameterBasedTreeLogCategory(Enum<?> logGrade, String species, double smallEndDiameter, boolean isFromStump) {
+		super(logGrade.toString(), isFromStump);
 		setSpecies(species);
 		this.logGrade = logGrade;
 		if (smallEndDiameter == -1) {

@@ -20,7 +20,7 @@ package repicea.treelogger.europeanbeech;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.stats.distributions.GaussianUtility;
-import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTree;
+import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogger;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedWoodPiece;
@@ -44,7 +44,7 @@ public class EuropeanBeechBasicTreeLogger extends DiameterBasedTreeLogger {
 	
 
 	@Override
-	protected DiameterBasedWoodPiece producePiece(DiameterBasedTree tree, DiameterBasedTreeLogCategory logCategory) {
+	protected DiameterBasedWoodPiece producePiece(DiameterBasedLoggableTree tree, DiameterBasedTreeLogCategory logCategory) {
 		double mqd = tree.getDbhCm();
 		double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
 		DiameterBasedWoodPiece piece = null;

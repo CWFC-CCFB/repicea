@@ -37,7 +37,7 @@ public class WBirchProdVolTreeLogCategory extends TreeLogCategory {
 			double lengthM, 
 			Double minimumSmallEndDiameterCm, 
 			Double maximumDecayDiameterCm) {
-		super(name);
+		super(name, false);
 		this.setSpecies(speciesName);
 		this.eligibleLogGrade = eligibleLogGrade;
 		this.lengthM = lengthM;

@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea library.
+ * This file is part of the repicea-foresttools library.
  *
- * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,16 +16,21 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.treelogger.europeanbeech;
+package repicea.treelogger.maritimepine;
 
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
-public interface EuropeanBeechBasicTree extends DiameterBasedLoggableTree {
+/**
+ * This interface ensures the tree can provide the basic features to be eligible for
+ * the MaritimePineBasicTreeLogger.
+ * @author Mathieu Fortin - November 2014
+ */
+public interface MaritimePineBasicLoggableTree extends DiameterBasedLoggableTree {
 
 	public static enum Species implements TextableEnum {
-		EuropeanBeech("European beech", "H\u00EAtre europ\u00E9en");
+		MaritimePine("Maritime pine", "Pin maritime");
 		
 		Species(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -40,4 +45,17 @@ public interface EuropeanBeechBasicTree extends DiameterBasedLoggableTree {
 		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 	
+	/**
+	 * This method returns the volume (m3) of harvest stump and roots.
+	 * @return a double
+	 */
+	public double getHarvestedStumpVolumeM3();
+	
+	
+	
+	/**
+	 * This method returns the volume (m3) of fine wood debris harvested in the crown.
+	 * @return a double
+	 */
+	public double getHarvestedCrownVolumeM3();
 }

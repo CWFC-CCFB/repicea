@@ -48,7 +48,7 @@ public class BasicLogCategory extends TreeLogCategory {
 	 * @param merchantableVolumeProportion the proportion of the merchantable volume that falls into this category
 	 */
 	public BasicLogCategory(String name, String species, double volumeProportionToBeProcessedInThisCategory) {
-		super(name);
+		super(name, false);
 		this.volumeProportionToBeProcessedInThisCategory = volumeProportionToBeProcessedInThisCategory;
 		setSpecies(species);
 	}

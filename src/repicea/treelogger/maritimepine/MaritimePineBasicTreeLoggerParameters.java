@@ -41,8 +41,8 @@ public class MaritimePineBasicTreeLoggerParameters extends DiameterBasedTreeLogg
 		IndustryWood("Particle", "Bois industrie"),
 		SawlogLowQuality("Sawlog low quality", "Sciage basse qualit\u00E9"),
 		SawlogHighQuality("Sawlog high quality", "Sciage haute qualit\u00E9"),
-//		Stump("Stump", "Souche"),
-//		Crown("Crown", "Houppier")
+		Stump("Stump", "Souche"),
+		Crown("Crown", "Houppier")
 		;
 
 		Grade(String englishText, String frenchText) {
@@ -71,16 +71,16 @@ public class MaritimePineBasicTreeLoggerParameters extends DiameterBasedTreeLogg
 		String species = getSpeciesName();
 		getLogCategories().clear();
 		getLogCategories().put(species, categories);
-//		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Stump, species, -1));
-		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogHighQuality, species, 25));
-		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogLowQuality, species, 16));
-		categories.add(new MaritimePineBasicTreeLogCategory(Grade.IndustryWood, species, 10));
-//		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Crown, species, -1));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Stump, species, -1, true));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogHighQuality, species, 25, false));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.SawlogLowQuality, species, 16, false));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.IndustryWood, species, 10, false));
+		categories.add(new MaritimePineBasicTreeLogCategory(Grade.Crown, species, -1, false));
 	}
 
 	@Override
 	protected String getSpeciesName() {
-		return MaritimePineBasicTree.Species.MaritimePine.toString();
+		return MaritimePineBasicLoggableTree.Species.MaritimePine.toString();
 	}
 
 	public static void main(String[] args) {
