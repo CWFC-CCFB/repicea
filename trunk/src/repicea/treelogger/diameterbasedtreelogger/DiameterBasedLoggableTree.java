@@ -21,7 +21,7 @@ package repicea.treelogger.diameterbasedtreelogger;
 import repicea.simulation.covariateproviders.treelevel.DbhCmProvider;
 import repicea.simulation.treelogger.LoggableTree;
 
-public abstract interface DiameterBasedTree extends LoggableTree, DbhCmProvider {
+public abstract interface DiameterBasedLoggableTree extends LoggableTree, DbhCmProvider {
 
 	
 	/**

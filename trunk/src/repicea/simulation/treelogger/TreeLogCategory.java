@@ -34,20 +34,23 @@ public abstract class TreeLogCategory implements Serializable, REpiceaUIObject {
 	
 	private String name;
 	private String species;
+	private boolean isFromStump = false;
 
 	/**
 	 * General constructor for all the TreeLogCategory-derived classes.
 	 * @param name the name of the log category
+	 * @param isFromStump true if this log category is extracted from the stump and the roots
 	 */
-	public TreeLogCategory(String name) {
+	public TreeLogCategory(String name, boolean isFromStump) {
 		this.name = name;
+		this.isFromStump = isFromStump;
 	}
 
 	/**
 	 * Default instantiation.
 	 */
 	public TreeLogCategory() {
-		this("unnamed");
+		this("unnamed", false);
 	}
 
 	protected void setSpecies(String species) {
@@ -95,4 +98,10 @@ public abstract class TreeLogCategory implements Serializable, REpiceaUIObject {
 		return false;
 	}
 	
+	/**
+	 * This method returns true if the log category is actually extracted from stumps. Typically, this is
+	 * done with maritime pine, where stumps are converted into energy wood.
+	 * @return a boolean
+	 */
+	public boolean isFromStump() {return isFromStump;};
 }

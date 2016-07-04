@@ -23,11 +23,11 @@ import java.util.List;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
 
-public abstract class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerParameters, DiameterBasedTree> {
+public abstract class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerParameters, DiameterBasedLoggableTree> {
 
 
 	@Override
-	protected void logThisTree(DiameterBasedTree tree) {
+	protected void logThisTree(DiameterBasedLoggableTree tree) {
 		List<DiameterBasedTreeLogCategory> logCategories = params.getSpeciesLogCategories(getTreeLoggerParameters().getSpeciesName());
 		DiameterBasedWoodPiece piece;
 		for (DiameterBasedTreeLogCategory logCategory : logCategories) {
@@ -45,9 +45,9 @@ public abstract class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTr
 	public abstract DiameterBasedTreeLoggerParameters createDefaultTreeLoggerParameters();
 	
 	@Override
-	public abstract DiameterBasedTree getEligible(LoggableTree t);
+	public abstract DiameterBasedLoggableTree getEligible(LoggableTree t);
 
 	
-	protected abstract DiameterBasedWoodPiece producePiece(DiameterBasedTree tree, DiameterBasedTreeLogCategory logCategory);
+	protected abstract DiameterBasedWoodPiece producePiece(DiameterBasedLoggableTree tree, DiameterBasedTreeLogCategory logCategory);
 }
 

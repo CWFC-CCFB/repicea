@@ -1,6 +1,6 @@
 package repicea.treelogger.maritimepine;
 
-class MaritimePineTree implements MaritimePineBasicTree {
+class MaritimePineTree implements MaritimePineBasicLoggableTree {
 
 	private final double dbhCm;
 	private final double standardDeviationCm;
@@ -27,7 +27,7 @@ class MaritimePineTree implements MaritimePineBasicTree {
 
 	@Override
 	public String getSpeciesName() {
-		return MaritimePineBasicTree.Species.MaritimePine.toString();
+		return MaritimePineBasicLoggableTree.Species.MaritimePine.toString();
 	}
 
 	@Override
@@ -38,6 +38,16 @@ class MaritimePineTree implements MaritimePineBasicTree {
 	@Override
 	public double getDbhCmStandardDeviation() {
 		return standardDeviationCm;
+	}
+
+	@Override
+	public double getHarvestedStumpVolumeM3() {
+		return 0;
+	}
+
+	@Override
+	public double getHarvestedCrownVolumeM3() {
+		return 0;
 	}
 
 }
