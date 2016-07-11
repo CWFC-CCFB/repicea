@@ -36,7 +36,7 @@ public class DiameterBasedTreeLoggerParametersDialog extends TreeLoggerParameter
 		super(window, params);
 		logGradePriorityChangeEnabled = false; 
 		mnFile.setEnabled(false);
-		mnEdit.setEnabled(false);
+		mnEdit.setEnabled(true);
 		mnSpecies.setEnabled(false);			//	the species cannot be changed 
 		mnLogGrade.setEnabled(false);			// the log grade cannot be changed either
 		mnTools.setEnabled(false);
