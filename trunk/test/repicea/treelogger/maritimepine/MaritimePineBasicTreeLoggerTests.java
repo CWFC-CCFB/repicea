@@ -16,8 +16,8 @@ public class MaritimePineBasicTreeLoggerTests {
 	public void TestWithSimpleTreeWithStandardDeviation() {
 		MaritimePineBasicTreeLogger treeLogger = new MaritimePineBasicTreeLogger();
 		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
-		Collection trees = new ArrayList<MaritimePineTree>();
-		MaritimePineTree tree = new MaritimePineTree(30,10);
+		Collection trees = new ArrayList<MaritimePineBasicLoggableTreeImpl>();
+		MaritimePineBasicLoggableTreeImpl tree = new MaritimePineBasicLoggableTreeImpl(30,10,0,0);
 		trees.add(tree);
 		treeLogger.init(trees);
 		treeLogger.run();
@@ -34,8 +34,8 @@ public class MaritimePineBasicTreeLoggerTests {
 	public void TestWithSimpleTreeWithNoStandardDeviation() {
 		MaritimePineBasicTreeLogger treeLogger = new MaritimePineBasicTreeLogger();
 		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
-		Collection trees = new ArrayList<MaritimePineTree>();
-		MaritimePineTree tree = new MaritimePineTree(29,0);
+		Collection trees = new ArrayList<MaritimePineBasicLoggableTreeImpl>();
+		MaritimePineBasicLoggableTreeImpl tree = new MaritimePineBasicLoggableTreeImpl(29,0,0,0);
 		trees.add(tree);
 		treeLogger.init(trees);
 		treeLogger.run();
@@ -44,6 +44,25 @@ public class MaritimePineBasicTreeLoggerTests {
 		WoodPiece woodPiece = woodPieces.iterator().next();
 		MaritimePineBasicTreeLogCategory logCategory = (MaritimePineBasicTreeLogCategory) woodPiece.getLogCategory();
 		Assert.assertTrue(logCategory.getGrade() == Grade.SawlogLowQuality);
+	}
+
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void TestWithStumpBranchAndStandardDeviation() {
+		MaritimePineBasicTreeLogger treeLogger = new MaritimePineBasicTreeLogger();
+		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
+		Collection trees = new ArrayList<MaritimePineBasicLoggableTreeImpl>();
+		MaritimePineBasicLoggableTreeImpl tree = new MaritimePineBasicLoggableTreeImpl(30,10,0.5,0.75);
+		trees.add(tree);
+		treeLogger.init(trees);
+		treeLogger.run();
+		double sum = 0;
+		for (WoodPiece piece : treeLogger.getWoodPieces().get(tree)) {
+			double volumeM3 = piece.getVolumeM3();
+			sum += volumeM3;
+		}
+		Assert.assertEquals("Comparing bole volume", 1d + .5 + .75, sum, 1E-8); 
 	}
 
 }
