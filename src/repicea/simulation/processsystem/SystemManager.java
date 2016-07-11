@@ -206,6 +206,10 @@ public class SystemManager implements ListManager<Processor>,
 		processors.addAll(retrievedProcessors);
 	}
 
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
 	
 	public static void main(String[] args) {
 		Processor unit1 = new Processor("1");

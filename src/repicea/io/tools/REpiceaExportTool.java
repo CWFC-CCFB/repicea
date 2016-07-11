@@ -514,6 +514,10 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 		}
 	}
 	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
 
 	/**
 	 * This method makes it possible to disable the saving to file. Then the Map that results from exportRecordSets() won't be empty.

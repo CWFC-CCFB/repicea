@@ -502,4 +502,9 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 		}
 	}
 	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 }

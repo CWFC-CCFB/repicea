@@ -217,5 +217,10 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 	 */
 	protected REpiceaPanel getProcessFeaturesPanel() {return null;}
 	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 	
 }

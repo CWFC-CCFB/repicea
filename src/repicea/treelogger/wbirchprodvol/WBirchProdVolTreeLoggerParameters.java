@@ -106,4 +106,10 @@ public class WBirchProdVolTreeLoggerParameters extends TreeLoggerParameters<WBir
 		stlp.showUI(null);
 		System.exit(0);
 	}
+	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 }

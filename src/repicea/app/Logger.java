@@ -126,4 +126,11 @@ public class Logger extends OutputStream implements Runnable, REpiceaUIObject {
 		return guiInterface;
 	}
 
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+	
+	
+
 }

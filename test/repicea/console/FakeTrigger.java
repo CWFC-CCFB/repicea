@@ -23,6 +23,7 @@ public class FakeTrigger extends Trigger {
 		return "I am the fake trigger!";
 	}
 	
+
 	public static void main(String[] args) {
 		new FakeTrigger().startApplication();
 	}

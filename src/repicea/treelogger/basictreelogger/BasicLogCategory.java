@@ -77,4 +77,9 @@ public class BasicLogCategory extends TreeLogCategory {
 
 	protected double getVolumeProportion() {return volumeProportionToBeProcessedInThisCategory;}
 
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 }

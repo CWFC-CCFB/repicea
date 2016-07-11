@@ -35,4 +35,10 @@ public interface REpiceaUIObjectWithParent {
 	 */
 	public Component getUI(Container parent); 
 
+	/**
+	 * This method returns true if the GUI is visible.
+	 * @return a boolean
+	 */
+	public boolean isVisible();
+
 }

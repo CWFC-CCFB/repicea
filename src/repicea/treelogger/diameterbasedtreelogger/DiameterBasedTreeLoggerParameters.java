@@ -72,6 +72,11 @@ public abstract class DiameterBasedTreeLoggerParameters extends TreeLoggerParame
 	
 	protected abstract String getSpeciesName();
 	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 //	public static void main(String[] args) {
 //		EuropeanBeechBasicTreeLoggerParameters params = new EuropeanBeechBasicTreeLoggerParameters();
 //		params.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(true));

@@ -92,7 +92,11 @@ public abstract class Trigger extends AbstractGenericEngine implements REpiceaSh
 		addTask(new TriggerTask(TaskID.ShowInterface, this));
 	}
 
-	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 	@Override
 	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
 		super.decideWhatToDoInCaseOfFailure(task);
