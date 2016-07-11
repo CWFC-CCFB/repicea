@@ -64,4 +64,10 @@ public class DiameterBasedTreeLogCategory extends TreeLogCategory {
 
 	public Enum<?> getGrade() {return logGrade;}
 
+	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 }

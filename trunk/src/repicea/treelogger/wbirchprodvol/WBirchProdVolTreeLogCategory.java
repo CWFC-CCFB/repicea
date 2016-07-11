@@ -52,6 +52,12 @@ public class WBirchProdVolTreeLogCategory extends TreeLogCategory {
 		} 
 		return guiInterface;
 	}
+	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 
 	@Override
 	public double getYieldFromThisPiece(WoodPiece piece) throws Exception {

@@ -91,9 +91,16 @@ public class BasicTreeLoggerParameters extends TreeLoggerParameters<BasicLogCate
 		return guiInterface;
 	}
 	
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
+	
 	public static void main(String[] args) {
 		BasicTreeLoggerParameters params = new BasicTreeLoggerParameters();
 		params.showUI(null);
 	}
 
+	
 }

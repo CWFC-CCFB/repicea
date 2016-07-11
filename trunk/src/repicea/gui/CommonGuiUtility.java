@@ -75,9 +75,9 @@ public class CommonGuiUtility {
 	private static class ErrorMessage implements Runnable {
 
 		private String message;
-		private Container parent;
+		private Component parent;
 		
-		private ErrorMessage(String message, Container parent) {
+		private ErrorMessage(String message, Component parent) {
 			this.message = message;
 			this.parent = parent;
 		}
@@ -99,9 +99,9 @@ public class CommonGuiUtility {
 	private static class WarningMessage implements Runnable {
 
 		private String message;
-		private Container parent;
+		private Component parent;
 		
-		private WarningMessage(String message, Container parent) {
+		private WarningMessage(String message, Component parent) {
 			this.message = message;
 			this.parent = parent;
 		}
@@ -123,9 +123,9 @@ public class CommonGuiUtility {
 	private static class InformationMessage implements Runnable {
 
 		private String message;
-		private Container parent;
+		private Component parent;
 		
-		private InformationMessage(String message, Container parent) {
+		private InformationMessage(String message, Component parent) {
 			this.message = message;
 			this.parent = parent;
 		}
@@ -384,7 +384,7 @@ public class CommonGuiUtility {
 	 * @param message the error message to be displayed
 	 * @param parent the Container instance that is the parent of this error message (can be null)
 	 */
-	public static void showErrorMessage(String message, Container parent) {
+	public static void showErrorMessage(String message, Component parent) {
 		SwingUtilities.invokeLater(new ErrorMessage(message, parent));
 	}
 
@@ -393,7 +393,7 @@ public class CommonGuiUtility {
 	 * @param message the error message to be displayed
 	 * @param parent the Container instance that is the parent of this error message (can be null)
 	 */
-	public static void showInformationMessage(String message, Container parent) {
+	public static void showInformationMessage(String message, Component parent) {
 		SwingUtilities.invokeLater(new InformationMessage(message, parent));
 	}
 
@@ -402,7 +402,7 @@ public class CommonGuiUtility {
 	 * @param message the error message to be displayed
 	 * @param parent the Container instance that is the parent of this error message (can be null)
 	 */
-	public static void showWarningMessage(String message, Container parent) {
+	public static void showWarningMessage(String message, Component parent) {
 		SwingUtilities.invokeLater(new WarningMessage(message, parent));
 	}
 

@@ -32,4 +32,11 @@ public interface REpiceaUIObject {
 	 */
 	public Component getUI(); 
 
+	
+	/**
+	 * This method returns true if the GUI is visible.
+	 * @return a boolean
+	 */
+	public boolean isVisible();
+	
 }

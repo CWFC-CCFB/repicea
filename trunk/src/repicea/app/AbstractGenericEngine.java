@@ -19,7 +19,6 @@
 package repicea.app;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -181,29 +180,25 @@ public abstract class AbstractGenericEngine {
 	 * @param failureReason the exception that was thrown
 	 */
 	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
-		if (this instanceof REpiceaUIObject) {
-			REpiceaUIObject guiObject = (REpiceaUIObject) this;
-			Component component = guiObject.getUI();
-			Container container = null;
-			if (component instanceof Container) {
-				container = (Container) component;
+		String message = null;
+		if (task.hasBeenCancelled()) {
+			message = MessageID.CancelMessage.toString();
+		} else {
+			String taskName = task.getName();
+			Exception failureCause = task.getFailureReason();
+			String errorType = "";
+			if (failureCause != null) {
+				errorType = failureCause.getClass().getSimpleName();
+				failureCause.printStackTrace();
 			}
-			if (container != null && container.isVisible()) {
-				if (task.hasBeenCancelled()) {
-					String message = MessageID.CancelMessage.toString();
-					CommonGuiUtility.showInformationMessage(message, container);
-				} else {
-					String taskName = task.getName();
-					Exception failureCause = task.getFailureReason();
-					String errorType = "";
-					if (failureCause != null) {
-						errorType = failureCause.getClass().getSimpleName();
-						failureCause.printStackTrace();
-					}
-					String message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType;
-					CommonGuiUtility.showErrorMessage(message, container);
-				}
-			}
+			message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType;
+		}
+		
+		if (this instanceof REpiceaUIObject && ((REpiceaUIObject) this).isVisible()) {
+			Component gui = ((REpiceaUIObject) this).getUI();
+			CommonGuiUtility.showInformationMessage(message, gui);
+		} else {
+			System.out.println(message);
 		}
 		queue.clear();
 	}

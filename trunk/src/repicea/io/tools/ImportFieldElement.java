@@ -158,5 +158,10 @@ public final class ImportFieldElement implements Cloneable,
 	 */
 	public FieldType getFieldType() {return fieldTypeClass;}
 
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 	
 }

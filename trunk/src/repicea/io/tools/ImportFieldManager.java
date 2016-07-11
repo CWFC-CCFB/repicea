@@ -456,5 +456,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	@Override
 	public String getFilename() {return ifeFilename;}
 
+	@Override
+	public boolean isVisible() {
+		return guiInterface != null && guiInterface.isVisible();
+	}
+
 
 }

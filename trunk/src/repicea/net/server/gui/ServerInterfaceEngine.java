@@ -25,7 +25,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 import repicea.app.AbstractGenericEngine;
-import repicea.app.GenericTask;
 import repicea.gui.REpiceaShowableUI;
 import repicea.net.SocketWrapper;
 import repicea.net.server.gui.InterfaceTask.InterfaceRelatedTask;
@@ -43,12 +42,6 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements REpi
 		super();
 	}
 	
-
-	@Override
-	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
-		// TODO Auto-generated method stub
-	}
-
 
 	@Override
 	public ServerDialog getUI() {
@@ -94,6 +87,12 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements REpi
 	
 	protected SocketWrapper getSocket() {return socket;}
 	
+
+	@Override
+	public boolean isVisible() {
+		return mainDialog != null && mainDialog.isVisible();
+	}
+
 	@Override
 	public void requestShutdown() {
 		queue.clear();
