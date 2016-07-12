@@ -30,11 +30,14 @@ import repicea.stats.distributions.StandardGaussianDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
 
-@SuppressWarnings("serial")
 public class ModelParameterEstimates extends SASParameterEstimates {
 	
+	private static final long serialVersionUID = 328041437808615842L;
+
 	static class SubjectSkeleton implements MonteCarloSimulationCompliantObject, Serializable {
 
+		private static final long serialVersionUID = -1520554227851705340L;
+		
 		final String subjectId;
 		final HierarchicalLevel level;
 		int monteCarloRealizationId;
@@ -63,6 +66,8 @@ public class ModelParameterEstimates extends SASParameterEstimates {
 	
 	static class SubjectRelatedIndices extends ArrayList<Integer> {
 		
+		private static final long serialVersionUID = -1095826540358010930L;
+
 		final SubjectSkeleton skeleton;
 		
 		SubjectRelatedIndices(SubjectSkeleton skeleton) {

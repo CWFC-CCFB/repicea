@@ -5,20 +5,19 @@ import java.io.Serializable;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 
-@SuppressWarnings("serial")
 public class TruncatedGaussianDistribution extends StandardGaussianDistribution implements BoundedDistribution {
+
+	private static final long serialVersionUID = -8980153249116737564L;
 
 	protected class Bound extends BasicBound implements Serializable {
 		
+		private static final long serialVersionUID = -7435897095155443037L;
+
 		private boolean isCompletelySet;
-		
-//		private Matrix value;
 		
 		private Matrix pdfValue;
 		
 		private Matrix cdfValue;
-		
-//		private final boolean isUpperBound;
 		
 		protected Bound(boolean isUpperBound) {
 			super(isUpperBound);

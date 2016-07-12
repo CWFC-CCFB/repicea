@@ -27,9 +27,9 @@ import repicea.stats.distributions.TruncatedGaussianDistribution;
  * distribution can set through the setLowerBound and setUpperBound methods. 
  * @author Mathieu Fortin - August 2015
  */
-@SuppressWarnings("serial")
 public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistribution> implements BoundedDistribution {
 
+	private static final long serialVersionUID = -1426033536030992926L;
 
 	/**
 	 * Basic constructor with mu set to 0 and sigma2 set to 1.
