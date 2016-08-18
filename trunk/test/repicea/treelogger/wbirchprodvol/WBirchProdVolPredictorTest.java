@@ -24,13 +24,13 @@ public class WBirchProdVolPredictorTest {
 	@SuppressWarnings("unused")
 	@Test
 	public void testFixedEffectPredictions() {
-		List<WBirchProdVolStandImpl> stands = readStands();
+		Map<String, WBirchProdVolStandImpl> stands = readStands();
 		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, false);
 		predictor.isTestPurpose = true;
 		int nbTrees = 0;
 		int nbMatches = 0;
 		int nbMatches2 = 0;
-		for (WBirchProdVolStandImpl stand : stands) {
+		for (WBirchProdVolStandImpl stand : stands.values()) {
 			for (WBirchProdVolTreeImpl tree : stand.getTrees().values()) {
 				Matrix pred = predictor.getLogGradeVolumePredictions(stand, tree);
 				//		Matrix variances = predictor.getVMatrixForThisTree(tree);
@@ -47,8 +47,8 @@ public class WBirchProdVolPredictorTest {
 		System.out.println("Successfully compared " + nbTrees + " trees.");
 	}
 	
-	protected static List<WBirchProdVolStandImpl> readStands() {
-		List<WBirchProdVolStandImpl> standList = new ArrayList<WBirchProdVolStandImpl>();
+	protected static Map<String, WBirchProdVolStandImpl> readStands() {
+//		List<WBirchProdVolStandImpl> standList = new ArrayList<WBirchProdVolStandImpl>();
 		String filename = ObjectUtility.getPackagePath(WBirchProdVolPredictorTest.class) + "pred-simul.csv";
 		Map<String, WBirchProdVolStandImpl> standMap = new HashMap<String, WBirchProdVolStandImpl>();
 		try {
@@ -104,8 +104,9 @@ public class WBirchProdVolPredictorTest {
 					stand.getTrees().put(treeID, tree);
 				}
 			}
-			standList.addAll(standMap.values());
-			return standList;
+//			standList.addAll(standMap.values());
+//			return standList;
+			return standMap;
 		} catch (IOException e) {
 			Assert.fail("Unable to load file " + filename);
 			return null;
@@ -134,10 +135,10 @@ public class WBirchProdVolPredictorTest {
 		stdRef.m_afData[6][0] = 0d;
 	
 		int nbRealizations = 100000;
-		List<WBirchProdVolStandImpl> stands = readStands();
+		Map<String, WBirchProdVolStandImpl> stands = readStands();
 		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, true);
-		WBirchProdVolStand stand = stands.get(0);
-		WBirchProdVolTree tree = ((WBirchProdVolStandImpl) stand).getTrees().values().iterator().next();
+		WBirchProdVolStand stand = stands.get("49");
+		WBirchProdVolTree tree = ((WBirchProdVolStandImpl) stand).getTrees().get(2);
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		Matrix pred;
 		for (int i = 0; i < nbRealizations; i++) {
@@ -157,10 +158,12 @@ public class WBirchProdVolPredictorTest {
 		Assert.assertTrue("Difference in terms of std", !relDiff.anyElementLargerThan(1E-2));
 	}
 
+	
+	// Unchecked since the switch to version Java 8
 	public void testMonteCarloPredictions2() throws IOException {
 		String filePath = ObjectUtility.getPackagePath(getClass()) + "MCSimul.csv";
 		int nbRealizations = 10000;
-		List<WBirchProdVolStandImpl> stands = readStands();
+		Map<String, WBirchProdVolStandImpl> stands = readStands();
 		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(true, true);
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		WBirchProdVolStandImpl stand = stands.get(0);
