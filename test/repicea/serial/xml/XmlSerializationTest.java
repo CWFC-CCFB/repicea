@@ -478,7 +478,8 @@ public class XmlSerializationTest {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void deserializationOfHashMapInJava7() throws FileNotFoundException, XmlMarshallException {
-
+		
+		System.out.println("Java version : " + System.getProperty("java.version"));
 		
 		HashMap<Integer, Map> originalHashMap = new HashMap<Integer, Map>();
 		originalHashMap.put(1, new HashMap<Integer, Double>());
@@ -507,7 +508,6 @@ public class XmlSerializationTest {
 				Assert.assertEquals("Comparing values", innerMap.get(k), serializedInnerMap.get(k), 1E-8);
 			}
 		}
-		
 	}
 	
 	

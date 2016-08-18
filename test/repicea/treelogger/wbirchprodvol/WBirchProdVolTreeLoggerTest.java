@@ -3,7 +3,6 @@ package repicea.treelogger.wbirchprodvol;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -17,12 +16,12 @@ public class WBirchProdVolTreeLoggerTest {
 
 	@Test
 	public void testTreeLoggerWithDeterministicPred() {
-		List<WBirchProdVolStandImpl> stands = WBirchProdVolPredictorTest.readStands();
+		Map<String, WBirchProdVolStandImpl> stands = WBirchProdVolPredictorTest.readStands();
 		WBirchProdVolTreeLogger treeLogger = new WBirchProdVolTreeLogger(false, false);
 		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
 		Collection<WBirchProdVolLoggableTree> trees = new ArrayList<WBirchProdVolLoggableTree>();
 		
-		for (WBirchProdVolStandImpl stand : stands) {
+		for (WBirchProdVolStandImpl stand : stands.values()) {
 			trees.addAll(stand.getTrees().values());
 		}
 		
