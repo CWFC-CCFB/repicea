@@ -93,14 +93,21 @@ public class XmlDeserializer {
 	public Object readObject() throws XmlMarshallException {
 		JAXBContext jaxbContext;
 		try {
-			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
-	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-	 		Object obj;
-	 		if (readMode == ReadMode.File) {
-	 			obj = jaxbUnmarshaller.unmarshal(file);
-	 		} else {
-	 			obj = jaxbUnmarshaller.unmarshal(is);
-	 		}
+//			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
+//	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+//	 		Object obj;
+//	 		if (readMode == ReadMode.File) {
+//	 			obj = jaxbUnmarshaller.unmarshal(file);
+//	 		} else {
+//	 			obj = jaxbUnmarshaller.unmarshal(is);
+//	 		}
+			XmlInternalUnmarshaller um;
+			if (readMode == ReadMode.File) {
+				um = new XmlInternalUnmarshaller(file);
+			} else {
+				um = new XmlInternalUnmarshaller(is);
+			}
+			XmlList obj = um.unmarshall();
 	 		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();
 	 		Object unmarshalledObj = null;
 			unmarshalledObj = unmarshaller.unmarshall((XmlList) obj);
