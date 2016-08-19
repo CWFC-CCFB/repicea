@@ -13,7 +13,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.util.ObjectUtility;
-import repicea.util.REpiceaSystem;
 
 public class XmlSerializationTest {
 	
