@@ -143,9 +143,9 @@ class XmlProcessor {
 		} else if (tag.equals("xs:float")){
 			entry.value = Float.parseFloat(extractContent());
 			tag = extractTag();
-//		} else if (tag.endsWith("Short")) {
-//			entry.value = Integer.parseInt(extractContent());
-//			tag = extractTag();
+		} else if (tag.endsWith("xs:boolean")) {
+			entry.value = Boolean.parseBoolean(extractContent());
+			tag = extractTag();
 		} else if (tag.equals("/list")) {	// value is null
 			return tag;
 		}
