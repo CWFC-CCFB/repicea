@@ -43,12 +43,14 @@ final class XmlEntry {
 	XmlEntry(XmlMarshaller marshaller, String fieldName, Object value) {
 		this.fieldName = fieldName;
 		if (value != null) {
-			if (!value.getClass().isPrimitive() 
-					&& !ReflectUtility.PrimitiveWrappers.contains(value.getClass())) {			// not a primitive
-				if (!value.getClass().equals(String.class)) {		// not a String
-					if (value.getClass().getSuperclass() != null) {	// not a simple Object instance
-						value = marshaller.marshall(value);
-					}
+			if (!value.getClass().isPrimitive() && !ReflectUtility.PrimitiveWrappers.contains(value.getClass())) {			// not a primitive
+//				if (!value.getClass().equals(String.class)) {		// not a String
+//					if (value.getClass().getSuperclass() != null) {	// not a simple Object instance
+//						value = marshaller.marshall(value);
+//					}
+//				}
+				if (!XmlMarshallingUtilities.isStringOrSimpleObject(value)) {
+					value = marshaller.marshall(value);
 				}
 			}
 		}

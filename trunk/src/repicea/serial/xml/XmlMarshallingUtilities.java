@@ -44,6 +44,11 @@ public class XmlMarshallingUtilities {
 		boundedClasses = classes.toArray(new Class[]{});
 	}
 
+		
+	@SuppressWarnings("serial")
+	static final class FakeList extends ArrayList {}
+	
+	
 	/**
 	 * This method drops all the component, static or transient fields. If the mother class is a Collection or
 	 * a Map then the transient fields are allowed.
@@ -157,6 +162,15 @@ public class XmlMarshallingUtilities {
 	 */
 	public static boolean areTheseTwoObjectsComparable(Object obj1, Object obj2) {
 		return new XmlMarshallComparator().compareTheseTwoObjects(obj1, obj2);
+	}
+	
+	/**
+	 * This method returns true if the object is either a String or a simple Object instance
+	 * @param obj the instance to be checked
+	 * @return a boolean
+	 */
+	static boolean isStringOrSimpleObject(Object obj) {
+		return obj.getClass().equals(String.class) || obj.getClass().getSuperclass() == null;
 	}
 	
 }

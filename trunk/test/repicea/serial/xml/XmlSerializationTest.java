@@ -80,8 +80,6 @@ public class XmlSerializationTest {
 			}
 			return false;
 		}
-
-		
 	}
 
 
@@ -160,6 +158,58 @@ public class XmlSerializationTest {
 			list = new ArrayList<String>();
 		}
 	}
+	
+	@Test
+	public void serializationOfProblematicCharacters() throws FileNotFoundException, XmlMarshallException {
+		String[] problematicCharacters = new String[5];
+		problematicCharacters[0] = "<";
+		problematicCharacters[1] = ">";
+		problematicCharacters[2] = "&";
+		problematicCharacters[3] = "'";
+		problematicCharacters[4] = "\"";
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(problematicCharacters);
+
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		Object copy = deserializer.readObject();
+		String[] copyArray = (String[]) copy;
+	
+		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters[0], copyArray[0]);
+		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters[1], copyArray[1]);
+		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters[2], copyArray[2]);
+		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters[3], copyArray[3]);
+		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters[4], copyArray[4]);
+	}
+	
+	@Test
+	public void serializationOfProblematicCharacters2() throws FileNotFoundException, XmlMarshallException {
+		String problematicCharacters = "<>>>&1DEZF3&D";
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(problematicCharacters);
+
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		Object copy = deserializer.readObject();
+		String copyString = (String) copy;
+	
+		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters, copyString);
+	}
+
+	@Test
+	public void serializationOfSimpleObject() throws FileNotFoundException, XmlMarshallException {
+		Object simpleObject = new Object();
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(simpleObject);
+
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		Object copy = deserializer.readObject();
+	
+		Assert.assertEquals("Is the copy equal to the original?", simpleObject, copy);
+	}
+
 	
 	@Test
 	public void serializationDeserializationOfAnSimpleObject() throws FileNotFoundException, XmlMarshallException {
