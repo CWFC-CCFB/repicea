@@ -197,22 +197,10 @@ public class XmlSerializationTest {
 		Assert.assertEquals("Is the copy equal to the original?", problematicCharacters, copyString);
 	}
 
-	@Test
-	public void serializationOfSimpleObject() throws FileNotFoundException, XmlMarshallException {
-		Object simpleObject = new Object();
-		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
-		XmlSerializer serializer = new XmlSerializer(pathname);
-		serializer.writeObject(simpleObject);
-
-		XmlDeserializer deserializer = new XmlDeserializer(pathname);
-		Object copy = deserializer.readObject();
-	
-		Assert.assertEquals("Is the copy equal to the original?", simpleObject, copy);
-	}
 
 	
 	@Test
-	public void serializationDeserializationOfAnSimpleObject() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfASimpleObject() throws FileNotFoundException, XmlMarshallException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClass ah = new FakeClass(arguments);
