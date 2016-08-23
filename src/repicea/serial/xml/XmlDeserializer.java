@@ -22,6 +22,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Unmarshaller;
+
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
 import repicea.util.REpiceaSystem;
 
@@ -80,23 +83,23 @@ public class XmlDeserializer {
 	 * @throws XmlMarshallException 
 	 */
 	public Object readObject() throws XmlMarshallException {
-//		JAXBContext jaxbContext;
+		JAXBContext jaxbContext;
 		try {
-//			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
-//	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-//	 		Object obj;
-//	 		if (readMode == ReadMode.File) {
-//	 			obj = jaxbUnmarshaller.unmarshal(file);
-//	 		} else {
-//	 			obj = jaxbUnmarshaller.unmarshal(is);
-//	 		}
-			XmlProcessor um;
-			if (readMode == ReadMode.File) {
-				um = new XmlProcessor(file);
-			} else {
-				um = new XmlProcessor(is);
-			}
-			XmlList obj = um.unmarshall();
+			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
+	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+	 		Object obj;
+	 		if (readMode == ReadMode.File) {
+	 			obj = jaxbUnmarshaller.unmarshal(file);
+	 		} else {
+	 			obj = jaxbUnmarshaller.unmarshal(is);
+	 		}
+//			XmlProcessor um;
+//			if (readMode == ReadMode.File) {
+//				um = new XmlProcessor(file);
+//			} else {
+//				um = new XmlProcessor(is);
+//			}
+//			XmlList obj = um.unmarshall();
 	 		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();
 	 		Object unmarshalledObj = null;
 			unmarshalledObj = unmarshaller.unmarshall((XmlList) obj);
