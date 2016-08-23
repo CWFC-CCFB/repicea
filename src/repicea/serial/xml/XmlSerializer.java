@@ -24,6 +24,8 @@ import java.io.FileNotFoundException;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
+import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
+
 /**
  * The XMLSerializer class handles the serialization process for any Object. The
  * OutputStream instances are also handled by this class.
@@ -51,9 +53,15 @@ public class XmlSerializer {
 	 * @param obj any Object instance
 	 * @throws XmlMarshallException 
 	 */
+	@SuppressWarnings("unchecked")
 	public void writeObject(Object obj) throws XmlMarshallException {
 		try {
 			XmlMarshaller marshaller = new XmlMarshaller();
+			if (XmlMarshallingUtilities.isStringOrSimpleObject(obj)) { // then we embed the object into a wrapper
+				FakeList wrapper = new FakeList();
+				wrapper.add(obj);
+				obj = wrapper;
+			}
 			Object xmlObject = marshaller.marshall(obj);
 			JAXBContext jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
 			Marshaller jabxMarshaller = jaxbContext.createMarshaller();

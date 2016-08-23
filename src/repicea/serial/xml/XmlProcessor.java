@@ -5,22 +5,32 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Vector;
 
-class XmlInternalUnmarshaller {
+class XmlProcessor {
 
-
+	private static final Map<String, String> ProblematicCharacters = new HashMap<String, String>();
+	static {
+		ProblematicCharacters.put("&lt;", "<");
+		ProblematicCharacters.put("&gt;", ">");
+		ProblematicCharacters.put("&amp;", "&");
+		ProblematicCharacters.put("&apos;", "'");
+		ProblematicCharacters.put("&quot;", "\"");
+	}
+	
 	private static enum Type {Opening, Closing, Header, END_OF_MARKERS}
 	private Vector<Object> openedInstances;
 
 	final InputStream is;
 	String str;
 
-	XmlInternalUnmarshaller(File file) throws FileNotFoundException {
+	XmlProcessor(File file) throws FileNotFoundException {
 		this(new FileInputStream(file)); 
 	}
 
-	XmlInternalUnmarshaller(InputStream is) {
+	XmlProcessor(InputStream is) {
 		this.is = is;
 		openedInstances = new Vector<Object>();
 	}
@@ -44,8 +54,8 @@ class XmlInternalUnmarshaller {
 	private XmlList createXmlList(String str) throws XmlMarshallException {
 		String marker;
 		do {
-			marker = extractMarker();
-		} while (getMarkerType(marker) != Type.Opening);
+			marker = extractTag();
+		} while (getTagType(marker) != Type.Opening);
 
 		if (!marker.equals("xmlList")) {	
 			throw new XmlMarshallException("Unable to properly read the file!");
@@ -58,13 +68,13 @@ class XmlInternalUnmarshaller {
 	}
 
 	String fillList(XmlList xmlList) throws XmlMarshallException {
-		String marker = extractMarker();
-		while (getMarkerType(marker) == Type.Opening) {
-			marker = processOpeningMarker(marker, xmlList);
+		String marker = extractTag();
+		while (getTagType(marker) == Type.Opening) {
+			marker = processStartTag(marker, xmlList);
 			if (marker.equals("/value")) {
 				return marker;
 			}
-			marker = extractMarker();
+			marker = extractTag();
 			if (marker.equals(Type.END_OF_MARKERS.name())) {
 				if (!openedInstances.isEmpty()) {
 					throw new XmlMarshallException("There are still some opened instances!");
@@ -79,95 +89,98 @@ class XmlInternalUnmarshaller {
 		return marker;
 	}
 
-	private String processOpeningMarker(String marker, XmlList xmlList) throws XmlMarshallException {
-		String value = extractValue();
-		if (marker.equals("className")) {
+	private String processStartTag(String markup, XmlList xmlList) throws XmlMarshallException {
+		String value = extractContent();
+		if (markup.equals("className")) {
 			xmlList.className = value;
-			return extractMarker();
-		} else if (marker.equals("refHashCode")) {
+			return extractTag();
+		} else if (markup.equals("refHashCode")) {
 			xmlList.refHashCode = Integer.parseInt(value);
-			return extractMarker();
-		} else if (marker.equals("isArray")) {
+			return extractTag();
+		} else if (markup.equals("isArray")) {
 			xmlList.isArray = Boolean.parseBoolean(value);
-			return extractMarker();
-		} else if (marker.equals("isPrimitive")) {
+			return extractTag();
+		} else if (markup.equals("isPrimitive")) {
 			xmlList.isPrimitive = Boolean.parseBoolean(value);
-			return extractMarker();
-		} else if (marker.equals("list")) {
+			return extractTag();
+		} else if (markup.equals("list")) {
 			do {
-				marker = addEntryToInternalList(xmlList, marker);
-				if (!marker.equals("/list")) {
+				markup = addEntryToInternalList(xmlList, markup);
+				if (!markup.equals("/list")) {
 					throw new XmlMarshallException("Not closing entry!");
 				}
-				marker = extractMarker();
-			} while (marker.equals("list"));
-			return marker;
+				markup = extractTag();
+			} while (markup.equals("list"));
+			return markup;
 		}
 		return null;
 	}
 
-	private String addEntryToInternalList(XmlList xmlList, String marker) throws XmlMarshallException {
+	private String addEntryToInternalList(XmlList xmlList, String tag) throws XmlMarshallException {
 		XmlEntry entry = new XmlEntry();
 		xmlList.list.add(entry);
-		marker = extractMarker();
-		if (marker.equals("fieldName")) {
-			entry.fieldName = extractValue();
-			if (getMarkerType(extractMarker()) != Type.Closing) {
+		tag = extractTag();
+		if (tag.equals("fieldName")) {
+			entry.fieldName = extractContent();
+			if (getTagType(extractTag()) != Type.Closing) {
 				throw new XmlMarshallException("Unable to properly read the file!");
 			}
 		}
-		marker = extractMarker();
-		if (marker.equals("xmlList")) {
+		tag = extractTag();
+		if (tag.equals("xmlList")) {
 			XmlList subXmlList = new XmlList();
 			entry.value = subXmlList; 
-			marker = fillList(subXmlList);
-		} else if (marker.equals("xs:int")) {
-			entry.value = Integer.parseInt(extractValue());
-			marker = extractMarker();
-		} else if (marker.equals("xs:double")){
-			entry.value = Double.parseDouble(extractValue());
-			marker = extractMarker();
-		} else if (marker.equals("xs:string")){
-			entry.value = extractValue();
-			marker = extractMarker();
-		} else if (marker.equals("xs:float")){
-			entry.value = Float.parseFloat(extractValue());
-			marker = extractMarker();
-		} else if (marker.equals("/list")) {	// value is null
-			return marker;
+			tag = fillList(subXmlList);
+		} else if (tag.equals("xs:int")) {
+			entry.value = Integer.parseInt(extractContent());
+			tag = extractTag();
+		} else if (tag.equals("xs:double")){
+			entry.value = Double.parseDouble(extractContent());
+			tag = extractTag();
+		} else if (tag.equals("xs:string")){
+			entry.value = extractContent();
+			tag = extractTag();
+		} else if (tag.equals("xs:float")){
+			entry.value = Float.parseFloat(extractContent());
+			tag = extractTag();
+//		} else if (tag.endsWith("Short")) {
+//			entry.value = Integer.parseInt(extractContent());
+//			tag = extractTag();
+		} else if (tag.equals("/list")) {	// value is null
+			return tag;
 		}
 		//			//			marker = extractMarker();
-		if (!marker.equals("/value")) {
+		if (!tag.equals("/value")) {
 			throw new XmlMarshallException("Not closing value!");
 		}
-		marker = extractMarker();
-		return marker;
+		tag = extractTag();
+		return tag;
 	}
 
-	private String extractMarker() {
-		String marker;
+	private String extractTag() {
+		String tag;
 		int pointerStart = str.indexOf("<");
 		int pointerEnd = str.indexOf(">");
 		if (pointerStart == -1) {
 			return Type.END_OF_MARKERS.name();
 		}
-		marker = str.substring(pointerStart + 1, pointerEnd);
+		tag = str.substring(pointerStart + 1, pointerEnd);
 		str = str.substring(pointerEnd + 1);
-		if (marker.startsWith("/")) {	// closing
-			openedInstances.remove(marker.substring(1));
-		} else if (!marker.startsWith("?")) {	// opening
-			if (marker.startsWith("value")) {
+		if (tag.startsWith("/")) {	// closing
+			openedInstances.remove(tag.substring(1));
+		} else if (!tag.startsWith("?")) {	// opening
+			if (tag.startsWith("value")) {
 				openedInstances.insertElementAt("value", 0);
-				marker = marker.substring(marker.indexOf("xsi:type=") + 10);
-				marker = marker.substring(0, marker.indexOf("\""));
+				tag = tag.substring(tag.indexOf("xsi:type=") + 10);
+				tag = tag.substring(0, tag.indexOf("\""));
 			} else {
-				openedInstances.insertElementAt(marker, 0);
+				openedInstances.insertElementAt(tag, 0);
 			}
 		}
-		return marker;
+		return tag;
 	}
 
-	private String extractValue() {
+	private String extractContent() {
 		String value;
 		int pointerEnd = str.indexOf("<");
 		if (pointerEnd == 0) {
@@ -175,11 +188,14 @@ class XmlInternalUnmarshaller {
 		} else {
 			value = str.substring(0, pointerEnd);
 			str = str.substring(pointerEnd);
+			for (String pc : ProblematicCharacters.keySet()) {
+				value = value.replaceAll(pc, ProblematicCharacters.get(pc));
+			}
 			return value;
 		}
 	}
 
-	private Type getMarkerType(String marker) {
+	private Type getTagType(String marker) {
 		if (marker.startsWith("/")) {	// closing
 			return Type.Closing;
 		} else if (marker.startsWith("?")) { // header
