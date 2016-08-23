@@ -23,7 +23,7 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
-import repicea.util.ObjectUtility;
+import repicea.util.REpiceaSystem;
 
 /**
  * The XMLDeserializer class handles the deserialisation from a XML file. See
@@ -33,16 +33,7 @@ import repicea.util.ObjectUtility;
 public class XmlDeserializer { 
 
 	static {
-		String jvmVersion = ObjectUtility.getJVMVersion();
-		String[] splittedDigits = jvmVersion.split("\\.");
-		int firstDigit = Integer.parseInt(splittedDigits[0]);
-		int secondDigit = Integer.parseInt(splittedDigits[1]);
-		@SuppressWarnings("unused")
-		int thirdDigit = 0;
-		if (splittedDigits.length > 2) {
-			thirdDigit = Integer.parseInt(splittedDigits[2]);
-		}
-		if (firstDigit > 1 || secondDigit > 7) {
+		if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.7")) {
 			XmlSerializerChangeMonitor.registerClassNameChange("java.util.HashMap$Entry", "java.util.AbstractMap$SimpleEntry");
 		}
 	}
