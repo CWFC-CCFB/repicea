@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.lang.reflect.ReflectUtility;
+import repicea.util.REpiceaSystem;
 
 /**
  * The XmlMarshallingUtilities class provides static methods for marshalling and unmarshalling.
@@ -171,6 +172,17 @@ public class XmlMarshallingUtilities {
 	 */
 	static boolean isStringOrSimpleObject(Object obj) {
 		return obj.getClass().equals(String.class) || obj.getClass().getSuperclass() == null;
+	}
+	
+	static XmlList getNextEntryFromJava7MapEntry(XmlList list) {
+		if (list.className.equals("java.util.HashMap$Entry") && REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.7")) {
+			for (XmlEntry entry : list.list) {
+				if (entry.fieldName.equals("next") && entry.value instanceof XmlList) {
+					return (XmlList) entry.value;
+				}
+			}
+		} 
+		return null;
 	}
 	
 }

@@ -80,6 +80,58 @@ public class REpiceaSystem {
 		setLanguageFromMain(args, null);
 	}
 
+	/**
+	 * This method returns the three digits of the JVM version
+	 * @return a 1x3 array of integers
+	 */
+	public static int[] getJVMVersion() {
+		String jvmVersion = ObjectUtility.getJVMVersion();
+		return parseJVMVersion(jvmVersion);
+	}
+
+	private static int[] parseJVMVersion(String jvmVersion) {
+		int[] version = new int[3];
+		String[] splittedDigits = jvmVersion.split("\\.");
+		version[0] = Integer.parseInt(splittedDigits[0]);
+		version[1] = Integer.parseInt(splittedDigits[1]);
+		version[2] = 0;
+		if (splittedDigits.length > 2) {
+			version[2] = Integer.parseInt(splittedDigits[2]);
+		}
+		return version;
+	}
+	
+	/**
+	 * This method returns true if the current version of the JVM is more recent than the parameter targetJVM
+	 * @param targetJVM a String
+	 * @param upToThirdDigit a boolean true to test up to the third digit
+	 * @return a boolean
+	 */
+	public static boolean isCurrentJVMGreaterThanThisVersion(String targetJVM, boolean upToThirdDigit) {
+		int[] currentVersion = getJVMVersion();
+		int[] targetVersion = parseJVMVersion(targetJVM);
+		if (currentVersion[0] > targetVersion[0]) {
+			return true;
+		} else if (currentVersion[1] > targetVersion[1]) {
+			return true;
+		} else if (upToThirdDigit && currentVersion[2] > targetVersion[2]) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/**
+	 * This method returns true if the current version of the JVM is more recent than the parameter targetJVM. The 
+	 * test is carried out on the first and second digit only. For instance, versions 1.7.12 and 1.7.17 would be equally
+	 * recent.
+	 * @param targetJVM a String
+	 * @return a boolean
+	 */
+	public static boolean isCurrentJVMGreaterThanThisVersion(String targetJVM) {
+		return isCurrentJVMGreaterThanThisVersion(targetJVM, false);
+	}
+
 //	public static void main(String[] args) {
 //		String[] argTest = "repicea-console.jar -l cd".split(" ");
 //			REpiceaSystem.setLanguageFromMain(argTest);
