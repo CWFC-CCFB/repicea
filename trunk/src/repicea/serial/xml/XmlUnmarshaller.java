@@ -80,8 +80,9 @@ class XmlUnmarshaller {
 							mapEntriesPossiblyLost.remove(obj);
 						}
 						list.add(obj);
-						XmlList nextXmlListForCompatibility = XmlMarshallingUtilities.getNextEntryFromJava7MapEntry(xmlListvalue);	// patch for the change in Map$Entry in Java 8
-						if (nextXmlListForCompatibility != null) {
+						
+						XmlList nextXmlListForCompatibility = xmlListvalue;
+						while ((nextXmlListForCompatibility = XmlMarshallingUtilities.getNextEntryFromJava7MapEntry(nextXmlListForCompatibility)) != null) {	// patch for the change in Map$Entry in Java 8
 							mapEntriesPossiblyLost.add(unmarshall(nextXmlListForCompatibility)); // instantiate the instance in the former next member, otherwise it is lost
 						}
 					} else {
