@@ -71,7 +71,7 @@ class XmlUnmarshaller {
 		} else {
 			if (xmlList.isArray) {											// array case
 				List<Object> list = new ArrayList<Object>();
-//				List<Object> buffer = new ArrayList<Object>();
+				List<Object> entriesPossiblyLost = new ArrayList<Object>();
 				for (XmlEntry entry : xmlList.getEntries()) {
 					if (entry.value != null && entry.value instanceof XmlList) {
 						XmlList xmlListvalue = (XmlList) entry.value;
@@ -79,8 +79,7 @@ class XmlUnmarshaller {
 						list.add(obj);
 						XmlList nextXmlListForCompatibility = XmlMarshallingUtilities.getNextEntryFromJava7MapEntry(xmlListvalue);	// patch for the change in Map$Entry in Java 8
 						if (nextXmlListForCompatibility != null) {
-//							buffer.add(unmarshall(nextXmlListForCompatibility));
-							unmarshall(nextXmlListForCompatibility);		// instantiate the instance in the former next member, otherwise it is lost
+							entriesPossiblyLost.add(unmarshall(nextXmlListForCompatibility)); // instantiate the instance in the former next member, otherwise it is lost
 						}
 					} else {
 						list.add(entry.value);
