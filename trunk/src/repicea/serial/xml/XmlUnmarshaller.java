@@ -71,21 +71,28 @@ class XmlUnmarshaller {
 		} else {
 			if (xmlList.isArray) {											// array case
 				List<Object> list = new ArrayList<Object>();
-				List<Object> entriesPossiblyLost = new ArrayList<Object>();
+				List<Object> mapEntriesPossiblyLost = new ArrayList<Object>();
 				for (XmlEntry entry : xmlList.getEntries()) {
 					if (entry.value != null && entry.value instanceof XmlList) {
 						XmlList xmlListvalue = (XmlList) entry.value;
 						Object obj = unmarshall(xmlListvalue); 
+						if (mapEntriesPossiblyLost.contains(obj)) {
+							mapEntriesPossiblyLost.remove(obj);
+						}
 						list.add(obj);
 						XmlList nextXmlListForCompatibility = XmlMarshallingUtilities.getNextEntryFromJava7MapEntry(xmlListvalue);	// patch for the change in Map$Entry in Java 8
 						if (nextXmlListForCompatibility != null) {
-							entriesPossiblyLost.add(unmarshall(nextXmlListForCompatibility)); // instantiate the instance in the former next member, otherwise it is lost
+							mapEntriesPossiblyLost.add(unmarshall(nextXmlListForCompatibility)); // instantiate the instance in the former next member, otherwise it is lost
 						}
 					} else {
 						list.add(entry.value);
 					}
 				}
 
+				if (!mapEntriesPossiblyLost.isEmpty()) {
+					list.addAll(mapEntriesPossiblyLost);
+				}
+				
 				Object arrayObject = Array.newInstance(clazz, list.size());
 				for (int i = 0; i < list.size(); i++) {
 					Array.set(arrayObject, i, list.get(i));
