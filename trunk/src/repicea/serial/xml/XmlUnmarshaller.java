@@ -89,7 +89,7 @@ class XmlUnmarshaller {
 					}
 				}
 
-				if (!mapEntriesPossiblyLost.isEmpty()) {
+				if (!mapEntriesPossiblyLost.isEmpty()) {		// we add the entries that were in the next member and possibly forgotten in the map since version 8 does not include the next member anymore
 					list.addAll(mapEntriesPossiblyLost);
 				}
 				
