@@ -50,11 +50,11 @@ import repicea.util.ExtendedFileFilter;
 /**
  * The TreeLoggerParameters contains the basic features for defining the
  * parameters of a treelogger.
- * @param <LogCategory> a TreeLogCategory-derived class
+ * @param <LC> a TreeLogCategory-derived class
  * @author M. Fortin - August 2010
  */
 @SuppressWarnings("serial")
-public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	implements Memorizable, 
+public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Memorizable, 
 																						IOUserInterfaceableObject, 
 																						Serializable, 
 																						REpiceaShowableUIWithParent, 
@@ -89,7 +89,7 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 
 	protected transient TreeLogger<?,?> treeLogger;		// MF20140207 changed to transient to avoid serializing when users save the parameters
 	private String treeLoggerClass;
-	private final Map<String, List<LogCategory>> selectedLogCategories;
+	private final Map<String, List<LC>> selectedLogCategories;
 	private transient boolean isParameterDialogCanceled;
 	private String filename;
 	private transient REpiceaGUIPermission readWrite = new DefaultREpiceaGUIPermission(true);
@@ -100,7 +100,7 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 	protected TreeLoggerParameters(Class<? extends TreeLogger<?,?>> treeLoggerClass) {
 		this.treeLoggerClass = treeLoggerClass.getName();
 		isParameterDialogCanceled = false; // default value
-		selectedLogCategories = new TreeMap<String, List<LogCategory>>();
+		selectedLogCategories = new TreeMap<String, List<LC>>();
 		setFilename("");
 	}
 
@@ -112,16 +112,16 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 	protected abstract void initializeDefaultLogCategories();
 
 	/**
-	 * This method returns a specific TreeLogCategory object among the selected
+	 * This method returns a specific LogCategory object among the selected
 	 * tree log categories contained in this class.
 	 * @param speciesName a String that represents the species name
 	 * @param name the name of the tree log category
 	 * @return a TreeLogCategory-derived instance or null if it cannot be found
 	 */
-	public LogCategory getLogCategory(String speciesName, String name) {
-		List<LogCategory> logCategoryList = getSpeciesLogCategories(speciesName);
+	public LC getLogCategory(String speciesName, String name) {
+		List<LC> logCategoryList = getSpeciesLogCategories(speciesName);
 		if (logCategoryList != null) {
-			for (LogCategory logCategory : logCategoryList) {
+			for (LC logCategory : logCategoryList) {
 				if (logCategory.getName().equals(name)) {
 					return logCategory;
 				}
@@ -148,8 +148,8 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 	 */
 	public List<String> getLogCategoryNames() {
 		List<String> outputList = new ArrayList<String>();
-		for (List<LogCategory> list : getLogCategories().values()) {
-			for (LogCategory logCategory : list) {
+		for (List<LC> list : getLogCategories().values()) {
+			for (LC logCategory : list) {
 				if (!outputList.contains(logCategory.getName())) {
 					outputList.add(logCategory.getName());
 				}
@@ -159,21 +159,21 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 	}
 	
 	/**
-	 * This method returns the List of TreeLogCategory-derived object for a
+	 * This method returns the List of LogCategory-derived object for a
 	 * particular species.
 	 * @param speciesName a String that represents the species name
 	 * @return a List of TreeLogCategory-derived instances or null if the species was not found
 	 */
-	public List<LogCategory> getSpeciesLogCategories(String speciesName) {
+	public List<LC> getSpeciesLogCategories(String speciesName) {
 		return getLogCategories().get(speciesName);
 	}
 
 	/**
 	 * This method returns a Map instance with the species names as key and the
-	 * corresponding List of TreeLogCategory-derived instances as values.
+	 * corresponding List of LogCategory-derived instances as values.
 	 * @return a Map instance
 	 */
-	public Map<String, List<LogCategory>> getLogCategories() {
+	public Map<String, List<LC>> getLogCategories() {
 		return selectedLogCategories;
 	}
 	
@@ -181,9 +181,9 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 	 * This method returns a list of all the LogCategory instances.
 	 * @return a List of LogCategory instances
 	 */
-	public List<LogCategory> getLogCategoryList() {
-		List<LogCategory> outputList = new ArrayList<LogCategory>();
-		for (List<LogCategory> list : getLogCategories().values()) {
+	public List<LC> getLogCategoryList() {
+		List<LC> outputList = new ArrayList<LC>();
+		for (List<LC> list : getLogCategories().values()) {
 			outputList.addAll(list);
 		}
 		return outputList;
@@ -290,7 +290,7 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 		if (obj == null || !(obj instanceof TreeLoggerParameters)) {
 			return false;
 		} else {
-	 		TreeLoggerParameters<LogCategory> refParams = (TreeLoggerParameters<LogCategory>) obj;
+	 		TreeLoggerParameters<LC> refParams = (TreeLoggerParameters<LC>) obj;
 	 		if (!refParams.getClass().equals(getClass())) {
 	 			return false;
 	 		}
@@ -302,10 +302,10 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 				return false;
 			}
 
-			List<LogCategory> refList;
-			List<LogCategory> thisList;
-			LogCategory refLogCategory;
-			LogCategory thisLogCategory;
+			List<LC> refList;
+			List<LC> thisList;
+			LC refLogCategory;
+			LC thisLogCategory;
 			for (String species : refParams.getLogCategories().keySet()) {
 				refList = refParams.getSpeciesLogCategories(species);
 				thisList = getSpeciesLogCategories(species);
@@ -381,7 +381,7 @@ public abstract class TreeLoggerParameters<LogCategory extends TreeLogCategory>	
 	@Override
 	public void postUnmarshallingAction() {
 		for (String species : selectedLogCategories.keySet()) {
-			for (LogCategory logCategory : selectedLogCategories.get(species)) {
+			for (LC logCategory : selectedLogCategories.get(species)) {
 				logCategory.setSpecies(species);
 			}
 		}

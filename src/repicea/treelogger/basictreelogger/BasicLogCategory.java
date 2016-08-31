@@ -19,8 +19,8 @@
 package repicea.treelogger.basictreelogger;
 
 
-import repicea.simulation.treelogger.TreeLogCategory;
-import repicea.simulation.treelogger.TreeLogCategoryPanel;
+import repicea.simulation.treelogger.LogCategory;
+import repicea.simulation.treelogger.LogCategoryPanel;
 import repicea.simulation.treelogger.WoodPiece;
 
 /**
@@ -29,9 +29,9 @@ import repicea.simulation.treelogger.WoodPiece;
  * @author Mathieu Fortin - February 2013
  */
 @SuppressWarnings("serial")
-public class BasicLogCategory extends TreeLogCategory {
+public class BasicLogCategory extends LogCategory {
 
-	static class CarbonAccountingToolDefaultLogCategoryPanel extends TreeLogCategoryPanel<BasicLogCategory> {
+	static class CarbonAccountingToolDefaultLogCategoryPanel extends LogCategoryPanel<BasicLogCategory> {
 		private CarbonAccountingToolDefaultLogCategoryPanel(BasicLogCategory logCategory) {
 			super(logCategory);
 		}

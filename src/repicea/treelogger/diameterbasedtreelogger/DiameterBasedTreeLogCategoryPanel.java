@@ -32,11 +32,11 @@ import javax.swing.SwingConstants;
 import javax.swing.border.EtchedBorder;
 
 import repicea.gui.UIControlManager;
-import repicea.simulation.treelogger.TreeLogCategoryPanel;
+import repicea.simulation.treelogger.LogCategoryPanel;
 import repicea.util.REpiceaTranslator;
 
 @SuppressWarnings("serial")
-public class DiameterBasedTreeLogCategoryPanel extends TreeLogCategoryPanel<DiameterBasedTreeLogCategory> {
+public class DiameterBasedTreeLogCategoryPanel extends LogCategoryPanel<DiameterBasedTreeLogCategory> {
 	
 	protected DiameterBasedTreeLogCategoryPanel(DiameterBasedTreeLogCategory logCategory) {
 		super(logCategory);

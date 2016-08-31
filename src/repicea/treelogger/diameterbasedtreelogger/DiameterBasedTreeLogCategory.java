@@ -18,11 +18,11 @@
  */
 package repicea.treelogger.diameterbasedtreelogger;
 
-import repicea.simulation.treelogger.TreeLogCategory;
+import repicea.simulation.treelogger.LogCategory;
 import repicea.simulation.treelogger.WoodPiece;
 
 @SuppressWarnings("serial")
-public class DiameterBasedTreeLogCategory extends TreeLogCategory {
+public class DiameterBasedTreeLogCategory extends LogCategory {
 	
 	protected final Double smallEndDiameter;
 	

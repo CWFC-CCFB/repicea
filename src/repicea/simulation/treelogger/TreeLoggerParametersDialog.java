@@ -73,7 +73,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @param <P> a TreeLogCategory-extended class
  */
 @SuppressWarnings("serial")
-public abstract class TreeLoggerParametersDialog<P extends TreeLogCategory> 
+public abstract class TreeLoggerParametersDialog<P extends LogCategory> 
 				extends REpiceaDialog implements ListSelectionListener, 
 												ActionListener,
 												OwnedWindow,
@@ -569,7 +569,7 @@ public abstract class TreeLoggerParametersDialog<P extends TreeLogCategory>
 	private void logGradeAddAction() {
 		String speciesName = (String) speciesList.getSelectedValue();
 		List<P> logGrades = params.getLogCategories().get(speciesName);
-		Class<? extends TreeLogCategory> clazz = (Class<? extends TreeLogCategory>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
+		Class<? extends LogCategory> clazz = (Class<? extends LogCategory>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 		try {
 			P newGrade = (P) clazz.newInstance();
 			newGrade.setSpecies(speciesName);
@@ -602,7 +602,7 @@ public abstract class TreeLoggerParametersDialog<P extends TreeLogCategory>
 	private void speciesAddAction() {
 		String species = (String) speciesList.getSelectedValue();
 		List<P> logGrades = params.getLogCategories().get(species);
-		Class<? extends TreeLogCategory> clazz = logGrades.get(0).getClass();
+		Class<? extends LogCategory> clazz = logGrades.get(0).getClass();
 		String newSpecies;
 		boolean valid = false;
 		do {

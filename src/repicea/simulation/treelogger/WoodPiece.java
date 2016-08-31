@@ -47,7 +47,7 @@ public abstract class WoodPiece implements Serializable {
 	private int rank = -1;
 	private boolean withBark;
 	private boolean withPith;
-	private TreeLogCategory logCategory;
+	private LogCategory logCategory;
 	private Map<Property, Double> properties;	
 
 	/**
@@ -56,7 +56,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @param logCategory a TreeLogCategory instance
 	 * @param tree a LoggableTree instance
 	 */
-	protected WoodPiece(TreeLogCategory logCategory, LoggableTree tree) {
+	protected WoodPiece(LogCategory logCategory, LoggableTree tree) {
 		this.logCategory = logCategory;
 		this.tree = tree;
 		properties = new HashMap<Property, Double>();
@@ -70,7 +70,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @param id an Integer that represents the id of this piece
 	 * @param tree a LoggableTree instance
 	 */
-	protected WoodPiece(TreeLogCategory logCategory, int id, LoggableTree tree) {
+	protected WoodPiece(LogCategory logCategory, int id, LoggableTree tree) {
 		this(logCategory, tree);
 		this.id = id;
 	}
@@ -84,7 +84,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @param tree a LoggableTree instance
 	 * @param rank an Integer that is the rank of this log in the tree from the stump to the top
 	 */
-	protected WoodPiece(TreeLogCategory logCategory, int id, LoggableTree tree, int rank) {
+	protected WoodPiece(LogCategory logCategory, int id, LoggableTree tree, int rank) {
 		this(logCategory, id, tree);
 		this.rank = rank;
 	}
@@ -100,7 +100,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @param withBark a boolean that indicates whether or not the piece was calculated with bark
 	 * @param withPith a boolean that indicates whether or not the piece was calculated with pith
 	 */
-	protected WoodPiece(TreeLogCategory logCategory, int id, LoggableTree tree, int rank, boolean withBark, boolean withPith) {
+	protected WoodPiece(LogCategory logCategory, int id, LoggableTree tree, int rank, boolean withBark, boolean withPith) {
 		this(logCategory, id, tree, rank);
 		this.withBark = withBark;
 		this.withPith = withPith;
@@ -168,7 +168,7 @@ public abstract class WoodPiece implements Serializable {
 	 * This method returns the tree log category associated to this piece.
 	 * @return a TreeLogCategory instance
 	 */
-	public TreeLogCategory getLogCategory() {return logCategory;}
+	public LogCategory getLogCategory() {return logCategory;}
 	
 	
 	
