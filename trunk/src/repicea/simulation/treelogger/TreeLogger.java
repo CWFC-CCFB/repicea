@@ -58,7 +58,7 @@ import repicea.gui.genericwindows.REpiceaProgressBarDialog;
  * @param <Parameter> the class that defines the parameters of this tree logger. It must be a TreeLoggerParameters instance.
  * @author Mathieu Fortin - April 2010
  */
-public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extends TreeLogCategory>, Tree extends LoggableTree> implements GenericTask {
+public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extends LogCategory>, Tree extends LoggableTree> implements GenericTask {
 	
 	
 	@Deprecated

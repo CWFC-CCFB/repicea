@@ -34,12 +34,12 @@ import javax.swing.border.EtchedBorder;
 import repicea.gui.components.NumberFormatFieldFactory;
 import repicea.gui.components.NumberFormatFieldFactory.Range;
 import repicea.gui.components.NumberFormatFieldFactory.Type;
-import repicea.simulation.treelogger.TreeLogCategoryPanel;
+import repicea.simulation.treelogger.LogCategoryPanel;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
-class WBirchProdVolTreeLogCategoryPanel extends TreeLogCategoryPanel<WBirchProdVolTreeLogCategory> {
+class WBirchProdVolTreeLogCategoryPanel extends LogCategoryPanel<WBirchProdVolTreeLogCategory> {
 
 	protected static enum MessageID implements TextableEnum {
 		MaximumDecayDiameter("Maximum decay diameter (cm)", "Diam\u00E8tre maximum de carie (cm)"),
@@ -118,7 +118,7 @@ class WBirchProdVolTreeLogCategoryPanel extends TreeLogCategoryPanel<WBirchProdV
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		logCategoryNamePanel.add(horizontalStrut);
 		
-		JLabel nameLabel = new JLabel(TreeLogCategoryPanel.MessageID.LogGradeName.toString());
+		JLabel nameLabel = new JLabel(LogCategoryPanel.MessageID.LogGradeName.toString());
 		nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
 		nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		logCategoryNamePanel.add(nameLabel);
@@ -137,9 +137,9 @@ class WBirchProdVolTreeLogCategoryPanel extends TreeLogCategoryPanel<WBirchProdV
 		
 		panel.add(makePanel(MessageID.EligibleLogGrade, eligibleLogGradeTextField));
 		
-		panel.add(makePanel(TreeLogCategoryPanel.MessageID.LongLength, logLengthMTextField));
+		panel.add(makePanel(LogCategoryPanel.MessageID.LongLength, logLengthMTextField));
 		
-		panel.add(makePanel(TreeLogCategoryPanel.MessageID.SmallEndDiameter, smallEndDiameterCmTextField));
+		panel.add(makePanel(LogCategoryPanel.MessageID.SmallEndDiameter, smallEndDiameterCmTextField));
 
 		panel.add(makePanel(MessageID.MaximumDecayDiameter, maximumDecayDiameterCmTextField));
 

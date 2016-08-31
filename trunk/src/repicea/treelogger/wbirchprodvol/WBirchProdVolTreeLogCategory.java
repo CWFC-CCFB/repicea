@@ -18,11 +18,11 @@
  */
 package repicea.treelogger.wbirchprodvol;
 
-import repicea.simulation.treelogger.TreeLogCategory;
+import repicea.simulation.treelogger.LogCategory;
 import repicea.simulation.treelogger.WoodPiece;
 
 @SuppressWarnings("serial")
-public class WBirchProdVolTreeLogCategory extends TreeLogCategory {
+public class WBirchProdVolTreeLogCategory extends LogCategory {
 
 	protected final double lengthM;
 	protected final Double minimumSmallEndDiameterCm;
