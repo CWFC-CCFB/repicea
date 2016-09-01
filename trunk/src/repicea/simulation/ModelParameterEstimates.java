@@ -30,6 +30,16 @@ import repicea.stats.distributions.StandardGaussianDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
 
+/**
+ * The ModelParameterEstimates is a wrapper for parameter estimates. It includes a common variance-
+ * covariance matrix for the parameter estimates and the blups of the random effects. It implements
+ * the mixed model equations of Henderson (1984)
+ *
+ * @author fortin
+ * 
+ *	@see <a href=https://support.sas.com/documentation/cdl/en/statug/63033/HTML/default/viewer.htm#statug_mixed_sect022.htm> 
+ * SAS 9.2 online help </a> 
+ */
 public class ModelParameterEstimates extends SASParameterEstimates {
 	
 	private static final long serialVersionUID = 328041437808615842L;

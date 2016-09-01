@@ -137,7 +137,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	 */
 	protected abstract void init();
 	
-	protected Map<String, Estimate<? extends StandardGaussianDistribution>> getDefaultRandomEffect() {
+	protected Map<String, Estimate<? extends StandardGaussianDistribution>> getDefaultRandomEffects() {
 		return defaultRandomEffects;
 	}
 
