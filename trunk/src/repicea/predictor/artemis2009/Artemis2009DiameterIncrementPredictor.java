@@ -53,7 +53,6 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 
 			if (beta != null && omegaVectorForm != null) {
 				String vegpotName = vegpotIndex.get(vegpotID);
-//				internalPredictor = new Artemis2009DiameterIncrementInternalPredictor(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, simulationDates);
 				internalPredictor = new Artemis2009DiameterIncrementInternalPredictor(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled);
 				internalPredictors.put(vegpotName, internalPredictor);
 				internalPredictor.setBeta(beta, omegaVectorForm.squareSym());
