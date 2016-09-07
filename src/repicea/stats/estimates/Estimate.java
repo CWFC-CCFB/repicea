@@ -78,8 +78,8 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	}
 	
 	/**
-	 * This method returns an difference estimate.
-	 * @param estimate2 an Estimate to be subtracted from this estimate.
+	 * This method returns a sum of two estimates.
+	 * @param estimate2 an Estimate to be added to this estimate.
 	 * @return an Estimate
 	 */
 	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {

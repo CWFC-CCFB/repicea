@@ -22,9 +22,12 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.stats.CentralMomentsSettable;
+import repicea.stats.Distribution;
+import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.distributions.NonparametricDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
-import repicea.stats.estimates.HybridEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.integral.TrapezoidalRule;
 
@@ -35,8 +38,10 @@ import repicea.stats.integral.TrapezoidalRule;
  * @author Mathieu Fortin - March 2012
  */
 @SuppressWarnings({ "rawtypes", "serial" })
-public abstract class StemTaperEstimate extends HybridEstimate {
+public abstract class StemTaperEstimate extends Estimate<Distribution> implements CentralMomentsSettable  {
 		
+	private final Distribution alternateDistribution;
+
 	private List<Double> heights;
 	private Estimate<?> volumeEstimate;
 
@@ -45,8 +50,7 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	 * @param computedHeights a List instance containing the heights (m) of the cross sections
 	 */
 	public StemTaperEstimate(List<Double> computedHeights) {
-		super();
-		heights = computedHeights;
+		this(false, computedHeights);
 	}
 
 	/**
@@ -56,7 +60,13 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	 * @param computedHeights a List instance containing the heights (m) of the cross sections
 	 */
 	public StemTaperEstimate(boolean isMonteCarlo, List<Double> computedHeights) {
-		super(isMonteCarlo);
+		super(new NonparametricDistribution());
+		alternateDistribution = new GaussianDistribution(null, null);
+		if (isMonteCarlo) {
+			estimatorType = EstimatorType.MonteCarlo;
+		} else {
+			estimatorType = EstimatorType.LikelihoodBased;
+		}
 		heights = computedHeights;
 	}
 
@@ -201,5 +211,59 @@ public abstract class StemTaperEstimate extends HybridEstimate {
 	
 	protected abstract double getScalingFactor();
 	
+	@Override
+	public Distribution getDistribution() {
+		if (estimatorType == EstimatorType.MonteCarlo) {
+			return super.getDistribution();
+		} else {
+			return alternateDistribution;
+		}
+	}
 	
+	protected int getNumberOfRealizations() {
+		if (getEstimatorType() == EstimatorType.MonteCarlo) {
+			return ((NonparametricDistribution) getDistribution()).getNumberOfRealizations();
+		} else {
+			return 0;		// TODO check if this works
+		}
+	}
+
+	protected List<Matrix> getRealizations() {
+		if (getEstimatorType() == EstimatorType.MonteCarlo) {
+			return ((NonparametricDistribution) getDistribution()).getRealizations();
+		} else {
+			return null;		// TODO check if this works
+		}
+	}
+
+	@Override
+	public void setMean(Matrix mean) {
+		if (getEstimatorType() == EstimatorType.LikelihoodBased) {
+			((GaussianDistribution) getDistribution()).setMean(mean);
+		} else {
+			throw new InvalidParameterException("The HybridEstimate was set to likelihood based!");
+		}
+	}
+
+	@Override
+	public void setVariance(Matrix variance) {
+		if (getEstimatorType() == EstimatorType.LikelihoodBased) {
+			((GaussianDistribution) getDistribution()).setVariance(variance);
+		} else {
+			throw new InvalidParameterException("The HybridEstimate was set to likelihood based!");
+		}
+	}
+
+	/**
+	 * This method records the realization of a particular Monte Carlo iteration
+	 * @param realization the realization as a Matrix instance
+	 */
+	public void addRealization(Matrix realization) {
+		if (getEstimatorType() == EstimatorType.MonteCarlo) {
+			((NonparametricDistribution) getDistribution()).addRealization(realization);
+		} else {
+			throw new InvalidParameterException("The HybridEstimate was set to Monte Carlo!");
+		}
+	}		
+
 }
