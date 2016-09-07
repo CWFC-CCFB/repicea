@@ -146,6 +146,7 @@ public class ParameterDispatcher {
 			value = record[1].toString();
 			index.put(i, value);
 		}
+		reader.close();
 		return index;
 	}
 	

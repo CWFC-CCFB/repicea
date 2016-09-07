@@ -124,6 +124,7 @@ public class SQLReader extends FormatReader<SQLHeader> {
 			while (objs != null) {
 				objs = reader.nextRecord();
 			}
+			reader.close();
 		}
 	}
 	
