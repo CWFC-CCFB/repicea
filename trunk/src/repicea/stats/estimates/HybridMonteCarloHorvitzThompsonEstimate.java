@@ -48,7 +48,11 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 		return mean;
 	}
 
-	
+	/**
+	 * This method returns the uncorrected variance of the total estimate. 
+	 * This estimator is based on the law of total variance. 
+	 * @return a Matrix
+	 */
 	public Matrix getTotalVarianceUncorrected() {
 		SampleMeanEstimate variance = new SampleMeanEstimate();
 		SampleMeanEstimate mean = new SampleMeanEstimate();
@@ -57,6 +61,34 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 			variance.addObservation(estimate.getVariance());
 		}
 		return mean.getVariance().add(variance.getMean());
+	}
+
+	/**
+	 * This method returns the corrected variance of the total estimate. 
+	 * This estimator is based on the law of total variance. 
+	 * @return a Matrix
+	 */
+	public Matrix getVarianceOfTotalEstimate() {
+		SampleMeanEstimate variance = new SampleMeanEstimate();
+		SampleMeanEstimate mean = new SampleMeanEstimate();
+		int nbObs = estimates.get(0).getObservations().size();
+		double populationSize = estimates.get(0).populationSize;
+		SampleMeanEstimate[] observationMeans = new SampleMeanEstimate[nbObs];
+		for (int i = 0; i < nbObs; i++) {
+			observationMeans[i] = new SampleMeanEstimate();
+		}
+		for (HorvitzThompsonTauEstimate estimate : estimates) {
+			mean.addObservation(estimate.getTotal());
+			variance.addObservation(estimate.getVariance());
+			for (int i = 0; i < nbObs; i++) {
+				observationMeans[i].addObservation(estimate.getObservations().get(i).observation);	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
+			}
+		}
+		HorvitzThompsonTauEstimate meanEstimate = new HorvitzThompsonTauEstimate(populationSize);
+		for (int i = 0; i < nbObs; i++) {
+			meanEstimate.addObservation(observationMeans[i].getMean(), estimates.get(0).getObservations().get(i).inclusionProbability);
+		}
+		return mean.getVariance().add(meanEstimate.getVariance().scalarMultiply(2d)).subtract(variance.getMean());
 	}
 	
 	@Override
