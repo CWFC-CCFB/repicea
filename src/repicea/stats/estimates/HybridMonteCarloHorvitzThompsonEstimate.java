@@ -54,11 +54,11 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 	 * @return a Matrix
 	 */
 	public Matrix getTotalVarianceUncorrected() {
-		SampleMeanEstimate variance = new SampleMeanEstimate();
-		SampleMeanEstimate mean = new SampleMeanEstimate();
+		MonteCarloEstimate variance = new MonteCarloEstimate();
+		MonteCarloEstimate mean = new MonteCarloEstimate();
 		for (HorvitzThompsonTauEstimate estimate : estimates) {
-			mean.addObservation(estimate.getTotal());
-			variance.addObservation(estimate.getVariance());
+			mean.addRealization(estimate.getTotal());
+			variance.addRealization(estimate.getVarianceOfTotalEstimate());
 		}
 		return mean.getVariance().add(variance.getMean());
 	}
@@ -69,8 +69,8 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 	 * @return a Matrix
 	 */
 	public Matrix getVarianceOfTotalEstimate() {
-		SampleMeanEstimate variance = new SampleMeanEstimate();
-		SampleMeanEstimate mean = new SampleMeanEstimate();
+		MonteCarloEstimate variance = new MonteCarloEstimate();
+		MonteCarloEstimate mean = new MonteCarloEstimate();
 		int nbObs = estimates.get(0).getObservations().size();
 		double populationSize = estimates.get(0).populationSize;
 		SampleMeanEstimate[] observationMeans = new SampleMeanEstimate[nbObs];
@@ -78,8 +78,8 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 			observationMeans[i] = new SampleMeanEstimate();
 		}
 		for (HorvitzThompsonTauEstimate estimate : estimates) {
-			mean.addObservation(estimate.getTotal());
-			variance.addObservation(estimate.getVariance());
+			mean.addRealization(estimate.getTotal());
+			variance.addRealization(estimate.getVarianceOfTotalEstimate());
 			for (int i = 0; i < nbObs; i++) {
 				observationMeans[i].addObservation(estimate.getObservations().get(i).observation);	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
 			}
@@ -88,7 +88,10 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 		for (int i = 0; i < nbObs; i++) {
 			meanEstimate.addObservation(observationMeans[i].getMean(), estimates.get(0).getObservations().get(i).inclusionProbability);
 		}
-		return mean.getVariance().add(meanEstimate.getVariance().scalarMultiply(2d)).subtract(variance.getMean());
+		Matrix meanContribution = mean.getVariance();
+		Matrix meanDesignVariance = meanEstimate.getVarianceOfTotalEstimate();
+		Matrix averageVariance = variance.getMean();
+		return meanContribution.add(meanDesignVariance.scalarMultiply(2d)).subtract(averageVariance);
 	}
 	
 	@Override
