@@ -32,7 +32,7 @@ public class HorvitzThompsonTauEstimateTests {
 		}
 		Matrix total = estimate.getTotal();
 		Assert.assertEquals("Testing the estimate of the total", 4111.11111111111, total.m_afData[0][0], 1E-8);
-		Matrix totalVariance = estimate.getVarianceTotal();
+		Matrix totalVariance = estimate.getVarianceOfTotalEstimate();
 		Assert.assertEquals("Testing the variance of the total", 507734.5679, totalVariance.m_afData[0][0], 1E-4);
 	}
 	

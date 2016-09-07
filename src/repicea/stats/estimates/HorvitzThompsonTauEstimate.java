@@ -47,7 +47,7 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 		}
 	}
 	
-	private final double populationSize;
+	protected final double populationSize;
 	private final List<Observation> observations;
 	private int nRows;
 	private int nCols;
@@ -69,13 +69,13 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 	 * area of the plot divided by the total area, and not the plot area multiplied by the sample
 	 * size. This product is actually handled internally.
 	 * @param observation a Matrix that contains the observation
-	 * @param inclusionProbablity the INDIVIDUAL inclusion probability of the sample unit.
+	 * @param inclusionProbability the INDIVIDUAL inclusion probability of the sample unit.
 	 */
-	public void addObservation(Matrix observation, double inclusionProbablity) {
+	public void addObservation(Matrix observation, double inclusionProbability) {
 		if (observation == null) {
 			throw new InvalidParameterException("The observation matrix cannot be null!");
 		}
-		observations.add(new Observation(observation, inclusionProbablity));
+		observations.add(new Observation(observation, inclusionProbability));
 		if (nCols == 0) {
 			nCols = observation.m_iCols;
 		}
@@ -113,7 +113,7 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 	 * This method returns the variance of the tau estimate.
 	 * @return a Matrix
 	 */
-	public Matrix getVarianceTotal() {
+	public Matrix getVarianceOfTotalEstimate() {
 		int n = observations.size();
 		Observation obs_i;
 		Observation obs_j;
@@ -157,4 +157,7 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 		}
 		return false;
 	}
+	
+	protected List<Observation> getObservations() {return observations;}
+	
 }
