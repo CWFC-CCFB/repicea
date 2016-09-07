@@ -52,7 +52,12 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 	private int nRows;
 	private int nCols;
 	
-	protected HorvitzThompsonTauEstimate(double populationSize) {
+	/**
+	 * Constructor.
+	 * @param the population size in terms of sampling units or eventually ha if the 
+	 * response variable is expressed at this scale
+	 */
+	public HorvitzThompsonTauEstimate(double populationSize) {
 		super(new UnknownDistribution());
 		this.populationSize = populationSize;
 		observations = new ArrayList<Observation>();
@@ -79,6 +84,8 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 		}
 	}
 
+	protected double getPopulationSize() {return populationSize;}
+	
 	@Override
 	public Matrix getMean() {
 		return getTotal().scalarMultiply(1d/populationSize);
@@ -137,5 +144,17 @@ public class HorvitzThompsonTauEstimate extends Estimate<UnknownDistribution> {
 		}
 		return variance;
 	}
-	
+
+	protected boolean isCompatible(HorvitzThompsonTauEstimate estimate) {
+		if (this.populationSize == estimate.populationSize) {
+			if (observations.size() == estimate.observations.size()) {
+				if (nRows == estimate.nRows) {
+					if (nCols == estimate.nCols) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
 }
