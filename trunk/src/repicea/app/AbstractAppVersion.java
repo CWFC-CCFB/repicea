@@ -32,12 +32,17 @@ public abstract class AbstractAppVersion {
 	
 	protected AbstractAppVersion(String appName, String csvRevisionFilename) {
 		this.appName = appName;
+		CSVReader reader = null;
 		try {
-			CSVReader reader = new CSVReader(csvRevisionFilename);
+			reader = new CSVReader(csvRevisionFilename);
 			Object[] record = reader.nextRecord();
 			revision = record[reader.getHeader().getIndexOfThisField(AbstractAppVersionCompiler.REVISION_STRING)].toString();
 		} catch (Exception e) {
 			revision = "Unknown";
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
 		}
 	}
 
