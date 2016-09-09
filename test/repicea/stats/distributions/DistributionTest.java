@@ -67,7 +67,7 @@ public class DistributionTest {
 		Matrix expectedMean = distribution.getMean();
 		Matrix expectedVariance = distribution.getVariance();
 		Assert.assertEquals("Testing the means", expectedMean.m_afData[0][0], simulatedMean.m_afData[0][0], 2E-3);
-		Assert.assertEquals("Testing the variances", expectedVariance.m_afData[0][0], simulatedVariance.m_afData[0][0], 1E-3);
+		Assert.assertEquals("Testing the variances", expectedVariance.m_afData[0][0], simulatedVariance.m_afData[0][0], 2E-3);
 
 	}
 
