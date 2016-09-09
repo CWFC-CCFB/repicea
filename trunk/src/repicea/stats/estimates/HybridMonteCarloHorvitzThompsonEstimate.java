@@ -10,12 +10,12 @@ import repicea.stats.distributions.UnknownDistribution;
 @SuppressWarnings("serial")
 public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDistribution>{
 
-	public class VarianceEstimate {
+	public class VariancePointEstimate {
 		private final Matrix modelRelatedVariance;
 		private final Matrix samplingRelatedVariance;
 		private final Matrix totalVariance;
 		
-		private VarianceEstimate(Matrix modelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance) {
+		private VariancePointEstimate(Matrix modelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance) {
 			this.modelRelatedVariance = modelRelatedVariance;
 			this.samplingRelatedVariance = samplingRelatedVariance;
 			this.totalVariance = totalVariance; 
@@ -100,7 +100,7 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 	 * This estimator is based on the law of total variance. 
 	 * @return a Matrix
 	 */
-	public VarianceEstimate getVarianceOfTotalEstimate() {
+	public VariancePointEstimate getVarianceOfTotalEstimate() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
 		int nbObs = estimates.get(0).getObservations().size();
@@ -127,7 +127,7 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 		Matrix samplingRelatedComponent = meanDesignVariance;
 		Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
 		Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
-		VarianceEstimate varEst = new VarianceEstimate(modelRelatedComponent, samplingRelatedComponent, totalVariance);
+		VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, samplingRelatedComponent, totalVariance);
 		return varEst;
 	}
 	
