@@ -1,21 +1,22 @@
-package repicea.treelogger.wbirchprodvol;
+package repicea.predictor.wbirchloggrades;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
 import repicea.simulation.HierarchicalLevel;
 
-class WBirchProdVolStandImpl implements WBirchProdVolStand {
+public class WBirchLogGradesStandImpl implements WBirchLogGradesStand {
 
 	private final String plotID;
 	private final double elevation;
-	private final Map<Integer, WBirchProdVolTreeImpl> trees;
+	private final Map<Integer, WBirchLogGradesTreeImpl> trees;
 	private int monteCarloId;
 	
-	WBirchProdVolStandImpl(String plotID, double elevation) {
+	WBirchLogGradesStandImpl(String plotID, double elevation) {
 		this.plotID = plotID;
 		this.elevation = elevation;
-		this.trees = new HashMap<Integer, WBirchProdVolTreeImpl>();
+		this.trees = new HashMap<Integer, WBirchLogGradesTreeImpl>();
 	}
 	
 	@Override
@@ -32,6 +33,6 @@ class WBirchProdVolStandImpl implements WBirchProdVolStand {
 	@Override
 	public double getElevationM() {return elevation;}
 	
-	protected Map<Integer, WBirchProdVolTreeImpl> getTrees() {return trees;}
+	public Map<Integer, WBirchLogGradesTreeImpl> getTrees() {return trees;}
 
 }

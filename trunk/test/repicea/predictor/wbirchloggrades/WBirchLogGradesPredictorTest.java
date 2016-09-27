@@ -1,4 +1,4 @@
-package repicea.treelogger.wbirchprodvol;
+package repicea.predictor.wbirchloggrades;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,23 +15,26 @@ import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictor;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesTree;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 import repicea.util.ObjectUtility;
 
-public class WBirchProdVolPredictorTest {
+public class WBirchLogGradesPredictorTest {
 
 	@SuppressWarnings("unused")
 	@Test
 	public void testFixedEffectPredictions() {
-		Map<String, WBirchProdVolStandImpl> stands = readStands();
-		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, false);
+		Map<String, WBirchLogGradesStandImpl> stands = readStands();
+		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(false, false);
 		predictor.isTestPurpose = true;
 		int nbTrees = 0;
 		int nbMatches = 0;
 		int nbMatches2 = 0;
-		for (WBirchProdVolStandImpl stand : stands.values()) {
-			for (WBirchProdVolTreeImpl tree : stand.getTrees().values()) {
+		for (WBirchLogGradesStandImpl stand : stands.values()) {
+			for (WBirchLogGradesTreeImpl tree : stand.getTrees().values()) {
 				Matrix pred = predictor.getLogGradeVolumePredictions(stand, tree);
 				//		Matrix variances = predictor.getVMatrixForThisTree(tree);
 				Matrix predRef = tree.getPredRef();
@@ -47,12 +50,13 @@ public class WBirchProdVolPredictorTest {
 		System.out.println("Successfully compared " + nbTrees + " trees.");
 	}
 	
-	protected static Map<String, WBirchProdVolStandImpl> readStands() {
+	public static Map<String, WBirchLogGradesStandImpl> readStands() {
 //		List<WBirchProdVolStandImpl> standList = new ArrayList<WBirchProdVolStandImpl>();
-		String filename = ObjectUtility.getPackagePath(WBirchProdVolPredictorTest.class) + "pred-simul.csv";
-		Map<String, WBirchProdVolStandImpl> standMap = new HashMap<String, WBirchProdVolStandImpl>();
+		String filename = ObjectUtility.getPackagePath(WBirchLogGradesPredictorTest.class) + "pred-simul.csv";
+		Map<String, WBirchLogGradesStandImpl> standMap = new HashMap<String, WBirchLogGradesStandImpl>();
+		CSVReader reader = null;
 		try {
-			CSVReader reader = new CSVReader(filename);
+			reader = new CSVReader(filename);
 			Object[] record;
 			String plotID;
 			int treeID;
@@ -67,7 +71,7 @@ public class WBirchProdVolPredictorTest {
 			double lowGradeVeneerVolPred;
 			double veneerVolPred;
 			double elevation;
-			WBirchProdVolStandImpl stand;
+			WBirchLogGradesStandImpl stand;
 			while ((record = reader.nextRecord()) != null) {
 				plotID = record[0].toString().trim();
 				treeID = Integer.parseInt(record[1].toString());
@@ -84,12 +88,12 @@ public class WBirchProdVolPredictorTest {
 				veneerVolPred = Double.parseDouble(record[24].toString());		
 
 				if (!standMap.containsKey(plotID)) {
-					standMap.put(plotID, new WBirchProdVolStandImpl(plotID, elevation));
+					standMap.put(plotID, new WBirchLogGradesStandImpl(plotID, elevation));
 				}
 				
 				stand = standMap.get(plotID);
 				if (!stand.getTrees().containsKey(treeID)) {
-					WBirchProdVolTreeImpl tree = new WBirchProdVolTreeImpl(treeID, 
+					WBirchLogGradesTreeImpl tree = new WBirchLogGradesTreeImpl(treeID, 
 							quality, 
 							dbhCm, 
 							stand,
@@ -110,6 +114,10 @@ public class WBirchProdVolPredictorTest {
 		} catch (IOException e) {
 			Assert.fail("Unable to load file " + filename);
 			return null;
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
 		}
 	}
 
@@ -135,14 +143,14 @@ public class WBirchProdVolPredictorTest {
 		stdRef.m_afData[6][0] = 0d;
 	
 		int nbRealizations = 100000;
-		Map<String, WBirchProdVolStandImpl> stands = readStands();
-		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, true);
-		WBirchProdVolStand stand = stands.get("49");
-		WBirchProdVolTree tree = ((WBirchProdVolStandImpl) stand).getTrees().get(2);
+		Map<String, WBirchLogGradesStandImpl> stands = readStands();
+		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(false, true);
+		WBirchLogGradesStand stand = stands.get("49");
+		WBirchLogGradesTree tree = ((WBirchLogGradesStandImpl) stand).getTrees().get(2);
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		Matrix pred;
 		for (int i = 0; i < nbRealizations; i++) {
-			((WBirchProdVolStandImpl) stand).setMonteCarloRealizationId(i);
+			((WBirchLogGradesStandImpl) stand).setMonteCarloRealizationId(i);
 			pred = predictor.getLogGradeVolumePredictions(stand, tree);
 			estimate.addRealization(pred);
 		}
@@ -163,14 +171,14 @@ public class WBirchProdVolPredictorTest {
 	public void testMonteCarloPredictions2() throws IOException {
 		String filePath = ObjectUtility.getPackagePath(getClass()) + "MCSimul.csv";
 		int nbRealizations = 10000;
-		Map<String, WBirchProdVolStandImpl> stands = readStands();
-		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(true, true);
+		Map<String, WBirchLogGradesStandImpl> stands = readStands();
+		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(true, true);
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
-		WBirchProdVolStandImpl stand = stands.get(0);
+		WBirchLogGradesStandImpl stand = stands.get(0);
 		for (int i = 0; i < nbRealizations; i++) {
 			Matrix sumProd = new Matrix(7,1);
 			stand.setMonteCarloRealizationId(i);
-			for (WBirchProdVolTree tree : stand.getTrees().values()) {
+			for (WBirchLogGradesTree tree : stand.getTrees().values()) {
 				sumProd = sumProd.add(predictor.getLogGradeVolumePredictions(stand, tree).scalarMultiply(0.001));
 			}
 			estimate.addRealization(sumProd);

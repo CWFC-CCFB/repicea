@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea-foresttools library.
  *
- * Copyright (C) 2009-2014 Mathieu Fortin (LERFoB), Robert Schneider (UQAR) 
+ * Copyright (C) 2009-2013 Mathieu Fortin (LERFoB), Robert Schneider (UQAR) 
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,19 +16,15 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.treelogger.wbirchprodvol;
+package repicea.predictor.wbirchloggrades;
 
-import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
-import repicea.predictor.wbirchloggrades.WBirchLogGradesTree;
-import repicea.simulation.treelogger.LoggableTree;
+import repicea.simulation.MonteCarloSimulationCompliantObject;
+import repicea.simulation.covariateproviders.standlevel.ElevationMProvider;
 
-public interface WBirchProdVolLoggableTree extends WBirchLogGradesTree, LoggableTree {
+/**
+ * This interface ensures the stand object is compatible with the tree logger WBirchProdVol.
+ * @author Mathieu Fortin - September 2013
+ */
+public interface WBirchLogGradesStand extends MonteCarloSimulationCompliantObject, ElevationMProvider {
 
-	/**
-	 * This method ensures the tree instance can provide the stand it grows in.
-	 * @return a WBirchProdVolStand instance
-	 */
-	public WBirchLogGradesStand getStand();
-	
-	
 }

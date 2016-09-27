@@ -24,16 +24,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesTree.WBirchProdVolTreeSpecies;
 import repicea.simulation.treelogger.TreeLoggerParameters;
 import repicea.simulation.treelogger.TreeLoggerParametersDialog;
-import repicea.treelogger.wbirchprodvol.WBirchProdVolTree.WBirchProdVolTreeSpecies;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
 public class WBirchProdVolTreeLoggerParameters extends TreeLoggerParameters<WBirchProdVolTreeLogCategory> {
 
-	protected static enum ProductID implements TextableEnum {
+	public enum ProductID implements TextableEnum {
 		Veneer("veneer", "d\u00E9roulage", 5),
 		LowGradeVeneer("low grade veneer", "d\u00E9roulable", 4),
 		Sawlog("sawlog", "sciage", 3),

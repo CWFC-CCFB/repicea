@@ -9,6 +9,9 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictor;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictorTest;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesStandImpl;
 import repicea.simulation.treelogger.WoodPiece;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 
@@ -16,12 +19,12 @@ public class WBirchProdVolTreeLoggerTest {
 
 	@Test
 	public void testTreeLoggerWithDeterministicPred() {
-		Map<String, WBirchProdVolStandImpl> stands = WBirchProdVolPredictorTest.readStands();
+		Map<String, WBirchLogGradesStandImpl> stands = WBirchLogGradesPredictorTest.readStands();
 		WBirchProdVolTreeLogger treeLogger = new WBirchProdVolTreeLogger(false, false);
 		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
 		Collection<WBirchProdVolLoggableTree> trees = new ArrayList<WBirchProdVolLoggableTree>();
 		
-		for (WBirchProdVolStandImpl stand : stands.values()) {
+		for (WBirchLogGradesStandImpl stand : stands.values()) {
 			trees.addAll(stand.getTrees().values());
 		}
 		
@@ -40,7 +43,7 @@ public class WBirchProdVolTreeLoggerTest {
 		}
 
 		Matrix pred = new Matrix(7,1);
-		WBirchProdVolPredictor predictor = new WBirchProdVolPredictor(false, false);
+		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(false, false);
 		for (WBirchProdVolLoggableTree tree : trees) {
 			if (treeLogger.getEligible(tree) != null) {
 				pred = pred.add(predictor.getLogGradeVolumePredictions(tree.getStand(), tree));

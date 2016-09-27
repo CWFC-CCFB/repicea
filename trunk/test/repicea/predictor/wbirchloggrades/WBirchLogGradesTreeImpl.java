@@ -1,21 +1,23 @@
-package repicea.treelogger.wbirchprodvol;
+package repicea.predictor.wbirchloggrades;
 
 import repicea.math.Matrix;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
 import repicea.simulation.HierarchicalLevel;
+import repicea.treelogger.wbirchprodvol.WBirchProdVolLoggableTree;
 
-class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
+class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 
 	private final int treeID;
 	private final double dbhCm;
 	private ABCDQuality quality;
-	private final WBirchProdVolStandImpl stand;
+	private final WBirchLogGradesStandImpl stand;
 	private final Matrix predRef;
 	private final double h20Obs;
 	
-	WBirchProdVolTreeImpl(int treeID, 
+	WBirchLogGradesTreeImpl(int treeID, 
 			String qualityString, 
 			double dbhCm, 
-			WBirchProdVolStandImpl stand, 
+			WBirchLogGradesStandImpl stand, 
 			double h20Obs,
 			double h20Pred, 
 			double merVolPred, 
@@ -92,6 +94,6 @@ class WBirchProdVolTreeImpl implements WBirchProdVolLoggableTree {
 
 
 	@Override
-	public WBirchProdVolStand getStand() {return this.stand;}
+	public WBirchLogGradesStand getStand() {return this.stand;}
 
 }
