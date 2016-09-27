@@ -22,6 +22,8 @@ import java.io.IOException;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictor;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
@@ -30,7 +32,7 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 
 	private final static double VERY_SMALL = 1E-6;
 	
-	private WBirchProdVolPredictor wbp;
+	private WBirchLogGradesPredictor wbp;
 
 	public WBirchProdVolTreeLogger() {
 		this(false, false);
@@ -41,13 +43,13 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	 */
 	public WBirchProdVolTreeLogger(boolean isParameterVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super();
-		wbp = new WBirchProdVolPredictor(isParameterVariabilityEnabled, isResidualVariabilityEnabled);
+		wbp = new WBirchLogGradesPredictor(isParameterVariabilityEnabled, isResidualVariabilityEnabled);
 	}
 	
 
 	@Override
 	protected void logThisTree(WBirchProdVolLoggableTree tree) {
-		WBirchProdVolStand stand = tree.getStand();
+		WBirchLogGradesStand stand = tree.getStand();
 		Matrix predictedVolumes = wbp.getLogGradeVolumePredictions(stand, tree);
 		List<WBirchProdVolTreeLogCategory> logCategory = getTreeLoggerParameters().getLogCategoryList();
 		for (ProductID productID : ProductID.values()) {
