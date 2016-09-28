@@ -35,4 +35,9 @@ public class WBirchLogGradesStandImpl implements WBirchLogGradesStand {
 	
 	public Map<Integer, WBirchLogGradesTreeImpl> getTrees() {return trees;}
 
+	@Override
+	public String toString() {
+		return "Plot " + plotID;
+	}
+
 }

@@ -37,7 +37,7 @@ public class WBirchLogGradesPredictorTest {
 			for (WBirchLogGradesTreeImpl tree : stand.getTrees().values()) {
 				Matrix pred = predictor.getLogGradeVolumePredictions(stand, tree);
 				//		Matrix variances = predictor.getVMatrixForThisTree(tree);
-				Matrix predRef = tree.getPredRef();
+				Matrix predRef = tree.getRealizedValues();
 				Assert.assertEquals("Number of elements", predRef.m_iRows, pred.m_iRows);
 				for (int i = 0; i < pred.m_iRows; i++) {
 					Assert.assertEquals("Comparing tree " + tree.getSubjectId() + " in plot " + stand.getSubjectId(), predRef.m_afData[i][0], pred.m_afData[i][0], 1E-6);
@@ -90,7 +90,15 @@ public class WBirchLogGradesPredictorTest {
 				if (!standMap.containsKey(plotID)) {
 					standMap.put(plotID, new WBirchLogGradesStandImpl(plotID, elevation));
 				}
-				
+				Matrix predRef = new Matrix(7,1);
+				predRef.m_afData[0][0] = h20Pred;
+				predRef.m_afData[1][0] = merVolPred;
+				predRef.m_afData[2][0] = pulpVolPred;
+				predRef.m_afData[3][0] = sawlogVolPred;
+				predRef.m_afData[4][0] = lowGradeVeneerVolPred;
+				predRef.m_afData[5][0] = veneerVolPred;
+				predRef.m_afData[6][0] = lowGradeSawlogVolPred;
+
 				stand = standMap.get(plotID);
 				if (!stand.getTrees().containsKey(treeID)) {
 					WBirchLogGradesTreeImpl tree = new WBirchLogGradesTreeImpl(treeID, 
@@ -98,13 +106,7 @@ public class WBirchLogGradesPredictorTest {
 							dbhCm, 
 							stand,
 							h20Obs,
-							h20Pred, 
-							merVolPred, 
-							pulpVolPred, 
-							lowGradeSawlogVolPred,
-							sawlogVolPred,
-							lowGradeVeneerVolPred,
-							veneerVolPred);
+							predRef);
 					stand.getTrees().put(treeID, tree);
 				}
 			}

@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import quebecmrnfutility.predictor.loggradespetro.PetroGradeTree.PetroGradeSpecies;
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
@@ -25,19 +24,53 @@ public class Population {
 	
 	Population(int populationSize) {
 		sampleUnits = new PlotList();
-		Plot p;
+		WBirchLogGradesStandImpl p;
 		for (int i = 0; i < populationSize; i++) {
 			int nbTrees = (int) (2 + Math.floor(random.nextDouble() * 21d));
-			p = new Plot(i);
+			double elevation = 250 + Math.floor(random.nextDouble() * 201);
+			p = new WBirchLogGradesStandImpl(i + "", elevation);
 			sampleUnits.add(p);
 			double dbhCm;
 			for (int j = 0; j < nbTrees; j++) {
-				dbhCm = 24 + Math.floor(random.nextDouble() * 27d);
-				p.addTree(new WBirchLogGradesTreeImpl(PetroGradeSpecies.ERS, dbhCm));
+				dbhCm = 18 + Math.floor(random.nextDouble() * 28d); // 18-45
+				String qualityString = getRandomQuality(dbhCm);
+				new WBirchLogGradesTreeImpl(j, qualityString, dbhCm, p);	
 			}
 		}
 	}
 	
+	private String getRandomQuality(double dbhCm) {
+		if (dbhCm < 24) {
+			return "NC";
+		} else if (dbhCm < 34) {
+			if (random.nextDouble() > .5) {
+				return "C";
+			} else {
+				return "D";
+			} 
+		} else if (dbhCm < 40) {
+			double randomNumber = random.nextDouble();
+			if (randomNumber < .33333) {
+				return "B";
+			} else  if (randomNumber < .666667) {
+				return "C";
+			} else {
+				return "D";
+			}
+		} else {
+			double randomNumber = random.nextDouble();
+			if (randomNumber < .25) {
+				return "A";
+			} else  if (randomNumber < .50) {
+				return "B";
+			} else  if (randomNumber < .75) {
+				return "C";
+			} else {
+				return "D";
+			}
+		}
+	}
+
 	PlotList getSample(int sampleSize) {
 		List<Integer> sampleIndex = new ArrayList<Integer>();
 		int index;
@@ -54,18 +87,18 @@ public class Population {
 		return sample;
 	}
 	
-	static void setRealizedValues(List<Plot> plots, WBirchLogGradesPredictor model) {
-		for (Plot plot : plots) {
-			for (WBirchLogGradesTreeImpl tree : plot.getTrees()) {
-				tree.setRealizedValues(model.getLogGradeVolumePredictions(stand, tree));
+	static void setRealizedValues(List<WBirchLogGradesStandImpl> plots, WBirchLogGradesPredictor model) {
+		for (WBirchLogGradesStandImpl plot : plots) {
+			for (WBirchLogGradesTreeImpl tree : plot.getTrees().values()) {
+				tree.setRealizedValues(model.getLogGradeVolumePredictions(plot, tree));
 			}
 		}
 	}
 	
 	Matrix getTotal() {
 		Matrix total = new Matrix(5,1);
-		for (Plot plot : sampleUnits) {
-			for (WBirchLogGradesTreeImpl tree : plot.getTrees()) {
+		for (WBirchLogGradesStandImpl plot : sampleUnits) {
+			for (WBirchLogGradesTreeImpl tree : plot.getTrees().values()) {
 				total = total.add(tree.getRealizedValues());
 			}
 		}
