@@ -33,6 +33,7 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 		}
 		this.dbhCm = dbhCm;
 		this.stand = stand;
+		this.stand.getTrees().put(treeID, this);
 	}
 
 

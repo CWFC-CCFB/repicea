@@ -20,7 +20,7 @@ class Realization {
 	}
 	
 	Object[] getRecord() {
-		Object[] record = new Object[6*5];
+		Object[] record = new Object[6*7];
 		record[0] = trueTau.m_afData[0][0];
 		record[1] = estTau.m_afData[0][0];
 		record[2] = estVarianceUncorr.m_afData[0][0];
@@ -55,6 +55,21 @@ class Realization {
 		record[27] = estVarianceCorr.m_afData[4][4];
 		record[28] = samplingPart.m_afData[4][4];
 		record[29] = modelPart.m_afData[4][4];
+		
+		record[30] = trueTau.m_afData[5][0];
+		record[31] = estTau.m_afData[5][0];
+		record[32] = estVarianceUncorr.m_afData[5][5];
+		record[33] = estVarianceCorr.m_afData[5][5];
+		record[34] = samplingPart.m_afData[5][5];
+		record[35] = modelPart.m_afData[5][5];
+
+		record[36] = trueTau.m_afData[6][0];
+		record[37] = estTau.m_afData[6][0];
+		record[38] = estVarianceUncorr.m_afData[6][6];
+		record[39] = estVarianceCorr.m_afData[6][6];
+		record[40] = samplingPart.m_afData[6][6];
+		record[41] = modelPart.m_afData[6][6];
+
 		return record;
 	}
 	

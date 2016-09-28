@@ -96,7 +96,7 @@ public class Population {
 	}
 	
 	Matrix getTotal() {
-		Matrix total = new Matrix(5,1);
+		Matrix total = new Matrix(7,1);
 		for (WBirchLogGradesStandImpl plot : sampleUnits) {
 			for (WBirchLogGradesTreeImpl tree : plot.getTrees().values()) {
 				total = total.add(tree.getRealizedValues());
@@ -112,14 +112,14 @@ public class Population {
 		long start = System.currentTimeMillis();
 		int populationSize = 1000;
 		Population pop = new Population(populationSize);
-		int nbRealizations = 10000;
+		int nbRealizations = 100; // TODO set this to 10000
 		int nbInternalReal = 1000;
 		int sampleSize = 10;
 		String filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
 		filename = filename.replace("bin", "manuscripts");
 		CSVWriter writer = new CSVWriter(new File(filename), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
-		for (int i = 1; i <= 5; i++) {
+		for (int i = 1; i <= 7; i++) {
 			fields.add(new CSVField("TrueTau" + i));
 			fields.add(new CSVField("EstTau" + i));
 			fields.add(new CSVField("UncorrVar" + i));
