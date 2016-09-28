@@ -191,10 +191,19 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 	}
 
 	/**
-	 * This method returns the predictions for each log grade (dm3)
+	 * This method returns the predictions for each log grade 
 	 * @param stand a WBirchProdVolStand instance
 	 * @param tree a WBirchProdVolTree instance
-	 * @return a Matrix instance
+	 * @return a Matrix instance 
+	 * <ul>
+	 * <li> slot 0 : predicted height at d = 20 cm (m) </li>
+	 * <li> slot 1 : commercial volume (m3)</li>
+	 * <li> slot 2 : pulp wood volume (m3) </li>
+	 * <li> slot 3 : sawlog volume (m3) </li>
+	 * <li> slot 4 : low grade veneer volume (m3) </li>
+	 * <li> slot 5 : veneer volume (m3) </li>
+	 * <li> slot 6 : log grade sawlog volume (m3) </li>
+	 * </ul>
 	 */
 	public Matrix getLogGradeVolumePredictions(WBirchLogGradesStand stand, WBirchLogGradesTree tree) {
 		Matrix modelParameters = getParametersForThisRealization(stand);
@@ -260,14 +269,15 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 			}
 		}
 		
-//		boolean isStochastic = isParametersVariabilityEnabled || isResidualVariabilityEnabled;
-//		WBirchProdVolEstimate estimate = new WBirchProdVolEstimate(version, isStochastic);
-//		if (isStochastic) {
-//			estimate.addRealization(logGradePred);
-//		} else {
-//			estimate.setMean(logGradePred);
-//		}
-		return logGradePred;
+		
+		logGradePred.m_afData[1][0] *= .001;
+		logGradePred.m_afData[2][0] *= .001;
+		logGradePred.m_afData[3][0] *= .001;
+		logGradePred.m_afData[4][0] *= .001;
+		logGradePred.m_afData[5][0] *= .001;
+		logGradePred.m_afData[6][0] *= .001;
+		
+		return logGradePred;		// to get the result in m3 and not in dm3
 	}
 	
 	

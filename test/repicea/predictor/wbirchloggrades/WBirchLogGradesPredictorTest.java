@@ -80,12 +80,12 @@ public class WBirchLogGradesPredictorTest {
 				elevation = Double.parseDouble(record[14].toString()); 
 				h20Obs = Double.parseDouble(record[5].toString());
 				h20Pred = Double.parseDouble(record[18].toString());
-				merVolPred = Double.parseDouble(record[19].toString());
-				pulpVolPred = Double.parseDouble(record[20].toString());
-				lowGradeSawlogVolPred = Double.parseDouble(record[21].toString());
-				sawlogVolPred = Double.parseDouble(record[22].toString());
-				lowGradeVeneerVolPred = Double.parseDouble(record[23].toString());		
-				veneerVolPred = Double.parseDouble(record[24].toString());		
+				merVolPred = Double.parseDouble(record[19].toString()) * .001;
+				pulpVolPred = Double.parseDouble(record[20].toString()) * .001;
+				lowGradeSawlogVolPred = Double.parseDouble(record[21].toString()) * .001;
+				sawlogVolPred = Double.parseDouble(record[22].toString()) * .001;
+				lowGradeVeneerVolPred = Double.parseDouble(record[23].toString()) * .001;		
+				veneerVolPred = Double.parseDouble(record[24].toString()) * .001;		
 
 				if (!standMap.containsKey(plotID)) {
 					standMap.put(plotID, new WBirchLogGradesStandImpl(plotID, elevation));
@@ -101,13 +101,7 @@ public class WBirchLogGradesPredictorTest {
 
 				stand = standMap.get(plotID);
 				if (!stand.getTrees().containsKey(treeID)) {
-					WBirchLogGradesTreeImpl tree = new WBirchLogGradesTreeImpl(treeID, 
-							quality, 
-							dbhCm, 
-							stand,
-							h20Obs,
-							predRef);
-					stand.getTrees().put(treeID, tree);
+					new WBirchLogGradesTreeImpl(treeID, quality, dbhCm, stand, h20Obs, predRef);
 				}
 			}
 //			standList.addAll(standMap.values());
@@ -128,18 +122,18 @@ public class WBirchLogGradesPredictorTest {
 	public void testMonteCarloPredictions() {
 		Matrix meanRef = new Matrix(7,1);
 		meanRef.m_afData[0][0] = 6.4262054572822125;
-		meanRef.m_afData[1][0] = 358.8726980631341;
-		meanRef.m_afData[2][0] = 212.9874983502981;
-		meanRef.m_afData[3][0] = 145.88519971283398;
+		meanRef.m_afData[1][0] = 358.8726980631341 * .001;
+		meanRef.m_afData[2][0] = 212.9874983502981 * .001;
+		meanRef.m_afData[3][0] = 145.88519971283398 * .001;
 		meanRef.m_afData[4][0] = 0d;
 		meanRef.m_afData[5][0] = 0d;
 		meanRef.m_afData[6][0] = 0d;
 		
 		Matrix stdRef = new Matrix(7,1);
 		stdRef.m_afData[0][0] = 0.14005679329726609;
-		stdRef.m_afData[1][0] = 48.39343575836749;
-		stdRef.m_afData[2][0] = 70.46323093748266;
-		stdRef.m_afData[3][0] = 68.00699931625708;
+		stdRef.m_afData[1][0] = 48.39343575836749 * .001;
+		stdRef.m_afData[2][0] = 70.46323093748266 * .001;
+		stdRef.m_afData[3][0] = 68.00699931625708 * .001; 
 		stdRef.m_afData[4][0] = 0d;
 		stdRef.m_afData[5][0] = 0d;
 		stdRef.m_afData[6][0] = 0d;
