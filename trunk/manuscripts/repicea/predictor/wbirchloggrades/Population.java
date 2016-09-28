@@ -112,7 +112,7 @@ public class Population {
 		long start = System.currentTimeMillis();
 		int populationSize = 1000;
 		Population pop = new Population(populationSize);
-		int nbRealizations = 1000; // TODO set this to 10000
+		int nbRealizations = 10000; // TODO set this to 10000
 		int nbInternalReal = 1000;
 		int sampleSize = 10;
 		String filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
