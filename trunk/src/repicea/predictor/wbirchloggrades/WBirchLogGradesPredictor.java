@@ -24,8 +24,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.ParameterLoader;
+import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.covariateproviders.treelevel.ABCDQualityProvider.ABCDQuality;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
@@ -290,8 +290,16 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 		} else {
 			return Version.NCClass;
 		}
-		
 	}
-	
+
+	/*
+	 * For manuscript purposes.
+	 */
+	void replaceBeta() {
+		Matrix newMean = getParameterEstimates().getRandomDeviate();
+		Matrix variance = getParameterEstimates().getVariance();
+		setParameterEstimates(new GaussianEstimate(newMean, variance));
+	}
+
 	
 }

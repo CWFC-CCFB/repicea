@@ -11,21 +11,20 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 	private final double dbhCm;
 	private ABCDQuality quality;
 	private final WBirchLogGradesStandImpl stand;
-	private final Matrix predRef;
-	private final double h20Obs;
-	
+	private Matrix predRef;
+	private double h20Obs;
+
+	/**
+	 * Basic constructor for manuscript on hybrid estimation
+	 * @param treeID
+	 * @param qualityString
+	 * @param dbhCm
+	 * @param stand
+	 */
 	WBirchLogGradesTreeImpl(int treeID, 
 			String qualityString, 
 			double dbhCm, 
-			WBirchLogGradesStandImpl stand, 
-			double h20Obs,
-			double h20Pred, 
-			double merVolPred, 
-			double pulpVolPred, 
-			double lowGradeSawlogVolPred,
-			double sawlogVolPred,
-			double lowGradeVeneerVolPred,
-			double veneerVolPred) {
+			WBirchLogGradesStandImpl stand) {
 		this.treeID = treeID;
 		if (qualityString.equals("NC")) {
 			quality = null;
@@ -34,16 +33,28 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 		}
 		this.dbhCm = dbhCm;
 		this.stand = stand;
+	}
+
+
+	/**
+	 * Constructor for test.
+	 * @param treeID
+	 * @param qualityString
+	 * @param dbhCm
+	 * @param stand
+	 * @param h20Obs
+	 * @param realization
+	 */
+	WBirchLogGradesTreeImpl(int treeID, 
+			String qualityString, 
+			double dbhCm, 
+			WBirchLogGradesStandImpl stand, 
+			double h20Obs,
+			Matrix realization) {
+		this(treeID, qualityString, dbhCm, stand);
 		this.h20Obs = h20Obs;
 
-		this.predRef = new Matrix(7,1);
-		predRef.m_afData[0][0] = h20Pred;
-		predRef.m_afData[1][0] = merVolPred;
-		predRef.m_afData[2][0] = pulpVolPred;
-		predRef.m_afData[3][0] = sawlogVolPred;
-		predRef.m_afData[4][0] = lowGradeVeneerVolPred;
-		predRef.m_afData[5][0] = veneerVolPred;
-		predRef.m_afData[6][0] = lowGradeSawlogVolPred;
+		setRealizedValues(realization);
 	}
 	
 	
@@ -62,7 +73,9 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 	@Override
 	public int getMonteCarloRealizationId() {return stand.getMonteCarloRealizationId();}
 
-	protected Matrix getPredRef() {return predRef;}
+	protected Matrix getRealizedValues() {return predRef;}
+	
+	protected void setRealizedValues(Matrix realization) {this.predRef = realization;} 
 	
 	public double getH20Obs() {return h20Obs;}
 
@@ -74,12 +87,6 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 	@Override
 	public double getNumber() {return 1d;}
 
-
-/*	@Override
-	public TreeStatusPriorToLogging getTreeStatusPriorToLogging() {
-		return TreeStatusPriorToLogging.Alive;
-	}
-*/
 
 	@Override
 	public double getCommercialVolumeM3() {
