@@ -147,9 +147,9 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 		
 		double a0 = beta.m_afData[11][0];
 		double a1 = beta.m_afData[12][0];
-		double a2 = beta.m_afData[13][0];
-		double a3 = beta.m_afData[14][0];
-		return a0 + a1 * Math.pow(dbhCm - 9d, a2) * h20Pred + a3 * isAB;
+//		double a2 = beta.m_afData[13][0];
+		double a3 = beta.m_afData[13][0];
+		return a0 + a1 * (dbhCm - 9d) * h20Pred + a3 * isAB;
 	}
 	
 	private double getPulpPrediction(WBirchLogGradesStand stand, WBirchLogGradesTree tree, Matrix beta, double h20Pred, double merVol) {
@@ -170,22 +170,22 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 		double b1C = beta.m_afData[1][0];
 		double b1D = beta.m_afData[2][0];
 		double b1NC = beta.m_afData[3][0];
-		double b2 = beta.m_afData[15][0];
+		double b2 = beta.m_afData[14][0];
 		
 		return merVol / (1 + Math.exp(b1 + b1C * isC + b1D * isD + b1NC * isNC - b2 * h20Pred / dbhCm));
 	}
 	
 	private double getSawlogPrediction(WBirchLogGradesStand stand, WBirchLogGradesTree tree, Matrix beta, double merVol, double pulpVol) {
 		double dbhCm = tree.getDbhCm();
-		double c1 = beta.m_afData[16][0];
-		double c2 = beta.m_afData[17][0];
+		double c1 = beta.m_afData[15][0];
+		double c2 = beta.m_afData[16][0];
 		
 		return (merVol - pulpVol) / (1 + Math.exp(c1 - c2 * dbhCm));
 	}
 	
 	private double getLowGradeVeneerPrediction(WBirchLogGradesStand stand, WBirchLogGradesTree tree, Matrix beta, double merVol, double pulpVol, double sawlogVol) {
 		double dbhCm = tree.getDbhCm();
-		double d2 = beta.m_afData[18][0];
+		double d2 = beta.m_afData[17][0];
 		
 		return (merVol - pulpVol - sawlogVol) / (1 + d2 * dbhCm);
 	}

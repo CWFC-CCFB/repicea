@@ -35,6 +35,9 @@ public class WBirchLogGradesPredictorTest {
 		int nbMatches2 = 0;
 		for (WBirchLogGradesStandImpl stand : stands.values()) {
 			for (WBirchLogGradesTreeImpl tree : stand.getTrees().values()) {
+				if (tree.getSubjectId().equals("113")) {
+					int u = 0;
+				}
 				Matrix pred = predictor.getLogGradeVolumePredictions(stand, tree);
 				//		Matrix variances = predictor.getVMatrixForThisTree(tree);
 				Matrix predRef = tree.getRealizedValues();
