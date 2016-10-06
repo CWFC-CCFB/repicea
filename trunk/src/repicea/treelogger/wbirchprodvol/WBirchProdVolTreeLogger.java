@@ -30,7 +30,7 @@ import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.Produc
 
 public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerParameters, WBirchProdVolLoggableTree> {
 
-	private final static double VERY_SMALL = 1E-6;
+	private final static double VERY_SMALL = 1E-8;
 	
 	private WBirchLogGradesPredictor wbp;
 
@@ -57,9 +57,9 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 		}
 	}
 	
-	private void addThisWoodPiece(WBirchProdVolTreeLogCategory logCategory, double volumeDm3, WBirchProdVolLoggableTree tree) {
-		if (volumeDm3 > VERY_SMALL) {
-			addWoodPiece(tree, new WBirchProdVolWoodPiece(logCategory, volumeDm3 * .001, tree));
+	private void addThisWoodPiece(WBirchProdVolTreeLogCategory logCategory, double volumeM3, WBirchProdVolLoggableTree tree) {
+		if (volumeM3 > VERY_SMALL) {
+			addWoodPiece(tree, new WBirchProdVolWoodPiece(logCategory, volumeM3, tree));
 		} 
 	}
 	

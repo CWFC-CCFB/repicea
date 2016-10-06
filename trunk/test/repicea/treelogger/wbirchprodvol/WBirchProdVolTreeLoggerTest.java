@@ -54,7 +54,7 @@ public class WBirchProdVolTreeLoggerTest {
 		double expected;
 		for (ProductID product : ProductID.values()) {
 			observed = refMap.get(product.toString());
-			expected = pred.m_afData[product.getIndex()][0] * .001;
+			expected = pred.m_afData[product.getIndex()][0];
 			Assert.assertEquals("Comparing product " + product.name(), expected, observed, 1E-6);
 		}
 	}
