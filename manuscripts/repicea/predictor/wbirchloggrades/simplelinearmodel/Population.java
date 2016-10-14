@@ -26,7 +26,7 @@ public class Population {
 		sampleUnits = new PlotList();
 		SamplePlot p;
 		for (int i = 0; i < populationSize; i++) {
-			double x = (2 + Math.floor(random.nextDouble() * 21d));
+			double x = (2 + random.nextDouble() * 6d);
 			p = new SamplePlot(i + "", x);
 			sampleUnits.add(p);
 		}
