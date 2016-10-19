@@ -21,6 +21,7 @@ package repicea.io.javacsv;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.List;
 
 import repicea.io.FormatReader;
@@ -30,9 +31,30 @@ public class CSVReader extends FormatReader<CSVHeader> {
 
 	private BufferedReader bufferedReader;
 	private int linePointer;
-	
+	private final Charset currentCharset;
+
+	/**
+	 * Constructor with default encoding
+	 * @param filename the file to read
+	 * @throws IOException
+	 */
 	public CSVReader(String filename) throws IOException {
+		this(filename, null);
+	}
+
+	/**
+	 * Constructor with specific encoding
+	 * @param filename the file to read
+	 * @param charset the encoding
+	 * @throws IOException
+	 */
+	public CSVReader(String filename, Charset charset) throws IOException {
 		super(filename);
+		if (charset != null) {
+			currentCharset = charset;
+		} else {
+			currentCharset = Charset.defaultCharset();
+		}
 		bufferedReader = openReader();
 		setFormatHeader(new CSVHeader());
 		getHeader().read(bufferedReader);
@@ -40,7 +62,6 @@ public class CSVReader extends FormatReader<CSVHeader> {
 		bufferedReader.readLine();			// skip the first line which is the header
 		linePointer = 1;
 	}
-	
 
 	@Override
 	public Object[] nextRecord(int skipThisNumberOfLines) throws IOException {
@@ -52,20 +73,10 @@ public class CSVReader extends FormatReader<CSVHeader> {
 		}
 		String line = bufferedReader.readLine();
 		if (line != null) {								
-//			String[] splitter = line.split(getHeader().getToken());
-//			Object[] outputArray = new Object[getFieldCount()];
-//			if (splitter.length > outputArray.length) {
-//				throw new IOException("The number of fields in this line is larger than the number of fields in the header: line " + linePointer + ".");
-//			}
 			List<String> splitter = ObjectUtility.splitLine(line, getHeader().getToken());
 			if (splitter.size() > getFieldCount()) {
 				throw new IOException("The number of fields in this line is larger than the number of fields in the header: line " + linePointer + ".");
 			}
-//			for (int i = 0; i < getFieldCount(); i++) {
-//				if (i < splitter.length) {
-//					outputArray[i] = splitter[i].replace("\"","");
-//				} 
-//			}
 			linePointer++;
 			return splitter.toArray();
 		} else {				// if the line is null then the end of file has been reached
@@ -75,7 +86,7 @@ public class CSVReader extends FormatReader<CSVHeader> {
 	
 	
 	private BufferedReader openReader() throws IOException {
-		InputStreamReader inputStreamReader = new InputStreamReader(openStream());
+		InputStreamReader inputStreamReader = new InputStreamReader(openStream(), currentCharset);
 		return new BufferedReader(inputStreamReader);
 	}
 	
