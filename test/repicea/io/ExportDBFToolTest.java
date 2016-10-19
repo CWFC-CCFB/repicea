@@ -4,6 +4,7 @@ import java.util.Vector;
 
 import repicea.io.tools.ExportTool;
 
+@SuppressWarnings("deprecation")
 public class ExportDBFToolTest extends ExportTool {
 
 
