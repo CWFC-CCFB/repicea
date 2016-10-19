@@ -55,7 +55,9 @@ public class ImportTests {
 			readDBF = dbfReader.nextRecord();
 			readCSV = csvReader.nextRecord();
 		}
-		
+		dbfReader.close();
+		csvReader.close();
+
 	}
 	
 	/**
@@ -103,7 +105,9 @@ public class ImportTests {
 			readSQL = sqlReader.nextRecord();
 			readCSV = csvReader.nextRecord();
 		}
-		
+		sqlReader.close();
+		csvReader.close();
+
 	}
 
 	
@@ -151,7 +155,9 @@ public class ImportTests {
 			readSQL = sqlReader.nextRecord();
 			readCSV = csvReader.nextRecord();
 		}
-		
+	
+		sqlReader.close();
+		csvReader.close();
 	}
 
 	
