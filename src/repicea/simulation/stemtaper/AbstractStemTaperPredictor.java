@@ -27,9 +27,9 @@ import repicea.simulation.REpiceaPredictor;
  * @author Mathieu Fortin - April 2014
  */
 @SuppressWarnings("serial")
-public abstract class StemTaperModel extends REpiceaPredictor {
+public abstract class AbstractStemTaperPredictor extends REpiceaPredictor {
 
-	protected StemTaperModel(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled,	boolean isResidualVariabilityEnabled) {
+	protected AbstractStemTaperPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled,	boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
 	}
 
@@ -40,9 +40,10 @@ public abstract class StemTaperModel extends REpiceaPredictor {
 	 * This method computes the stem taper.
 	 * @param tree a BasicStemTaperTrees
 	 * @param heightMeasures a List of Double that represent the height (m)
+	 * @param additionalParameters a series of Object that are additional parameters
 	 * @return an Estimate instance
 	 */
-	public abstract StemTaperEstimate getPredictedTaperForTheseHeights(BasicStemTaperTree tree, List<Double> heightMeasures);
+	public abstract AbstractStemTaperEstimate getPredictedTaperForTheseHeights(BasicStemTaperTree tree, List<Double> heightMeasures, Object... additionalParameters);
 
 	
 	/**
@@ -50,7 +51,7 @@ public abstract class StemTaperModel extends REpiceaPredictor {
 	 * @param stemTaperSegments a List of StemTaperSegment instances
 	 * @return a StemTaperEstimate instance with the cross section diameter
 	 */
-	public StemTaperEstimate getPredictedTaperForTheseSegments(BasicStemTaperTree tree, StemTaperSegmentList stemTaperSegments) {		
+	public AbstractStemTaperEstimate getPredictedTaperForTheseSegments(BasicStemTaperTree tree, StemTaperSegmentList stemTaperSegments) {		
 		List<Double> currentHeightsToEvaluate = stemTaperSegments.getHeightsWithoutReplicates();	
 		return getPredictedTaperForTheseHeights(tree, currentHeightsToEvaluate);		
 	}
