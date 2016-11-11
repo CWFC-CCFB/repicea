@@ -32,7 +32,8 @@ public class MonteCarloSettings {
 		HDRelationship("Height module", "Module de hauteur"),
 		Volume("Volume module", "Module de volume"),
 		Harvesting("Harvesting module", "Module de r\u00E9colte"),
-		Climate("Climate module", "Module de climat");
+		Climate("Climate module", "Module de climat"),
+		TreeBucking("Bucking module", "Module de billonnage");
 		
 		MonteCarloVarSource(String englishString, String frenchString) {
 			setText(englishString, frenchString);
