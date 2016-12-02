@@ -25,10 +25,8 @@ import repicea.math.Matrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.Distribution;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.distributions.NonparametricDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
-import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.integral.TrapezoidalRule;
 
 /**
@@ -36,37 +34,23 @@ import repicea.stats.integral.TrapezoidalRule;
  * likelihood based. The method getMean() and getVariance() are overriden in order to select which super methods apply.
  * The StemTaperEstimate handles the volume integration.
  * @author Mathieu Fortin - March 2012
+ * @author Mathieu Fortin - December 2016 (Refactoring)
  */
 @SuppressWarnings({ "rawtypes", "serial" })
 public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> implements CentralMomentsSettable  {
 		
-	private final Distribution alternateDistribution;
-
 	private List<Double> heights;
 	private Estimate<?> volumeEstimate;
 
+
 	/**
-	 * Constructor 1.
+	 * Constructor.
+	 * @param numberOfRealizations the number of realizations (an integer)
 	 * @param computedHeights a List instance containing the heights (m) of the cross sections
 	 */
 	public AbstractStemTaperEstimate(List<Double> computedHeights) {
-		this(false, computedHeights);
-	}
-
-	/**
-	 * Constructor 2.
-	 * @param numberOfRealizations the number of realizations (an integer)
-	 * @param isMonteCarlo a boolean 
-	 * @param computedHeights a List instance containing the heights (m) of the cross sections
-	 */
-	public AbstractStemTaperEstimate(boolean isMonteCarlo, List<Double> computedHeights) {
-		super(new NonparametricDistribution());
-		alternateDistribution = new GaussianDistribution(null, null);
-		if (isMonteCarlo) {
-			estimatorType = EstimatorType.MonteCarlo;
-		} else {
-			estimatorType = EstimatorType.LikelihoodBased;
-		}
+		super(new GaussianDistribution(null, null));
+		estimatorType = EstimatorType.LikelihoodBased;
 		heights = computedHeights;
 	}
 
@@ -160,40 +144,22 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 
 		Matrix weights = new Matrix(segments.getWeightsAcrossSegments());
 		Matrix rescalingFactors = new Matrix(segments.getRescalingFactorsAcrossSegments());
-//		Matrix volumeFactor = rescalingFactors.elementWiseMultiply(weights).scalarMultiply(Math.PI / 4 * 1E-3); 							// 1E-3 is a factor to express the result in dm3
 		Matrix volumeFactor = rescalingFactors.elementWiseMultiply(weights).scalarMultiply(getScalingFactor());
 		Matrix varianceFactor = volumeFactor.multiply(volumeFactor.transpose());
 
-		Estimate result;
-		if (getEstimatorType() == EstimatorType.MonteCarlo) {
-			result = new MonteCarloEstimate();
-		} else {
-			result = new GaussianEstimate();
-			((GaussianEstimate) result).setMean(null);
-			((GaussianEstimate) result).setVariance(null);
-		}
+		Estimate result = new GaussianEstimate();
+		((GaussianEstimate) result).setMean(null);
+		((GaussianEstimate) result).setVariance(null);
 
-		Matrix volumeEstim;
-		Matrix taper;
 		Matrix variance;
 
-		if (getEstimatorType() == EstimatorType.MonteCarlo) {
-			for (int iter = 0; iter < getNumberOfRealizations(); iter++) {
-				taper = getSquaredDiameters(getRealizations().get(iter));
-				taper = reshapeMatrixAccordingToSegments(segments, taper);
-				volumeEstim = taper.elementWiseMultiply(volumeFactor);
-				((MonteCarloEstimate) result).addRealization(volumeEstim);
-			}
-		} else {
+		Matrix taper = getSquaredDiameters(reshapeMatrixAccordingToSegments(segments, getMean()));
 
-			taper = getSquaredDiameters(reshapeMatrixAccordingToSegments(segments, getMean()));
-
-			volumeEstim = taper.elementWiseMultiply(volumeFactor);
-			((GaussianEstimate) result).setMean(volumeEstim);
-			if (getVariance() != null) {
-				variance = getVarianceOfSquaredDiameter(reshapeMatrixAccordingToSegments(segments, getVariance()));
-				((GaussianEstimate) result).setVariance(variance.elementWiseMultiply(varianceFactor));
-			}
+		Matrix volumeEstim = taper.elementWiseMultiply(volumeFactor);
+		((GaussianEstimate) result).setMean(volumeEstim);
+		if (getVariance() != null) {
+			variance = getVarianceOfSquaredDiameter(reshapeMatrixAccordingToSegments(segments, getVariance()));
+			((GaussianEstimate) result).setVariance(variance.elementWiseMultiply(varianceFactor));
 		}
 		return result;
 	}
@@ -212,58 +178,13 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 	protected abstract double getScalingFactor();
 	
 	@Override
-	public Distribution getDistribution() {
-		if (estimatorType == EstimatorType.MonteCarlo) {
-			return super.getDistribution();
-		} else {
-			return alternateDistribution;
-		}
-	}
-	
-	protected int getNumberOfRealizations() {
-		if (getEstimatorType() == EstimatorType.MonteCarlo) {
-			return ((NonparametricDistribution) getDistribution()).getNumberOfRealizations();
-		} else {
-			return 0;		// TODO check if this works
-		}
-	}
-
-	protected List<Matrix> getRealizations() {
-		if (getEstimatorType() == EstimatorType.MonteCarlo) {
-			return ((NonparametricDistribution) getDistribution()).getRealizations();
-		} else {
-			return null;		// TODO check if this works
-		}
-	}
-
-	@Override
 	public void setMean(Matrix mean) {
-		if (getEstimatorType() == EstimatorType.LikelihoodBased) {
-			((GaussianDistribution) getDistribution()).setMean(mean);
-		} else {
-			throw new InvalidParameterException("The HybridEstimate was set to likelihood based!");
-		}
+		((GaussianDistribution) getDistribution()).setMean(mean);
 	}
 
 	@Override
 	public void setVariance(Matrix variance) {
-		if (getEstimatorType() == EstimatorType.LikelihoodBased) {
-			((GaussianDistribution) getDistribution()).setVariance(variance);
-		} else {
-			throw new InvalidParameterException("The HybridEstimate was set to likelihood based!");
-		}
+		((GaussianDistribution) getDistribution()).setVariance(variance);
 	}
-
-	/**
-	 * This method records the realization of a particular Monte Carlo iteration
-	 * @param realization the realization as a Matrix instance
-	 */
-	public void addRealization(Matrix realization) {
-		if (getEstimatorType() == EstimatorType.MonteCarlo) {
-			((NonparametricDistribution) getDistribution()).addRealization(realization);
-		} else {
-			throw new InvalidParameterException("The HybridEstimate was set to Monte Carlo!");
-		}
-	}		
 
 }
