@@ -33,11 +33,11 @@ import java.util.Set;
  * The XmlMarshaller class handles the serialization of any object into XmlList and XmlEntry objects.
  * @author Mathieu Fortin - November 2012
  */
-final class XmlMarshaller {
+public final class XmlMarshaller {
 
 	private Map<Class<?>, Set<Integer>> registeredObjects;
 	
-	protected XmlMarshaller() {
+	public XmlMarshaller() {
 		registeredObjects = new HashMap<Class<?>, Set<Integer>>();
 	}
 	
@@ -61,7 +61,7 @@ final class XmlMarshaller {
 
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected XmlList marshall(Object obj) {
+	public XmlList marshall(Object obj) {
 		XmlList xmlObj = new XmlList(obj);
 		if (!hasObjectBeenRegistered(obj)) {
 			registerObject(obj);

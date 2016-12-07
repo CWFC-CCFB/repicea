@@ -20,8 +20,8 @@ package repicea.serial;
 
 import java.util.concurrent.LinkedBlockingDeque;
 
-import repicea.serial.cloner.SerialCloner;
-import repicea.serial.cloner.XmlSerialCloner;
+import repicea.serial.xml.XmlList;
+import repicea.serial.xml.XmlMarshaller;
 
 class MemorizerWorker extends Thread {
 	
@@ -29,14 +29,11 @@ class MemorizerWorker extends Thread {
 
 	private final LinkedBlockingDeque<MemorizerPackage> queue;
 
-	private final SerialCloner<MemorizerPackage> memorizer;
-
-	private final MemorizedRegistrable registrable;
+	private final REpiceaMemorizerHandler handler;
 	
-	protected MemorizerWorker(String name, MemorizedRegistrable registrable) {
+	protected MemorizerWorker(String name, REpiceaMemorizerHandler handler) {
 		setName(name);
-		this.registrable = registrable;
-		memorizer = new XmlSerialCloner<MemorizerPackage>();
+		this.handler = handler;
 		queue = new LinkedBlockingDeque<MemorizerPackage>();
 	}
 
@@ -51,8 +48,9 @@ class MemorizerWorker extends Thread {
 				if (System.identityHashCode(originalMp) == System.identityHashCode(ShutDownMemorizerPackage)) {
 					stop = true;
 				} else {
-					MemorizerPackage mp = memorizer.cloneThisObject(originalMp);
-					registrable.registerMemorizerPackage(mp);
+					XmlMarshaller marshaller = new XmlMarshaller();
+					XmlList list = marshaller.marshall(originalMp);
+					handler.registerMemorizerPackage(list);
 				}
 			} catch (InterruptedException e) {
 				numberOfFailures++;
