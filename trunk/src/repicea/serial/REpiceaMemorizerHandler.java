@@ -34,8 +34,10 @@ import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.Resettable;
 import repicea.gui.SynchronizedListening;
+import repicea.serial.xml.XmlList;
+import repicea.serial.xml.XmlUnmarshaller;
 
-public class REpiceaMemorizerHandler implements ActionListener, SynchronizedListening, Resettable, MemorizedRegistrable {
+public class REpiceaMemorizerHandler implements ActionListener, SynchronizedListening, Resettable {
 	
 	private class InternalComponentAdapter implements ComponentListener {
 
@@ -48,7 +50,6 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 		@Override
 		public void componentShown(ComponentEvent arg0) {
 			if (arg0.getSource().equals(window)) {
-				REpiceaMemorizerHandler.this.memorized.setMemorizerWorkerEnabled(true);
 				REpiceaMemorizerHandler.this.setMemorizerWorkerEnabled(true);
 				reset();
 				listenTo();
@@ -60,7 +61,6 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 			if (arg0.getSource().equals(window)) {
 				doNotListenToAnymore();
 				REpiceaMemorizerHandler.this.setMemorizerWorkerEnabled(false);
-				REpiceaMemorizerHandler.this.memorized.setMemorizerWorkerEnabled(false);
 			}
 		}
 	}
@@ -81,12 +81,24 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 			} else if (propertyName.equals(REpiceaAWTProperty.JustSaved.name())) {
 				reset();
 			} else if (propertyName.equals(REpiceaAWTProperty.WindowCancelledConfirmed.name())) {
-				REpiceaMemorizerHandler.this.windowOwner.unpackMemorizerPackage(referencePackage);
+				REpiceaMemorizerHandler.this.windowOwner.unpackMemorizerPackage(convertToMemorizerPackage(referencePackage));
 				synchronize();
 			} else  if (propertyName.equals(REpiceaAWTProperty.SynchronizeWithOwner.name())) {
 				synchronize();
 			}
 
+		}
+	}
+	
+	private MemorizerPackage convertToMemorizerPackage(XmlList list) {
+		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();
+		MemorizerPackage mp;
+		try {
+			mp = (MemorizerPackage) unmarshaller.unmarshall(list);
+			return mp;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 		
@@ -103,7 +115,7 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 	private boolean isFirstMemorizing;
 	private boolean extendedImplementation;
 
-	protected MemorizerPackage referencePackage;
+	protected XmlList referencePackage;
 
 	private final MemorizedArray memorized; 
 	
@@ -148,7 +160,7 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 		this(window, null, null);
 	}
 
-	private void addMemorizerPackage(MemorizerPackage retrieve) {
+	private void addMemorizerPackage(XmlList retrieve) {
 		if (currentPointer + 1 == maxCapacity) {
 			memorized.remove(0);
 			currentPointer--;
@@ -171,24 +183,22 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource().equals(undo)) {
 			currentPointer--;
-			MemorizerPackage serializedMemorizerPackage = memorized.get(currentPointer);
+			MemorizerPackage serializedMemorizerPackage = convertToMemorizerPackage(memorized.get(currentPointer));
 			windowOwner.unpackMemorizerPackage(serializedMemorizerPackage);
 			redo.setEnabled(true);
 			undo.setEnabled(true);
 			if (currentPointer == 0) {
 				undo.setEnabled(false);
 			} 
-//			redo.setEnabled(true);
 			synchronize();
 		} else if (arg0.getSource().equals(redo)) {
-			MemorizerPackage serializedMemorizerPackage = memorized.get(++currentPointer);
+			MemorizerPackage serializedMemorizerPackage = convertToMemorizerPackage(memorized.get(++currentPointer));
 			windowOwner.unpackMemorizerPackage(serializedMemorizerPackage);
 			undo.setEnabled(true);
 			redo.setEnabled(true);
 			if (currentPointer == memorized.size() - 1) {
 				redo.setEnabled(false);
 			} 
-//			undo.setEnabled(true);
 			synchronize();
 		}
 	}
@@ -203,8 +213,7 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 		((Window) window).removePropertyChangeListener(propertyChangeAdapter);
 	}
 	
-	@Override
-	public void registerMemorizerPackage(MemorizerPackage mp) {
+	protected void registerMemorizerPackage(XmlList mp) {
 		if (isFirstMemorizing) {
 			referencePackage = mp;
 			isFirstMemorizing = false;
@@ -238,8 +247,7 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 		memorizeFromWindow(window);
 	}
 
-	@Override
-	public void setMemorizerWorkerEnabled(boolean enabled) {
+	protected void setMemorizerWorkerEnabled(boolean enabled) {
 		if (worker == null || !worker.isAlive()) {
 			if (enabled) {
 				worker = new MemorizerWorker("Memorizer Thread", REpiceaMemorizerHandler.this);

@@ -34,7 +34,7 @@ import sun.reflect.ReflectionFactory;
  * The XmlUnmarshaller class handles the deserialization from XmlEntry and XmlList classes.
  * @author Mathieu Fortin - November 2012
  */
-class XmlUnmarshaller {
+public final class XmlUnmarshaller {
 
 	private Map<Class<?>, Map<Integer, Object>> registeredObjects;
 	
@@ -63,7 +63,7 @@ class XmlUnmarshaller {
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	Object unmarshall(XmlList xmlList) throws Exception {
+	public Object unmarshall(XmlList xmlList) throws Exception {
 		Class<?> clazz = XmlMarshallingUtilities.getClass(xmlList);
 		int referenceHashCode = xmlList.refHashCode;
 		if (hasObjectBeenRegistered(clazz, referenceHashCode)) {		// if the object has already been registered it is returned

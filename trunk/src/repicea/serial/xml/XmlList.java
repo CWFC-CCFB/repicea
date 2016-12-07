@@ -31,7 +31,7 @@ import javax.xml.bind.annotation.XmlType;
  */
 @XmlType
 @XmlRootElement
-class XmlList {
+public class XmlList {
 	
 	@XmlElement
 	String className;

@@ -67,6 +67,9 @@ public class ProcessorLinkLine extends ValidProcessorLinkLine implements REpicea
 	protected void setLabel() {
 		Processor fatherProcessor = getFatherAnchor().getOwner();
 		Processor sonProcessor = getSonAnchor().getOwner();
+		if (fatherProcessor.getSubProcessorIntakes().get(sonProcessor) == null) {
+			fatherProcessor.getSubProcessorIntakes().get(sonProcessor);
+		}
 		int intake = fatherProcessor.getSubProcessorIntakes().get(sonProcessor);
 		label.setText(intake + "%");
 		panel.repaint();
