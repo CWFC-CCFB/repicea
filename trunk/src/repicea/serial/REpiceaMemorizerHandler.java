@@ -27,6 +27,7 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.ArrayList;
 
 import javax.swing.AbstractButton;
 
@@ -117,7 +118,7 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 
 	protected XmlList referencePackage;
 
-	private final MemorizedArray memorized; 
+	private final ArrayList<XmlList> memorized; 
 	
 	private AbstractButton undo;
 	private AbstractButton redo;
@@ -134,7 +135,7 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 	public REpiceaMemorizerHandler(OwnedWindow window, AbstractButton undo, AbstractButton redo) {
 		this.windowOwner = window.getWindowOwner();
 		this.window = window;
-		this.memorized = new MemorizedArray();
+		this.memorized = new ArrayList<XmlList>();
 		
 		propertyChangeAdapter = new InternalPropertyChangeAdapter();
 		componentAdapter = new InternalComponentAdapter();
