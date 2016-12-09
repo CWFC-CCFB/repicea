@@ -97,6 +97,7 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	protected final DragGestureRecognizer createLinkRecognizer;
 	protected final JLabel label;
 	private final SystemPanel panel;
+	private boolean hasChanged;
 	protected transient ProcessorInternalDialog guiInterface;
 	
 	protected ProcessorButton(SystemPanel panel, Processor process, REpiceaGUIPermission permission) {
@@ -198,7 +199,17 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	@Override
 	public void showUI(Window window) {
 		ProcessorInternalDialog dlg = getUI(window);
+		if (!dlg.isVisible()) {
+			hasChanged = false;
+		}
 		dlg.setVisible(true);
+		if (hasChanged) {
+			SystemManagerDialog systemDlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+			if (systemDlg != null) {
+				systemDlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, this, null);
+			}
+			hasChanged = false;
+		}
 	}
 
 	@Override
@@ -208,4 +219,5 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	@Override
 	protected Icon getDefaultIcon() {return UISetup.Icons.get(ProcessorButton.class.getName());}
 
+	protected void setChanged(boolean hasChanged) {this.hasChanged = hasChanged;}
 }
