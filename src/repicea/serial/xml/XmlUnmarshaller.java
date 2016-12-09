@@ -115,13 +115,6 @@ public final class XmlUnmarshaller {
 				cstor.setAccessible(true);
 				Object newInstance = cstor.newInstance(new Object[]{});
 				registerObject(clazz, xmlList.refHashCode, newInstance);
-//				if (Map.class.isAssignableFrom(clazz)) {				// map case
-//					Object[] entries = (Object[]) unmarshall((XmlList) xmlList.list.get(0).value);
-//					for (Object entry : entries) {
-//						((Map) newInstance).put(((Entry) entry).getKey(), ((Entry) entry).getValue());
-//					}
-//					return newInstance;
-//				} else {
 				Map<String, Field> fieldsToFill = XmlMarshallingUtilities.getFieldMapFromClass(clazz);
 				Object[] mapEntries = null;
 				for (XmlEntry entry : xmlList.getEntries()) {
@@ -131,7 +124,7 @@ public final class XmlUnmarshaller {
 						mapEntries = (Object[]) unmarshall((XmlList) entry.value);
 					} else {
 						Field field = fieldsToFill.get(entry.fieldName);
-						if (field != null) {			// means the field has been deleted since then
+						if (field != null && !isExceptionField(newInstance, field)) {			// means the field has been deleted since then
 							field.setAccessible(true);
 							Object value = entry.value;
 							if (value instanceof XmlList) {
@@ -149,14 +142,12 @@ public final class XmlUnmarshaller {
 						}
 					} else if (Collection.class.isAssignableFrom(clazz)) {
 						try {
-//							Field sizeField = clazz.getDeclaredField("size");
-							Field sizeField = this.findSizeField(clazz);
+							Field sizeField = findSizeField(clazz);
 							sizeField.setAccessible(true);
 							sizeField.set(newInstance, (Integer) 0);	// force the size to be 0 otherwise the clear method may exceed the array length
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-//						((Collection) newInstance).clear();
 						for (Object listEntry : mapEntries) {
 							((Collection) newInstance).add(listEntry);
 						}
@@ -170,6 +161,18 @@ public final class XmlUnmarshaller {
 		}
 	}
 	
+	private boolean isExceptionField(Object newInstance, Field field) {
+		if (Map.class.isAssignableFrom(newInstance.getClass())) {
+			if (field.getName().equals("loadFactor")) {
+				return true;
+			} 
+			if (field.getName().equals("threshold")) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	@SuppressWarnings("rawtypes")
 	private Field findSizeField(Class clazz) {
 		List<Class> classes = new ArrayList<Class>();

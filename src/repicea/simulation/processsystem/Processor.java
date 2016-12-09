@@ -183,8 +183,12 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 	public void caretUpdate(CaretEvent evt) {
 		if (evt.getSource() instanceof JTextField) {
 			JTextField txtField = (JTextField) evt.getSource();
-			setName(txtField.getText());
-			getUI().setLabel();
+			String newLabel = txtField.getText();
+			if (!newLabel.equals(getName())) {
+				getUI().setChanged(true);
+				setName(newLabel);
+				getUI().setLabel();
+			}
 		}
 	}
 	
