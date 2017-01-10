@@ -29,25 +29,25 @@ public class VarianceEstimate extends Estimate<ChiSquaredDistribution> {
 
 	private static final long serialVersionUID = 20121114L;
 
-	/**
-	 * Common constructor.
-	 * @param degreesOfFreedom the degrees of freedom
-	 */
-	public VarianceEstimate(int degreesOfFreedom) {
-		super(new ChiSquaredDistribution(degreesOfFreedom));
-		estimatorType = EstimatorType.LikelihoodBased;
-	}
+//	/**
+//	 * Common constructor.
+//	 * @param degreesOfFreedom the degrees of freedom
+//	 */
+//	public VarianceEstimate(int degreesOfFreedom) {
+//		super(new ChiSquaredDistribution(degreesOfFreedom));
+//		estimatorType = EstimatorType.LikelihoodBased;
+//	}
 	
-	/**
-	 * Constructor with mean and variance.
-	 * @param degreesOfFreedom the degrees of freedom
-	 * @param mean the estimated mean
-	 * @param variance the variance
-	 */
-	public VarianceEstimate(int degreesOfFreedom, double mean, double variance) {
-		super(new ChiSquaredDistribution(degreesOfFreedom, mean, variance));
-		estimatorType = EstimatorType.LikelihoodBased;
-	}
+//	/**
+//	 * Constructor with mean and variance.
+//	 * @param degreesOfFreedom the degrees of freedom
+//	 * @param mean the estimated mean
+//	 * @param variance the variance
+//	 */
+//	public VarianceEstimate(int degreesOfFreedom, double mean, double variance) {
+//		super(new ChiSquaredDistribution(degreesOfFreedom, mean, variance));
+//		estimatorType = EstimatorType.LikelihoodBased;
+//	}
 
 	/**
 	 * Constructor with mean only.
