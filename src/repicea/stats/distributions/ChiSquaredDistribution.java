@@ -21,18 +21,18 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
-import repicea.stats.CentralMomentsSettable;
 import repicea.stats.Distribution;
 
 /**
  * The ChiSquareDistribution class represents a univariate Chi Square distribution with a given degrees of freedom.
  * @author Mathieu Fortin - November 2012
  */
-public final class ChiSquaredDistribution implements Distribution, CentralMomentsSettable {
+public final class ChiSquaredDistribution implements Distribution {
+//public final class ChiSquaredDistribution implements Distribution, CentralMomentsSettable {
 
 	private static final long serialVersionUID = 20121114L;
 
-	private int degreesOfFreedom;
+	private final int degreesOfFreedom;
 
 	private Matrix mean;
 	private Matrix variance;
@@ -41,7 +41,7 @@ public final class ChiSquaredDistribution implements Distribution, CentralMoment
 	 * Common constructor.
 	 * @param degreesOfFreedom the degrees of freedom
 	 */
-	public ChiSquaredDistribution(int degreesOfFreedom) {
+	private ChiSquaredDistribution(int degreesOfFreedom) {
 		if (degreesOfFreedom < 1) {
 			throw new InvalidParameterException("The number of degrees of freedom must be equal to or larger than 1!");
 		}
@@ -49,47 +49,47 @@ public final class ChiSquaredDistribution implements Distribution, CentralMoment
 	}
 
 	/**
-	 * Constructor with mean only. The variance is calculated as 2 / (2 + v) * meanEstimate ^ 2 with
-	 * v being the degrees of freedom.
+	 * Constructor for univariate Chi-squared distribution. 
 	 * @param degreesOfFreedom the degrees of freedom
-	 * @param estimate the estimated mean
+	 * @param meanValue the mean value
 	 */
-	public ChiSquaredDistribution(int degreesOfFreedom, double estimate) {
+	public ChiSquaredDistribution(int degreesOfFreedom, double meanValue) {
 		this(degreesOfFreedom);
-		if (estimate < 0) {
+		if (meanValue < 0) {
 			throw new InvalidParameterException("The variance estimate must be larger than 0!");
 		}
-		double var = 2d / (2 + degreesOfFreedom) * estimate * estimate;
+//		double var = 2d / (2 + degreesOfFreedom) * meanValue * meanValue;
 		Matrix mean = new Matrix(1,1);
-		mean.m_afData[0][0] = estimate;
-		setMean(mean);
-		Matrix variance = new Matrix(1,1);
-		variance.m_afData[0][0] = var;
-		setVariance(variance);
+		mean.m_afData[0][0] = meanValue;
+		this.mean = mean;
+//		Matrix variance = new Matrix(1,1);
+//		variance.m_afData[0][0] = var;
+//		setVariance(variance);
 	}
 
 
-	/**
-	 * Constructor with mean and variance.
-	 * @param degreesOfFreedom the degrees of freedom
-	 * @param estimate the estimate of the mean
-	 * @param var the variance
-	 */
-	public ChiSquaredDistribution(int degreesOfFreedom, double estimate, double var) {
-		this(degreesOfFreedom);
-		if (estimate < 0) {
-			throw new InvalidParameterException("The variance estimate must be larger than 0!");
-		}
-		if (var < 0) {
-			throw new InvalidParameterException("The variance must be larger than 0!");
-		}
-		Matrix mean = new Matrix(1,1);
-		mean.m_afData[0][0] = estimate;
-		setMean(mean);
-		Matrix variance = new Matrix(1,1);
-		variance.m_afData[0][0] = var;
-		setVariance(variance);
-	}
+//	/**
+//	 * Constructor with mean and variance.
+//	 * @param degreesOfFreedom the degrees of freedom
+//	 * @param estimate the estimate of the mean
+//	 * @param var the variance
+//	 */
+//	public ChiSquaredDistribution(int degreesOfFreedom, double estimate, double var) { 	
+	// TODO this constructor should not include the degrees of freedom and could use the Satterthwaite approximation
+//		this(degreesOfFreedom);
+//		if (estimate < 0) {
+//			throw new InvalidParameterException("The variance estimate must be larger than 0!");
+//		}
+//		if (var < 0) {
+//			throw new InvalidParameterException("The variance must be larger than 0!");
+//		}
+//		Matrix mean = new Matrix(1,1);
+//		mean.m_afData[0][0] = estimate;
+//		setMean(mean);
+//		Matrix variance = new Matrix(1,1);
+//		variance.m_afData[0][0] = var;
+//		setVariance(variance);
+//	}
 
 	/**
 	 * This method returns the degrees of freedom.
@@ -106,7 +106,11 @@ public final class ChiSquaredDistribution implements Distribution, CentralMoment
 
 	@Override
 	public Matrix getVariance() {
-		return variance;
+		if (variance == null) {
+			return getMean().elementWisePower(2).scalarMultiply(2d / getDegreesOfFreedom());
+		} else {
+			return variance;
+		}
 	}
 
 
@@ -121,20 +125,9 @@ public final class ChiSquaredDistribution implements Distribution, CentralMoment
 
 	@Override
 	public Matrix getRandomRealization() {
-		// TODO Auto-generated method stub
-		return null;
+		double factor = ChiSquaredUtility.randomValue(getDegreesOfFreedom()) / getDegreesOfFreedom();
+		return getMean().scalarMultiply(factor);
 	}
 
-
-
-	@Override
-	public void setMean(Matrix mean) {
-		this.mean = mean;
-	}
-
-	@Override
-	public void setVariance(Matrix variance) {
-		this.variance = variance;
-	}
 
 }
