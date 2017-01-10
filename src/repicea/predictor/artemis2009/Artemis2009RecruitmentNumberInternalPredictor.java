@@ -24,7 +24,7 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
-import repicea.stats.distributions.GammaFunction;
+import repicea.stats.distributions.GammaUtility;
 import repicea.stats.estimates.GaussianEstimate;
 //import org.apache.commons.math.special.Gamma;
 
@@ -71,13 +71,13 @@ class Artemis2009RecruitmentNumberInternalPredictor extends REpiceaPredictor {
 			double fTmp3 = 1.0;
 			double constant = 0.0;
 			
-			constant = GammaFunction.logGamma(fTmp2);
+			constant = GammaUtility.logGamma(fTmp2);
 
 			int recruitNumber = 0;													// number of recruits
 
 			while ((threshold > prob)&&(recruitNumber<80)) {						// maximum number of recruits is set to 80
-				prob += Math.exp(GammaFunction.logGamma(recruitNumber + fTmp2) 
-						- GammaFunction.logGamma(recruitNumber + 1.0) - constant)* fTmp3 	// fTmp3 replaces : * Math.pow(fTmp,fTreeFreq)
+				prob += Math.exp(GammaUtility.logGamma(recruitNumber + fTmp2) 
+						- GammaUtility.logGamma(recruitNumber + 1.0) - constant)* fTmp3 	// fTmp3 replaces : * Math.pow(fTmp,fTreeFreq)
 						/ (Math.pow(1+fTmp,recruitNumber + fTmp2));
 				fTmp3 *= fTmp;
 				recruitNumber++;
