@@ -29,6 +29,7 @@ import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.covariateproviders.treelevel.ABCDQualityProvider.ABCDQuality;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.distributions.ChiSquaredDistribution;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.util.ObjectUtility;
 
@@ -61,7 +62,8 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 	private Matrix weightExponentCoefficients;
 	private Matrix corrMatrix;
 	private Map<Double, Matrix> cholMatrices;
-//	private Map<Double, Matrix> varianceMatrices;
+
+	private ChiSquaredDistribution distributionForVCovRandomDeviates;
 	
 
 	/**
@@ -305,10 +307,15 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 	/*
 	 * For manuscript purposes.
 	 */
-	void replaceBeta() {
+	void replaceModelParameters() {
 		Matrix newMean = getParameterEstimates().getRandomDeviate();
 		Matrix variance = getParameterEstimates().getVariance();
-		setParameterEstimates(new GaussianEstimate(newMean, variance));
+		if (distributionForVCovRandomDeviates == null) {
+			int degreesOfFreedom = 607;		// according to simul.gnls.3 in the file resolution-simultanee-v8-mathieu
+			distributionForVCovRandomDeviates = new ChiSquaredDistribution(degreesOfFreedom, variance);
+		}
+		Matrix newVariance = distributionForVCovRandomDeviates.getRandomRealization();
+		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
 	}
 
 	

@@ -136,7 +136,7 @@ public class Population {
 			setRealizedValues(pop.sampleUnits, pop.superModel);
 			Matrix total = pop.getTotal();
 			WBirchLogGradesPredictor currentModel = new WBirchLogGradesPredictor(true, true); // the current model must account for the errors in the parameter estimates
-			currentModel.replaceBeta();	// the parameter estimates are drawn at random in the distribution
+			currentModel.replaceModelParameters();	// the parameter estimates are drawn at random in the distribution
 			PlotList sample = pop.getSample(sampleSize);
 			HybridMonteCarloHorvitzThompsonEstimate hybHTEstimate = new HybridMonteCarloHorvitzThompsonEstimate();
 			for (int internalReal = 0; internalReal < nbInternalReal; internalReal++) {

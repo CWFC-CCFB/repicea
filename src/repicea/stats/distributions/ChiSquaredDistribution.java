@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2017 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,7 +28,6 @@ import repicea.stats.Distribution;
  * @author Mathieu Fortin - November 2012
  */
 public final class ChiSquaredDistribution implements Distribution {
-//public final class ChiSquaredDistribution implements Distribution, CentralMomentsSettable {
 
 	private static final long serialVersionUID = 20121114L;
 
@@ -36,17 +35,10 @@ public final class ChiSquaredDistribution implements Distribution {
 
 	private Matrix mean;
 	private Matrix variance;
-
-	/**
-	 * Common constructor.
-	 * @param degreesOfFreedom the degrees of freedom
-	 */
-	private ChiSquaredDistribution(int degreesOfFreedom) {
-		if (degreesOfFreedom < 1) {
-			throw new InvalidParameterException("The number of degrees of freedom must be equal to or larger than 1!");
-		}
-		this.degreesOfFreedom = degreesOfFreedom;
-	}
+	
+	private Matrix lowerTriangleChol;
+	private Matrix upperTriangleChol;
+	
 
 	/**
 	 * Constructor for univariate Chi-squared distribution. 
@@ -54,7 +46,10 @@ public final class ChiSquaredDistribution implements Distribution {
 	 * @param meanValue the mean value
 	 */
 	public ChiSquaredDistribution(int degreesOfFreedom, double meanValue) {
-		this(degreesOfFreedom);
+		if (degreesOfFreedom < 1) {
+			throw new InvalidParameterException("The number of degrees of freedom must be equal to or larger than 1!");
+		}
+		this.degreesOfFreedom = degreesOfFreedom;
 		if (meanValue < 0) {
 			throw new InvalidParameterException("The variance estimate must be larger than 0!");
 		}
@@ -65,6 +60,26 @@ public final class ChiSquaredDistribution implements Distribution {
 //		Matrix variance = new Matrix(1,1);
 //		variance.m_afData[0][0] = var;
 //		setVariance(variance);
+	}
+
+	
+	/**
+	 * Constructor for multivariate Chi-squared distribution (Wishart distribution). 
+	 * @param degreesOfFreedom the degrees of freedom
+	 * @param meanValue the mean value
+	 */
+	public ChiSquaredDistribution(int degreesOfFreedom, Matrix meanValues) {
+		if (degreesOfFreedom < 1) {
+			throw new InvalidParameterException("The number of degrees of freedom must be equal to or larger than 1!");
+		}
+		this.degreesOfFreedom = degreesOfFreedom;
+		if (!meanValues.isSymmetric()) {
+			throw new InvalidParameterException("The variance-covariance matrix must be symmetric!");
+		}
+		if (meanValues.diagonalVector().anyElementSmallerOrEqualTo(0d)) {
+			throw new InvalidParameterException("The variance estimate must be larger than 0!");
+		}
+		this.mean = meanValues.getDeepClone();
 	}
 
 
@@ -101,32 +116,70 @@ public final class ChiSquaredDistribution implements Distribution {
 	
 	@Override
 	public Matrix getMean() {
-		return mean;
+		return mean.getDeepClone();
 	}
 
 	@Override
 	public Matrix getVariance() {
 		if (variance == null) {
-			return getMean().elementWisePower(2).scalarMultiply(2d / getDegreesOfFreedom());
-		} else {
-			return variance;
+			variance = calculateVarianceMatrix();
 		}
+		return variance;
 	}
 
+	/**
+	 * This method is based on Wishart's distribution.
+	 */
+	private Matrix calculateVarianceMatrix() {
+		int nRows = mean.m_iRows;
+		int nCols = mean.m_iCols;
+		Matrix varianceMat = new Matrix(nRows, nCols);
+		double result;
+		for (int i = 0; i < nRows; i++) {
+			for (int j = i; j < nCols; j++) {
+				result = mean.m_afData[i][j] * mean.m_afData[i][j] + mean.m_afData[i][i] * mean.m_afData[j][j];  
+				varianceMat.m_afData[i][j] = result;
+				if (j != i) {
+					varianceMat.m_afData[j][i] = result;
+				}
+			}
+		}
+		return varianceMat.scalarMultiply(1d / getDegreesOfFreedom());
+	}
+	
+	
 
 	@Override
 	public boolean isParametric() {return true;}
 
 	@Override
-	public boolean isMultivariate() {return false;}
+	public boolean isMultivariate() {
+		return mean.m_iRows > 1;
+	}
 
 	@Override
-	public Type getType() {return Type.CHI_SQUARE;}
+	public Type getType() {
+		if (isMultivariate()) {
+			return Type.WISHART;
+		} else {
+			return Type.CHI_SQUARE;
+		}
+	}
 
 	@Override
 	public Matrix getRandomRealization() {
-		double factor = ChiSquaredUtility.randomValue(getDegreesOfFreedom()) / getDegreesOfFreedom();
-		return getMean().scalarMultiply(factor);
+		if (isMultivariate()) {	// then we use Bartlett decomposition for a Wishart distribution
+			if (lowerTriangleChol == null) {
+				lowerTriangleChol = mean.getLowerCholTriangle();
+				upperTriangleChol = lowerTriangleChol.transpose();
+			}
+			Matrix aMat = ChiSquaredUtility.getBartlettDecompositionMatrix(getDegreesOfFreedom(), mean.m_iRows);
+			Matrix randomMat = lowerTriangleChol.multiply(aMat).multiply(aMat.transpose()).multiply(upperTriangleChol).scalarMultiply(1d/getDegreesOfFreedom());
+			return randomMat;
+		} else {
+			double factor = ChiSquaredUtility.randomValue(getDegreesOfFreedom()) / getDegreesOfFreedom();
+			return mean.scalarMultiply(factor);
+		}
 	}
 
 

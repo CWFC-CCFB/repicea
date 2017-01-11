@@ -162,6 +162,25 @@ public final class Matrix implements Serializable, DeepCloneable {
 		return false;
 	}
 
+	
+	/**
+	 * This method tests whether if any element of the Matrix object is 
+	 * smaller than or equal to parameter d. 
+	 * @param d the value to be checked
+	 * @return true if at least one element is larger than d
+	 */
+	public boolean anyElementSmallerOrEqualTo(double d) {
+		for (int i = 0; i < this.m_iRows; i++) {
+			for (int j = 0; j < this.m_iCols; j++) {
+				if (this.m_afData[i][j] <= d) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	
 	/**
 	 * This method return a vector that contains the diagonal element of this.
 	 * A check is implemented to make sure this is a square matrix.

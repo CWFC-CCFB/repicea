@@ -2,12 +2,16 @@ package repicea.predictor.wbirchloggrades.simplelinearmodel;
 
 import repicea.math.Matrix;
 import repicea.simulation.REpiceaPredictor;
+import repicea.stats.distributions.ChiSquaredDistribution;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
 class SimpleLinearModel extends REpiceaPredictor {
 
+	private ChiSquaredDistribution distributionForVCovRandomDeviates;
+	
+	
 	protected SimpleLinearModel(boolean isParametersVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, false, isResidualVariabilityEnabled);
 		init();
@@ -40,10 +44,20 @@ class SimpleLinearModel extends REpiceaPredictor {
 		return pred;
 	}
 
-	protected void replaceBeta() {
+	
+	/*
+	 * For manuscript purposes.
+	 */
+	void replaceModelParameters() {
 		Matrix newMean = getParameterEstimates().getRandomDeviate();
 		Matrix variance = getParameterEstimates().getVariance();
-		setParameterEstimates(new GaussianEstimate(newMean, variance));
+		if (distributionForVCovRandomDeviates == null) {
+			int degreesOfFreedom = 98;		// assumption of 100 observations - 2 parameters
+			distributionForVCovRandomDeviates = new ChiSquaredDistribution(degreesOfFreedom, variance);
+		}
+		Matrix newVariance = distributionForVCovRandomDeviates.getRandomRealization();
+		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
 	}
 
+	
 }

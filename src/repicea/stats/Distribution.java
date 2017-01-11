@@ -37,7 +37,8 @@ public interface Distribution extends CentralMomentsGettable, Serializable {
 		UNIFORM("Uniform", "Uniforme"), 
 		NONPARAMETRIC("Non parametric", "Non param\u00E9trique"), 
 		UNKNOWN("Unknown", "Inconnue"), 
-		CHI_SQUARE("Chi square", "Chi carr\u00E9");
+		CHI_SQUARE("Chi squared", "Chi carr\u00E9"),
+		WISHART("Wishart", "Wishart");
 
 		
 		Type(String englishText, String frenchText) {
