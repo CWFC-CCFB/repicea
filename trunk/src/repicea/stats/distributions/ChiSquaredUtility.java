@@ -21,6 +21,8 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 import java.util.Random;
 
+import repicea.math.Matrix;
+
 public class ChiSquaredUtility {
 
 	private static final Random RANDOM = new Random();
@@ -41,4 +43,26 @@ public class ChiSquaredUtility {
 		}
 		return sumSquared;
 	}
+	
+	/**
+	 * This method returns the matrix A in the Bartlett decomposition.
+	 * @param degreesOfFreedom
+	 * @param dim the dimensions of the matrix
+	 * @return a Matrix
+	 */
+	protected static Matrix getBartlettDecompositionMatrix(int degreesOfFreedom, int dim) {
+		Matrix aMat = new Matrix(dim, dim);
+		for (int i = 0; i < aMat.m_iRows; i++) {
+			for (int j = 0; j <= i; j++) {
+				if (i == j) {
+					aMat.m_afData[i][j] = Math.sqrt(randomValue(degreesOfFreedom - i));	
+				} else {
+					aMat.m_afData[i][j] = RANDOM.nextGaussian();
+				}
+			}
+		}
+		return aMat;
+	}
+	
+	
 }

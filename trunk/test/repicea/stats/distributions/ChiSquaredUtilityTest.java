@@ -25,9 +25,8 @@ import repicea.math.Matrix;
 
 public class ChiSquaredUtilityTest {
 
-	
 	@Test
-	public void randomGenerationTest() {
+	public void randomGenerationTestForUnivariateChiSquared() {
 		int df = 100;
 		double expectedMean = 5d;
 		ChiSquaredDistribution dist = new ChiSquaredDistribution(df, expectedMean);
@@ -43,5 +42,43 @@ public class ChiSquaredUtilityTest {
 	}
 	
 	
+	@Test
+	public void randomGenerationTestForMultivariateChiSquared() {
+		int df = 100;
+		Matrix expectedMean = new Matrix(2,2);
+		expectedMean.m_afData[0][0] = 5d;
+		expectedMean.m_afData[1][1] = 5d;
+		expectedMean.m_afData[0][1] = 0d;
+		expectedMean.m_afData[1][0] = 0d;
+		
+		ChiSquaredDistribution dist = new ChiSquaredDistribution(df, expectedMean);
+		NonparametricDistribution receiver = new NonparametricDistribution();
+		NonparametricDistribution receiver00 = new NonparametricDistribution();
+		NonparametricDistribution receiver01 = new NonparametricDistribution();
+		NonparametricDistribution receiver10 = new NonparametricDistribution();
+		NonparametricDistribution receiver11 = new NonparametricDistribution();
+		for (int i = 0; i < 1000000; i++) {
+			Matrix realization = dist.getRandomRealization();
+			receiver.addRealization(realization);
+			receiver00.addRealization(realization.getSubMatrix(0, 0, 0, 0));
+			receiver01.addRealization(realization.getSubMatrix(0, 0, 1, 1));
+			receiver10.addRealization(realization.getSubMatrix(1, 1, 0, 0));
+			receiver11.addRealization(realization.getSubMatrix(1, 1, 1, 1));
+		}
+		
+		Matrix obsMean = receiver.getMean();
+		Matrix meanDiff = expectedMean.subtract(obsMean);
+		Assert.assertTrue("Testing the mean", !meanDiff.getAbsoluteValue().anyElementLargerThan(5E-3));	// test if no absolute difference is larger than 5E-3
+
+		Matrix obsVariance = new Matrix(2,2);
+		obsVariance.m_afData[0][0] = receiver00.getVariance().m_afData[0][0];
+		obsVariance.m_afData[0][1] = receiver01.getVariance().m_afData[0][0];
+		obsVariance.m_afData[1][0] = receiver10.getVariance().m_afData[0][0];
+		obsVariance.m_afData[1][1] = receiver11.getVariance().m_afData[0][0];
+		Matrix expectedVariance = dist.getVariance();
+		Matrix varianceDiff = expectedVariance.subtract(obsVariance);
+		
+		Assert.assertTrue("Testing the variance", !varianceDiff.getAbsoluteValue().anyElementLargerThan(5E-3)); 	// test if no absolute difference is larger than 5E-3
+	}
 	
 }
