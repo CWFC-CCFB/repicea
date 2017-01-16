@@ -71,7 +71,7 @@ public class Population {
 		Population pop = new Population(populationSize);
 		int nbRealizations = 10000; 
 		int nbInternalReal = 1000;
-		int sampleSize = 10;
+		int sampleSize = 50;
 		String filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
 		filename = filename.replace("bin", "manuscripts");
 		CSVWriter writer = new CSVWriter(new File(filename), false);
