@@ -49,14 +49,19 @@ class SimpleLinearModel extends REpiceaPredictor {
 	 * For manuscript purposes.
 	 */
 	void replaceModelParameters() {
+		int degreesOfFreedom = 98;		// assumption of 100 observations - 2 parameters
 		Matrix newMean = getParameterEstimates().getRandomDeviate();
 		Matrix variance = getParameterEstimates().getVariance();
 		if (distributionForVCovRandomDeviates == null) {
-			int degreesOfFreedom = 98;		// assumption of 100 observations - 2 parameters
 			distributionForVCovRandomDeviates = new ChiSquaredDistribution(degreesOfFreedom, variance);
 		}
 		Matrix newVariance = distributionForVCovRandomDeviates.getRandomRealization();
 		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
+		
+		Matrix residualVariance = this.getDefaultResidualError(ErrorTermGroup.Default).getVariance();
+		ChiSquaredDistribution residualVarianceDistribution = new ChiSquaredDistribution(degreesOfFreedom, residualVariance);
+		Matrix newResidualVariance = residualVarianceDistribution.getRandomRealization();
+		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(newResidualVariance));
 	}
 
 	
