@@ -64,7 +64,8 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 	private Map<Double, Matrix> cholMatrices;
 
 	private ChiSquaredDistribution distributionForVCovRandomDeviates;
-	
+	private Matrix variancesWeights;
+	private Matrix varianceCorrCoefficient;
 
 	/**
 	 * Constructor.
@@ -85,6 +86,8 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 			String omegaFilename = path + "0_omega.csv";
 			String rMatrixFilename = path + "0_rMatrix.csv";
 			String varParmsFilename = path + "0_varParams.csv";
+			String varWeightsFilename = path + "0_varianceWeights.csv";
+			String varCorrCoefFilename = path + "0_varianceCorrCoef.csv";
 
 			Matrix beta = ParameterLoader.loadVectorFromFile(betaFilename).get();
 			Matrix omega = ParameterLoader.loadMatrixFromFile(omegaFilename);
@@ -94,6 +97,10 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0).matrixDiagonal(); 
 
 			setParameterEstimates(new GaussianEstimate(beta, omega));
+			
+			variancesWeights = ParameterLoader.loadVectorFromFile(varWeightsFilename).get();
+			varianceCorrCoefficient = ParameterLoader.loadVectorFromFile(varCorrCoefFilename).get();
+		
 		} catch (Exception e) {
 			System.out.println("Unable to load parameters!");
 		}
@@ -308,14 +315,36 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 	 * For manuscript purposes.
 	 */
 	void replaceModelParameters() {
+		int degreesOfFreedom = 607;		// according to simul.gnls.3 in the file resolution-simultanee-v8-mathieu
 		Matrix newMean = getParameterEstimates().getRandomDeviate();
 		Matrix variance = getParameterEstimates().getVariance();
 		if (distributionForVCovRandomDeviates == null) {
-			int degreesOfFreedom = 607;		// according to simul.gnls.3 in the file resolution-simultanee-v8-mathieu
 			distributionForVCovRandomDeviates = new ChiSquaredDistribution(degreesOfFreedom, variance);
 		}
 		Matrix newVariance = distributionForVCovRandomDeviates.getRandomRealization();
 		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
+		
+		ChiSquaredDistribution residualVarianceDistribution = new ChiSquaredDistribution(degreesOfFreedom, sigma2Res);
+		double newSigma2Res = residualVarianceDistribution.getRandomRealization().m_afData[0][0];
+		sigma2Res = newSigma2Res;
+		
+		Matrix errorWeights = StatisticalUtility.drawRandomVector(weightExponentCoefficients.m_iRows, Type.GAUSSIAN);
+		Matrix newWeights = weightExponentCoefficients.add(variancesWeights.elementWisePower(0.5).elementWiseMultiply(errorWeights).matrixDiagonal());
+		weightExponentCoefficients = newWeights;
+		
+		Matrix errorCorrCoef = varianceCorrCoefficient.elementWisePower(0.5).elementWiseMultiply(StatisticalUtility.drawRandomVector(varianceCorrCoefficient.m_iRows, Type.GAUSSIAN));
+		Matrix output = new Matrix(5,5);
+		int nbElem = 0;
+		for (int i = 0; i < output.m_iRows - 1; i++) {
+			for (int j = i + 1; j < output.m_iCols; j++) {
+				output.m_afData[i][j] = errorCorrCoef.m_afData[nbElem][0];
+				output.m_afData[j][i] = errorCorrCoef.m_afData[nbElem][0];
+				nbElem++;
+			}
+		}
+		
+		Matrix newCorrelationMatrix = this.corrMatrix.add(output);
+		corrMatrix = newCorrelationMatrix;
 	}
 
 	
