@@ -133,10 +133,10 @@ public class WBirchLogGradesPredictorTest {
 		meanRef.m_afData[6][0] = 0d;
 		
 		Matrix stdRef = new Matrix(7,1);
-		stdRef.m_afData[0][0] = 0.14005679329726609;
-		stdRef.m_afData[1][0] = 48.39343575836749 * .001;
-		stdRef.m_afData[2][0] = 70.46323093748266 * .001;
-		stdRef.m_afData[3][0] = 68.00699931625708 * .001; 
+		stdRef.m_afData[0][0] = 0.13280569488806207;
+		stdRef.m_afData[1][0] = 0.048334578844355075;
+		stdRef.m_afData[2][0] = 0.07043375186265777;
+		stdRef.m_afData[3][0] = 0.0679108872730103; 
 		stdRef.m_afData[4][0] = 0d;
 		stdRef.m_afData[5][0] = 0d;
 		stdRef.m_afData[6][0] = 0d;

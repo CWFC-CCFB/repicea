@@ -65,7 +65,7 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 
 	private ChiSquaredDistribution distributionForVCovRandomDeviates;
 	private Matrix variancesWeights;
-	private Matrix varianceCorrCoefficient;
+//	private Matrix varianceCorrCoefficient;
 
 	/**
 	 * Constructor.
@@ -87,19 +87,19 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 			String rMatrixFilename = path + "0_rMatrix.csv";
 			String varParmsFilename = path + "0_varParams.csv";
 			String varWeightsFilename = path + "0_varianceWeights.csv";
-			String varCorrCoefFilename = path + "0_varianceCorrCoef.csv";
+//			String varCorrCoefFilename = path + "0_varianceCorrCoef.csv";
 
 			Matrix beta = ParameterLoader.loadVectorFromFile(betaFilename).get();
 			Matrix omega = ParameterLoader.loadMatrixFromFile(omegaFilename);
 			corrMatrix = ParameterLoader.loadMatrixFromFile(rMatrixFilename);
 			Matrix varParms = ParameterLoader.loadVectorFromFile(varParmsFilename).get();
 			sigma2Res = varParms.m_afData[varParms.m_iRows - 1][0];
-			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0).matrixDiagonal(); 
+			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0); 
 
 			setParameterEstimates(new GaussianEstimate(beta, omega));
 			
 			variancesWeights = ParameterLoader.loadVectorFromFile(varWeightsFilename).get();
-			varianceCorrCoefficient = ParameterLoader.loadVectorFromFile(varCorrCoefFilename).get();
+//			varianceCorrCoefficient = ParameterLoader.loadVectorFromFile(varCorrCoefFilename).get();
 		
 		} catch (Exception e) {
 			System.out.println("Unable to load parameters!");
@@ -110,7 +110,7 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 		double dbhCm = tree.getDbhCm();
 
 		if (!cholMatrices.containsKey(dbhCm)) {
-			Matrix weightMat = weightExponentCoefficients.powMatrix(dbhCm);  
+			Matrix weightMat = weightExponentCoefficients.powMatrix(dbhCm).matrixDiagonal();  
 			Matrix vMat = weightMat.multiply(corrMatrix).multiply(weightMat).scalarMultiply(sigma2Res);
 			cholMatrices.put(dbhCm, vMat.getLowerCholTriangle());
 		}
@@ -329,22 +329,23 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 		sigma2Res = newSigma2Res;
 		
 		Matrix errorWeights = StatisticalUtility.drawRandomVector(weightExponentCoefficients.m_iRows, Type.GAUSSIAN);
-		Matrix newWeights = weightExponentCoefficients.add(variancesWeights.elementWisePower(0.5).elementWiseMultiply(errorWeights).matrixDiagonal());
+		Matrix newWeights = weightExponentCoefficients.add(variancesWeights.elementWisePower(0.5).elementWiseMultiply(errorWeights));
 		weightExponentCoefficients = newWeights;
 		
-		Matrix errorCorrCoef = varianceCorrCoefficient.elementWisePower(0.5).elementWiseMultiply(StatisticalUtility.drawRandomVector(varianceCorrCoefficient.m_iRows, Type.GAUSSIAN));
-		Matrix output = new Matrix(5,5);
-		int nbElem = 0;
-		for (int i = 0; i < output.m_iRows - 1; i++) {
-			for (int j = i + 1; j < output.m_iCols; j++) {
-				output.m_afData[i][j] = errorCorrCoef.m_afData[nbElem][0];
-				output.m_afData[j][i] = errorCorrCoef.m_afData[nbElem][0];
-				nbElem++;
-			}
-		}
-		
-		Matrix newCorrelationMatrix = this.corrMatrix.add(output);
-		corrMatrix = newCorrelationMatrix;
+		// These errors in the correlation parameter leads to exception in the Cholesky decomposition
+//		Matrix errorCorrCoef = varianceCorrCoefficient.elementWisePower(0.5).elementWiseMultiply(StatisticalUtility.drawRandomVector(varianceCorrCoefficient.m_iRows, Type.GAUSSIAN));
+//		Matrix output = new Matrix(5,5);
+//		int nbElem = 0;
+//		for (int i = 0; i < output.m_iRows - 1; i++) {
+//			for (int j = i + 1; j < output.m_iCols; j++) {
+//				output.m_afData[i][j] = errorCorrCoef.m_afData[nbElem][0];
+//				output.m_afData[j][i] = errorCorrCoef.m_afData[nbElem][0];
+//				nbElem++;
+//			}
+//		}
+//		
+//		Matrix newCorrelationMatrix = this.corrMatrix.add(output);
+//		corrMatrix = newCorrelationMatrix;
 	}
 
 	
