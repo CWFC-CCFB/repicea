@@ -29,7 +29,8 @@ import java.util.Map;
 public class XmlSerializerChangeMonitor {
 
 	static Map<String, String> ClassNameChangeMap = new HashMap<String, String>();
-	
+	static Map<String, String> EnumNameChangeMap = new HashMap<String, String>();
+
 	/**
 	 * This method register a class name change.
 	 * @param oldName the former name of this class
@@ -39,7 +40,16 @@ public class XmlSerializerChangeMonitor {
 		ClassNameChangeMap.put(oldName, newName);
 	}
 
-	
+
+	/**
+	 * This method register an enum name change.
+	 * @param oldName the former name of this enum
+	 * @param newName the new name of this enum
+	 */
+	public static void registerEnumNameChange(String oldName, String newName) {
+		EnumNameChangeMap.put(oldName, newName);
+	}
+
 	
 	
 	
