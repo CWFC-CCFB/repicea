@@ -136,7 +136,20 @@ public class XmlMarshallingUtilities {
 		return className;
 	}
 	
-	
+	/**
+	 * This method returns the new enum name if it has been changed.
+	 * @param originalEnumName
+	 * @return a String
+	 */
+	protected static String getEnumName(String originalEnumName) {
+		String enumName = originalEnumName;
+		String changedName = XmlSerializerChangeMonitor.EnumNameChangeMap.get(enumName);
+		if (changedName != null) {
+			enumName = changedName;
+		} 
+		return enumName;
+	}
+
 	
 	/**
 	 * This method creates a deep clone of an object. Transient fields and graphics components
