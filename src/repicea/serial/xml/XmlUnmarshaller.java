@@ -101,7 +101,7 @@ public final class XmlUnmarshaller {
 				
 				return arrayObject;
 			} else if (Enum.class.isAssignableFrom(clazz)) {			// enum case
-				String enumName = XmlMarshallingUtilities.getEnumName(xmlList.getEntries().get(0).value.toString());
+				String enumName = XmlMarshallingUtilities.getEnumName(clazz.getName(), xmlList.getEntries().get(0).value.toString());
 				Object newInstance = Enum.valueOf((Class<Enum>) clazz, enumName);
 				registerObject(clazz, xmlList.refHashCode, newInstance);
 				return newInstance;
