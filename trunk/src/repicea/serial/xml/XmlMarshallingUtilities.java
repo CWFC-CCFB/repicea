@@ -141,12 +141,14 @@ public class XmlMarshallingUtilities {
 	 * @param originalEnumName
 	 * @return a String
 	 */
-	protected static String getEnumName(String originalEnumName) {
+	protected static String getEnumName(String enumClass, String originalEnumName) {
 		String enumName = originalEnumName;
-		String changedName = XmlSerializerChangeMonitor.EnumNameChangeMap.get(enumName);
-		if (changedName != null) {
-			enumName = changedName;
-		} 
+		if (XmlSerializerChangeMonitor.EnumNameChangeMap.containsKey(enumClass)) {
+			String changedName = XmlSerializerChangeMonitor.EnumNameChangeMap.get(enumClass).get(enumName);
+			if (changedName != null) {
+				enumName = changedName;
+			} 
+		}
 		return enumName;
 	}
 
