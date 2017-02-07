@@ -211,7 +211,7 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 	 * <li> slot 3 : sawlog volume (m3) </li>
 	 * <li> slot 4 : low grade veneer volume (m3) </li>
 	 * <li> slot 5 : veneer volume (m3) </li>
-	 * <li> slot 6 : log grade sawlog volume (m3) </li>
+	 * <li> slot 6 : low grade sawlog volume (m3) </li>
 	 * </ul>
 	 */
 	public Matrix getLogGradeVolumePredictions(WBirchLogGradesStand stand, WBirchLogGradesTree tree) {
