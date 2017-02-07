@@ -11,6 +11,7 @@ class SimpleLinearModel extends REpiceaPredictor {
 
 	private ChiSquaredDistribution distributionForVCovRandomDeviates;
 	
+	protected static boolean R2_95Version = false;
 	
 	protected SimpleLinearModel(boolean isParametersVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, false, isResidualVariabilityEnabled);
@@ -29,7 +30,11 @@ class SimpleLinearModel extends REpiceaPredictor {
 		omega.m_afData[1][0] = omega.m_afData[0][1];
 		setParameterEstimates(new GaussianEstimate(beta, omega));
 		Matrix residualVariance = new Matrix(1,1);
-		residualVariance.m_afData[0][0] = 2d;
+		if (R2_95Version) {
+			residualVariance.m_afData[0][0] = .284;			// to ensure a R2 of 0.95
+		} else {
+			residualVariance.m_afData[0][0] = 2d;
+		}
 		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(residualVariance));
 		oXVector = new Matrix(1, beta.m_iRows);
 	}

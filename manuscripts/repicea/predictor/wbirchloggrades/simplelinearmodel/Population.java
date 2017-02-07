@@ -72,8 +72,14 @@ public class Population {
 		int nbRealizations = 10000; 
 		int nbInternalReal = 1000;
 		int sampleSize = 50;
-		String filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
+		String filename;
+		if (SimpleLinearModel.R2_95Version) {
+			filename = ObjectUtility.getPackagePath(Population.class) + "simulationR2_95_" + sampleSize + ".csv";
+		} else {
+			filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
+		}
 		filename = filename.replace("bin", "manuscripts");
+		
 		CSVWriter writer = new CSVWriter(new File(filename), false);
 		List<FormatField> fields = new ArrayList<FormatField>();
 		fields.add(new CSVField("TrueTau"));
@@ -84,6 +90,17 @@ public class Population {
 		fields.add(new CSVField("Model"));
 		writer.setFields(fields);
 
+		String filenameSingleSimulation = ObjectUtility.getPackagePath(Population.class) + "stabilize" + sampleSize + ".csv";
+		filenameSingleSimulation = filenameSingleSimulation.replace("bin", "manuscripts");
+		CSVWriter writerStabilizer = new CSVWriter(new File(filenameSingleSimulation), false);
+		List<FormatField> fieldsStabilizer = new ArrayList<FormatField>();
+		fieldsStabilizer.add(new CSVField("RealID"));
+		fieldsStabilizer.add(new CSVField("Mean"));
+		fieldsStabilizer.add(new CSVField("Var"));
+		writerStabilizer.setFields(fieldsStabilizer);
+		boolean isWriterStabilizerOpen = true;
+
+		Object[] recordStabilizer = new Object[3];
 		List<Realization> realizations = new ArrayList<Realization>();
 		long timeDiff;
 		for (int real = 0; real < nbRealizations; real++) {
@@ -100,6 +117,15 @@ public class Population {
 //				Matrix tauHat = htEstimator.getTotal();
 //				Matrix varTau = htEstimator.getVarianceOfTotalEstimate();
 				hybHTEstimate.addHTEstimate(htEstimator);
+				if (real == 0 && internalReal >= 1) {
+					recordStabilizer[0] = internalReal;
+					recordStabilizer[1] = hybHTEstimate.getTotal().m_afData[0][0];
+					recordStabilizer[2] = hybHTEstimate.getVarianceOfTotalEstimate().getTotalVariance().m_afData[0][0];
+					writerStabilizer.addRecord(recordStabilizer);
+				} else if (real > 0 && isWriterStabilizerOpen) {
+					writerStabilizer.close();
+					isWriterStabilizerOpen = false;
+				}
 			}
 			VariancePointEstimate correctedVarEstimate = hybHTEstimate.getVarianceOfTotalEstimate();
 			Realization thisRealization = new Realization(total.m_afData[0][0], 
