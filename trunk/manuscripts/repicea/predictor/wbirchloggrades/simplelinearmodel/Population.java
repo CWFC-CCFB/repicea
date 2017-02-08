@@ -114,8 +114,6 @@ public class Population {
 				sample.setRealization(internalReal);
 				setRealizedValues(sample, currentModel);
 				HorvitzThompsonTauEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
-//				Matrix tauHat = htEstimator.getTotal();
-//				Matrix varTau = htEstimator.getVarianceOfTotalEstimate();
 				hybHTEstimate.addHTEstimate(htEstimator);
 				if (real == 0 && internalReal >= 1) {
 					recordStabilizer[0] = internalReal;

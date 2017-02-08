@@ -127,9 +127,21 @@ public class Population {
 			fields.add(new CSVField("Samp" + i));
 			fields.add(new CSVField("Model" + i));
 		}
-
 		writer.setFields(fields);
 
+		String filenameSingleSimulation = ObjectUtility.getPackagePath(Population.class) + "stabilize" + sampleSize + ".csv";
+		filenameSingleSimulation = filenameSingleSimulation.replace("bin", "manuscripts");
+		CSVWriter writerStabilizer = new CSVWriter(new File(filenameSingleSimulation), false);
+		List<FormatField> fieldsStabilizer = new ArrayList<FormatField>();
+		fieldsStabilizer.add(new CSVField("RealID"));
+		for (int i = 1; i <= 7; i++) {
+			fieldsStabilizer.add(new CSVField("Mean" + i));
+			fieldsStabilizer.add(new CSVField("Var" + i));
+		}
+		writerStabilizer.setFields(fieldsStabilizer);
+		boolean isWriterStabilizerOpen = true;
+		
+		Object[] recordStabilizer = new Object[writerStabilizer.getHeader().getNumberOfFields()];
 		List<Realization> realizations = new ArrayList<Realization>();
 		long timeDiff;
 		for (int real = 0; real < nbRealizations; real++) {
@@ -143,9 +155,20 @@ public class Population {
 				sample.setRealization(internalReal);
 				setRealizedValues(sample, currentModel);
 				HorvitzThompsonTauEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
-//				Matrix tauHat = htEstimator.getTotal();
-//				Matrix varTau = htEstimator.getVarianceOfTotalEstimate();
 				hybHTEstimate.addHTEstimate(htEstimator);
+				if (real == 0 && internalReal >= 1) {
+					recordStabilizer[0] = internalReal;
+					Matrix totalReal = hybHTEstimate.getTotal();
+					Matrix varReal = hybHTEstimate.getVarianceOfTotalEstimate().getTotalVariance();
+					for (int ii = 0; ii < totalReal.m_iRows; ii++) {
+						recordStabilizer[ii*2 + 1] = totalReal.m_afData[ii][0];
+						recordStabilizer[ii*2 + 2] = varReal.m_afData[ii][ii];
+					}
+					writerStabilizer.addRecord(recordStabilizer);
+				} else if (real > 0 && isWriterStabilizerOpen) {
+					writerStabilizer.close();
+					isWriterStabilizerOpen = false;
+				}
 			}
 			VariancePointEstimate correctedVarEstimate = hybHTEstimate.getVarianceOfTotalEstimate();
 			Realization thisRealization = new Realization(total, 
