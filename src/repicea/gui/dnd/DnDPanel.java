@@ -20,17 +20,19 @@ package repicea.gui.dnd;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Point;
 import java.awt.dnd.DropTargetDropEvent;
 import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.ListManager;
 import repicea.gui.REpiceaPanel;
-import repicea.gui.Refreshable;
 import repicea.gui.REpiceaUIObject;
+import repicea.gui.Refreshable;
 import repicea.gui.components.REpiceaScrollPane;
 
 /**
@@ -39,7 +41,7 @@ import repicea.gui.components.REpiceaScrollPane;
  * @param <D> the class of this object to be received
  */
 @SuppressWarnings("serial")
-public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane implements AcceptableDropComponent<D>, Refreshable {
+public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane implements AcceptableDropComponent<D>, Refreshable { 
 
 	public static class InternalPanel extends REpiceaPanel {
 		
@@ -101,9 +103,25 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 	@Override
 	public void acceptThisObject(D obj, DropTargetDropEvent evt) {
 		manager.registerObject(obj);
+		getViewport().setDropping(true);
 		refreshInterface();
+		Runnable doRun = new Runnable() {
+			@Override
+			public void run() {
+				getViewport().setDropping(false);			// disable the bypass when the drop is over
+			}
+		};
+		SwingUtilities.invokeLater(doRun);
 	}
 
+	protected Point getRelativePointFromDropEvent(DropTargetDropEvent arg0) {
+		Point dropPoint = arg0.getLocation();
+		Point offset = getViewport().getViewPosition();
+		return new Point(dropPoint.x + offset.x, dropPoint.y + offset.y);
+	}
+	
+	
+	
 	@Override
 	public void refreshInterface() {
 		internalPanel.removeAll();

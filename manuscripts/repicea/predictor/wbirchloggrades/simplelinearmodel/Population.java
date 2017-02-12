@@ -64,6 +64,7 @@ public class Population {
 	
 	
 	public static void main(String[] args) throws IOException {
+		SimpleLinearModel.R2_95Version = true;
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(1);
 		long start = System.currentTimeMillis();
@@ -115,7 +116,7 @@ public class Population {
 				setRealizedValues(sample, currentModel);
 				HorvitzThompsonTauEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
 				hybHTEstimate.addHTEstimate(htEstimator);
-				if (real == 0 && internalReal >= 1) {
+				if (!SimpleLinearModel.R2_95Version && real == 0 && internalReal >= 1) {
 					recordStabilizer[0] = internalReal;
 					recordStabilizer[1] = hybHTEstimate.getTotal().m_afData[0][0];
 					recordStabilizer[2] = hybHTEstimate.getVarianceOfTotalEstimate().getTotalVariance().m_afData[0][0];

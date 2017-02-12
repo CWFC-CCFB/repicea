@@ -24,6 +24,7 @@ import java.awt.event.MouseEvent;
 
 import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
+import javax.swing.JViewport;
 
 import repicea.gui.dnd.DragGestureMoveComponentHandler;
 
@@ -70,7 +71,33 @@ public class REpiceaScrollPane extends JScrollPane {
 		
 	}
 	
+
+	public static class REpiceaViewport extends JViewport {
 	
+		public REpiceaViewport() {
+			super();
+		}
+		
+		
+		protected boolean isDropping;		
+	
+		@Override
+		public void setViewPosition(Point point) {
+			if (!isDropping) {
+				super.setViewPosition(point);
+			}
+		}
+		
+		/**
+		 * This method is used to disable the reset of the upper left corner during a drop. When set to true, the 
+		 * setViewPosition method is ignored.
+		 */
+		public void setDropping(boolean isDropping) {
+			this.isDropping = isDropping;
+		}
+
+	}
+
 	/**
 	 * Constructor.
 	 * @param container the container to be put in the scroll panel.
@@ -78,6 +105,16 @@ public class REpiceaScrollPane extends JScrollPane {
 	public REpiceaScrollPane(Container container) {
 		super(container);
 		new InternalDragGestureMoveComponentHandler(this);
+	}
+
+	@Override
+	protected JViewport createViewport() {
+		return new REpiceaViewport();
+	}
+	
+	@Override
+	public REpiceaViewport getViewport() {
+		return (REpiceaViewport) super.getViewport();
 	}
 
 }
