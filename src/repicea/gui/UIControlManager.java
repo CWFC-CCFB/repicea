@@ -139,7 +139,8 @@ public class UIControlManager {
 		Redo("Redo", "R\u00E9tablir", "edit-redo.png"),
 		StopRecord("Stop", "Arr\u00EAter", "stoprecord.png"),
 		PlayRecord("Play", "Jouer", "playrecord.png"),
-		Record("Record", "Enregistrer", "record.png");
+		Record("Record", "Enregistrer", "record.png"),
+		FullScreen("Full screen", "Plein ecran", null);
 		
 		String iconFilename;
 		
@@ -174,6 +175,7 @@ public class UIControlManager {
 		File("File", "Fichier"),
 		Edit("Edit", "Edition"),
 		Tools("Tools", "Outils"),
+		View("View", "Affichage"),
 		Options("Options", "Options"),
 		About("?", "?");
 		

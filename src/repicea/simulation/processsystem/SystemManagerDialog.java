@@ -20,11 +20,15 @@ package repicea.simulation.processsystem;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 
 import javax.swing.AbstractButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -52,7 +56,8 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class SystemManagerDialog extends REpiceaDialog implements ActionListener, 
 									IOUserInterface,
 									Resettable,
-									OwnedWindow {
+									OwnedWindow, 
+									ItemListener {
 	
 	protected static enum MessageID implements TextableEnum {
 		SliderTitle("Output flux", "Flux sortant"),
@@ -87,6 +92,8 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	protected JMenuItem help;
 	protected JMenuItem undo;
 	protected JMenuItem redo;
+	protected JCheckBoxMenuItem enlarge;
+	protected Dimension previousDimension;
 	
 	protected final WindowSettings windowSettings;
 	
@@ -125,6 +132,8 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		redo = UIControlManager.createCommonMenuItem(CommonControlID.Redo);
 		
 		new REpiceaMemorizerHandler(this, undo, redo);
+		
+		enlarge = new JCheckBoxMenuItem(CommonControlID.FullScreen.toString());
 	}
 	
 	protected void setToolPanel() {
@@ -161,6 +170,11 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		return about;
 	}
 	
+	protected JMenu createViewMenu() {
+		JMenu view = UIControlManager.createCommonMenu(CommonMenuTitle.View);
+		view.add(enlarge);
+		return view;
+	}
 	/**
 	 * This method returns the SystemManager instance behind this dialog.
 	 * @return a SystemManager instance.
@@ -180,10 +194,11 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		menuBar.add(editMenu);
 		editMenu.setEnabled(getCaller().getGUIPermission().isEnablingGranted());
 		
+		menuBar.add(createViewMenu());
+				
 		menuBar.add(createAboutMenu());
 		
 		getContentPane().setLayout(new BorderLayout());
-//		JScrollPane scrollPane = new REpiceaScrollPane(systemPanel);
 		getContentPane().add(systemPanel, BorderLayout.CENTER);
 		getContentPane().add(toolPanel, BorderLayout.WEST);
 		refreshTitle();
@@ -195,6 +210,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		reset.addActionListener(this);
 		close.addActionListener(this);
 		help.addActionListener(this);
+		enlarge.addItemListener(this);
 	}
 
 	@Override
@@ -202,6 +218,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		reset.removeActionListener(this);
 		close.removeActionListener(this);
 		help.removeActionListener(this);
+		enlarge.removeItemListener(this);
 	}
 
 	@Override
@@ -270,5 +287,21 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	public Memorizable getWindowOwner() {return getCaller();}
 
 	public SettingMemory getSettingMemory() {return windowSettings;}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource().equals(enlarge)) {
+			if (enlarge.isSelected()) {
+				if (previousDimension == null) {
+					previousDimension = getSize();
+				}
+				Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+				setSize(screenSize);
+			} else {
+				setSize(previousDimension);
+				previousDimension = null;
+			}
+		}
+	}
 	
 }
