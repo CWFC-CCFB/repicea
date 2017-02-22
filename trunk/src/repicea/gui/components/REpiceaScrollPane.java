@@ -103,9 +103,16 @@ public class REpiceaScrollPane extends JScrollPane {
 	 * @param container the container to be put in the scroll panel.
 	 */
 	public REpiceaScrollPane(Container container) {
-		super(container);
+		this();
+		setViewportView(container);
+	}
+	
+	public REpiceaScrollPane() {
+		super();
 		new InternalDragGestureMoveComponentHandler(this);
 	}
+	
+	
 
 	@Override
 	protected JViewport createViewport() {

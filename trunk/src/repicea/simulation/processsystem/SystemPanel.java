@@ -18,6 +18,7 @@
  */
 package repicea.simulation.processsystem;
 
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.dnd.DropTargetDropEvent;
@@ -38,9 +39,9 @@ import javax.swing.KeyStroke;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
+import repicea.gui.REpiceaUIObject;
 import repicea.gui.Resettable;
 import repicea.gui.UIControlManager;
-import repicea.gui.REpiceaUIObject;
 import repicea.gui.dnd.DnDPanel;
 import repicea.simulation.processsystem.UISetup.BasicMode;
 import repicea.util.REpiceaTranslator;
@@ -52,6 +53,11 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 																Resettable {
 
 	protected class SystemInternalPanel extends InternalPanel {
+		
+		@Override
+		public void setSize(Dimension dim) {
+			super.setSize(dim);
+		}
 		
 		@Override
 		public void paint(Graphics g) {

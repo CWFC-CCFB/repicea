@@ -22,13 +22,11 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.dnd.DropTargetDropEvent;
-import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import repicea.gui.CommonGuiUtility;
 import repicea.gui.ListManager;
 import repicea.gui.REpiceaPanel;
 import repicea.gui.REpiceaUIObject;
@@ -78,11 +76,9 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 	 * @param clazz class of the interfaceable object
 	 */
 	public DnDPanel(ListManager<D> manager, Class<D> clazz) {
-		super(new InternalEmbeddingPanel());
-		List<Component> componentList = CommonGuiUtility.mapComponents(this, InternalEmbeddingPanel.class);
-		InternalEmbeddingPanel internalEmbeddingPanel = (InternalEmbeddingPanel) componentList.get(0);
+		super();
 		this.internalPanel = createInternalPanel();
-		internalEmbeddingPanel.add(internalPanel, BorderLayout.NORTH);
+		setViewportView(internalPanel);
 		this.manager = manager;
 		new DropTargetImpl<D>(this, clazz);
 	}
