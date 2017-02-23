@@ -24,20 +24,18 @@ import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.Window;
 
-import javax.swing.JLabel;
-
 import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.UIControlManager;
 
 @SuppressWarnings("serial")
 public class ProcessorLinkLine extends ValidProcessorLinkLine implements REpiceaShowableUIWithParent {
 
-	private final JLabel label;
+	private final SystemLabel label;
 	private transient ProcessorLinkLineSlider guiInterface;
 	
 	protected ProcessorLinkLine(SystemPanel panel, Processor fatherProcessor, Processor sonProcessor) {
 		super(panel, fatherProcessor.getUI(panel), sonProcessor.getUI(panel));
-		label = new JLabel();
+		label = new SystemLabel();
 		fatherProcessor.addSubProcessor(sonProcessor);
 		fatherProcessor.getUI(panel).addComponentListener(this);
 		sonProcessor.getUI(panel).addComponentListener(this);

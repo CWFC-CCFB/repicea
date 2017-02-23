@@ -30,6 +30,8 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 	private final AnchorProvider fatherAnchor;
 	private AnchorProvider sonAnchor;
 	
+	private static final int BezierFactor = 50;
+	
 	protected AbstractProcessorLinkLine(SystemPanel panel, AnchorProvider fatherAnchor, AnchorProvider sonAnchor) {
 		super(panel.getListManager().getGUIPermission());
 		this.panel = panel;
@@ -61,12 +63,12 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 			int controlX2 = midX;
 			int controlY1 = fatherLocation.y;
 			int controlY2 = sonLocation.y;
-			if (sonLocation.x - fatherLocation.x < 50) {
-				controlX1 = fatherLocation.x + 50;
-				controlX2 = sonLocation.x - 50;
-				int offset = 50;
+			if (sonLocation.x - fatherLocation.x < SystemLayout.convertToRelative(BezierFactor)) {
+				controlX1 = fatherLocation.x + SystemLayout.convertToRelative(BezierFactor);
+				controlX2 = sonLocation.x - SystemLayout.convertToRelative(BezierFactor);
+				int offset = SystemLayout.convertToRelative(BezierFactor);
 				if (fatherLocation.y > sonLocation.y) {
-					offset = -50;
+					offset = -SystemLayout.convertToRelative(BezierFactor);
 				}
 				controlY1 = fatherLocation.y + offset;
 				controlY2 = sonLocation.y - offset;

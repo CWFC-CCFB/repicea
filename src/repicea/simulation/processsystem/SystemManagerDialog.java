@@ -20,6 +20,7 @@ package repicea.simulation.processsystem;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
@@ -29,10 +30,13 @@ import java.awt.event.ItemListener;
 
 import javax.swing.AbstractButton;
 import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.JSeparator;
+import javax.swing.JSlider;
 
 import repicea.app.SettingMemory;
 import repicea.gui.CommonGuiUtility;
@@ -94,6 +98,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	protected JMenuItem redo;
 	protected JCheckBoxMenuItem enlarge;
 	protected Dimension previousDimension;
+	protected JSlider zoomSlider;
 	
 	protected final WindowSettings windowSettings;
 	
@@ -134,7 +139,22 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		new REpiceaMemorizerHandler(this, undo, redo);
 		
 		enlarge = new JCheckBoxMenuItem(CommonControlID.FullScreen.toString());
+		zoomSlider = createZoomSlider();
+		zoomSlider.addChangeListener(systemPanel);
 	}
+
+	
+	protected JSlider createZoomSlider() {
+		JSlider slider = new JSlider();
+		slider.setMaximum(100);
+		slider.setMinimum(30);
+		slider.setValue(systemPanel.getSystemLayout().getCurrentZoom());
+		slider.setPaintTicks(true);
+		slider.setMajorTickSpacing(10);
+		slider.setPaintLabels(true);
+		return slider;
+	}
+	
 	
 	protected void setToolPanel() {
 		toolPanel = new ToolPanel(systemPanel);
@@ -197,10 +217,16 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		menuBar.add(createViewMenu());
 				
 		menuBar.add(createAboutMenu());
+
+		JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+		bottomPanel.add(new JLabel("-"));
+		bottomPanel.add(zoomSlider);
+		bottomPanel.add(new JLabel("+"));
 		
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(systemPanel, BorderLayout.CENTER);
 		getContentPane().add(toolPanel, BorderLayout.WEST);
+		getContentPane().add(bottomPanel, BorderLayout.SOUTH);
 		refreshTitle();
 	}
 	
