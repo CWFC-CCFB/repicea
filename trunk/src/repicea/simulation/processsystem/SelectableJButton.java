@@ -19,17 +19,28 @@
 package repicea.simulation.processsystem;
 
 import java.awt.Dimension;
+import java.awt.Image;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import repicea.gui.permissions.REpiceaGUIPermission;
 
 @SuppressWarnings("serial")
 public abstract class SelectableJButton extends AbstractPermissionProviderButton {
 
+	protected final ImageIcon originalIcon;
+	
 	protected SelectableJButton(REpiceaGUIPermission permission) {
 		super(permission);
-		setIcon();
+		
+		String className = getClass().getName();
+		Icon icon = UISetup.Icons.get(className);
+		if (icon == null) {
+			icon = getDefaultIcon();	// default value
+		}
+		setIcon(icon);
+		originalIcon = (ImageIcon) icon;
 		setToolTip();
 		Dimension dim;
 		if (getIcon() != null) {
@@ -52,15 +63,14 @@ public abstract class SelectableJButton extends AbstractPermissionProviderButton
 		}
 	}
 
-	private void setIcon() {
-		String className = getClass().getName();
-		Icon icon = UISetup.Icons.get(className);
-		if (icon == null) {
-			icon = getDefaultIcon();	// default value
-		}
-		setIcon(icon);
+	@Override
+	public Icon getIcon() {
+		Image newImage = originalIcon.getImage().getScaledInstance(SystemLayout.convertToRelative(originalIcon.getIconWidth()),
+				SystemLayout.convertToRelative(originalIcon.getIconHeight()),
+				Image.SCALE_DEFAULT);
+		return new ImageIcon(newImage);
 	}
-
+	
 	protected abstract Icon getDefaultIcon();
 	
 	@Override

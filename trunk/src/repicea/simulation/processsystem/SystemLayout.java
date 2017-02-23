@@ -34,6 +34,7 @@ public class SystemLayout implements LayoutManager {
 
 	private int height;
 	private int width;
+	private static int ZoomFactor = 100;
 	
 	protected SystemLayout() {
 		height = 100;
@@ -43,6 +44,33 @@ public class SystemLayout implements LayoutManager {
 	@Override
 	public void addLayoutComponent(String arg0, Component arg1) {}
 
+	protected int getCurrentZoom() {return ZoomFactor;}
+	protected void setCurrentZoom(int currentZoom) {ZoomFactor = currentZoom;}
+	
+	protected static Point convertRelativeToOriginal(Point point) {
+		return new Point(convertToOriginal(point.x), convertToOriginal(point.y));
+	}
+	
+	protected static Point convertOriginalToRelative(Point point) {
+		return new Point(convertToRelative(point.x), convertToRelative(point.y));
+	}
+
+	protected static Dimension convertRelativeToOriginal(Dimension dim) {
+		return new Dimension(convertToOriginal(dim.width), convertToOriginal(dim.height));
+	}
+	
+	protected static Dimension convertOriginalToRelative(Dimension dim) {
+		return new Dimension(convertToRelative(dim.width), convertToRelative(dim.height));
+	}
+
+	protected static int convertToRelative(int x) {
+		return (int) Math.round(x * ZoomFactor * .01);
+	}
+	
+	protected static int convertToOriginal(int x) {
+		return (int) Math.round(x * 100d / ZoomFactor);
+	}
+	
 	@Override
 	public void layoutContainer(Container container) {
 		width = container.getWidth();
@@ -68,8 +96,8 @@ public class SystemLayout implements LayoutManager {
 							if (fatherProcessor.getSubProcessors().contains(thisProcessor)) {
 								hasAFather = true;
 								int index = fatherProcessor.getSubProcessors().indexOf(thisProcessor);
-								Point tmpPoint = new Point(fatherLocation.x + UISetup.XGap, 
-										fatherLocation.y + index * UISetup.YGap);
+								Point tmpPoint = new Point(fatherLocation.x + convertToRelative(UISetup.XGap), 
+										fatherLocation.y + index * convertToRelative(UISetup.YGap));
 								boolean isIn = false;
 								do {
 									for (Processor knownProcessor : knownProcessors) {
@@ -80,7 +108,7 @@ public class SystemLayout implements LayoutManager {
 										}
 									}
 									if (isIn) {
-										tmpPoint = new Point(tmpPoint.x + UISetup.XGap, tmpPoint.y);
+										tmpPoint = new Point(tmpPoint.x + convertToRelative(UISetup.XGap), tmpPoint.y);
 									}
 								} while (isIn);
 								locationOfThisButton = tmpPoint;
@@ -88,7 +116,7 @@ public class SystemLayout implements LayoutManager {
 							}
 						}
 						if (!hasAFather) {
-							locationOfThisButton = new Point(UISetup.XOrigin,  farY + UISetup.YGap);
+							locationOfThisButton = new Point(UISetup.XOrigin,  farY + convertToRelative(UISetup.YGap));
 						}
 					}
 					setInternalSize(locationOfThisButton);
@@ -101,11 +129,11 @@ public class SystemLayout implements LayoutManager {
 
 	
 	protected void setInternalSize(Point lastPoint) {
-		if (lastPoint.x > width - UISetup.XGap) {
-			width = lastPoint.x + UISetup.XGap;
+		if (lastPoint.x > width - convertToRelative(UISetup.XGap)) {
+			width = lastPoint.x + convertToRelative(UISetup.XGap);
 		}
-		if (lastPoint.y > height - UISetup.YGap) {
-			height = lastPoint.y + UISetup.YGap;
+		if (lastPoint.y > height - convertToRelative(UISetup.YGap)) {
+			height = lastPoint.y + convertToRelative(UISetup.YGap);
 		}
 	}
 	

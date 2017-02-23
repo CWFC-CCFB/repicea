@@ -36,6 +36,8 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
@@ -50,7 +52,8 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 @SuppressWarnings("serial")
 public class SystemPanel extends DnDPanel<Processor> implements MouseListener, 
 																ActionListener,
-																Resettable {
+																Resettable, 
+																ChangeListener {
 
 	protected class SystemInternalPanel extends InternalPanel {
 		
@@ -120,7 +123,9 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 		registerKeyboardAction(deleteListener, backSpaceStroke, JComponent.WHEN_IN_FOCUSED_WINDOW);
 	}
 	
+	
 	protected void initUI() {
+		getSystemLayout().setCurrentZoom(100);
 		internalPanel.removeAll();
 		linkLines.clear();
 		processorButtons.clear();
@@ -129,6 +134,10 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 		setMode(BasicMode.MoveProcessor);	// Default button
 	}
 
+	public SystemLayout getSystemLayout() {
+		return (SystemLayout) internalPanel.getLayout();
+	}
+		
 	@Override
 	protected InternalPanel createInternalPanel() {return new SystemInternalPanel();}
 	
@@ -320,6 +329,15 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 
 	@Override
 	public void reset() {initUI();}
+
+	@Override
+	public void stateChanged(ChangeEvent e) {
+		if (e.getSource().equals(getListManager().guiInterface.zoomSlider)) {
+			int newValue = getListManager().guiInterface.zoomSlider.getValue();
+			getSystemLayout().setCurrentZoom(newValue);
+			refreshInterface();
+		}
+	}
 
 
 }

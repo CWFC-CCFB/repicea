@@ -19,6 +19,7 @@
 package repicea.simulation.processsystem;
 
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.dnd.DnDConstants;
@@ -27,7 +28,6 @@ import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
-import javax.swing.JLabel;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
@@ -95,7 +95,7 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	private final Processor process;
 	protected final DragGestureMoveComponentHandler<ProcessorButton> buttonMoveRecognizer;
 	protected final DragGestureRecognizer createLinkRecognizer;
-	protected final JLabel label;
+	protected final SystemLabel label;
 	private final SystemPanel panel;
 	private boolean hasChanged;
 	protected transient ProcessorInternalDialog guiInterface;
@@ -104,7 +104,7 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 		super(permission);
 		this.panel = panel;
 		this.process = process;
-		this.label = new JLabel();
+		this.label = new SystemLabel();
 		addMouseListener(new SystemComponentMouseAdapter(this));
 		DragSource ds = new DragSource();
 		buttonMoveRecognizer = new DragGestureButtonMoveHandler(this);
@@ -166,12 +166,12 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	}
 
 	@Override
-	public void setLocation(Point point) {
-		super.setLocation(point);
-		getOwner().setOriginalLocation(point);
-		label.setLocation(point.x, point.y + (int) getSize().getHeight());
+	public void setLocation(Point point) {setLocation(point.x, point.y);}
+	
+	@Override
+	public Dimension getPreferredSize() {
+		return SystemLayout.convertOriginalToRelative(super.getPreferredSize());
 	}
-
 	
 	@SuppressWarnings("rawtypes")
 	protected void setDragMode(Enum mode) {

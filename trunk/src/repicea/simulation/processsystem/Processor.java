@@ -140,11 +140,19 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 
 	
 	protected Point getOriginalLocation() {
-		return originalLocation;
+		if (originalLocation == null) {
+			return originalLocation;
+		} else {
+			return SystemLayout.convertOriginalToRelative(originalLocation);
+		}
 	}
 	
-	protected void setOriginalLocation(Point point) {
-		this.originalLocation = point;
+	protected void setOriginalLocation(Point relativePoint) {
+		if (relativePoint == null) {
+			originalLocation = relativePoint;
+		} else {
+			this.originalLocation = SystemLayout.convertRelativeToOriginal(relativePoint);
+		}
 	}
 		
 	@Override
