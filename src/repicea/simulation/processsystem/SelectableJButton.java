@@ -19,7 +19,6 @@
 package repicea.simulation.processsystem;
 
 import java.awt.Dimension;
-import java.awt.Image;
 
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -44,7 +43,7 @@ public abstract class SelectableJButton extends AbstractPermissionProviderButton
 		setToolTip();
 		Dimension dim;
 		if (getIcon() != null) {
-			dim = new Dimension(getIcon().getIconWidth(), getIcon().getIconHeight());
+			dim = new Dimension(originalIcon.getIconWidth(), originalIcon.getIconHeight());
 		} else {
 			dim = new Dimension(30,30);
 		}
@@ -63,14 +62,6 @@ public abstract class SelectableJButton extends AbstractPermissionProviderButton
 		}
 	}
 
-	@Override
-	public Icon getIcon() {
-		Image newImage = originalIcon.getImage().getScaledInstance(SystemLayout.convertToRelative(originalIcon.getIconWidth()),
-				SystemLayout.convertToRelative(originalIcon.getIconHeight()),
-				Image.SCALE_DEFAULT);
-		return new ImageIcon(newImage);
-	}
-	
 	protected abstract Icon getDefaultIcon();
 	
 	@Override

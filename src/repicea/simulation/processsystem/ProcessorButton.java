@@ -20,6 +20,7 @@ package repicea.simulation.processsystem;
 
 import java.awt.Container;
 import java.awt.Dimension;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Window;
 import java.awt.dnd.DnDConstants;
@@ -28,6 +29,7 @@ import java.awt.dnd.DragSource;
 import java.awt.event.MouseEvent;
 
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
@@ -133,6 +135,18 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 		panel.remove(label);
 	}
 	
+	@Override
+	public Icon getIcon() {
+		if (originalIcon == null) {
+			return originalIcon;
+		} else{
+			Image newImage = originalIcon.getImage().getScaledInstance(SystemLayout.convertToRelative(originalIcon.getIconWidth()),
+					SystemLayout.convertToRelative(originalIcon.getIconHeight()),
+					Image.SCALE_DEFAULT);
+			return new ImageIcon(newImage);
+		}
+	}
+
 
 	/**
 	 * This method returns the Processor instance that owns this button.
