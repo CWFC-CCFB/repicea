@@ -125,7 +125,6 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 	
 	
 	protected void initUI() {
-		getSystemLayout().setCurrentZoom(100);
 		internalPanel.removeAll();
 		linkLines.clear();
 		processorButtons.clear();
