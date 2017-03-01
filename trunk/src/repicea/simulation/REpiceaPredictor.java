@@ -276,7 +276,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		return getSubjectPlusMonteCarloSpecificId(object.getSubjectId(), object.getMonteCarloRealizationId());
 	}
 
-	private static String getSubjectPlusMonteCarloSpecificId(String subjectID, int monteCarloRealizationID) {
+	protected static String getSubjectPlusMonteCarloSpecificId(String subjectID, int monteCarloRealizationID) {
 		return subjectID + "_" + monteCarloRealizationID;
 	}
 	
