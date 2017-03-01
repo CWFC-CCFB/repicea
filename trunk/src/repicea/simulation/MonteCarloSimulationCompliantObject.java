@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea  library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -28,7 +28,7 @@ public interface MonteCarloSimulationCompliantObject {
 	 * @return a String that defines the subject id and that remains constant throughout the simulation
 	 */
 	public String getSubjectId();
-	
+
 	/**
 	 * This method returns the hierarchical levels of the object.
 	 * @return a HierarchicalLevel instance
