@@ -62,18 +62,15 @@ public abstract class SensitivityAnalysisParameter<E extends Estimate> implement
 	protected synchronized Matrix getParametersForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		if (isParametersVariabilityEnabled) {
 			String subjectPlusMonteCarloId = REpiceaPredictor.getSubjectPlusMonteCarloSpecificId(subject.getSubjectId(), subject.getMonteCarloRealizationId());
-			if (!simulatedParameters.containsKey(subjectPlusMonteCarloId.hashCode())) {		// the simulated parameters remain constant within the same Monte Carlo iteration
-				setSpecificParametersDeviateForThisRealization(subject);
+			int hashCodeSubjectId = subjectPlusMonteCarloId.hashCode();
+			if (!simulatedParameters.containsKey(hashCodeSubjectId)) {		// the simulated parameters remain constant within the same Monte Carlo iteration
+				Matrix randomDeviates = getParameterEstimates().getRandomDeviate();
+				simulatedParameters.put(hashCodeSubjectId, randomDeviates);
 			}
-			return simulatedParameters.get(subject.getMonteCarloRealizationId());
+			return simulatedParameters.get(hashCodeSubjectId);
 		} else {
 			return getParameterEstimates().getMean();
 		}
-	}
-	
-	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
-		Matrix randomDeviates = getParameterEstimates().getRandomDeviate();
-		simulatedParameters.put(subject.getMonteCarloRealizationId(), randomDeviates);
 	}
 
 
