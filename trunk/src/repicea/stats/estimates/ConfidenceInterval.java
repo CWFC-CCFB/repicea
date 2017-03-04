@@ -70,5 +70,14 @@ public class ConfidenceInterval {
 	 * @return a double
 	 */
 	public double getProbabilityLevel() {return probabilityLevel;}
+
+	
+	/**
+	 * This method returns true if one of the bound of the confidence intervals contains a NaN
+	 * @return
+	 */
+	public boolean isThereAnyNaN() {
+		return getLowerLimit().doesContainAnyNaN() || getUpperLimit().doesContainAnyNaN();
+	}
 	
 }
