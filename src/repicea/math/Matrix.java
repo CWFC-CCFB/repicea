@@ -200,6 +200,21 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
+	 * This method returns true if the matrix contains at least one value NaN.
+	 * @return a boolean
+	 */
+	public boolean doesContainAnyNaN() {
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				if (Double.isNaN(m_afData[i][j])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * This method compute the elementwise division of this / m
 	 * @param m
 	 * @return the resulting matrix
