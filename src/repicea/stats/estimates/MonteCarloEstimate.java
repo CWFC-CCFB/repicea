@@ -185,4 +185,14 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 		}
 		return subEstimate;
 	}
+	
+	protected boolean isCompatible(Estimate<?> estimate) {
+		if (estimate instanceof MonteCarloEstimate) {
+			if (((MonteCarloEstimate) estimate).getNumberOfRealizations() == getNumberOfRealizations()) {
+				return true;
+			};
+		}
+		return false;
+	}
+	
 }

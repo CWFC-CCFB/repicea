@@ -67,7 +67,7 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	 * @return an Estimate
 	 */
 	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
-		if (this instanceof MonteCarloEstimate && estimate2 instanceof MonteCarloEstimate) {
+		if (this instanceof MonteCarloEstimate && ((MonteCarloEstimate) this).isCompatible(estimate2)) {
 			try {
 				return ((MonteCarloEstimate) this).subtract((MonteCarloEstimate) estimate2);
 			} catch (Exception e) {}
@@ -83,7 +83,7 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	 * @return an Estimate
 	 */
 	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
-		if (this instanceof MonteCarloEstimate && estimate2 instanceof MonteCarloEstimate) {
+		if (this instanceof MonteCarloEstimate && ((MonteCarloEstimate) this).isCompatible(estimate2)) {
 			try {
 				return ((MonteCarloEstimate) this).add((MonteCarloEstimate) estimate2);
 			} catch (Exception e) {}
