@@ -24,7 +24,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class MonteCarloSettings {
 	
 	public static enum MonteCarloVarSource implements TextableEnum {
-		Parameters("Module parameters", "Param\u00E9trage des modules"),
+//		Parameters("Module parameters", "Param\u00E9trage des modules"),
 		Mortality("Mortality module", "Module de mortalit\u00E9"),
 		DiameterGrowth("Diameter increment module", "Module de croissance diam\u00E9trale"),
 		Recruitment("Recruitment module", "Module de recrutement"),
