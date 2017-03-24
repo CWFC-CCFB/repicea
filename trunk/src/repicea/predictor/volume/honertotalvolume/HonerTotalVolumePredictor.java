@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-foresttools library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2013 Mathieu Fortin for Rouge-Epicea
  *
