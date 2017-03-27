@@ -22,7 +22,7 @@ package repicea.simulation;
 /**
  * This class defines the method to access the logistic model predictions. 
  * @author Mathieu Fortin - November 2012
- * @param <S> a class that represents the stand
+ * @param <S> a class that represents the stand or the plot
  * @param <T> a class that represents the tree
  */
 public abstract class REpiceaLogisticPredictor<S, T> extends REpiceaPredictor {

@@ -68,7 +68,6 @@ public final class MatapediaMortalityPredictor extends REpiceaLogisticPredictor<
 		super(isParametersVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualVariabilityEnabled);
 		init();
 		linkFunction = new LinkFunction(Type.CLogLog);
-//		eta = linkFunction.getOriginalFunction();
 		linkFunction.setParameterValue(0, 0d);		// random parameter
 		linkFunction.setVariableValue(0, 1d);		// variable that multiplies the random parameter
 		linkFunction.setParameterValue(1, 1d);		// paramter that multiplies the xBeta

@@ -110,7 +110,7 @@ public class Artemis2009PredictorTests {
 			for (List<ReferenceTree> treeList : ReferenceTreeMap.values()) {
 				Collections.sort(treeList);
 			}
-			
+			reader.close();
 		} catch (IOException e) {
 			Assert.fail("Unable to read the reference trees");
 		}
@@ -166,7 +166,8 @@ public class Artemis2009PredictorTests {
 			for (Artemis2009CompatibleStandImpl s : StandMap.values()) {
 				s.updatePlotVariables();
 			}
-		}catch (IOException e) {
+			dbfReader.close();
+		} catch (IOException e) {
 			Assert.fail("Unable to read the trees to grow!");
 		}
 	}

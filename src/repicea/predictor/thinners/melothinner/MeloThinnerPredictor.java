@@ -18,20 +18,224 @@
  */
 package repicea.predictor.thinners.melothinner;
 
-import repicea.simulation.REpiceaPredictor;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import repicea.math.AbstractMathematicalFunction;
+import repicea.math.Matrix;
+import repicea.simulation.HierarchicalLevel;
+import repicea.simulation.MonteCarloSimulationCompliantObject;
+import repicea.simulation.ParameterLoader;
+import repicea.simulation.REpiceaLogisticPredictor;
+import repicea.simulation.SASParameterEstimates;
+import repicea.simulation.covariateproviders.standlevel.SlopeMRNFClassProvider.SlopeMRNFClass;
+import repicea.stats.estimates.GaussianEstimate;
+import repicea.stats.integral.GaussHermiteQuadrature;
+import repicea.stats.integral.GaussQuadrature.NumberOfPoints;
+import repicea.util.ObjectUtility;
 
 @SuppressWarnings("serial")
-public class MeloThinnerPredictor extends REpiceaPredictor {
+public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPlot, Object> {
 
-	protected MeloThinnerPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled, boolean isResidualVariabilityEnabled) {
-		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
-		// TODO Auto-generated constructor stub
+	class CruiseLine implements MonteCarloSimulationCompliantObject {
+		private final String subjectId;
+		private int monteCarloRealizationId;
+		
+		CruiseLine(String subjectId) {
+			this.subjectId = subjectId;
+		}
+		
+		@Override
+		public String getSubjectId() {return subjectId;}
+
+		@Override
+		public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.CRUISE_LINE;}
+
+		@Override
+		public int getMonteCarloRealizationId() {return monteCarloRealizationId;}
+	}
+
+	class EmbeddedFunction extends AbstractMathematicalFunction {
+		@Override
+		public Double getValue() {
+			double conditionalSurvival = getParameterValue(0) * getVariableValue(0);
+			double u = getParameterValue(1) * getVariableValue(1);
+			return Math.pow(conditionalSurvival, Math.exp(u));
+		}
+
+		@Override
+		public Matrix getGradient() {return null;}
+
+		@Override
+		public Matrix getHessian() {return null;}
+	}
+	
+	private static final List<Integer> ParametersToIntegrate = new ArrayList<Integer>();
+	static {
+		ParametersToIntegrate.add(1);
+	}
+	
+	private boolean quadratureEnabled = true;
+	
+	private Map<SlopeMRNFClass, Matrix> slopeClassDummy;
+	private Map<String, Matrix> dynamicTypeDummy;
+	private Map<String, CruiseLine> cruiseLineMap;
+	private final GaussHermiteQuadrature ghq = new GaussHermiteQuadrature(NumberOfPoints.N5);
+	private final EmbeddedFunction embeddedFunction;
+	
+	
+	protected MeloThinnerPredictor(boolean isVariabilityEnabled) {
+		super(isVariabilityEnabled, isVariabilityEnabled, isVariabilityEnabled);
+		init();
+		embeddedFunction = new EmbeddedFunction();
+		embeddedFunction.setVariableValue(0, 1);
+		embeddedFunction.setVariableValue(1, 1);
+		embeddedFunction.setParameterValue(0, 0);
+		embeddedFunction.setParameterValue(1, 0);
+		cruiseLineMap = new HashMap<String, CruiseLine>();
 	}
 
 	@Override
 	protected void init() {
-		// TODO Auto-generated method stub
+		try {
+			String path = ObjectUtility.getRelativePackagePath(getClass());
+			String betaFilename = path + "0_HarvestBeta.csv";
+			String omegaFilename = path + "0_HarvestOmega.csv";
+			
+			Matrix defaultBetaMean = ParameterLoader.loadVectorFromFile(betaFilename).get();
+			Matrix randomEffectVariance = defaultBetaMean.getSubMatrix(11, 11, 0, 0);
+			defaultBetaMean = defaultBetaMean.getSubMatrix(0, 10, 0, 0);
+			
+			Matrix defaultBetaVariance = ParameterLoader.loadVectorFromFile(omegaFilename).get().squareSym();
+			defaultBetaVariance = defaultBetaVariance.getSubMatrix(0, 10, 0, 10);
+			Matrix meanRandomEffect = new Matrix(1,1);
+			setDefaultRandomEffects(HierarchicalLevel.CRUISE_LINE, new GaussianEstimate(meanRandomEffect, randomEffectVariance));
+			GaussianEstimate estimate = new SASParameterEstimates(defaultBetaMean, defaultBetaVariance);
+			setParameterEstimates(estimate); 
+			oXVector = new Matrix(1, estimate.getMean().m_iRows);
+			
+		} catch (Exception e) {
+			System.out.println("MeloThinnerPredictor.init() : Unable to initialize the mortality module!");
+		}
 
 	}
 
+	@Override
+	public synchronized double predictEventProbability(MeloThinnerPlot stand, Object tree, Object... parms) {
+		oXVector.resetMatrix();
+		Matrix beta = getParametersForThisRealization(stand);
+		double proportionalPart = getProportionalPart(stand, beta);
+		double[] aac = (double[]) parms[0];
+		double baseline = getBaseline(beta, aac);
+
+		double conditionalSurvival = Math.exp(-proportionalPart * baseline);
+		embeddedFunction.setParameterValue(0, conditionalSurvival);
+		
+		double survival;
+		if (isRandomEffectsVariabilityEnabled) {
+			String cruiseLineId = stand.getCruiseLineID();
+			if (cruiseLineId == null) {
+				cruiseLineId = stand.getSubjectId();
+			}
+			if (!cruiseLineMap.containsKey(cruiseLineId)) {
+				cruiseLineMap.put(cruiseLineId, new CruiseLine(cruiseLineId));
+			}
+
+			Matrix randomEffect = getRandomEffectsForThisSubject(cruiseLineMap.get(cruiseLineId));
+			double u = randomEffect.m_afData[0][0];
+			embeddedFunction.setParameterValue(1, u);
+			survival = embeddedFunction.getValue();
+		} else {
+			if (quadratureEnabled) {
+				Matrix lowerCholeskyTriangle = getDefaultRandomEffects(HierarchicalLevel.CRUISE_LINE).getVariance().getLowerCholTriangle();
+				survival = ghq.getIntegralApproximation(embeddedFunction, ParametersToIntegrate, lowerCholeskyTriangle);
+			} else {
+				embeddedFunction.setParameterValue(1, 0);
+				survival = embeddedFunction.getValue();
+			}
+		}
+		double harvestProb = 1 - survival;
+		return harvestProb;
+	}
+
+	private double getBaseline(Matrix beta, double[] aac) {
+		
+		double gamma0 = beta.m_afData[9][0];
+		double gamma1 = beta.m_afData[10][0];
+		
+		double baselineResult = 0;
+		for (double v : aac) {
+			baselineResult += Math.exp(gamma0 + gamma1 * v);
+		}
+		
+		return baselineResult;
+	}
+
+	private double getProportionalPart(MeloThinnerPlot stand, Matrix beta) {
+		int index = 0;
+		oXVector.m_afData[0][index] = Math.log(stand.getBasalAreaM2Ha());
+		index++;
+		
+		oXVector.m_afData[0][index] = stand.getNumberOfStemsHa();
+		index++;
+		
+		Matrix slopeClassDummy = getDummySlopeClass(stand.getSlopeClass());
+		oXVector.setSubMatrix(slopeClassDummy, 0, index);
+		index += slopeClassDummy.m_iCols;
+		
+		Matrix dynamicTypeDummy = getDynamicTypeDummy(stand.getEcologicalType());
+		oXVector.setSubMatrix(dynamicTypeDummy, 0, index);
+		index += dynamicTypeDummy.m_iCols;
+		
+		Matrix xBeta = oXVector.multiply(beta);
+		return Math.exp(xBeta.m_afData[0][0]);
+	}
+	
+	
+	private Matrix getDummySlopeClass(SlopeMRNFClass slopeClass) {
+		if (slopeClassDummy == null) {
+			slopeClassDummy = new HashMap<SlopeMRNFClass, Matrix>();
+			Matrix dummy;
+			for (SlopeMRNFClass sc : SlopeMRNFClass.values()) {
+				dummy = new Matrix(1,5);
+				if (sc.ordinal() > 0) {
+					dummy.m_afData[0][sc.ordinal() - 1] = 1d;
+				}
+				slopeClassDummy.put(sc, dummy);
+			}
+		}
+		return slopeClassDummy.get(slopeClass);
+	}
+	
+	private Matrix getDynamicTypeDummy(String ecologicalType) {
+		if (dynamicTypeDummy == null) {
+			dynamicTypeDummy = new HashMap<String, Matrix>();
+			Matrix dummy = new Matrix(1,2);
+			dummy.m_afData[0][0] = 1d;
+			dynamicTypeDummy.put("F", dummy);
+			
+			dummy = new Matrix(1,2);
+			dummy.m_afData[0][1] = 1d;
+			dynamicTypeDummy.put("M", dummy);
+			
+			dummy = new Matrix(1,2);
+			dynamicTypeDummy.put("R", dummy);
+		}
+		return dynamicTypeDummy.get(ecologicalType.substring(0, 1));
+	}
+
+	/*
+	 * For test purpuse. Not to be disabled.
+	 */
+	void setGaussianQuadrature(boolean quadEnabled) {
+		this.quadratureEnabled = quadEnabled;
+	}
+	
+	
+	
+	public static void main(String[] args) {
+		new MeloThinnerPredictor(false);
+	}
 }
