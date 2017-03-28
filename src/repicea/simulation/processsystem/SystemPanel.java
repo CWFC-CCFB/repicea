@@ -181,7 +181,6 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 
 	protected void removeProcessorButton(ProcessorButton processorButton) {
 		if (processorButtons.remove(processorButton)) {
-			getViewport().setViewPositionVetoEnabled(true);	// TODO correct this it does not work
 			processorButton.removeMouseListener(this);
 			processorButton.finalize();
 			for (ValidProcessorLinkLine linkLine : linkLines) {
@@ -194,7 +193,6 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 			if (dlg != null) {
 				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
 			}
-			sendVetoDisabledOnDispatchThread();
 		}
 	}
 
@@ -244,12 +242,14 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 					UIControlManager.InformationMessageTitle.Warning.toString(), 
 					JOptionPane.YES_NO_OPTION, 
 					JOptionPane.WARNING_MESSAGE) == 0) {
+				getViewport().setViewPositionVetoEnabled(true);	
 				if (selectedButton instanceof ProcessorButton) {
 					removeProcessorButton((ProcessorButton) selectedButton);
 				} else if (selectedButton instanceof ValidProcessorLinkLine) {
 					removeLinkLine((ValidProcessorLinkLine) selectedButton);
 				}
 				refreshInterface();
+				sendVetoDisabledOnDispatchThread();
 			}
 		}
 	}
