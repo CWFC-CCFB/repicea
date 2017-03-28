@@ -42,7 +42,6 @@ import repicea.gui.components.REpiceaScrollPane;
 public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane implements AcceptableDropComponent<D>, Refreshable { 
 
 	public static class InternalPanel extends REpiceaPanel {
-		
 		protected InternalPanel() {
 			setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 		}
@@ -55,9 +54,24 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 
 		@Override
 		public void refreshInterface() {}
-
 	}
 
+	class InnerThread extends Thread {
+		final Runnable runnable;
+		
+		InnerThread(Runnable runnable) {
+			this.runnable = runnable;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				wait(200);	// this pause gives some time for the other events to be processed before lifting the veto
+			} catch (Exception e) {}
+			SwingUtilities.invokeLater(runnable);
+		}
+	}
+	
 	
 	protected static class InternalEmbeddingPanel extends JPanel {
 		
@@ -99,15 +113,19 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 	@Override
 	public void acceptThisObject(D obj, DropTargetDropEvent evt) {
 		manager.registerObject(obj);
-		getViewport().setDropping(true);
+		getViewport().setViewPositionVetoEnabled(true);
 		refreshInterface();
+		sendVetoDisabledOnDispatchThread();
+	}
+
+	protected final void sendVetoDisabledOnDispatchThread() {
 		Runnable doRun = new Runnable() {
 			@Override
 			public void run() {
-				getViewport().setDropping(false);			// disable the bypass when the drop is over
+				getViewport().setViewPositionVetoEnabled(false);	// disable the bypass when the drop is over
 			}
 		};
-		SwingUtilities.invokeLater(doRun);
+		new InnerThread(doRun).start();
 	}
 
 	protected Point getRelativePointFromDropEvent(DropTargetDropEvent arg0) {
@@ -115,9 +133,7 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 		Point offset = getViewport().getViewPosition();
 		return new Point(dropPoint.x + offset.x, dropPoint.y + offset.y);
 	}
-	
-	
-	
+		
 	@Override
 	public void refreshInterface() {
 		internalPanel.removeAll();

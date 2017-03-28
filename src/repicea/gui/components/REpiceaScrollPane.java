@@ -79,21 +79,22 @@ public class REpiceaScrollPane extends JScrollPane {
 		}
 		
 		
-		protected boolean isDropping;		
+		protected boolean viewPositionVetoEnabled;		
 	
 		@Override
 		public void setViewPosition(Point point) {
-			if (!isDropping) {
+			if (!viewPositionVetoEnabled) {
 				super.setViewPosition(point);
 			}
 		}
 		
 		/**
-		 * This method is used to disable the reset of the upper left corner during a drop. When set to true, the 
+		 * This method is used to disable the reset of the upper left corner during an action. When set to true, the 
 		 * setViewPosition method is ignored.
+		 * @param bool a boolean
 		 */
-		public void setDropping(boolean isDropping) {
-			this.isDropping = isDropping;
+		public void setViewPositionVetoEnabled(boolean bool) {
+			this.viewPositionVetoEnabled = bool;
 		}
 
 	}
