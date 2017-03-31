@@ -29,8 +29,8 @@ import java.util.List;
 import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.ListManager;
-import repicea.gui.Resettable;
 import repicea.gui.REpiceaShowableUIWithParent;
+import repicea.gui.Resettable;
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
@@ -211,6 +211,33 @@ public class SystemManager implements ListManager<Processor>,
 		return guiInterface != null && guiInterface.isVisible();
 	}
 	
+	@SuppressWarnings({ "rawtypes"})
+	protected void checkForEndlessLoops() {
+//		List<List<Processor>> endlessLoopPatterns = new ArrayList<List<Processor>>();
+		for (Processor processor : getList()) {
+			processor.setPartOfEndlessLoop(false);
+		}
+		List<ProcessUnit> inputUnits = new ArrayList<ProcessUnit>();
+		inputUnits.add(new TestProcessUnit());
+		
+//		List<Processor> loopPattern;
+		for (Processor processor : getPrimaryProcessors()) {
+			processor.doProcess(inputUnits);
+//			Collection<TestProcessUnit> resultingUnits = (Collection) processor.doProcess(inputUnits);
+//			for (TestProcessUnit test : resultingUnits) {
+//				if (test.partOfEndlessLoop) {
+//					loopPattern = new ArrayList<Processor>();
+//					loopPattern.addAll(test.processorList);
+//					if (!endlessLoopPatterns.contains(loopPattern)) {
+//						endlessLoopPatterns.add(loopPattern);
+//					}
+//				}
+//			}
+		}
+//		return endlessLoopPatterns;
+	}
+	
+	@SuppressWarnings("rawtypes")
 	public static void main(String[] args) {
 		Processor unit1 = new Processor("1");
 		Processor unit2 = new Processor("2");
@@ -225,6 +252,12 @@ public class SystemManager implements ListManager<Processor>,
 		manager.registerObject(unit2);
 		manager.registerObject(unit3);
 		manager.registerObject(unit4);
+
+		List<ProcessUnit> units = new ArrayList<ProcessUnit>();
+		units.add(new TestProcessUnit());
+		unit1.doProcess(units);
+		@SuppressWarnings("unused")
+		List<Processor> processors = manager.getList();
 		manager.showUI(null);
 		System.exit(0);
 	}
