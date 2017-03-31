@@ -49,6 +49,7 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 	
 	@Deprecated
 	protected double averageIntake;
+	private boolean markedAsPartOfEndlessLoop;
 		
 	
 	/**
@@ -77,10 +78,21 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 	@SuppressWarnings("rawtypes")
 	public Collection<ProcessUnit> doProcess(List<ProcessUnit> inputUnits) {
 		Collection<ProcessUnit> coll = new ArrayList<ProcessUnit>();
+		
+		for (ProcessUnit inputUnit : inputUnits) {
+			if (inputUnit instanceof TestProcessUnit) {
+				if (((TestProcessUnit) inputUnit).recordProcessor(this)) {
+					coll.add(inputUnit);		// it stops the recursive method here
+				}
+			}
+		}		
+		
+		inputUnits.removeAll(coll); // and make sure that they won't follow the recursive method further on
+		
 		for (Processor subProcessor : getSubProcessorIntakes().keySet()) {
 			int intake = getSubProcessorIntakes().get(subProcessor);
 			for (ProcessUnit inputUnit : inputUnits) {
-				coll.addAll(subProcessor.doProcess(subProcessor.createProcessUnitsFromThisProcessor(inputUnit, intake)));
+				coll.addAll(subProcessor.doProcess(subProcessor.createProcessUnits(inputUnit, intake)));
 			}
 		}
 		if (!hasSubProcessors()) {
@@ -89,10 +101,23 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 		return coll;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	protected final List<ProcessUnit> createProcessUnits(ProcessUnit inputUnit, int intake) {
+		if (inputUnit instanceof TestProcessUnit) {
+			List<ProcessUnit> outputUnits = new ArrayList<ProcessUnit>();
+			outputUnits.add(new TestProcessUnit(((TestProcessUnit) inputUnit).processorList));
+			return outputUnits;
+		} else {
+			return createProcessUnitsFromThisProcessor(inputUnit, intake);
+		}
+		
+	}
+	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected List<ProcessUnit> createProcessUnitsFromThisProcessor(ProcessUnit inputUnit, int intake) {
 		List<ProcessUnit> outputUnits = new ArrayList<ProcessUnit>();
-		outputUnits.add(new ProcessUnit(inputUnit.getAmountMap().multiplyByAScalar(intake * .01)));
+		ProcessUnit unit = new ProcessUnit(inputUnit.getAmountMap().multiplyByAScalar(intake * .01));
+		outputUnits.add(unit);
 		return outputUnits;
 	}
 	
@@ -222,6 +247,7 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 		}
 	}
 	
+	public boolean isPartOfEndlessLoop() {return this.markedAsPartOfEndlessLoop;}
 	
 	/**
 	 * This method returns other process features when the processor button is double clicked.
@@ -234,5 +260,7 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 		return guiInterface != null && guiInterface.isVisible();
 	}
 
-	
+	protected void setPartOfEndlessLoop(boolean bool) {
+		this.markedAsPartOfEndlessLoop = bool;
+	}
 }

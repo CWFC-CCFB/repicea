@@ -46,8 +46,12 @@ public class ProcessorLinkLine extends ValidProcessorLinkLine implements REpicea
 	
 	@Override
 	protected void draw(Graphics g) {
-		if (!getFatherAnchor().getOwner().isValid()) {
+		Processor fatherProcessor = getFatherAnchor().getOwner();
+		Processor sonProcessor = getSonAnchor().getOwner();
+		if (!fatherProcessor.isValid()) {
 			g.setColor(Color.RED);
+		} else if (fatherProcessor.isPartOfEndlessLoop() && sonProcessor.isPartOfEndlessLoop()) {
+			g.setColor(Color.ORANGE);
 		}
 		super.draw(g);
 		g.setColor(UISetup.DefaultColor);

@@ -130,6 +130,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 		processorButtons.clear();
 		futureLink = null;
 		addManagerComponents();
+		getListManager().checkForEndlessLoops();
 		setMode(BasicMode.MoveProcessor);	// Default button
 	}
 
@@ -248,6 +249,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 				} else if (selectedButton instanceof ValidProcessorLinkLine) {
 					removeLinkLine((ValidProcessorLinkLine) selectedButton);
 				}
+				getListManager().checkForEndlessLoops();
 				refreshInterface();
 				sendVetoDisabledOnDispatchThread();
 			}
@@ -325,6 +327,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 			addLinkLine(futureLink.convertIntoProcessorLinkLine());
 		}
 		registerLinkBeingCreated(null);
+		getListManager().checkForEndlessLoops();
 		validate();
 	}
 
