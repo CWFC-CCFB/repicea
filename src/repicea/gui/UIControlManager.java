@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.Event;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.Window;
@@ -588,5 +589,18 @@ public class UIControlManager {
 	public static JPanel createSimpleHorizontalPanel(TextableEnum labelEnum, Component control, int margin, boolean expandable) {
 		return createSimpleHorizontalPanel(UIControlManager.getLabel(labelEnum), control, margin, expandable);
 	}
+	
+	/**
+	 * This method returns a button with a red circle icon and no text. 
+	 * @return a JButton instance
+	 */
+	public static JButton createButtonWithRedCircleIcon() {
+		JButton setToAppropriateValue = UIControlManager.createCommonButton(CommonControlID.Record);
+		setToAppropriateValue.setText("");
+		Insets insets = new Insets(1,1,1,1);
+		setToAppropriateValue.setMargin(insets);
+		return setToAppropriateValue;
+	}
+	
 
  }

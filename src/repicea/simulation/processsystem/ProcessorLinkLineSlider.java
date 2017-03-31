@@ -19,7 +19,6 @@
 package repicea.simulation.processsystem;
 
 import java.awt.FlowLayout;
-import java.awt.Insets;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -35,7 +34,6 @@ import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
-import repicea.gui.UIControlManager.CommonControlID;
 import repicea.simulation.processsystem.SystemManagerDialog.MessageID;
 
 @SuppressWarnings("serial")
@@ -54,11 +52,7 @@ public class ProcessorLinkLineSlider extends REpiceaDialog implements ChangeList
 		slider.setMajorTickSpacing(20);
 		slider.setPaintTicks(true);
 		slider.setPaintLabels(true);
-		setToAppropriateValue = UIControlManager.createCommonButton(CommonControlID.Record);
-		setToAppropriateValue.setText("");
-		Insets insets = new Insets(1,1,1,1);
-		setToAppropriateValue.setMargin(insets);
-		
+		setToAppropriateValue = UIControlManager.createButtonWithRedCircleIcon();
 		initUI();
 		refreshInterface();
 		pack();
