@@ -55,8 +55,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		}
 	}
 
-	protected HDRelationshipModel(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled, boolean isResidualVariabilityEnabled) {
-		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
+	protected HDRelationshipModel(boolean isVariabilityEnabledEnabled) {
+		super(isVariabilityEnabledEnabled, isVariabilityEnabledEnabled, isVariabilityEnabledEnabled);
 	}
 
 
@@ -239,10 +239,17 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 				Matrix matV = matZ.multiply(matG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
 				Matrix invV = matV.getInverseMatrix();
 				Matrix blups = matG.multiply(matZ.transpose()).multiply(invV).multiply(res);
-				Matrix matC21 = matG.multiply(matZ.transpose()).multiply(invV).multiply(matX).multiply(omega).scalarMultiply(-1d);
-				Matrix matC22_1 = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matG.getInverseMatrix()).getInverseMatrix();		
-				Matrix matC22_2 = matC21.multiply(matX.transpose()).multiply(invV).multiply(matZ).multiply(matG).scalarMultiply(-1d);
-				Matrix matC22 = matC22_1.add(matC22_2);
+				Matrix matC21;
+				Matrix matC22;
+				if (isParametersVariabilityEnabled && isRandomEffectsVariabilityEnabled) {
+					matC21 = matG.multiply(matZ.transpose()).multiply(invV).multiply(matX).multiply(omega).scalarMultiply(-1d);
+					Matrix matC22_1 = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matG.getInverseMatrix()).getInverseMatrix();		
+					Matrix matC22_2 = matC21.multiply(matX.transpose()).multiply(invV).multiply(matZ).multiply(matG).scalarMultiply(-1d);
+					matC22 = matC22_1.add(matC22_2);
+				} else {
+					matC22 = new Matrix(blups.m_iRows, blups.m_iRows);
+					matC21 = new Matrix(blups.m_iRows, omega.m_iRows);
+				}
 				registerBlups(blups, matC22, matC21, subjectList);
 			}
 		}
