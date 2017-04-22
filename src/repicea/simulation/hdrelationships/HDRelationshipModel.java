@@ -152,6 +152,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void predictHeightRandomEffects(Stand stand) {
 		if (!areBlupsEstimated()) {
+			boolean isStochastic = isParametersVariabilityEnabled && isRandomEffectsVariabilityEnabled;
 			
 			Matrix matGbck = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
 
@@ -169,6 +170,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			Matrix res = null;
 			Matrix matR = null;
 			Matrix matG = null;
+			Matrix invV = null;
+			Matrix blups = null;
 			List<MonteCarloSimulationCompliantObject> subjectList = new ArrayList<MonteCarloSimulationCompliantObject>();
 			
 			for (HDRelationshipStand s : stands) {
@@ -231,17 +234,30 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 					} else {
 						matG = matG.matrixDiagBlock(matGbck);
 					}
+					Matrix matV_i = matZ_i.multiply(matGbck).multiply(matZ_i.transpose()).add(matR_i);
+					Matrix invV_i = matV_i.getInverseMatrix();
+					if (invV == null) {
+						invV = invV_i;
+					} else {
+						invV = invV.matrixDiagBlock(invV_i);
+					}
+					Matrix blups_i = matGbck.multiply(matZ_i.transpose()).multiply(invV_i).multiply(res_i);
+					if (blups == null) {
+						blups = blups_i;
+					} else {
+						blups = blups.matrixStack(blups_i, true);
+					}
 				}
 				
 			}
 
-			if (matZ != null) {
-				Matrix matV = matZ.multiply(matG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
-				Matrix invV = matV.getInverseMatrix();
-				Matrix blups = matG.multiply(matZ.transpose()).multiply(invV).multiply(res);
+			if (blups != null) {
+//				Matrix matV = matZ.multiply(matG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
+//				Matrix invV = matV.getInverseMatrix();
+//				Matrix blups = matG.multiply(matZ.transpose()).multiply(invV).multiply(res);
 				Matrix matC21;
 				Matrix matC22;
-				if (isParametersVariabilityEnabled && isRandomEffectsVariabilityEnabled) {
+				if (isStochastic) {
 					matC21 = matG.multiply(matZ.transpose()).multiply(invV).multiply(matX).multiply(omega).scalarMultiply(-1d);
 					Matrix matC22_1 = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matG.getInverseMatrix()).getInverseMatrix();		
 					Matrix matC22_2 = matC21.multiply(matX.transpose()).multiply(invV).multiply(matZ).multiply(matG).scalarMultiply(-1d);
