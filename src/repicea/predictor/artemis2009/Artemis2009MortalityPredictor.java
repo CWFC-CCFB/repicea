@@ -41,8 +41,8 @@ public final class Artemis2009MortalityPredictor extends REpiceaLogisticPredicto
 	 * @param isParametersVariabilityEnabled
 	 * @param isResidualVariabilityEnabled
 	 */
-	public Artemis2009MortalityPredictor(boolean isParametersVariabilityEnabled, boolean isResidualVariabilityEnabled) {
-		super(isParametersVariabilityEnabled, false, isResidualVariabilityEnabled);		// no random effect in this module
+	public Artemis2009MortalityPredictor(boolean isVariabilityEnabled) {
+		super(isVariabilityEnabled, false, isVariabilityEnabled);		// no random effect in this module
 		init();
 	}
 

@@ -181,11 +181,11 @@ public class Artemis2009PredictorTests {
 			readTreesToGrow();
 		}
 		
-		Artemis2009MortalityPredictor mortalityPredictor = new Artemis2009MortalityPredictor(false, false);
+		Artemis2009MortalityPredictor mortalityPredictor = new Artemis2009MortalityPredictor(false);
 		List<Integer> simulationDates = new ArrayList<Integer>();
 		simulationDates.add(2014);
 		simulationDates.add(2024);
-		Artemis2009DiameterIncrementPredictor diamIncPredictor = new Artemis2009DiameterIncrementPredictor(false, false);
+		Artemis2009DiameterIncrementPredictor diamIncPredictor = new Artemis2009DiameterIncrementPredictor(false);
 		List<String> potentialVegetationList = new ArrayList<String>();
 		
 		int nbTreesCompared = 0;
@@ -241,9 +241,9 @@ public class Artemis2009PredictorTests {
 		}
 
 		List<String> potentialVegetationList = new ArrayList<String>();
-		Artemis2009RecruitmentOccurrencePredictor occPred = new Artemis2009RecruitmentOccurrencePredictor(false, false);
-		Artemis2009RecruitmentNumberPredictor numbPred = new Artemis2009RecruitmentNumberPredictor(false, false);
-		Artemis2009RecruitDiameterPredictor diamPred = new Artemis2009RecruitDiameterPredictor(false, false); 
+		Artemis2009RecruitmentOccurrencePredictor occPred = new Artemis2009RecruitmentOccurrencePredictor(false);
+		Artemis2009RecruitmentNumberPredictor numbPred = new Artemis2009RecruitmentNumberPredictor(false);
+		Artemis2009RecruitDiameterPredictor diamPred = new Artemis2009RecruitDiameterPredictor(false); 
 		
 		int nbTreesCompared = 0;
 		for (String standId : StandMap.keySet()) {

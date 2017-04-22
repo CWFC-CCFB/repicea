@@ -40,7 +40,7 @@ public class MatapediaMortalityPredictorTest {
 	public void testPredictions() throws IOException, ClassNotFoundException {
 	
 		
-		MatapediaMortalityPredictor pred = new MatapediaMortalityPredictor(false, false, false);
+		MatapediaMortalityPredictor pred = new MatapediaMortalityPredictor(false);
 
 		List<Double> predictions = new ArrayList<Double>();
 		
@@ -96,7 +96,7 @@ public class MatapediaMortalityPredictorTest {
 		int nbReal = 100000;
 		
 		MatapediaMortalityPredictor stochasticPredictor = new MatapediaMortalityPredictor(false, true, false);
-		MatapediaMortalityPredictor deterministicPredictor = new MatapediaMortalityPredictor(false, false, false);
+		MatapediaMortalityPredictor deterministicPredictor = new MatapediaMortalityPredictor(false);
 		
 		MatapediaStand stand = Stands.get(0);
 		List<MatapediaTreeImpl> trees = ((List) stand.getMatapediaTrees());

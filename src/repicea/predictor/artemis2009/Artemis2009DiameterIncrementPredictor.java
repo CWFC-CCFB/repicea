@@ -33,8 +33,8 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 
 	private Map<String, Artemis2009DiameterIncrementInternalPredictor> internalPredictors;
 
-	public Artemis2009DiameterIncrementPredictor(boolean isParametersVariabilityEnabled, boolean isOtherRandomEffectsVariabilityEnabled) {
-		super(isParametersVariabilityEnabled, isOtherRandomEffectsVariabilityEnabled, isOtherRandomEffectsVariabilityEnabled);
+	public Artemis2009DiameterIncrementPredictor(boolean isVariabilityEnabled) {
+		super(isVariabilityEnabled, isVariabilityEnabled, isVariabilityEnabled);
 		init();
 	}
 
