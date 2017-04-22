@@ -30,7 +30,7 @@ public class MatapediaDbhIncrementPredictorTest {
 		}
 		stands.add(stand);
 		
-		MatapediaDbhIncrementPredictor pred = new MatapediaDbhIncrementPredictor(false, false, false);
+		MatapediaDbhIncrementPredictor pred = new MatapediaDbhIncrementPredictor(false);
 
 		List<Double> predictions = new ArrayList<Double>();
 		

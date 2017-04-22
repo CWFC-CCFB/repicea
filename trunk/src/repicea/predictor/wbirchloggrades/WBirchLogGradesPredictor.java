@@ -69,10 +69,14 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 
 	/**
 	 * Constructor.
-	 * @param isParametersVariabilityEnabled a boolean instance
+	 * @param isVariabilityEnabled a boolean instance
 	 */
-	public WBirchLogGradesPredictor(boolean isParametersVariabilityEnabled, boolean isResidualVariabilityEnabled) {		
-		super(isParametersVariabilityEnabled, false, isResidualVariabilityEnabled);
+	public WBirchLogGradesPredictor(boolean isVariabilityEnabled) {	
+		this(isVariabilityEnabled, isVariabilityEnabled);
+	}
+
+	WBirchLogGradesPredictor(boolean isParameterVariabilityEnabled, boolean isResidualVariabiltyEnabled) {		
+		super(isParameterVariabilityEnabled, false, isResidualVariabiltyEnabled);
 		cholMatrices = new HashMap<Double, Matrix>();
 		init();
 	}

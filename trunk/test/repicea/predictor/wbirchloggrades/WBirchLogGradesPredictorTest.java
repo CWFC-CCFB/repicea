@@ -28,7 +28,7 @@ public class WBirchLogGradesPredictorTest {
 	@Test
 	public void testFixedEffectPredictions() {
 		Map<String, WBirchLogGradesStandImpl> stands = readStands();
-		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(false, false);
+		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(false);
 		predictor.isTestPurpose = true;
 		int nbTrees = 0;
 		int nbMatches = 0;
@@ -171,7 +171,7 @@ public class WBirchLogGradesPredictorTest {
 		String filePath = ObjectUtility.getPackagePath(getClass()) + "MCSimul.csv";
 		int nbRealizations = 10000;
 		Map<String, WBirchLogGradesStandImpl> stands = readStands();
-		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(true, true);
+		WBirchLogGradesPredictor predictor = new WBirchLogGradesPredictor(true);
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		WBirchLogGradesStandImpl stand = stands.get(0);
 		for (int i = 0; i < nbRealizations; i++) {

@@ -60,22 +60,25 @@ public final class MatapediaMortalityPredictor extends REpiceaLogisticPredictor<
 	
 	/**
 	 * Constructor.
-	 * @param isParametersVariabilityEnabled true to enable the variability in the parameter estimates
-	 * @param isRandomEffectVariabilityEnabled true to enable the variability due to the random effect
-	 * @param isResidualVariabilityEnabled true to enable the residual variability
+	 * @param isVariabilityEnabled true to enable the variability in the parameter estimates, the random effects and the residual error terms
 	 */
-	public MatapediaMortalityPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectVariabilityEnabled, boolean isResidualVariabilityEnabled) {
-		super(isParametersVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualVariabilityEnabled);
+	public MatapediaMortalityPredictor(boolean isVariabilityEnabled) {
+		this(isVariabilityEnabled,isVariabilityEnabled,isVariabilityEnabled);
+	}
+
+	
+	MatapediaMortalityPredictor(boolean isParameterVariabilityEnabled, boolean isRandomEffectVariabilityEnabled, boolean isResidualVariabilityEnabled) {
+		super(isParameterVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualVariabilityEnabled);
 		init();
 		linkFunction = new LinkFunction(Type.CLogLog);
 		linkFunction.setParameterValue(0, 0d);		// random parameter
 		linkFunction.setVariableValue(0, 1d);		// variable that multiplies the random parameter
-		linkFunction.setParameterValue(1, 1d);		// paramter that multiplies the xBeta
+		linkFunction.setParameterValue(1, 1d);		// parameter that multiplies the xBeta
 		ghq = new GaussHermiteQuadrature(NumberOfPoints.N15);
 		indicesForGaussianQuad = new ArrayList<Integer>();
 		indicesForGaussianQuad.add(0);
 	}
-
+	
 	protected void init() {
 		try {
 			String path = ObjectUtility.getRelativePackagePath(getClass());

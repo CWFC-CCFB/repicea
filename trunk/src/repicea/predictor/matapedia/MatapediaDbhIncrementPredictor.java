@@ -44,8 +44,8 @@ public class MatapediaDbhIncrementPredictor extends REpiceaPredictor implements 
 	 * @param isRandomEffectsVariabilityEnabled true to enable the variability at the tree level
 	 * @param isResidualVariabilityEnabled true to enable the variability at the measurement level
 	 */
-	public MatapediaDbhIncrementPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled,	boolean isResidualVariabilityEnabled) {
-		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
+	public MatapediaDbhIncrementPredictor(boolean isVariabilityEnabled) {
+		super(isVariabilityEnabled, isVariabilityEnabled, isVariabilityEnabled);
 		init();
 		oXVector = new Matrix(1,15);
 	}

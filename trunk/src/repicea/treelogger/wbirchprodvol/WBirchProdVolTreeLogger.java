@@ -35,15 +35,16 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	private WBirchLogGradesPredictor wbp;
 
 	public WBirchProdVolTreeLogger() {
-		this(false, false);
+		this(false);
 	}
 	
 	/**
 	 * Constructor. 
+	 * @param isVariabilityEnabled true to enable the stochastic mode
 	 */
-	public WBirchProdVolTreeLogger(boolean isParameterVariabilityEnabled, boolean isResidualVariabilityEnabled) {
+	public WBirchProdVolTreeLogger(boolean isVariabilityEnabled) {
 		super();
-		wbp = new WBirchLogGradesPredictor(isParameterVariabilityEnabled, isResidualVariabilityEnabled);
+		wbp = new WBirchLogGradesPredictor(isVariabilityEnabled);
 	}
 	
 
@@ -89,21 +90,22 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 		return null;
 	}
 
+	@Override
+	public boolean isCompatibleWith(Object referent) {
+		return referent instanceof WBirchProdVolLoggableTree;
+	}
+
 	/*
 	 * For test purposes
 	 * @param args
 	 * @throws IOException
 	 */
 	public static void main (String[] args) throws IOException {
-		WBirchProdVolTreeLogger log = new WBirchProdVolTreeLogger(false, false);
+		WBirchProdVolTreeLogger log = new WBirchProdVolTreeLogger(false);
 		log.setTreeLoggerParameters();
 	}
 
 
-	@Override
-	public boolean isCompatibleWith(Object referent) {
-		return referent instanceof WBirchProdVolLoggableTree;
-	}
 
 
 
