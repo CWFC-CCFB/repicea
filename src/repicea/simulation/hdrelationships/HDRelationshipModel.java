@@ -209,52 +209,52 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 						double residual = height - regElement.fixedPred;
 						res_i.m_afData[i][0] = residual;
 					}
-					if (matX == null) {
-						matX = matX_i;
-					} else {
-						matX = matX.matrixStack(matX_i, true);
-					}
-					if (matZ == null) {
-						matZ = matZ_i;
-					} else {
-						matZ = matZ.matrixDiagBlock(matZ_i);
-					}
-					if (matR == null) {
-						matR = matR_i;
-					} else {
-						matR = matR.matrixDiagBlock(matR_i);
-					}
-					if (res == null) {
-						res = res_i;
-					} else {
-						res = res.matrixStack(res_i, true);
-					}
-					if (matG == null) {
-						matG = matGbck.getDeepClone();
-					} else {
-						matG = matG.matrixDiagBlock(matGbck);
-					}
 					Matrix matV_i = matZ_i.multiply(matGbck).multiply(matZ_i.transpose()).add(matR_i);
 					Matrix invV_i = matV_i.getInverseMatrix();
-					if (invV == null) {
-						invV = invV_i;
-					} else {
-						invV = invV.matrixDiagBlock(invV_i);
-					}
 					Matrix blups_i = matGbck.multiply(matZ_i.transpose()).multiply(invV_i).multiply(res_i);
 					if (blups == null) {
 						blups = blups_i;
 					} else {
 						blups = blups.matrixStack(blups_i, true);
 					}
+					
+					if (isStochastic) {
+						if (matX == null) {
+							matX = matX_i;
+						} else {
+							matX = matX.matrixStack(matX_i, true);
+						}
+						if (matZ == null) {
+							matZ = matZ_i;
+						} else {
+							matZ = matZ.matrixDiagBlock(matZ_i);
+						}
+						if (matR == null) {
+							matR = matR_i;
+						} else {
+							matR = matR.matrixDiagBlock(matR_i);
+						}
+						if (res == null) {
+							res = res_i;
+						} else {
+							res = res.matrixStack(res_i, true);
+						}
+						if (matG == null) {
+							matG = matGbck.getDeepClone();
+						} else {
+							matG = matG.matrixDiagBlock(matGbck);
+						}
+						if (invV == null) {
+							invV = invV_i;
+						} else {
+							invV = invV.matrixDiagBlock(invV_i);
+						}
+					}
 				}
 				
 			}
 
 			if (blups != null) {
-//				Matrix matV = matZ.multiply(matG).multiply(matZ.transpose()).add(matR);	// variance - covariance matrix
-//				Matrix invV = matV.getInverseMatrix();
-//				Matrix blups = matG.multiply(matZ.transpose()).multiply(invV).multiply(res);
 				Matrix matC21;
 				Matrix matC22;
 				if (isStochastic) {
