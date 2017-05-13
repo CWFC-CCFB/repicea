@@ -30,6 +30,8 @@ import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.REpiceaLogisticPredictor;
 import repicea.simulation.SASParameterEstimates;
+import repicea.simulation.covariateproviders.standlevel.LandOwnershipProvider;
+import repicea.simulation.covariateproviders.standlevel.LandOwnershipProvider.LandOwnership;
 import repicea.simulation.covariateproviders.standlevel.SlopeMRNFClassProvider.SlopeMRNFClass;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.integral.GaussHermiteQuadrature;
@@ -127,7 +129,23 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 		oXVector.resetMatrix();
 		Matrix beta = getParametersForThisRealization(stand);
 		double proportionalPart = getProportionalPart(stand, beta);
-		double[] aac = (double[]) parms[0];
+		double[] aac;
+		if (parms[0] instanceof double[]) {
+			aac = (double[]) parms[0];
+		} else {
+			int year0 = (Integer) parms[0];
+			int year1 = (Integer) parms[1];
+			LandOwnership ownership;
+			if (stand instanceof LandOwnershipProvider) {
+				ownership = ((LandOwnershipProvider) stand).getLandOwnership();
+			} else {
+				ownership = LandOwnership.Public;
+			}
+			aac = MeloThinnerAACProvider.getInstance().getAACValues(stand.getQuebecForestRegion(),
+					ownership, 
+					year0,
+					year1);
+		}
 		double baseline = getBaseline(beta, aac);
 
 		double conditionalSurvival = Math.exp(-proportionalPart * baseline);
