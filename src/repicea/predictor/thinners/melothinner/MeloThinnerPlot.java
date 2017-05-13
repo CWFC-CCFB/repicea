@@ -21,16 +21,31 @@ package repicea.predictor.thinners.melothinner;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.standlevel.BasalAreaM2HaProvider;
 import repicea.simulation.covariateproviders.standlevel.EcologicalTypeProvider;
+import repicea.simulation.covariateproviders.standlevel.QuebecForestRegionProvider;
 import repicea.simulation.covariateproviders.standlevel.SlopeMRNFClassProvider;
 import repicea.simulation.covariateproviders.standlevel.StemDensityHaProvider;
 
+/**
+ * The MeloThinnerPlot interface ensures that the plot instance is compatible with the MeloThinnerPredictor. The plot
+ * may optionally implement the LandOwnership interface. If not, the land ownership is assumed to be public.
+ * @author Mathieu Fortin - May 2017
+ */
 public interface MeloThinnerPlot extends MonteCarloSimulationCompliantObject, 
 											BasalAreaM2HaProvider, 
 											StemDensityHaProvider,
 											SlopeMRNFClassProvider,
-											EcologicalTypeProvider {
+											EcologicalTypeProvider,
+											QuebecForestRegionProvider {
 
 	
+	
+	
+	/**
+	 * This method returns the cruise line ID for the random effect. If there is no cruise line, the predictor uses the plot ID assuming 
+	 * the plots were not linked by cruise line. 
+	 * @return a String
+	 */
 	public String getCruiseLineID();
+	
 	
 }

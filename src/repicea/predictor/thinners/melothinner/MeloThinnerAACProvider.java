@@ -23,19 +23,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.io.javacsv.CSVReader;
+import repicea.simulation.covariateproviders.standlevel.LandOwnershipProvider.LandOwnership;
+import repicea.simulation.covariateproviders.standlevel.QuebecForestRegionProvider.QuebecForestRegion;
 import repicea.util.ObjectUtility;
 
-public class MeloThinnerAACProvider {
+class MeloThinnerAACProvider {
 
 	private static MeloThinnerAACProvider Instance;
 
-	private final Map<Integer, Map<String, Map<Integer, Double>>> aacMap; // region : land ownership : year : aac/ha
+	private final Map<QuebecForestRegion, Map<LandOwnership, Map<Integer, Double>>> aacMap; // region : land ownership : year : aac/ha
 
 	private int minimumYearDate;
 	private int maximumYearDate;
 	
 	private MeloThinnerAACProvider() {
-		aacMap = new HashMap<Integer, Map<String, Map<Integer, Double>>>();
+		aacMap = new HashMap<QuebecForestRegion, Map<LandOwnership, Map<Integer, Double>>>();
 		init();
 	}
 	
@@ -46,27 +48,33 @@ public class MeloThinnerAACProvider {
 			reader = new CSVReader(filename);
 			Object[] record;
 			while ((record = reader.nextRecord()) != null) {
-				int region = Integer.parseInt(record[0].toString());
-				if (!aacMap.containsKey(region)) {
-					aacMap.put(region, new HashMap<String, Map<Integer, Double>>());
-				}
-				Map<String, Map<Integer, Double>> innerMap1 = aacMap.get(region);
+				int regionCode = Integer.parseInt(record[0].toString());
+				QuebecForestRegion region = QuebecForestRegion.getRegion(regionCode);
+				if (region != null) {
+					if (!aacMap.containsKey(region)) {
+						aacMap.put(region, new HashMap<LandOwnership, Map<Integer, Double>>());
+					}
+					Map<LandOwnership, Map<Integer, Double>> innerMap1 = aacMap.get(region);
 
-				String ownership = record[2].toString();
-				if (!innerMap1.containsKey(ownership)) {
-					innerMap1.put(ownership, new HashMap<Integer, Double>());
+					String ownershipCode = record[2].toString();
+					LandOwnership landOwnership = LandOwnership.getLandOwnership(ownershipCode);
+					if (landOwnership != null) {
+						if (!innerMap1.containsKey(landOwnership)) {
+							innerMap1.put(landOwnership, new HashMap<Integer, Double>());
+						}
+						Map<Integer, Double> innerMap2 = innerMap1.get(landOwnership);
+						
+						int year = Integer.parseInt(record[1].toString());
+						if (minimumYearDate == 0 || year < minimumYearDate) {
+							minimumYearDate = year;
+						}
+						if (maximumYearDate == 0 || year > maximumYearDate) {
+							maximumYearDate = year;
+						}
+						double aac = Double.parseDouble(record[5].toString());
+						innerMap2.put(year, aac);
+					}
 				}
-				Map<Integer, Double> innerMap2 = innerMap1.get(ownership);
-				
-				int year = Integer.parseInt(record[1].toString());
-				if (minimumYearDate == 0 || year < minimumYearDate) {
-					minimumYearDate = year;
-				}
-				if (maximumYearDate == 0 || year > maximumYearDate) {
-					maximumYearDate = year;
-				}
-				double aac = Double.parseDouble(record[5].toString());
-				innerMap2.put(year, aac);
 			}
 		} catch (Exception e) {
 			System.out.println("Unable to load the aac table in MeloThinnerAACProvider!");
@@ -83,7 +91,7 @@ public class MeloThinnerAACProvider {
 	 * This method returns the singleton instance of this class.
 	 * @return the only MeloThinnerAACProvider instance 
 	 */
-	public static MeloThinnerAACProvider getInstance() {
+	static MeloThinnerAACProvider getInstance() {
 		if (Instance == null) {
 			Instance = new MeloThinnerAACProvider();
 		}
@@ -93,13 +101,13 @@ public class MeloThinnerAACProvider {
 	/**
 	 * This method returns the array of aac for particular years. If the year is smaller than 1988, it is assumed that the
 	 * AAC is that of 1988. If the year is larger than 2014, it assumated that the AAC is that of 2014.
-	 * @param regionCode the code of the region from 1 to 10
-	 * @param ownership PU for public or PR for private
+	 * @param region a QuebecForestRegion enum
+	 * @param ownership  a LandOwnership enum
 	 * @param startingYear not included in the array
 	 * @param endingYear included in the array
 	 * @return an array of double
 	 */
-	public double[] getAACValues(int regionCode, String ownership, int startingYear, int endingYear) {
+	double[] getAACValues(QuebecForestRegion region, LandOwnership ownership, int startingYear, int endingYear) {
 		if (endingYear <= startingYear) {
 			throw new InvalidParameterException("The ending year must be greater than the starting year!");
 		}
@@ -113,25 +121,25 @@ public class MeloThinnerAACProvider {
 			if (yearDate > maximumYearDate) {
 				yearDate = maximumYearDate;
 			}
-			aacArray[yearIndex] = aacMap.get(regionCode).get(ownership).get(yearDate);
+			aacArray[yearIndex] = aacMap.get(region).get(ownership).get(yearDate);
 		}
 		return aacArray;
 	}
 
-	/**
-	 * This method returns the array of aac for particular years on public lands. If the year is smaller than 1988, it is assumed that the
-	 * AAC is that of 1988. If the year is larger than 2014, it assumated that the AAC is that of 2014.
-	 * @param regionCode the code of the region from 1 to 10
-	 * @param startingYear not included in the array
-	 * @param endingYear included in the array
-	 * @return an array of double
-	 */
-	public double[] getAACValues(int regionCode, int startingYear, int endingYear) {
-		return getAACValues(regionCode, "PU", startingYear, endingYear);
-	}
+//	/**
+//	 * This method returns the array of aac for particular years on public lands. If the year is smaller than 1988, it is assumed that the
+//	 * AAC is that of 1988. If the year is larger than 2014, it assumated that the AAC is that of 2014.
+//	 * @param region a QuebecForestRegion enum
+//	 * @param startingYear not included in the array
+//	 * @param endingYear included in the array
+//	 * @return an array of double
+//	 */
+//	public double[] getAACValues(QuebecForestRegion region, int startingYear, int endingYear) {
+//		return getAACValues(region, LandOwnership.Public, startingYear, endingYear);
+//	}
 
 //	public static void main(String[] args) {
-//		double[] aacValue = getInstance().getAACValues(5, "PU", 2012, 2018);
+//		double[] aacValue = getInstance().getAACValues(QuebecForestRegion.Estrie, LandOwnership.Public, 2012, 2018);
 //		int u = 0;
 //	}
 	

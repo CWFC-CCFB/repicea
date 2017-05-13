@@ -27,13 +27,17 @@ public class MeloThinnerTests {
 			Object[] record;
 			while ((record = reader.nextRecord()) != null) {
 				String plotId = record[1].toString();
-				String slopeClass = record[2].toString();
+				String ownershipCode = record[2].toString().trim();
+				int regionCode = Integer.parseInt(record[3].toString());
+				String slopeClass = record[4].toString();
 				SlopeMRNFClass sc = SlopeMRNFClass.valueOf(slopeClass);
-				double basalAreaM2Ha = Double.parseDouble(record[3].toString());
-				double stemDensityHa = Double.parseDouble(record[4].toString());
-				String ecologicalType = record[5].toString();
+				double basalAreaM2Ha = Double.parseDouble(record[5].toString());
+				double stemDensityHa = Double.parseDouble(record[6].toString());
+				String ecologicalType = record[7].toString();
+				int year0 = Integer.parseInt(record[9].toString());
+				int year1 = Integer.parseInt(record[10].toString());
 				List<Integer> possIndex = new ArrayList<Integer>();
-				for (int i = 7; i <=33; i++) {
+				for (int i = 11; i <=37; i++) {
 					if (record[i].toString().equals("1")) {
 						possIndex.add( i + 27 );
 					}
@@ -42,14 +46,18 @@ public class MeloThinnerTests {
 				for (int i = 0; i < possIndex.size(); i++) {
 					aac[i] = Double.parseDouble(record[possIndex.get(i)].toString());
 				}
-				double pred = Double.parseDouble(record[71].toString());
-				double meanPA = Double.parseDouble(record[72].toString());
+				double pred = Double.parseDouble(record[75].toString());
+				double meanPA = Double.parseDouble(record[76].toString());
 				
 				MeloThinnerPlotImpl plot = new MeloThinnerPlotImpl(plotId, 
 						basalAreaM2Ha, 
 						stemDensityHa, 
 						ecologicalType, 
 						sc,
+						year0,
+						year1,
+						regionCode,
+						ownershipCode,
 						aac,
 						pred,
 						meanPA);
@@ -88,6 +96,34 @@ public class MeloThinnerTests {
 		System.out.println("Successfully tested plots : " + nbPlots);
 	}
 
+	@Test
+	public void testModelAgainstConditionalSASPredictionWithAACProvider() throws IOException {
+		ReadPlots();
+		int nbPlots = 0;
+		MeloThinnerPredictor predictor = new MeloThinnerPredictor(false);
+		predictor.setGaussianQuadrature(false);
+		for (MeloThinnerPlotImpl plot : Plots) {
+			double actual = 1 - predictor.predictEventProbability(plot, null, plot.getYear0(), plot.getYear1()); // 1 - probability of harvesting to get the survival
+			double expected = plot.getPredSurvival();
+			Assert.assertEquals("Comparing plot no " + plot.getSubjectId(), expected, actual, 1E-8);
+			nbPlots++;
+		}
+		System.out.println("Successfully tested plots : " + nbPlots);
+	}
+
+	@Test
+	public void testModelAgainstMarginalSASPredictionWithAACProvider() throws IOException {
+		ReadPlots();
+		int nbPlots = 0;
+		MeloThinnerPredictor predictor = new MeloThinnerPredictor(false);
+		for (MeloThinnerPlotImpl plot : Plots) {
+			double actual = 1 - predictor.predictEventProbability(plot, null, plot.getYear0(), plot.getYear1()); // 1 - probability of harvesting to get the survival
+			double expected = plot.getMeanPA();
+			Assert.assertEquals("Comparing plot no " + plot.getSubjectId(), expected, actual, 1E-6);
+			nbPlots++;
+		}
+		System.out.println("Successfully tested plots : " + nbPlots);
+	}
 	
 	
 }
