@@ -68,6 +68,30 @@ class SimpleLinearModel extends REpiceaPredictor {
 		Matrix newResidualVariance = residualVarianceDistribution.getRandomRealization();
 		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(newResidualVariance));
 	}
+	
+	
+	void replaceModelParameters(PlotList sample) {
+		int degreesOfFreedom = sample.size() - 2;
+		Matrix matX = new Matrix(sample.size(), 2);
+		Matrix matY = new Matrix(sample.size(), 1);
+		Matrix matW = new Matrix(sample.size(), sample.size());
+		for (int i = 0; i < sample.size(); i++) {
+			SamplePlot plot = sample.get(i);
+			matX.m_afData[i][0] = 1d;
+			matX.m_afData[i][1] = plot.getX();
+			matY.setSubMatrix(plot.getY(), i, 0);
+			matW.m_afData[i][i] = plot.getX();
+		}
+		Matrix invW = matW.getInverseMatrix();
+		Matrix invXWX = matX.transpose().multiply(invW).multiply(matX).getInverseMatrix();
+		Matrix newMean = invXWX.multiply(matX.transpose()).multiply(invW).multiply(matY);
+		Matrix res = matY.subtract(matX.multiply(newMean));
+		Matrix newResidualVariance = res.transpose().multiply(invW).multiply(res).scalarMultiply(1d/(degreesOfFreedom));
+		Matrix newVariance = invXWX.scalarMultiply(newResidualVariance.m_afData[0][0]);
+		
+		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
+		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(newResidualVariance));
+	}
 
 	
 }

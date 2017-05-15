@@ -64,7 +64,8 @@ public class Population {
 	
 	
 	public static void main(String[] args) throws IOException {
-		SimpleLinearModel.R2_95Version = true;
+		boolean simpleReplacement = true;		// default is true
+		SimpleLinearModel.R2_95Version = false;	// default is false
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(1);
 		long start = System.currentTimeMillis();
@@ -76,6 +77,8 @@ public class Population {
 		String filename;
 		if (SimpleLinearModel.R2_95Version) {
 			filename = ObjectUtility.getPackagePath(Population.class) + "simulationR2_95_" + sampleSize + ".csv";
+		} else if (!simpleReplacement) {
+			filename = ObjectUtility.getPackagePath(Population.class) + "fromDataset_" + sampleSize + ".csv";
 		} else {
 			filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
 		}
@@ -108,8 +111,18 @@ public class Population {
 			setRealizedValues(pop.sampleUnits, pop.superModel);
 			Matrix total = pop.getTotal();
 			SimpleLinearModel currentModel = new SimpleLinearModel(true, true); // the current model must account for the errors in the parameter estimates
-			currentModel.replaceModelParameters();	// the parameter estimates are drawn at random in the distribution
-			PlotList sample = pop.getSample(sampleSize);
+			PlotList sample;;
+			if (simpleReplacement) {
+				currentModel.replaceModelParameters();	// the parameter estimates are drawn at random in the distribution
+				sample = pop.getSample(sampleSize);
+			} else {
+				sample = pop.getSample(sampleSize + 100);
+				PlotList dataSet = new PlotList();
+				for (int i = 0; i < 100; i++) {
+					dataSet.add(sample.remove(0));
+				}
+				currentModel.replaceModelParameters(dataSet);
+			}
 			HybridMonteCarloHorvitzThompsonEstimate hybHTEstimate = new HybridMonteCarloHorvitzThompsonEstimate();
 			for (int internalReal = 0; internalReal < nbInternalReal; internalReal++) {
 				sample.setRealization(internalReal);
