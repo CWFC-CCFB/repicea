@@ -18,14 +18,19 @@
  */
 package repicea.predictor;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
+import repicea.io.javacsv.CSVReader;
 import repicea.math.Matrix;
+import repicea.simulation.covariateproviders.standlevel.QuebecForestRegionProvider.QuebecForestRegion;
+import repicea.util.ObjectUtility;
 
 /**
  * This class contains the general settings for Quebec context.
@@ -33,6 +38,57 @@ import repicea.math.Matrix;
  */
 public class QuebecGeneralSettings {
 
+	private final static Random RANDOM = new Random();
+	
+	private static final Map<String, Map<QuebecForestRegion, Double>> FOREST_REGION_MAP = new HashMap<String, Map<QuebecForestRegion, Double>>();
+	static {
+		String path = ObjectUtility.getRelativePackagePath(QuebecGeneralSettings.class);
+		CSVReader reader = null;
+		try {
+			reader = new CSVReader(path + "correspondanceTable.csv");
+			Object[] record;
+			while ((record = reader.nextRecord()) != null) {
+				String regEco = record[0].toString();
+				int regionCode = Integer.parseInt(record[1].toString());
+				QuebecForestRegion forestRegion = QuebecForestRegion.getRegion(regionCode);
+				double prob = Double.parseDouble(record[2].toString());
+				if (!FOREST_REGION_MAP.containsKey(regEco)) {
+					FOREST_REGION_MAP.put(regEco, new HashMap<QuebecForestRegion, Double>());
+				}
+				Map<QuebecForestRegion, Double> innerMap = FOREST_REGION_MAP.get(regEco);
+				innerMap.put(forestRegion, prob);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (reader != null) {
+				reader.close();
+			}
+		}
+	}
+	
+	
+	public static QuebecForestRegion getForestRegion(String ecologicalRegion, boolean stochastic) {
+		Map<QuebecForestRegion, Double> forestRegionMap = FOREST_REGION_MAP.get(ecologicalRegion);
+		double maxValue = 0;
+		double sumValue = 0;
+		double randomValue = RANDOM.nextDouble();
+		QuebecForestRegion currentSelectedRegion = null;
+		for (QuebecForestRegion region : forestRegionMap.keySet()) {
+			double prob = forestRegionMap.get(region);
+			sumValue += prob;
+			if (prob > maxValue) {
+				maxValue = prob;
+				currentSelectedRegion = region;
+			}
+			if (stochastic & randomValue < sumValue) {
+				return region;
+			}
+		}
+		return currentSelectedRegion;
+	}
+	
+	
 	public static final Set<String> CLIMATIC_SUBDOMAIN_LIST = new HashSet<String>();
 	static {
 		CLIMATIC_SUBDOMAIN_LIST.add("1ouest");
@@ -285,4 +341,7 @@ public class QuebecGeneralSettings {
 		TREE_STATUS_LIST.put(56, "Mort");
 	}
 
+	public static void main(String[] args) {
+		QuebecForestRegion region = QuebecGeneralSettings.getForestRegion("2b", false);
+	}
 }
