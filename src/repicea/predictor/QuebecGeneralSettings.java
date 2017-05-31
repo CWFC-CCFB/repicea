@@ -341,7 +341,7 @@ public class QuebecGeneralSettings {
 		TREE_STATUS_LIST.put(56, "Mort");
 	}
 
-	public static void main(String[] args) {
-		QuebecForestRegion region = QuebecGeneralSettings.getForestRegion("2b", false);
-	}
+//	public static void main(String[] args) {
+//		QuebecForestRegion region = QuebecGeneralSettings.getForestRegion("2b", false);
+//	}
 }
