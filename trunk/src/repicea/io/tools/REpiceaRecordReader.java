@@ -249,7 +249,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 			} else if (e instanceof FileNotFoundException) {
 				message = MessageID.FileCouldNotBeFound.toString() + importFieldManager.getFileSpecifications()[0];
 			} else if (e instanceof NullInThisFieldException) {
-				message = ((NullInThisFieldException) e).getMessage();
+				message = ((NullInThisFieldException) e).getMessage() + " " + MessageID.AtLine.toString() + lineCounter;
 			} else {
 				message = MessageID.ErrorWhileReading.toString() + importFieldManager.getFileSpecifications()[0] + " " + MessageID.AtLine.toString() + lineCounter;
 			}
