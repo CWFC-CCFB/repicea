@@ -52,13 +52,35 @@ public abstract class REpiceaRecordReader implements Serializable {
 		}
 	}
 	
+	@SuppressWarnings("serial")
+	public static class NullInThisFieldException extends NullPointerException {
+		
+		private final ImportFieldElement ife;
+
+		public NullInThisFieldException(ImportFieldElement ife) {
+			this.ife = ife;
+		}
+		
+		@Override
+		public String getMessage() {
+			return MessageID.NullValueInThisField.toString() + ife.getFieldName();
+		}
+	}
+	
+	
+	
 	public static enum MessageID implements TextableEnum {
 		ProgressMessage("Reading the strata list...",
 				"Lecture des strates..."),
 		StratumSelectionTitle("Stratum to be imported",
 				"S\u00E9lection du peuplement ou de la strate \u00E0 importer"),
 		StratumSelectionMessage("The input file contains many strata. Please select the stratum to import: ",
-				"Votre fichier d'entr\u00E9e comprend plus d'un peuplement ou plus d'une strate. Veuillez s\u00E9lectionner le peuplement ou la strate \u00E0 importer :");
+				"Votre fichier d'entr\u00E9e comprend plus d'un peuplement ou plus d'une strate. Veuillez s\u00E9lectionner le peuplement ou la strate \u00E0 importer :"),
+		NullValueInThisField("A null value has been found in this field: ", "Une valeur nulle a \u00E9t\\u00E9 d\u00E9tect\u00E9e dans le champ suivant : "),
+		InconsistentValueInThisField("Values of variables are inconsistent ", "Les valeurs de certains champs sont incoh\u00E9rentes "),
+		AtLine("at line ", "\u00A0 la ligne "),
+		FileCouldNotBeFound("CAPSIS cannot find file: ", "CAPSIS n'a pas pu trouv\u00E9 le fichier : "),
+		ErrorWhileReading("Error while reading file: ", "Erreur lors de la lecture du fichier : ");
 		
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -67,6 +89,9 @@ public abstract class REpiceaRecordReader implements Serializable {
 		public void setText(String englishText, String frenchText) {
 			REpiceaTranslator.setString(this, englishText, frenchText);
 		}
+
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 	
 	private static final long serialVersionUID = 20101220;
@@ -220,11 +245,13 @@ public abstract class REpiceaRecordReader implements Serializable {
 		} catch (Exception e) {
 			String message; 
 			if (e instanceof VariableValueException) {
-				message = "Values of variables are inconsistent at line : " + lineCounter + ": " + e.getMessage();
+				message = MessageID.InconsistentValueInThisField.toString() + MessageID.AtLine.toString() + lineCounter + ": " + e.getMessage();
 			} else if (e instanceof FileNotFoundException) {
-				message = "Could not find file : " + importFieldManager.getFileSpecifications()[0];
+				message = MessageID.FileCouldNotBeFound.toString() + importFieldManager.getFileSpecifications()[0];
+			} else if (e instanceof NullInThisFieldException) {
+				message = ((NullInThisFieldException) e).getMessage();
 			} else {
-				message = "Error while reading file : " + importFieldManager.getFileSpecifications()[0] + " at line : " + lineCounter;
+				message = MessageID.ErrorWhileReading.toString() + importFieldManager.getFileSpecifications()[0] + " " + MessageID.AtLine.toString() + lineCounter;
 			}
 			throw new Exception(message);
 		} finally {
@@ -299,21 +326,21 @@ public abstract class REpiceaRecordReader implements Serializable {
 				switch(oVecImport.get(i).getFieldType()) {
 				case Double:							// type = float
 					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = (Double) null;
+						oArray[i] = null;
 					} else {
 						oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
 					}
 					break;
 				case Integer:
 					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = (Integer) null;
+						oArray[i] = null;
 					} else {
 						oArray[i] = (Integer) ((Double) Double.parseDouble(oArray[i].toString().replace(",","."))).intValue();
 					}
 					break;
 				case String:												// type = character
 					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = (String) "";
+						oArray[i] = "";
 					} else {
 						oArray[i] = (oArray[i].toString()).trim();
 					}
