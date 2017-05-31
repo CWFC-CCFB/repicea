@@ -51,7 +51,7 @@ public final class ImportFieldElement implements Cloneable,
 	private int matchingFieldIndex;			// index of the corresponding DBF field in the input file
 	public boolean isOptional;				// specifies whether or not the field is optional
 	public String helpDescription;			// a string that appears in the popup window to help the used
-	private FieldType fieldTypeClass;
+	public FieldType fieldTypeClass;
 	protected Enum<?> fieldID;					// an enum that can be used to refer to the field
 	
 	private transient ImportFieldElementPanel guiInterface;
