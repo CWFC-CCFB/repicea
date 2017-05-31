@@ -298,7 +298,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 			if (oArray[i] != null) {								// if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
 				switch(oVecImport.get(i).getFieldType()) {
 				case Double:							// type = float
-					if (oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
 						oArray[i] = Double.NaN;
 					} else {
 						oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
