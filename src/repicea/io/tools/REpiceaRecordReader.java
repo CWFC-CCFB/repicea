@@ -299,16 +299,24 @@ public abstract class REpiceaRecordReader implements Serializable {
 				switch(oVecImport.get(i).getFieldType()) {
 				case Double:							// type = float
 					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = Double.NaN;
+						oArray[i] = (Double) null;
 					} else {
 						oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
 					}
 					break;
 				case Integer:
-					oArray[i] = (Integer) ((Double) Double.parseDouble(oArray[i].toString().replace(",","."))).intValue();
+					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+						oArray[i] = (Integer) null;
+					} else {
+						oArray[i] = (Integer) ((Double) Double.parseDouble(oArray[i].toString().replace(",","."))).intValue();
+					}
 					break;
 				case String:												// type = character
-					oArray[i] = (oArray[i].toString()).trim();
+					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+						oArray[i] = (String) "";
+					} else {
+						oArray[i] = (oArray[i].toString()).trim();
+					}
 					break;
 				default:
 					throw new Exception("Unknown field type");
