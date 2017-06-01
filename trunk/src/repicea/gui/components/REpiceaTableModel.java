@@ -113,6 +113,11 @@ public class REpiceaTableModel extends DefaultTableModel implements CellEditorLi
 		return true;
 	}
 	
+	public void removeAll() {
+		while (getRowCount() > 0) {
+			removeRow(0);
+		}
+	}
 
 
 }
