@@ -86,10 +86,11 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 	private Map<String, CruiseLine> cruiseLineMap;
 	private final GaussHermiteQuadrature ghq = new GaussHermiteQuadrature(NumberOfPoints.N5);
 	private final EmbeddedFunction embeddedFunction;
-	
+	private final MeloThinnerTreeHarvestDecision decisionTable;
 	
 	public MeloThinnerPredictor(boolean isVariabilityEnabled) {
 		super(isVariabilityEnabled, isVariabilityEnabled, isVariabilityEnabled);
+		decisionTable = new MeloThinnerTreeHarvestDecision();
 		init();
 		embeddedFunction = new EmbeddedFunction();
 		embeddedFunction.setVariableValue(0, 1);
@@ -251,6 +252,13 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 		this.quadratureEnabled = quadEnabled;
 	}
 	
+	/**
+	 * This method returns the decision table for orienting the different potential vegetation to silvicultural treatements.
+	 * @return a MeloThinnerTreeHarvestDecision instance
+	 */
+	public MeloThinnerTreeHarvestDecision getDecisionTable() {
+		return decisionTable;
+	}
 	
 	
 	public static void main(String[] args) {

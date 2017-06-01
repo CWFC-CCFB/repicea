@@ -73,15 +73,18 @@ public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithPare
 
 	protected MeloThinnerTreeHarvestDecision() {
 		potentialTreatments = new ArrayList<Enum<?>>();
-		addPotentialTreatment(BasicDefaultTreatment.values());
+		addPotentialTreatments(BasicDefaultTreatment.values());
 		treatmentMatchMap = new TreeMap<String, Enum<?>>();
 		for (String potentialVegetation : QuebecGeneralSettings.POTENTIAL_VEGETATION_LIST) {
 			treatmentMatchMap.put(potentialVegetation, BasicDefaultTreatment.CPRS);
 		}
 	}
 
-	
-	public void addPotentialTreatment(Enum<?>[] enumValues) {
+	/**
+	 * This method adds a potential treatment to the list of available treatments
+	 * @param enumValues an array of enum variable 
+	 */
+	public void addPotentialTreatments(Enum<?>[] enumValues) {
 		for (Enum<?> enumValue : enumValues) {
 			if (!potentialTreatments.contains(enumValue)) {
 				potentialTreatments.add(enumValue);
@@ -113,10 +116,6 @@ public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithPare
 	}
 
 	
-	public static void main(String[] args) {
-		new MeloThinnerTreeHarvestDecision().showUI(null);
-	}
-
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		if (e.getType() == TableModelEvent.UPDATE) {
@@ -193,5 +192,9 @@ public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithPare
 		potentialTreatments.clear();
 		potentialTreatments.addAll((List) wasMemorized.get(1));
 	}
-	
+
+//	public static void main(String[] args) {
+//		new MeloThinnerTreeHarvestDecision().showUI(null);
+//	}
+
 }
