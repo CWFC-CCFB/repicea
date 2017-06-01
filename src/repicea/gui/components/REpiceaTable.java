@@ -42,16 +42,32 @@ public class REpiceaTable extends JTable implements ActionListener {
 	private final REpiceaPopupMenu popupMenu;
 	private final JMenuItem addItem;
 	private final JMenuItem deleteItem;
-	
-	public REpiceaTable(REpiceaTableModel model) {
+
+	/**
+	 * General constructor.
+	 * @param model an REpiceaTableModel instance
+	 * @param popupEnabled true to enable the popup menu that allows to add or delete a record
+	 */
+	public REpiceaTable(REpiceaTableModel model, boolean popupEnabled) {
 		super(model);
 		addItem = UIControlManager.createCommonMenuItem(CommonControlID.Addone);
 		deleteItem = UIControlManager.createCommonMenuItem(CommonControlID.Delete);
 		popupMenu = new REpiceaPopupMenu(this, addItem, deleteItem);
-		addMouseListener(new REpiceaPopupListener(popupMenu));
-		getTableHeader().addMouseListener(new REpiceaPopupListener(popupMenu));
+		if (popupEnabled) {
+			addMouseListener(new REpiceaPopupListener(popupMenu));
+			getTableHeader().addMouseListener(new REpiceaPopupListener(popupMenu));
+		}
 	}
 
+	/**
+	 * Default constructor with popup menu enabled. 
+	 * @param model an REpiceaTableModel instance
+	 */
+	public REpiceaTable(REpiceaTableModel model) {
+		this(model, true);
+	}
+	
+	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource().equals(addItem)) {

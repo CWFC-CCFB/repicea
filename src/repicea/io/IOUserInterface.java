@@ -18,8 +18,8 @@
  */
 package repicea.io;
 
-import repicea.app.SettingMemory;
 import repicea.gui.REpiceaWindow;
+import repicea.gui.WindowSettings;
 
 
 /**
@@ -43,7 +43,7 @@ public interface IOUserInterface extends REpiceaWindow {
 	 * This method returns the SettingMemory instance of the object if any. It can be null.
 	 * @return a Settings instance
 	 */
-	public SettingMemory getSettingMemory();
+	public WindowSettings getWindowSettings();
 
 	
 	

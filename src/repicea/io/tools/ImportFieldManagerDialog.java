@@ -55,7 +55,6 @@ import javax.swing.PopupFactory;
 import javax.swing.border.BevelBorder;
 import javax.swing.border.Border;
 
-import repicea.app.SettingMemory;
 import repicea.gui.AutomatedHelper;
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.REpiceaDialog;
@@ -369,7 +368,7 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 	}
 
 	@Override
-	public SettingMemory getSettingMemory() {return windowSettings;}
+	public WindowSettings getWindowSettings() {return windowSettings;}
 
 }
 

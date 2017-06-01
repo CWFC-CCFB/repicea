@@ -47,7 +47,6 @@ import javax.swing.border.BevelBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
-import repicea.app.SettingMemory;
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaAWTProperty;
@@ -550,7 +549,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 	}
 	
 	@Override
-	public SettingMemory getSettingMemory() {return windowSettings;}
+	public WindowSettings getWindowSettings() {return windowSettings;}
 	
 	private void logGradeRemoveAction() {
 		int selectedIndex = logCategoryList.getSelectedIndex();
