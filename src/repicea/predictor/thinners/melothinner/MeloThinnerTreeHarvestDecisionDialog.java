@@ -9,6 +9,7 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JScrollPane;
 
+import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
@@ -19,12 +20,13 @@ import repicea.gui.components.REpiceaTable;
 import repicea.gui.components.REpiceaTableModel;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
+import repicea.serial.Memorizable;
 import repicea.util.REpiceaSystem;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
-public class MeloThinnerTreeHarvestDecisionDialog extends REpiceaDialog implements IOUserInterface {
+public class MeloThinnerTreeHarvestDecisionDialog extends REpiceaDialog implements IOUserInterface, OwnedWindow {
 	
 	static {
 		UIControlManager.setTitle(MeloThinnerTreeHarvestDecisionDialog.class, "Treatments to be applied in each potential vegetation", "Traitement \u00E0 appliquer dans chaque v\u00E9g\u00E9tation potentielle");
@@ -58,7 +60,7 @@ public class MeloThinnerTreeHarvestDecisionDialog extends REpiceaDialog implemen
 	protected MeloThinnerTreeHarvestDecisionDialog(MeloThinnerTreeHarvestDecision caller, Window parent) {
 		super(parent);
 		windowSettings = new WindowSettings(REpiceaSystem.getJavaIOTmpDir() + getClass().getSimpleName()+ ".ser", this);
-		this.cancelOnClose = false;
+		setCancelOnClose(false);
 		this.caller = caller;
 		load = UIControlManager.createCommonMenuItem(CommonControlID.Open);
 		save = UIControlManager.createCommonMenuItem(CommonControlID.Save);
@@ -72,7 +74,16 @@ public class MeloThinnerTreeHarvestDecisionDialog extends REpiceaDialog implemen
 		table = new REpiceaTable(tableModel, false); // false : adding or deleting rows is disabled
 		table.setDefaultEditor(Enum.class, new REpiceaCellEditor(new JComboBox<TextableEnum>(caller.potentialTreatments.toArray(new TextableEnum[]{})), tableModel));
 //		table.setRowSorter(new TableRowSorter<REpiceaTableModel>(tableModel));
-		
+
+		refreshTable();
+		initUI();
+		pack();
+
+	}
+	
+	
+	protected void refreshTable() {
+		tableModel.removeAll();
 		Object[] record;
 		for (String potentialVegetation : this.caller.treatmentMatchMap.keySet()) {
 			record = new Object[2];
@@ -80,10 +91,8 @@ public class MeloThinnerTreeHarvestDecisionDialog extends REpiceaDialog implemen
 			record[1] = this.caller.treatmentMatchMap.get(potentialVegetation);
 			tableModel.addRow(record);
 		}
-		initUI();
-		pack();
-
 	}
+	
 	
 	@Override
 	public void listenTo() {
@@ -111,18 +120,50 @@ public class MeloThinnerTreeHarvestDecisionDialog extends REpiceaDialog implemen
 	}
 
 	@Override
-	public void postLoadingAction() {
-		// TODO Auto-generated method stub
-		
+	public void postSavingAction() {
+		refreshTitle();
 	}
 
 	@Override
-	public void postSavingAction() {
-		// TODO Auto-generated method stub
-		
+	public void postLoadingAction() {
+		synchronizeUIWithOwner();
+	}
+
+	private String getTitleForThisDialog() {
+		String titleOfThisClass = UIControlManager.getTitle(getClass());
+		return titleOfThisClass;
+	}
+ 
+	/**
+	 * The method sets the title of the dialog.
+	 */
+	protected void refreshTitle() {
+		String filename = caller.getFilename();
+		if (filename.isEmpty()) {
+			setTitle(getTitleForThisDialog());
+		} else {
+			if (filename.length() > 40) {
+				filename = "..." + filename.substring(filename.length()-41, filename.length());
+			}
+			setTitle(getTitleForThisDialog() + " - " + filename);
+		}
 	}
 
 	@Override
 	public WindowSettings getWindowSettings() {return windowSettings;}
+
+	@Override
+	public void synchronizeUIWithOwner() {
+		doNotListenToAnymore();
+		refreshTable();
+		refreshInterface();
+		refreshTitle();
+		listenTo();
+	}
+
+	@Override
+	public Memorizable getWindowOwner() {
+		return caller;
+	}
 
 }

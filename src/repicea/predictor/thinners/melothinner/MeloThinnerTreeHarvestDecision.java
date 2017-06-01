@@ -21,6 +21,8 @@ package repicea.predictor.thinners.melothinner;
 import java.awt.Container;
 import java.awt.Window;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,11 +35,17 @@ import javax.swing.filechooser.FileFilter;
 import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.gui.components.REpiceaTableModel;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.io.GFileFilter.FileType;
 import repicea.predictor.QuebecGeneralSettings;
+import repicea.serial.Memorizable;
+import repicea.serial.MemorizerPackage;
+import repicea.serial.xml.XmlDeserializer;
+import repicea.serial.xml.XmlMarshallException;
+import repicea.serial.xml.XmlSerializer;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
-public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithParent, TableModelListener, IOUserInterfaceableObject {
+public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithParent, TableModelListener, IOUserInterfaceableObject, Memorizable {
 
 	public static enum BasicDefaultTreatment implements TextableEnum {
 		CPRS("Harvesting with soil and regeneration protection", "Coupe avec protection de la r\u00E9g\u00E9n\u00E9ration et des sols (CPRS)"),
@@ -57,22 +65,24 @@ public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithPare
 		
 	}
 		
-	protected final Map<String, TextableEnum> treatmentMatchMap;
-	protected List<TextableEnum> potentialTreatments;
-	private MeloThinnerTreeHarvestDecisionDialog guiInterface;
-	
+	protected final Map<String, Enum<?>> treatmentMatchMap;
+	protected final List<Enum<?>> potentialTreatments;
+	private String filename;
+
+	private transient MeloThinnerTreeHarvestDecisionDialog guiInterface;
+
 	protected MeloThinnerTreeHarvestDecision() {
-		potentialTreatments = new ArrayList<TextableEnum>();
+		potentialTreatments = new ArrayList<Enum<?>>();
 		addPotentialTreatment(BasicDefaultTreatment.values());
-		treatmentMatchMap = new TreeMap<String, TextableEnum>();
+		treatmentMatchMap = new TreeMap<String, Enum<?>>();
 		for (String potentialVegetation : QuebecGeneralSettings.POTENTIAL_VEGETATION_LIST) {
 			treatmentMatchMap.put(potentialVegetation, BasicDefaultTreatment.CPRS);
 		}
 	}
 
 	
-	public void addPotentialTreatment(TextableEnum[] enumValues) {
-		for (TextableEnum enumValue : enumValues) {
+	public void addPotentialTreatment(Enum<?>[] enumValues) {
+		for (Enum<?> enumValue : enumValues) {
 			if (!potentialTreatments.contains(enumValue)) {
 				potentialTreatments.add(enumValue);
 			}
@@ -113,7 +123,7 @@ public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithPare
 			if (e.getSource() instanceof REpiceaTableModel) {
 				REpiceaTableModel model = (REpiceaTableModel) e.getSource();
 				String potentialVegetation = (String) model.getValueAt(e.getLastRow(), 0);
-				TextableEnum treatement = (TextableEnum) model.getValueAt(e.getLastRow(), 1);
+				Enum<?> treatement = (Enum<?>) model.getValueAt(e.getLastRow(), 1);
 				treatmentMatchMap.put(potentialVegetation, treatement);
 			}
 		}
@@ -122,29 +132,66 @@ public class MeloThinnerTreeHarvestDecision implements REpiceaShowableUIWithPare
 
 	@Override
 	public void save(String filename) throws IOException {
-		// TODO Auto-generated method stub
-		
+		setFilename(filename);
+		XmlSerializer serializer = new XmlSerializer(filename);
+		try {
+			serializer.writeObject(this);
+		} catch (XmlMarshallException e) {
+			throw new IOException("A XmlMarshallException occurred while saving the file!");
+		}
 	}
+	
+	private void setFilename(String filename) {this.filename = filename;}
 
 
 	@Override
 	public void load(String filename) throws IOException {
-		// TODO Auto-generated method stub
-		
+		XmlDeserializer deserializer;
+		try {
+			deserializer = new XmlDeserializer(filename);
+		} catch (Exception e) {
+			InputStream is = ClassLoader.getSystemResourceAsStream(filename);
+			if (is == null) {
+				throw new IOException("The filename is not a file and cannot be converted into a stream!");
+			} else {
+				deserializer = new XmlDeserializer(is);
+			}
+		}
+		MeloThinnerTreeHarvestDecision newloadedInstance;
+		try {
+			newloadedInstance = (MeloThinnerTreeHarvestDecision) deserializer.readObject();
+			unpackMemorizerPackage(newloadedInstance.getMemorizerPackage());
+			setFilename(filename);
+		} catch (XmlMarshallException e) {
+			throw new IOException("A XmlMarshallException occurred while loading the file!");
+		}
 	}
 
 
 	@Override
-	public FileFilter getFileFilter() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+	public FileFilter getFileFilter() {return FileType.XML.getFileFilter();}
 
 
 	@Override
-	public String getFilename() {
-		// TODO Auto-generated method stub
-		return null;
+	public String getFilename() {return filename;}
+
+
+	@Override
+	public MemorizerPackage getMemorizerPackage() {
+		MemorizerPackage mp = new MemorizerPackage();
+		mp.add((Serializable) treatmentMatchMap);
+		mp.add((Serializable) potentialTreatments);
+		return mp;
+	}
+
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public void unpackMemorizerPackage(MemorizerPackage wasMemorized) {
+		treatmentMatchMap.clear();
+		treatmentMatchMap.putAll((Map) wasMemorized.get(0));
+		potentialTreatments.clear();
+		potentialTreatments.addAll((List) wasMemorized.get(1));
 	}
 	
 }
