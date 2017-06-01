@@ -88,7 +88,7 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 	private final EmbeddedFunction embeddedFunction;
 	
 	
-	protected MeloThinnerPredictor(boolean isVariabilityEnabled) {
+	public MeloThinnerPredictor(boolean isVariabilityEnabled) {
 		super(isVariabilityEnabled, isVariabilityEnabled, isVariabilityEnabled);
 		init();
 		embeddedFunction = new EmbeddedFunction();
