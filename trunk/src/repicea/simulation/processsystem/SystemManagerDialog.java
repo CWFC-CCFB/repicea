@@ -38,7 +38,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 
-import repicea.app.SettingMemory;
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaAWTProperty;
@@ -312,7 +311,8 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	@Override
 	public Memorizable getWindowOwner() {return getCaller();}
 
-	public SettingMemory getSettingMemory() {return windowSettings;}
+	@Override
+	public WindowSettings getWindowSettings() {return windowSettings;}
 
 	@Override
 	public void itemStateChanged(ItemEvent e) {

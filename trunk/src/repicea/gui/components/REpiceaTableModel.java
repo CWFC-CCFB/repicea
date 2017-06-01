@@ -19,7 +19,9 @@
 package repicea.gui.components;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
@@ -33,10 +35,12 @@ import javax.swing.table.DefaultTableModel;
 public class REpiceaTableModel extends DefaultTableModel implements CellEditorListener {
 
 	private final List<Class<?>> columnClass;
+	private final Map<Integer, Boolean> vetos;
 
 	public REpiceaTableModel(Object[] columnNames) {
 		super(columnNames, 0);
 		columnClass = new ArrayList<Class<?>>();
+		vetos = new HashMap<Integer, Boolean>();
 	}
 
 	@Override
@@ -91,5 +95,25 @@ public class REpiceaTableModel extends DefaultTableModel implements CellEditorLi
 		}
 		addRow(record);
 	}
+	
+	/**
+	 * By default, all the cells are editable. This method can be used to disable the editing is a particular column.
+	 * @param columnIndex the index of the column
+	 * @param veto true to disable the editing
+	 */
+	public void setEditableVetos(int columnIndex, boolean veto) {
+		vetos.put(columnIndex, veto);
+	}
+
+	@Override
+	public boolean isCellEditable(int row, int column) {
+		if (vetos.containsKey(column)) {
+			return !vetos.get(column);
+		}
+		return true;
+	}
+	
+
+
 }
 

@@ -101,7 +101,7 @@ public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeLis
 	 */
 	protected void loadAction() {
 		try {
-			SettingMemory settings = component.getSettingMemory();
+			SettingMemory settings = component.getWindowSettings();
 			String filename;
 			if (settings != null) {
 				filename = settings.getProperty(component.getClass().getSimpleName() + ".last.file.loaded", componentOwner.getFilename());
