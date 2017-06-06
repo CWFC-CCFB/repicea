@@ -34,7 +34,7 @@ import repicea.stats.integral.TrapezoidalRule;
  */
 public class StemTaperSegment {
 
-	public static final double VERY_SMALL = 1E-6;
+	public static final double VERY_SMALL = 1E-3;
 
 	private NumericalIntegrationMethod nim;
 	
