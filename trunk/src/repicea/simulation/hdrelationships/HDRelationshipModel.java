@@ -55,10 +55,24 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		}
 	}
 
+	/**
+	 * Preferred constructor.
+	 * @param isVariabilityEnabledEnabled enables the variability in the parameter estimates, the random effects and the
+	 * residual errors at the same time
+	 */
 	protected HDRelationshipModel(boolean isVariabilityEnabledEnabled) {
-		super(isVariabilityEnabledEnabled, isVariabilityEnabledEnabled, isVariabilityEnabledEnabled);
+		this(isVariabilityEnabledEnabled, isVariabilityEnabledEnabled, isVariabilityEnabledEnabled);
 	}
 
+	/**
+	 * Second constructor for greater flexilibity
+	 * @param isParameterVariabilityEnabled enables the variability in the parameter estimates
+	 * @param isRandomEffectVariabilityEnabled enables the variability in the random effects
+	 * @param isResidualErrorVariabilityEnabled enables the variability in the residual errors
+	 */
+	protected HDRelationshipModel(boolean isParameterVariabilityEnabled, boolean isRandomEffectVariabilityEnabled, boolean isResidualErrorVariabilityEnabled) {
+		super(isParameterVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualErrorVariabilityEnabled);
+	}
 
 	/**
 	 * This method calculates the height for individual trees and also implements the Monte Carlo simulation automatically. In case of 
@@ -78,7 +92,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			RegressionElements regElement = fixedEffectsPrediction(stand, tree, getParametersForThisRealization(stand));
 			double predictedHeight = regElement.fixedPred;
 			predictedHeight += blupImplementation(stand, regElement);
-
 			predictedHeight += residualImplementation(tree);
 			if (predictedHeight < 1.3) {
 				predictedHeight = 1.3;
@@ -112,7 +125,10 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 * @param errorTerm a GaussianErrorTerm instance
 	 */
 	protected final void setSpecificResiduals(Tree tree, GaussianErrorTerm errorTerm) {
-		getGaussianErrorTerms(tree).add(errorTerm);
+		GaussianErrorTermList list = getGaussianErrorTerms(tree);
+		if (!list.getDistanceIndex().contains(tree.getErrorTermIndex())) {		// we add the GaussianErrorTerm only if it is not already in the list
+			list.add(errorTerm);
+		}
 	}
 	
 	/**
@@ -208,12 +224,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 					Matrix matV_i = matZ_i.multiply(matGbck).multiply(matZ_i.transpose()).add(matR_i);
 					Matrix invV_i = matV_i.getInverseMatrix();
 					Matrix blups_i = matGbck.multiply(matZ_i.transpose()).multiply(invV_i).multiply(res_i);
-					
-					
-					
-					
-					
-					
 					
 					if (blups == null) {
 						blups = blups_i;
