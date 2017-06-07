@@ -185,7 +185,9 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			Matrix matG = null;
 			Matrix invV = null;
 			Matrix blups = null;
+			
 			List<MonteCarloSimulationCompliantObject> subjectList = new ArrayList<MonteCarloSimulationCompliantObject>();
+			List<HDRelationshipTree> heightableTreesCopy;
 			
 			for (HDRelationshipStand s : stands) {
 				Collection trees = getTreesFromStand((Stand) s);
@@ -203,7 +205,9 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 				}
 				if (!heightableTrees.isEmpty()) {
 					subjectList.add(s);
-					fullListOfHeightableTrees.put((Stand) s, heightableTrees);
+					heightableTreesCopy = new ArrayList<HDRelationshipTree>();
+					heightableTreesCopy.addAll(heightableTrees);
+					fullListOfHeightableTrees.put((Stand) s, heightableTreesCopy);
 					// matrices for the blup calculation
 					int nbObs = heightableTrees.size();
 					Matrix matZ_i = new Matrix(nbObs, matGbck.m_iRows);		// design matrix for random effects 
