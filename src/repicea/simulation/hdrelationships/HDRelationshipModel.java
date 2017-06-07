@@ -20,12 +20,14 @@ package repicea.simulation.hdrelationships;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
+import repicea.simulation.REpiceaPredictor;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
@@ -171,7 +173,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			
 			List<HDRelationshipTree> heightableTrees = new ArrayList<HDRelationshipTree>(); // put all the trees for which the height is available in a List
 
-			List<HDRelationshipTree> fullListOfHeightableTrees = new ArrayList<HDRelationshipTree>(); 
+			Map<Stand, List<HDRelationshipTree>> fullListOfHeightableTrees = new HashMap<Stand, List<HDRelationshipTree>>(); 
 
 			Matrix defaultBeta = getParameterEstimates().getMean();		// at this point the mean only contains the fixed effects
 			Matrix omega = getParameterEstimates().getVariance();
@@ -201,7 +203,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 				}
 				if (!heightableTrees.isEmpty()) {
 					subjectList.add(s);
-					fullListOfHeightableTrees.addAll(heightableTrees);
+					fullListOfHeightableTrees.put((Stand) s, heightableTrees);
 					// matrices for the blup calculation
 					int nbObs = heightableTrees.size();
 					Matrix matZ_i = new Matrix(nbObs, matGbck.m_iRows);		// design matrix for random effects 
@@ -282,19 +284,20 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 				registerBlups(blups, matC22, matC21, subjectList);
 			}
 			
-			
-			for (HDRelationshipTree t : fullListOfHeightableTrees) {
-				Tree tree = (Tree) t;
-				double observedHeight = tree.getHeightM();
-				double predictedHeight; 
-				regElement = fixedEffectsPrediction(stand, tree, getParametersForThisRealization(stand));
-				predictedHeight = regElement.fixedPred;
-				predictedHeight += blupImplementation(stand, regElement);
+			for(Stand s : fullListOfHeightableTrees.keySet()) {
+				for (HDRelationshipTree t : fullListOfHeightableTrees.get(s)) {
+					Tree tree = (Tree) t;
+					double observedHeight = tree.getHeightM();
+					double predictedHeight; 
+					regElement = fixedEffectsPrediction(s, tree, getParametersForThisRealization(s));
+					predictedHeight = regElement.fixedPred;
+					predictedHeight += blupImplementation(s, regElement);
 
-				double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
-				double dNormResidual = (observedHeight - predictedHeight) / Math.pow(variance, 0.5);
-				GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, observedHeight - predictedHeight);
-				setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
+					double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
+					double dNormResidual = (observedHeight - predictedHeight) / Math.pow(variance, 0.5);
+					GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, observedHeight - predictedHeight);
+					setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
+				}
 			}
 		}
 		setBlupsEstimated(true);
