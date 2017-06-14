@@ -51,11 +51,11 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	
 	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject, Serializable {
 
-		private final int monteCarloRealization;
+		private final int monteCarloRealizationID;
 		private final String subjectID;
 		
 		protected IntervalNestedInPlotDefinition(MonteCarloSimulationCompliantObject stand, int date) {
-			monteCarloRealization = stand.getMonteCarloRealizationId();
+			monteCarloRealizationID = stand.getMonteCarloRealizationId();
 			subjectID = getSubjectID(stand, date);
 		}
 		
@@ -73,12 +73,31 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 
 		@Override
 		public int getMonteCarloRealizationId() {
-			return monteCarloRealization;
+			return monteCarloRealizationID;
 		}
 		
 		private static String getSubjectID(MonteCarloSimulationCompliantObject stand, int date) {
 			return stand.getSubjectId() + "_" + date;
 		}
+	}
+
+	protected static class CruiseLine implements MonteCarloSimulationCompliantObject {
+		private final String subjectID;
+		private final int monteCarloRealizationID;
+		
+		protected CruiseLine(String subjectID, MonteCarloSimulationCompliantObject subject) {
+			this.subjectID = subjectID;
+			monteCarloRealizationID = subject.getMonteCarloRealizationId();
+		}
+		
+		@Override
+		public String getSubjectId() {return subjectID;}
+
+		@Override
+		public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.CRUISE_LINE;}
+
+		@Override
+		public int getMonteCarloRealizationId() {return monteCarloRealizationID;}
 	}
 
 	
@@ -88,6 +107,9 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	protected final CopyOnWriteArrayList<REpiceaPredictorListener> listeners;
 	
 	private boolean areBlupsEstimated;
+	
+	protected Map<String, CruiseLine> cruiseLineMap;
+
 
 	// set by the constructor
 	protected boolean isRandomEffectsVariabilityEnabled;
@@ -129,6 +151,8 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
 		
 		listeners = new CopyOnWriteArrayList<REpiceaPredictorListener>();
+		
+		cruiseLineMap = new HashMap<String, CruiseLine>();
 	}
 	
 	/**
@@ -194,6 +218,20 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 			intervalLists.put(getSubjectPlusMonteCarloSpecificId(intDef), intDef);
 		}
 		return intDef;
+	}
+
+	/**
+	 * This method checks if a cruise line exists for this plot
+	 * @param cruiseLineID the id of the cruise line
+	 * @param stand a MonteCarloSimulationCompliantObject instance
+	 * @return a CruiseLine instance
+	 */
+	protected synchronized CruiseLine getCruiseLineForThisSubject(String cruiseLineID, MonteCarloSimulationCompliantObject stand) {
+		String cruiseLineIDPlusMCRealization = cruiseLineID.concat("_") + stand.getMonteCarloRealizationId();
+		if (!cruiseLineMap.containsKey(cruiseLineIDPlusMCRealization)) {
+			cruiseLineMap.put(cruiseLineIDPlusMCRealization, new CruiseLine(cruiseLineID, stand));
+		}
+		return cruiseLineMap.get(cruiseLineIDPlusMCRealization);
 	}
 	
 	/**
