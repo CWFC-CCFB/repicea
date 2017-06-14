@@ -20,6 +20,7 @@ package repicea.predictor.thinners.melothinner;
 
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.standlevel.BasalAreaM2HaProvider;
+import repicea.simulation.covariateproviders.standlevel.CruiseLineProvider;
 import repicea.simulation.covariateproviders.standlevel.EcologicalTypeProvider;
 import repicea.simulation.covariateproviders.standlevel.QuebecForestRegionProvider;
 import repicea.simulation.covariateproviders.standlevel.SlopeMRNFClassProvider;
@@ -35,17 +36,12 @@ public interface MeloThinnerPlot extends MonteCarloSimulationCompliantObject,
 											StemDensityHaProvider,
 											SlopeMRNFClassProvider,
 											EcologicalTypeProvider,
-											QuebecForestRegionProvider {
+											QuebecForestRegionProvider,
+											CruiseLineProvider {
 
 	
 	
 	
-	/**
-	 * This method returns the cruise line ID for the random effect. If there is no cruise line, the predictor uses the plot ID assuming 
-	 * the plots were not linked by cruise line. 
-	 * @return a String
-	 */
-	public String getCruiseLineID();
 	
 	
 }
