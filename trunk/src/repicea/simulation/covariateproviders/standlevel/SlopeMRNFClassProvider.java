@@ -18,6 +18,9 @@
  */
 package repicea.simulation.covariateproviders.standlevel;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -36,8 +39,20 @@ public interface SlopeMRNFClassProvider {
 		E("31-40%"),
 		F(">40%");
 		
+		private static List<String> AvailableSlopeClasses;
+		
 		SlopeMRNFClass(String text) {
 			setText(text,text);
+		}
+		
+		public static boolean isThisClassRecognized(String slopeClassString) {
+			if (AvailableSlopeClasses == null) {
+				AvailableSlopeClasses = new ArrayList<String>();
+				for (SlopeMRNFClass slopeClass : SlopeMRNFClass.values()) {
+					AvailableSlopeClasses.add(slopeClass.name());
+				}
+			}
+			return AvailableSlopeClasses.contains(slopeClassString);
 		}
 		
 		@Override
