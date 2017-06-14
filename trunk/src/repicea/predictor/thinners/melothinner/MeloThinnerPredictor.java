@@ -26,7 +26,6 @@ import java.util.Map;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.REpiceaLogisticPredictor;
 import repicea.simulation.SASParameterEstimates;
@@ -41,23 +40,6 @@ import repicea.util.ObjectUtility;
 @SuppressWarnings("serial")
 public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPlot, Object> {
 
-	class CruiseLine implements MonteCarloSimulationCompliantObject {
-		private final String subjectId;
-		private int monteCarloRealizationId;
-		
-		CruiseLine(String subjectId) {
-			this.subjectId = subjectId;
-		}
-		
-		@Override
-		public String getSubjectId() {return subjectId;}
-
-		@Override
-		public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.CRUISE_LINE;}
-
-		@Override
-		public int getMonteCarloRealizationId() {return monteCarloRealizationId;}
-	}
 
 	class EmbeddedFunction extends AbstractMathematicalFunction {
 		@Override
@@ -83,7 +65,6 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 	
 	private Map<SlopeMRNFClass, Matrix> slopeClassDummy;
 	private Map<String, Matrix> dynamicTypeDummy;
-	private Map<String, CruiseLine> cruiseLineMap;
 	private final GaussHermiteQuadrature ghq = new GaussHermiteQuadrature(NumberOfPoints.N5);
 	private final EmbeddedFunction embeddedFunction;
 	
@@ -152,16 +133,13 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 		
 		double survival;
 		if (isRandomEffectsVariabilityEnabled) {
-			String cruiseLineId = stand.getCruiseLineID();
-			if (cruiseLineId == null) {
-				cruiseLineId = stand.getSubjectId();
+			String cruiseLineID = stand.getCruiseLineID();
+			if (cruiseLineID == null) {
+				cruiseLineID = stand.getSubjectId();
 			}
-			if (!cruiseLineMap.containsKey(cruiseLineId)) {
-				cruiseLineMap.put(cruiseLineId, new CruiseLine(cruiseLineId));
-			}
-
-			Matrix randomEffect = getRandomEffectsForThisSubject(cruiseLineMap.get(cruiseLineId));
-			double u = randomEffect.m_afData[0][0];
+			CruiseLine cruiseLine = getCruiseLineForThisSubject(cruiseLineID, stand);
+			Matrix cruiseLineRandomEffect = getRandomEffectsForThisSubject(cruiseLine);
+			double u = cruiseLineRandomEffect.m_afData[0][0];
 			embeddedFunction.setParameterValue(1, u);
 			survival = embeddedFunction.getValue();
 		} else {
