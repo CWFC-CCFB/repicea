@@ -59,7 +59,7 @@ public class UISetup {
 	
 	protected static Border ButtonSelectedBorder = BorderFactory.createLineBorder(Color.BLACK, 3);
 	
-	protected static Border ButtonDefaultBorder = BorderFactory.createLineBorder(Color.BLACK, 1);
+	public static Border ButtonDefaultBorder = BorderFactory.createLineBorder(Color.BLACK, 1);
 	
 	public static Stroke BoldStroke = new BasicStroke(3);
 
