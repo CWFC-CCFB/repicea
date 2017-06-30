@@ -95,4 +95,9 @@ class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
 		return result;
 	}
 
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 }

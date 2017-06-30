@@ -352,5 +352,9 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 //		corrMatrix = newCorrelationMatrix;
 	}
 
-	
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 }

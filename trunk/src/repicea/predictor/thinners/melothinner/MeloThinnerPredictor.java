@@ -228,7 +228,11 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 		this.quadratureEnabled = quadEnabled;
 	}
 	
-	
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 //	public static void main(String[] args) {
 //		new MeloThinnerPredictor(false);
 //	}

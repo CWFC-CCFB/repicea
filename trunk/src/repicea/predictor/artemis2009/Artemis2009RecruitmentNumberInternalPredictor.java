@@ -91,5 +91,9 @@ class Artemis2009RecruitmentNumberInternalPredictor extends REpiceaPredictor {
 		}
 	}
 
-	
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 }

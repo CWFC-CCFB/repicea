@@ -188,4 +188,9 @@ public class HonerTotalVolumePredictor extends REpiceaPredictor {
 		return a2 * tree.getSquaredDbhCm() / (a0 + a1 / h);
 	}
 	
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 }
