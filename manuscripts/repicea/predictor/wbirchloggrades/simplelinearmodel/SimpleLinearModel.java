@@ -93,9 +93,5 @@ class SimpleLinearModel extends REpiceaPredictor {
 		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(newResidualVariance));
 	}
 
-	@Override
-	public void clear() {
-		clearDeviates();
-	}
 
 }

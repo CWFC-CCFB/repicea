@@ -80,9 +80,9 @@ public class Artemis2009RecruitmentNumberPredictor extends REpiceaPredictor {
 	}
 	
 	@Override
-	public void clear() {
+	public void clearDeviates() {
 		for (Artemis2009RecruitmentNumberInternalPredictor p : internalPredictors.values()) {
-			p.clear();
+			p.clearDeviates();
 		}
 	}
 

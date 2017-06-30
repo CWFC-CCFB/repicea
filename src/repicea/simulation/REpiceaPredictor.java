@@ -349,13 +349,14 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		return simulatedRandomEffects.get(subjectLevel.getName()) != null && simulatedRandomEffects.get(subjectLevel.getName()).containsKey(getSubjectPlusMonteCarloSpecificId(subject)); 
 	}
 	
+	@Deprecated
+	public final void clear() {};
+
 	/**
 	 * This method clears all simulated deviates for the parameter estimates, the random effects and the residual errors. 
 	 * IMPORTANT: it does not reset the blups of the random effects. By default, it should call the final method clearDeviate().
 	 */
-	public abstract void clear();
-	
-	protected final void clearDeviates() {
+	public void clearDeviates() {
 		simulatedParameters.clear();
 		simulatedRandomEffects.clear();
 		simulatedResidualError.clear();

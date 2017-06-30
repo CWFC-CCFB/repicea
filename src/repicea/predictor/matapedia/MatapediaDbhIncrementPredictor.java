@@ -128,10 +128,5 @@ public class MatapediaDbhIncrementPredictor extends REpiceaPredictor implements 
 		return result;
 	}
 
-	@Override
-	public void clear() {
-		clearDeviates();
-	}
-
 	
 }
