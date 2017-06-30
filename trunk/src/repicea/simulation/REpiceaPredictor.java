@@ -123,7 +123,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
 	final Map<String, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
 	
-	protected boolean rememberRandomDeviates = true; 		// default value
+//	protected boolean rememberRandomDeviates = true; 		// default value
 	
 	protected Random random = new Random();
 	
@@ -245,9 +245,9 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	@Override
 	protected final synchronized Matrix getParametersForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		if (isParametersVariabilityEnabled) {
-			if (!rememberRandomDeviates) {
-				simulatedParameters.clear();
-			}
+//			if (!rememberRandomDeviates) {
+//				simulatedParameters.clear();
+//			}
 			if (!simulatedParameters.containsKey(subject.getMonteCarloRealizationId())) {		// the simulated parameters remain constant within the same Monte Carlo iteration
 				setSpecificParametersDeviateForThisRealization(subject);
 			}
@@ -327,9 +327,9 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	protected final synchronized Matrix getRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		if (isRandomEffectsVariabilityEnabled) {
-			if (!rememberRandomDeviates) {
-				simulatedRandomEffects.clear();
-			}
+//			if (!rememberRandomDeviates) {
+//				simulatedRandomEffects.clear();
+//			}
 			if (!doRandomDeviatesExistForThisSubject(subject)) {
 				setSpecificRandomEffectsForThisSubject(subject);
 			}
@@ -350,6 +350,15 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	}
 	
 	/**
+	 * This method clears all simulated deviates for the parameter estimates, the random effects and the residual errors. 
+	 * IMPORTANT: it does not reset the blups of the random effects.
+	 */
+	public void clear() {
+		simulatedParameters.clear();
+		simulatedRandomEffects.clear();
+		simulatedResidualError.clear();
+	}
+	/**
 	 * This method returns the residual error or the vector of residual errors associated with the subjectId.
 	 * If the subject parameter is entered as null, the method assumes there is no need to store the simulated
 	 * error terms in the simulatedResidualError map. This feature is useful if the residual error terms are 
@@ -360,9 +369,9 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	 */
 	protected synchronized final Matrix getResidualErrorForThisSubject(MonteCarloSimulationCompliantObject subject, Enum<?> group) {
 		if (isResidualVariabilityEnabled) {				// running in Monte Carlo mode
-			if (!rememberRandomDeviates) {
-				simulatedResidualError.clear();
-			}
+//			if (!rememberRandomDeviates) {
+//				simulatedResidualError.clear();
+//			}
 			if (subject!= null && subject instanceof IndexableErrorTerm && defaultResidualError.get(group).getDistribution().isStructured()) {
 				IndexableErrorTerm indexable = (IndexableErrorTerm) subject;
 				GaussianErrorTermList list = getGaussianErrorTerms(subject);
@@ -435,14 +444,14 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		listeners.remove(listener);
 	}
 	
-	/**
-	 * This method enables the recording of the random deviates. By default, this option is set to true.
-	 * It can be desirable to set this option to false when running large stochastic simulations.
-	 * @param rememberRandomDeviates a boolean
-	 */
-	public void setRememberRandomDeviates(boolean rememberRandomDeviates) {
-		this.rememberRandomDeviates = rememberRandomDeviates;
-	}
+//	/**
+//	 * This method enables the recording of the random deviates. By default, this option is set to true.
+//	 * It can be desirable to set this option to false when running large stochastic simulations.
+//	 * @param rememberRandomDeviates a boolean
+//	 */
+//	public void setRememberRandomDeviates(boolean rememberRandomDeviates) {
+//		this.rememberRandomDeviates = rememberRandomDeviates;
+//	}
 
 	/**
 	 * This method returns the blups for the subject or nothing if there is no blups for this subject
