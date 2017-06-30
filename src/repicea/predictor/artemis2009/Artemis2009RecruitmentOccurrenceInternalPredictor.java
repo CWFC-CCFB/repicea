@@ -61,4 +61,9 @@ class Artemis2009RecruitmentOccurrenceInternalPredictor extends REpiceaLogisticP
 		return recruitmentProbability;
 	}
 
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 }

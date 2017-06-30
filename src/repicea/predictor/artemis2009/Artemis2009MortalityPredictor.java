@@ -77,5 +77,12 @@ public final class Artemis2009MortalityPredictor extends REpiceaLogisticPredicto
 		}
 	}
 	
+	@Override
+	public void clear() {
+		for (Artemis2009MortalityInternalPredictor p : internalPredictors.values()) {
+			p.clear();
+		}
+	}
+
 
 }

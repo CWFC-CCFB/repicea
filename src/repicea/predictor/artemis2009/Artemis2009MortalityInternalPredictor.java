@@ -62,4 +62,9 @@ class Artemis2009MortalityInternalPredictor extends REpiceaLogisticPredictor<Art
 		return deathProbability;
 	}
 
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
+
 }

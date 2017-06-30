@@ -106,5 +106,10 @@ class Artemis2009DiameterIncrementInternalPredictor extends REpiceaPredictor {
 	 */
 	@Override
 	protected void init() {}
+	
+	@Override
+	public void clear() {
+		clearDeviates();
+	}
 
 }

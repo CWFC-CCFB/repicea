@@ -81,6 +81,13 @@ public class Artemis2009RecruitDiameterPredictor extends REpiceaPredictor {
 		}
 	}
 
+	@Override
+	public void clear() {
+		for (Artemis2009RecruitDiameterInternalPredictor p : internalPredictors.values()) {
+			p.clear();
+		}
+	}
+
 //	public static void main(String[] args) {
 //		Artemis2009RecruitDiameterPredictor pred = new Artemis2009RecruitDiameterPredictor(false, false);
 //		int u = 0;

@@ -77,7 +77,13 @@ public class Artemis2009RecruitmentOccurrencePredictor extends REpiceaLogisticPr
 		}
 	}
 	
-	
+	@Override
+	public void clear() {
+		for (Artemis2009RecruitmentOccurrenceInternalPredictor p : internalPredictors.values()) {
+			p.clear();
+		}
+	}
+
 //	public static void main(String[] args) {
 //		Artemis2009RecruitmentOccurrencePredictor pred = new Artemis2009RecruitmentOccurrencePredictor(false, false);
 //		int u = 0;

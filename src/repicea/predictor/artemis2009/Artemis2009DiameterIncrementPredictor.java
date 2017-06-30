@@ -92,4 +92,10 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 		}
 	}
 	
+	@Override
+	public void clear() {
+		for (Artemis2009DiameterIncrementInternalPredictor p : internalPredictors.values()) {
+			p.clear();
+		}
+	}
 }
