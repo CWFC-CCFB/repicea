@@ -169,9 +169,5 @@ public final class MatapediaMortalityPredictor extends REpiceaLogisticPredictor<
 		return result;
 	}
 
-	@Override
-	public void clear() {
-		clearDeviates();
-	}
 
 }

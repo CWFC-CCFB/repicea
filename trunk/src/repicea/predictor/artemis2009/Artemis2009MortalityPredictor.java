@@ -78,9 +78,9 @@ public final class Artemis2009MortalityPredictor extends REpiceaLogisticPredicto
 	}
 	
 	@Override
-	public void clear() {
+	public void clearDeviates() {
 		for (Artemis2009MortalityInternalPredictor p : internalPredictors.values()) {
-			p.clear();
+			p.clearDeviates();
 		}
 	}
 
