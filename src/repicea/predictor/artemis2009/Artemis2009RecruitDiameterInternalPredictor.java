@@ -21,18 +21,17 @@ package repicea.predictor.artemis2009;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.math.random.RandomDataImpl;
-
 import repicea.math.Matrix;
 import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
+import repicea.stats.REpiceaRandom;
 import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
 class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
 
 	private List<Integer> effectList;
-	private RandomDataImpl randomGenerator;
+	private REpiceaRandom randomGenerator;
 
 	protected Artemis2009RecruitDiameterInternalPredictor(boolean isParametersVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, false, isResidualVariabilityEnabled);		// no random effect in this model
@@ -41,7 +40,7 @@ class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
 
 	protected void init() {
 		effectList = new ArrayList<Integer>();
-		randomGenerator = new RandomDataImpl();
+		randomGenerator = new REpiceaRandom();
 	}
 
 	
