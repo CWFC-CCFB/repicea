@@ -61,8 +61,8 @@ public class UniformDistributionTest {
 		meanMC = meanMC.scalarMultiply(1d/nbMc);
 		Matrix mean = dist.getMean();
 		Matrix relativeResult = meanMC.elementWiseDivide(mean);
-		Assert.assertEquals(1d, relativeResult.m_afData[0][0], 3E-3);
-		Assert.assertEquals(1d, relativeResult.m_afData[1][0], 3E-3);
+		Assert.assertEquals(1d, relativeResult.m_afData[0][0], 4E-3);
+		Assert.assertEquals(1d, relativeResult.m_afData[1][0], 4E-3);
 	}
 
 	
