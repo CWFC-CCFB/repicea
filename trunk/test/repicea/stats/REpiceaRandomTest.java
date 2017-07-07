@@ -12,8 +12,10 @@ public class REpiceaRandomTest {
 	public void testGammaMean() {
 		double dDispersionGamma = 0.61766452969979;
 		double fGammaMean = 1.813311388045523;
-		double scale = dDispersionGamma;
-		double shape = fGammaMean / dDispersionGamma;
+//		double scale = dDispersionGamma;
+//		double shape = fGammaMean / dDispersionGamma;
+		double shape = dDispersionGamma;
+		double scale = fGammaMean / dDispersionGamma;
 		REpiceaRandom randomGenerator = new REpiceaRandom();
 		
 		double mean = 0;
@@ -38,8 +40,10 @@ public class REpiceaRandomTest {
 	public void testGammaVariance() {
 		double dDispersionGamma = 0.61766452969979;
 		double fGammaMean = 1.813311388045523;
-		double scale = dDispersionGamma;
-		double shape = fGammaMean / dDispersionGamma;
+//		double scale = dDispersionGamma;
+//		double shape = fGammaMean / dDispersionGamma;
+		double shape = dDispersionGamma;
+		double scale = fGammaMean / dDispersionGamma;
 		REpiceaRandom randomGenerator = new REpiceaRandom();
 //		RandomDataImpl randomGenerator = new RandomDataImpl();
 		double variance = fGammaMean * fGammaMean / dDispersionGamma;
@@ -56,7 +60,7 @@ public class REpiceaRandomTest {
 		@SuppressWarnings("unused")
 		double mean = estimate.getMean().m_afData[0][0];
 		System.out.println ("Simulated variance = " + actual + "; Expected variance = " + variance);
-		Assert.assertEquals("Testing mean for gamma random values", fGammaMean, actual, 2E-3);
+		Assert.assertEquals("Testing mean for gamma random values", variance, actual, 5E-2);
 	}
 
 	
