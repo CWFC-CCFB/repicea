@@ -72,6 +72,12 @@ class Artemis2009CompatibleStandImpl implements Artemis2009CompatibleStand {
 		basalAreaBySpeciesGroups = ParameterDispatcher.getGroupEssGorN(this, trees, true); // true for the number of stems
 	}
 	
+	
+	protected void setMonteCarloRealization(int i) {
+		monteCarloRealizationId = i;
+	}
+	
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void setBAL() {
 		for (Artemis2009CompatibleTree tree : getTrees()) {

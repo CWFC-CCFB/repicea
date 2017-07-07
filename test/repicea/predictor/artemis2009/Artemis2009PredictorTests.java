@@ -12,6 +12,8 @@ import org.junit.Test;
 
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
+import repicea.math.Matrix;
+import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.util.ObjectUtility;
 
 public class Artemis2009PredictorTests {
@@ -276,6 +278,36 @@ public class Artemis2009PredictorTests {
 		}
 		System.out.println("Successfully compared " + nbTreesCompared + " trees");
 		System.out.println(potentialVegetationList.toString());
+	}
+
+	@Test
+	public void testRecruitmentVariability() throws IOException {
+		if (StandMap == null) {
+			readTreesToGrow();
+		}
+		Artemis2009CompatibleStandImpl stand = StandMap.get("880080470501");
+		Artemis2009CompatibleTree tree = stand.getTrees().get(0);
+		Artemis2009RecruitDiameterPredictor pred = new Artemis2009RecruitDiameterPredictor(false, true);
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		Matrix realization;
+		for (int i = 0; i < 50000; i++) {
+			stand.setMonteCarloRealization(i);
+			double[] dbhPrediction = pred.predictRecruitDiameter(stand, tree);
+			realization = new Matrix(1,1);
+			realization.m_afData[0][0] = dbhPrediction[0];
+			estimate.addRealization(realization);
+		}
+		
+		double dispersion = 0.57746369036272;
+		double gammaMean = 1.4466793436321166;
+		double expectedMean = gammaMean *.1 + 9.1;
+		double expectedVariance = gammaMean * gammaMean / dispersion * .01;
+		
+		double actualMean = estimate.getMean().m_afData[0][0];
+		double actualVariance = estimate.getVariance().m_afData[0][0];
+
+		Assert.assertEquals("Comparing mean", expectedMean, actualMean, 1E-2);
+		Assert.assertEquals("Comparing variance", expectedVariance, actualVariance, 1E-2);
 	}
 
 }

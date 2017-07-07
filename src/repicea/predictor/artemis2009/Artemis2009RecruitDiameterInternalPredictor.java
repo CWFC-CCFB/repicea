@@ -69,8 +69,10 @@ class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
 
 		double dVariance = 0.0;
 
-		double scale = dispersion;
-		double shape = fGammaMean/dispersion;
+//		double scale = dispersion;
+//		double shape = fGammaMean/dispersion;
+		double shape = dispersion;		// correction here this is the other way around
+		double scale = fGammaMean / dispersion; // correction here this is the other way around
 
 		double[] result = new double[2];
 		double fDiameter;

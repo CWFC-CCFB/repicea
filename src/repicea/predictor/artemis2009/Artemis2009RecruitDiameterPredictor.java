@@ -34,14 +34,19 @@ public class Artemis2009RecruitDiameterPredictor extends REpiceaPredictor {
 	
 	/**
 	 * Constructor.
-	 * @param isParametersVariabilityEnabled
-	 * @param isResidualVariabilityEnabled
+	 * @param isVariabilityEnabled true to enable the variability in the parameter estimate and the residual variance
 	 */
 	public Artemis2009RecruitDiameterPredictor(boolean isVariabilityEnabled) {
-		super(isVariabilityEnabled, false, isVariabilityEnabled);		// no random effect in this module
+		this(isVariabilityEnabled, isVariabilityEnabled);
+	}
+
+	
+	protected Artemis2009RecruitDiameterPredictor(boolean isParameterVariabilityEnabled, boolean isResidualVariabilityEnabled) {		// no random effect in this module
+		super(isParameterVariabilityEnabled, false, isResidualVariabilityEnabled);		// no random effect in this module
 		init();
 	}
 
+	
 	protected void init() {
 		internalPredictors = new HashMap<String, Artemis2009RecruitDiameterInternalPredictor>();
 		ParameterDispatcher pd = ParameterDispatcher.getInstance();
