@@ -21,6 +21,8 @@ package repicea.stats;
 import java.security.InvalidParameterException;
 import java.util.Random;
 
+import repicea.stats.distributions.GammaUtility;
+
 @SuppressWarnings("serial")
 public class REpiceaRandom extends Random {
 	
@@ -69,6 +71,35 @@ public class REpiceaRandom extends Random {
 		}
 		double x = getRandomGammaForAnyShape(shape);
 		return x * scale;
+	}
+	
+	
+	/**
+	 * This method returns a random integer that follows negative binomial distribution.
+	 * @param mean the mean of the distribution
+	 * @param dispersion the dispersion parameter
+	 * @return an integer
+	 */
+	public int nextNegativeBinomial(double mean, double dispersion) {
+		double threshold = nextDouble();	// to determine how many recruits there are
+		double prob = 0.0;
+		double fTmp = dispersion * mean;
+		double fTmp2 = 1/dispersion;
+		double fTmp3 = 1.0;
+		double constant = 0.0;
+		
+		constant = GammaUtility.logGamma(fTmp2);
+
+		int output = -1;
+
+		while (threshold > prob) {		
+			output++;
+			prob += Math.exp(GammaUtility.logGamma(output + fTmp2) 
+					- GammaUtility.logGamma(output + 1.0) - constant)* fTmp3 	// fTmp3 replaces : * Math.pow(fTmp,fTreeFreq)
+					/ (Math.pow(1+fTmp,output + fTmp2));
+			fTmp3 *= fTmp;
+		}
+		return output;
 	}
 	
 }

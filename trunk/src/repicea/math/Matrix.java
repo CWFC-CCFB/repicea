@@ -38,6 +38,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 		
 	protected static int SizeBeforeSwitchingToLUDecompositionInDeterminantCalculation = 6;
 	
+	public static int NB_ROWS_BEYOND_WHICH_MATRIX_INVERSION_TAKES_TOO_MUCH_TIME = 600;
+	
+	
 	/*
 	 * Members of this class
 	 */
@@ -1283,6 +1286,37 @@ public final class Matrix implements Serializable, DeepCloneable {
 		return adjugate;
 	}
 	
+	protected Matrix getInternalInverseMatrix() {
+		if (m_iRows == 1) {
+			Matrix output = new Matrix(1,1);
+			output.m_afData[0][0] = 1d/m_afData[0][0];
+			return output;
+		} else if (m_iRows > SizeBeforeSwitchingToLUDecompositionInDeterminantCalculation) {
+			int index = m_iCols / 2;
+			Matrix output = new Matrix(m_iRows, m_iCols);
+			Matrix a = getSubMatrix(0, index - 1, 0, index - 1);
+			Matrix b = getSubMatrix(0, index - 1, index, m_iCols - 1);
+			Matrix c = getSubMatrix(index, m_iRows - 1, 0, index - 1);
+			Matrix d = getSubMatrix(index, m_iRows - 1, index, m_iCols - 1);
+			Matrix invD = d.getInternalInverseMatrix();
+			Matrix tmp = b.multiply(invD).multiply(c);
+			Matrix invComplement = a.subtract(tmp).getInternalInverseMatrix();
+			output.setSubMatrix(invComplement, 0, 0);
+			output.setSubMatrix(invComplement.multiply(b).multiply(invD).scalarMultiply(-1d), 0, index);
+			output.setSubMatrix(invD.multiply(c).multiply(invComplement).scalarMultiply(-1d), index, 0);
+			output.setSubMatrix(invD.multiply(c).multiply(invComplement).multiply(b).multiply(invD).add(invD), index, index);
+			return output;
+		} else {
+			double determinant = getDeterminant();
+			if (determinant == 0) {
+				throw new UnsupportedOperationException("The matrix cannot be inverted as its determinant is equal to 0!");
+			} else {
+				return getAdjugateMatrix().scalarMultiply(1d / determinant);
+			}
+		}
+
+	}
+	
 	/**
 	 * This method returns the inverse matrix of this matrix.
 	 * @return the inverse matrix
@@ -1300,33 +1334,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 		} 
 		List<List<Integer>> indices = getBlockConfiguration();
 		if (indices.size() == 1) {
-			if (m_iRows > SizeBeforeSwitchingToLUDecompositionInDeterminantCalculation) {
-				int index = m_iCols / 2;
-				Matrix output = new Matrix(m_iRows, m_iCols);
-				Matrix a = getSubMatrix(0, index - 1, 0, index - 1);
-				Matrix b = getSubMatrix(0, index - 1, index, m_iCols - 1);
-				Matrix c = getSubMatrix(index, m_iRows - 1, 0, index - 1);
-				Matrix d = getSubMatrix(index, m_iRows - 1, index, m_iCols - 1);
-				Matrix invD = d.getInverseMatrix();
-				Matrix tmp = b.multiply(invD).multiply(c);
-				Matrix invComplement = a.subtract(tmp).getInverseMatrix();
-				output.setSubMatrix(invComplement, 0, 0);
-				output.setSubMatrix(invComplement.multiply(b).multiply(invD).scalarMultiply(-1d), 0, index);
-				output.setSubMatrix(invD.multiply(c).multiply(invComplement).scalarMultiply(-1d), index, 0);
-				output.setSubMatrix(invD.multiply(c).multiply(invComplement).multiply(b).multiply(invD).add(invD), index, index);
-				return output;
-			} else {
-				double determinant = getDeterminant();
-				if (determinant == 0) {
-					throw new UnsupportedOperationException("The matrix cannot be inverted as its determinant is equal to 0!");
-				} else {
-					return getAdjugateMatrix().scalarMultiply(1d / determinant);
-				}
-			}
+			return getInternalInverseMatrix();
 		} else {
 			Matrix inverseMatrix = new Matrix(m_iRows, m_iCols);
 			for (List<Integer> blockIndex : indices) {
-				Matrix invSubMatrix = getSubMatrix(blockIndex, blockIndex).getInverseMatrix();
+				Matrix invSubMatrix = getSubMatrix(blockIndex, blockIndex).getInternalInverseMatrix();
 				for (int i = 0; i < blockIndex.size(); i++) {
 					for (int j = 0; j < blockIndex.size(); j++) {
 						inverseMatrix.m_afData[blockIndex.get(i)][blockIndex.get(j)] = invSubMatrix.m_afData[i][j];
@@ -1362,5 +1374,4 @@ public final class Matrix implements Serializable, DeepCloneable {
 			return false;
 		}
 	}
-
 }

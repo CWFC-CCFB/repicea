@@ -18,12 +18,20 @@
  */
 package repicea.math;
 
-import org.junit.Assert;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.io.FormatField;
+import repicea.io.javacsv.CSVField;
+import repicea.io.javacsv.CSVWriter;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
+import repicea.util.ObjectUtility;
 
 /**
  * This test class performs some tests on matrix calculation.
@@ -35,7 +43,7 @@ public class MatrixTests {
 	 * This test is performed on the calculation of the inverse of a blocked matrix.
 	 */
 	@Test
-	public void BlockedInversedMatrixTest() {
+	public void blockedInversedMatrixTest() {
 		
 		Matrix mat = new Matrix(9,9);
 		mat.m_afData[0][0] = 5.49;
@@ -83,7 +91,7 @@ public class MatrixTests {
 	 * This test is performed on the calculation of the inverse of a large symmetric matrix with many zero cells.
 	 */
 	@Test
-	public void InversionWithZeroCellsTest() {
+	public void inversionWithZeroCellsTest() {
 		
 		Matrix coordinates = new Matrix(20,1,0,1);
 		
@@ -97,9 +105,35 @@ public class MatrixTests {
 		boolean equalToIdentity = !diff.anyElementLargerThan(1E-10);
 		
 		Assert.assertEquals(true, equalToIdentity);
-	
+	}
+
+	public void speedTestInversionMatrix(int iMax) throws IOException {
+		String filename = ObjectUtility.getPackagePath(getClass()) + "inversionTimes.csv";
+		CSVWriter writer = new CSVWriter(new File(filename), false);
+		List<FormatField> fields = new ArrayList<FormatField>();
+		fields.add(new CSVField("dimension"));
+		fields.add(new CSVField("time"));
+		writer.setFields(fields);
+		
+		long startingTime;
+		Object[] record = new Object[2];
+		int size;
+		for (int i = 1; i < iMax; i++) {
+			size = i * 10;
+			record[0] = size;
+			startingTime = System.currentTimeMillis();
+			Matrix coordinates = new Matrix(size,1,0,1);
+			Matrix rMatrix = StatisticalUtility.constructRMatrix(coordinates, 2, 0.2, TypeMatrixR.LINEAR);
+			rMatrix.getInverseMatrix();
+			record[1] = (System.currentTimeMillis() - startingTime) * .001;
+			writer.addRecord(record);
+		}
+		writer.close();
 	}
 	
-	
+	public static void main(String[] args) throws IOException {
+		MatrixTests test = new MatrixTests();
+		test.speedTestInversionMatrix(100);
+	}
 	
 }

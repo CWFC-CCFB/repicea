@@ -23,11 +23,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 import repicea.math.Matrix;
 import repicea.simulation.REpiceaPredictorEvent.ModelBasedSimulatorEventProperty;
+import repicea.stats.REpiceaRandom;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
@@ -123,9 +123,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
 	final Map<String, GaussianErrorTermList> simulatedResidualError;		// refers to the subject + realization ids
 	
-//	protected boolean rememberRandomDeviates = true; 		// default value
-	
-	protected Random random = new Random();
+	protected REpiceaRandom random = new REpiceaRandom();
 	
 	private final Map<String, IntervalNestedInPlotDefinition> intervalLists;
 	
