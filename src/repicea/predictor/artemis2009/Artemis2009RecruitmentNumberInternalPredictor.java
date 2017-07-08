@@ -54,7 +54,7 @@ class Artemis2009RecruitmentNumberInternalPredictor extends REpiceaPredictor {
 	}
 	
 	protected synchronized double predictNumberOfRecruits(Artemis2009CompatibleStand stand, Artemis2009CompatibleTree tree) {
-		Matrix beta = getParametersForThisRealization(stand);
+		Matrix beta = getParametersForThisRealization(stand).getDeepClone();
 		double dispersion = beta.m_afData[beta.m_iRows - 1][0];
 		beta.m_afData[beta.m_iRows-1][0] = 1.0;    // last element is replaced by 1 to account for the offset variable	
 	
@@ -84,7 +84,7 @@ class Artemis2009RecruitmentNumberInternalPredictor extends REpiceaPredictor {
 ////				if (recruitNumber == 80) {
 ////					System.out.println("WARNING - Recruits threshold reached!");
 ////				}
-			if (nbRecruits > 80) { // maximum number of recruits is set to 80
+			if (nbRecruits > 80 && !Artemis2009RecruitmentNumberPredictor.Override80Limit) { // maximum number of recruits is set to 80
 				nbRecruits = 80;
 			}
 			return nbRecruits;

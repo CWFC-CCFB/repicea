@@ -27,6 +27,7 @@ import repicea.util.Index;
 
 @SuppressWarnings("serial")
 public class Artemis2009RecruitmentNumberPredictor extends REpiceaPredictor {
+	protected static boolean Override80Limit = false;
 
 	protected static final String ModuleName = "recrutement_b"; 
 
@@ -38,10 +39,15 @@ public class Artemis2009RecruitmentNumberPredictor extends REpiceaPredictor {
 	 * @param isResidualVariabilityEnabled
 	 */
 	public Artemis2009RecruitmentNumberPredictor(boolean isVariabilityEnabled) {
-		super(isVariabilityEnabled, false, isVariabilityEnabled);		// no random effect in this module
-		init();
+		this(isVariabilityEnabled, isVariabilityEnabled);		
 	}
 
+	protected Artemis2009RecruitmentNumberPredictor(boolean isParameterVariabilityEnabled, boolean isResidualVariabilityEnabled) {
+		super(isParameterVariabilityEnabled, false, isResidualVariabilityEnabled);		// no random effect in this module
+		init();
+	}
+	
+	
 	protected void init() {
 		internalPredictors = new HashMap<String, Artemis2009RecruitmentNumberInternalPredictor>();
 		ParameterDispatcher pd = ParameterDispatcher.getInstance();
