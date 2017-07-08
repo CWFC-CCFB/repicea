@@ -281,7 +281,7 @@ public class Artemis2009PredictorTests {
 	}
 
 	@Test
-	public void testRecruitmentVariability() throws IOException {
+	public void testRecruitDiameterMeanAndVariability() throws IOException {
 		if (StandMap == null) {
 			readTreesToGrow();
 		}
@@ -308,6 +308,37 @@ public class Artemis2009PredictorTests {
 
 		Assert.assertEquals("Comparing mean", expectedMean, actualMean, 1E-2);
 		Assert.assertEquals("Comparing variance", expectedVariance, actualVariance, 1E-2);
+	}
+
+	
+	@Test
+	public void testRecruitNumberMeanAndVariability() throws IOException {
+		if (StandMap == null) {
+			readTreesToGrow();
+		}
+		Artemis2009CompatibleStandImpl stand = StandMap.get("880080470501");
+		Artemis2009CompatibleTree tree = stand.getTrees().get(0);
+		Artemis2009RecruitmentNumberPredictor pred = new Artemis2009RecruitmentNumberPredictor(false, true);
+		Artemis2009RecruitmentNumberPredictor.Override80Limit = true;
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		Matrix realization;
+		for (int i = 0; i < 100000; i++) {
+			stand.setMonteCarloRealization(i);
+			double nbPrediction = pred.predictNumberOfRecruits(stand, tree);
+			realization = new Matrix(1,1);
+			realization.m_afData[0][0] = nbPrediction;
+			estimate.addRealization(realization);
+		}
+		
+		double dispersion = 1.41209128903651;
+		double expectedMean = 0.5172784824575968;	
+		double expectedVariance = expectedMean + expectedMean * expectedMean * dispersion;
+		expectedMean = expectedMean + 1; // because y was modelled as nb - 1
+		double actualMean = estimate.getMean().m_afData[0][0];
+		double actualVariance = estimate.getVariance().m_afData[0][0];
+
+		Assert.assertEquals("Comparing mean", expectedMean, actualMean, 1E-2);
+		Assert.assertEquals("Comparing variance", expectedVariance, actualVariance, 2E-2);
 	}
 
 }
