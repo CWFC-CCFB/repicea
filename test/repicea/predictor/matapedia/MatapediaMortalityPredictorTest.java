@@ -115,7 +115,7 @@ public class MatapediaMortalityPredictorTest {
 			double meanStochastic = dist.getMean().m_afData[0][0];
 
 			System.out.println("Deterministic : " + meanDeterministic + "; Stochastic : " + meanStochastic);			
-			assertEquals(meanDeterministic, meanStochastic, 0.002);
+			assertEquals(meanDeterministic, meanStochastic, 0.003);
 		}
 	}
 
