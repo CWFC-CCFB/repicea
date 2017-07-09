@@ -246,7 +246,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 			Matrix oMat = new Matrix(this.m_iRows,this.m_iCols);
 			for (int i = 0; i < this.m_iRows; i++) {
 				for (int j = 0; j < this.m_iCols; j++) {
-					oMat.m_afData[i][j] = this.m_afData[i][j] * m.m_afData[i][j];
+					if (this.m_afData[i][j] != 0d && m.m_afData[i][j] != 0d) {
+						oMat.m_afData[i][j] = this.m_afData[i][j] * m.m_afData[i][j];
+					}
 				}
 			}
 			return oMat;
@@ -573,7 +575,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 				for (int j_m = 0; j_m < m.m_iCols; j_m++ ) {
 					for (int j_this = 0; j_this < m_iCols; j_this++) {
 						int i_m = j_this;
-						mat.m_afData[i_this][j_m] += m_afData[i_this][j_this] * m.m_afData[i_m][j_m];
+						if (m_afData[i_this][j_this] != 0d && m.m_afData[i_m][j_m] != 0d) {
+							mat.m_afData[i_this][j_m] += m_afData[i_this][j_this] * m.m_afData[i_m][j_m];
+						}
 					}
 				}
 			}

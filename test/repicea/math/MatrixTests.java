@@ -131,9 +131,18 @@ public class MatrixTests {
 		writer.close();
 	}
 	
+	public void speedTestMatrixMultiplication() {
+		int i = 1000;
+		Matrix oMat = Matrix.getIdentityMatrix(i);
+		long startingTime;
+		startingTime = System.currentTimeMillis();
+		oMat.multiply(oMat);
+		System.out.println("Elapsed time = " + ((System.currentTimeMillis() - startingTime) * .001));
+	}
 	public static void main(String[] args) throws IOException {
 		MatrixTests test = new MatrixTests();
-		test.speedTestInversionMatrix(100);
+//		test.speedTestInversionMatrix(100);
+		test.speedTestMatrixMultiplication();
 	}
 	
 }
