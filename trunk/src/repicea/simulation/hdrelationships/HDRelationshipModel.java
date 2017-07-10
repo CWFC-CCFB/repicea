@@ -163,8 +163,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void predictHeightRandomEffects(Stand stand) {
 		if (!areBlupsEstimated()) {
-			boolean isStochastic = isParametersVariabilityEnabled && isRandomEffectsVariabilityEnabled;
-			
 			Matrix matGbck = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
 
 			RegressionElements regElement;
@@ -178,13 +176,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			Matrix defaultBeta = getParameterEstimates().getMean();		// at this point the mean only contains the fixed effects
 			Matrix omega = getParameterEstimates().getVariance();
 			
-			Matrix matX = null;
-			Matrix matZ = null;
-			Matrix res = null;
-			Matrix matR = null;
-			Matrix matG = null;
-			Matrix invV = null;
 			Matrix blups = null;
+			Matrix newMatG = null;
 			
 			List<MonteCarloSimulationCompliantObject> subjectList = new ArrayList<MonteCarloSimulationCompliantObject>();
 			List<HDRelationshipTree> heightableTreesCopy;
@@ -237,36 +230,13 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 						blups = blups.matrixStack(blups_i, true);
 					}
 					
-					if (isStochastic) {
-						if (matX == null) {
-							matX = matX_i;
+					if (isRandomEffectsVariabilityEnabled) {
+						Matrix matP = invV_i.subtract(invV_i.multiply(matX_i).multiply(omega).multiply(matX_i.transpose()).multiply(invV_i));  
+						Matrix newMatG_i = matGbck.subtract(matGbck.multiply(matZ_i.transpose()).multiply(matP).multiply(matZ_i).multiply(matGbck));
+						if (newMatG == null) {
+							newMatG = newMatG_i;
 						} else {
-							matX = matX.matrixStack(matX_i, true);
-						}
-						if (matZ == null) {
-							matZ = matZ_i;
-						} else {
-							matZ = matZ.matrixDiagBlock(matZ_i);
-						}
-						if (matR == null) {
-							matR = matR_i;
-						} else {
-							matR = matR.matrixDiagBlock(matR_i);
-						}
-						if (res == null) {
-							res = res_i;
-						} else {
-							res = res.matrixStack(res_i, true);
-						}
-						if (matG == null) {
-							matG = matGbck.getDeepClone();
-						} else {
-							matG = matG.matrixDiagBlock(matGbck);
-						}
-						if (invV == null) {
-							invV = invV_i;
-						} else {
-							invV = invV.matrixDiagBlock(invV_i);
+							newMatG = newMatG.matrixDiagBlock(newMatG_i);
 						}
 					}
 				}
@@ -274,17 +244,22 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			}
 
 			if (blups != null) {
-				Matrix matC21;
+				Matrix matC21 = new Matrix(blups.m_iRows, omega.m_iRows);
 				Matrix matC22;
-				if (isStochastic) {
-					matC21 = matG.multiply(matZ.transpose()).multiply(invV).multiply(matX).multiply(omega).scalarMultiply(-1d);
-					Matrix matC22_1 = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matG.getInverseMatrix()).getInverseMatrix();		
-					Matrix matC22_2 = matC21.multiply(matX.transpose()).multiply(invV).multiply(matZ).multiply(matG).scalarMultiply(-1d);
-					matC22 = matC22_1.add(matC22_2);
+				if (isRandomEffectsVariabilityEnabled) {
+					matC22 = newMatG;
 				} else {
 					matC22 = new Matrix(blups.m_iRows, blups.m_iRows);
-					matC21 = new Matrix(blups.m_iRows, omega.m_iRows);
 				}
+//				if (isStochastic) {
+//					matC21 = matG.multiply(matZ.transpose()).multiply(invV).multiply(matX).multiply(omega).scalarMultiply(-1d);
+//					Matrix matC22_1 = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matG.getInverseMatrix()).getInverseMatrix();		
+//					Matrix matC22_2 = matC21.multiply(matX.transpose()).multiply(invV).multiply(matZ).multiply(matG).scalarMultiply(-1d);
+//					matC22 = matC22_1.add(matC22_2);
+//				} else {
+//					matC22 = new Matrix(blups.m_iRows, blups.m_iRows);
+//					matC21 = new Matrix(blups.m_iRows, omega.m_iRows);
+//				}
 				registerBlups(blups, matC22, matC21, subjectList);
 			}
 			
