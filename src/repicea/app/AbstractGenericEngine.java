@@ -87,7 +87,6 @@ public abstract class AbstractGenericEngine {
 				shutdown(1);
 			}
 		}
-
 				
 	}
 	
@@ -116,7 +115,9 @@ public abstract class AbstractGenericEngine {
 				do {
 					currentTask = queue.take();			
 
-					System.out.println("Running task : " + currentTask.getName());
+					if (currentTask.isVerbose()) {
+						System.out.println("Running task : " + currentTask.getName());
+					}
 
 					currentTask.run();
 
