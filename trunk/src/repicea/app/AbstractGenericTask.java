@@ -144,4 +144,7 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 		}
 	}
 	
+	@Override
+	public boolean isVerbose() {return false;}
+
 }

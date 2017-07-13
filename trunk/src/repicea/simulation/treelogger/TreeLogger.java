@@ -344,5 +344,9 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	 * @return a boolean
 	 */
 	public abstract boolean isCompatibleWith(Object referent);
+	
+	@Override
+	public boolean isVerbose() {return false;}
+
 		
 }

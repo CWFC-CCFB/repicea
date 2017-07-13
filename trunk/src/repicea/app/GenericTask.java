@@ -40,4 +40,10 @@ public interface GenericTask extends Executable {
 	 * @return a boolean
 	 */
 	public boolean hasBeenCancelled();
+	
+	/**
+	 * This method returns true if the task displays messages.
+	 * @return a boolean
+	 */
+	public boolean isVerbose();
 }
