@@ -18,8 +18,11 @@
  */
 package repicea.simulation.processsystem;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Graphics;
 
+import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
@@ -29,6 +32,8 @@ import repicea.gui.permissions.REpiceaGUIPermission;
 public abstract class SelectableJButton extends AbstractPermissionProviderButton {
 
 	protected final ImageIcon originalIcon;
+	private int borderWidth = 1;
+	private Color borderColor = Color.BLACK;
 	
 	protected SelectableJButton(REpiceaGUIPermission permission) {
 		super(permission);
@@ -68,11 +73,18 @@ public abstract class SelectableJButton extends AbstractPermissionProviderButton
 	public void setSelected(boolean bool) {
 		super.setSelected(bool);
 		if (bool) {
-			setBorder(UISetup.ButtonSelectedBorder);
+			setBorderWidth(3);
 		} else {
-			setBorder(UISetup.ButtonDefaultBorder);
+			setBorderWidth(1);
 		}
 	}
-
-
+	
+	protected void setBorderWidth(int width) {borderWidth = width;}
+	protected void setBorderColor(Color col) {borderColor = col;}
+		
+	@Override
+	public void paint(Graphics g) {
+		setBorder(BorderFactory.createLineBorder(borderColor, borderWidth));
+		super.paint(g);
+	}
 }
