@@ -25,6 +25,7 @@ import java.awt.Graphics;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
+import javax.swing.border.Border;
 
 import repicea.gui.permissions.REpiceaGUIPermission;
 
@@ -78,6 +79,12 @@ public abstract class SelectableJButton extends AbstractPermissionProviderButton
 			setBorderWidth(1);
 		}
 	}
+
+	@Deprecated
+	public void setBorder(Border border) {
+		super.setBorder(border);
+	}
+	
 	
 	protected void setBorderWidth(int width) {borderWidth = width;}
 	protected void setBorderColor(Color col) {borderColor = col;}
