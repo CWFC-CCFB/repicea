@@ -57,9 +57,9 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 	
 	protected final Map<Object, Enum<E>> matchMap;
 	protected final List<Enum<E>> potentialMatches;
-	private String filename;
-	private transient REpiceaMatchSelectorDialog guiInterface;
-	private final Object[] columnNames;
+	protected String filename;
+	protected transient REpiceaMatchSelectorDialog guiInterface;
+	protected final Object[] columnNames;
 	
 	/**
 	 * Official constructor
@@ -91,7 +91,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 		}
 	}
 	
-	protected List<Enum<E>> getPotentialMatch() {return potentialMatches;}
+	protected List<Enum<E>> getPotentialMatches() {return potentialMatches;}
 	
 	@Override
 	public REpiceaMatchSelectorDialog getUI(Container parent) {
@@ -141,7 +141,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 		}
 	}
 	
-	private void setFilename(String filename) {this.filename = filename;}
+	protected void setFilename(String filename) {this.filename = filename;}
 
 
 	@SuppressWarnings("unchecked")
@@ -195,7 +195,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 		potentialMatches.addAll((List) wasMemorized.get(1));
 	}
 
-	protected Enum<?> getMatch(String s) {
+	protected Enum<E> getMatch(String s) {
 		return matchMap.get(s);
 	}
 	
