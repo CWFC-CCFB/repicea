@@ -75,8 +75,6 @@ public abstract class REpiceaRecordReader implements Serializable {
 						index.add(i);
 					}
 				}
-
-				firePropertyChange(REpiceaProgressBarDialog.LABEL, "", "Read records...");
 				
 				double factor = 100d / index.size();
 				
@@ -291,7 +289,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param groupId a integer that corresponds to the group ID
 	 * @throws Exception
 	 */
-	public synchronized void readRecordsForThisGroupId(int groupId) throws Exception {
+	public void readRecordsForThisGroupId(int groupId) throws Exception {
 		InternalTask task = new InternalTask(groupId); 
 
 		if (guiMode) {
