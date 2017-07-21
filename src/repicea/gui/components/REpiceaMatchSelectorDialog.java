@@ -129,7 +129,7 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 	public void refreshInterface() {
 		tableModel.removeAll();
 		Object[] record;
-		for (String s : caller.matchMap.keySet()) {
+		for (Object s : caller.matchMap.keySet()) {
 			record = new Object[2];
 			record[0] = s;
 			record[1] = caller.matchMap.get(s);
