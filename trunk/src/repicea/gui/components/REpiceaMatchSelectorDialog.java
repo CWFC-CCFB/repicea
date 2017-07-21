@@ -165,18 +165,25 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 		fileMenu.add(saveAs);
 		
 		getContentPane().setLayout(new BorderLayout());
-		JPanel pane = new JPanel();
-		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
-		getContentPane().add(pane, BorderLayout.CENTER);		
+		getContentPane().add(getMainPanel(), BorderLayout.CENTER);		
 		
-		pane.add(Box.createVerticalStrut(10));
-		JScrollPane scrollPane = new JScrollPane(table);
-		pane.add(createSimplePanel(scrollPane, 20));
-		pane.add(Box.createVerticalStrut(10));
 		
 		getContentPane().add(getControlPanel(), BorderLayout.SOUTH);
 	}
 
+	protected REpiceaTable getTable() {return table;}
+	
+	protected JPanel getMainPanel() {
+		JPanel pane = new JPanel();
+		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
+
+		pane.add(Box.createVerticalStrut(10));
+		JScrollPane scrollPane = new JScrollPane(getTable());
+		pane.add(createSimplePanel(scrollPane, 20));
+		pane.add(Box.createVerticalStrut(10));
+		return pane;
+	}
+	
 	
 	protected JPanel createSimplePanel(Component comp, int margin) {
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.LEFT));
