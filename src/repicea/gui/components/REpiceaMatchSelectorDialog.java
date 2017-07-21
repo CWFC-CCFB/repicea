@@ -96,6 +96,7 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 	
 	protected void init() {}
 	
+	protected REpiceaMatchSelector<?> getCaller() {return caller;}
 	
 	protected JPanel getControlPanel() {
 		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
