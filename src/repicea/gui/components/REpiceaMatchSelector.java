@@ -195,8 +195,13 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 		potentialMatches.addAll((List) wasMemorized.get(1));
 	}
 
-	protected Enum<E> getMatch(String s) {
-		return matchMap.get(s);
+	/**
+	 * This method returns the match corresponding to the parameter.
+	 * @param obj
+	 * @return an Enum of class E
+	 */
+	public Enum<E> getMatch(Object obj) {
+		return matchMap.get(obj);
 	}
 	
 	
