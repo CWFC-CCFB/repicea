@@ -82,7 +82,7 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 		tableModel = new REpiceaTableModel(columnNames);
 		tableModel.setEditableVetos(0, true);
 		table = new REpiceaTable(tableModel, false); // false : adding or deleting rows is disabled
-		TextableEnum[] possibleTreatments =  caller.potentialTreatments.toArray(new TextableEnum[]{});
+		TextableEnum[] possibleTreatments =  caller.potentialMatches.toArray(new TextableEnum[]{});
 		table.setDefaultEditor(Enum.class, new REpiceaCellEditor(new JComboBox<TextableEnum>(possibleTreatments), tableModel));
 		table.setRowSelectionAllowed(false);
 
@@ -129,10 +129,10 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 	public void refreshInterface() {
 		tableModel.removeAll();
 		Object[] record;
-		for (String s : caller.treatmentMatchMap.keySet()) {
+		for (String s : caller.matchMap.keySet()) {
 			record = new Object[2];
 			record[0] = s;
-			record[1] = caller.treatmentMatchMap.get(s);
+			record[1] = caller.matchMap.get(s);
 			tableModel.addRow(record);
 		}
 		super.refreshInterface();
