@@ -70,7 +70,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 	 */
 	public REpiceaMatchSelector(Object[] toBeMatched, Enum<E>[] potentialMatchArray, Enum<E> defaultMatch, Object[] columnNames) {
 		potentialMatches = new ArrayList<Enum<E>>();
-		addPotentialTreatments(potentialMatchArray);
+		addMatches(potentialMatchArray);
 		matchMap = new TreeMap<Object, Enum<E>>();
 		for (Object s : toBeMatched) {
 			matchMap.put(s, defaultMatch);
@@ -83,7 +83,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 	 * This method adds a potential treatment to the list of available treatments
 	 * @param enumValues an array of enum variable 
 	 */
-	protected void addPotentialTreatments(Enum<E>[] enumValues) {
+	protected void addMatches(Enum<E>[] enumValues) {
 		for (Enum<E> enumValue : enumValues) {
 			if (!potentialMatches.contains(enumValue)) {
 				potentialMatches.add(enumValue);
@@ -91,7 +91,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 		}
 	}
 	
-	
+	protected List<Enum<E>> getPotentialMatch() {return potentialMatches;}
 	
 	@Override
 	public REpiceaMatchSelectorDialog getUI(Container parent) {
@@ -124,7 +124,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 				String s = (String) model.getValueAt(e.getLastRow(), 0);
 				Enum<E> match = (Enum<E>) model.getValueAt(e.getLastRow(), 1);
 				matchMap.put(s, match);
-//				System.out.println("new match : " + s + " = " + match.name());
+				System.out.println("new match : " + s + " = " + match.name());
 			}
 		}
 	}
