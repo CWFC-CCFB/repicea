@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
 
+import repicea.app.AbstractGenericTask;
 import repicea.gui.UIControlManager;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.gui.genericwindows.REpiceaSimpleListDialog;
@@ -43,6 +44,98 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @author Mathieu Fortin - December 2010
  */
 public abstract class REpiceaRecordReader implements Serializable {
+	
+	@SuppressWarnings("serial")
+	protected class InternalTask extends AbstractGenericTask {
+
+		final int groupId;
+		
+		protected InternalTask(int groupId) {
+			this.groupId = groupId;
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		protected void doThisJob() throws Exception {
+			int lineCounter = 0;
+
+			List<ImportFieldElement> importFieldElements = importFieldManager.getFields();
+			List<Integer> index = groupingRegistryReader.getObservationIndicesForThisGroup(groupId);
+
+			Object[] oArray;
+
+			FormatReader<? extends FormatHeader<? extends FormatField>> reader = null;
+			try {
+				reader = FormatReader.createFormatReader(importFieldManager.getFileSpecifications());
+				oArray = new Object[importFieldElements.size()];
+
+				if (index==null) {							// if the index is null a false index that contains all the observations is created
+					index = new ArrayList<Integer>();
+					for (int i = 0; i < reader.getRecordCount(); i++) {
+						index.add(i);
+					}
+				}
+
+				firePropertyChange(REpiceaProgressBarDialog.LABEL, "", "Read records...");
+				
+				double factor = 100d / index.size();
+				
+				// Now, lets start reading the rows
+				int numberOfLinesToSkip;
+				int lineNumber;
+				int numberLinesRead = 0;
+				Object[] rowObjects = null;
+				for (Iterator<Integer> iterRow = index.iterator(); iterRow.hasNext();) {
+					lineNumber = iterRow.next();
+					numberOfLinesToSkip = lineNumber - lineCounter;
+					rowObjects = reader.nextRecord(numberOfLinesToSkip);
+					lineCounter = lineNumber + 1;  					// 1 is added to have the real reference line 1 is really line 1
+
+					if (rowObjects!=null) {
+						for (int i = 0; i < importFieldElements.size(); i++) {
+							ImportFieldElement impFieldElem = importFieldElements.get(i);
+							int iFieldIndex = impFieldElem.getMatchingFieldIndex();
+							if (!impFieldElem.isOptional) {										// if the field is not optional
+								try {
+									oArray[i] = rowObjects[iFieldIndex].toString().trim();
+								} catch (NullPointerException e) {
+									throw new NullPointerException("A null value has been found at line " + lineNumber + " in the DBF file : field " + impFieldElem.getFieldName());
+								}
+							} else {																// the field is then optional
+								if (iFieldIndex < 0 || rowObjects[iFieldIndex] == null || rowObjects[iFieldIndex].toString().isEmpty()) {			// if the field has not been specified or the selected field contains a null value
+									oArray[i] = null;
+								} else {
+									oArray[i] = rowObjects[iFieldIndex].toString().trim();
+								}
+							}
+						}
+						checkInputFieldsFormat(oArray);
+						readLineRecord(oArray, lineCounter);
+						numberLinesRead++;
+						firePropertyChange(REpiceaProgressBarDialog.PROGRESS, 0, (int) (numberLinesRead * factor));
+					}
+				}
+
+			} catch (Exception e) {
+				String message; 
+				if (e instanceof VariableValueException) {
+					message = MessageID.InconsistentValueInThisField.toString() + MessageID.AtLine.toString() + lineCounter + ": " + e.getMessage();
+				} else if (e instanceof FileNotFoundException) {
+					message = MessageID.FileCouldNotBeFound.toString() + importFieldManager.getFileSpecifications()[0];
+				} else if (e instanceof NullInThisFieldException) {
+					message = ((NullInThisFieldException) e).getMessage() + " " + MessageID.AtLine.toString() + lineCounter;
+				} else {
+					message = MessageID.ErrorWhileReading.toString() + importFieldManager.getFileSpecifications()[0] + " " + MessageID.AtLine.toString() + lineCounter;
+				}
+				throw new Exception(message);
+			} finally {
+				if (reader != null) {
+					reader.close();
+				}
+			}
+		}
+		
+	}
 	
 	public static class VariableValueException extends Exception {
 		private static final long serialVersionUID = 20101221L;
@@ -80,7 +173,9 @@ public abstract class REpiceaRecordReader implements Serializable {
 		InconsistentValueInThisField("Values of variables are inconsistent ", "Les valeurs de certains champs sont incoh\u00E9rentes "),
 		AtLine("at line ", "\u00A0 la ligne "),
 		FileCouldNotBeFound("CAPSIS cannot find file: ", "CAPSIS n'a pas pu trouv\u00E9 le fichier : "),
-		ErrorWhileReading("Error while reading file: ", "Erreur lors de la lecture du fichier : ");
+		ErrorWhileReading("Error while reading file: ", "Erreur lors de la lecture du fichier : "),
+		ReadingFile("Reading the records...", "Lecture des enregistrements...")
+		;
 		
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -101,11 +196,16 @@ public abstract class REpiceaRecordReader implements Serializable {
 	private GroupingRegistryReader groupingRegistryReader;
 	
 	private boolean isPopUpWindowEnabled;
+	private boolean guiMode;
+	
+	private transient Window windowOwner;
 	
 	/**
 	 * Constructor for GUI mode.
 	 */
-	protected REpiceaRecordReader() {}
+	protected REpiceaRecordReader() {
+		guiMode = false;
+	}
 
 
 	/**
@@ -115,6 +215,9 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
 	public void initGUIMode(Window guiOwner, String... fileSpec) throws Exception {
+		
+		this.windowOwner = guiOwner;
+		this.guiMode = true;
 		
 		importFieldManager = new ImportFieldManager(defineFieldsToImport(), fileSpec);
 		importFieldManager.setStratumFieldEnum(defineGroupFieldEnum());
@@ -188,76 +291,18 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param groupId a integer that corresponds to the group ID
 	 * @throws Exception
 	 */
-	@SuppressWarnings("unchecked")
-	public void readRecordsForThisGroupId(int groupId) throws Exception {
-		int lineCounter = 0;
+	public synchronized void readRecordsForThisGroupId(int groupId) throws Exception {
+		InternalTask task = new InternalTask(groupId); 
 
-		List<ImportFieldElement> importFieldElements = importFieldManager.getFields();
-		List<Integer> index = groupingRegistryReader.getObservationIndicesForThisGroup(groupId);
-
-		Object[] oArray;
-
-		FormatReader<? extends FormatHeader<? extends FormatField>> reader = null;
-		try {
-			reader = FormatReader.createFormatReader(importFieldManager.getFileSpecifications());
-			oArray = new Object[importFieldElements.size()];
-
-			if (index==null) {							// if the index is null a false index that contains all the observations is created
-				index = new ArrayList<Integer>();
-				for (int i = 0; i < reader.getRecordCount(); i++) {
-					index.add(i);
-				}
-			}
-
-			// Now, lets start reading the rows
-			int numberOfLinesToSkip;
-			int lineNumber;
-			Object[] rowObjects = null;
-			for (Iterator<Integer> iterRow = index.iterator(); iterRow.hasNext();) {
-				lineNumber = iterRow.next();
-				numberOfLinesToSkip = lineNumber - lineCounter;
-				rowObjects = reader.nextRecord(numberOfLinesToSkip);
-				lineCounter = lineNumber + 1;  					// 1 is added to have the real reference line 1 is really line 1
-
-				if (rowObjects!=null) {
-					for (int i = 0; i < importFieldElements.size(); i++) {
-						ImportFieldElement impFieldElem = importFieldElements.get(i);
-						int iFieldIndex = impFieldElem.getMatchingFieldIndex();
-						if (!impFieldElem.isOptional) {										// if the field is not optional
-							try {
-								oArray[i] = rowObjects[iFieldIndex].toString().trim();
-							} catch (NullPointerException e) {
-								throw new NullPointerException("A null value has been found at line " + lineNumber + " in the DBF file : field " + impFieldElem.getFieldName());
-							}
-						} else {																// the field is then optional
-							if (iFieldIndex < 0 || rowObjects[iFieldIndex] == null || rowObjects[iFieldIndex].toString().isEmpty()) {			// if the field has not been specified or the selected field contains a null value
-								oArray[i] = null;
-							} else {
-								oArray[i] = rowObjects[iFieldIndex].toString().trim();
-							}
-						}
-					}
-					checkInputFieldsFormat(oArray);
-					readLineRecord(oArray, lineCounter);
-				}
-			}
-
-		} catch (Exception e) {
-			String message; 
-			if (e instanceof VariableValueException) {
-				message = MessageID.InconsistentValueInThisField.toString() + MessageID.AtLine.toString() + lineCounter + ": " + e.getMessage();
-			} else if (e instanceof FileNotFoundException) {
-				message = MessageID.FileCouldNotBeFound.toString() + importFieldManager.getFileSpecifications()[0];
-			} else if (e instanceof NullInThisFieldException) {
-				message = ((NullInThisFieldException) e).getMessage() + " " + MessageID.AtLine.toString() + lineCounter;
-			} else {
-				message = MessageID.ErrorWhileReading.toString() + importFieldManager.getFileSpecifications()[0] + " " + MessageID.AtLine.toString() + lineCounter;
-			}
-			throw new Exception(message);
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
+		if (guiMode) {
+			String title = REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress);
+			String message = REpiceaTranslator.getString(MessageID.ReadingFile);
+			new REpiceaProgressBarDialog(windowOwner, title, message, task, false);
+		} else {
+			task.execute();
+		}
+		if (!task.get()) {
+			throw task.getFailureReason();
 		}
 	}
 
@@ -387,6 +432,8 @@ public abstract class REpiceaRecordReader implements Serializable {
 	protected abstract void readLineRecord(Object[] oArray, int lineCounter) throws VariableValueException, Exception;
 
 	protected ImportFieldManager getImportFieldManager() {return importFieldManager;}
+
+
 	
 	
 }
