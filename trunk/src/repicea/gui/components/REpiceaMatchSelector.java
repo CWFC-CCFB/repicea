@@ -55,7 +55,7 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 											Memorizable {
 
 	
-	protected final Map<String, Enum<E>> matchMap;
+	protected final Map<Object, Enum<E>> matchMap;
 	protected final List<Enum<E>> potentialMatches;
 	private String filename;
 	private transient REpiceaMatchSelectorDialog guiInterface;
@@ -68,11 +68,11 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 	 * @param defaultMatch an enum variable that acts as a default match
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
-	public REpiceaMatchSelector(String[] toBeMatched, Enum<E>[] potentialMatchArray, Enum<E> defaultMatch, Object[] columnNames) {
+	public REpiceaMatchSelector(Object[] toBeMatched, Enum<E>[] potentialMatchArray, Enum<E> defaultMatch, Object[] columnNames) {
 		potentialMatches = new ArrayList<Enum<E>>();
 		addPotentialTreatments(potentialMatchArray);
-		matchMap = new TreeMap<String, Enum<E>>();
-		for (String s : toBeMatched) {
+		matchMap = new TreeMap<Object, Enum<E>>();
+		for (Object s : toBeMatched) {
 			matchMap.put(s, defaultMatch);
 		}
 		this.columnNames = columnNames;
