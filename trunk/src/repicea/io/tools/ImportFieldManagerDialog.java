@@ -33,6 +33,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.lang.reflect.Method;
 import java.util.List;
 
 import javax.swing.BorderFactory;
@@ -66,6 +67,7 @@ import repicea.gui.dnd.DragGestureImpl;
 import repicea.io.FormatField;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
+import repicea.net.BrowserCaller;
 import repicea.util.REpiceaSystem;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -81,6 +83,12 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 	
 	static {
 		UIControlManager.setTitle(ImportFieldManagerDialog.class, "REpicea import tool", "Utilitaire d'importation REpicea");
+		try {
+			Method callHelp = BrowserCaller.class.getMethod("openUrl", String.class);
+			String url = "https://sourceforge.net/p/repiceasource/wiki/REpicea%20-%20Import%20tool/";
+			AutomatedHelper helper = new AutomatedHelper(callHelp, new Object[]{url});
+			UIControlManager.setHelpMethod(ImportFieldManagerDialog.class, helper);
+		} catch (Exception e) {}
 	}
 	
 	private static final Font TEXT_FONT = new Font("Arial12",Font.PLAIN,12);
@@ -188,10 +196,7 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 		} else if (evt.getSource().equals(cancel)) {
 			cancelAction();
 		} else if (evt.getSource().equals(help)) {
-			AutomatedHelper helper = UIControlManager.getHelper(getClass());
-			if (helper != null) {
-				helper.callHelp();
-			}
+			helpAction();
 		}
 	}
 	

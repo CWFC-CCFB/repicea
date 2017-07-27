@@ -26,6 +26,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +57,7 @@ import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.io.GFileFilter;
+import repicea.net.BrowserCaller;
 import repicea.util.MemoryWatchDog.ExpectedMemoryCapacityException;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -68,6 +70,12 @@ public class REpiceaExportToolDialog extends REpiceaDialog implements ActionList
 
 	static {
 		UIControlManager.setTitle(REpiceaExportToolDialog.class, "REpicea export tool", "Utilitaire d'exportation REpicea");
+		try {
+			Method callHelp = BrowserCaller.class.getMethod("openUrl", String.class);
+			String url = "https://sourceforge.net/p/repiceasource/wiki/REpicea%20-%20Export%20tool/";
+			AutomatedHelper helper = new AutomatedHelper(callHelp, new Object[]{url});
+			UIControlManager.setHelpMethod(REpiceaExportToolDialog.class, helper);
+		} catch (Exception e) {}
 	}
 	
 	private static final long serialVersionUID = 20110124L;
