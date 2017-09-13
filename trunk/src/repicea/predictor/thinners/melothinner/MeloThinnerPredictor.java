@@ -76,7 +76,6 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 		embeddedFunction.setVariableValue(1, 1);
 		embeddedFunction.setParameterValue(0, 0);
 		embeddedFunction.setParameterValue(1, 0);
-		cruiseLineMap = new HashMap<String, CruiseLine>();
 	}
 
 	@Override

@@ -49,6 +49,10 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		DefaultZeroIndex.add(0);
 	}
 	
+	/**
+	 * This class creates a fake subject for interval random effects nested in the plots. 
+	 * @author Mathieu Fortin - November 2016
+	 */
 	protected static class IntervalNestedInPlotDefinition implements MonteCarloSimulationCompliantObject, Serializable {
 
 		private final int monteCarloRealizationID;
@@ -81,6 +85,10 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		}
 	}
 
+	/**
+	 * This class creates a fake subject for cruise line random effects.
+	 * @author Mathieu Fortin - April 2017
+	 */
 	protected static class CruiseLine implements MonteCarloSimulationCompliantObject {
 		private final String subjectID;
 		private final int monteCarloRealizationID;
@@ -108,7 +116,8 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	
 	private boolean areBlupsEstimated;
 	
-	protected Map<String, CruiseLine> cruiseLineMap;
+	private final Map<String, CruiseLine> cruiseLineMap;
+	private final Map<String, IntervalNestedInPlotDefinition> intervalLists;
 
 
 	// set by the constructor
@@ -125,7 +134,6 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	
 	protected REpiceaRandom random = new REpiceaRandom();
 	
-	private final Map<String, IntervalNestedInPlotDefinition> intervalLists;
 	
 	/**
 	 * General constructor for all combinations of uncertainty sources.
@@ -143,14 +151,15 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		defaultRandomEffects = new HashMap<String, Estimate<? extends StandardGaussianDistribution>>();
 				
 		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
-
 		simulatedResidualError = new HashMap<String, GaussianErrorTermList>();
+		
 		intervalLists = new HashMap<String, IntervalNestedInPlotDefinition>();
+		cruiseLineMap = new HashMap<String, CruiseLine>();
+
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
 		
 		listeners = new CopyOnWriteArrayList<REpiceaPredictorListener>();
 		
-		cruiseLineMap = new HashMap<String, CruiseLine>();
 	}
 	
 	/**
@@ -350,12 +359,14 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 
 	/**
 	 * This method clears all simulated deviates for the parameter estimates, the random effects and the residual errors. 
-	 * IMPORTANT: it does not reset the blups of the random effects. By default, it should call the final method clearDeviate().
+	 * IMPORTANT: it does not reset the blups of the random effects. 
 	 */
 	public void clearDeviates() {
 		simulatedParameters.clear();
 		simulatedRandomEffects.clear();
 		simulatedResidualError.clear();
+		intervalLists.clear();
+		cruiseLineMap.clear();
 	}
 	
 	/**
