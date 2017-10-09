@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
+import repicea.stats.distributions.utility.ChiSquaredUtility;
 
 /**
  * The ChiSquareDistribution class represents a univariate Chi Square distribution with a given degrees of freedom.

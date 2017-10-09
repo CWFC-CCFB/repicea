@@ -4,6 +4,7 @@ import java.io.Serializable;
 
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.distributions.utility.GaussianUtility;
 
 public class TruncatedGaussianDistribution extends StandardGaussianDistribution implements BoundedDistribution {
 

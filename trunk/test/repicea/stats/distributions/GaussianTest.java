@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import repicea.stats.distributions.GaussianUtility;
+import repicea.stats.distributions.utility.GaussianUtility;
 
 public class GaussianTest {
 
