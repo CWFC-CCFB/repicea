@@ -19,7 +19,7 @@
 package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.LoggableTree;
-import repicea.stats.distributions.GaussianUtility;
+import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogger;

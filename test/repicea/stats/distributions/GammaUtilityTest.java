@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.io.javacsv.CSVReader;
+import repicea.stats.distributions.utility.GammaUtility;
 import repicea.util.ObjectUtility;
 
 public class GammaUtilityTest {

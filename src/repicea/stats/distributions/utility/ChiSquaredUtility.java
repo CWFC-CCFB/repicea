@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.distributions;
+package repicea.stats.distributions.utility;
 
 import java.security.InvalidParameterException;
 import java.util.Random;
@@ -32,7 +32,7 @@ public class ChiSquaredUtility {
 	 * @param df the degrees of freedom
 	 * @return a double
 	 */
-	protected static double randomValue(int df) {
+	public static double randomValue(int df) {
 		if (df <= 0) {
 			throw new InvalidParameterException("The number of degrees of freedom should be larger than 0");
 		}
@@ -50,7 +50,7 @@ public class ChiSquaredUtility {
 	 * @param dim the dimensions of the matrix
 	 * @return a Matrix
 	 */
-	protected static Matrix getBartlettDecompositionMatrix(int degreesOfFreedom, int dim) {
+	public static Matrix getBartlettDecompositionMatrix(int degreesOfFreedom, int dim) {
 		Matrix aMat = new Matrix(dim, dim);
 		for (int i = 0; i < aMat.m_iRows; i++) {
 			for (int j = 0; j <= i; j++) {

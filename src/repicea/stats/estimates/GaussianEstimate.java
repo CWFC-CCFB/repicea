@@ -23,7 +23,7 @@ import java.io.Serializable;
 import repicea.math.Matrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.distributions.GaussianUtility;
+import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
  * This class contains the elements related to the random effects, i.e. the best linear unbiased predictors (blups) as well as their variances.
