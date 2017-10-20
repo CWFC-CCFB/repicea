@@ -66,7 +66,7 @@ public class BasicClient implements Closeable {
 	}
 
 	
-	protected Object processRequest(Object obj) {
+	protected Object processRequest(Object obj) throws IOException {
 		if (open) {
 			try {
 				socketWrapper.writeObject(obj);
@@ -81,7 +81,7 @@ public class BasicClient implements Closeable {
 				} 
 			}
 		}
-		return null;
+		throw new IOException("Socket is closed");
 	}
 	
 	/**
