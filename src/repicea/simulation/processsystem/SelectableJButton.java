@@ -86,13 +86,17 @@ public abstract class SelectableJButton extends AbstractPermissionProviderButton
 	
 	
 	protected void setBorderWidth(int width) {
-		borderWidth = width;
-		setBorder(BorderFactory.createLineBorder(borderColor, borderWidth));
+		if (width != borderWidth) {
+			borderWidth = width;
+			setBorder(BorderFactory.createLineBorder(borderColor, borderWidth));
+		}
 	}
 	
 	protected void setBorderColor(Color col) {
-		borderColor = col;
-		setBorder(BorderFactory.createLineBorder(borderColor, borderWidth));
+		if (!col.equals(borderColor)) {
+			borderColor = col;
+			setBorder(BorderFactory.createLineBorder(borderColor, borderWidth));
+		}
 	}
 		
 	@Override
