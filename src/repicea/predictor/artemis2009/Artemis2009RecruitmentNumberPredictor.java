@@ -85,12 +85,12 @@ public class Artemis2009RecruitmentNumberPredictor extends REpiceaPredictor {
 		}
 	}
 	
-	@Override
-	public void clearDeviates() {
-		for (Artemis2009RecruitmentNumberInternalPredictor p : internalPredictors.values()) {
-			p.clearDeviates();
-		}
-	}
+//	@Override
+//	public void clearDeviates() {
+//		for (Artemis2009RecruitmentNumberInternalPredictor p : internalPredictors.values()) {
+//			p.clearDeviates();
+//		}
+//	}
 
 //	public static void main(String[] args) {
 //		Artemis2009RecruitmentNumberPredictor pred = new Artemis2009RecruitmentNumberPredictor(false, false);
