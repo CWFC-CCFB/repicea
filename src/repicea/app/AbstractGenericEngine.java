@@ -311,7 +311,9 @@ public abstract class AbstractGenericEngine {
 		queue.clear();
 		addTask(finalTask);
 		try {
-			lockEngine();		// the engine should be lock and only unlocked when the shutdown is completed
+			if (Thread.currentThread() != worker) {
+				lockEngine();		// the engine should be locked if the executing thread is not the internal worker and only unlocked when the shutdown is completed
+			}
 		} catch (Exception e) {}
 	}
 
