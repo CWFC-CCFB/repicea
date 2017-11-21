@@ -310,6 +310,9 @@ public abstract class AbstractGenericEngine {
 	public void requestShutdown() {
 		queue.clear();
 		addTask(finalTask);
+		try {
+			lockEngine();		// the engine should be lock and only unlocked when the shutdown is completed
+		} catch (Exception e) {}
 	}
 
 	
