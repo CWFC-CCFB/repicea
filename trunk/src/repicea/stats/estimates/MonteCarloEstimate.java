@@ -195,4 +195,8 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 		return false;
 	}
 	
+	@Override
+	public String toString() {
+		return "Monte Carlo estimate (mean = " + getMean() + ", n = " + getNumberOfRealizations();
+	}
 }
