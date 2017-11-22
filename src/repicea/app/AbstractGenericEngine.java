@@ -272,11 +272,14 @@ public abstract class AbstractGenericEngine {
 
 	
 	/**
-	 * This method locks the engine while the interface can be doing something else.
+	 * This method locks the engine while the interface can be doing something else. The engine 
+	 * can be locked only if the executing thread is not the internal worker.
 	 * @throws InterruptedException
 	 */
 	protected void lockEngine() throws InterruptedException {
-		lockEngine(0);
+		if (Thread.currentThread() != worker) {
+			lockEngine(0);
+		}
 	}
 	
 	
@@ -311,9 +314,7 @@ public abstract class AbstractGenericEngine {
 		queue.clear();
 		addTask(finalTask);
 		try {
-			if (Thread.currentThread() != worker) {
-				lockEngine();		// the engine should be locked if the executing thread is not the internal worker and only unlocked when the shutdown is completed
-			}
+			lockEngine();		
 		} catch (Exception e) {}
 	}
 
