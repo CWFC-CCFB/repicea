@@ -10,8 +10,8 @@ import java.util.Random;
 
 public class FakeClient extends BasicClient {
 
-	protected FakeClient(SocketAddress socketAddress) throws UnknownHostException, IOException, ClassNotFoundException {
-		super(socketAddress);
+	protected FakeClient(SocketAddress socketAddress) throws BasicClientException {
+		super(socketAddress, 10);
 	}
 
 	
@@ -36,7 +36,7 @@ public class FakeClient extends BasicClient {
 			client.close();
 			int u = 0;
 			System.out.println("Successfully treated.");
-		} catch (ClassNotFoundException | IOException e) {
+		} catch (BasicClientException e) {
 			e.printStackTrace();
 		}
 	}
