@@ -146,13 +146,15 @@ public class BasicClient implements Closeable {
 	@Override
 	public void close() {
 		try {
-			if (open) {
+			if (socketWrapper != null & open) {
 				socketWrapper.writeObject(ClientRequest.closeConnection);
 			}
 		} catch (IOException e) {
 		} finally {
 			try {
-				socketWrapper.close();
+				if (socketWrapper != null) {
+					socketWrapper.close();
+				}
 			} catch (IOException e) {}
 		}
 	}
