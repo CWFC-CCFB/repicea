@@ -23,74 +23,138 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 
 import repicea.net.SocketWrapper;
 import repicea.net.server.AbstractServer.ServerReply;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 public class BasicClient implements Closeable {
 	
 	protected static enum ClientRequest {closeConnection}
+
+	public static enum ExceptionType implements TextableEnum {
+		ConnectionFailed("The client failed to connect to the server.", "La connexion au serveur n'a pas pu \u00EAtre \u00E9tablie."),
+		ConnectionRejected("The server is busy and cannot process the requests.", "Le serveur est actuellement occup\u00E9 et ne peut r\u00E9pondre aux requ\u00EAtes."),
+		ConnectionTooLong("The reply from the server has exceeded the allowed time.", "La r\u00E9ponse du serveur a ex\u00E9c\u00E9d\u00E9 le temps d'attente."),
+		UnknownErrorWhileConnected("An exception occurred while processing the request.", "Une exception est survenue dans l'ex\u00E9cution de la requ\u00EAte.");
+		
+		ExceptionType(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+
+		@Override
+		public String toString() {
+			return REpiceaTranslator.getString(this);
+		}
+	}
 	
-//	public static final byte[] SIGNAL_END_OF_FILE = new byte[20];
-//	static {
-//		for (int i = 0; i < SIGNAL_END_OF_FILE.length; i++) {
-//			SIGNAL_END_OF_FILE[i] = Byte.MAX_VALUE;
-//		}
-//	}
+	
+	@SuppressWarnings("serial")
+	public static class BasicClientException extends Exception {
+		private BasicClientException(ExceptionType exceptionType) {
+			super(exceptionType.toString());
+		}
+	}
+	
+	
 	
 	private SocketWrapper socketWrapper;
 	private boolean open;
+	private final int timeout;
+	
 	
 	/**
 	 * Constructor.
 	 * @param socketAddress the SocketAddress instance that corresponds to the server
+	 * @param timeoutSeconds the number of seconds to wait for server reply before throwing a TimeoutException
+	 * @throws BasicClientException 
 	 * @throws UnknownHostException if the host is unknown
 	 * @throws IOException if the connection failed
 	 * @throws ClassNotFoundException if the reply from the server is incorrect
 	 * @throws ClientException if the connection has been lost
 	 */
-	protected BasicClient(SocketAddress socketAddress) throws UnknownHostException, IOException, ClassNotFoundException {
+	@SuppressWarnings("resource")
+	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds) throws BasicClientException {
+		this.timeout = timeoutSeconds;
 		Socket socket = new Socket();
-		socket.connect(socketAddress, 5000);
+		try {
+			socket.connect(socketAddress, 5000);
+		} catch (IOException e) {
+			close();
+			throw new BasicClientException(ExceptionType.ConnectionFailed);
+		} 
 		
 		socketWrapper = new SocketWrapper(socket);
-		
-		ServerReply replyFromServer = (ServerReply) socketWrapper.readObject();
+
+		ServerReply replyFromServer = (ServerReply) readObjectFromServer();
 		if (replyFromServer == ServerReply.CallAccepted) {
 			open = true;
 		} else if (replyFromServer == ServerReply.IAmBusyCallBackLater) {
 			open = false;
 			close();
+			throw new BasicClientException(ExceptionType.ConnectionRejected);
 		}
 		
 	}
 
 	
-	protected Object processRequest(Object obj) throws IOException {
+	protected Object readObjectFromServer() throws BasicClientException {
+		try {
+			return socketWrapper.readObject(timeout);
+		} catch (Exception e) {
+			e.printStackTrace();
+			close();
+			throw handleException(e);
+		} 
+	}
+	
+	
+	
+	private BasicClientException handleException(Exception e) {
+		if (e instanceof InterruptedException || e instanceof ExecutionException || e instanceof TimeoutException) {
+			return new BasicClientException(ExceptionType.ConnectionTooLong);
+		} else {
+			return new BasicClientException(ExceptionType.UnknownErrorWhileConnected);
+		}
+	}
+
+
+	protected Object processRequest(Object obj) throws BasicClientException {
 		if (open) {
 			try {
 				socketWrapper.writeObject(obj);
-				Object reply = socketWrapper.readObject();
-				return reply;
-			} catch (IOException | ClassNotFoundException e) {
+			} catch (IOException e) {
+				close();
 				e.printStackTrace();
-				try {
-					close();
-				} catch (IOException e1) {
-					e1.printStackTrace();
-				} 
 			}
+			return readObjectFromServer();
 		}
-		throw new IOException("Socket is closed");
+		throw new BasicClientException(ExceptionType.ConnectionFailed);
 	}
 	
 	/**
 	 * This method sends a request to the server to close the connection and closes the output and input streams.
 	 */
 	@Override
-	public void close() throws IOException {
-		socketWrapper.writeObject(ClientRequest.closeConnection);
-		socketWrapper.close();
+	public void close() {
+		try {
+			if (open) {
+				socketWrapper.writeObject(ClientRequest.closeConnection);
+			}
+		} catch (IOException e) {
+		} finally {
+			try {
+				socketWrapper.close();
+			} catch (IOException e) {}
+		}
 	}
 
 	

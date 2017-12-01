@@ -25,12 +25,31 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
+import repicea.app.AbstractGenericTask;
 
 /**
  * The SocketWrapper handles the output and input streams of socket. 
  * @author Mathieu Fortin - December 2011
  */
 public class SocketWrapper implements Closeable {
+	
+	@SuppressWarnings("serial")
+	private class SocketWrapperTask extends AbstractGenericTask {
+
+		Object result;
+		
+		@Override
+		protected void doThisJob() throws Exception {
+			result = SocketWrapper.this.getObjectInputStream().readObject();
+		}
+		
+	}
+	
+	
 	
 	private Socket socket;
 	
@@ -49,10 +68,43 @@ public class SocketWrapper implements Closeable {
 	}
 	
 	public Socket getSocket() {return socket;}
+
+	/**
+	 * This method reads the object from the server. There is no timeout.
+	 * @return the object
+	 * @throws Exception
+	 * @throws InterruptedException
+	 * @throws ExecutionException
+	 * @throws TimeoutException
+	 */
+	public Object readObject() throws Exception, InterruptedException, ExecutionException, TimeoutException {
+		return readObject(0);
+	}
+		
 	
-	
-	public Object readObject() throws IOException, ClassNotFoundException {
-		return getObjectInputStream().readObject();
+	/**
+	 * This method reads the object from the server. There is a timeout after a given number of
+	 * seconds. If the number of sectonds is equal to or smaller than 0, then there is no timeout.
+	 * @param  numberOfSeconds number of seconds to wait before throwing a TimeoutException
+	 * @return the object
+	 * @throws Exception if the thread has not correctly terminated
+	 * @throws InterruptedException if the thread was interrupted
+	 * @throws ExecutionException if the execution failed
+	 * @throws TimeoutException if the client has been wainting for more than 10 sec.
+	 */
+	public Object readObject(int numberOfSeconds) throws Exception, InterruptedException, ExecutionException, TimeoutException {
+		SocketWrapperTask t = new SocketWrapperTask();
+		t.execute();
+		if (numberOfSeconds > 0) {
+			t.get(numberOfSeconds, TimeUnit.SECONDS);
+		} else {
+			t.get();
+		}
+		if (t.isCorrectlyTerminated()) {
+			return t.result;
+		} else {
+			throw t.getFailureReason();
+		}
 	}
 	
 	public void writeObject(Object obj) throws IOException {
