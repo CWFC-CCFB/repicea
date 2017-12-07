@@ -75,7 +75,7 @@ public class Population {
 		List<Integer> sampleIndex = new ArrayList<Integer>();
 		int index;
 		while (sampleIndex.size() < sampleSize) {
-			index = (int) Math.floor(random.nextDouble() * 1000);
+			index = (int) Math.floor(random.nextDouble() * sampleUnits.size());
 			if (!sampleIndex.contains(index)) {
 				sampleIndex.add(index);
 			}

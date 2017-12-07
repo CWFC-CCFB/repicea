@@ -36,7 +36,7 @@ public class Population {
 		List<Integer> sampleIndex = new ArrayList<Integer>();
 		int index;
 		while (sampleIndex.size() < sampleSize) {
-			index = (int) Math.floor(random.nextDouble() * 1000);
+			index = (int) Math.floor(random.nextDouble() * sampleUnits.size());
 			if (!sampleIndex.contains(index)) {
 				sampleIndex.add(index);
 			}
@@ -63,7 +63,8 @@ public class Population {
 	}
 	
 	
-	public static void main(String[] args) throws IOException {
+	public static void main(String[] args) throws IOException, CloneNotSupportedException {
+		boolean isCompleteBootstrap = true;
 		boolean simpleReplacement = true;		// default is true
 		SimpleLinearModel.R2_95Version = false;	// default is false
 		NumberFormat nf = NumberFormat.getInstance();
@@ -79,6 +80,8 @@ public class Population {
 			filename = ObjectUtility.getPackagePath(Population.class) + "simulationR2_95_" + sampleSize + ".csv";
 		} else if (!simpleReplacement) {
 			filename = ObjectUtility.getPackagePath(Population.class) + "fromDataset_" + sampleSize + ".csv";
+		} else if (isCompleteBootstrap) {
+			filename = ObjectUtility.getPackagePath(Population.class) + "compBootstrap_" + sampleSize + ".csv";
 		} else {
 			filename = ObjectUtility.getPackagePath(Population.class) + "simulation" + sampleSize + ".csv";
 		}
@@ -111,7 +114,7 @@ public class Population {
 			setRealizedValues(pop.sampleUnits, pop.superModel);
 			Matrix total = pop.getTotal();
 			SimpleLinearModel currentModel = new SimpleLinearModel(true, true); // the current model must account for the errors in the parameter estimates
-			PlotList sample;;
+			PlotList sample;
 			if (simpleReplacement) {
 				currentModel.replaceModelParameters();	// the parameter estimates are drawn at random in the distribution
 				sample = pop.getSample(sampleSize);
@@ -124,7 +127,13 @@ public class Population {
 				currentModel.replaceModelParameters(dataSet);
 			}
 			HybridMonteCarloHorvitzThompsonEstimate hybHTEstimate = new HybridMonteCarloHorvitzThompsonEstimate();
+			PlotList referenceSample = sample;
 			for (int internalReal = 0; internalReal < nbInternalReal; internalReal++) {
+				if (isCompleteBootstrap) {
+					sample = referenceSample.getBootstrapSample();
+				} else {
+					sample = referenceSample;
+				}
 				sample.setRealization(internalReal);
 				setRealizedValues(sample, currentModel);
 				HorvitzThompsonTauEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
