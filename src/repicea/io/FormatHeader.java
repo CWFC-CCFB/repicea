@@ -34,7 +34,7 @@ public abstract class FormatHeader<P extends FormatField> {
 	 * This method adds a field into the field list and synchronizes the field index.
 	 * @param field the FormatField instance to be added
 	 */
-	public void addField(P field) {
+	protected void addField(P field) {
 		field.setIndex(getFieldList().size());
 		getFieldList().add(field);
 	}
