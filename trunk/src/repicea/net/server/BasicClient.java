@@ -23,6 +23,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
+import java.security.InvalidParameterException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
@@ -69,6 +70,7 @@ public class BasicClient implements Closeable {
 	private SocketWrapper socketWrapper;
 	private boolean open;
 	private final int timeout;
+	private boolean bypassTimeout;
 	
 	
 	/**
@@ -83,7 +85,11 @@ public class BasicClient implements Closeable {
 	 */
 	@SuppressWarnings("resource")
 	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds) throws BasicClientException {
+		if (timeoutSeconds < 0) {
+			throw new InvalidParameterException("The timeout delay must be equal to or greater than 0!");
+		}
 		this.timeout = timeoutSeconds;
+		this.bypassTimeout = false;
 		Socket socket = new Socket();
 		try {
 			socket.connect(socketAddress, 5000);
@@ -102,13 +108,16 @@ public class BasicClient implements Closeable {
 			close();
 			throw new BasicClientException(ExceptionType.ConnectionRejected);
 		}
-		
 	}
 
 	
 	protected Object readObjectFromServer() throws BasicClientException {
 		try {
-			return socketWrapper.readObject(timeout);
+			if (bypassTimeout) {
+				return socketWrapper.readObject();
+			} else {
+				return socketWrapper.readObject(timeout);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			close();
@@ -159,5 +168,8 @@ public class BasicClient implements Closeable {
 		}
 	}
 
+	protected void setBypassTimeout(boolean bypass) {
+		this.bypassTimeout = bypass;
+	}
 	
 }
