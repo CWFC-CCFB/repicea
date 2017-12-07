@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2017 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -27,7 +27,7 @@ import repicea.math.Matrix;
 
 /**
  * This class contains static methods that are useful for statistical regressions.
- * @author Mathieu Fortin - August 2012
+ * @author Mathieu Fortin - August 2012, December 2017
  */
 public class StatisticalUtility {
 
@@ -244,16 +244,42 @@ public class StatisticalUtility {
 		} else {
 			throw new UnsupportedOperationException("The two matrices do not have the same number of rows!");
 		}
-//		if (mat1.isRowVector() && mat2.isRowVector()) {
-//			int nbCols = mat1.m_iCols * mat2.m_iCols;
-//			Matrix oMat = new Matrix(1,nbCols);
-//			for (int i = 0; i < mat1.m_iCols; i++)
-//				for (int j = 0; j < mat2.m_iCols; j++)
-//					oMat.m_afData[0][i*mat2.m_iCols+j] = mat1.m_afData[0][i] * mat2.m_afData[0][j];
-//			return oMat;
-//		} else {
-//			throw new UnsupportedOperationException("One of the two matrices is not a row vector!");
-//		}
 	}
+
+	/**
+	 * This method returns a sample from a population. 
+	 * @param observations a list of observations that compose the population
+	 * @param sampleSize the sample size (n)
+	 * @param withReplacement a boolean to indicate whether the sample is with or without replacement
+	 * @return a List that contains the sample
+	 */
+	public static List<Object> getSampleFromPopulation(List<?> observations, int sampleSize, boolean withReplacement) {
+		if (sampleSize < 1) {
+			throw new InvalidParameterException("The sample size must be at least of 1.");
+		}
+		List<Integer> sampleIndex = new ArrayList<Integer>();
+		int index;
+		while (sampleIndex.size() < sampleSize) {
+			index = (int) Math.floor(random.nextDouble() * observations.size());
+			if (!sampleIndex.contains(index) || withReplacement) {
+				sampleIndex.add(index);
+			}
+		}
+		ArrayList<Object> sample = new ArrayList<Object>();
+		for (Integer ind : sampleIndex) {
+			sample.add(observations.get(ind));
+		}
+		return sample;
+	}
+
+	
+//	public static void main(String[] args) {
+//		List<Integer> population = new ArrayList<Integer>();
+//		for (int i = 1; i <= 10; i++) {
+//			population.add(i);
+//		}
+//		List<Object> sample = getSampleFromPopulation(population, 10, true);
+//		System.out.println(sample.toString());
+//	}
 
 }

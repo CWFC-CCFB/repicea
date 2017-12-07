@@ -4,7 +4,7 @@ import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 
-class SamplePlot implements MonteCarloSimulationCompliantObject {
+class SamplePlot implements MonteCarloSimulationCompliantObject, Cloneable {
 
 	private final String id;
 	private final double x;
@@ -43,6 +43,8 @@ class SamplePlot implements MonteCarloSimulationCompliantObject {
 	
 	protected void setMonteCarloRealizationId(int realization) {this.realization = realization;}
 	
-	
-	
+	@Override
+	public SamplePlot clone() throws CloneNotSupportedException {
+		return (SamplePlot) super.clone();
+	}
 }
