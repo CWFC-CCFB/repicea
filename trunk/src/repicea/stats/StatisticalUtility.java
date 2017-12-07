@@ -260,7 +260,7 @@ public class StatisticalUtility {
 		List<Integer> sampleIndex = new ArrayList<Integer>();
 		int index;
 		while (sampleIndex.size() < sampleSize) {
-			index = (int) Math.floor(random.nextDouble() * observations.size());
+			index = (int) Math.floor(getRandom().nextDouble() * observations.size());
 			if (!sampleIndex.contains(index) || withReplacement) {
 				sampleIndex.add(index);
 			}
