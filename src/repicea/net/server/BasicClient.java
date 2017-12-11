@@ -34,7 +34,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 
 public class BasicClient implements Closeable {
 	
-	protected static enum ClientRequest {closeConnection}
+	public static enum ClientRequest {closeConnection}
 
 	public static enum ExceptionType implements TextableEnum {
 		ConnectionFailed("The client failed to connect to the server.", "La connexion au serveur n'a pas pu \u00EAtre \u00E9tablie."),
