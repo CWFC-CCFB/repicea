@@ -114,7 +114,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	
 	protected final CopyOnWriteArrayList<REpiceaPredictorListener> listeners;
 	
-	private boolean areBlupsEstimated;
+//	private boolean areBlupsEstimated;
 	
 	private final Map<String, CruiseLine> cruiseLineMap;
 	private final Map<String, IntervalNestedInPlotDefinition> intervalLists;
@@ -127,6 +127,8 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	protected Matrix oXVector;
 
 	final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
+	final Map<String, Map<String, Estimate<? extends StandardGaussianDistribution>>> blupsRandomEffects; // key1: hierarchical level, key2: subject id
+	
 	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
 	private final Map<Enum<?>, GaussianErrorTermEstimate> defaultResidualError;
@@ -149,6 +151,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		this.isResidualVariabilityEnabled = isResidualVariabilityEnabled;
 		
 		defaultRandomEffects = new HashMap<String, Estimate<? extends StandardGaussianDistribution>>();
+		blupsRandomEffects = new HashMap<String, Map<String, Estimate<? extends StandardGaussianDistribution>>>();
 				
 		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
 		simulatedResidualError = new HashMap<String, GaussianErrorTermList>();
@@ -174,14 +177,15 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 
 	@Override
 	protected void setParameterEstimates(GaussianEstimate gaussianEstimate) {
-		super.setParameterEstimates(new ModelParameterEstimates(gaussianEstimate, this));
+//		super.setParameterEstimates(new ModelParameterEstimates(gaussianEstimate, this));
+		super.setParameterEstimates(gaussianEstimate);
 		fireModelBasedSimulatorEvent(new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, getParameterEstimates(), this));
 	}
 	
-	@Override
-	protected ModelParameterEstimates getParameterEstimates() {
-		return (ModelParameterEstimates) super.getParameterEstimates();
-	}
+//	@Override
+//	protected ModelParameterEstimates getParameterEstimates() {
+//		return (ModelParameterEstimates) super.getParameterEstimates();
+//	}
 
 	protected void setDefaultRandomEffects(HierarchicalLevel level, Estimate<? extends StandardGaussianDistribution> newEstimate) {
 		Estimate<? extends StandardGaussianDistribution> formerEstimate = defaultRandomEffects.get(level.getName());
@@ -201,13 +205,13 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	}
 	
 	
-	/**
-	 * This method generates a stand-specific vector of model parameters using matrix Omega.
-	 * @param subject a MonteCarloSimulationCompliantObject object
-	 */
-	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
-		getParameterEstimates().simulateBlups(subject);
-	}
+//	/**
+//	 * This method generates a stand-specific vector of model parameters using matrix Omega.
+//	 * @param subject a MonteCarloSimulationCompliantObject object
+//	 */
+//	private void setSpecificParametersDeviateForThisRealization(MonteCarloSimulationCompliantObject subject) {
+////		getParameterEstimates().simulateBlups(subject);
+//	}
 
 	/**
 	 * This method checks if the interval definition is available for the stand at that date. If it is, it returns the
@@ -252,15 +256,13 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	@Override
 	protected final synchronized Matrix getParametersForThisRealization(MonteCarloSimulationCompliantObject subject) {
 		if (isParametersVariabilityEnabled) {
-//			if (!rememberRandomDeviates) {
-//				simulatedParameters.clear();
-//			}
 			if (!simulatedParameters.containsKey(subject.getMonteCarloRealizationId())) {		// the simulated parameters remain constant within the same Monte Carlo iteration
-				setSpecificParametersDeviateForThisRealization(subject);
+				simulatedParameters.put(subject.getMonteCarloRealizationId(), getParameterEstimates().getRandomDeviate());
+				//			setSpecificParametersDeviateForThisRealization(subject);
 			}
 			return simulatedParameters.get(subject.getMonteCarloRealizationId());
 		} else {
-			return getParameterEstimates().getFixedEffectsPart();
+			return getParameterEstimates().getMean();
 		}
 	}
 
@@ -274,8 +276,8 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		
 		Matrix randomDeviates;
 		Estimate<? extends StandardGaussianDistribution> originalRandomEffects;
-		if (getParameterEstimates().doBlupsExistForThisSubject(subject)) {
-			getParameterEstimates().simulateBlups(subject);
+		if (doBlupsExistForThisSubject(subject)) {
+			simulateDeviatesForRandomEffectsOfThisSubject(subject, getBlupsForThisSubject(subject));
 		} else {
 			randomDeviates = simulateDeviatesForRandomEffectsOfThisSubject(subject, defaultRandomEffects.get(subjectLevel.getName()));
 			originalRandomEffects = getDefaultRandomEffects(subjectLevel);
@@ -334,15 +336,12 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	protected final synchronized Matrix getRandomEffectsForThisSubject(MonteCarloSimulationCompliantObject subject) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		if (isRandomEffectsVariabilityEnabled) {
-//			if (!rememberRandomDeviates) {
-//				simulatedRandomEffects.clear();
-//			}
 			if (!doRandomDeviatesExistForThisSubject(subject)) {
 				setSpecificRandomEffectsForThisSubject(subject);
 			}
 			return simulatedRandomEffects.get(subjectLevel.getName()).get(getSubjectPlusMonteCarloSpecificId(subject));
 		} else {
-			GaussianEstimate blups = getParameterEstimates().getBlupsForThisSubject(subject);
+			Estimate<? extends StandardGaussianDistribution> blups = getBlupsForThisSubject(subject);
 			if (blups != null) {
 				return blups.getMean();
 			} else {
@@ -415,9 +414,6 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		return simulatedResidualError.containsKey(getSubjectPlusMonteCarloSpecificId(subject));
 	}
 	
-	protected final boolean doBlupsExistForThisSubject(MonteCarloSimulationCompliantObject subject) {
-		return getParameterEstimates().doBlupsExistForThisSubject(subject);
-	}
 	
 	/**
 	 * This method returns the residual error under the assumption of iid and that the error is unique for all groups. 
@@ -434,9 +430,9 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		}
 	}
 	
-	protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
-		getParameterEstimates().registerBlups(mean, variance, covariance, subjectList);
-	}
+//	protected void registerBlups(Matrix mean, Matrix variance, Matrix covariance, List<MonteCarloSimulationCompliantObject> subjectList) {
+//		getParameterEstimates().registerBlups(mean, variance, covariance, subjectList);
+//	}
 	
 	/**
 	 * This method adds the listener instance to the list of listeners.
@@ -465,17 +461,34 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 //		this.rememberRandomDeviates = rememberRandomDeviates;
 //	}
 
+	protected boolean doBlupsExistForThisSubject(MonteCarloSimulationCompliantObject subject) {
+		return getBlupsForThisSubject(subject) != null;
+	}
+
+
 	/**
 	 * This method returns the blups for the subject or nothing if there is no blups for this subject
 	 * @param subject a MonteCarloSimulationCompliantObject instance
-	 * @return a GaussianEstimate instance or null
+	 * @return an Estimate instance or null
 	 */
-	protected GaussianEstimate getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
-		return getParameterEstimates().getBlupsForThisSubject(subject);
+	protected Estimate<? extends StandardGaussianDistribution> getBlupsForThisSubject(MonteCarloSimulationCompliantObject subject) {
+		if (blupsRandomEffects.containsKey(subject.getHierarchicalLevel().getName())) {
+			if (blupsRandomEffects.get(subject.getHierarchicalLevel().getName()).containsKey(subject.getSubjectId())) {
+				return blupsRandomEffects.get(subject.getHierarchicalLevel().getName()).get(subject.getSubjectId());
+			}
+		}
+		return null;
 	}
 
-	protected boolean areBlupsEstimated() {return areBlupsEstimated;}
-	protected void setBlupsEstimated(boolean bool) {areBlupsEstimated = bool;};
+	protected final void setBlupsForThisSubject(MonteCarloSimulationCompliantObject subject, Estimate<? extends StandardGaussianDistribution> blups) {
+		if (!blupsRandomEffects.containsKey(subject.getHierarchicalLevel().getName())) {
+			blupsRandomEffects.put(subject.getHierarchicalLevel().getName(), new HashMap<String, Estimate<? extends StandardGaussianDistribution>>());
+		}
+		blupsRandomEffects.get(subject.getHierarchicalLevel().getName()).put(subject.getSubjectId(), blups);
+	}
+	
+//	protected boolean areBlupsEstimated() {return areBlupsEstimated;}
+//	protected void setBlupsEstimated(boolean bool) {areBlupsEstimated = bool;};
 	
 }
 

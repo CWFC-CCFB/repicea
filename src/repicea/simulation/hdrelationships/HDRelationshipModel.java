@@ -20,17 +20,15 @@ package repicea.simulation.hdrelationships;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.REpiceaPredictor;
 import repicea.stats.distributions.GaussianErrorTerm;
 import repicea.stats.distributions.GaussianErrorTermList;
 import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
+import repicea.stats.estimates.GaussianEstimate;
 
 /**
  * The HDRelationshipModel class is the basic class for all HD relationships based on linear mixed-effects modelling.
@@ -85,12 +83,10 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 */
 	public double predictHeight(Stand stand, Tree tree) {
 		try {
-			if (!areBlupsEstimated()) {
+			if (!doBlupsExistForThisSubject(stand)) {
 				predictHeightRandomEffects(stand);	// this method now deals with the blups and the residual error so that if observed height is greater
 													// than 1.3 m there is no need to avoid predicting the height
 			}
-//			double observedHeight = tree.getHeightM();
-//			double predictedHeight; 
 			RegressionElements regElement = fixedEffectsPrediction(stand, tree, getParametersForThisRealization(stand));
 			double predictedHeight = regElement.fixedPred;
 			predictedHeight += blupImplementation(stand, regElement);
@@ -156,130 +152,89 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 		return residualForThisPrediction;
 	}
 
+	
 	/**
 	 * This method computes the best linear unbiased predictors of the random effects
 	 * @param stand a HeightableStand instance
 	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	protected synchronized void predictHeightRandomEffects(Stand stand) {
-		if (!areBlupsEstimated()) {
+		if (!doBlupsExistForThisSubject(stand)) {
 			Matrix matGbck = getDefaultRandomEffects(HierarchicalLevel.PLOT).getVariance();
 
 			RegressionElements regElement;
-			
-			List<HDRelationshipStand> stands = stand.getAllHDStands();
-			
+
 			List<HDRelationshipTree> heightableTrees = new ArrayList<HDRelationshipTree>(); // put all the trees for which the height is available in a List
 
-			Map<Stand, List<HDRelationshipTree>> fullListOfHeightableTrees = new HashMap<Stand, List<HDRelationshipTree>>(); 
 
 			Matrix defaultBeta = getParameterEstimates().getMean();		// at this point the mean only contains the fixed effects
 			Matrix omega = getParameterEstimates().getVariance();
-			
-			Matrix blups = null;
-			Matrix newMatG = null;
-			
-			List<MonteCarloSimulationCompliantObject> subjectList = new ArrayList<MonteCarloSimulationCompliantObject>();
-			List<HDRelationshipTree> heightableTreesCopy;
-			
-			for (HDRelationshipStand s : stands) {
-				Collection trees = getTreesFromStand((Stand) s);
-				heightableTrees.clear();
-				if (trees != null && !trees.isEmpty()) {
-					for (Object tree : trees) {
-						if (tree instanceof HDRelationshipTree) {
-							double height = ((HDRelationshipTree) tree).getHeightM();
-							if (height > 1.3) {
-								heightableTrees.add((HDRelationshipTree) tree);
-							}
-							
-						}
-					}
-				}
-				if (!heightableTrees.isEmpty()) {
-					subjectList.add(s);
-					heightableTreesCopy = new ArrayList<HDRelationshipTree>();
-					heightableTreesCopy.addAll(heightableTrees);
-					fullListOfHeightableTrees.put((Stand) s, heightableTreesCopy);
-					// matrices for the blup calculation
-					int nbObs = heightableTrees.size();
-					Matrix matZ_i = new Matrix(nbObs, matGbck.m_iRows);		// design matrix for random effects 
-					Matrix matR_i = new Matrix(nbObs, nbObs);					// within-tree variance-covariance matrix  
-					Matrix matX_i = new Matrix(nbObs, getParameterEstimates().getTrueParameterIndices().size());					// within-tree variance-covariance matrix  
-					Matrix res_i = new Matrix(nbObs, 1);						// vector of residuals
 
-					for (int i = 0; i < nbObs; i++) {
-						Tree t = (Tree) heightableTrees.get(i);
-						double height = t.getHeightM();
-						
-						regElement = fixedEffectsPrediction((Stand) s, t, defaultBeta);
-						matX_i.setSubMatrix(oXVector.getSubMatrix(DefaultZeroIndex, getParameterEstimates().getTrueParameterIndices()), i, 0);
-						matZ_i.setSubMatrix(regElement.vectorZ, i, 0);
-						double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
-						matR_i.m_afData[i][i] = variance;
-						double residual = height - regElement.fixedPred;
-						res_i.m_afData[i][0] = residual;
-					}
-					Matrix matV_i = matZ_i.multiply(matGbck).multiply(matZ_i.transpose()).add(matR_i);
-					Matrix invV_i = matV_i.getInverseMatrix();
-					Matrix blups_i = matGbck.multiply(matZ_i.transpose()).multiply(invV_i).multiply(res_i);
-					
-					if (blups == null) {
-						blups = blups_i;
-					} else {
-						blups = blups.matrixStack(blups_i, true);
-					}
-					
-					if (isRandomEffectsVariabilityEnabled) {
-						Matrix matP = invV_i.subtract(invV_i.multiply(matX_i).multiply(omega).multiply(matX_i.transpose()).multiply(invV_i));  
-						Matrix newMatG_i = matGbck.subtract(matGbck.multiply(matZ_i.transpose()).multiply(matP).multiply(matZ_i).multiply(matGbck));
-						if (newMatG == null) {
-							newMatG = newMatG_i;
-						} else {
-							newMatG = newMatG.matrixDiagBlock(newMatG_i);
+			Collection trees = getTreesFromStand(stand);
+			heightableTrees.clear();
+			if (trees != null && !trees.isEmpty()) {
+				for (Object tree : trees) {
+					if (tree instanceof HDRelationshipTree) {
+						double height = ((HDRelationshipTree) tree).getHeightM();
+						if (height > 1.3) {
+							heightableTrees.add((HDRelationshipTree) tree);
 						}
+
 					}
 				}
-				
 			}
+			if (!heightableTrees.isEmpty()) {
+				// matrices for the blup calculation
+				int nbParameters = getParameterEstimates().getMean().m_iRows;
+				int nbObs = heightableTrees.size();
+				Matrix matZ_i = new Matrix(nbObs, matGbck.m_iRows);		// design matrix for random effects 
+				Matrix matR_i = new Matrix(nbObs, nbObs);					// within-tree variance-covariance matrix  
+				Matrix matX_i = new Matrix(nbObs, nbParameters);					// within-tree variance-covariance matrix  
+				Matrix res_i = new Matrix(nbObs, 1);						// vector of residuals
 
-			if (blups != null) {
-				Matrix matC21 = new Matrix(blups.m_iRows, omega.m_iRows);
-				Matrix matC22;
+				for (int i = 0; i < nbObs; i++) {
+					Tree t = (Tree) heightableTrees.get(i);
+					double height = t.getHeightM();
+					regElement = fixedEffectsPrediction(stand, t, defaultBeta);
+					matX_i.setSubMatrix(oXVector.getSubMatrix(0, 0, 0, nbParameters - 1), i, 0);
+					matZ_i.setSubMatrix(regElement.vectorZ, i, 0);
+					double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
+					matR_i.m_afData[i][i] = variance;
+					double residual = height - regElement.fixedPred;
+					res_i.m_afData[i][0] = residual;
+				}
+				Matrix matV_i = matZ_i.multiply(matGbck).multiply(matZ_i.transpose()).add(matR_i);
+				Matrix invV_i = matV_i.getInverseMatrix();
+				Matrix blups_i = matGbck.multiply(matZ_i.transpose()).multiply(invV_i).multiply(res_i);
+
+				Matrix newMatG_i = null;
+
 				if (isRandomEffectsVariabilityEnabled) {
-					matC22 = newMatG;
-				} else {
-					matC22 = new Matrix(blups.m_iRows, blups.m_iRows);
+					Matrix matP = invV_i.subtract(invV_i.multiply(matX_i).multiply(omega).multiply(matX_i.transpose()).multiply(invV_i));  
+					newMatG_i = matGbck.subtract(matGbck.multiply(matZ_i.transpose()).multiply(matP).multiply(matZ_i).multiply(matGbck));
 				}
-//				if (isStochastic) {
-//					matC21 = matG.multiply(matZ.transpose()).multiply(invV).multiply(matX).multiply(omega).scalarMultiply(-1d);
-//					Matrix matC22_1 = matZ.transpose().multiply(matR.getInverseMatrix()).multiply(matZ).add(matG.getInverseMatrix()).getInverseMatrix();		
-//					Matrix matC22_2 = matC21.multiply(matX.transpose()).multiply(invV).multiply(matZ).multiply(matG).scalarMultiply(-1d);
-//					matC22 = matC22_1.add(matC22_2);
-//				} else {
-//					matC22 = new Matrix(blups.m_iRows, blups.m_iRows);
-//					matC21 = new Matrix(blups.m_iRows, omega.m_iRows);
-//				}
-				registerBlups(blups, matC22, matC21, subjectList);
+
+				setBlupsForThisSubject(stand, new GaussianEstimate(blups_i, newMatG_i));
+			} else {
+				setBlupsForThisSubject(stand, getDefaultRandomEffects(HierarchicalLevel.PLOT));
+			}
+
+			for (HDRelationshipTree t : heightableTrees) {
+				Tree tree = (Tree) t;
+				double observedHeight = tree.getHeightM();
+				double predictedHeight; 
+				regElement = fixedEffectsPrediction(stand, tree, getParametersForThisRealization(stand));
+				predictedHeight = regElement.fixedPred;
+				predictedHeight += blupImplementation(stand, regElement);
+
+				double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
+				double dNormResidual = (observedHeight - predictedHeight) / Math.pow(variance, 0.5);
+				GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, observedHeight - predictedHeight);
+				setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
 			}
 			
-			for(Stand s : fullListOfHeightableTrees.keySet()) {
-				for (HDRelationshipTree t : fullListOfHeightableTrees.get(s)) {
-					Tree tree = (Tree) t;
-					double observedHeight = tree.getHeightM();
-					double predictedHeight; 
-					regElement = fixedEffectsPrediction(s, tree, getParametersForThisRealization(s));
-					predictedHeight = regElement.fixedPred;
-					predictedHeight += blupImplementation(s, regElement);
-
-					double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
-					double dNormResidual = (observedHeight - predictedHeight) / Math.pow(variance, 0.5);
-					GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, observedHeight - predictedHeight);
-					setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
-				}
-			}
 		}
-		setBlupsEstimated(true);
+
 	}
 
 	protected Enum<?> getErrorGroup(Tree tree) {
@@ -308,4 +263,6 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 */
 	protected abstract RegressionElements fixedEffectsPrediction(Stand stand, Tree t, Matrix beta);
 
+	
+	
 }
