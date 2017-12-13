@@ -309,7 +309,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		return randomDeviates.getDeepClone();
 	}
 
-	synchronized void setDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Matrix randomDeviates) {
+	protected final synchronized void setDeviatesForRandomEffectsOfThisSubject(MonteCarloSimulationCompliantObject subject, Matrix randomDeviates) {
 		HierarchicalLevel subjectLevel = subject.getHierarchicalLevel();
 		if (!simulatedRandomEffects.containsKey(subjectLevel.getName())) {
 			simulatedRandomEffects.put(subjectLevel.getName(), new HashMap<String, Matrix>());
