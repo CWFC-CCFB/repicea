@@ -250,6 +250,7 @@ public class QuebecGeneralSettings {
 		ECO_REGION_MAP.put("2c","2est");
 		ECO_REGION_MAP.put("3a","3ouest");
 		ECO_REGION_MAP.put("3b","3ouest");
+		ECO_REGION_MAP.put("sv","3ouest");
 		ECO_REGION_MAP.put("3c","3est");
 		ECO_REGION_MAP.put("3d","3est");
 		ECO_REGION_MAP.put("4a","4ouest");
@@ -260,6 +261,7 @@ public class QuebecGeneralSettings {
 		ECO_REGION_MAP.put("4f","4est");
 		ECO_REGION_MAP.put("4g","4est");
 		ECO_REGION_MAP.put("4h","4est");
+		ECO_REGION_MAP.put("du","4est");
 		ECO_REGION_MAP.put("5a","5ouest");
 		ECO_REGION_MAP.put("5b","5ouest");
 		ECO_REGION_MAP.put("5c","5ouest");
