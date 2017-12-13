@@ -485,6 +485,12 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 			blupsRandomEffects.put(subject.getHierarchicalLevel().getName(), new HashMap<String, Estimate<? extends StandardGaussianDistribution>>());
 		}
 		blupsRandomEffects.get(subject.getHierarchicalLevel().getName()).put(subject.getSubjectId(), blups);
+		
+		REpiceaPredictorEvent event = new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
+				null, 
+				new Object[]{defaultRandomEffects, subject}, 
+				this);
+		fireModelBasedSimulatorEvent(event);
 	}
 	
 //	protected boolean areBlupsEstimated() {return areBlupsEstimated;}
