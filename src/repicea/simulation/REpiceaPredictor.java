@@ -488,7 +488,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		
 		REpiceaPredictorEvent event = new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.BLUPS_JUST_SET, 
 				null, 
-				new Object[]{defaultRandomEffects, subject}, 
+				new Object[]{defaultRandomEffects.get(subject.getHierarchicalLevel().getName()), subject}, 
 				this);
 		fireModelBasedSimulatorEvent(event);
 	}
