@@ -128,6 +128,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 
 	final Map<String, Estimate<? extends StandardGaussianDistribution>> defaultRandomEffects;
 	final Map<String, Map<String, Estimate<? extends StandardGaussianDistribution>>> blupsRandomEffects; // key1: hierarchical level, key2: subject id
+	final Map<String, List<String>> subjectTestedForBlups; // key: hierarchical level
 	
 	private final Map<String, Map<String, Matrix>> simulatedRandomEffects;	// refers to the subject + realization ids
 
@@ -152,7 +153,8 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		
 		defaultRandomEffects = new HashMap<String, Estimate<? extends StandardGaussianDistribution>>();
 		blupsRandomEffects = new HashMap<String, Map<String, Estimate<? extends StandardGaussianDistribution>>>();
-				
+		subjectTestedForBlups = new HashMap<String, List<String>>();		
+		
 		simulatedRandomEffects = new HashMap<String, Map<String, Matrix>>();
 		simulatedResidualError = new HashMap<String, GaussianErrorTermList>();
 		
@@ -162,7 +164,6 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		defaultResidualError = new HashMap<Enum<?>, GaussianErrorTermEstimate>();
 		
 		listeners = new CopyOnWriteArrayList<REpiceaPredictorListener>();
-		
 	}
 	
 	/**
@@ -493,6 +494,22 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		fireModelBasedSimulatorEvent(event);
 	}
 	
+	protected final void recordSubjectTestedForBlups(MonteCarloSimulationCompliantObject subject) {
+		if (!subjectTestedForBlups.containsKey(subject.getHierarchicalLevel().getName())) {
+			subjectTestedForBlups.put(subject.getHierarchicalLevel().getName(), new ArrayList<String>());
+		}
+		subjectTestedForBlups.get(subject.getHierarchicalLevel().getName()).add(subject.getSubjectId());
+	}
+
+	protected final boolean hasSubjectBeenTestedForBlups(MonteCarloSimulationCompliantObject subject) {
+		if (subjectTestedForBlups.containsKey(subject.getHierarchicalLevel().getName())) {
+			return subjectTestedForBlups.get(subject.getHierarchicalLevel().getName()).contains(subject.getSubjectId());
+		} else {
+			return false;
+		}
+		
+	}
+
 //	protected boolean areBlupsEstimated() {return areBlupsEstimated;}
 //	protected void setBlupsEstimated(boolean bool) {areBlupsEstimated = bool;};
 	
