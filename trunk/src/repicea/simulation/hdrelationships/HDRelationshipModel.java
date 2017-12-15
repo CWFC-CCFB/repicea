@@ -83,9 +83,9 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 */
 	public double predictHeight(Stand stand, Tree tree) {
 		try {
-			if (!doBlupsExistForThisSubject(stand)) {
-				predictHeightRandomEffects(stand);	// this method now deals with the blups and the residual error so that if observed height is greater
-													// than 1.3 m there is no need to avoid predicting the height
+			if (!hasSubjectBeenTestedForBlups(stand)) {
+				predictHeightRandomEffects(stand);	// this method now deals with the blups and the residual error so that if observed height is greater than 1.3 m there is no need to avoid predicting the height
+				recordSubjectTestedForBlups(stand);
 			}
 			RegressionElements regElement = fixedEffectsPrediction(stand, tree, getParametersForThisRealization(stand));
 			double predictedHeight = regElement.fixedPred;
