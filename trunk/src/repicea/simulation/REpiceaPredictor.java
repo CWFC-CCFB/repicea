@@ -19,6 +19,7 @@
 package repicea.simulation;
 
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -498,7 +499,11 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 		if (!subjectTestedForBlups.containsKey(subject.getHierarchicalLevel().getName())) {
 			subjectTestedForBlups.put(subject.getHierarchicalLevel().getName(), new ArrayList<String>());
 		}
-		subjectTestedForBlups.get(subject.getHierarchicalLevel().getName()).add(subject.getSubjectId());
+		if (subjectTestedForBlups.get(subject.getHierarchicalLevel().getName()).contains(subject.getSubjectId())) {
+			throw new InvalidParameterException("The subject has already been tested for blups!");
+		} else {
+			subjectTestedForBlups.get(subject.getHierarchicalLevel().getName()).add(subject.getSubjectId());
+		}
 	}
 
 	protected final boolean hasSubjectBeenTestedForBlups(MonteCarloSimulationCompliantObject subject) {
