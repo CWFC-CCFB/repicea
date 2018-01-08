@@ -51,7 +51,7 @@ public class REpiceaSliderGroup implements ChangeListener, SynchronizedListening
 	 * @param repiceaSlider a REpiceaSlider instance 
 	 */
 	public void add(REpiceaSlider repiceaSlider) {
-		if (sliders.size() < 2) {
+		if (!sliders.contains(repiceaSlider.slider)) {
 			sliders.add(repiceaSlider.slider);
 			repiceaSlider.slider.addChangeListener(this);
 		}
@@ -67,25 +67,27 @@ public class REpiceaSliderGroup implements ChangeListener, SynchronizedListening
 
 	@Override
 	public void stateChanged(ChangeEvent arg0) {
-		int sum = sumUp();
-		if (sum != total) {
-			doNotListenToAnymore();
-			for (JSlider slider : sliders) {
-				if (!slider.equals(arg0.getSource())) {
-					int formerValue = slider.getValue();
-					int newValue = formerValue - (sum - total);
-					slider.setValue(newValue);
-				}
+		doNotListenToAnymore();
+		int sum;
+		int indexSourceSlider = sliders.indexOf(arg0.getSource());
+		int sliderIndexToAdjust = indexSourceSlider + 1;
+		while ((sum = sumUp()) != total) {
+			if (sliderIndexToAdjust == sliders.size()) {
+				sliderIndexToAdjust = 0;
 			}
-			sum = sumUp();
-			if (sum != total) {
-				JSlider thisSlider = (JSlider) arg0.getSource();
-				int formerValue = thisSlider.getValue();
-				int newValue = formerValue - (sum - total);
-				thisSlider.setValue(newValue);
+			JSlider currentSlider = sliders.get(sliderIndexToAdjust);
+			int formerValue = currentSlider.getValue();
+			int newValue = formerValue - (sum - total);
+			if (newValue > currentSlider.getMaximum()) {
+				newValue = currentSlider.getMaximum();
+			} 
+			if (newValue < currentSlider.getMinimum()) {
+				newValue = currentSlider.getMinimum();
 			}
-			listenTo();
+			currentSlider.setValue(newValue);
+			sliderIndexToAdjust++;
 		}
+		listenTo();
 	}
 
 	@Override

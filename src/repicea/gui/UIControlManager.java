@@ -551,14 +551,14 @@ public class UIControlManager {
 	
 	/**
 	 * This static method creates an horizontal JPanel with a label and a control. 
-	 * @param label a JLabel instance
+	 * @param label a Component instance
 	 * @param control a Component to be displayed
 	 * @param margin the size of the horizontal strut
 	 * @param expandable a boolean if true the component is located in the CENTER of the BorderLayout. Otherwise, it is put in
 	 * the EAST of the BorderLayout
 	 * @return a JPanel instance
 	 */
-	public static JPanel createSimpleHorizontalPanel(JLabel label, Component control, int margin, boolean expandable) {
+	public static JPanel createSimpleHorizontalPanel(Component label, Component control, int margin, boolean expandable) {
 		JPanel panel = new JPanel(new BorderLayout());
 		JPanel subPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 		subPanel.add(Box.createHorizontalStrut(margin));
