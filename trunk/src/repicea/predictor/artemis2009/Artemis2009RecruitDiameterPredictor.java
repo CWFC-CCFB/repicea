@@ -18,6 +18,7 @@
  */
 package repicea.predictor.artemis2009;
 
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,14 +77,14 @@ public class Artemis2009RecruitDiameterPredictor extends REpiceaPredictor {
 	 */
 	public double[] predictRecruitDiameter(Artemis2009CompatibleStand stand, Artemis2009CompatibleTree tree, Object... parms) {
 		String potentialVegetationCode = stand.getPotentialVegetation();
-		if (potentialVegetationCode != null && internalPredictors.containsKey(potentialVegetationCode)) {
-			return internalPredictors.get(potentialVegetationCode).predictRecruitDiameter(stand, tree);
-		} else {
-			double[] result = new double[2];
-			result[0] = -1d;
-			result[1] = -1d;
-			return result;
+		if (potentialVegetationCode == null || !internalPredictors.containsKey(potentialVegetationCode)) {
+			throw new InvalidParameterException("The potential vegetation of this plot is either missing or not considered in the recruit diameter submodel!");
 		}
+		double[] predictedValues = internalPredictors.get(potentialVegetationCode).predictRecruitDiameter(stand, tree);
+		if (predictedValues[0] > 300) {
+			int u = 0;
+		}
+		return predictedValues;
 	}
 
 //	@Override

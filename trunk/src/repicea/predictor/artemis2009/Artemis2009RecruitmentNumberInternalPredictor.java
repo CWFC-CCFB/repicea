@@ -64,26 +64,6 @@ class Artemis2009RecruitmentNumberInternalPredictor extends REpiceaPredictor {
 		
 		if (isResidualVariabilityEnabled) {
 			int nbRecruits = random.nextNegativeBinomial(predictedValue, dispersion) + 1; // 1 is required since the modelled value was y - 1 
-//			double threshold = random.nextDouble();	// to determine how many recruits there are
-//			double prob = 0.0;
-//			double fTmp = dispersion * predictedValue;
-//			double fTmp2 = 1/dispersion;
-//			double fTmp3 = 1.0;
-//			double constant = 0.0;
-//			
-//			constant = GammaUtility.logGamma(fTmp2);
-//
-//			int recruitNumber = 0;													// number of recruits
-//
-//			while ((threshold > prob)&&(recruitNumber<80)) {						// maximum number of recruits is set to 80
-//				prob += Math.exp(GammaUtility.logGamma(recruitNumber + fTmp2) 
-//						- GammaUtility.logGamma(recruitNumber + 1.0) - constant)* fTmp3 	// fTmp3 replaces : * Math.pow(fTmp,fTreeFreq)
-//						/ (Math.pow(1+fTmp,recruitNumber + fTmp2));
-//				fTmp3 *= fTmp;
-//				recruitNumber++;
-////				if (recruitNumber == 80) {
-////					System.out.println("WARNING - Recruits threshold reached!");
-////				}
 			if (nbRecruits > 80 && !Artemis2009RecruitmentNumberPredictor.Override80Limit) { // maximum number of recruits is set to 80
 				nbRecruits = 80;
 			}
