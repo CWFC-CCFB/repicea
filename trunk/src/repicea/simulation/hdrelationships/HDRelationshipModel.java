@@ -229,8 +229,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 					setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
 				}
 			} 
+			recordSubjectTestedForBlups(stand);
 		}
-		recordSubjectTestedForBlups(stand);
 	}
 
 	protected Enum<?> getErrorGroup(Tree tree) {
