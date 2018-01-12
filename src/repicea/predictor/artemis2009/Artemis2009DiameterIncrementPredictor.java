@@ -18,6 +18,7 @@
  */
 package repicea.predictor.artemis2009;
 
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -69,11 +70,14 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 	
 	public double[] predictGrowth(Artemis2009CompatibleStand stand, Artemis2009CompatibleTree tree) {
 		String potentialVegetationCode = stand.getPotentialVegetation();
-		if (potentialVegetationCode != null && internalPredictors.containsKey(potentialVegetationCode)) {
-			return internalPredictors.get(potentialVegetationCode).predictGrowth(stand, tree);
-		} else {
-			return null;
+		if (potentialVegetationCode == null || !internalPredictors.containsKey(potentialVegetationCode)) {
+			throw new InvalidParameterException("The potential vegetation of this plot is either missing or not considered in the diameter increment submodel!");
 		}
+		double[] predictedGrowth = internalPredictors.get(potentialVegetationCode).predictGrowth(stand, tree);
+		if (predictedGrowth[0] > 300) {
+			int u = 0;
+		}
+		return predictedGrowth;
 	}
 
 	/**

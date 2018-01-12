@@ -18,6 +18,7 @@
  */
 package repicea.predictor.artemis2009;
 
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -78,11 +79,10 @@ public class Artemis2009RecruitmentNumberPredictor extends REpiceaPredictor {
 	 */
 	public double predictNumberOfRecruits(Artemis2009CompatibleStand stand, Artemis2009CompatibleTree tree, Object... parms) {
 		String potentialVegetationCode = stand.getPotentialVegetation();
-		if (potentialVegetationCode != null && internalPredictors.containsKey(potentialVegetationCode)) {
-			return internalPredictors.get(potentialVegetationCode).predictNumberOfRecruits(stand, tree);
-		} else {
-			return -1d;
+		if (potentialVegetationCode == null || !internalPredictors.containsKey(potentialVegetationCode)) {
+			throw new InvalidParameterException("The potential vegetation of this plot is either missing or not considered in the recruit number submodel!");
 		}
+		return internalPredictors.get(potentialVegetationCode).predictNumberOfRecruits(stand, tree);
 	}
 	
 //	@Override
