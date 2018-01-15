@@ -74,7 +74,7 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 			throw new InvalidParameterException("The potential vegetation of this plot is either missing or not considered in the diameter increment submodel!");
 		}
 		double[] predictedGrowth = internalPredictors.get(potentialVegetationCode).predictGrowth(stand, tree);
-		if (predictedGrowth[0] > 300) {
+		if (predictedGrowth[0] > 30) {
 			int u = 0;
 		}
 		return predictedGrowth;

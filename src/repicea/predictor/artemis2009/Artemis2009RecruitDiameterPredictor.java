@@ -81,9 +81,6 @@ public class Artemis2009RecruitDiameterPredictor extends REpiceaPredictor {
 			throw new InvalidParameterException("The potential vegetation of this plot is either missing or not considered in the recruit diameter submodel!");
 		}
 		double[] predictedValues = internalPredictors.get(potentialVegetationCode).predictRecruitDiameter(stand, tree);
-		if (predictedValues[0] > 300) {
-			int u = 0;
-		}
 		return predictedValues;
 	}
 
