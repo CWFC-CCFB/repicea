@@ -62,7 +62,6 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 				internalPredictor.setRandomEffect(HierarchicalLevel.PLOT, covparms.getSubMatrix(0, 0, 0, 0));
 				internalPredictor.setRandomEffect(HierarchicalLevel.INTERVAL_NESTED_IN_PLOT, covparms.getSubMatrix(1, 1, 0, 0));
 				internalPredictor.setResidualErrorCovariance(covparms.m_afData[3][0], covparms.m_afData[2][0]);
-//				internalPredictor.setResidualErrorCovariance(covparms.m_afData[3][0], covparms.m_afData[2][0], simulationDates);
 			}
 		}
 	}
@@ -74,8 +73,8 @@ public class Artemis2009DiameterIncrementPredictor extends REpiceaPredictor {
 			throw new InvalidParameterException("The potential vegetation of this plot is either missing or not considered in the diameter increment submodel!");
 		}
 		double[] predictedGrowth = internalPredictors.get(potentialVegetationCode).predictGrowth(stand, tree);
-		if (predictedGrowth[0] > 30) {
-			int u = 0;
+		if (predictedGrowth[0] > 3 * stand.getGrowthStepLengthYr()) {	// if the tree grows at more than 3cm/yr than the increment is truncated to 3cm/yr
+			predictedGrowth[0] = 3 * stand.getGrowthStepLengthYr();
 		}
 		return predictedGrowth;
 	}
