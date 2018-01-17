@@ -90,7 +90,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	 * This class creates a fake subject for cruise line random effects.
 	 * @author Mathieu Fortin - April 2017
 	 */
-	protected static class CruiseLine implements MonteCarloSimulationCompliantObject {
+	protected static class CruiseLine implements MonteCarloSimulationCompliantObject, Serializable {
 		private final String subjectID;
 		private final int monteCarloRealizationID;
 		
