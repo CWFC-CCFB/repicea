@@ -42,16 +42,16 @@ import javax.swing.border.Border;
  * @author Jean-Fran�ois Lavoie and Mathieu Fortin  - May 2009
  */
 @SuppressWarnings("serial")
-public class GenericSplashWindow extends JDialog {
+public class REpiceaSplashWindow extends JDialog {
 	
 	/**
 	 * Subclass ToDoTask is a timer that makes the window appears for a specified number of seconds. 
 	 */
 	private class ToDoTask extends TimerTask  {
 		
-	    private GenericSplashWindow window;
+	    private REpiceaSplashWindow window;
 	    
-		public ToDoTask(GenericSplashWindow window) {
+		public ToDoTask(REpiceaSplashWindow window) {
 	    	this.window = window;
 	    }
 		
@@ -71,7 +71,7 @@ public class GenericSplashWindow extends JDialog {
 	 * @param nbSec a double that represents the number of seconds the logo appears on screen.
 	 * @param parent the parent component which can be null
 	 */
-	public GenericSplashWindow (String imagePath, double nbSec, Component parent) {
+	public REpiceaSplashWindow (String imagePath, double nbSec, Component parent) {
 		this.imagePath = imagePath;
 		try  {
 			splashWindow(parent);
