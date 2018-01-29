@@ -39,10 +39,11 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 		DBF("dBase IV file (*.dbf)", "Fichier dBase IV (*.dbf)"), 
 		CSV("delimited text file (*.csv)", "Fichier texte d\u00E9limit\u00E9 (*.csv)"),
 		IFE("ImportFieldElements file (*.ife)",	"Fichier ImportFieldElements (*.ife)"),
-//		MDB("Microsoft Access DataBase (*.mdb)", "Base de donn\u00E9e Microsoft Access (*.mdb)"),
 		ACCDB("Microsoft Access 2007 DataBase (*.accdb", "Base de donn\u00E9e Microsoft Access 2007 (*.accdb)"),
 		XML("XML file (*.xml)", "Fichier XML (*.xml)"),
 		JAVACLASS("Java class file (*.class)", "Fichier de classe Java (*.class)"),
+		HTML("Hypertext Markup Language (*.html)", "Langage Hypertext Markup (*.html)"),
+		TXT("Text File (*.txt)", "Fichier texte  (*.txt)"),
 		UNKNOWN("","");
 
 		private static Map<FileType, GFileFilter> FileFilterMap;
@@ -71,6 +72,8 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 				FileFilterMap.put(IFE, GFileFilter.IFE);
 				FileFilterMap.put(XML, GFileFilter.XML);
 				FileFilterMap.put(JAVACLASS, GFileFilter.JAVACLASS);
+				FileFilterMap.put(HTML, GFileFilter.HTML);
+				FileFilterMap.put(TXT, GFileFilter.TXT);
 			}
 			return FileFilterMap;
 		}
@@ -92,6 +95,9 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 	public final static GFileFilter ACCDB = new GFileFilter(".accdb", FileType.ACCDB);
 	public final static GFileFilter XML = new GFileFilter(".xml", FileType.XML);
 	public final static GFileFilter JAVACLASS = new GFileFilter(".class", FileType.JAVACLASS);
+	public final static GFileFilter HTML = new GFileFilter(".html", FileType.HTML);
+	public final static GFileFilter TXT = new GFileFilter(".txt", FileType.TXT);
+	
 	
 	private String extension;
 	private FileType fileType;
