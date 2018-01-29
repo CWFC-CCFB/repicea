@@ -33,7 +33,7 @@ import repicea.gui.REpiceaDialog;
 import repicea.io.GFileFilter;
 
 @SuppressWarnings("serial")
-public abstract class REpicaeGenericShowDialog extends REpiceaDialog {
+public abstract class REpiceaGenericShowDialog extends REpiceaDialog {
 
 	private String filePath;
 	
@@ -42,7 +42,7 @@ public abstract class REpicaeGenericShowDialog extends REpiceaDialog {
 	 * @param parent a Window instance
 	 * @param filePath the html file to show
 	 */
-	protected REpicaeGenericShowDialog(Window parent, String filePath) {
+	protected REpiceaGenericShowDialog(Window parent, String filePath) {
 		super(parent);
 		this.filePath = filePath;
 	}

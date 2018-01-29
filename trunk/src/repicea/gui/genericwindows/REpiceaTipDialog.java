@@ -39,7 +39,7 @@ import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
-public class REpiceaTipDialog extends REpicaeGenericShowDialog implements ActionListener {
+public class REpiceaTipDialog extends REpiceaGenericShowDialog implements ActionListener {
 	
 	
 	public static enum MessageID implements TextableEnum {
