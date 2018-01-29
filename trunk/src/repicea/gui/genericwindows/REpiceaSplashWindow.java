@@ -22,6 +22,8 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Image;
 import java.io.File;
 import java.io.InputStream;
@@ -140,19 +142,28 @@ public class REpiceaSplashWindow extends JDialog {
 		imagePanel.setSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
 
 		imagePanel.add(image);
+		
+		int width = icon.getIconWidth();
 
-		setSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
 		getContentPane().add(imagePanel);
 		
+		int height = icon.getIconHeight();
+		
 		if (bottomMessage != null) {
 			JLabel label = new JLabel(bottomMessage);
+			Font myFont = new Font("Serif", Font.ITALIC, 10);
+			label.setFont(myFont);
 			JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			bottomPanel.add(label);
+			FontMetrics metric = bottomPanel.getFontMetrics(label.getFont());
+			int ht = metric.getHeight();
+			bottomPanel.setSize(new Dimension(width, ht));
 			getContentPane().add(bottomPanel);
-			
+			height += ht;
 		}
-		
+
+		setSize(new Dimension(width, height));
 		setLocationRelativeTo(parent);	// put the window in the center of the screen
 
 		setResizable(false);
