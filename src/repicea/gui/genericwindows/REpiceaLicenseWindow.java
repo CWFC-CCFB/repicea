@@ -39,12 +39,12 @@ import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 
-public class REpicaeLicenseWindow extends REpicaeGenericShowDialog implements ActionListener {
+public class REpiceaLicenseWindow extends REpiceaGenericShowDialog implements ActionListener {
 	
 	private static final long serialVersionUID = 20120104L;
 
 	static {
-		UIControlManager.setTitle(REpicaeLicenseWindow.class, "License of use", "Licence d'utilisation");
+		UIControlManager.setTitle(REpiceaLicenseWindow.class, "License of use", "Licence d'utilisation");
 	}
 	
 	public static enum ControlID implements TextableEnum {
@@ -75,7 +75,7 @@ public class REpicaeLicenseWindow extends REpicaeGenericShowDialog implements Ac
 	 * @param licensePath the File instance that refers to the license text
 	 * @throws IOException if the file that contains the license text does not exist or does not have the appropriate format
 	 */
-	public REpicaeLicenseWindow(Window parent, String licensePath) throws IOException {
+	public REpiceaLicenseWindow(Window parent, String licensePath) throws IOException {
 		super(parent, licensePath);
 		initUI();
 	}
