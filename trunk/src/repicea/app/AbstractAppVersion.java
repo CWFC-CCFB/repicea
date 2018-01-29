@@ -47,10 +47,19 @@ public abstract class AbstractAppVersion {
 	}
 
 	/**
-	 * This method returns the revision number.
+	 * This method returns the revision number, i.e. the label "revision" + the build number.
 	 * @return a String
 	 */
 	public final String getRevision() {return "Revision " + revision.trim();}
+
+	/**
+	 * This method returns the build. It is just the number without any other string.
+	 * @return the build number as a string.
+	 */
+	public final String getBuild() {return revision.trim();}
+	
+	
+	
 	
 	/**
 	 * This method returns the application name.

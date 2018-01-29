@@ -21,6 +21,7 @@ package repicea.gui.genericwindows;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Image;
 import java.io.File;
 import java.io.InputStream;
@@ -29,11 +30,14 @@ import java.util.TimerTask;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+
+import repicea.app.REpiceaJARSVNAppVersion;
 
 
 /**
@@ -64,6 +68,7 @@ public class REpiceaSplashWindow extends JDialog {
 
 	protected Timer splashTimer;
 	protected String imagePath;
+	private String bottomMessage;
 	
 	/**
 	 * The constructor requires a file that contains a logo and a number of seconds.
@@ -87,7 +92,33 @@ public class REpiceaSplashWindow extends JDialog {
 			}
 		} 
 	}
+
 	
+	/**
+	 * The constructor requires a file that contains a logo and a number of seconds.
+	 * @param imagePath a file that contains the logo to be displayed
+	 * @param nbSec a double that represents the number of seconds the logo appears on screen.
+	 * @param parent the parent component which can be null
+	 * @param bottomMessage a message to appear just below the splashwindow
+	 */
+	public REpiceaSplashWindow (String imagePath, double nbSec, Component parent, String bottomMessage) {
+		this.imagePath = imagePath;
+		this.bottomMessage = bottomMessage;
+		try  {
+			splashWindow(parent);
+			splashTimer = new Timer();
+			int nbMMSec = (int) (nbSec * 1000);
+			splashTimer.schedule(new ToDoTask(this), nbMMSec) ;
+			pack();
+			setVisible(true);
+		} catch (Exception e) {
+			System.out.println("Unable to initialize the splash window!");
+			if (isVisible()) {
+				dispose();
+			}
+		} 
+	}
+
 	/** 
 	 * Fills the window with the logo contained in the file
 	 */
@@ -111,13 +142,40 @@ public class REpiceaSplashWindow extends JDialog {
 		imagePanel.add(image);
 
 		setSize(new Dimension(icon.getIconWidth(), icon.getIconHeight()));
-		add(imagePanel);
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		getContentPane().add(imagePanel);
+		
+		if (bottomMessage != null) {
+			JLabel label = new JLabel(bottomMessage);
+			JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+			bottomPanel.add(label);
+			getContentPane().add(bottomPanel);
+			
+		}
+		
 		setLocationRelativeTo(parent);	// put the window in the center of the screen
 
 		setResizable(false);
 		setUndecorated(true);	// plain window
 		setModal(true);			// modal window to avoid any interaction with other windows
 	}
+	
+	public static void main(String[] args) {
+		String file = File.separator + "home" + File.separator + 
+				"fortin" + File.separator + 
+				"Documents" + File.separator + 
+				"7_Developpement" + File.separator + 
+				"JavaProjects" + File.separator + 
+				"lerfob-foresttools" + File.separator + 
+				"src" + File.separator + 
+				"lerfob" + File.separator + 
+				"carbonbalancetool" + File.separator + 
+				"SplashImage.jpg";
+		
+		new REpiceaSplashWindow(file, 2, null, "REpicea Build " + REpiceaJARSVNAppVersion.getInstance().getBuild());
+	}
+	
+	
 }
 
 
