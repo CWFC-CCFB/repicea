@@ -8,6 +8,7 @@ class FakeServer extends AbstractServer {
 			super(caller, workerID);
 		}
 
+		@SuppressWarnings("unused")
 		@Override
 		protected void processRequest() throws Exception {
 			String request = (String) getSocket().readObject();
