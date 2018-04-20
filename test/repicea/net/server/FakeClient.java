@@ -1,9 +1,7 @@
 package repicea.net.server;
 
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -15,6 +13,7 @@ public class FakeClient extends BasicClient {
 	}
 
 	
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		Random random = new Random();
 //		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18000);
