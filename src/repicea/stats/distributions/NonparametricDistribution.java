@@ -26,14 +26,15 @@ import repicea.stats.StatisticalUtility;
  * are derived from an array of matrices that represents the observations.
  * @author Mathieu Fortin - August 2012
  */
-public class NonparametricDistribution extends ObservedDistribution {
+@Deprecated
+class NonparametricDistribution extends EmpiricalDistribution {
 
 	private static final long serialVersionUID = 20120826L;
 
 	/**
 	 * Constructor.
 	 */
-	public NonparametricDistribution() {
+	private NonparametricDistribution() {
 		super();
 	}
 	

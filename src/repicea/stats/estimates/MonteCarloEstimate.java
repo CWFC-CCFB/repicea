@@ -24,7 +24,7 @@ import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.NonparametricDistribution;
+import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -32,7 +32,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * This estimate contains the realizations of a Monte Carlo simulations.
  * @author Mathieu Fortin - October 2011
  */
-public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
+public class MonteCarloEstimate extends Estimate<EmpiricalDistribution> {
 	
 	private static final long serialVersionUID = 20110912L;
 	
@@ -60,7 +60,7 @@ public class MonteCarloEstimate extends Estimate<NonparametricDistribution> {
 	 * Constructor.
 	 */
 	public MonteCarloEstimate() {
-		super(new NonparametricDistribution());
+		super(new EmpiricalDistribution());
 		estimatorType = EstimatorType.MonteCarlo;
 	}
 	

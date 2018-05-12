@@ -20,7 +20,7 @@ import repicea.stats.distributions.UnknownDistribution;
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
 @SuppressWarnings("serial")
-public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDistribution>{
+public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 
 	public class VariancePointEstimate {
 		private final Matrix modelRelatedVariance;
@@ -56,7 +56,7 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 	
 	private final List<HorvitzThompsonTauEstimate> estimates;
 	
-	public HybridMonteCarloHorvitzThompsonEstimate() {
+	public BootstrapHybridTauEstimate() {
 		super(new UnknownDistribution());
 		estimates = new ArrayList<HorvitzThompsonTauEstimate>();
 	}
