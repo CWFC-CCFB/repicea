@@ -30,7 +30,7 @@ public class ChiSquaredUtilityTest {
 		int df = 100;
 		double expectedMean = 5d;
 		ChiSquaredDistribution dist = new ChiSquaredDistribution(df, expectedMean);
-		NonparametricDistribution receiver = new NonparametricDistribution();
+		EmpiricalDistribution receiver = new EmpiricalDistribution();
 		for (int i = 0; i < 1000000; i++) {
 			receiver.addRealization(dist.getRandomRealization());
 		}
@@ -52,11 +52,11 @@ public class ChiSquaredUtilityTest {
 		expectedMean.m_afData[1][0] = 0d;
 		
 		ChiSquaredDistribution dist = new ChiSquaredDistribution(df, expectedMean);
-		NonparametricDistribution receiver = new NonparametricDistribution();
-		NonparametricDistribution receiver00 = new NonparametricDistribution();
-		NonparametricDistribution receiver01 = new NonparametricDistribution();
-		NonparametricDistribution receiver10 = new NonparametricDistribution();
-		NonparametricDistribution receiver11 = new NonparametricDistribution();
+		EmpiricalDistribution receiver = new EmpiricalDistribution();
+		EmpiricalDistribution receiver00 = new EmpiricalDistribution();
+		EmpiricalDistribution receiver01 = new EmpiricalDistribution();
+		EmpiricalDistribution receiver10 = new EmpiricalDistribution();
+		EmpiricalDistribution receiver11 = new EmpiricalDistribution();
 		for (int i = 0; i < 1000000; i++) {
 			Matrix realization = dist.getRandomRealization();
 			receiver.addRealization(realization);

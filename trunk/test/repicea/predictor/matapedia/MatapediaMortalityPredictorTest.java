@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
-import repicea.stats.distributions.NonparametricDistribution;
+import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.util.ObjectUtility;
 
 public class MatapediaMortalityPredictorTest {
@@ -103,7 +103,7 @@ public class MatapediaMortalityPredictorTest {
 		
 		for (int treeID = 0; treeID < 10; treeID++) {
 			MatapediaTreeImpl tree = trees.get(treeID*10);
-			NonparametricDistribution dist = new NonparametricDistribution();
+			EmpiricalDistribution dist = new EmpiricalDistribution();
 			Matrix resultWrapper;
 			for (int i = 0; i < nbReal; i++) {
 				((MatapediaStandImpl) stand).setMonteCarloRealizationId(i);

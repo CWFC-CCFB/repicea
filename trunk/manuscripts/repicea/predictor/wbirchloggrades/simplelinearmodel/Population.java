@@ -11,9 +11,9 @@ import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
+import repicea.stats.estimates.BootstrapHybridTauEstimate;
 import repicea.stats.estimates.HorvitzThompsonTauEstimate;
-import repicea.stats.estimates.HybridMonteCarloHorvitzThompsonEstimate;
-import repicea.stats.estimates.HybridMonteCarloHorvitzThompsonEstimate.VariancePointEstimate;
+import repicea.stats.estimates.BootstrapHybridTauEstimate.VariancePointEstimate;
 import repicea.util.ObjectUtility;
 
 public class Population {
@@ -126,7 +126,7 @@ public class Population {
 				}
 				currentModel.replaceModelParameters(dataSet);
 			}
-			HybridMonteCarloHorvitzThompsonEstimate hybHTEstimate = new HybridMonteCarloHorvitzThompsonEstimate();
+			BootstrapHybridTauEstimate hybHTEstimate = new BootstrapHybridTauEstimate();
 			PlotList referenceSample = sample;
 			for (int internalReal = 0; internalReal < nbInternalReal; internalReal++) {
 				if (isCompleteBootstrap) {

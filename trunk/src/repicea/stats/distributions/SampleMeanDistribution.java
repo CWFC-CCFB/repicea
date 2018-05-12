@@ -21,7 +21,7 @@ package repicea.stats.distributions;
 import repicea.math.Matrix;
 
 @SuppressWarnings("serial")
-public class SampleMeanDistribution extends ObservedDistribution {
+public class SampleMeanDistribution extends EmpiricalDistribution {
 
 	public SampleMeanDistribution() {
 		super();

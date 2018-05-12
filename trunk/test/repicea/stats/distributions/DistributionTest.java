@@ -15,7 +15,7 @@ public class DistributionTest {
 	@Test
 	public void stochasticSimulationFromGaussianDistribution() {
 		int nbReal = 1000000;
-		NonparametricDistribution npDist = new NonparametricDistribution(); 
+		EmpiricalDistribution npDist = new EmpiricalDistribution(); 
 		Matrix mean = new Matrix(2,1);
 		mean.m_afData[0][0] = 2d;
 		mean.m_afData[1][0] = 3d;
