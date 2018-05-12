@@ -7,6 +7,18 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.stats.distributions.UnknownDistribution;
 
+/**
+ * This class implements the bootstrap estimator of the total as developed by Fortin et al. 
+ * (2018) in the context of hybrid inference. More specifically, it applies when (i) the 
+ * variable of interest has not been observed but predicted by a model and (ii) the covariates 
+ * are not censused but only observed in a sample of the population. The estimator takes into 
+ * account the variance that stems from the model as well as that of the sampling design. 
+ * IMPORTANT: The model must  benefits from a full stochastic implementation.
+ * @author Mathieu Fortin - May 2018
+ * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
+ * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
+ * inference in forest inventories. Forestry 91(3): 354-365. </a>
+ */
 @SuppressWarnings("serial")
 public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDistribution>{
 
@@ -82,10 +94,14 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 
 	/**
 	 * This method returns the uncorrected variance of the total estimate. 
-	 * This estimator is based on the law of total variance. 
+	 * This estimator is based on the law of total variance. It tends to overestimate 
+	 * the true variance. 
 	 * @return a Matrix
+	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
+	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
+	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
-	public Matrix getTotalVarianceUncorrected() {
+	public final Matrix getTotalVarianceUncorrected() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
 		for (HorvitzThompsonTauEstimate estimate : estimates) {
@@ -97,8 +113,11 @@ public class HybridMonteCarloHorvitzThompsonEstimate extends Estimate<UnknownDis
 
 	/**
 	 * This method returns the corrected variance of the total estimate. 
-	 * This estimator is based on the law of total variance. 
+	 * This estimator is unbiased.. 
 	 * @return a Matrix
+	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
+	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
+	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
 	public VariancePointEstimate getVarianceOfTotalEstimate() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
