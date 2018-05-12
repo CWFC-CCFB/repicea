@@ -100,7 +100,7 @@ class MeloThinnerAACProvider {
 
 	/**
 	 * This method returns the array of aac for particular years. If the year is smaller than 1988, it is assumed that the
-	 * AAC is that of 1988. If the year is larger than 2014, it assumated that the AAC is that of 2014.
+	 * AAC is that of 1988. If the year is larger than 2014, it assumed that the AAC is that of 2014.
 	 * @param region a QuebecForestRegion enum
 	 * @param ownership  a LandOwnership enum
 	 * @param startingYear not included in the array
