@@ -18,8 +18,6 @@
  */
 package repicea.stats.estimates;
 
-import java.security.InvalidParameterException;
-
 import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
@@ -33,7 +31,6 @@ import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 @SuppressWarnings("serial")
 public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqualInclusionProbability> {
 		
-	private final double populationSize;
 	private final EmpiricalDistribution sample;
 
 	/**
@@ -41,9 +38,7 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	 */
 	public PopulationMeanEstimate() {
 		super();
-		estimatorType = EstimatorType.LeastSquares;
 		sample = new EmpiricalDistribution();
-		populationSize = -1d;
 	}
 
 	/**
@@ -51,13 +46,8 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	 * @param populationSize the number of units in the population.
 	 */
 	public PopulationMeanEstimate(double populationSize) {
-		super();
-		estimatorType = EstimatorType.LeastSquares;
+		super(populationSize);
 		sample = new EmpiricalDistribution();
-		if (populationSize <= 0) {
-			throw new InvalidParameterException("The population size must be greater than 0!");
-		}
-		this.populationSize = populationSize;
 	}
 	
 	
@@ -71,8 +61,8 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	@Override
 	public Matrix getVariance() {
 		double smallAreaCorrectionFactor = 1d;
-		if (populationSize != -1d) {
-			smallAreaCorrectionFactor = 1d - getSampleSize()/populationSize;
+		if (isPopulationSizeKnown()) {
+			smallAreaCorrectionFactor = 1d - getSampleSize()/getPopulationSize();
 		}
 		return sample.getVariance().scalarMultiply(1d/getSampleSize() * smallAreaCorrectionFactor);
 	}
@@ -87,10 +77,11 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	@Override
 	public void addObservation(PopulationUnitWithEqualInclusionProbability obs) {
 		if (obs != null) {
+			super.addObservation(obs);
 			sample.addRealization(obs.getData());
 		}		
 	}
-
+	
 	// TODO adapt other public methods
 	
 }

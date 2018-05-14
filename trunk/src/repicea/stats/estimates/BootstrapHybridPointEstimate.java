@@ -1,5 +1,6 @@
 package repicea.stats.estimates;
 
+import java.lang.reflect.Constructor;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
@@ -7,6 +8,8 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.distributions.UnknownDistribution;
+import repicea.stats.sampling.PopulationUnit;
+import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
 /**
@@ -22,7 +25,7 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
 @SuppressWarnings("serial")
-public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
+public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 
 	public class VariancePointEstimate {
 		private final Matrix modelRelatedVariance;
@@ -56,24 +59,24 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	}
 	
 	
-	private final List<PopulationTotalEstimate> estimates;
+	private final List<PointEstimate<?>> estimates;
 	
-	public BootstrapHybridTauEstimate() {
+	public BootstrapHybridPointEstimate() {
 		super(new UnknownDistribution());
-		estimates = new ArrayList<PopulationTotalEstimate>();
+		estimates = new ArrayList<PointEstimate<?>>();
 	}
 
 	/**
-	 * This method adds a realization of the HT estimate. The compatibility of 
-	 * the instance with previously added instances is checked. If the chek fails
+	 * This method adds a realization of the point estimate. The compatibility of 
+	 * the instance with previously added instances is checked. If the check fails
 	 * an InvalidParameterException is thrown.
-	 * @param estimate a HorvitzThompsonTauEstimate instance
+	 * @param estimate a PointEstimate instance
 	 */
-	public void addHTEstimate(PopulationTotalEstimate estimate) {
+	public void addPointEstimate(PointEstimate<?> estimate) {
 		if (estimates.isEmpty() || estimates.get(0).isCompatible(estimate)) {
 			estimates.add(estimate);
 		} else {
-			throw new InvalidParameterException("The HT estimate is not compatible with the previous estimates!");
+			throw new InvalidParameterException("The point estimate is not compatible with the previous estimates!");
 		}
 	}
 	
@@ -85,7 +88,7 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	@Override
 	public Matrix getMean() {
 		Matrix mean = null;
-		for (PopulationTotalEstimate estimate : estimates) {
+		for (PointEstimate<?> estimate : estimates) {
 			if (mean == null) {
 				mean = estimate.getMean();
 			} else {
@@ -108,7 +111,7 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	public final Matrix getUncorrectedVariance() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
-		for (PopulationTotalEstimate estimate : estimates) {
+		for (PointEstimate<?> estimate : estimates) {
 			mean.addRealization(estimate.getMean());
 			variance.addRealization(estimate.getVariance());
 		}
@@ -119,6 +122,7 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	 * This method returns the corrected variance of the total estimate. 
 	 * This estimator is unbiased. 
 	 * @return a VariancePointEstimate
+	 * 
 	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
@@ -132,30 +136,48 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 		for (int i = 0; i < nbObs; i++) {
 			observationMeans[i] = new EmpiricalDistribution();
 		}
-		for (PopulationTotalEstimate estimate : estimates) {
+		for (PointEstimate<?> estimate : estimates) {
 			mean.addRealization(estimate.getMean());
 			variance.addRealization(estimate.getVariance());
 			for (int i = 0; i < nbObs; i++) {
 				observationMeans[i].addRealization(estimate.getObservations().get(i).getData());	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
 			}
 		}
-		PopulationTotalEstimate meanEstimate = new PopulationTotalEstimate();
-		PopulationUnitWithUnequalInclusionProbability popUnit;
-		for (int i = 0; i < nbObs; i++) {
-			popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
-					estimates.get(0).getObservations().get(i).getInclusionProbability());
-			meanEstimate.addObservation(popUnit);
+		PointEstimate<?> meanEstimate; 
+		try {
+			if (estimates.get(0).isPopulationSizeKnown()) {
+				double populationSize = estimates.get(0).getPopulationSize();
+				Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
+				meanEstimate = (PointEstimate<?>) cons.newInstance(populationSize);
+			} else {
+				meanEstimate = estimates.get(0).getClass().newInstance();
+			}
+			
+//			PopulationTotalEstimate meanEstimate = new PopulationTotalEstimate();
+			PopulationUnit popUnit;
+			for (int i = 0; i < nbObs; i++) {
+				if (meanEstimate instanceof PopulationTotalEstimate) {
+					popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
+							((PopulationTotalEstimate) estimates.get(0)).getObservations().get(i).getInclusionProbability());
+					((PopulationTotalEstimate) meanEstimate).addObservation((PopulationUnitWithUnequalInclusionProbability) popUnit);
+				} else {
+					popUnit = new PopulationUnitWithEqualInclusionProbability(observationMeans[i].getMean());
+					((PopulationMeanEstimate) meanEstimate).addObservation((PopulationUnitWithEqualInclusionProbability) popUnit);
+				}
+			}
+			
+			Matrix meanContribution = mean.getVariance();
+			Matrix meanDesignVariance = meanEstimate.getVariance();
+			Matrix averageVariance = variance.getMean();
+			
+			Matrix samplingRelatedComponent = meanDesignVariance;
+			Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
+			Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
+			VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, samplingRelatedComponent, totalVariance);
+			return varEst;
+		} catch (Exception e) {
+			throw new InvalidParameterException("An error occured while instantiating the correct PointEstimate class!");
 		}
-		
-		Matrix meanContribution = mean.getVariance();
-		Matrix meanDesignVariance = meanEstimate.getVariance();
-		Matrix averageVariance = variance.getMean();
-		
-		Matrix samplingRelatedComponent = meanDesignVariance;
-		Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
-		Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
-		VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, samplingRelatedComponent, totalVariance);
-		return varEst;
 	}
 
 	@Override
