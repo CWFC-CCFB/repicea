@@ -11,9 +11,9 @@ import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
-import repicea.stats.estimates.BootstrapHybridTauEstimate;
+import repicea.stats.estimates.BootstrapHybridPointEstimate;
 import repicea.stats.estimates.PopulationTotalEstimate;
-import repicea.stats.estimates.BootstrapHybridTauEstimate.VariancePointEstimate;
+import repicea.stats.estimates.BootstrapHybridPointEstimate.VariancePointEstimate;
 import repicea.util.ObjectUtility;
 
 public class Population {
@@ -150,12 +150,12 @@ public class Population {
 			WBirchLogGradesPredictor currentModel = new WBirchLogGradesPredictor(true, true); // the current model must account for the errors in the parameter estimates
 			currentModel.replaceModelParameters();	// the parameter estimates are drawn at random in the distribution
 			PlotList sample = pop.getSample(sampleSize);
-			BootstrapHybridTauEstimate hybHTEstimate = new BootstrapHybridTauEstimate();
+			BootstrapHybridPointEstimate hybHTEstimate = new BootstrapHybridPointEstimate();
 			for (int internalReal = 0; internalReal < nbInternalReal; internalReal++) {
 				sample.setRealization(internalReal);
 				setRealizedValues(sample, currentModel);
 				PopulationTotalEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
-				hybHTEstimate.addHTEstimate(htEstimator);
+				hybHTEstimate.addPointEstimate(htEstimator);
 				if (real == 0 && internalReal >= 1) {
 					recordStabilizer[0] = internalReal;
 					Matrix totalReal = hybHTEstimate.getMean();

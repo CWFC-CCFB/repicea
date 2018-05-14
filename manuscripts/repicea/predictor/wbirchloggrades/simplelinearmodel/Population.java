@@ -11,9 +11,9 @@ import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
-import repicea.stats.estimates.BootstrapHybridTauEstimate;
+import repicea.stats.estimates.BootstrapHybridPointEstimate;
 import repicea.stats.estimates.PopulationTotalEstimate;
-import repicea.stats.estimates.BootstrapHybridTauEstimate.VariancePointEstimate;
+import repicea.stats.estimates.BootstrapHybridPointEstimate.VariancePointEstimate;
 import repicea.util.ObjectUtility;
 
 public class Population {
@@ -126,7 +126,7 @@ public class Population {
 				}
 				currentModel.replaceModelParameters(dataSet);
 			}
-			BootstrapHybridTauEstimate hybHTEstimate = new BootstrapHybridTauEstimate();
+			BootstrapHybridPointEstimate hybHTEstimate = new BootstrapHybridPointEstimate();
 			PlotList referenceSample = sample;
 			for (int internalReal = 0; internalReal < nbInternalReal; internalReal++) {
 				if (isCompleteBootstrap) {
@@ -137,7 +137,7 @@ public class Population {
 				sample.setRealization(internalReal);
 				setRealizedValues(sample, currentModel);
 				PopulationTotalEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
-				hybHTEstimate.addHTEstimate(htEstimator);
+				hybHTEstimate.addPointEstimate(htEstimator);
 				if (!SimpleLinearModel.R2_95Version && real == 0 && internalReal >= 1) {
 					recordStabilizer[0] = internalReal;
 					recordStabilizer[1] = hybHTEstimate.getMean().m_afData[0][0];

@@ -18,10 +18,6 @@
  */
 package repicea.stats.estimates;
 
-import java.security.InvalidParameterException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-
 import repicea.math.Matrix;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
@@ -33,47 +29,21 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 @SuppressWarnings("serial")
 public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUnequalInclusionProbability> {
 
-//	protected final double populationSize;
-	private final List<PopulationUnitWithUnequalInclusionProbability> observations;
-	private int nRows;
-	private int nCols;
-	
 	/**
 	 * Constructor.
-	 * @param the population size in terms of sampling units or eventually ha if the 
-	 * response variable is expressed at this scale
 	 */
-//	public PopulationTotalEstimate(double populationSize) {
 	public PopulationTotalEstimate() {
 		super();
-//		this.populationSize = populationSize;
-		observations = new CopyOnWriteArrayList<PopulationUnitWithUnequalInclusionProbability>();
 	}
 
 	/**
-	 * This methods add an observation to the sample. 
-	 * @param observation a Matrix that contains the observation
-	 * @param inclusionProbability the INDIVIDUAL inclusion probability of the sample unit.
+	 * Constructor with population size.
+	 * @param populationSize the number of units in the population
 	 */
-	@Override
-	public void addObservation(PopulationUnitWithUnequalInclusionProbability observation) {
-		if (nCols == 0) {
-			nCols = observation.getData().m_iCols;
-		}
-		if (nRows == 0) {
-			nRows = observation.getData().m_iRows;
-		}
-		if (observation.getData().m_iCols != nCols || observation.getData().m_iRows != nRows) {
-			throw new InvalidParameterException("The observation is incompatible with what was already observed!");
-		} else {
-			observations.add(observation);
-		}
+	public PopulationTotalEstimate(double populationSize) {
+		super(populationSize);
 	}
 
-//	protected double getPopulationSize() {return populationSize;}
-	
-
-	
 	/**
 	 * This method returns the value of the Horvitz-Thompson estimator (tau hat).
 	 * @return a Matrix instance
@@ -81,8 +51,8 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 	@Override
 	public Matrix getMean() {
 		Matrix total = new Matrix(nRows, nCols);
-		int sampleSize = observations.size();
-		for (PopulationUnitWithUnequalInclusionProbability observation : observations) {
+		int sampleSize = getObservations().size();
+		for (PopulationUnitWithUnequalInclusionProbability observation : getObservations()) {
 			total = total.add(observation.getData().scalarMultiply(1d/(sampleSize * observation.getInclusionProbability())));
 		}
 		return total;
@@ -94,7 +64,7 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 	 */
 	@Override
 	public Matrix getVariance() {
-		int n = observations.size();
+		int n = getObservations().size();
 		PopulationUnitWithUnequalInclusionProbability obs_i;
 		PopulationUnitWithUnequalInclusionProbability obs_j;
 		double pi_i;
@@ -102,10 +72,10 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		double pi_ij;
 		Matrix varianceContribution;
 		Matrix variance = null;
-		for (int i = 0; i < observations.size(); i++) {
-			for (int j = i; j < observations.size(); j++) {
-				obs_i = observations.get(i);
-				obs_j = observations.get(j);
+		for (int i = 0; i < getObservations().size(); i++) {
+			for (int j = i; j < getObservations().size(); j++) {
+				obs_i = getObservations().get(i);
+				obs_j = getObservations().get(j);
 				pi_i = n * obs_i.getInclusionProbability();
 				pi_j = n * obs_j.getInclusionProbability();
 				if (i == j) {
@@ -125,17 +95,5 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		return variance;
 	}
 
-	protected boolean isCompatible(PopulationTotalEstimate estimate) {
-		if (observations.size() == estimate.observations.size()) {
-			if (nRows == estimate.nRows) {
-				if (nCols == estimate.nCols) {
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	protected List<PopulationUnitWithUnequalInclusionProbability> getObservations() {return observations;}
 	
 }
