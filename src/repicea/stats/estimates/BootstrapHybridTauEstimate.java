@@ -5,7 +5,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.distributions.UnknownDistribution;
+import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
 /**
  * This class implements the bootstrap estimator of the total as developed by Fortin et al. 
@@ -54,11 +56,11 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	}
 	
 	
-	private final List<HorvitzThompsonTauEstimate> estimates;
+	private final List<PopulationTotalEstimate> estimates;
 	
 	public BootstrapHybridTauEstimate() {
 		super(new UnknownDistribution());
-		estimates = new ArrayList<HorvitzThompsonTauEstimate>();
+		estimates = new ArrayList<PopulationTotalEstimate>();
 	}
 
 	/**
@@ -67,7 +69,7 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	 * an InvalidParameterException is thrown.
 	 * @param estimate a HorvitzThompsonTauEstimate instance
 	 */
-	public void addHTEstimate(HorvitzThompsonTauEstimate estimate) {
+	public void addHTEstimate(PopulationTotalEstimate estimate) {
 		if (estimates.isEmpty() || estimates.get(0).isCompatible(estimate)) {
 			estimates.add(estimate);
 		} else {
@@ -76,19 +78,21 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	}
 	
 	/**
-	 * This method returns the estimate of the total.
+	 * This method returns the estimate of the total, which is the mean of the 
+	 * realized point estimates.
 	 * @return a Matrix instance
 	 */
-	public Matrix getTotal() {
+	@Override
+	public Matrix getMean() {
 		Matrix mean = null;
-		for (HorvitzThompsonTauEstimate estimate : estimates) {
+		for (PopulationTotalEstimate estimate : estimates) {
 			if (mean == null) {
-				mean = estimate.getTotal();
+				mean = estimate.getMean();
 			} else {
-				mean = mean.add(estimate.getTotal());
+				mean = mean.add(estimate.getMean());
 			}
 		}
-		mean = mean.scalarMultiply(1d/estimates.size());
+		mean = mean.scalarMultiply(1d / estimates.size());
 		return mean;
 	}
 
@@ -101,46 +105,50 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
-	public final Matrix getTotalVarianceUncorrected() {
+	public final Matrix getUncorrectedVariance() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
-		for (HorvitzThompsonTauEstimate estimate : estimates) {
-			mean.addRealization(estimate.getTotal());
-			variance.addRealization(estimate.getVarianceOfTotalEstimate());
+		for (PopulationTotalEstimate estimate : estimates) {
+			mean.addRealization(estimate.getMean());
+			variance.addRealization(estimate.getVariance());
 		}
 		return mean.getVariance().add(variance.getMean());
 	}
 
 	/**
 	 * This method returns the corrected variance of the total estimate. 
-	 * This estimator is unbiased.. 
-	 * @return a Matrix
+	 * This estimator is unbiased. 
+	 * @return a VariancePointEstimate
 	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
-	public VariancePointEstimate getVarianceOfTotalEstimate() {
+	public final VariancePointEstimate getVarianceOfTotalEstimate() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
 		int nbObs = estimates.get(0).getObservations().size();
-		double populationSize = estimates.get(0).populationSize;
-		SampleMeanEstimate[] observationMeans = new SampleMeanEstimate[nbObs];
+//		double populationSize = estimates.get(0).populationSize;
+		EmpiricalDistribution[] observationMeans = new EmpiricalDistribution[nbObs];
 		for (int i = 0; i < nbObs; i++) {
-			observationMeans[i] = new SampleMeanEstimate();
+			observationMeans[i] = new EmpiricalDistribution();
 		}
-		for (HorvitzThompsonTauEstimate estimate : estimates) {
-			mean.addRealization(estimate.getTotal());
-			variance.addRealization(estimate.getVarianceOfTotalEstimate());
+		for (PopulationTotalEstimate estimate : estimates) {
+			mean.addRealization(estimate.getMean());
+			variance.addRealization(estimate.getVariance());
 			for (int i = 0; i < nbObs; i++) {
-				observationMeans[i].addObservation(estimate.getObservations().get(i).observation);	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
+				observationMeans[i].addRealization(estimate.getObservations().get(i).getData());	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
 			}
 		}
-		HorvitzThompsonTauEstimate meanEstimate = new HorvitzThompsonTauEstimate(populationSize);
+		PopulationTotalEstimate meanEstimate = new PopulationTotalEstimate();
+		PopulationUnitWithUnequalInclusionProbability popUnit;
 		for (int i = 0; i < nbObs; i++) {
-			meanEstimate.addObservation(observationMeans[i].getMean(), estimates.get(0).getObservations().get(i).inclusionProbability);
+			popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
+					estimates.get(0).getObservations().get(i).getInclusionProbability());
+			meanEstimate.addObservation(popUnit);
 		}
+		
 		Matrix meanContribution = mean.getVariance();
-		Matrix meanDesignVariance = meanEstimate.getVarianceOfTotalEstimate();
+		Matrix meanDesignVariance = meanEstimate.getVariance();
 		Matrix averageVariance = variance.getMean();
 		
 		Matrix samplingRelatedComponent = meanDesignVariance;
@@ -149,19 +157,19 @@ public class BootstrapHybridTauEstimate extends Estimate<UnknownDistribution>{
 		VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, samplingRelatedComponent, totalVariance);
 		return varEst;
 	}
-	
+
 	@Override
-	public Matrix getMean() {
-		return getTotal().scalarMultiply(1d/getPopulationSize());
+	public Matrix getVariance() {
+		return getVarianceOfTotalEstimate().getTotalVariance();
 	}
 	
-	protected double getPopulationSize() {
-		if (!estimates.isEmpty()) {
-			return estimates.get(0).getPopulationSize();
-		} else {
-			return 0d;
-		}
-	}
+//	protected double getPopulationSize() {
+//		if (!estimates.isEmpty()) {
+//			return estimates.get(0).getPopulationSize();
+//		} else {
+//			return 0d;
+//		}
+//	}
 	
 	
 	protected int getNumberOfRealizations() {

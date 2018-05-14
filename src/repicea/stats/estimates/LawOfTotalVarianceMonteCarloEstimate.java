@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
 /**
  * The LawOfTotalVarianceMonteCarloEstimate is a Monte Carlo estimate for random variable.
@@ -33,7 +34,7 @@ import repicea.math.Matrix;
 public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 
 	
-	private final List<SampleMeanEstimate> realizations;
+	private final List<PopulationMeanEstimate> realizations;
 	
 	
 	/**
@@ -41,14 +42,14 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	 */
 	public LawOfTotalVarianceMonteCarloEstimate() {
 		super();
-		realizations = new ArrayList<SampleMeanEstimate>();
+		realizations = new ArrayList<PopulationMeanEstimate>();
 	}
 
 	/**
 	 * This method is a surrogate for addRealization(Matrix) method.
 	 * @param estimate a SampleEstimate instance
 	 */
-	public void addRealization(SampleMeanEstimate estimate) {
+	public void addRealization(PopulationMeanEstimate estimate) {
 		realizations.add(estimate);
 		getDistribution().getRealizations().add(estimate.getMean());
 	}
@@ -63,7 +64,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	public Matrix getVariance() {
 		MonteCarloEstimate meanOfVariances = new MonteCarloEstimate();
 		MonteCarloEstimate varianceOfMeans = new MonteCarloEstimate();
-		for (SampleMeanEstimate realization : realizations) {
+		for (PopulationMeanEstimate realization : realizations) {
 			meanOfVariances.addRealization(realization.getVariance());
 			varianceOfMeans.addRealization(realization.getMean());
 		}
@@ -71,10 +72,10 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 		return meanOfVariances.getMean().add(varianceOfMeans.getVariance());
 	}
 
-	private SampleMeanEstimate unformatObservation(Matrix formattedObservation) {
-		SampleMeanEstimate estimate = new SampleMeanEstimate();
+	private PopulationMeanEstimate unformatObservation(Matrix formattedObservation) {
+		PopulationMeanEstimate estimate = new PopulationMeanEstimate();
 		for (int j = 0; j < formattedObservation.m_iCols; j++) {
-			estimate.addObservation(formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j));
+			estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j)));
 		}
 		return estimate;
 	}
@@ -82,7 +83,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	@Override
 	public Matrix getMean() {
 		Matrix mean = null;
-		for (SampleMeanEstimate estimate : realizations) {
+		for (PopulationMeanEstimate estimate : realizations) {
 			if (mean == null) {
 				mean = estimate.getMean();
 			} else {

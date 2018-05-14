@@ -3,7 +3,8 @@ package repicea.predictor.wbirchloggrades.simplelinearmodel;
 import java.util.ArrayList;
 import java.util.Random;
 
-import repicea.stats.estimates.HorvitzThompsonTauEstimate;
+import repicea.stats.estimates.PopulationTotalEstimate;
+import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
 @SuppressWarnings("serial")
 class PlotList extends ArrayList<SamplePlot> {
@@ -16,11 +17,11 @@ class PlotList extends ArrayList<SamplePlot> {
 		}
 	}
 	
-	HorvitzThompsonTauEstimate getHorvitzThompsonEstimate(int populationSize) {
-		HorvitzThompsonTauEstimate estimate = new HorvitzThompsonTauEstimate(populationSize);
+	PopulationTotalEstimate getHorvitzThompsonEstimate(int populationSize) {
+		PopulationTotalEstimate estimate = new PopulationTotalEstimate();
 		
 		for (SamplePlot plot : this) {
-			estimate.addObservation(plot.getY(), 1d/populationSize);
+			estimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(plot.getY(), 1d/populationSize));
 		}
 		return estimate;
 	}
