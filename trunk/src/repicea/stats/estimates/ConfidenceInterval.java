@@ -36,7 +36,7 @@ public class ConfidenceInterval {
 		}
 		
 		@Override
-		protected Matrix getBoundValue() {
+		public Matrix getBoundValue() {
 			return super.getBoundValue();
 		}
 	}

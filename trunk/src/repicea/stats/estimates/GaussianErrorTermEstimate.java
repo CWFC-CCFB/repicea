@@ -22,6 +22,7 @@ import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.distributions.CenteredGaussianDistribution;
 import repicea.stats.distributions.GaussianErrorTermList;
+import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
  * The GaussianErrorTermEstimate class handles the complex covariance structure in linear and nonlinear models. It assumes the mean of the
@@ -64,4 +65,18 @@ public final class GaussianErrorTermEstimate extends Estimate<CenteredGaussianDi
 		return getDistribution().getRandomRealization(errorTermList);
 	}
 	
+	
+	protected Matrix getQuantileForProbability(double probability) {
+		Matrix stdDev = getVariance().diagonalVector().elementWisePower(.5); 
+		double quantile = GaussianUtility.getQuantile(probability);
+		return getMean().add(stdDev.scalarMultiply(quantile));
+	}
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	}
+
 }

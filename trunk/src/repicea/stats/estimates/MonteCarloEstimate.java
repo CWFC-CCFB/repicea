@@ -199,4 +199,11 @@ public class MonteCarloEstimate extends Estimate<EmpiricalDistribution> {
 	public String toString() {
 		return "Monte Carlo estimate (mean = " + getMean() + ", n = " + getNumberOfRealizations();
 	}
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	}
 }

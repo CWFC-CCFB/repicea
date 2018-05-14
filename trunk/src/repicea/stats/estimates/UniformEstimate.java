@@ -44,4 +44,18 @@ public class UniformEstimate extends Estimate<UniformDistribution> implements Bo
 		getDistribution().setUpperBoundValue(upperBoundValue);
 	}
 
+	protected Matrix getQuantileForProbability(double probability) {
+		Matrix lowerBound = getDistribution().getLowerBound().getBoundValue();
+		Matrix upperBound = getDistribution().getUpperBound().getBoundValue();
+		Matrix boundDistance = upperBound.subtract(lowerBound);
+		return lowerBound.add(boundDistance.scalarMultiply(probability));
+	}
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	}
+
 }

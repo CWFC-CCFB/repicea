@@ -56,6 +56,11 @@ public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistrib
 	public void setUpperBoundValue(Matrix upperBoundValue) {
 		getDistribution().setUpperBoundValue(upperBoundValue);
 	}
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		return null;
+	}
 	
 
 //	public static void main(String[] args) {

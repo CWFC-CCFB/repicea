@@ -8,6 +8,7 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.distributions.UnknownDistribution;
+import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.stats.sampling.PopulationUnit;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
@@ -188,5 +189,18 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 		return estimates.size();
 	}
 	
+	protected Matrix getQuantileForProbability(double probability) {
+		Matrix stdDev = getVariance().diagonalVector().elementWisePower(.5); 
+		double quantile = GaussianUtility.getQuantile(probability);
+		return getMean().add(stdDev.scalarMultiply(quantile));
+	}
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	}
+
 		
 }
