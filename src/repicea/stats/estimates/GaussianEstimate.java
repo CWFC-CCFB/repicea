@@ -67,7 +67,13 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 		double quantile = GaussianUtility.getQuantile(probability);
 		return getMean().add(stdDev.scalarMultiply(quantile));
 	}
-	
-	
-	
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		Matrix lowerBoundValue = getQuantileForProbability(.5 * (1d - oneMinusAlpha));
+		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
+		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
+	}
+
 }
+	

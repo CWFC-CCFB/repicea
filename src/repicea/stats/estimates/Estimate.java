@@ -116,20 +116,6 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	 * @param oneMinusAlpha is 1 minus the probability of Type I error
 	 * @return a ConfidenceInterval instance 
 	 */
-	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
-		Matrix lowerBoundValue;
-		Matrix upperBoundValue; 
-		if (this instanceof MonteCarloEstimate) {
-			lowerBoundValue = ((MonteCarloEstimate) this).getQuantileForProbability(.5 * (1d - oneMinusAlpha));
-			upperBoundValue = ((MonteCarloEstimate) this).getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
-			return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
-		} else if (this instanceof GaussianEstimate) {
-			lowerBoundValue = ((GaussianEstimate) this).getQuantileForProbability(.5 * (1d - oneMinusAlpha));
-			upperBoundValue = ((GaussianEstimate) this).getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
-			return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
-		} else {
-			return null;
-		}
-	}
+	public abstract ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha);
 	
 }

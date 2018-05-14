@@ -57,5 +57,8 @@ public class UniformDistribution implements Distribution, BoundedDistribution {
 	public void setUpperBoundValue(Matrix upperBoundValue) {
 		upperBound.setBoundValue(upperBoundValue);
 	}
+	
+	public BasicBound getLowerBound() {return lowerBound;}
+	public BasicBound getUpperBound() {return upperBound;}
 
 }

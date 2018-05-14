@@ -50,6 +50,12 @@ public class SimpleEstimate extends Estimate<UnknownDistribution> implements Cen
 	public void setVariance(Matrix variance) {
 		getDistribution().setVariance(variance);
 	}
+
+
+	@Override
+	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {
+		return null; // as no specific distribution is assumed
+	}
 	
 	
 }

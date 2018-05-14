@@ -42,7 +42,7 @@ public class BasicBound implements Serializable {
 		this.value = value;
 	}
 
-	protected Matrix getBoundValue() {return value;}
+	public Matrix getBoundValue() {return value;}
 	
 	protected boolean isUpperBound() {return isUpperBound;}
 }
