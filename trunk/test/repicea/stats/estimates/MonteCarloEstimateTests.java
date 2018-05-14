@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
 public class MonteCarloEstimateTests {
 
@@ -36,12 +37,12 @@ public class MonteCarloEstimateTests {
 		LawOfTotalVarianceMonteCarloEstimate output = new LawOfTotalVarianceMonteCarloEstimate();
 		for (int i = 0; i < 50000; i++) {
 			double meanForThisRealization = generator.nextGaussian() * outerStd;
-			SampleMeanEstimate estimate = new SampleMeanEstimate();
+			PopulationMeanEstimate estimate = new PopulationMeanEstimate();
 			Matrix obs;
 			for (int j = 0; j < sampleSize; j++) {
 				obs = new Matrix(1,1);
 				obs.m_afData[0][0] = generator.nextGaussian() * innerStd + meanForThisRealization; 
-				estimate.addObservation(obs);
+				estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(obs));
 			}
 			output.addRealization(estimate);
 		}

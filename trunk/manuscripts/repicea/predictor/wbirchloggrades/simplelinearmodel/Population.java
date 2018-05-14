@@ -12,7 +12,7 @@ import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.stats.estimates.BootstrapHybridTauEstimate;
-import repicea.stats.estimates.HorvitzThompsonTauEstimate;
+import repicea.stats.estimates.PopulationTotalEstimate;
 import repicea.stats.estimates.BootstrapHybridTauEstimate.VariancePointEstimate;
 import repicea.util.ObjectUtility;
 
@@ -136,11 +136,11 @@ public class Population {
 				}
 				sample.setRealization(internalReal);
 				setRealizedValues(sample, currentModel);
-				HorvitzThompsonTauEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
+				PopulationTotalEstimate htEstimator = sample.getHorvitzThompsonEstimate(populationSize);
 				hybHTEstimate.addHTEstimate(htEstimator);
 				if (!SimpleLinearModel.R2_95Version && real == 0 && internalReal >= 1) {
 					recordStabilizer[0] = internalReal;
-					recordStabilizer[1] = hybHTEstimate.getTotal().m_afData[0][0];
+					recordStabilizer[1] = hybHTEstimate.getMean().m_afData[0][0];
 					recordStabilizer[2] = hybHTEstimate.getVarianceOfTotalEstimate().getTotalVariance().m_afData[0][0];
 					writerStabilizer.addRecord(recordStabilizer);
 				} else if (real > 0 && isWriterStabilizerOpen) {
@@ -150,8 +150,8 @@ public class Population {
 			}
 			VariancePointEstimate correctedVarEstimate = hybHTEstimate.getVarianceOfTotalEstimate();
 			Realization thisRealization = new Realization(total.m_afData[0][0], 
-					hybHTEstimate.getTotal().m_afData[0][0], 
-					hybHTEstimate.getTotalVarianceUncorrected().m_afData[0][0], 
+					hybHTEstimate.getMean().m_afData[0][0], 
+					hybHTEstimate.getUncorrectedVariance().m_afData[0][0], 
 					correctedVarEstimate.getTotalVariance().m_afData[0][0], 
 					correctedVarEstimate.getSamplingRelatedVariance().m_afData[0][0], 
 					correctedVarEstimate.getModelRelatedVariance().m_afData[0][0]);

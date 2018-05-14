@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
 public class HorvitzThompsonTauEstimateTests {
 
@@ -23,16 +24,16 @@ public class HorvitzThompsonTauEstimateTests {
 		sample.add(5d);
 		sample.add(4d);
 		sample.add(7d);
-		HorvitzThompsonTauEstimate estimate = new HorvitzThompsonTauEstimate(populationSize);
+		PopulationTotalEstimate estimate = new PopulationTotalEstimate();
 		Matrix obs;
 		for (Double value : sample) {
 			obs = new Matrix(1,1);
 			obs.m_afData[0][0] = value;
-			estimate.addObservation(obs, 1d/populationSize);
+			estimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(obs, 1d/populationSize));
 		}
-		Matrix total = estimate.getTotal();
+		Matrix total = estimate.getMean();
 		Assert.assertEquals("Testing the estimate of the total", 4111.11111111111, total.m_afData[0][0], 1E-8);
-		Matrix totalVariance = estimate.getVarianceOfTotalEstimate();
+		Matrix totalVariance = estimate.getVariance();
 		Assert.assertEquals("Testing the variance of the total", 507734.5679, totalVariance.m_afData[0][0], 1E-4);
 	}
 	
