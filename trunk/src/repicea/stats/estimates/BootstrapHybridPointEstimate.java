@@ -18,7 +18,7 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  * variable of interest has not been observed but predicted by a model and (ii) the covariates 
  * are not censused but only observed in a sample of the population. The estimator takes into 
  * account the variance that stems from the model as well as that of the sampling design. 
- * IMPORTANT: The model must  benefits from a full stochastic implementation.
+ * IMPORTANT: The model must  benefit from a full stochastic implementation.
  * @author Mathieu Fortin - May 2018
  * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
  * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
@@ -153,7 +153,6 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 				meanEstimate = estimates.get(0).getClass().newInstance();
 			}
 			
-//			PopulationTotalEstimate meanEstimate = new PopulationTotalEstimate();
 			PopulationUnit popUnit;
 			for (int i = 0; i < nbObs; i++) {
 				if (meanEstimate instanceof PopulationTotalEstimate) {
@@ -184,15 +183,6 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 	public Matrix getVariance() {
 		return getVarianceOfTotalEstimate().getTotalVariance();
 	}
-	
-//	protected double getPopulationSize() {
-//		if (!estimates.isEmpty()) {
-//			return estimates.get(0).getPopulationSize();
-//		} else {
-//			return 0d;
-//		}
-//	}
-	
 	
 	protected int getNumberOfRealizations() {
 		return estimates.size();
