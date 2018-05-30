@@ -98,7 +98,7 @@ public class MeloThinnerPredictor extends REpiceaLogisticPredictor<MeloThinnerPl
 			oXVector = new Matrix(1, estimate.getMean().m_iRows);
 			
 		} catch (Exception e) {
-			System.out.println("MeloThinnerPredictor.init() : Unable to initialize the mortality module!");
+			System.out.println("MeloThinnerPredictor.init() : : Unable to read parameter files!");
 		}
 
 	}
