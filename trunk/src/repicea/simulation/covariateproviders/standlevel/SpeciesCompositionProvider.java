@@ -32,5 +32,11 @@ public abstract interface SpeciesCompositionProvider {
 		Mixed
 	}
 	
+	/**
+	 * This method returns the composition of the plot, that is either broadleaved dominated, 
+	 * conifer dominated or mixed.
+	 * @return a SpeciesComposition enum
+	 */
+	public SpeciesComposition	getSpeciesComposition();
 	
 }
