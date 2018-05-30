@@ -20,7 +20,7 @@ package repicea.simulation.allometrycalculator;
 
 import repicea.simulation.covariateproviders.treelevel.CommercialVolumeM3Provider;
 import repicea.simulation.covariateproviders.treelevel.HeightMProvider;
-import repicea.simulation.covariateproviders.treelevel.PlotWeightProvider;
+import repicea.simulation.covariateproviders.treelevel.TreeWeightProvider;
 import repicea.simulation.covariateproviders.treelevel.TotalVolumeDm3Provider;
 
 /**
@@ -29,7 +29,7 @@ import repicea.simulation.covariateproviders.treelevel.TotalVolumeDm3Provider;
  * @author Mathieu Fortin - November 2012
  */
 public interface AllometryCalculableTree extends LightAllometryCalculableTree,
-												PlotWeightProvider,
+												TreeWeightProvider,
 												HeightMProvider,
 												CommercialVolumeM3Provider,
 												TotalVolumeDm3Provider {
