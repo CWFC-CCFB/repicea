@@ -18,32 +18,11 @@
  */
 package repicea.simulation.covariateproviders.treelevel;
 
-import repicea.util.REpiceaTranslator;
-import repicea.util.REpiceaTranslator.TextableEnum;
-
 /**
  * This interface ensures the tree can provide its own species name.
  * @author Mathieu Fortin - March 2013
  */
 public abstract interface SpeciesNameProvider {
-
-	public static enum SpeciesType implements TextableEnum {
-		ConiferousSpecies("Coniferous","Conif\u00E8re"),
-		BroadleavedSpecies("Broadleaved", "Feuillue");
-
-		SpeciesType(String englishText, String frenchText) {
-			setText(englishText, frenchText);
-		}
-		
-		@Override
-		public void setText(String englishText, String frenchText) {
-			REpiceaTranslator.setString(this, englishText, frenchText);
-		}
-		
-		@Override
-		public String toString() {return REpiceaTranslator.getString(this);}
-	}
-	
 
 	/**
 	 * This method returns the species name of this tree.
