@@ -30,6 +30,7 @@ public class HierarchicalLevel implements Serializable {
 
 	public static final HierarchicalLevel PLOT = new HierarchicalLevel("plot");
 	public static final HierarchicalLevel TREE = new HierarchicalLevel("tree");
+	public static final HierarchicalLevel YEAR = new HierarchicalLevel("year");
 	public static final HierarchicalLevel INTERVAL_NESTED_IN_PLOT = new HierarchicalLevel("interval_nested_in_plot");
 	public static final HierarchicalLevel CRUISE_LINE = new HierarchicalLevel("cruise_line");
 	
