@@ -258,7 +258,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 		return currentFieldID;
 	}
 
-	protected abstract void checkInputFieldsValue(Object[] oArray, Enum<?> fieldID) throws Exception;
+	protected void checkInputFieldsValue(Object[] oArray, Enum<?> fieldID) throws Exception {}
 	
 	/**
 	 * This method initializes the RecordInstantiator object in GUI mode with no owner.
