@@ -242,6 +242,19 @@ public abstract class REpiceaRecordReader implements Serializable {
 	}
 	
 	/**
+	 * This method returns true if the field is available. 
+	 * @param fieldID the enum that represents the field.
+	 * @param oArray the line record from the file.
+	 * @return true if the field can be found in the import field manager and if it can be found in the line record.
+ 	 */
+	protected final boolean isThisFieldAvailable(Enum<?> fieldID, Object[] oArray) {
+		int index = this.getImportFieldManager().getIndexOfThisField(fieldID);
+		return index != -1 && oArray[index] != null;
+	}
+
+	
+	
+	/**
 	 * This method initializes the RecordInstantiator object in GUI mode with no owner.
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
