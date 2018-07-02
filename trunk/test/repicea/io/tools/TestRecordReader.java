@@ -336,6 +336,8 @@ public class TestRecordReader extends REpiceaRecordReader {
 
 	}
 
+	@Override
+	protected void checkInputFieldsValue(Object[] oArray, Enum<?> fieldID) throws Exception {}
 	
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
@@ -354,6 +356,7 @@ public class TestRecordReader extends REpiceaRecordReader {
 		}
 		System.exit(0);
 	}
+
 
 	
 	
