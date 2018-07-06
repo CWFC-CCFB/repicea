@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * whether or not it has just been harvested or thinned.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface InterventionResultProvider {
+public interface InterventionResultProvider {
 
 	/**
 	 * This method returns true if the stand has just been harvested or thinned.

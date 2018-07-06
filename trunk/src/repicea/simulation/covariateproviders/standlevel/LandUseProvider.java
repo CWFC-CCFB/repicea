@@ -18,11 +18,20 @@
  */
 package repicea.simulation.covariateproviders.standlevel;
 
-public interface InterventionPlannedProvider {
+/**
+ * The LandUseProvider interface ensures that the plot instance knows its land use.
+ * @author Mathieu Fortin - July 2018
+ */
+public interface LandUseProvider {
 
+	public static enum LandUse {
+		WoodProduction,
+		Others;
+	}
+	
 	/**
-	 * This method returns true if the plot instance is going to be harvested in the upcoming time step.
-	 * @return a boolean
+	 * This method returns the land use of the plot instance.
+	 * @return a LandUse enum
 	 */
-	public boolean isGoingToBeHarvested();
+	public LandUse getLandUse();
 }

@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * ecological type code.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface EcologicalTypeProvider {
+public interface EcologicalTypeProvider {
 
 	/**
 	 * This method returns the ecological type code (4 characters) as defined by the Quebec Ministry of 

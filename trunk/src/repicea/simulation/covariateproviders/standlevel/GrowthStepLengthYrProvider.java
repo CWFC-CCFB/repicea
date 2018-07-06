@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * This interface ensures that the Stand instance provides the duration of the growth step in years.
  * @author Mathieu Fortin - July 2015
  */
-public abstract interface GrowthStepLengthYrProvider {
+public interface GrowthStepLengthYrProvider {
 
 	
 	/**

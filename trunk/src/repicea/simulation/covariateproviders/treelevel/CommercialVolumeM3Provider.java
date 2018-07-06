@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This interface ensures the tree instance can provide its own commercial volume.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface CommercialVolumeM3Provider {
+public interface CommercialVolumeM3Provider {
 
 	/**
 	 * This method returns the merchantable volume, i.e. volume up to a particular small-end diameter, for 

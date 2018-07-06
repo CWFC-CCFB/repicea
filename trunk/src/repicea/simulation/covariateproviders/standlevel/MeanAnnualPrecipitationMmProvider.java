@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * annual precipitation.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface MeanAnnualPrecipitationMmProvider {
+public interface MeanAnnualPrecipitationMmProvider {
 
 	/**
 	 * This method returns the mean annual precipitation in mm.

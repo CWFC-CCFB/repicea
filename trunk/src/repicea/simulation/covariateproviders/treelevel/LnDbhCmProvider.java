@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2013 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * of its own dbh.
  * @author Mathieu Fortin - July 2013
  */
-public abstract interface LnDbhCmProvider {
+public interface LnDbhCmProvider {
 
 	/**
 	 * This method returns ln(dbh) with the dbh in cm.

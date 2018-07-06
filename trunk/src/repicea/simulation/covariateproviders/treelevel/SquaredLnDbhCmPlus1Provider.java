@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -24,7 +24,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * natural log of its own dbh + 1.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface SquaredLnDbhCmPlus1Provider {
+public interface SquaredLnDbhCmPlus1Provider {
 
 	/**
 	 * This method returns (ln(dbh + 1))^2 with the dbh in cm.

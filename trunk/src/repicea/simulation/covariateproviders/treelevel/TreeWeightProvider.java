@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This method ensures the tree instance can provide the weight of the plot it is located in.
  * @author Mathieu Fortin - March 2013
  */
-public abstract interface TreeWeightProvider {
+public interface TreeWeightProvider {
 	
 	/**
 	 * This method returns the plot weight. If there is no weight then the method should return 1.

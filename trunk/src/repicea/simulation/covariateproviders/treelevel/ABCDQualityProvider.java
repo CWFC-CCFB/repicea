@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -25,7 +25,7 @@ import repicea.math.Matrix;
  * class, i.e. A, B, C, D.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface ABCDQualityProvider {
+public interface ABCDQualityProvider {
 
 	/** 
 	 * Tree log classification ABCD

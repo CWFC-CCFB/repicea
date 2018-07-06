@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * basal area.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface BasalAreaM2HaProvider {
+public interface BasalAreaM2HaProvider {
 
 	/**
 	 * This method returns the basal area of the stand in m2/ha.

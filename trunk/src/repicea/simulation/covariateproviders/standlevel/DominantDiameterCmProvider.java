@@ -24,7 +24,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * thickest trees per hectare.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface DominantDiameterCmProvider {
+public interface DominantDiameterCmProvider {
 
 	/**
 	 * This method returns the stand dominant diameter (cm)

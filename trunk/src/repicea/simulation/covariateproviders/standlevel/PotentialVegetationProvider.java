@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * potential vegetation code.
  * @author Mathieu Fortin - July 2014
  */
-public abstract interface PotentialVegetationProvider {
+public interface PotentialVegetationProvider {
 
 	/**
 	 * This method returns the potential vegetation type code (3 characters) as defined by the Quebec Ministry of 

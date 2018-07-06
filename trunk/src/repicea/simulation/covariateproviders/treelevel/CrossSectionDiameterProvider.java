@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * its bole, typically through a stem taper model.
  * @author Mathieu Fortin - December 2012
  */
-public abstract interface CrossSectionDiameterProvider {
+public interface CrossSectionDiameterProvider {
 
 	
 	/**

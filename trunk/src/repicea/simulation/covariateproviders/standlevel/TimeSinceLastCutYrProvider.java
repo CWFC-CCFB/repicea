@@ -18,7 +18,7 @@
  */
 package repicea.simulation.covariateproviders.standlevel;
 
-public abstract interface TimeSinceLastCutYrProvider {
+public interface TimeSinceLastCutYrProvider {
 
 	/**
 	 * This method returns the number of years since the last harvesting. It should return Double.POSITIVE_INFINITY if 

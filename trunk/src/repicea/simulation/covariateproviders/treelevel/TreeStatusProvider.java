@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2013 Mathieu Fortin for Rouge-Epicea
  *
@@ -26,7 +26,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * This interface ensures the tree can provide its status.
  * @author Mathieu Fortin - May 2013
  */
-public abstract interface TreeStatusProvider {
+public interface TreeStatusProvider {
 
 	
 	public static enum StatusClass implements TextableEnum {

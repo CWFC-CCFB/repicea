@@ -24,7 +24,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * trees per hectare.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface DominantHeightMProvider {
+public interface DominantHeightMProvider {
 
 	/**
 	 * This method returns the stand dominant height (m)

@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * annual temperature.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface MeanAnnualTemperatureCProvider {
+public interface MeanAnnualTemperatureCProvider {
 
 	/**
 	 * This method returns the mean annual temperature in Celcius degrees.

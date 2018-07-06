@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * drainage class according to the current regulation in Quebec.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface DrainageClassProvider {
+public interface DrainageClassProvider {
 
 	/**
 	 * This method returns the drainage class as recognized by the 
