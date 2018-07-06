@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This interface ensures the tree can provide its own crown length (m).
  * @author Mathieu Fortin - February 2013
  */
-public abstract interface CrownLengthMProvider {
+public interface CrownLengthMProvider {
 
 	/**
 	 * This method returns the crown length (m).

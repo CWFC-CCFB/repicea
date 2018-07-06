@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * This method ensures the stand instance can provide the current year date.
  * @author Mathieu Fortin - October 2013
  */
-public abstract interface DateYrProvider {
+public interface DateYrProvider {
 
 	/**
 	 * This method returns the current date in years.

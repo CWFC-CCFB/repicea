@@ -27,7 +27,7 @@ import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.Status
  * to a particular tree status.
  * @author Mathieu Fortin - September 2013
  */
-public abstract interface TreeStatusCollectionsProvider {
+public interface TreeStatusCollectionsProvider {
 
 	/**
 	 * This method returns the Collection of Tree instances with a particular 

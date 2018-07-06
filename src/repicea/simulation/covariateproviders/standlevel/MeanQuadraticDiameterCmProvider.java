@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * quadratic diameter for living trees.
  * @author Mathieu Fortin - May 2014
  */
-public abstract interface MeanQuadraticDiameterCmProvider {
+public interface MeanQuadraticDiameterCmProvider {
 
 	/**
 	 * This method returns the mean quadratic diameter of the living trees (cm).

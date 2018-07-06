@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This interface ensures the tree instance can provide its total above ground volume.
  * @author Mathieu Fortin - March 2013
  */
-public abstract interface TotalVolumeDm3Provider {
+public interface TotalVolumeDm3Provider {
 
 	/**
 	 * This method returns the total above ground volume WITHOUT any expansion factor.

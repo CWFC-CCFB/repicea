@@ -24,7 +24,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * @author Mathieu Fortin - May 2018
  *
  */
-public abstract interface SpeciesCompositionProvider {
+public interface SpeciesCompositionProvider {
 
 	public static enum SpeciesComposition {
 		BroadleavedDominated,

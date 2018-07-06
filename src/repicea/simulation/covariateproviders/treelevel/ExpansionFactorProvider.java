@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * i.e. the number of trees represented by this entry.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface ExpansionFactorProvider {
+public interface ExpansionFactorProvider {
 
 	/**
 	 * This method returns the number of stems represented by this tree instance.

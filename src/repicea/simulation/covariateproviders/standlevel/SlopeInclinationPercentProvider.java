@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * in percentage.
  * @author Mathieu Fortin - April 2018
  */
-public abstract interface SlopeInclinationPercentProvider {
+public interface SlopeInclinationPercentProvider {
 
 	/**
 	 * This method returns the slope inclination in percentage.

@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2018 Mathieu Fortin for Rouge-Epicea
  *
@@ -25,7 +25,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * This interface ensures that the tree can return its species type, i.e. Coniferous or Broadleaved.
  * @author Mathieu Fortin - June 2018
  */
-public abstract interface SpeciesTypeProvider {
+public interface SpeciesTypeProvider {
 
 	
 	

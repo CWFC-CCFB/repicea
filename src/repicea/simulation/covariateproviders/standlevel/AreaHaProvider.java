@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * This interface ensures the plot can provide its area in ha.
  * @author Mathieu Fortin - August 2013
  */
-public abstract interface AreaHaProvider {
+public interface AreaHaProvider {
 
 	/**
 	 * This method returns the plot area in ha.

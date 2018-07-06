@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * ecological region code.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface EcologicalRegionProvider {
+public interface EcologicalRegionProvider {
 
 	/**
 	 * This method returns the ecological region type (2 characters) as defined by the Quebec Ministry of 

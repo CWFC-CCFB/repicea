@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2017 Mathieu Fortin for Rouge-Epicea
  *
@@ -21,7 +21,7 @@ package repicea.simulation.covariateproviders.standlevel;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract interface QuebecForestRegionProvider {
+public interface QuebecForestRegionProvider {
 
 	public static enum QuebecForestRegion {
 		BasStLaurentGaspesie,

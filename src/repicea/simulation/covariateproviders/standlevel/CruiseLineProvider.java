@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * @author Mathieu Fortin - June 2017
  *
  */
-public abstract interface CruiseLineProvider {
+public interface CruiseLineProvider {
 
 	/**
 	 * This method returns the cruise line ID.  

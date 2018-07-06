@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This interface ensures the tree instance can provide its own height.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface HeightMProvider {
+public interface HeightMProvider {
 
 	/**
 	 * This method returns the tree height in m.

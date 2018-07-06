@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * area of the trees with larger diameter than its own dbh.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface BasalAreaLargerThanSubjectM2Provider {
+public interface BasalAreaLargerThanSubjectM2Provider {
 
 	/**
 	 * This method returns the basal area of all the trees with dbh larger than this tree instance.

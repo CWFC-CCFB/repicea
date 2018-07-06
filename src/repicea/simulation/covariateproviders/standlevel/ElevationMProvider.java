@@ -24,7 +24,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * @author Mathieu Fortin - November 2012
  *
  */
-public abstract interface ElevationMProvider {
+public interface ElevationMProvider {
 
 	/**
 	 * This method returns the elevation above sea level (m).

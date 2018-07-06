@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -25,7 +25,7 @@ import repicea.math.Matrix;
  * i.e. M, S, C, R.
  * @author Mathieu Fortin - November 2012
  */
-public abstract interface MSCRPriorityProvider {
+public interface MSCRPriorityProvider {
 
 	/**
 	 * Harvest priorities MSCR.
@@ -48,7 +48,7 @@ public abstract interface MSCRPriorityProvider {
 	}
 
 	/**
-	 * This method returns the MSCR harvest priority according the current classification in Québec.
+	 * This method returns the MSCR harvest priority according the current classification in Quï¿½bec.
 	 * @return a MSCRPriority enum variable
 	 */
 	public MSCRPriority getMSCRPriority();
