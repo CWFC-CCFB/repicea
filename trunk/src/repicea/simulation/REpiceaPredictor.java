@@ -35,7 +35,6 @@ import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
 import repicea.stats.distributions.StandardGaussianDistribution;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
-import repicea.stats.estimates.GaussianEstimate;
 
 /**
  * This class is the basic class for all models that are designed for predictions.
@@ -43,7 +42,7 @@ import repicea.stats.estimates.GaussianEstimate;
  * @author Mathieu Fortin - October 2011
  */
 @SuppressWarnings("serial")
-public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<GaussianEstimate> {
+public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<ModelParameterEstimates> {
 
 	protected static final List<Integer> DefaultZeroIndex = new ArrayList<Integer>();
 	static {
@@ -178,7 +177,7 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Gaus
 	}
 
 	@Override
-	protected void setParameterEstimates(GaussianEstimate gaussianEstimate) {
+	protected void setParameterEstimates(ModelParameterEstimates gaussianEstimate) {
 //		super.setParameterEstimates(new ModelParameterEstimates(gaussianEstimate, this));
 		super.setParameterEstimates(gaussianEstimate);
 		fireModelBasedSimulatorEvent(new REpiceaPredictorEvent(ModelBasedSimulatorEventProperty.DEFAULT_BETA_JUST_SET, null, getParameterEstimates(), this));

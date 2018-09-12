@@ -24,13 +24,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.ModelParameterEstimates;
 import repicea.simulation.ParameterLoader;
 import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.covariateproviders.treelevel.ABCDQualityProvider.ABCDQuality;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.ChiSquaredDistribution;
-import repicea.stats.estimates.GaussianEstimate;
 import repicea.util.ObjectUtility;
 
 @SuppressWarnings("serial")
@@ -100,7 +100,7 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 			sigma2Res = varParms.m_afData[varParms.m_iRows - 1][0];
 			weightExponentCoefficients = varParms.getSubMatrix(0, varParms.m_iRows - 2, 0, 0); 
 
-			setParameterEstimates(new GaussianEstimate(beta, omega));
+			setParameterEstimates(new ModelParameterEstimates(beta, omega));
 			
 			variancesWeights = ParameterLoader.loadVectorFromFile(varWeightsFilename).get();
 //			varianceCorrCoefficient = ParameterLoader.loadVectorFromFile(varCorrCoefFilename).get();
@@ -326,7 +326,7 @@ public class WBirchLogGradesPredictor extends REpiceaPredictor {
 			distributionForVCovRandomDeviates = new ChiSquaredDistribution(degreesOfFreedom, variance);
 		}
 		Matrix newVariance = distributionForVCovRandomDeviates.getRandomRealization();
-		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
+		setParameterEstimates(new ModelParameterEstimates(newMean, newVariance));
 		
 		ChiSquaredDistribution residualVarianceDistribution = new ChiSquaredDistribution(degreesOfFreedom, sigma2Res);
 		double newSigma2Res = residualVarianceDistribution.getRandomRealization().m_afData[0][0];

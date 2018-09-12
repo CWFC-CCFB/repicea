@@ -24,8 +24,9 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.predictor.matapedia.MatapediaTree.MatapediaTreeSpecies;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.REpiceaLogisticPredictor;
+import repicea.simulation.ModelParameterEstimates;
 import repicea.simulation.ParameterLoader;
+import repicea.simulation.REpiceaLogisticPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.integral.GaussHermiteQuadrature;
@@ -92,7 +93,7 @@ public final class MatapediaMortalityPredictor extends REpiceaLogisticPredictor<
 			
 			Matrix meanRandomEffect = new Matrix(1,1);
 			setDefaultRandomEffects(HierarchicalLevel.INTERVAL_NESTED_IN_PLOT, new GaussianEstimate(meanRandomEffect, randomEffectVariance));
-			GaussianEstimate estimate = new SASParameterEstimates(defaultBetaMean, defaultBetaVariance);
+			ModelParameterEstimates estimate = new SASParameterEstimates(defaultBetaMean, defaultBetaVariance);
 			setParameterEstimates(estimate); 
 			oXVector = new Matrix(1, estimate.getMean().m_iRows);
 			
