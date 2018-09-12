@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.simulation.ModelParameterEstimates;
 import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.REpiceaRandom;
-import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
 class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
@@ -45,7 +45,7 @@ class Artemis2009RecruitDiameterInternalPredictor extends REpiceaPredictor {
 
 	
 	protected void setBeta(Matrix beta, Matrix omega) {
-		GaussianEstimate estimate = new SASParameterEstimates(beta, omega);
+		ModelParameterEstimates estimate = new SASParameterEstimates(beta, omega);
 		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}

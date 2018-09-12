@@ -109,14 +109,14 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
-	public final Matrix getUncorrectedVariance() {
+	public final VariancePointEstimate getUncorrectedVariance() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
 		for (PointEstimate<?> estimate : estimates) {
 			mean.addRealization(estimate.getMean());
 			variance.addRealization(estimate.getVariance());
 		}
-		return mean.getVariance().add(variance.getMean());
+		return new VariancePointEstimate(mean.getVariance(), variance.getMean(), mean.getVariance().add(variance.getMean()));
 	}
 
 	/**

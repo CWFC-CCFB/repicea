@@ -19,13 +19,10 @@
 package repicea.simulation;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.estimates.GaussianEstimate;
 
 /**
  * The SASParameterEstimates class is customized for SAS outputs. The major difference
@@ -35,9 +32,9 @@ import repicea.stats.estimates.GaussianEstimate;
  * @author Mathieu Fortin - September 2012
  */
 @SuppressWarnings("serial")
-public class SASParameterEstimates extends GaussianEstimate {
+public class SASParameterEstimates extends ModelParameterEstimates {
 
-	protected final List<Integer> estimatedParameterIndices;
+//	protected final List<Integer> estimatedParameterIndices;
 
 	/**
 	 * Constructor.
@@ -46,16 +43,24 @@ public class SASParameterEstimates extends GaussianEstimate {
 	 */
 	public SASParameterEstimates(Matrix mean, Matrix variance) {
 		super(mean, variance);
-		estimatedParameterIndices = new ArrayList<Integer>();
+//		estimatedParameterIndices = new ArrayList<Integer>();
+	}
+
+	@Override
+	protected void setEstimatedParameterIndices() {
+		Matrix mean = getMean();
 		for (int i = 0; i < mean.m_iRows; i++) {
 			if (mean.m_afData[i][0] != 0.0 && mean.m_afData[i][0] != 1.0) { 
 				estimatedParameterIndices.add(i);
 			}
 		}
+		Matrix variance = getVariance();
 		if (variance!= null  && variance.m_iRows != estimatedParameterIndices.size()) {
 			throw new InvalidParameterException("SASParameterEstimates: the variance matrix is not compatible with the vector of parameter estimates");
 		}
 	}
+	
+	
 
 	@Override
 	public Matrix getRandomDeviate() {
@@ -67,23 +72,23 @@ public class SASParameterEstimates extends GaussianEstimate {
 		return deviate;
 	}
 
-	/**
-	 * This method returns a list of indices for variance extraction. This method is needed
-	 * because the SAS implementation includes some fake parameters.
-	 * @param parameterIndices a List of integer
-	 * @return a List of integer instances
-	 */
-	protected List<Integer> getVarianceIndicesForThoseParameterIndices(List<Integer> parameterIndices) {
-		List<Integer> varianceIndices = new ArrayList<Integer>();
-		for (Integer paramIndex : parameterIndices) {
-			if (!estimatedParameterIndices.contains(paramIndex)) {
-				throw new InvalidParameterException("The list contains some parameter indices that are not valid!");
-			} else {
-				varianceIndices.add(estimatedParameterIndices.indexOf(paramIndex));
-			}
-		}
-		return varianceIndices;
-	}
+//	/**
+//	 * This method returns a list of indices for variance extraction. This method is needed
+//	 * because the SAS implementation includes some fake parameters.
+//	 * @param parameterIndices a List of integer
+//	 * @return a List of integer instances
+//	 */
+//	protected List<Integer> getVarianceIndicesForThoseParameterIndices(List<Integer> parameterIndices) {
+//		List<Integer> varianceIndices = new ArrayList<Integer>();
+//		for (Integer paramIndex : parameterIndices) {
+//			if (!estimatedParameterIndices.contains(paramIndex)) {
+//				throw new InvalidParameterException("The list contains some parameter indices that are not valid!");
+//			} else {
+//				varianceIndices.add(estimatedParameterIndices.indexOf(paramIndex));
+//			}
+//		}
+//		return varianceIndices;
+//	}
 	
-	
+
 }

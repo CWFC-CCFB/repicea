@@ -1,10 +1,10 @@
 package repicea.predictor.wbirchloggrades.simplelinearmodel;
 
 import repicea.math.Matrix;
+import repicea.simulation.ModelParameterEstimates;
 import repicea.simulation.REpiceaPredictor;
 import repicea.stats.distributions.ChiSquaredDistribution;
 import repicea.stats.estimates.GaussianErrorTermEstimate;
-import repicea.stats.estimates.GaussianEstimate;
 
 @SuppressWarnings("serial")
 class SimpleLinearModel extends REpiceaPredictor {
@@ -28,7 +28,7 @@ class SimpleLinearModel extends REpiceaPredictor {
 		omega.m_afData[1][1] = 0.0005;
 		omega.m_afData[0][1] = Math.sqrt(omega.m_afData[0][0] * omega.m_afData[1][1]) * .1;
 		omega.m_afData[1][0] = omega.m_afData[0][1];
-		setParameterEstimates(new GaussianEstimate(beta, omega));
+		setParameterEstimates(new ModelParameterEstimates(beta, omega));
 		Matrix residualVariance = new Matrix(1,1);
 		if (R2_95Version) {
 			residualVariance.m_afData[0][0] = .284;			// to ensure a R2 of 0.95
@@ -61,7 +61,7 @@ class SimpleLinearModel extends REpiceaPredictor {
 			distributionForVCovRandomDeviates = new ChiSquaredDistribution(degreesOfFreedom, variance);
 		}
 		Matrix newVariance = distributionForVCovRandomDeviates.getRandomRealization();
-		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
+		setParameterEstimates(new ModelParameterEstimates(newMean, newVariance));
 		
 		Matrix residualVariance = this.getDefaultResidualError(ErrorTermGroup.Default).getVariance();
 		ChiSquaredDistribution residualVarianceDistribution = new ChiSquaredDistribution(degreesOfFreedom, residualVariance);
@@ -89,7 +89,7 @@ class SimpleLinearModel extends REpiceaPredictor {
 		Matrix newResidualVariance = res.transpose().multiply(invW).multiply(res).scalarMultiply(1d/(degreesOfFreedom));
 		Matrix newVariance = invXWX.scalarMultiply(newResidualVariance.m_afData[0][0]);
 		
-		setParameterEstimates(new GaussianEstimate(newMean, newVariance));
+		setParameterEstimates(new ModelParameterEstimates(newMean, newVariance));
 		setDefaultResidualError(ErrorTermGroup.Default, new GaussianErrorTermEstimate(newResidualVariance));
 	}
 

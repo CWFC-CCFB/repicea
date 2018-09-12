@@ -25,6 +25,7 @@ import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.simulation.HierarchicalLevel;
+import repicea.simulation.ModelParameterEstimates;
 import repicea.simulation.REpiceaPredictor;
 import repicea.simulation.SASParameterEstimates;
 import repicea.stats.StatisticalUtility;
@@ -44,7 +45,7 @@ class Artemis2009DiameterIncrementInternalPredictor extends REpiceaPredictor {
 	}
 
 	protected void setBeta(Matrix beta, Matrix omega) {
-		GaussianEstimate estimate = new SASParameterEstimates(beta, omega);
+		ModelParameterEstimates estimate = new SASParameterEstimates(beta, omega);
 		setParameterEstimates(estimate);
 		oXVector = new Matrix(1, estimate.getMean().m_iRows);
 	}
