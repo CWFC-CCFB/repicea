@@ -46,6 +46,7 @@ public class ModelParameterEstimates extends GaussianEstimate {
 	public ModelParameterEstimates(Matrix mean, Matrix variance) {
 		super(mean, variance);
 		estimatedParameterIndices = new ArrayList<Integer>();
+		setEstimatedParameterIndices();
 	}
 	
 	protected void setEstimatedParameterIndices() {
