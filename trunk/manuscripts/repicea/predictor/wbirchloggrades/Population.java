@@ -173,7 +173,7 @@ public class Population {
 			VariancePointEstimate correctedVarEstimate = hybHTEstimate.getVarianceOfTotalEstimate();
 			Realization thisRealization = new Realization(total, 
 					hybHTEstimate.getMean(), 
-					hybHTEstimate.getUncorrectedVariance(), 
+					hybHTEstimate.getUncorrectedVariance().getTotalVariance(), 
 					correctedVarEstimate.getTotalVariance(), 
 					correctedVarEstimate.getSamplingRelatedVariance(), 
 					correctedVarEstimate.getModelRelatedVariance());

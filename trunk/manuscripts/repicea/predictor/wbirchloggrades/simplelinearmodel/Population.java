@@ -74,7 +74,7 @@ public class Population {
 		Population pop = new Population(populationSize);
 		int nbRealizations = 10000; 
 		int nbInternalReal = 1000;
-		int sampleSize = 50;
+		int sampleSize = 25;
 		String filename;
 		if (SimpleLinearModel.R2_95Version) {
 			filename = ObjectUtility.getPackagePath(Population.class) + "simulationR2_95_" + sampleSize + ".csv";
@@ -149,9 +149,13 @@ public class Population {
 				}
 			}
 			VariancePointEstimate correctedVarEstimate = hybHTEstimate.getVarianceOfTotalEstimate();
+			double uncorrectedVariance = hybHTEstimate.getUncorrectedVariance().getTotalVariance().m_afData[0][0];
+			if (isCompleteBootstrap) {
+				uncorrectedVariance = hybHTEstimate.getUncorrectedVariance().getModelRelatedVariance().m_afData[0][0];  // onmy the variance of the point estimates for the complete bootstrap
+			}
 			Realization thisRealization = new Realization(total.m_afData[0][0], 
 					hybHTEstimate.getMean().m_afData[0][0], 
-					hybHTEstimate.getUncorrectedVariance().m_afData[0][0], 
+					uncorrectedVariance, 
 					correctedVarEstimate.getTotalVariance().m_afData[0][0], 
 					correctedVarEstimate.getSamplingRelatedVariance().m_afData[0][0], 
 					correctedVarEstimate.getModelRelatedVariance().m_afData[0][0]);

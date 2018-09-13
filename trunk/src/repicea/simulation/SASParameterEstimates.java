@@ -21,8 +21,6 @@ package repicea.simulation;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
-import repicea.stats.Distribution;
-import repicea.stats.StatisticalUtility;
 
 /**
  * The SASParameterEstimates class is customized for SAS outputs. The major difference
@@ -62,15 +60,15 @@ public class SASParameterEstimates extends ModelParameterEstimates {
 	
 	
 
-	@Override
-	public Matrix getRandomDeviate() {
-		Matrix lowerChol = getDistribution().getStandardDeviation();
-		Matrix randomVector = StatisticalUtility.drawRandomVector(lowerChol.m_iRows, Distribution.Type.GAUSSIAN);
-		Matrix oMat = lowerChol.multiply(randomVector);
-		Matrix deviate = getMean().getDeepClone();
-		deviate.addElementsAt(estimatedParameterIndices, oMat);
-		return deviate;
-	}
+//	@Override
+//	public Matrix getRandomDeviate() {
+//		Matrix lowerChol = getDistribution().getStandardDeviation();
+//		Matrix randomVector = StatisticalUtility.drawRandomVector(lowerChol.m_iRows, Distribution.Type.GAUSSIAN);
+//		Matrix oMat = lowerChol.multiply(randomVector);
+//		Matrix deviate = getMean().getDeepClone();
+//		deviate.addElementsAt(estimatedParameterIndices, oMat);
+//		return deviate;
+//	}
 
 //	/**
 //	 * This method returns a list of indices for variance extraction. This method is needed
