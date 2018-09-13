@@ -184,7 +184,8 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 			}
 			if (!heightableTrees.isEmpty()) {
 				// matrices for the blup calculation
-				int nbParameters = getParameterEstimates().getMean().m_iRows;
+				List<Integer> trueParameterIndices = getParameterEstimates().getTrueParameterIndices();
+				int nbParameters = trueParameterIndices.size();
 				int nbObs = heightableTrees.size();
 				Matrix matZ_i = new Matrix(nbObs, matGbck.m_iRows);		// design matrix for random effects 
 				Matrix matR_i = new Matrix(nbObs, nbObs);					// within-tree variance-covariance matrix  
@@ -195,7 +196,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 					Tree t = (Tree) heightableTrees.get(i);
 					double height = t.getHeightM();
 					regElement = fixedEffectsPrediction(stand, t, defaultBeta);
-					matX_i.setSubMatrix(oXVector.getSubMatrix(0, 0, 0, nbParameters - 1), i, 0);
+					matX_i.setSubMatrix(oXVector.getSubMatrix(DefaultZeroIndex, trueParameterIndices), i, 0);
 					matZ_i.setSubMatrix(regElement.vectorZ, i, 0);
 					double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
 					matR_i.m_afData[i][i] = variance;
