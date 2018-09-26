@@ -24,16 +24,6 @@ import java.util.List;
 public class TreeLoggerManager {
 
 	private static final List<String> TreeLoggerClassNames = new ArrayList<String>();
-	static {
-//		TreeLoggerClassNames.add(BasicTreeLogger.class.getName());
-//		TreeLoggerClassNames.add(EuropeanBeechBasicTreeLogger.class.getName());
-//		TreeLoggerClassNames.add(MaritimePineBasicTreeLogger.class.getName());
-//		TreeLoggerClassNames.add(WBirchProdVolTreeLogger.class.getName());
-//		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.petrotreelogger.PetroTreeLogger");
-//		TreeLoggerClassNames.add("quebecmrnfutility.treelogger.sybille.SybilleTreeLogger");
-//		TreeLoggerClassNames.add("lerfob.treelogger.mathilde.MathildeTreeLogger");	
-//		TreeLoggerClassNames.add("lerfob.treelogger.douglasfirfcba.DouglasFCBATreeLogger");
-	}
 	
 	private static TreeLoggerManager Instance;
 	
