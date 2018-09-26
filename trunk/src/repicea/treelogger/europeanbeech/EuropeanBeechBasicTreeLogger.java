@@ -19,6 +19,7 @@
 package repicea.treelogger.europeanbeech;
 
 import repicea.simulation.treelogger.LoggableTree;
+import repicea.simulation.treelogger.TreeLoggerManager;
 import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
@@ -28,6 +29,11 @@ import repicea.treelogger.europeanbeech.EuropeanBeechBasicTreeLoggerParameters.G
 
 public class EuropeanBeechBasicTreeLogger extends DiameterBasedTreeLogger {
 
+	static {
+		TreeLoggerManager.registerTreeLoggerName(EuropeanBeechBasicTreeLogger.class.getName());
+	}
+	
+	
 	@Override
 	public EuropeanBeechBasicTreeLoggerParameters createDefaultTreeLoggerParameters() {
 		return new EuropeanBeechBasicTreeLoggerParameters();
