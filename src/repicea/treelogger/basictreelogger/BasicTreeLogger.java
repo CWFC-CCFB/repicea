@@ -23,13 +23,8 @@ import java.util.List;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
-import repicea.simulation.treelogger.TreeLoggerManager;
 
 public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, LoggableTree> {
-
-	static {
-		TreeLoggerManager.registerTreeLoggerName(BasicTreeLogger.class.getName());
-	}
 	
 	public BasicTreeLogger() {}
 

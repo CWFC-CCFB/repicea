@@ -26,15 +26,10 @@ import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictor;
 import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
-import repicea.simulation.treelogger.TreeLoggerManager;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 
 public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerParameters, WBirchProdVolLoggableTree> {
 
-	static {
-		TreeLoggerManager.registerTreeLoggerName(WBirchProdVolTreeLogger.class.getName());
-	}
-	
 	private final static double VERY_SMALL = 1E-8;
 	
 	private WBirchLogGradesPredictor wbp;

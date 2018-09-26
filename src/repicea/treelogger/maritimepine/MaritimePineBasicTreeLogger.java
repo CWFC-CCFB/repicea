@@ -19,7 +19,6 @@
 package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.LoggableTree;
-import repicea.simulation.treelogger.TreeLoggerManager;
 import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
@@ -35,10 +34,6 @@ import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Gra
  */
 public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 
-	static {
-		TreeLoggerManager.registerTreeLoggerName(MaritimePineBasicTreeLogger.class.getName());
-	}
-	
 	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
 
 	@Override
