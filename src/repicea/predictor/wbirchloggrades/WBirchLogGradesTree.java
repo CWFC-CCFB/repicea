@@ -21,36 +21,38 @@ package repicea.predictor.wbirchloggrades;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.treelevel.ABCDQualityProvider;
 import repicea.simulation.covariateproviders.treelevel.DbhCmProvider;
-import repicea.util.REpiceaTranslator;
-import repicea.util.REpiceaTranslator.TextableEnum;
+import repicea.simulation.covariateproviders.treelevel.SpeciesProvider;
 
 /**
  * This interface ensures the tree object is compatible with the tree logger WBirchProdVol.
  * @author Mathieu Fortin - September 2013
  */
-public interface WBirchLogGradesTree extends DbhCmProvider, ABCDQualityProvider, MonteCarloSimulationCompliantObject {
+public interface WBirchLogGradesTree extends DbhCmProvider, 
+											SpeciesProvider, 
+											ABCDQualityProvider, 
+											MonteCarloSimulationCompliantObject {
 	
-	public static enum WBirchProdVolTreeSpecies implements TextableEnum {
-		WhiteBirch("White birch", "Bouleau \u00E0 papier");
-
-		WBirchProdVolTreeSpecies(String englishText, String frenchText) {
-			setText(englishText, frenchText);
-		}
-		
-		@Override
-		public void setText(String englishText, String frenchText) {
-			REpiceaTranslator.setString(this, englishText, frenchText);
-		}
-		
-		@Override
-		public String toString() {return REpiceaTranslator.getString(this);}
-	}
+//	public static enum WBirchProdVolTreeSpecies implements TextableEnum {
+//		WhiteBirch("White birch", "Bouleau \u00E0 papier");
+//
+//		WBirchProdVolTreeSpecies(String englishText, String frenchText) {
+//			setText(englishText, frenchText);
+//		}
+//		
+//		@Override
+//		public void setText(String englishText, String frenchText) {
+//			REpiceaTranslator.setString(this, englishText, frenchText);
+//		}
+//		
+//		@Override
+//		public String toString() {return REpiceaTranslator.getString(this);}
+//	}
 	
 	/**
 	 * This method ensures the tree instance knows its species. It should return null if the tree is not eligible.
 	 * @return a WBirchProdVolTreeSpecies enum 
 	 */
-	public WBirchProdVolTreeSpecies getWBirchProdVolTreeSpecies();
+//	public WBirchProdVolTreeSpecies getWBirchProdVolTreeSpecies();
 	
 	
 	
