@@ -24,10 +24,8 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictor;
 import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
-import repicea.simulation.species.REpiceaSpecies;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
-import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 
 public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerParameters, WBirchProdVolLoggableTree> {
@@ -85,7 +83,7 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	public WBirchProdVolLoggableTree getEligible(LoggableTree t) {
 		if (t instanceof WBirchProdVolLoggableTree) {
 			WBirchProdVolLoggableTree tree = (WBirchProdVolLoggableTree) t;
-			if (tree.getSpecies() == REpiceaSpecies.Species.Betula_papyrifera && tree.getDbhCm() >= 18) {	// trees below 18 cm in dbh are not eligible
+			if (tree.getWBirchProdVolTreeSpecies() != null && tree.getDbhCm() >= 18) {	// trees below 18 cm in dbh are not eligible
 				return tree;
 			}
 		}
@@ -93,8 +91,8 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	}
 
 	@Override
-	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
-		return check.getTreeInstance() instanceof WBirchProdVolLoggableTree; // strong match only because the WBirchProdVolLoggableTree implements many other methods
+	public boolean isCompatibleWith(Object referent) {
+		return referent instanceof WBirchProdVolLoggableTree;
 	}
 
 	/*

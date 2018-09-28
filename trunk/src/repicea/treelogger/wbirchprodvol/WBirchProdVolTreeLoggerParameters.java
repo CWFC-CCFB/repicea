@@ -24,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
-import repicea.simulation.species.REpiceaSpecies;
+import repicea.predictor.wbirchloggrades.WBirchLogGradesTree.WBirchProdVolTreeSpecies;
 import repicea.simulation.treelogger.TreeLoggerParameters;
 import repicea.simulation.treelogger.TreeLoggerParametersDialog;
 import repicea.util.REpiceaTranslator;
@@ -70,7 +70,7 @@ public class WBirchProdVolTreeLoggerParameters extends TreeLoggerParameters<WBir
 	protected void initializeDefaultLogCategories() {
 		getLogCategories().clear();
 		List<WBirchProdVolTreeLogCategory> logCategories = new ArrayList<WBirchProdVolTreeLogCategory>();
-		String speciesName = REpiceaSpecies.Species.Betula_papyrifera.toString();
+		String speciesName = WBirchProdVolTreeSpecies.WhiteBirch.toString();
 		getLogCategories().put(speciesName, logCategories);
 		logCategories.add(new WBirchProdVolTreeLogCategory(ProductID.Veneer.toString(), speciesName, "A", 2.5, null, null));
 		logCategories.add(new WBirchProdVolTreeLogCategory(ProductID.LowGradeVeneer.toString(), speciesName, "B", 2.5, 27.1, 3.1));

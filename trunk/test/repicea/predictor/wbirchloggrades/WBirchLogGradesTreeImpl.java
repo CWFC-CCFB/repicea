@@ -3,7 +3,6 @@ package repicea.predictor.wbirchloggrades;
 import repicea.math.Matrix;
 import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
 import repicea.simulation.HierarchicalLevel;
-import repicea.simulation.species.REpiceaSpecies;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolLoggableTree;
 
 class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
@@ -83,7 +82,7 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 
 
 	@Override
-	public REpiceaSpecies.Species getSpecies() {return REpiceaSpecies.Species.Betula_papyrifera;}
+	public WBirchProdVolTreeSpecies getWBirchProdVolTreeSpecies() {return WBirchProdVolTreeSpecies.WhiteBirch;}
 
 
 	@Override
@@ -96,10 +95,10 @@ class WBirchLogGradesTreeImpl implements WBirchProdVolLoggableTree {
 	}
 
 
-//	@Override
-//	public String getSpeciesName() {
-//		return getWBirchProdVolTreeSpecies().toString();
-//	}
+	@Override
+	public String getSpeciesName() {
+		return getWBirchProdVolTreeSpecies().toString();
+	}
 
 
 	@Override
