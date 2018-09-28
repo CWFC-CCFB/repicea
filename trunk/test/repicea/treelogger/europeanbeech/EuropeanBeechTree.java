@@ -18,6 +18,8 @@
  */
 package repicea.treelogger.europeanbeech;
 
+import repicea.simulation.species.REpiceaSpecies;
+import repicea.simulation.species.REpiceaSpecies.Species;
 
 public class EuropeanBeechTree implements EuropeanBeechBasicTree {
 
@@ -44,10 +46,10 @@ public class EuropeanBeechTree implements EuropeanBeechBasicTree {
 		return 1;
 	}
 
-	@Override
-	public String getSpeciesName() {
-		return EuropeanBeechBasicTree.Species.EuropeanBeech.toString();
-	}
+//	@Override
+//	public String getSpeciesName() {
+//		return EuropeanBeechBasicTree.Species.EuropeanBeech.toString();
+//	}
 
 	@Override
 	public double getDbhCm() {
@@ -57,6 +59,11 @@ public class EuropeanBeechTree implements EuropeanBeechBasicTree {
 	@Override
 	public double getDbhCmStandardDeviation() {
 		return standardDeviationCm;
+	}
+
+	@Override
+	public Species getSpecies() {
+		return REpiceaSpecies.Species.Fagus_sylvatica;
 	}
 
 }

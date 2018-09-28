@@ -18,12 +18,18 @@
  */
 package repicea.treelogger.europeanbeech;
 
+import java.util.List;
+
+import repicea.simulation.species.REpiceaSpecies;
+import repicea.simulation.species.REpiceaSpecies.Species;
 import repicea.simulation.treelogger.LoggableTree;
+import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
 import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogger;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedWoodPiece;
+//import repicea.treelogger.europeanbeech.EuropeanBeechBasicTree.Species;
 import repicea.treelogger.europeanbeech.EuropeanBeechBasicTreeLoggerParameters.Grade;
 
 public class EuropeanBeechBasicTreeLogger extends DiameterBasedTreeLogger {
@@ -35,9 +41,9 @@ public class EuropeanBeechBasicTreeLogger extends DiameterBasedTreeLogger {
 	}
 
 	@Override
-	public EuropeanBeechBasicTree getEligible(LoggableTree t) {
-		if (t instanceof EuropeanBeechBasicTree) {
-			return (EuropeanBeechBasicTree) t;
+	public DiameterBasedLoggableTree getEligible(LoggableTree t) {
+		if (t instanceof DiameterBasedLoggableTree && t.getSpecies() == REpiceaSpecies.Species.Fagus_sylvatica) {
+			return (DiameterBasedLoggableTree) t;
 		} else {
 			return null;
 		}
@@ -122,8 +128,23 @@ public class EuropeanBeechBasicTreeLogger extends DiameterBasedTreeLogger {
 	}
 
 	@Override
-	public boolean isCompatibleWith(Object referent) {
-		return referent instanceof EuropeanBeechBasicTree; 
+	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
+		Object treeInstance = check.getTreeInstance();
+		if (treeInstance instanceof EuropeanBeechBasicTree) {	// strong match
+			return true;
+		} else {		// weak match
+			if (treeInstance instanceof DiameterBasedLoggableTree) {
+				List<Species> speciesList = check.getSpeciesList();
+				if (speciesList != null) {
+					if (speciesList.size() == 1) {
+						if (speciesList.get(0) == Species.Fagus_sylvatica) {
+							return true;
+						} 
+					}
+				}
+			}
+			return false;
+		} 
 	}
 	
 	

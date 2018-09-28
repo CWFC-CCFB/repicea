@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2018 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,23 +16,20 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.simulation.covariateproviders.standlevel;
+package repicea.simulation.covariateproviders.treelevel;
 
-import java.util.List;
-
-import repicea.simulation.species.REpiceaSpecies.Species;
+import repicea.simulation.species.REpiceaSpecies;
 
 /**
- * This interface ensures that the plot can return a list of all species.
- * @author Mathieu Fortin - September 2018
+ * This interface ensures the tree can provide its own species name.
+ * @author Mathieu Fortin - March 2013
  */
-public interface SpeciesListProvider {
-	
+public interface SpeciesProvider {
 
 	/**
-	 * This method returns a list of species name that are found in either this plot or all other plots.
-	 * @return a List of String instances
+	 * This method returns the species name of this tree.
+	 * @return a Species enum
 	 */
-	public List<Species> getExtensiveSpeciesList();
+	public REpiceaSpecies.Species getSpecies();
 	
 }

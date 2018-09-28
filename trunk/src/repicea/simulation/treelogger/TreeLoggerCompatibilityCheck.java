@@ -21,6 +21,8 @@ package repicea.simulation.treelogger;
 import java.util.ArrayList;
 import java.util.List;
 
+import repicea.simulation.species.REpiceaSpecies.Species;
+
 /**
  * The TreeLoggerCompatibilityCheck class provide a tree instance and the list of species name for an extended check
  * on the compatibility of the tree loggers.
@@ -29,21 +31,19 @@ import java.util.List;
 public class TreeLoggerCompatibilityCheck {
 	
 	private final Object treeInstance;
-	private final List<String> speciesNameList;
+	private final List<Species> speciesList;
 	
-	public TreeLoggerCompatibilityCheck(Object treeInstance, List<String> speciesNameList) {
+	public TreeLoggerCompatibilityCheck(Object treeInstance, List<Species> speciesList) {
 		this.treeInstance = treeInstance;
-		this.speciesNameList = new ArrayList<String>();
-		this.speciesNameList.addAll(speciesNameList);
+		this.speciesList = new ArrayList<Species>();
+		this.speciesList.addAll(speciesList);
 	}
 		
-	// TODO FP check if could be protected instead
 	public Object getTreeInstance() {return treeInstance;}
 
-	// TODO FP check if could be protected instead
-	public List<String> getSpeciesNameList() {
-		List<String> copyList = new ArrayList<String>();
-		copyList.addAll(speciesNameList);
+	public List<Species> getSpeciesList() {
+		List<Species> copyList = new ArrayList<Species>();
+		copyList.addAll(speciesList);
 		return copyList;
 	}
 

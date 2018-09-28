@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
+import repicea.simulation.species.REpiceaSpecies;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLoggerParameters;
 import repicea.util.REpiceaTranslator;
@@ -80,7 +81,7 @@ public class MaritimePineBasicTreeLoggerParameters extends DiameterBasedTreeLogg
 
 	@Override
 	protected String getSpeciesName() {
-		return MaritimePineBasicLoggableTree.Species.MaritimePine.toString();
+		return REpiceaSpecies.Species.Pinus_pinaster.toString();
 	}
 
 	public static void main(String[] args) {

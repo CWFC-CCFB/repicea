@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
+import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
 
 public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, LoggableTree> {
 	
@@ -58,8 +59,8 @@ public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, Logga
 	}
 
 	@Override
-	public boolean isCompatibleWith(Object referent) {
-		return referent instanceof LoggableTree;
+	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
+		return check.getTreeInstance() instanceof LoggableTree;
 	}
 	
 }
