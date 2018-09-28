@@ -19,7 +19,6 @@
 package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.LoggableTree;
-import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
 import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
@@ -120,8 +119,8 @@ public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 	}
 
 	@Override
-	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
-		return check.getTreeInstance() instanceof MaritimePineBasicLoggableTree;	// strong match - weak match is impossible because the MaritimePineBasicLoggableTree implements other methods
+	public boolean isCompatibleWith(Object referent) {
+		return referent instanceof MaritimePineBasicLoggableTree;
 	}
 	
 	
