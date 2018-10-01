@@ -17,7 +17,18 @@ public class MaritimePineBasicTreeLogCategory extends DiameterBasedTreeLogCatego
 	
 	@Override
 	protected boolean isEligible(LoggableTree tree) {
-		return tree instanceof MaritimePineBasicLoggableTree;
+		if (tree instanceof MaritimePineBasicLoggableTree) {
+			boolean subjectToMinimumDiameter = true;
+			if (tree instanceof DbhCmStandardDeviationProvider) {
+				subjectToMinimumDiameter = ((DbhCmStandardDeviationProvider) tree).getDbhCmStandardDeviation() <= 0d;
+			} 
+			if (subjectToMinimumDiameter) {		// only enabled if the standard deviation is 0
+				return ((MaritimePineBasicLoggableTree) tree).getDbhCm() >= minimumDbhCm;
+			} else {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override

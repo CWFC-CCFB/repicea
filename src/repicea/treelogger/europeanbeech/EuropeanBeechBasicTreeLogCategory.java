@@ -39,10 +39,19 @@ public class EuropeanBeechBasicTreeLogCategory extends DiameterBasedTreeLogCateg
 	protected EuropeanBeechBasicTreeLogCategory(Grade logGrade, String species, double smallEndDiameter) {
 		super(logGrade, species, smallEndDiameter, false);
 	}
-	
+
+	@Override
 	protected boolean isEligible(LoggableTree tree) {
-		if (tree instanceof EuropeanBeechBasicTree && tree.getCommercialVolumeM3() > 0d) {
-			return ((EuropeanBeechBasicTree) tree).getDbhCm() >= minimumDbhCm;
+		if (tree instanceof EuropeanBeechBasicTree) {
+			boolean subjectToMinimumDiameter = true;
+			if (tree instanceof DbhCmStandardDeviationProvider) {
+				subjectToMinimumDiameter = ((DbhCmStandardDeviationProvider) tree).getDbhCmStandardDeviation() <= 0d;
+			} 
+			if (subjectToMinimumDiameter) {		// only enabled if the standard deviation is 0
+				return ((EuropeanBeechBasicTree) tree).getDbhCm() >= minimumDbhCm;
+			} else {
+				return true;
+			}
 		} else {
 			return false;
 		}
@@ -101,7 +110,7 @@ public class EuropeanBeechBasicTreeLogCategory extends DiameterBasedTreeLogCateg
 					veneerProportion = 0d;
 				} else { 
 					energyWoodProportion = 0d;
-					industryWoodProportion = 1d;
+					industryWoodProportion = 0d;
 					lowQualitySawlogProportion = 0d;
 					regularQualitySawlogProportion = 0d;
 					veneerProportion = 1d;
