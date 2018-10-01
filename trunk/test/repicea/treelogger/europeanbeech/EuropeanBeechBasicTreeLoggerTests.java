@@ -44,6 +44,7 @@ public class EuropeanBeechBasicTreeLoggerTests {
 			sum += volumeM3;
 		}
 		Assert.assertEquals("Comparing bole volume", 1d, sum, 1E-8); 
+		
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })

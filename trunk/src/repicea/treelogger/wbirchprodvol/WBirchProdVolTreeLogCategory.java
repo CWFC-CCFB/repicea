@@ -19,6 +19,7 @@
 package repicea.treelogger.wbirchprodvol;
 
 import repicea.simulation.treelogger.LogCategory;
+import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.WoodPiece;
 
 @SuppressWarnings("serial")
@@ -61,8 +62,16 @@ public class WBirchProdVolTreeLogCategory extends LogCategory {
 
 	@Override
 	public double getYieldFromThisPiece(WoodPiece piece) throws Exception {
-		// TODO Auto-generated method stub
-		return 0;
+		return 1d;
+	}
+
+	/*
+	 * Useless for this module (non-Javadoc)
+	 * @see repicea.simulation.treelogger.LogCategory#extractFromTree(repicea.simulation.treelogger.LoggableTree, java.lang.Object[])
+	 */
+	@Override
+	protected WoodPiece extractFromTree(LoggableTree tree, Object... parms) {
+		return null;
 	}
 
 }

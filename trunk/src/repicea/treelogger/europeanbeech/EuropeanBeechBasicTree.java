@@ -18,26 +18,25 @@
  */
 package repicea.treelogger.europeanbeech;
 
+import repicea.simulation.covariateproviders.treelevel.DbhCmStandardDeviationProvider;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
-import repicea.util.REpiceaTranslator;
-import repicea.util.REpiceaTranslator.TextableEnum;
 
-public interface EuropeanBeechBasicTree extends DiameterBasedLoggableTree {
+public interface EuropeanBeechBasicTree extends DiameterBasedLoggableTree, DbhCmStandardDeviationProvider {
 
-	public static enum Species implements TextableEnum {
-		EuropeanBeech("European beech", "H\u00EAtre europ\u00E9en");
-		
-		Species(String englishText, String frenchText) {
-			setText(englishText, frenchText);
-		}
-		
-		@Override
-		public void setText(String englishText, String frenchText) {
-			REpiceaTranslator.setString(this, englishText, frenchText);
-		}
-		
-		@Override
-		public String toString() {return REpiceaTranslator.getString(this);}
-	}
+//	public static enum Species implements TextableEnum {
+//		EuropeanBeech("European beech", "H\u00EAtre europ\u00E9en");
+//		
+//		Species(String englishText, String frenchText) {
+//			setText(englishText, frenchText);
+//		}
+//		
+//		@Override
+//		public void setText(String englishText, String frenchText) {
+//			REpiceaTranslator.setString(this, englishText, frenchText);
+//		}
+//		
+//		@Override
+//		public String toString() {return REpiceaTranslator.getString(this);}
+//	}
 	
 }

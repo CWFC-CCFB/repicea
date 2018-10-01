@@ -22,16 +22,19 @@ import java.util.List;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
+import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
+import repicea.treelogger.basictreelogger.BasicTreeLogger;
 
-public abstract class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerParameters, DiameterBasedLoggableTree> {
+public class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerParameters, DiameterBasedLoggableTree> {
 
 
+	
 	@Override
 	protected void logThisTree(DiameterBasedLoggableTree tree) {
-		List<DiameterBasedTreeLogCategory> logCategories = params.getSpeciesLogCategories(getTreeLoggerParameters().getSpeciesName());
+		List<DiameterBasedTreeLogCategory> logCategories = params.getSpeciesLogCategories(params.getSpeciesName());
 		DiameterBasedWoodPiece piece;
 		for (DiameterBasedTreeLogCategory logCategory : logCategories) {
-			piece = producePiece(tree, logCategory);
+			piece = logCategory.extractFromTree(tree, params);
 			if (piece != null) {
 				addWoodPiece(tree, piece);	
 			} 
@@ -42,12 +45,22 @@ public abstract class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTr
 	public void setTreeLoggerParameters() {}
 
 	@Override
-	public abstract DiameterBasedTreeLoggerParameters createDefaultTreeLoggerParameters();
+	public DiameterBasedTreeLoggerParameters createDefaultTreeLoggerParameters() {
+		return new DiameterBasedTreeLoggerParameters(BasicTreeLogger.class);
+	}
 	
 	@Override
-	public abstract DiameterBasedLoggableTree getEligible(LoggableTree t);
+	public DiameterBasedLoggableTree getEligible(LoggableTree t) {
+		if (t instanceof DiameterBasedLoggableTree) {
+			return (DiameterBasedLoggableTree) t;
+		} else {
+			return null;
+		}
+	}
 
-	
-	protected abstract DiameterBasedWoodPiece producePiece(DiameterBasedLoggableTree tree, DiameterBasedTreeLogCategory logCategory);
+	@Override
+	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
+		return check.getTreeInstance() instanceof DiameterBasedLoggableTree;
+	}
 }
 

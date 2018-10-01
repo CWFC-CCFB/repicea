@@ -53,6 +53,7 @@ public class BasicTreeLoggerParameters extends TreeLoggerParameters<BasicLogCate
 			return REpiceaTranslator.getString(this);
 		}
 	}
+	
 
 	private transient BasicTreeLoggerParametersDialog guiInterface;
 	

@@ -21,6 +21,7 @@ package repicea.treelogger.basictreelogger;
 
 import repicea.simulation.treelogger.LogCategory;
 import repicea.simulation.treelogger.LogCategoryPanel;
+import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.WoodPiece;
 
 /**
@@ -80,6 +81,14 @@ public class BasicLogCategory extends LogCategory {
 	@Override
 	public boolean isVisible() {
 		return guiInterface != null && guiInterface.isVisible();
+	}
+
+
+	@Override
+	protected BasicTreeLoggerWoodPiece extractFromTree(LoggableTree tree, Object... parms) {
+		double volumeM3 = tree.getCommercialVolumeM3() * volumeProportionToBeProcessedInThisCategory;
+		BasicTreeLoggerWoodPiece piece = new BasicTreeLoggerWoodPiece(this, tree, volumeM3); 
+		return piece;
 	}
 
 }
