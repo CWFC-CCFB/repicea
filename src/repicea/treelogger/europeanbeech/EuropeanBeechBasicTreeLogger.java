@@ -19,6 +19,7 @@
 package repicea.treelogger.europeanbeech;
 
 import repicea.simulation.treelogger.LoggableTree;
+import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
 import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
@@ -122,8 +123,8 @@ public class EuropeanBeechBasicTreeLogger extends DiameterBasedTreeLogger {
 	}
 
 	@Override
-	public boolean isCompatibleWith(Object referent) {
-		return referent instanceof EuropeanBeechBasicTree; 
+	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
+		return check.getTreeInstance() instanceof EuropeanBeechBasicTree; 
 	}
 	
 	
