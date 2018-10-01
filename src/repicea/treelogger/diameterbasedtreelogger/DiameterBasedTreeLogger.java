@@ -23,7 +23,6 @@ import java.util.List;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
 import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
-import repicea.treelogger.basictreelogger.BasicTreeLogger;
 
 public class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerParameters, DiameterBasedLoggableTree> {
 
@@ -47,7 +46,7 @@ public class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerP
 
 	@Override
 	public DiameterBasedTreeLoggerParameters createDefaultTreeLoggerParameters() {
-		return new DiameterBasedTreeLoggerParameters(BasicTreeLogger.class);
+		return new DiameterBasedTreeLoggerParameters(DiameterBasedTreeLogger.class);
 	}
 	
 	@Override
