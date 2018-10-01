@@ -20,12 +20,7 @@ package repicea.treelogger.maritimepine;
 
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
-import repicea.stats.distributions.utility.GaussianUtility;
-import repicea.treelogger.diameterbasedtreelogger.DiameterBasedLoggableTree;
-import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogger;
-import repicea.treelogger.diameterbasedtreelogger.DiameterBasedWoodPiece;
-import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Grade;
 
 /**
  * The MaritimePineBasicTreeLogger class is a simple tree logger which considers
@@ -35,7 +30,7 @@ import repicea.treelogger.maritimepine.MaritimePineBasicTreeLoggerParameters.Gra
  */
 public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 
-	private static double LowQualityPercentageWithinHighQualityGrade = 0.65;
+	protected static double LowQualityPercentageWithinHighQualityGrade = 0.65;
 
 	@Override
 	public MaritimePineBasicTreeLoggerParameters createDefaultTreeLoggerParameters() {
@@ -51,73 +46,6 @@ public class MaritimePineBasicTreeLogger extends DiameterBasedTreeLogger {
 		}
 	}
 
-	@Override
-	protected DiameterBasedWoodPiece producePiece(DiameterBasedLoggableTree tree, DiameterBasedTreeLogCategory logCategory) {
-		double mqd = tree.getDbhCm();
-		double dbhStandardDeviation = tree.getDbhCmStandardDeviation();
-		DiameterBasedWoodPiece piece = null;
-		double energyWoodProportion;
-		double highQualitySawlogProportion;
-		double lowQualitySawlogProportion;
-
-		if (dbhStandardDeviation > 0) {
-			// Assumption of a normal distribution for stem distribution
-			energyWoodProportion = GaussianUtility.getCumulativeProbability((20d - mqd)/dbhStandardDeviation);
-			lowQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation) - energyWoodProportion;
-			double potentialHighQualitySawlogProportion = GaussianUtility.getCumulativeProbability((30d - mqd)/dbhStandardDeviation, true);
-			lowQualitySawlogProportion += LowQualityPercentageWithinHighQualityGrade * potentialHighQualitySawlogProportion;
-			highQualitySawlogProportion = potentialHighQualitySawlogProportion * (1 - LowQualityPercentageWithinHighQualityGrade); 
-		} else {	// no standard deviation
-			if (mqd < 20) {
-				energyWoodProportion = 1d;
-				lowQualitySawlogProportion = 0d;
-				highQualitySawlogProportion = 0d;
-			} else  if (mqd < 30) {
-				energyWoodProportion = 0d;
-				lowQualitySawlogProportion = 1d;
-				highQualitySawlogProportion = 0d;
-			} else {
-				energyWoodProportion = 0d;
-				lowQualitySawlogProportion = LowQualityPercentageWithinHighQualityGrade;
-				highQualitySawlogProportion = 1 - LowQualityPercentageWithinHighQualityGrade;
-			}
-		}
-		
-		
-		Grade logGrade = (Grade) logCategory.getGrade();
-		
-		switch(logGrade) {
-		case Stump:
-			double stumpVolumeM3 = ((MaritimePineBasicLoggableTree) tree).getHarvestedStumpVolumeM3();
-			if  (stumpVolumeM3 > 0) {
-				piece = new DiameterBasedWoodPiece(logCategory, tree, stumpVolumeM3);
-			} 
-			break;
-		case Crown:
-			double crownVolumeM3 = ((MaritimePineBasicLoggableTree) tree).getHarvestedCrownVolumeM3();
-			if  (crownVolumeM3 > 0) {
-				piece = new DiameterBasedWoodPiece(logCategory, tree, crownVolumeM3);
-			} 
-			break;
-		case IndustryWood:
-			if (energyWoodProportion > 0) {
-				piece = new DiameterBasedWoodPiece(logCategory, tree, energyWoodProportion * tree.getCommercialVolumeM3());
-			} 
-			break;
-		case SawlogLowQuality:
-			if (lowQualitySawlogProportion > 0) {
-				piece = new DiameterBasedWoodPiece(logCategory, tree, lowQualitySawlogProportion * tree.getCommercialVolumeM3());
-			}
-			break;
-		case SawlogHighQuality:
-			if (highQualitySawlogProportion > 0) {
-				piece = new DiameterBasedWoodPiece(logCategory, tree, highQualitySawlogProportion * tree.getCommercialVolumeM3());
-			}
-			break;
-		}
-
-		return piece;
-	}
 
 	@Override
 	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {

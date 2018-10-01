@@ -1,5 +1,7 @@
 package repicea.treelogger.maritimepine;
 
+import repicea.simulation.species.REpiceaSpecies;
+
 class MaritimePineBasicLoggableTreeImpl implements MaritimePineBasicLoggableTree {
 
 	private final double dbhCm;
@@ -31,7 +33,7 @@ class MaritimePineBasicLoggableTreeImpl implements MaritimePineBasicLoggableTree
 
 	@Override
 	public String getSpeciesName() {
-		return MaritimePineBasicLoggableTree.Species.MaritimePine.toString();
+		return REpiceaSpecies.Species.Pinus_pinaster.toString();
 	}
 
 	@Override

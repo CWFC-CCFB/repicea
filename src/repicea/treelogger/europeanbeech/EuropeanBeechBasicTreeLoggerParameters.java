@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
+import repicea.simulation.species.REpiceaSpecies;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLogCategory;
 import repicea.treelogger.diameterbasedtreelogger.DiameterBasedTreeLoggerParameters;
 import repicea.util.REpiceaTranslator;
@@ -70,12 +71,8 @@ public class EuropeanBeechBasicTreeLoggerParameters extends DiameterBasedTreeLog
 		categories.add(new EuropeanBeechBasicTreeLogCategory(Grade.EnergyWood, species, 5));
 	}
 	
+	protected String getSpeciesName() {return REpiceaSpecies.Species.Fagus_sylvatica.toString();}
 	
-	@Override
-	protected String getSpeciesName() {
-		return EuropeanBeechBasicTree.Species.EuropeanBeech.toString();
-	}
-
 	public static void main(String[] args) {
 		EuropeanBeechBasicTreeLoggerParameters params = new EuropeanBeechBasicTreeLoggerParameters();
 		params.setReadWritePermissionGranted(new DefaultREpiceaGUIPermission(true));

@@ -43,7 +43,10 @@ public class BasicTreeLogger extends TreeLogger<BasicTreeLoggerParameters, Logga
 		List<BasicLogCategory> logCategories = params.getSpeciesLogCategories(BasicTreeLoggerParameters.ANY_SPECIES);
 		if (tree.getCommercialVolumeM3() > 0) {
 			for (BasicLogCategory logCategory : logCategories) {
-				addWoodPiece(tree, new BasicTreeLoggerWoodPiece(logCategory, tree));
+				BasicTreeLoggerWoodPiece piece = logCategory.extractFromTree(tree);
+				if (piece != null) {
+					addWoodPiece(tree, piece);
+				}
 			}
 		}
 	}

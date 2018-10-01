@@ -18,6 +18,7 @@
  */
 package repicea.treelogger.diameterbasedtreelogger;
 
+import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.WoodPiece;
 
 @SuppressWarnings("serial")
@@ -30,7 +31,7 @@ public class DiameterBasedWoodPiece extends WoodPiece {
 	 * @param tree a MaritimePineBasicTree instance
 	 * @param volumeM3 the volume without any expansion factor
 	 */
-	public DiameterBasedWoodPiece(DiameterBasedTreeLogCategory logCategory, DiameterBasedLoggableTree tree, double volumeM3) {
+	public DiameterBasedWoodPiece(DiameterBasedTreeLogCategory logCategory, LoggableTree tree, double volumeM3) {
 		super(logCategory, tree);
 		setVolumeM3(volumeM3);
 	}

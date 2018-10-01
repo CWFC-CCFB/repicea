@@ -18,6 +18,7 @@
  */
 package repicea.treelogger.europeanbeech;
 
+import repicea.simulation.species.REpiceaSpecies;
 
 public class EuropeanBeechTree implements EuropeanBeechBasicTree {
 
@@ -46,7 +47,7 @@ public class EuropeanBeechTree implements EuropeanBeechBasicTree {
 
 	@Override
 	public String getSpeciesName() {
-		return EuropeanBeechBasicTree.Species.EuropeanBeech.toString();
+		return REpiceaSpecies.Species.Fagus_sylvatica.toString();
 	}
 
 	@Override

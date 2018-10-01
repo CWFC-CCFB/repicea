@@ -34,9 +34,29 @@ import javax.swing.border.EtchedBorder;
 import repicea.gui.UIControlManager;
 import repicea.simulation.treelogger.LogCategoryPanel;
 import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
 public class DiameterBasedTreeLogCategoryPanel extends LogCategoryPanel<DiameterBasedTreeLogCategory> {
+	
+	protected static enum MessageID implements TextableEnum {
+		MinimumDBH("Minimum DBH (cm)", "DHP minimum (cm)");
+
+		MessageID(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+		
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
+	}
+	
+	
+	
 	
 	protected DiameterBasedTreeLogCategoryPanel(DiameterBasedTreeLogCategory logCategory) {
 		super(logCategory);
@@ -57,7 +77,7 @@ public class DiameterBasedTreeLogCategoryPanel extends LogCategoryPanel<Diameter
 		Component horizontalStrut = Box.createHorizontalStrut(20);
 		logCategoryNamePanel.add(horizontalStrut);
 
-		JLabel nameLabel = new JLabel(REpiceaTranslator.getString(MessageID.LogGradeName));
+		JLabel nameLabel = new JLabel(LogCategoryPanel.MessageID.LogGradeName.toString());
 		nameLabel.setFont(new Font("Arial", Font.BOLD, 12));
 		nameLabel.setHorizontalAlignment(SwingConstants.LEFT);
 		logCategoryNamePanel.add(nameLabel);
@@ -76,11 +96,11 @@ public class DiameterBasedTreeLogCategoryPanel extends LogCategoryPanel<Diameter
 
 		JPanel featurePanel = new JPanel();
 		featurePanel.add(Box.createHorizontalStrut(5));
-		featurePanel.add(UIControlManager.getLabel(MessageID.SmallEndDiameter));
+		featurePanel.add(UIControlManager.getLabel(MessageID.MinimumDBH));
 		featurePanel.add(Box.createHorizontalStrut(5));
 		JTextField textField = new JTextField(5);
-		if (!Double.isNaN(getTreeLogCategory().smallEndDiameter)) {
-			textField.setText(getTreeLogCategory().smallEndDiameter.toString());
+		if (!Double.isNaN(getTreeLogCategory().minimumDbhCm)) {
+			textField.setText(getTreeLogCategory().minimumDbhCm.toString());
 		}
 		textField.setEditable(false);
 		featurePanel.add(textField);

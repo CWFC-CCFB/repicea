@@ -19,30 +19,33 @@
 package repicea.treelogger.diameterbasedtreelogger;
 
 import repicea.simulation.treelogger.LogCategory;
+import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.WoodPiece;
 
 @SuppressWarnings("serial")
 public class DiameterBasedTreeLogCategory extends LogCategory {
 	
-	protected final Double smallEndDiameter;
+	protected final Double minimumDbhCm;
+	protected double proportionCommercialVolume;
 	
 	private transient DiameterBasedTreeLogCategoryPanel guiInterface;
 	protected final Enum<?> logGrade;
-	
+
 	/**
-	 * Constructor.
-	 * @param str the name of the category
+	 * Constructor under the assumption that all the commercial volume falls into this category.
+	 * @param logGrade an Enum defined in the parameter
 	 * @param species the species name
-	 * @param merchantableVolumeProportion the proportion of the merchantable volume that falls into this category
+	 * @param minimumDbhCm the minimum dbh for the tree to be eligible
+	 * @param isFromStump true if this volume comes from the stump
 	 */
-	public DiameterBasedTreeLogCategory(Enum<?> logGrade, String species, double smallEndDiameter, boolean isFromStump) {
+	public DiameterBasedTreeLogCategory(Enum<?> logGrade, String species, double minimumDbhCm, boolean isFromStump) {
 		super(logGrade.toString(), isFromStump);
 		setSpecies(species);
 		this.logGrade = logGrade;
-		if (smallEndDiameter == -1) {
-			this.smallEndDiameter = Double.NaN;
+		if (minimumDbhCm == -1) {
+			this.minimumDbhCm = Double.NaN;
 		} else {
-			this.smallEndDiameter = smallEndDiameter;
+			this.minimumDbhCm = minimumDbhCm;
 		}
 	}
 
@@ -70,4 +73,41 @@ public class DiameterBasedTreeLogCategory extends LogCategory {
 		return guiInterface != null && guiInterface.isVisible();
 	}
 
+	
+	protected boolean isEligible(LoggableTree tree) {
+		if (tree instanceof DiameterBasedLoggableTree && tree.getCommercialVolumeM3() > 0d) {
+			return ((DiameterBasedLoggableTree) tree).getDbhCm() >= minimumDbhCm;
+		} else {
+			return false;
+		}
+	}
+
+	@Override
+	protected DiameterBasedWoodPiece extractFromTree(LoggableTree tree, Object... parms) {
+		DiameterBasedWoodPiece piece = null;
+		if (isEligible(tree)) {
+			DiameterBasedTreeLoggerParameters parameters = (DiameterBasedTreeLoggerParameters) parms[0];
+			boolean isEligibleToSmallLumberWood = !parameters.getLargeLumberWoodLogCategory().isEligible(tree);
+			double volumeToBeProcessed = 0d;
+			switch((DiameterBasedTreeLoggerParameters.Grade) logGrade) {
+			case EnergyWood:
+				volumeToBeProcessed = tree.getCommercialVolumeM3() * (1 - proportionCommercialVolume); 
+				break;
+			case SmallLumberWood:
+				if (isEligibleToSmallLumberWood) {
+					volumeToBeProcessed = tree.getCommercialVolumeM3() * proportionCommercialVolume; 
+				}
+				break;
+			case LargeLumberWood:
+				volumeToBeProcessed = tree.getCommercialVolumeM3() * proportionCommercialVolume; 
+				break;
+			}
+			if (volumeToBeProcessed > 0) {
+				piece = new DiameterBasedWoodPiece(this, tree, volumeToBeProcessed);
+			} 
+		}
+		return piece;
+	}
+	
+	
 }

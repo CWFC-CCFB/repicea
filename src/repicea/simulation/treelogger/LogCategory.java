@@ -103,5 +103,17 @@ public abstract class LogCategory implements Serializable, REpiceaUIObject {
 	 * done with maritime pine, where stumps are converted into energy wood.
 	 * @return a boolean
 	 */
-	public boolean isFromStump() {return isFromStump;};
+	public boolean isFromStump() {return isFromStump;}
+	
+
+	/**
+	 * This method returns a wood piece if it can be extract from the tree.
+	 * @param tree a LoggableTree instance
+	 * @param parms optional parameters
+	 * @return a WoodPiece instance or null if cannot be extracted from the tree
+	 */
+	protected abstract WoodPiece extractFromTree(LoggableTree tree, Object... parms);
+	
+	
+	
 }
