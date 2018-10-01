@@ -18,34 +18,29 @@
  */
 package repicea.simulation.treelogger;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
- * The TreeLoggerCompatibilityCheck class provide a tree instance and the list of species name for an extended check
- * on the compatibility of the tree loggers.
+ * The TreeLoggerCompatibilityCheck class provides some parameters than can be included in the compatibility check
+ * of the tree loggers.
  * @author Mathieu Fortin - Sept 2018
  */
 public class TreeLoggerCompatibilityCheck {
 	
 	private final Object treeInstance;
-	private final List<String> speciesNameList;
+//	private final List<String> speciesNameList;
 	
-	public TreeLoggerCompatibilityCheck(Object treeInstance, List<String> speciesNameList) {
+	public TreeLoggerCompatibilityCheck(Object treeInstance) {
 		this.treeInstance = treeInstance;
-		this.speciesNameList = new ArrayList<String>();
-		this.speciesNameList.addAll(speciesNameList);
+//		this.speciesNameList = new ArrayList<String>();
+//		this.speciesNameList.addAll(speciesNameList);
 	}
-		
-	// TODO FP check if could be protected instead
+
 	public Object getTreeInstance() {return treeInstance;}
 
-	// TODO FP check if could be protected instead
-	public List<String> getSpeciesNameList() {
-		List<String> copyList = new ArrayList<String>();
-		copyList.addAll(speciesNameList);
-		return copyList;
-	}
+//	public List<String> getSpeciesNameList() {
+//		List<String> copyList = new ArrayList<String>();
+//		copyList.addAll(speciesNameList);
+//		return copyList;
+//	}
 
 
 }

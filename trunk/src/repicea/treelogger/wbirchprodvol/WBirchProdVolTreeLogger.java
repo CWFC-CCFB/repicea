@@ -26,6 +26,7 @@ import repicea.predictor.wbirchloggrades.WBirchLogGradesPredictor;
 import repicea.predictor.wbirchloggrades.WBirchLogGradesStand;
 import repicea.simulation.treelogger.LoggableTree;
 import repicea.simulation.treelogger.TreeLogger;
+import repicea.simulation.treelogger.TreeLoggerCompatibilityCheck;
 import repicea.treelogger.wbirchprodvol.WBirchProdVolTreeLoggerParameters.ProductID;
 
 public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerParameters, WBirchProdVolLoggableTree> {
@@ -91,8 +92,8 @@ public class WBirchProdVolTreeLogger extends TreeLogger<WBirchProdVolTreeLoggerP
 	}
 
 	@Override
-	public boolean isCompatibleWith(Object referent) {
-		return referent instanceof WBirchProdVolLoggableTree;
+	public boolean isCompatibleWith(TreeLoggerCompatibilityCheck check) {
+		return check.getTreeInstance() instanceof WBirchProdVolLoggableTree;
 	}
 
 	/*

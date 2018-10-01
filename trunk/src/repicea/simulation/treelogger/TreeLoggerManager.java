@@ -58,11 +58,11 @@ public class TreeLoggerManager {
 	 * @return a List of TreeLoggerDescription instances
 	 */
 	@SuppressWarnings("rawtypes")
-	public List<TreeLoggerDescription> getCompatibleTreeLoggers(Object referent) {
+	public List<TreeLoggerDescription> getCompatibleTreeLoggers(TreeLoggerCompatibilityCheck check) {
 		List<TreeLoggerDescription> outputList = new ArrayList<TreeLoggerDescription>();		
 		for (TreeLoggerDescription treeLoggerDescription : availableTreeLoggers) {
 			TreeLogger treeLogger = treeLoggerDescription.instantiateTreeLogger(false);
-			if (treeLogger.isCompatibleWith(referent)) {
+			if (treeLogger.isCompatibleWith(check)) {
 				outputList.add(treeLoggerDescription);
 			}
 		}
