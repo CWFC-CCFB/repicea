@@ -28,6 +28,25 @@ public class MaritimePineBasicTreeLoggerTests {
 		}
 		Assert.assertEquals("Comparing bole volume", 1d, sum, 1E-8); 
 	}
+
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@Test
+	public void TestWithSimpleTreeWithStandardDeviationBelowDiameterLimitOfLargeLumberWood() {
+		MaritimePineBasicTreeLogger treeLogger = new MaritimePineBasicTreeLogger();
+		treeLogger.setTreeLoggerParameters(treeLogger.createDefaultTreeLoggerParameters());
+		Collection trees = new ArrayList<MaritimePineBasicLoggableTreeImpl>();
+		MaritimePineBasicLoggableTreeImpl tree = new MaritimePineBasicLoggableTreeImpl(24,10,0,0);
+		trees.add(tree);
+		treeLogger.init(trees);
+		treeLogger.run();
+		double sum = 0;
+		for (WoodPiece piece : treeLogger.getWoodPieces().get(tree)) {
+			double volumeM3 = piece.getVolumeM3();
+			sum += volumeM3;
+		}
+		Assert.assertEquals("Comparing bole volume", 1d, sum, 1E-8); 
+	}
+
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
