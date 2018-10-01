@@ -28,6 +28,7 @@ import repicea.treelogger.basictreelogger.BasicTreeLogger;
 public class DiameterBasedTreeLogger extends TreeLogger<DiameterBasedTreeLoggerParameters, DiameterBasedLoggableTree> {
 
 
+	public DiameterBasedTreeLogger() {}
 	
 	@Override
 	protected void logThisTree(DiameterBasedLoggableTree tree) {
