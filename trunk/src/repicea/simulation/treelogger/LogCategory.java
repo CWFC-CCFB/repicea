@@ -19,6 +19,7 @@
 package repicea.simulation.treelogger;
 
 import java.io.Serializable;
+import java.util.List;
 
 import repicea.gui.REpiceaUIObject;
 
@@ -112,7 +113,7 @@ public abstract class LogCategory implements Serializable, REpiceaUIObject {
 	 * @param parms optional parameters
 	 * @return a WoodPiece instance or null if cannot be extracted from the tree
 	 */
-	protected abstract WoodPiece extractFromTree(LoggableTree tree, Object... parms);
+	protected abstract List<? extends WoodPiece> extractFromTree(LoggableTree tree, Object... parms);
 	
 	
 	
