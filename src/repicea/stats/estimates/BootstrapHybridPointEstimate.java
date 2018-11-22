@@ -81,6 +81,18 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 		}
 	}
 	
+	
+	/**
+	 * This method is useful for large simulations. The simulation can be run in different threads or batches
+	 * and the resulting BootstrapHybridPointEstimate can then be combined through this method.
+	 * @param estimate a BootstrapHybridPointEstimate instance that relies on the same PointEstimate class in the estimates member
+	 */
+	public void addBootstrapHybridEstimate(BootstrapHybridPointEstimate estimate) {
+		for (PointEstimate<?> pointEstimate : estimate.estimates) {
+			addPointEstimate(pointEstimate);
+		}
+	}
+	
 	/**
 	 * This method returns the estimate of the total, which is the mean of the 
 	 * realized point estimates.
