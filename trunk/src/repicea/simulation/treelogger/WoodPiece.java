@@ -22,6 +22,8 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
+import repicea.simulation.covariateproviders.treelevel.TreeWeightProvider;
+
 /**	
  * A basic wood piece from a logger. All other pieces class should inherit from this class.
  * @author Mathieu Fortin - April 2010
@@ -43,12 +45,12 @@ public abstract class WoodPiece implements Serializable {
 	private static final long serialVersionUID = 20100805L;
 	
 	private int id = -1;
-	private LoggableTree tree;
+	private final LoggableTree tree;
 	private int rank = -1;
 	private boolean withBark;
 	private boolean withPith;
-	private LogCategory logCategory;
-	private Map<Property, Double> properties;	
+	private final LogCategory logCategory;
+	private final Map<Property, Double> properties;	
 
 	/**
 	 * Constructor based on the loggable tree. This constructor checks if the tree is a Numberable instance. If so, the number of
@@ -108,13 +110,26 @@ public abstract class WoodPiece implements Serializable {
 	
 	
 	/**
-	 * This method returns the area expansion factor. This area expansion factor is equal to 1 if the tree is not a Numberable instance.
+	 * This method returns the expansion factor for the number of stems. That is the number of stems
+	 * represented by the LoggableTree instance
 	 * @return a double
 	 */
-	protected double getAreaExpansionFactor() {
+	protected double getNumberOfStemsExpansionFactor() {
 		return tree.getNumber();
 	}
 
+	/**
+	 * This method returns the plot weight expansion factor in the case of unequal sampling probability or 
+	 * unequal areas represented by each plot. 
+	 * @return a double
+	 */
+	protected double getPlotWeightExpansionFactor() {
+		if (tree instanceof TreeWeightProvider) {
+			return ((TreeWeightProvider) tree).getPlotWeight();
+		} else {
+			return 1d;
+		}
+	}
 	
 	/**
 	 * This method calculates the volume of this wood piece, without consideration for any expansion factor. For instance, if the
@@ -192,7 +207,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @return the volume in m3 (double)
 	 */
 	public double getWeightedVolumeM3() {
-		return getVolumeM3() * getAreaExpansionFactor();
+		return getVolumeM3() * getNumberOfStemsExpansionFactor() * getPlotWeightExpansionFactor();
 	}
 	
 	
