@@ -22,8 +22,6 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-import repicea.simulation.covariateproviders.treelevel.TreeWeightProvider;
-
 /**	
  * A basic wood piece from a logger. All other pieces class should inherit from this class.
  * @author Mathieu Fortin - April 2010
@@ -124,11 +122,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @return a double
 	 */
 	protected double getPlotWeightExpansionFactor() {
-		if (tree instanceof TreeWeightProvider) {
-			return ((TreeWeightProvider) tree).getPlotWeight();
-		} else {
-			return 1d;
-		}
+		return tree.getPlotWeight();
 	}
 	
 	/**
