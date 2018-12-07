@@ -25,9 +25,9 @@ package repicea.simulation.covariateproviders.treelevel;
 public interface TreeWeightProvider {
 	
 	/**
-	 * This method returns the plot weight. If there is no weight then the method should return 1.
+	 * This method returns the plot weight. If there is no weight then the method returns 1 by default.
 	 * @return a double
 	 */
-	public double getPlotWeight();
+	default public double getPlotWeight() {return 1d;}
 
 }
