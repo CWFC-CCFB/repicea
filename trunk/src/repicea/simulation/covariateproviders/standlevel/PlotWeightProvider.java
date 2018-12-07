@@ -25,11 +25,12 @@ package repicea.simulation.covariateproviders.standlevel;
 public interface PlotWeightProvider {
 
 	/**
-	 * This method returns the weight of the plot instance. It should be a value
-	 * close to 1.
+	 * This method returns the weight of the plot instance. By default, it returns 1.
 	 * @return a double
 	 */
-	public double getWeight();
+	default public double getWeight() {
+		return 1d;
+	}
 	
 	/**
 	 * This method sets the weight of the plot instance.
