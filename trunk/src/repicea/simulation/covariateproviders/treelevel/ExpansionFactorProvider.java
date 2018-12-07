@@ -26,9 +26,12 @@ package repicea.simulation.covariateproviders.treelevel;
 public interface ExpansionFactorProvider {
 
 	/**
-	 * This method returns the number of stems represented by this tree instance.
+	 * This method returns the number of stems represented by this tree instance. By default,
+	 * this method returns 1.
 	 * @return the number of stems (double)
 	 */
-	public double getNumber();
+	default public double getNumber() {
+		return 1d;
+	}
 
 }
