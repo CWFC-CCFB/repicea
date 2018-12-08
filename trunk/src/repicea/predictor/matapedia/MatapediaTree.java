@@ -19,6 +19,7 @@
 package repicea.predictor.matapedia;
 
 import repicea.math.Matrix;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.treelevel.BasalAreaLargerThanSubjectM2Provider;
 import repicea.simulation.covariateproviders.treelevel.DbhCmProvider;
@@ -37,6 +38,9 @@ public interface MatapediaTree extends MonteCarloSimulationCompliantObject,
 										BasalAreaLargerThanSubjectM2Provider {
 
 	
+	@Override
+	default public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}
+
 	/**
 	 * An enum variable that defines the species.
 	 * @author Mathieu Fortin - November 2012

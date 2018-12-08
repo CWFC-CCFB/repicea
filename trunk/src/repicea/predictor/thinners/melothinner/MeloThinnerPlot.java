@@ -18,6 +18,7 @@
  */
 package repicea.predictor.thinners.melothinner;
 
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.standlevel.BasalAreaM2HaProvider;
 import repicea.simulation.covariateproviders.standlevel.CruiseLineProvider;
@@ -39,9 +40,7 @@ public interface MeloThinnerPlot extends MonteCarloSimulationCompliantObject,
 											QuebecForestRegionProvider,
 											CruiseLineProvider {
 
-	
-	
-	
-	
+	@Override
+	default public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
 	
 }

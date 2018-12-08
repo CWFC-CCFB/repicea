@@ -19,6 +19,7 @@
 package repicea.predictor.artemis2009;
 
 import repicea.math.Matrix;
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.standlevel.AreaHaProvider;
 import repicea.simulation.covariateproviders.standlevel.BasalAreaM2HaProvider;
@@ -47,6 +48,9 @@ public interface Artemis2009CompatibleStand extends PotentialVegetationProvider,
 													MonteCarloSimulationCompliantObject,
 													GrowthStepLengthYrProvider {
 	
+	
+	@Override
+	default public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
 	
 	/**
 	 * This method returns true if the plot is going to be defoliated by spruce budworm.

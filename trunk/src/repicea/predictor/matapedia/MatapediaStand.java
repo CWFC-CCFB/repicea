@@ -20,6 +20,7 @@ package repicea.predictor.matapedia;
 
 import java.util.Collection;
 
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.covariateproviders.standlevel.DateYrProvider;
 import repicea.simulation.covariateproviders.standlevel.SpruceBudwormDefoliatedProvider;
@@ -32,6 +33,11 @@ import repicea.simulation.covariateproviders.standlevel.SpruceBudwormDefoliatedP
 public interface MatapediaStand extends MonteCarloSimulationCompliantObject,
 										SpruceBudwormDefoliatedProvider,
 										DateYrProvider {
+	
+	
+	
+	@Override
+	default public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
 	
 	/**
 	 * This method returns a boolean that takes the value true if there is a 

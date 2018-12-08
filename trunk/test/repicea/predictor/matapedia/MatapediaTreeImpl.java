@@ -1,7 +1,5 @@
 package repicea.predictor.matapedia;
 
-import repicea.simulation.HierarchicalLevel;
-
 public class MatapediaTreeImpl implements MatapediaTree {
 
 	private MatapediaTreeSpecies species;
@@ -23,12 +21,6 @@ public class MatapediaTreeImpl implements MatapediaTree {
 	public String getSubjectId() {
 		return ((Integer) hashCode()).toString();
 	}
-
-	@Override
-	public HierarchicalLevel getHierarchicalLevel() {
-		return HierarchicalLevel.TREE;
-	}
-
 
 	@Override
 	public int getMonteCarloRealizationId() {
