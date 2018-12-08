@@ -1,7 +1,5 @@
 package repicea.predictor.artemis2009;
 
-import repicea.simulation.HierarchicalLevel;
-
 class Artemis2009CompatibleTreeImpl implements Artemis2009CompatibleTree {
 
 	private Artemis2009CompatibleStandImpl stand;
@@ -52,8 +50,8 @@ class Artemis2009CompatibleTreeImpl implements Artemis2009CompatibleTree {
 	@Override
 	public String getSubjectId() {return ((Integer) id).toString();}
 
-	@Override
-	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}
+//	@Override
+//	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}
 
 //	@Override
 //	public void setMonteCarloRealizationId(int i) {stand.setMonteCarloRealizationId(i);}

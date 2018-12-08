@@ -18,6 +18,7 @@
  */
 package repicea.predictor.artemis2009;
 
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 import repicea.simulation.allometrycalculator.LightAllometryCalculableTree;
 import repicea.simulation.covariateproviders.treelevel.BasalAreaLargerThanSubjectM2Provider;
@@ -29,6 +30,11 @@ public interface Artemis2009CompatibleTree extends BasalAreaLargerThanSubjectM2P
 													LnDbhCmProvider,
 													MonteCarloSimulationCompliantObject,
 													IndexableErrorTerm {
+
+	@Override
+	default public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.TREE;}
+
+	
 	/**
 	 * This method returns the species group name.
 	 * @return a String

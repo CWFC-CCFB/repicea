@@ -18,13 +18,12 @@
  */
 package repicea.simulation.hdrelationships;
 
+import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 
 public abstract interface HDRelationshipStand extends MonteCarloSimulationCompliantObject {
-	
-//	/**
-//	 * This method returns all the stands for the random effect blup estimation
-//	 * @return a List of HDRelationshipStand instances
-//	 */
-//	public List<HDRelationshipStand> getAllHDStands();
+
+	@Override
+	default public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
+
 }

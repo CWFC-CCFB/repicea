@@ -1,6 +1,5 @@
 package repicea.predictor.thinners.melothinner;
 
-import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.covariateproviders.standlevel.LandOwnershipProvider;
 
 class MeloThinnerPlotImpl implements MeloThinnerPlot, LandOwnershipProvider {
@@ -46,9 +45,6 @@ class MeloThinnerPlotImpl implements MeloThinnerPlot, LandOwnershipProvider {
 		
 	@Override
 	public String getSubjectId() {return subjectId;}
-
-	@Override
-	public HierarchicalLevel getHierarchicalLevel() {return HierarchicalLevel.PLOT;}
 
 	@Override
 	public int getMonteCarloRealizationId() {return 0;}
