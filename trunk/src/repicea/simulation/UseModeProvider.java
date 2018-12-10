@@ -53,6 +53,12 @@ public interface UseModeProvider {
 	 * @param useMode a UseMode enum
 	 */
 	public void setUseMode(UseMode useMode);
+	
+	/**
+	 * This method returns true if the use mode is set to GUI_MODE.
+	 * @return a boolean
+	 */
+	default public boolean isGuiEnabled() {return getUseMode() == UseMode.GUI_MODE;}
 
 
 }
