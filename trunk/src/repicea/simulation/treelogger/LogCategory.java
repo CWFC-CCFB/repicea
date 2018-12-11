@@ -34,7 +34,7 @@ public abstract class LogCategory implements Serializable, REpiceaUIObject {
 	private static final long serialVersionUID = 20100804L;
 	
 	private String name;
-	private String species;
+	private Object species;
 	private boolean isFromStump = false;
 
 	/**
@@ -54,7 +54,7 @@ public abstract class LogCategory implements Serializable, REpiceaUIObject {
 		this("unnamed", false);
 	}
 
-	protected void setSpecies(String species) {
+	protected void setSpecies(Object species) {
 		this.species = species;
 	}
 	
@@ -69,7 +69,7 @@ public abstract class LogCategory implements Serializable, REpiceaUIObject {
 	 */
 	public void setName(String str) {name = str;}
 
-	public String getSpecies() {return species;}
+	public Object getSpecies() {return species;}
 	
 	@Override
 	public String toString() {return getName();}
