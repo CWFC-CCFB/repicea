@@ -636,7 +636,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 		}
 		redefineSpeciesList();
 		int selectedIndex = 0;
-		for (String speciesName : params.getLogCategories().keySet()) {
+		for (Object speciesName : params.getLogCategories().keySet()) {
 			if (speciesName.equals(newSpecies)) {
 				speciesList.setSelectedIndex(selectedIndex);
 				return;

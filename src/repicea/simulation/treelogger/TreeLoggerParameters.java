@@ -89,7 +89,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 
 	protected transient TreeLogger<?,?> treeLogger;		// MF20140207 changed to transient to avoid serializing when users save the parameters
 	private String treeLoggerClass;
-	private final Map<String, List<LC>> selectedLogCategories;
+	private final Map<Object, List<LC>> selectedLogCategories;
 	private transient boolean isParameterDialogCanceled;
 	private String filename;
 	private transient REpiceaGUIPermission readWrite = new DefaultREpiceaGUIPermission(true);
@@ -100,7 +100,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	protected TreeLoggerParameters(Class<? extends TreeLogger<?,?>> treeLoggerClass) {
 		this.treeLoggerClass = treeLoggerClass.getName();
 		isParameterDialogCanceled = false; // default value
-		selectedLogCategories = new TreeMap<String, List<LC>>();
+		selectedLogCategories = new TreeMap<Object, List<LC>>();
 		setFilename("");
 	}
 
@@ -164,7 +164,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	 * @param speciesName a String that represents the species name
 	 * @return a List of TreeLogCategory-derived instances or null if the species was not found
 	 */
-	public List<LC> getSpeciesLogCategories(String speciesName) {
+	public List<LC> getSpeciesLogCategories(Object speciesName) {
 		return getLogCategories().get(speciesName);
 	}
 
@@ -173,7 +173,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	 * corresponding List of LogCategory-derived instances as values.
 	 * @return a Map instance
 	 */
-	public Map<String, List<LC>> getLogCategories() {
+	public Map<Object, List<LC>> getLogCategories() {
 		return selectedLogCategories;
 	}
 	
@@ -306,7 +306,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 			List<LC> thisList;
 			LC refLogCategory;
 			LC thisLogCategory;
-			for (String species : refParams.getLogCategories().keySet()) {
+			for (Object species : refParams.getLogCategories().keySet()) {
 				refList = refParams.getSpeciesLogCategories(species);
 				thisList = getSpeciesLogCategories(species);
 				if (refList.size() != thisList.size()) {
@@ -380,7 +380,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	
 	@Override
 	public void postUnmarshallingAction() {
-		for (String species : selectedLogCategories.keySet()) {
+		for (Object species : selectedLogCategories.keySet()) {
 			for (LC logCategory : selectedLogCategories.get(species)) {
 				logCategory.setSpecies(species);
 			}
