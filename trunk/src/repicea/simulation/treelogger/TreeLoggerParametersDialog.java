@@ -417,9 +417,9 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 
 	@SuppressWarnings("unchecked")
 	private void defineLogCategoryList() {
-		String speciesName = (String) speciesList.getSelectedValue();
+		Object species = speciesList.getSelectedValue();
 		logCategoryList.removeListSelectionListener(this);
-		logCategoryList.setListData(params.getLogCategories().get(speciesName).toArray());
+		logCategoryList.setListData(params.getLogCategories().get(species).toArray());
 		logCategoryList.addListSelectionListener(this);
 		logCategoryList.setSelectedIndex(0);
 		if (logCategoryList.getModel().getSize() <= 1) {
@@ -431,7 +431,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 	
 	private void logGradeGoUpAction() {
 		int selectedIndex = logCategoryList.getSelectedIndex();
-		String species = (String) speciesList.getSelectedValue();
+		Object species = speciesList.getSelectedValue();
 		List<P> logList = params.getLogCategories().get(species);
 		P removedElement = logList.remove(selectedIndex - 1);
 		logList.add(selectedIndex, removedElement);
@@ -441,7 +441,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 
 	private void logGradeGoDownAction() {
 		int selectedIndex = logCategoryList.getSelectedIndex();
-		String species = (String) speciesList.getSelectedValue();
+		Object species = speciesList.getSelectedValue();
 		List<P> logList = params.getLogCategories().get(species);
 		P removedElement = logList.remove(selectedIndex);
 		logList.add(selectedIndex + 1, removedElement);
@@ -553,7 +553,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 	
 	private void logGradeRemoveAction() {
 		int selectedIndex = logCategoryList.getSelectedIndex();
-		String species = (String) speciesList.getSelectedValue();
+		Object species = speciesList.getSelectedValue();
 		params.getLogCategories().get(species).remove(selectedIndex);
 		defineLogCategoryList();
 		if (selectedIndex < logCategoryList.getModel().getSize()) {
@@ -566,12 +566,12 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 
 	@SuppressWarnings("unchecked")
 	private void logGradeAddAction() {
-		String speciesName = (String) speciesList.getSelectedValue();
-		List<P> logGrades = params.getLogCategories().get(speciesName);
+		Object species = speciesList.getSelectedValue();
+		List<P> logGrades = params.getLogCategories().get(species);
 		Class<? extends LogCategory> clazz = (Class<? extends LogCategory>) ((ParameterizedType) this.getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 		try {
 			P newGrade = (P) clazz.newInstance();
-			newGrade.setSpecies(speciesName);
+			newGrade.setSpecies(species);
 			logGrades.add(newGrade);
 		} catch (InstantiationException e) {
 			e.printStackTrace();
@@ -585,7 +585,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 
 	private void speciesRemoveAction() {
 		int selectedIndex = speciesList.getSelectedIndex();
-		String species = (String) speciesList.getSelectedValue();
+		Object species = speciesList.getSelectedValue();
 		params.getLogCategories().remove(species);
 		redefineSpeciesList();
 		if (selectedIndex < speciesList.getModel().getSize()) {
@@ -597,9 +597,12 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 		firePropertyChange(TreeLoggerAWTProperty.SpeciesRemoved, null, this);
 	}
 
+	/**
+	 * The basic implementation of this method assumes that the species are designated by String instance.
+	 */
 	@SuppressWarnings("unchecked")
-	private void speciesAddAction() {
-		String species = (String) speciesList.getSelectedValue();
+	protected void speciesAddAction() {
+		Object species = speciesList.getSelectedValue();
 		List<P> logGrades = params.getLogCategories().get(species);
 		Class<? extends LogCategory> clazz = logGrades.get(0).getClass();
 		String newSpecies;
