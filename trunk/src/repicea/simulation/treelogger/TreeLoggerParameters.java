@@ -26,6 +26,7 @@ import java.io.Serializable;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -100,7 +101,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	protected TreeLoggerParameters(Class<? extends TreeLogger<?,?>> treeLoggerClass) {
 		this.treeLoggerClass = treeLoggerClass.getName();
 		isParameterDialogCanceled = false; // default value
-		selectedLogCategories = new TreeMap<Object, List<LC>>();
+		selectedLogCategories = new HashMap<Object, List<LC>>();
 		setFilename("");
 	}
 
@@ -213,7 +214,12 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 		MemorizerPackage mp = new MemorizerPackage();
 		mp.add(treeLoggerClass);
 		mp.add(getFilename());
-		mp.add((TreeMap) getLogCategories());
+		Map logCategoryMap = getLogCategories();
+		if (logCategoryMap instanceof TreeMap) { // former implementation
+			mp.add((TreeMap) getLogCategories());		
+		} else {
+			mp.add((HashMap) getLogCategories());
+		}
 		return mp;
 	}
 
@@ -223,7 +229,7 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 		this.treeLoggerClass = mp.get(0).toString();
 		setFilename(mp.get(1).toString());
 		getLogCategories().clear();
-		getLogCategories().putAll((TreeMap) mp.get(2));
+		getLogCategories().putAll((Map) mp.get(2));
 	}
 
 	@Deprecated

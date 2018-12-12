@@ -29,6 +29,8 @@ import java.awt.event.ActionListener;
 import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeMap;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -119,7 +121,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 	 * Just a JList that makes sure the selected index is always visible
 	 */
 	@SuppressWarnings("rawtypes")
-	static class CustomJList extends JList {
+	protected static class CustomJList extends JList {
 		@Override
 		public void setSelectedIndex(int index) {
 			super.setSelectedIndex(index);
@@ -254,11 +256,33 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 		return controlPanel;
 	}
 	
+	protected List<Object> provideSpeciesInNaturalOrder() {
+		TreeMap<String, Object> names = new TreeMap<String, Object>();
+		Set<Object> speciesSet = params.getLogCategories().keySet();
+		for (Object species : speciesSet) {
+			names.put(species.toString(), species);
+		}
+		List<Object> sortedSpeciesList = new ArrayList<Object>();
+		sortedSpeciesList.addAll(names.values());
+		Object defaultSpecies = getDefaultSpecies();
+		if (defaultSpecies != null) {
+			if (sortedSpeciesList.remove(defaultSpecies)) {		// we remove the default species
+				sortedSpeciesList.add(defaultSpecies);		// we add the default species at the end of the list
+			};
+		}
+		return sortedSpeciesList;
+	}
+
+	protected Object getDefaultSpecies() {return null;}
 	
 	@SuppressWarnings("unchecked")
-	private void redefineSpeciesList() {
+	protected final void redefineSpeciesList() {
 		speciesList.removeListSelectionListener(this);
-		speciesList.setListData(params.getLogCategories().keySet().toArray());
+		
+//		speciesList.setListData(params.getLogCategories().keySet().toArray());
+		speciesList.setListData(provideSpeciesInNaturalOrder().toArray());
+		
+		
 		speciesList.addListSelectionListener(this);
 		if (speciesList.getModel().getSize() <= 1) {
 			speciesRemove.setEnabled(false);
