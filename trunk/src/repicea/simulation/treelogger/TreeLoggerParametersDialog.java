@@ -413,7 +413,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 	@SuppressWarnings("unchecked")
 	@Override
 	public void valueChanged(ListSelectionEvent evt) {
-		if (evt.getValueIsAdjusting ()) {
+		if (evt.getValueIsAdjusting()) {
 			return;
 		} else if (evt.getSource().equals(speciesList)) {
 			defineLogCategoryList();
@@ -450,6 +450,9 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 			logGradeRemove.setEnabled(false);
 		} else {
 			logGradeRemove.setEnabled(true);
+		}
+		if (speciesList.getModel().getSize() >= 2) {
+			speciesRemove.setEnabled(!species.equals(getDefaultSpecies()));	// if the species list has two elements or more the species remove button is disabled if the selected species is the default species
 		}
 	}
 	
