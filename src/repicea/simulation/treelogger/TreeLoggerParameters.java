@@ -168,12 +168,20 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	
 	/**
 	 * This method returns the List of LogCategory-derived object for a
-	 * particular species.
-	 * @param speciesName a String that represents the species name
+	 * particular species. IMPORTANT: If there is a default species as specified through the
+	 * getDefaultSpecies() method and the species is not found
+	 * in the map, then the log categories of the default species are returned.
+	 * @param species an Object that represents the species name
 	 * @return a List of TreeLogCategory-derived instances or null if the species was not found
 	 */
-	public List<LC> getSpeciesLogCategories(Object speciesName) {
-		return getLogCategories().get(speciesName);
+	public List<LC> getSpeciesLogCategories(Object species) {
+		if (getLogCategories().containsKey(species)) {
+			return getLogCategories().get(species);
+		} else if (getDefaultSpecies() != null) {
+			return getLogCategories().get(getDefaultSpecies());
+		} else {
+			return null;
+		}
 	}
 
 	/**
