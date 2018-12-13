@@ -264,7 +264,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 		}
 		List<Object> sortedSpeciesList = new ArrayList<Object>();
 		sortedSpeciesList.addAll(names.values());
-		Object defaultSpecies = getDefaultSpecies();
+		Object defaultSpecies = params.getDefaultSpecies();
 		if (defaultSpecies != null) {
 			if (sortedSpeciesList.remove(defaultSpecies)) {		// we remove the default species
 				sortedSpeciesList.add(defaultSpecies);		// we add the default species at the end of the list
@@ -273,8 +273,6 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 		return sortedSpeciesList;
 	}
 
-	protected Object getDefaultSpecies() {return null;}
-	
 	@SuppressWarnings("unchecked")
 	protected final void redefineSpeciesList() {
 		speciesList.removeListSelectionListener(this);
@@ -452,7 +450,7 @@ public abstract class TreeLoggerParametersDialog<P extends LogCategory>
 			logGradeRemove.setEnabled(true);
 		}
 		if (speciesList.getModel().getSize() >= 2) {
-			speciesRemove.setEnabled(!species.equals(getDefaultSpecies()));	// if the species list has two elements or more the species remove button is disabled if the selected species is the default species
+			speciesRemove.setEnabled(!species.equals(params.getDefaultSpecies()));	// if the species list has two elements or more the species remove button is disabled if the selected species is the default species
 		}
 	}
 	

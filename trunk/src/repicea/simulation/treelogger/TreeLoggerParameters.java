@@ -113,6 +113,13 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	protected abstract void initializeDefaultLogCategories();
 
 	/**
+	 * This method can be override in order to specify a default species. That species cannot
+	 * be removed from the list.
+	 * @return an Object preferably either a String or an Enum
+	 */
+	protected Object getDefaultSpecies() {return null;}
+
+	/**
 	 * This method returns a specific LogCategory object among the selected
 	 * tree log categories contained in this class.
 	 * @param speciesName a String that represents the species name
