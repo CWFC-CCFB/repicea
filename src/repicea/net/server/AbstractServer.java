@@ -71,7 +71,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 			try {
 				while (!shutdownCall) {
 					SocketWrapper clientSocket;
-					clientSocket = new SocketWrapper(serverSocket.accept());
+					clientSocket = new SocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
 					if (clientQueue.size() < maxNumberOfWaitingClients) {
 						clientSocket.writeObject(ServerReply.CallAccepted);
 						clientQueue.add(clientSocket);
@@ -149,7 +149,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	private CallReceiverThread callReceiver;
 	@SuppressWarnings("unused")
 	private ActivityMonitor activityMonitor;
-
+	
+	protected final boolean isCallerAJavaApplication;
+	
 	private final ServerConfiguration configuration;
 
 	private InterfaceConnectionThread interfaceThread;
@@ -163,8 +165,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * @param exceptionRuleFilename the filename of the referenceRule if any (optional, can be null)
 	 * @throws Exception
 	 */
-	protected AbstractServer(ServerConfiguration configuration) throws Exception {
+	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
 		this.configuration = configuration;
+		this.isCallerAJavaApplication = isCallerAJavaApplication;
 		clientThreads = new ArrayList<ClientThread>();
 		clientQueue = new LinkedBlockingQueue<SocketWrapper>();
 		try {

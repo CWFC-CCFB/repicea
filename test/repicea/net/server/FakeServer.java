@@ -24,8 +24,8 @@ class FakeServer extends AbstractServer {
 	}
 	
 	
-	FakeServer(ServerConfiguration configuration) throws Exception {
-		super(configuration);
+	FakeServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
+		super(configuration, isCallerAJavaApplication);
 	}
 
 	@Override
@@ -37,7 +37,7 @@ class FakeServer extends AbstractServer {
 		try {
 			ServerConfiguration configuration = new ServerConfiguration(5, 18000, 18804);
 			System.out.println("Configuration instantiated");
-			FakeServer server = new FakeServer(configuration);		
+			FakeServer server = new FakeServer(configuration, true);		
 			System.out.println("Server instantiated");
 			server.startApplication();
 		} catch (Exception e) {

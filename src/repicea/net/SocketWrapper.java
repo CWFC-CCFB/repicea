@@ -44,12 +44,17 @@ public class SocketWrapper implements Closeable {
 		
 		@Override
 		protected void doThisJob() throws Exception {
-			result = SocketWrapper.this.getObjectInputStream().readObject();
+			if (SocketWrapper.this.isJavaObjectExpected) {
+				result = SocketWrapper.this.getObjectInputStream().readObject();
+			} else {
+				result = SocketWrapper.this.readString();
+			}
 		}
 		
 	}
 	
-	
+	private final byte[] buffer = new byte[100000];
+	private final boolean isJavaObjectExpected;
 	
 	private Socket socket;
 	
@@ -60,11 +65,23 @@ public class SocketWrapper implements Closeable {
 	
 	
 	/**
-	 * General constructor.
+	 * General constructor. If the caller is calling from a Java application,
+	 * then the isJavaObjectExpected boolean should be set to true. Otherwise,
+	 * the incoming stream is converted to String by default.
 	 * @param socket a Socket instance
+	 * @param isJavaObjectExpected a boolean.
+	 */
+	public SocketWrapper(Socket socket, boolean isJavaObjectExpected) {
+		this.socket = socket;
+		this.isJavaObjectExpected = isJavaObjectExpected;
+	}
+
+	/**
+	 * Simple constructor for Java calling applications.
+	 * @param socket
 	 */
 	public SocketWrapper(Socket socket) {
-		this.socket = socket;
+		this(socket, true);
 	}
 	
 	public Socket getSocket() {return socket;}
@@ -114,6 +131,17 @@ public class SocketWrapper implements Closeable {
 	public int readBytes(byte[] buffer) throws IOException {
 		return getBasicInputStream().read(buffer);
 	}
+
+	/**
+	 * This method returns a String from the incoming bytes. The buffer is 100000 byte long.
+	 * @return a String instance
+	 * @throws IOException
+	 */
+	public String readString() throws IOException {
+		int nbBytes = readBytes(buffer);
+		String incomingMessage = new String(buffer).substring(0, nbBytes);
+		return incomingMessage;
+	}
 	
 	public int read() throws IOException {
 		return getBasicInputStream().read();
@@ -134,8 +162,6 @@ public class SocketWrapper implements Closeable {
 	public void flush() throws IOException {
 		getBasicOutputStream().flush();
 	}
-	
-//	public boolean isConnected() {return socket.isConnected();}
 	
 	public boolean isClosed() {return socket.isClosed();}
 	
