@@ -47,7 +47,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 		if (!file.exists()) {			// then try to load it as a system resource
 			InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(filename);
 			if (in == null) {
-				throw new IOException("The file " + filename + " does not exist and cannot be loaded as a System ressource!");
+				throw new IOException("The file " + filename + " does not exist and cannot be loaded as a ressource!");
 			} else {
 				in.close();
 				isSystemResource = true;
