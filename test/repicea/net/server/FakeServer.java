@@ -1,5 +1,7 @@
 package repicea.net.server;
 
+import repicea.net.server.BasicClient.ClientRequest;
+
 class FakeServer extends AbstractServer {
 
 	protected static class FakeClientThread extends ClientThread {
@@ -10,40 +12,31 @@ class FakeServer extends AbstractServer {
 
 		@SuppressWarnings("unused")
 		@Override
-		protected void processRequest() throws Exception {
-			String request = (String) getSocket().readObject();
-			String[] requestStrings = request.split(";");
-			if (requestStrings.length == 3) {
-				double latitude = Double.parseDouble(requestStrings[0]);
-				double longitude = Double.parseDouble(requestStrings[1]);
-				float altitude = Float.parseFloat(requestStrings[2]);
-				int u = 0;
+		protected Object processRequest() throws Exception {
+			Object crudeRequest = getSocket().readObject();
+			if (crudeRequest instanceof ClientRequest) {
+				return crudeRequest;
+			} else if (crudeRequest instanceof String) {
+				String request = (String) crudeRequest;
+				String[] requestStrings = request.split(";");
+				if (requestStrings.length == 3) {
+					double latitude = Double.parseDouble(requestStrings[0]);
+					double longitude = Double.parseDouble(requestStrings[1]);
+					float altitude = Float.parseFloat(requestStrings[2]);
+				}
 			}
+			return null;
 		}
 		
 	}
 	
 	
-	FakeServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
-		super(configuration, isCallerAJavaApplication);
+	FakeServer(ServerConfiguration configuration, Mode mode) throws Exception {
+		super(configuration, mode, true);
 	}
 
 	@Override
 	protected ClientThread createClientThread(AbstractServer server, int id) {
 		return new FakeClientThread(server, id);
 	}
-
-	public static void main(String[] args) {
-		try {
-			ServerConfiguration configuration = new ServerConfiguration(5, 18000, 18804);
-			System.out.println("Configuration instantiated");
-			FakeServer server = new FakeServer(configuration, true);		
-			System.out.println("Server instantiated");
-			server.startApplication();
-		} catch (Exception e) {
-			e.printStackTrace();
-			System.out.println(e.getMessage());
-		}
-	}
-
 }

@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.net.SocketWrapper;
+import repicea.net.server.AbstractServer.Mode;
 import repicea.net.server.AbstractServer.ServerReply;
 import repicea.util.PropertyChangeEventGeneratingClass;
 
@@ -55,6 +56,7 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 		this.workerID = workerID;
 		statusMap = new HashMap<String, PropertyChangeEvent>();
 	}
+
 	
 	
 
@@ -68,14 +70,18 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 					clientAddress = socketWrapper.getSocket().getInetAddress();
 					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 
-//					while (!socketWrapper.isClosed()) {
-					firePropertyChange("status", null, "Processing request");
-					processRequest();
-//					}
-
-					socketWrapper.writeObject(ServerReply.ClosingConnection);
-					firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
-					closeSocket();
+					while (!socketWrapper.isClosed()) {
+						firePropertyChange("status", null, "Processing request");
+						Object somethingInParticular = processRequest();
+						if (caller.mode == Mode.AnswerProcessAndClose ||
+								(somethingInParticular != null && somethingInParticular.equals(BasicClient.ClientRequest.closeConnection))) {
+							socketWrapper.writeObject(ServerReply.ClosingConnection);
+							firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
+							closeSocket();
+						} else {
+							socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
+						}
+					}
 				} catch (Exception e) {
 					try {
 						e.printStackTrace();
@@ -98,7 +104,7 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 
 
 
-	protected abstract void processRequest() throws Exception;
+	protected abstract Object processRequest() throws Exception;
 
 
 	@Override

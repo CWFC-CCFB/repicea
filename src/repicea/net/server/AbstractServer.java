@@ -40,8 +40,11 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	protected static enum ServerReply {IAmBusyCallBackLater, 
 		CallAccepted, 
-		ClosingConnection}
+		ClosingConnection,
+		RequestReceivedAndProcessed}
 
+	public static enum Mode {AnswerProcessAndClose, AnswerAndProcessUntilClientClose}
+	
 	/**
 	 * This internal class handles the calls and stores these in the queue.
 	 * @author Mathieu Fortin - October 2011
@@ -158,6 +161,8 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	private List<PropertyChangeListener> listeners;
 
+	protected final Mode mode;
+	
 	/**
 	 * Constructor.
 	 * @param port the port of communication
@@ -165,9 +170,10 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * @param exceptionRuleFilename the filename of the referenceRule if any (optional, can be null)
 	 * @throws Exception
 	 */
-	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
+	protected AbstractServer(ServerConfiguration configuration, Mode mode, boolean isCallerAJavaApplication) throws Exception {
 		this.configuration = configuration;
 		this.isCallerAJavaApplication = isCallerAJavaApplication;
+		this.mode = mode;
 		clientThreads = new ArrayList<ClientThread>();
 		clientQueue = new LinkedBlockingQueue<SocketWrapper>();
 		try {
@@ -185,6 +191,16 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 	}
 
+	/**
+	 * Constructor for basic implementation answer and close.
+	 * @param configuration
+	 * @param isCallerAJavaApplication
+	 * @throws Exception
+	 */
+	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
+		this(configuration, Mode.AnswerProcessAndClose, isCallerAJavaApplication);
+	}
+	
 	protected abstract ClientThread createClientThread(AbstractServer server, int id);
 		
 	
