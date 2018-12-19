@@ -65,7 +65,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 			this.maxNumberOfWaitingClients = maxNumberOfWaitingClients;
 			setName("Answering calls thread");
 		}
-
+		
 		/*
 		 * The swingworker
 		 */

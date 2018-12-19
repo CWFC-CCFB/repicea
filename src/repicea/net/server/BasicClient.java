@@ -22,6 +22,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.InvalidParameterException;
 import java.util.concurrent.ExecutionException;
@@ -78,6 +79,7 @@ public class BasicClient implements Closeable {
 	 * @param socketAddress the SocketAddress instance that corresponds to the server
 	 * @param timeoutSeconds the number of seconds to wait for server reply before throwing a TimeoutException
 	 * @throws BasicClientException 
+	 * @throws SocketException 
 	 * @throws UnknownHostException if the host is unknown
 	 * @throws IOException if the connection failed
 	 * @throws ClassNotFoundException if the reply from the server is incorrect
