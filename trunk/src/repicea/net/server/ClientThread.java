@@ -58,19 +58,17 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 	}
 
 	
-	
-
 	@Override
 	public void run() {
 		while (true) {
 			try {
-				try {
-					firePropertyChange("status", null, "Waiting");
-					socketWrapper = caller.getWaitingClients();
-					clientAddress = socketWrapper.getSocket().getInetAddress();
-					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
+				firePropertyChange("status", null, "Waiting");
+				socketWrapper = caller.getWaitingClients();
+				clientAddress = socketWrapper.getSocket().getInetAddress();
+				firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 
-					while (!socketWrapper.isClosed()) {
+				while (!socketWrapper.isClosed()) {
+					try {
 						firePropertyChange("status", null, "Processing request");
 						Object somethingInParticular = processRequest();
 						if (caller.mode == Mode.AnswerProcessAndClose ||
@@ -78,24 +76,28 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 							socketWrapper.writeObject(ServerReply.ClosingConnection);
 							firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
 							closeSocket();
+						} else if (somethingInParticular != null) {
+							socketWrapper.writeObject(somethingInParticular);
 						} else {
 							socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
 						}
-					}
-				} catch (Exception e) {
-					try {
-						e.printStackTrace();
-						if (socketWrapper.isClosed()) {
-							socketWrapper.writeObject(e);
+					} catch (Exception e) {		// something wrong happened during the processing of the request
+						try {
+							e.printStackTrace();
+							if (!socketWrapper.isClosed()) {
+								socketWrapper.writeObject(e);
+							}
+							if (caller.mode == Mode.AnswerProcessAndClose) {	// if is this mode, we hang up and we stop !!!
+								closeSocket();
+								firePropertyChange("status", null, "Interrupted");
+								firePropertyChange("restartButton", null, true);
+								synchronized (lock) {
+									lock.wait();
+								}
+							}
+						} catch (IOException e1) {
+							socketWrapper = null;
 						}
-						closeSocket();
-					} catch (IOException e1) {
-						socketWrapper = null;
-					}
-					firePropertyChange("status", null, "Interrupted");
-					firePropertyChange("restartButton", null, true);
-					synchronized (lock) {
-						lock.wait();
 					}
 				}
 			} catch (InterruptedException e) {}

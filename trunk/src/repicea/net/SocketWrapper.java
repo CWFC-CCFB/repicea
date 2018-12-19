@@ -25,6 +25,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
@@ -70,6 +71,7 @@ public class SocketWrapper implements Closeable {
 	 * the incoming stream is converted to String by default.
 	 * @param socket a Socket instance
 	 * @param isJavaObjectExpected a boolean.
+	 * @throws SocketException 
 	 */
 	public SocketWrapper(Socket socket, boolean isJavaObjectExpected) {
 		this.socket = socket;
@@ -79,6 +81,7 @@ public class SocketWrapper implements Closeable {
 	/**
 	 * Simple constructor for Java calling applications.
 	 * @param socket
+	 * @throws SocketException 
 	 */
 	public SocketWrapper(Socket socket) {
 		this(socket, true);
@@ -125,7 +128,11 @@ public class SocketWrapper implements Closeable {
 	}
 	
 	public void writeObject(Object obj) throws IOException {
-		getObjectOutputStream().writeObject(obj);
+		if (isJavaObjectExpected) {
+			getObjectOutputStream().writeObject(obj);
+		} else {
+			writeString(obj.toString());
+		}
 	}
 	
 	public int readBytes(byte[] buffer) throws IOException {
@@ -142,6 +149,16 @@ public class SocketWrapper implements Closeable {
 		String incomingMessage = new String(buffer).substring(0, nbBytes);
 		return incomingMessage;
 	}
+
+	/**
+	 * This method sends a String on the socket connection.
+	 * @param str a String instance
+	 * @throws IOException
+	 */
+	public void writeString(String str) throws IOException {
+		writeBytes(str.getBytes());
+	}
+	
 	
 	public int read() throws IOException {
 		return getBasicInputStream().read();
