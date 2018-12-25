@@ -23,10 +23,8 @@ import repicea.net.server.BasicClient.ClientRequest;
 import repicea.net.server.ClientThread;
 import repicea.net.server.ServerConfiguration;
 
-// TODO try to work with streams instead of socket. A communication sender already exists in the class 
-// TODO AbstractIndependentProcess. Create a receiver that would replace the socketWrapper in the abstract server class
 
-class RGatewayServer extends AbstractServer {
+public class RGatewayServer extends AbstractServer {
 
 	public final REnvironment translator = new REnvironment();
 	
