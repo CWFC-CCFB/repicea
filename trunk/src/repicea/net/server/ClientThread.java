@@ -71,7 +71,7 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 					try {
 						firePropertyChange("status", null, "Processing request");
 						Object somethingInParticular = processRequest();
-						if (caller.mode == Mode.AnswerProcessAndClose ||
+						if (caller.mode == Mode.DistantServerMode ||
 								(somethingInParticular != null && somethingInParticular.equals(BasicClient.ClientRequest.closeConnection))) {
 							socketWrapper.writeObject(ServerReply.ClosingConnection);
 							firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
@@ -87,7 +87,7 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 							if (!socketWrapper.isClosed()) {
 								socketWrapper.writeObject(e);
 							}
-							if (caller.mode == Mode.AnswerProcessAndClose) {	// if is this mode, we hang up and we stop !!!
+							if (caller.mode == Mode.DistantServerMode) {	// if is this mode, we hang up and we stop !!!
 								closeSocket();
 								firePropertyChange("status", null, "Interrupted");
 								firePropertyChange("restartButton", null, true);

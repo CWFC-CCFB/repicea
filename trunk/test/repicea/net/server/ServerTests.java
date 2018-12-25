@@ -15,7 +15,7 @@ public class ServerTests {
 	public void testServerConnectionSingleRequest() throws Exception {
 		ServerConfiguration configuration = new ServerConfiguration(1, 18001, 18805);
 		System.out.println("Configuration instantiated");
-		FakeServer server = new FakeServer(configuration, Mode.AnswerProcessAndClose);		
+		FakeServer server = new FakeServer(configuration, Mode.DistantServerMode);		
 		System.out.println("Server instantiated");
 		server.startApplication();
 		 
@@ -33,7 +33,7 @@ public class ServerTests {
 	public void testServerConnectionMultipleRequests() throws Exception {
 		ServerConfiguration configuration = new ServerConfiguration(1, 18000, 18804);
 		System.out.println("Configuration instantiated");
-		FakeServer server = new FakeServer(configuration, Mode.AnswerAndProcessUntilClientClose);		
+		FakeServer server = new FakeServer(configuration, Mode.LocalServerMode);		
 		System.out.println("Server instantiated");
 		server.startApplication();
 		 

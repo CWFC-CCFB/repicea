@@ -43,7 +43,15 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		ClosingConnection,
 		RequestReceivedAndProcessed}
 
-	public static enum Mode {AnswerProcessAndClose, AnswerAndProcessUntilClientClose}
+	public static enum Mode {
+		/**
+		 * In this mode, the server processes short requests and then hang up on the client. The server is shutdown manually.
+		 */
+		DistantServerMode, 
+		/**
+		 * In this mode, the client is the one who shut the server down.
+		 */
+		LocalServerMode}
 	
 	/**
 	 * This internal class handles the calls and stores these in the queue.
@@ -198,7 +206,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * @throws Exception
 	 */
 	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
-		this(configuration, Mode.AnswerProcessAndClose, isCallerAJavaApplication);
+		this(configuration, Mode.DistantServerMode, isCallerAJavaApplication);
 	}
 	
 	protected abstract ClientThread createClientThread(AbstractServer server, int id);
