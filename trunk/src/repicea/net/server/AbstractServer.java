@@ -92,7 +92,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 				}
 				System.out.println("Call receiver thread shut down");
 			} catch (Exception e) {
-				e.printStackTrace();
+				if (!shutdownCall) {
+					e.printStackTrace();
+				}
 			}
 		}
 
@@ -317,11 +319,12 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	@Override
 	public void requestShutdown() {
-		this.callReceiver.shutdownCall = true;
-		this.callReceiver.clientQueue.clear();
+		callReceiver.shutdownCall = true;
+		callReceiver.clientQueue.clear();
 		try {
+			serverSocket.close();
 			callReceiver.join();
-		} catch (InterruptedException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		super.requestShutdown();

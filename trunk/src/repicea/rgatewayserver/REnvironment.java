@@ -32,10 +32,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.math.Matrix;
+import repicea.net.server.BasicClient;
 
-class RCodeTranslator {
+@SuppressWarnings("serial")
+class REnvironment extends ConcurrentHashMap<Integer, Object> {
 
-	private final static Map<Integer, Object> ENVIRONMENT = new ConcurrentHashMap<Integer, Object>();
 
 	private final static Map<String, Class<?>> PrimitiveTypeMap = new HashMap<String, Class<?>>();
 	static {
@@ -109,7 +110,7 @@ class RCodeTranslator {
 		
 	private static String ConstructCode = "create";
 	private static String MethodCode = "method";
-	private static String KillCode = "kill";
+	private static String SynchronizeEnvironment = "sync";
 
 	
 	public Object processCode(String request) throws Exception {
@@ -118,18 +119,36 @@ class RCodeTranslator {
 			return createObjectFromRequestStrings(requestStrings); 
 		} else if (requestStrings[0].equals(MethodCode)) {
 			return processMethod(requestStrings);
-		} else if (requestStrings[0].equals(KillCode)) {
-			killThisObject(requestStrings);
+		} else if (requestStrings[0].equals(SynchronizeEnvironment)) {
+			synchronizeEnvironment(requestStrings);
 			return null;
 		} else {
-			throw new InvalidParameterException("Request unknown! " + request);
+			try {
+				return BasicClient.ClientRequest.valueOf(request);
+			} catch (Exception e) {
+				throw new InvalidParameterException("Request unknown! " + request);
+			}
 		}
 
 	}
 	
-	private void killThisObject(String[] requestStrings) {
-		Object caller = findObjectInEnvironment(requestStrings[1]).value;
-		ENVIRONMENT.remove(caller.hashCode());
+	private void synchronizeEnvironment(String[] requestStrings) {
+		Map<Integer, Object> actualMap = new HashMap<Integer, Object>();
+		for (int i = 1; i < requestStrings.length; i++) {
+			Object caller = findObjectInEnvironment(requestStrings[i]).value;
+			if (caller != null) {
+				actualMap.put(caller.hashCode(), caller);
+			}
+		}
+		Map<Integer, Object> toBeRemoved = new HashMap<Integer, Object>();
+		for (Object value : values()) {
+			if (!actualMap.containsKey(value.hashCode())) {
+				toBeRemoved.put(value.hashCode(), value);
+			}
+		}
+		for (Object value : toBeRemoved.values()) {
+			remove(value.hashCode(), value);
+		}
 	}
 
 
@@ -137,8 +156,8 @@ class RCodeTranslator {
 		String prefix = "java.objecthashcode";
 		if (string.startsWith(prefix)) {
 			int hashcodeForThisJavaObject = Integer.parseInt(string.substring(prefix.length()));
-			if (ENVIRONMENT.containsKey(hashcodeForThisJavaObject)) {
-				Object value = ENVIRONMENT.get(hashcodeForThisJavaObject);
+			if (containsKey(hashcodeForThisJavaObject)) {
+				Object value = get(hashcodeForThisJavaObject);
 				Class<?> type = value.getClass();
 				return new ParameterWrapper(type, value);
 			} else {
@@ -151,7 +170,6 @@ class RCodeTranslator {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object processMethod(String[] requestStrings) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		long start = System.currentTimeMillis();
 		Object caller = findObjectInEnvironment(requestStrings[1]).value;
 		List[] outputLists = marshallParameters(requestStrings, 3);
 		List<Class<?>> parameterTypes = outputLists[0];
@@ -180,12 +198,10 @@ class RCodeTranslator {
 			met = possibleMatches.get(0).method;
 		} 			
 		Object result = met.invoke(caller, parameters.toArray());
-		double elapsedTime = (System.currentTimeMillis() - start) / 1000d;
-		System.out.println("Time to process method " + elapsedTime);
 
 		if (result != null) {
 			if (!PrimitiveJavaWrapper.contains(result.getClass())) {
-				ENVIRONMENT.put(result.hashCode(), result);
+				put(result.hashCode(), result);
 			}
 			return new ParameterWrapper(result.getClass(), result);
 		} else {
@@ -247,16 +263,13 @@ class RCodeTranslator {
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object createObjectFromRequestStrings(String[] requestStrings) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		long start = System.currentTimeMillis();
 		Class<?> clazz = Class.forName(requestStrings[1]);
 		List[] outputLists = marshallParameters(requestStrings, 2);
 		List<Class<?>> parameterTypes = outputLists[0];
 		List<Object> parameters = outputLists[1];
 		Constructor<?> constructor = clazz.getConstructor(parameterTypes.toArray(new Class[]{}));
 		Object newInstance = constructor.newInstance(parameters.toArray());
-		ENVIRONMENT.put(newInstance.hashCode(), newInstance);
-		double elapsedTime = (System.currentTimeMillis() - start) / 1000d;
-		System.out.println("Time to construct object " + elapsedTime);
+		put(newInstance.hashCode(), newInstance);
 		return new ParameterWrapper(newInstance.getClass(), newInstance);
 	}
 	
