@@ -18,9 +18,6 @@
  */
 package repicea.rgatewayserver;
 
-import java.net.SocketException;
-
-import repicea.net.SocketWrapper;
 import repicea.net.server.AbstractServer;
 import repicea.net.server.BasicClient.ClientRequest;
 import repicea.net.server.ClientThread;
@@ -31,7 +28,7 @@ import repicea.net.server.ServerConfiguration;
 
 class RGatewayServer extends AbstractServer {
 
-	public final RCodeTranslator translator = new RCodeTranslator();
+	public final REnvironment translator = new REnvironment();
 	
 	
 	private class RClientThread extends ClientThread {
@@ -53,16 +50,17 @@ class RGatewayServer extends AbstractServer {
 		}
 	}
 	
-	@Override
-	protected SocketWrapper getWaitingClients() throws InterruptedException {
-		SocketWrapper socketWrapper = super.getWaitingClients();
-		try {
-			socketWrapper.getSocket().setTcpNoDelay(true);
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
-		return socketWrapper;
-	}
+//	@Override
+//	protected SocketWrapper getWaitingClients() throws InterruptedException {
+//		SocketWrapper socketWrapper = super.getWaitingClients();
+//		try {
+//			socketWrapper.getSocket().setTcpNoDelay(true);
+//		} catch (SocketException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		return socketWrapper;
+//	}
 	
 	protected RGatewayServer(ServerConfiguration configuration) throws Exception {
 		super(configuration, Mode.LocalServerMode, false);	// the caller is not a Java application
