@@ -52,7 +52,7 @@ public class ServerTests {
 		Assert.assertTrue(callback != null);
 		Assert.assertTrue(callback.equals(ServerReply.RequestReceivedAndProcessed));
 		
-		client.close();
+//		client.close();			// otherwise the JVM is shutdown and the test series aborts
 		System.out.println("Server implementation with multiple requests (3) successfully tested!");
 	}
 
