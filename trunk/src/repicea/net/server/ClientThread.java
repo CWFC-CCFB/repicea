@@ -71,13 +71,21 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 					try {
 						firePropertyChange("status", null, "Processing request");
 						Object somethingInParticular = processRequest();
-						if (caller.mode == Mode.DistantServerMode ||
-								(somethingInParticular != null && somethingInParticular.equals(BasicClient.ClientRequest.closeConnection))) {
+						if (caller.mode == Mode.DistantServerMode) { // then close the connection and wait for another client		
 							socketWrapper.writeObject(ServerReply.ClosingConnection);
 							firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
 							closeSocket();
 						} else if (somethingInParticular != null) {
-							socketWrapper.writeObject(somethingInParticular);
+							if (caller.mode == Mode.LocalServerMode &&  // then the server is shut down
+									somethingInParticular.equals(BasicClient.ClientRequest.closeConnection)) {
+								socketWrapper.writeObject(ServerReply.ClosingConnection);
+								firePropertyChange("status", null, "Shutdown requested by local client");
+								closeSocket();
+								caller.requestShutdown();
+								break;
+							} else {
+								socketWrapper.writeObject(somethingInParticular);
+							}
 						} else {
 							socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
 						}
@@ -87,7 +95,7 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 							if (!socketWrapper.isClosed()) {
 								socketWrapper.writeObject(e);
 							}
-							if (caller.mode == Mode.DistantServerMode) {	// if is this mode, we hang up and we stop !!!
+							if (caller.mode == Mode.DistantServerMode) {	// if in this mode, we hang up and we stop !!!
 								closeSocket();
 								firePropertyChange("status", null, "Interrupted");
 								firePropertyChange("restartButton", null, true);
