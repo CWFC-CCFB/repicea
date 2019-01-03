@@ -14,8 +14,8 @@ import repicea.io.GFileFilter;
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
 import repicea.io.javasql.SQLReader;
+import repicea.lang.REpiceaSystem;
 import repicea.util.ObjectUtility;
-import repicea.util.REpiceaSystem;
 
 public class ImportTests {
 	

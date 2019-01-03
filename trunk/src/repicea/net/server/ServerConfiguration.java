@@ -27,7 +27,7 @@ public class ServerConfiguration implements Serializable {
 	
 	protected final int numberOfClientThreads;
 	protected final int outerPort;
-	protected final int innerPort;
+	protected final Integer innerPort;
 	
 	/**
 	 * Constructor. 
@@ -35,7 +35,7 @@ public class ServerConfiguration implements Serializable {
 	 * @param outerPort port on which the server exchange the information with the clients
 	 * @param internalPort port on which the server interface can be accessed
 	 */
-	public ServerConfiguration(int numberOfClientThreads, int outerPort, int internalPort) {
+	public ServerConfiguration(int numberOfClientThreads, int outerPort, Integer internalPort) {
 		if (numberOfClientThreads < 0 || numberOfClientThreads > 10) {
 			throw new InvalidParameterException("Number of client threads should be between 1 and 10");
 		} else {
@@ -46,7 +46,7 @@ public class ServerConfiguration implements Serializable {
 		} else {
 			this.outerPort = outerPort;
 		}
-		if (internalPort < 1024 || internalPort > 49151) {
+		if (internalPort != null && (internalPort < 1024 || internalPort > 49151)) {
 			throw new InvalidParameterException("The inner port must be between 1024 and 49151");
 		} else {
 			this.innerPort = internalPort;

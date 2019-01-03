@@ -56,7 +56,7 @@ import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.io.GFileFilter;
-import repicea.util.MemoryWatchDog.ExpectedMemoryCapacityException;
+import repicea.lang.MemoryWatchDog.ExpectedMemoryCapacityException;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 

@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import repicea.lang.REpiceaSystem;
 import repicea.lang.reflect.ReflectUtility;
-import repicea.util.REpiceaSystem;
 
 /**
  * The XmlMarshallingUtilities class provides static methods for marshalling and unmarshalling.

@@ -78,14 +78,14 @@ public class SocketWrapper implements Closeable {
 		this.isJavaObjectExpected = isJavaObjectExpected;
 	}
 
-	/**
-	 * Simple constructor for Java calling applications.
-	 * @param socket
-	 * @throws SocketException 
-	 */
-	public SocketWrapper(Socket socket) {
-		this(socket, true);
-	}
+//	/**
+//	 * Simple constructor for Java calling applications.
+//	 * @param socket
+//	 * @throws SocketException 
+//	 */
+//	public SocketWrapper(Socket socket) {
+//		this(socket, true);
+//	}
 	
 	public Socket getSocket() {return socket;}
 
@@ -146,6 +146,10 @@ public class SocketWrapper implements Closeable {
 	 */
 	public String readString() throws IOException {
 		int nbBytes = readBytes(buffer);
+		if (nbBytes == -1) {
+			close();
+			throw new IOException("Seems that the connection has been shutdown by the client...");
+		}
 		String incomingMessage = new String(buffer).substring(0, nbBytes);
 		return incomingMessage;
 	}

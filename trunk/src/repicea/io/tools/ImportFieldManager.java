@@ -42,10 +42,10 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
 import repicea.io.GFileFilter;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlMarshallException;
 import repicea.serial.xml.XmlSerializer;
-import repicea.util.REpiceaSystem;
 
 
 /**

@@ -25,8 +25,8 @@ import java.io.InputStream;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 
+import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
-import repicea.util.REpiceaSystem;
 
 /**
  * The XMLDeserializer class handles the deserialisation from a XML file. See
