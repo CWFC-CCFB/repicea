@@ -43,16 +43,6 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		ClosingConnection,
 		RequestReceivedAndProcessed}
 
-	public static enum Mode {
-		/**
-		 * In this mode, the server processes short requests and then hang up on the client. The server is shutdown manually.
-		 */
-		DistantServerMode, 
-		/**
-		 * In this mode, the client is the one who shut the server down.
-		 */
-		LocalServerMode}
-	
 	/**
 	 * This internal class handles the calls and stores these in the queue.
 	 * @author Mathieu Fortin - October 2011
@@ -134,7 +124,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 					InetAddress socketAddress = socket.getInetAddress();
 					boolean isLocal = socketAddress.isLoopbackAddress(); 
 					if (isLocal) {
-						interfaceSocket = new SocketWrapper(socket);
+						interfaceSocket = new SocketWrapper(socket, true);
 						eventConnector = new ServerSideRemoteEventConnector(interfaceSocket, AbstractServer.this);
 						eventConnector.sendLocalListeners(getAllListeners());
 						eventConnector.connectRemoteListeners();			// lock here until close call from the interface
@@ -153,15 +143,12 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		}
 	}
 
-	//		private static Logger logger;
-	//		private static String loggerPath;
-
 	private ServerSocket serverSocket;
 	private ArrayList<ClientThread> clientThreads;
 	private LinkedBlockingQueue<SocketWrapper> clientQueue;
 	private CallReceiverThread callReceiver;
-	@SuppressWarnings("unused")
-	private ActivityMonitor activityMonitor;
+//	@SuppressWarnings("unused")
+//	private ActivityMonitor activityMonitor;
 	
 	protected final boolean isCallerAJavaApplication;
 	
@@ -171,7 +158,6 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	private List<PropertyChangeListener> listeners;
 
-	protected final Mode mode;
 	
 	/**
 	 * Constructor.
@@ -180,10 +166,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * @param exceptionRuleFilename the filename of the referenceRule if any (optional, can be null)
 	 * @throws Exception
 	 */
-	protected AbstractServer(ServerConfiguration configuration, Mode mode, boolean isCallerAJavaApplication) throws Exception {
+	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
 		this.configuration = configuration;
 		this.isCallerAJavaApplication = isCallerAJavaApplication;
-		this.mode = mode;
 		clientThreads = new ArrayList<ClientThread>();
 		clientQueue = new LinkedBlockingQueue<SocketWrapper>();
 		try {
@@ -192,8 +177,10 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 			for (int i = 0; i < configuration.numberOfClientThreads; i++) {
 				clientThreads.add(createClientThread(this, i + 1));		// i + 1 serves as id
 			}
-			activityMonitor = new ActivityMonitor(this, 300);			// 5 minutes between the checks
-			interfaceThread = new InterfaceConnectionThread(this);
+			if (this.configuration.innerPort != null) {
+				new ActivityMonitor(this, 300);			// 5 minutes between the checks
+				interfaceThread = new InterfaceConnectionThread(this);
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 			throw new Exception("Unable to initialize the server");
@@ -201,15 +188,15 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 	}
 
-	/**
-	 * Constructor for basic implementation answer and close.
-	 * @param configuration
-	 * @param isCallerAJavaApplication
-	 * @throws Exception
-	 */
-	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
-		this(configuration, Mode.DistantServerMode, isCallerAJavaApplication);
-	}
+//	/**
+//	 * Constructor for basic implementation answer and close.
+//	 * @param configuration
+//	 * @param isCallerAJavaApplication
+//	 * @throws Exception
+//	 */
+//	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
+//		this(configuration, Mode.DistantServerMode, isCallerAJavaApplication);
+//	}
 	
 	protected abstract ClientThread createClientThread(AbstractServer server, int id);
 		
@@ -310,7 +297,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	public void propertyChange(PropertyChangeEvent evt) {
 		String propertyName = evt.getPropertyName();
 		if (propertyName.equals("shutdownServer")) {
-			if (interfaceThread.eventConnector != null) {
+			if (interfaceThread != null && interfaceThread.eventConnector != null) {
 				interfaceThread.eventConnector.close();
 			}
 			requestShutdown();

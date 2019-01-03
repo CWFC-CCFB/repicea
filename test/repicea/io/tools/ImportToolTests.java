@@ -9,10 +9,10 @@ import org.junit.Test;
 
 import repicea.io.FileUtility;
 import repicea.io.ImportTests;
+import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.util.ObjectUtility;
-import repicea.util.REpiceaSystem;
 
 public class ImportToolTests {
 

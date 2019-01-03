@@ -22,8 +22,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.security.InvalidParameterException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
@@ -72,21 +70,27 @@ public class BasicClient implements Closeable {
 	private boolean open;
 	private final int timeout;
 	private boolean bypassTimeout;
-	
-	
+
+
 	/**
 	 * Constructor.
 	 * @param socketAddress the SocketAddress instance that corresponds to the server
 	 * @param timeoutSeconds the number of seconds to wait for server reply before throwing a TimeoutException
 	 * @throws BasicClientException 
-	 * @throws SocketException 
-	 * @throws UnknownHostException if the host is unknown
-	 * @throws IOException if the connection failed
-	 * @throws ClassNotFoundException if the reply from the server is incorrect
-	 * @throws ClientException if the connection has been lost
+	 */
+	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds) throws BasicClientException {
+		this(socketAddress, timeoutSeconds, true);
+	}
+
+	/**
+	 * Constructor.
+	 * @param socketAddress the SocketAddress instance that corresponds to the server
+	 * @param timeoutSeconds the number of seconds to wait for server reply before throwing a TimeoutException
+	 * @param isAJavaApplication a boolean that should be set to true by default (false mode is used only for test purpose)
+	 * @throws BasicClientException 
 	 */
 	@SuppressWarnings("resource")
-	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds) throws BasicClientException {
+	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds, boolean isAJavaApplication) throws BasicClientException {
 		if (timeoutSeconds < 0) {
 			throw new InvalidParameterException("The timeout delay must be equal to or greater than 0!");
 		}
@@ -100,16 +104,28 @@ public class BasicClient implements Closeable {
 			throw new BasicClientException(ExceptionType.ConnectionFailed);
 		} 
 		
-		socketWrapper = new SocketWrapper(socket);
+		socketWrapper = new SocketWrapper(socket, isAJavaApplication);
 
-		ServerReply replyFromServer = (ServerReply) readObjectFromServer();
-		if (replyFromServer == ServerReply.CallAccepted) {
-			open = true;
-		} else if (replyFromServer == ServerReply.IAmBusyCallBackLater) {
-			open = false;
-			close();
-			throw new BasicClientException(ExceptionType.ConnectionRejected);
+		if (isAJavaApplication) {
+			ServerReply replyFromServer = (ServerReply) readObjectFromServer();
+			if (replyFromServer == ServerReply.CallAccepted) {
+				open = true;
+			} else if (replyFromServer == ServerReply.IAmBusyCallBackLater) {
+				open = false;
+				close();
+				throw new BasicClientException(ExceptionType.ConnectionRejected);
+			}
+		} else {
+			String replyFromServer = (String) readObjectFromServer();
+			if (replyFromServer.equals(ServerReply.CallAccepted.name())) {
+				open = true;
+			} else if (replyFromServer.equals(ServerReply.IAmBusyCallBackLater.name())) {
+				open = false;
+				close();
+				throw new BasicClientException(ExceptionType.ConnectionRejected);
+			}
 		}
+		
 	}
 
 	

@@ -67,7 +67,7 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements REpi
 		SocketAddress socketAddress = new InetSocketAddress(localAddress, communicationPort);
 		Socket socket = new Socket();
 		socket.connect(socketAddress, 5000);
-		this.socket = new SocketWrapper(socket); 
+		this.socket = new SocketWrapper(socket, true);	// java application is expected 
 		connector = new InterfaceSideRemoteEventConnector(this);
 		try {
 			connector.connectRemoteListeners();

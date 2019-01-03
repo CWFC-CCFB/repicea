@@ -1,6 +1,6 @@
 package repicea.console;
 
-import repicea.util.REpiceaSystem;
+import repicea.lang.REpiceaSystem;
 
 public class FakeTrigger extends Trigger {
 

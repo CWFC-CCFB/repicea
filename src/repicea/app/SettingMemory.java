@@ -31,10 +31,10 @@ import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
+import repicea.lang.REpiceaSystem;
 import repicea.serial.DeprecatedObject;
 import repicea.serial.Memorizable;
 import repicea.serial.MemorizerPackage;
-import repicea.util.REpiceaSystem;
 
 /**
  * The class SettingMemory makes it possible to record properties in a Map object and 

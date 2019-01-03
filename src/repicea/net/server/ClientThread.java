@@ -27,16 +27,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.net.SocketWrapper;
-import repicea.net.server.AbstractServer.Mode;
 import repicea.net.server.AbstractServer.ServerReply;
 import repicea.util.PropertyChangeEventGeneratingClass;
 
 public abstract class ClientThread extends PropertyChangeEventGeneratingClass implements Runnable, ActionListener {
 	
-	private AbstractServer caller;
-	private SocketWrapper socketWrapper;
+	protected final AbstractServer caller;
+	protected SocketWrapper socketWrapper;
 	
-	private int workerID;
+	private final int workerID;
 	private InetAddress clientAddress;
 	
 	private Thread worker;
@@ -57,60 +56,100 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 		statusMap = new HashMap<String, PropertyChangeEvent>();
 	}
 
-	
 	@Override
 	public void run() {
 		while (true) {
 			try {
-				firePropertyChange("status", null, "Waiting");
-				socketWrapper = caller.getWaitingClients();
-				clientAddress = socketWrapper.getSocket().getInetAddress();
-				firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
+				try {
+					firePropertyChange("status", null, "Waiting");
+					socketWrapper = caller.getWaitingClients();
+					clientAddress = socketWrapper.getSocket().getInetAddress();
+					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 
-				while (!socketWrapper.isClosed()) {
+					firePropertyChange("status", null, "Processing request");
+					processRequest();
+
+					socketWrapper.writeObject(ServerReply.ClosingConnection);
+					firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
+					closeSocket();
+				} catch (Exception e) {
 					try {
-						firePropertyChange("status", null, "Processing request");
-						Object somethingInParticular = processRequest();
-						if (caller.mode == Mode.DistantServerMode) { // then close the connection and wait for another client		
-							socketWrapper.writeObject(ServerReply.ClosingConnection);
-							firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
-							closeSocket();
-						} else if (somethingInParticular != null) {
-							if (caller.mode == Mode.LocalServerMode &&  // then the server is shut down
-									somethingInParticular.equals(BasicClient.ClientRequest.closeConnection)) {
-								socketWrapper.writeObject(ServerReply.ClosingConnection);
-								firePropertyChange("status", null, "Shutdown requested by local client");
-								closeSocket();
-								caller.requestShutdown();
-								break;
-							} else {
-								socketWrapper.writeObject(somethingInParticular);
-							}
-						} else {
-							socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
+						e.printStackTrace();
+						if (!socketWrapper.isClosed()) {
+							socketWrapper.writeObject(e);
 						}
-					} catch (Exception e) {		// something wrong happened during the processing of the request
-						try {
-							e.printStackTrace();
-							if (!socketWrapper.isClosed()) {
-								socketWrapper.writeObject(e);
-							}
-							if (caller.mode == Mode.DistantServerMode) {	// if in this mode, we hang up and we stop !!!
-								closeSocket();
-								firePropertyChange("status", null, "Interrupted");
-								firePropertyChange("restartButton", null, true);
-								synchronized (lock) {
-									lock.wait();
-								}
-							}
-						} catch (IOException e1) {
-							socketWrapper = null;
-						}
+						closeSocket();
+					} catch (IOException e1) {
+						socketWrapper = null;
+					}
+					firePropertyChange("status", null, "Interrupted");
+					firePropertyChange("restartButton", null, true);
+					synchronized (lock) {
+						lock.wait();
 					}
 				}
 			} catch (InterruptedException e) {}
 		}
 	}
+
+//	@Override
+//	public void run() {
+//		while (true) {
+//			try {
+//				firePropertyChange("status", null, "Waiting");
+//				socketWrapper = caller.getWaitingClients();
+//				clientAddress = socketWrapper.getSocket().getInetAddress();
+//				firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
+//
+//				while (!socketWrapper.isClosed()) {
+//					try {
+//						firePropertyChange("status", null, "Processing request");
+//						Object somethingInParticular = processRequest();
+//						if (caller.mode == Mode.DistantServerMode) { // then close the connection and wait for another client		
+//							socketWrapper.writeObject(ServerReply.ClosingConnection);
+//							firePropertyChange("status", null, "Disconnecting from client: " + clientAddress.getHostAddress());
+//							closeSocket();
+//						} else if (somethingInParticular != null) {
+//							if (caller.mode == Mode.LocalServerMode &&  // then the server is shut down
+//									somethingInParticular.equals(BasicClient.ClientRequest.closeConnection)) {
+//								socketWrapper.writeObject(ServerReply.ClosingConnection);
+//								firePropertyChange("status", null, "Shutdown requested by local client");
+//								closeSocket();
+//								caller.requestShutdown();
+//								break;
+//							} else {
+//								socketWrapper.writeObject(somethingInParticular);
+//							}
+//						} else {
+//							socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
+//						}
+//					} catch (Exception e) {		// something wrong happened during the processing of the request
+//						try {
+//							e.printStackTrace();
+//							if (e instanceof IOException) {
+//								closeSocket();
+//							} else if (!socketWrapper.isClosed()) {
+//								socketWrapper.writeObject(e);
+//							}
+//							if (caller.mode == Mode.DistantServerMode) {	// if in this mode, we hang up and we stop !!!
+//								closeSocket();
+//								firePropertyChange("status", null, "Interrupted");
+//								firePropertyChange("restartButton", null, true);
+//								synchronized (lock) {
+//									lock.wait();
+//								}
+//							}
+//						} catch (IOException e1) {}
+//					}
+//				}
+//				if (caller.mode == Mode.LocalServerMode) {	// once the client or the server has hung up then we exit this loop
+//					caller.requestShutdown();
+//				}
+//			} catch (InterruptedException e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
 
 
 
@@ -145,8 +184,8 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 	 */
 	protected int getWorkerID() {return workerID;}
 	
-	private void closeSocket() throws IOException {
-		if (socketWrapper != null) {
+	protected void closeSocket() throws IOException {
+		if (socketWrapper != null && !socketWrapper.isClosed()) {
 			socketWrapper.close();
 		}
 		clientAddress = null;

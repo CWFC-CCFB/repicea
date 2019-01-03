@@ -43,8 +43,8 @@ import repicea.gui.UIControlManager.CommonMenuTitle;
 import repicea.gui.WindowSettings;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
+import repicea.lang.REpiceaSystem;
 import repicea.serial.Memorizable;
-import repicea.util.REpiceaSystem;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
