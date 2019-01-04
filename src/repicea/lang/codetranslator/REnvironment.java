@@ -26,16 +26,13 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.console.JavaProcessWrapper;
 import repicea.lang.REpiceaClassLoader;
 import repicea.lang.REpiceaSystem;
-import repicea.lang.codetranslator.REpiceaCodeTranslator;
 import repicea.math.Matrix;
 import repicea.multiprocess.JavaProcess;
 import repicea.multiprocess.JavaProcess.JVM_OPTION;
@@ -58,15 +55,29 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		PrimitiveTypeMap.put("logical", boolean.class);
 	}
 
-	private	final static Set<Class<?>> PrimitiveJavaWrapper	= new HashSet<Class<?>>();
+	private	final static Map<Class<?>, Class<?>> JavaWrapperToPrimitiveMap	= new HashMap<Class<?>, Class<?>>();
 	static {
-		PrimitiveJavaWrapper.add(Double.class);
-		PrimitiveJavaWrapper.add(Integer.class);
-		PrimitiveJavaWrapper.add(Long.class);
-		PrimitiveJavaWrapper.add(Float.class);
-		PrimitiveJavaWrapper.add(String.class);
-		PrimitiveJavaWrapper.add(Boolean.class);
+		JavaWrapperToPrimitiveMap.put(Double.class, double.class);
+		JavaWrapperToPrimitiveMap.put(Integer.class, int.class);
+		JavaWrapperToPrimitiveMap.put(Long.class, long.class);
+		JavaWrapperToPrimitiveMap.put(Float.class, float.class);
+		JavaWrapperToPrimitiveMap.put(String.class, String.class);
+		JavaWrapperToPrimitiveMap.put(Boolean.class, boolean.class);
+		JavaWrapperToPrimitiveMap.put(Character.class, char.class);
 	}
+
+	private	final static Map<Class<?>, Class<?>> PrimitiveToJavaWrapperMap	= new HashMap<Class<?>, Class<?>>();
+	static {
+		PrimitiveToJavaWrapperMap.put(double.class, Double.class);
+		PrimitiveToJavaWrapperMap.put(int.class, Integer.class);
+		PrimitiveToJavaWrapperMap.put( long.class, Long.class);
+		PrimitiveToJavaWrapperMap.put(float.class, Float.class);
+		PrimitiveToJavaWrapperMap.put(String.class, String.class);
+		PrimitiveToJavaWrapperMap.put(boolean.class, Boolean.class);
+		PrimitiveToJavaWrapperMap.put( char.class, Character.class);
+	}
+
+	
 	
 	static class MethodWrapper implements Comparable<MethodWrapper> {
 
@@ -147,7 +158,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 		@Override
 		public String toString() {
-			if (PrimitiveJavaWrapper.contains(type)) {
+			if (JavaWrapperToPrimitiveMap.containsKey(type)) {
 				if (type.equals(Double.class) || type.equals(Float.class)) {
 					return "numeric" + ((Number) value).toString();
 				} else if (type.equals(Integer.class) || type.equals(Long.class)) {
@@ -247,46 +258,16 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			} else {	// the exception might arise from the fact that the types are from derived classes
 				met = findNearestMethod(caller, methodName, parameterTypes);
 			}
-			
-//			Method[] methods = caller.getClass().getMethods();
-//			List<MethodWrapper> possibleMatches = new ArrayList<MethodWrapper>();
-//			for (Method method : methods) {
-//				if (method.getName().equals(methodName)) {	// possible match
-//					Class[] classes = method.getParameterTypes();
-//					double score = doParameterTypesMatch(classes, parameterTypes.toArray(new Class[]{}));
-//					if (score >= 0) {
-//						possibleMatches.add(new MethodWrapper(score, method));
-//					}
-//				}
-//			}
-//			if (possibleMatches.isEmpty()) {
-//				throw e;
-//			} else {
-//				Collections.sort(possibleMatches);
-//			}
-//			met = possibleMatches.get(0).method;
 		} 			
 		
 		JavaObjectList outputList = new JavaObjectList();
 		if (parameters.isEmpty()) {
 			Object result = met.invoke(caller, (Object[]) null);
 			registerMethodOutput(result, outputList);
-//			if (result != null) {
-//				if (!PrimitiveJavaWrapper.contains(result.getClass())) {
-//					put(System.identityHashCode(result), result);
-//				}
-//				outputList.add(new ParameterWrapper(result.getClass(), result));
-//			} 
 		} else {
 			for (int i = 0; i < parameters.getInnerSize(); i++) {
 				Object result = met.invoke(caller, parameters.getParameterArray(i));
 				registerMethodOutput(result, outputList);
-//				if (result != null) {
-//					if (!PrimitiveJavaWrapper.contains(result.getClass())) {
-//						put(System.identityHashCode(result), result);
-//					}
-//					outputList.add(new ParameterWrapper(result.getClass(), result));
-//				} 
 			}		
 		}
 		if (outputList.isEmpty()) {
@@ -321,7 +302,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private void registerMethodOutput(Object result, JavaObjectList outputList) {
 		if (result != null) {
-			if (!PrimitiveJavaWrapper.contains(result.getClass())) {
+			if (!JavaWrapperToPrimitiveMap.containsKey(result.getClass())) {
 				put(System.identityHashCode(result), result);
 			}
 			outputList.add(new ParameterWrapper(result.getClass(), result));
@@ -349,6 +330,16 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	}
 
 	private boolean implementThisClassAsAnInterface(Class<?> refcl1, Class<?> cl) {
+		if (JavaWrapperToPrimitiveMap.containsKey(refcl1)) {
+			if (cl.equals(JavaWrapperToPrimitiveMap.get(refcl1))) {
+				return true;
+			}
+		}
+		if (PrimitiveToJavaWrapperMap.containsKey(refcl1)) {
+			if (cl.equals(PrimitiveToJavaWrapperMap.get(refcl1))) {
+				return true;
+			}
+		}
 		Class<?>[] interfaces = cl.getInterfaces();
 		for (Class<?> inter : interfaces) {
 			if (inter.getName().equals(refcl1.getName())) {
@@ -391,15 +382,11 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		if (parameters.isEmpty()) { // constructor with no argument then
 			Object newInstance = clazz.newInstance();
 			registerNewInstance(newInstance, outputList);
-//			put(System.identityHashCode(newInstance), newInstance);
-//			outputList.add(new ParameterWrapper(newInstance.getClass(), newInstance));
 		} else {
 			for (int i = 0; i < parameters.getInnerSize(); i++) {
 				Constructor<?> constructor = clazz.getConstructor(parameterTypes.toArray(new Class[]{}));
 				Object newInstance = constructor.newInstance(parameters.getParameterArray(i));
 				registerNewInstance(newInstance, outputList);
-//				put(System.identityHashCode(newInstance), newInstance);
-//				outputList.add(new ParameterWrapper(newInstance.getClass(), newInstance));
 			}
 		}
 		if (outputList.isEmpty()) {

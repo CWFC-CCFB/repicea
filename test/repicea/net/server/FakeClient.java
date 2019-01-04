@@ -19,13 +19,20 @@ public class FakeClient extends BasicClient {
 	}	
 	
 	protected Object createAnArrayList() throws BasicClientException {
-		String request = "create;java.util.ArrayList";
+		String request = "create;repicea.net.server.FakeArrayList";
 		Object result = processRequest(request);
 		return result;
 	}
 	
 	protected Object addThisToArrayList(Object arrayList, String toBeAdded) throws BasicClientException {
-		String request = "method;" + arrayList.toString().replace("JavaObject;java.util.ArrayList@", "java.objecthashcode") + ";add;" + toBeAdded;
+		String request = "method;" + arrayList.toString().replace("JavaObject;repicea.net.server.FakeArrayList@", "java.objecthashcode") + ";add;" + toBeAdded;
+		Object result = processRequest(request);
+		return result;
+	}
+
+	protected Object testThisDoubleWrapper(Object arrayList) throws BasicClientException {
+		String request = "method;" + arrayList.toString().replace("JavaObject;repicea.net.server.FakeArrayList@", "java.objecthashcode") +
+				";processThisDouble;" + "numeric0";
 		Object result = processRequest(request);
 		return result;
 	}
