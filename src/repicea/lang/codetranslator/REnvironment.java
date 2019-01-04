@@ -471,8 +471,11 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 
 			JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
 			JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
+//			JavaProcess rGatewayProcess = new JavaProcess(newCommands, rootPath);
 			rGatewayProcess.setOption(JVM_OPTION.SystemClassLoader, "-Djava.system.class.loader=repicea.lang.REpiceaClassLoader");
 			rGatewayProcessWrapper.run();
+//			rGatewayProcess.execute();
+//			while (rGatewayProcess.getState() == StateValue.PENDING) {}
 			System.exit(0);
 		}
 		String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
