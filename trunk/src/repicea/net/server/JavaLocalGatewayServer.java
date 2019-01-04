@@ -38,38 +38,43 @@ public class JavaLocalGatewayServer extends AbstractServer {
 
 		@Override
 		public void run() {
-			try {
-				socketWrapper = caller.getWaitingClients();
-				
-				while (!socketWrapper.isClosed()) {
-					try {
-						Object somethingInParticular = processRequest();
-						if (somethingInParticular != null) {
-							if (somethingInParticular.equals(BasicClient.ClientRequest.closeConnection)) {
-								socketWrapper.writeObject(ServerReply.ClosingConnection);
-								closeSocket();
-								caller.requestShutdown();
-								break;
-							} else {
-								socketWrapper.writeObject(somethingInParticular);
-							}
-						} else {
-							socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
-						}
-					} catch (Exception e) {		// something wrong happened during the processing of the request
+			while(true) {
+				try {
+					socketWrapper = caller.getWaitingClients();
+					
+					while (!socketWrapper.isClosed()) {
 						try {
-							e.printStackTrace();
-							if (e instanceof IOException) {	// seems that the connection was lost
-								closeSocket();
-							} else if (!socketWrapper.isClosed()) {
-								socketWrapper.writeObject(e);
+							Object somethingInParticular = processRequest();
+							if (somethingInParticular != null) {
+								if (somethingInParticular.equals(BasicClient.ClientRequest.closeConnection)) {
+									socketWrapper.writeObject(ServerReply.ClosingConnection);
+									closeSocket();
+									caller.requestShutdown();
+									break;
+								} else {
+									socketWrapper.writeObject(somethingInParticular);
+								}
+							} else {
+								socketWrapper.writeObject(ServerReply.RequestReceivedAndProcessed);
 							}
-						} catch (IOException e1) {}
+						} catch (Exception e) {		// something wrong happened during the processing of the request
+							try {
+//								e.printStackTrace();
+								if (e instanceof IOException) {	// seems that the connection was lost
+									closeSocket();
+								} else if (!socketWrapper.isClosed()) {
+									socketWrapper.writeObject(e);
+								}
+							} catch (IOException e1) {}
+						}
 					}
+					if (JavaLocalGatewayServer.this.shutdownOnClosedConnection) {
+						caller.requestShutdown();
+						break;
+					}
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
-				caller.requestShutdown();
-			} catch (InterruptedException e) {
-				e.printStackTrace();
 			}
 		}
 
@@ -87,7 +92,8 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	}
 
 	protected final REpiceaCodeTranslator translator;	
-
+	protected final boolean shutdownOnClosedConnection;
+	
 	/**
 	 * Constructor.
 	 * @param outerPort a port for communication between the local server and the other application.
@@ -95,8 +101,21 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	 * @throws Exception
 	 */
 	public JavaLocalGatewayServer(int outerPort, REpiceaCodeTranslator translator) throws Exception {
+		this(outerPort, translator, true); // true: the server shuts down when the connection is lost
+		
+	}
+
+	/**
+	 * Hidden constructor for test purpose
+	 * @param outerPort a port for communication between the local server and the other application.
+	 * @param translator an instance that implements the REpiceaCodeTranslator interface
+	 * @param shutdownOnClosedConnection by default this parameter is set to true so that if the connection is lost, the server is shutdown.
+	 * @throws Exception
+	 */
+	protected JavaLocalGatewayServer(int outerPort, REpiceaCodeTranslator translator, boolean shutdownOnClosedConnection) throws Exception {
 		super(new ServerConfiguration(1, outerPort, null), false); // false: the client is not a Java application
 		this.translator = translator;
+		this.shutdownOnClosedConnection = shutdownOnClosedConnection;
 	}
 
 	@Override
