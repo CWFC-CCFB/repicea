@@ -29,7 +29,7 @@ public class ServerTests {
 		System.out.println("Server basic implementation answer, reply and close successfully tested!");
 	}
 	
-	@SuppressWarnings({ "resource", "rawtypes" })
+	@SuppressWarnings({"rawtypes" })
 	@Test
 	public void testLocalServerMultipleRequests() throws Exception {
 		REnvironment env = new REnvironment();
@@ -41,7 +41,7 @@ public class ServerTests {
 		FakeClient client = new FakeClient(socketAddress, false);	// false: it does as if was not a Java application
 		Object arrayListRepresentation = client.createAnArrayList();
 		Assert.assertTrue(arrayListRepresentation != null);
-		Assert.assertTrue(arrayListRepresentation.toString().startsWith("JavaObject;java.util.ArrayList"));
+		Assert.assertTrue(arrayListRepresentation.toString().startsWith("JavaObject;repicea.net.server.FakeArrayList"));
 		int hashCode = Integer.parseInt(arrayListRepresentation.toString().substring(arrayListRepresentation.toString().indexOf("@") + 1));
 		ArrayList trueArrayList = (ArrayList) env.get(hashCode);
 		
@@ -55,13 +55,12 @@ public class ServerTests {
 		Assert.assertTrue(callback.toString().equals("logicaltrue"));
 		Assert.assertTrue((int) trueArrayList.get(1) == 1);
 
+		callback = client.testThisDoubleWrapper(arrayListRepresentation);		// here we test if a method with Double as argument will be match to a double 
+		Assert.assertTrue(callback != null);
+		Assert.assertTrue(callback.toString().equals("numeric0.0"));
+				
 		// TODO handle multiple  caller as in the vector logic 
-		// TODO handle the switch from primitive to wrapper for instance a list of Double should add double
-//		callback = client.sendFakeRequest();
-//		Assert.assertTrue(callback != null);
-//		Assert.assertTrue(callback.equals(ServerReply.RequestReceivedAndProcessed));
-		
-//		client.close();			// otherwise the JVM is shutdown and the test series aborts
+		client.close();			
 		System.out.println("Server implementation with multiple requests (3) successfully tested!");
 	}
 
