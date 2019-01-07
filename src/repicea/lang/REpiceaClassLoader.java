@@ -55,7 +55,7 @@ public class REpiceaClassLoader extends URLClassLoader {
 		if (!hasExtensionDirectoryBeenRead) {
 			System.out.println("Loading default extensions jar");
 			try {
-				if (extensionPath != null) {
+				if (extensionPath != null && extensionPath.exists() && extensionPath.isDirectory()) {
 					for (File file : extensionPath.listFiles()) {
 						if (file.getAbsolutePath().trim().endsWith(".jar")) {
 							if (!file.getAbsolutePath().trim().endsWith("repicea.jar")) {
