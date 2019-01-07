@@ -454,28 +454,30 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		return wrappers;
 	}
 
-	
+	/**
+	 * Main entry point for creating a REnvironment hosted by a Java local gateway server.
+	 * @param args
+	 * @throws Exception
+	 */
 	public static void main(String[] args) throws Exception {
 		List<String> arguments = REpiceaSystem.setClassicalOptions(args);
 		String firstCall = REpiceaSystem.retrieveArgument(FIRSTCALL, arguments);
 		if (firstCall != null && firstCall.toLowerCase().trim().equals("true")) {
 			List<String> newCommands = new ArrayList<String>();
 			String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
+			newCommands.add("repicea.jar");
 			if (extensionPath != null) {
-				newCommands.add("repicea.jar");
 				newCommands.add(EXTENSION);
 				newCommands.add(extensionPath);
 			}
 			File jarFile = new File(REnvironment.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 			File rootPath = jarFile.getParentFile();
 
+//			System.out.println("Bootstrapping repicea.jar at expected location " + rootPath.getAbsolutePath());
 			JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
 			JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
-//			JavaProcess rGatewayProcess = new JavaProcess(newCommands, rootPath);
 			rGatewayProcess.setOption(JVM_OPTION.SystemClassLoader, "-Djava.system.class.loader=repicea.lang.REpiceaClassLoader");
 			rGatewayProcessWrapper.run();
-//			rGatewayProcess.execute();
-//			while (rGatewayProcess.getState() == StateValue.PENDING) {}
 			System.exit(0);
 		}
 		String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
