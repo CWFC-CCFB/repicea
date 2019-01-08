@@ -76,12 +76,7 @@ public class ServerTests {
 			Assert.assertEquals("Testing capacity", vec.capacity(), expCapacity);
 			expCapacity++;
 		}
-//		hashCode = Integer.parseInt(callback.toString().substring(callback.toString().indexOf("@") + 1));
-//		Vector listWithCapacityOf3 = (Vector) env.get(hashCode);
-//		Assert.assertEquals("Testing capacity", listWithCapacityOf3.capacity(), 3);
 
-		int u = 0;
-		// TODO handle multiple  caller as in the vector logic 
 		client.close();			
 		System.out.println("Server implementation with multiple requests (3) successfully tested!");
 	}
