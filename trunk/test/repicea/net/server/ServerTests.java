@@ -15,7 +15,7 @@ public class ServerTests {
 
 	@Test
 	public void testDistantServerWithSingleRequest() throws Exception {
-		ServerConfiguration configuration = new ServerConfiguration(1, 18001, 18805);
+		ServerConfiguration configuration = new ServerConfiguration(1, 0, 18001, 18805);
 		System.out.println("Configuration instantiated");
 		FakeDistantServer server = new FakeDistantServer(configuration);		
 		System.out.println("Server instantiated");

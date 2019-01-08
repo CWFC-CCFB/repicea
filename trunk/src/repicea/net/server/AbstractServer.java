@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EventListener;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -73,7 +74,10 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 				while (!shutdownCall) {
 					SocketWrapper clientSocket;
 					clientSocket = new SocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
-					if (clientQueue.size() < maxNumberOfWaitingClients) {
+					if (maxNumberOfWaitingClients > 0 && clientQueue.size() < maxNumberOfWaitingClients) {
+						clientSocket.writeObject(ServerReply.CallAccepted);
+						clientQueue.add(clientSocket);
+					} else if (AbstractServer.this.isThereAtLeastOneThreadWaiting()) {	// there is no waiting list here
 						clientSocket.writeObject(ServerReply.CallAccepted);
 						clientQueue.add(clientSocket);
 					} else {
@@ -145,10 +149,8 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	private ServerSocket serverSocket;
 	private ArrayList<ClientThread> clientThreads;
-	private LinkedBlockingQueue<SocketWrapper> clientQueue;
+	protected final LinkedBlockingQueue<SocketWrapper> clientQueue;
 	private CallReceiverThread callReceiver;
-//	@SuppressWarnings("unused")
-//	private ActivityMonitor activityMonitor;
 	
 	protected final boolean isCallerAJavaApplication;
 	
@@ -173,7 +175,8 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		clientQueue = new LinkedBlockingQueue<SocketWrapper>();
 		try {
 			serverSocket = new ServerSocket(configuration.outerPort);					// five sockets are open
-			callReceiver = new CallReceiverThread(serverSocket, clientQueue, configuration.numberOfClientThreads);
+//			callReceiver = new CallReceiverThread(serverSocket, clientQueue, configuration.numberOfClientThreads);
+			callReceiver = new CallReceiverThread(serverSocket, clientQueue, configuration.maxSizeOfWaitingList);
 			for (int i = 0; i < configuration.numberOfClientThreads; i++) {
 				clientThreads.add(createClientThread(this, i + 1));		// i + 1 serves as id
 			}
@@ -188,18 +191,27 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		listeners = new CopyOnWriteArrayList<PropertyChangeListener>();
 	}
 
-//	/**
-//	 * Constructor for basic implementation answer and close.
-//	 * @param configuration
-//	 * @param isCallerAJavaApplication
-//	 * @throws Exception
-//	 */
-//	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
-//		this(configuration, Mode.DistantServerMode, isCallerAJavaApplication);
-//	}
 	
 	protected abstract ClientThread createClientThread(AbstractServer server, int id);
 		
+	private boolean isThereAtLeastOneThreadWaiting() {
+		for (ClientThread t : clientThreads) {
+			Map<String, PropertyChangeEvent> statusMap = t.getCurrentStatusMap();
+			if (statusMap.isEmpty()) {
+				return true;
+			} else {
+				if (statusMap.containsKey("status")) {
+					String currentStatus = t.getCurrentStatusMap().get("status").getNewValue().toString();
+					if (currentStatus.equals("Waiting")) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+	
+	
 	
 	private List<EventListener> getAllListeners() {
 		List<EventListener> listeners = new ArrayList<EventListener>();

@@ -19,8 +19,10 @@
 package repicea.net.server;
 
 import java.io.IOException;
+import java.net.InetAddress;
 
 import repicea.lang.codetranslator.REpiceaCodeTranslator;
+import repicea.net.SocketWrapper;
 import repicea.net.server.BasicClient.ClientRequest;
 
 /**
@@ -40,7 +42,10 @@ public class JavaLocalGatewayServer extends AbstractServer {
 		public void run() {
 			while(true) {
 				try {
+					firePropertyChange("status", null, "Waiting");
 					socketWrapper = caller.getWaitingClients();
+					InetAddress clientAddress = socketWrapper.getSocket().getInetAddress();
+					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 					
 					while (!socketWrapper.isClosed()) {
 						try {
@@ -106,6 +111,17 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	}
 
 	/**
+	 * This method waits until the head of the queue is non null and returns the socket.
+	 * @return a Socket instance
+	 * @throws InterruptedException 
+	 */
+	@Override
+	protected synchronized SocketWrapper getWaitingClients() throws InterruptedException {
+		SocketWrapper socket = clientQueue.take();
+		return socket;
+	}
+
+	/**
 	 * Hidden constructor for test purpose
 	 * @param outerPort a port for communication between the local server and the other application.
 	 * @param translator an instance that implements the REpiceaCodeTranslator interface
@@ -113,7 +129,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	 * @throws Exception
 	 */
 	protected JavaLocalGatewayServer(int outerPort, REpiceaCodeTranslator translator, boolean shutdownOnClosedConnection) throws Exception {
-		super(new ServerConfiguration(1, outerPort, null), false); // false: the client is not a Java application
+		super(new ServerConfiguration(1, 0, outerPort, null), false); // false: the client is not a Java application
 		this.translator = translator;
 		this.shutdownOnClosedConnection = shutdownOnClosedConnection;
 	}
