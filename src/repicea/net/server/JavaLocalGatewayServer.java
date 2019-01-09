@@ -107,7 +107,6 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	 */
 	public JavaLocalGatewayServer(int outerPort, REpiceaCodeTranslator translator) throws Exception {
 		this(outerPort, translator, true); // true: the server shuts down when the connection is lost
-		
 	}
 
 	/**

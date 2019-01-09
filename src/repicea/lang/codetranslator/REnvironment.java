@@ -45,6 +45,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private static final String EXTENSION = "-ext";
 	
 	private static final String FIRSTCALL = "-firstcall";
+	
+	private static final String PORT = "-port";
 
 
 	private final static Map<String, Class<?>> PrimitiveTypeMap = new HashMap<String, Class<?>>();
@@ -470,6 +472,11 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				newCommands.add(EXTENSION);
 				newCommands.add(extensionPath);
 			}
+			String port = REpiceaSystem.retrieveArgument(PORT, arguments);
+			if (port != null) {
+				newCommands.add(PORT);
+				newCommands.add(port);
+			}
 			File jarFile = new File(REnvironment.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 			File rootPath = jarFile.getParentFile();
 
@@ -484,7 +491,14 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		if (extensionPath != null) {
 			((REpiceaClassLoader) ClassLoader.getSystemClassLoader()).setExtensionPath(new File(extensionPath));
 		}
-		JavaLocalGatewayServer server = new JavaLocalGatewayServer(18011, new REnvironment());
+		String portStr = REpiceaSystem.retrieveArgument(PORT, arguments);
+		int port;
+		if (portStr != null) {
+			port = Integer.parseInt(portStr);
+		} else {
+			port = 18011;		// default port
+		}
+		JavaLocalGatewayServer server = new JavaLocalGatewayServer(port, new REnvironment());
 		server.startApplication();
 	}
 	
