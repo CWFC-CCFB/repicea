@@ -19,6 +19,7 @@
 package repicea.net.server;
 
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 
 import repicea.lang.codetranslator.REpiceaCodeTranslator;
@@ -68,7 +69,11 @@ public class JavaLocalGatewayServer extends AbstractServer {
 								if (e instanceof IOException) {	// seems that the connection was lost
 									closeSocket();
 								} else if (!socketWrapper.isClosed()) {
-									socketWrapper.writeObject(e);
+									if (e instanceof InvocationTargetException) {
+										socketWrapper.writeObject(((InvocationTargetException) e).getTargetException());
+									} else {
+										socketWrapper.writeObject(e);
+									}
 								}
 							} catch (IOException e1) {}
 						}
