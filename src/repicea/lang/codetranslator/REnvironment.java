@@ -242,7 +242,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object processMethod(String[] requestStrings) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		Object caller = findObjectInEnvironment(requestStrings[1]).get(0).value;
+		List<ParameterWrapper> wrappers = findObjectInEnvironment(requestStrings[1]);
+		Object caller = getCallerAmongWrappers(wrappers);
 		List[] outputLists = marshallParameters(requestStrings, 3);
 		List<Class<?>> parameterTypes = outputLists[0];
 		ParameterList parameters = (ParameterList) outputLists[1];
@@ -264,13 +265,28 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 		JavaObjectList outputList = new JavaObjectList();
 		if (parameters.isEmpty()) {
-			Object result = met.invoke(caller, (Object[]) null);
-			registerMethodOutput(result, outputList);
-		} else {
-			for (int i = 0; i < parameters.getInnerSize(); i++) {
-				Object result = met.invoke(caller, parameters.getParameterArray(i));
+			for (int j = 0; j < wrappers.size(); j++) {
+				Object result = met.invoke(wrappers.get(j).value, (Object[]) null);
 				registerMethodOutput(result, outputList);
-			}		
+			}
+		} else {
+			if (wrappers.size() > 1 && parameters.getInnerSize() > 1 && wrappers.size() != parameters.getInnerSize()) {
+				throw new InvalidParameterException("The length of the java.arraylist object is different of the length of the vectors in the parameters!");
+			} else {
+				int maxSize = Math.max(wrappers.size(), parameters.getInnerSize());
+				for (int i = 0; i < maxSize; i++) {
+					int j = i;
+					if (parameters.getInnerSize() == 1) {
+						j = 0;
+					}
+					int k = i;
+					if (wrappers.size() == 1) {
+						k = 0;
+					}
+					Object result = met.invoke(wrappers.get(k).value, parameters.getParameterArray(j));
+					registerMethodOutput(result, outputList);
+				}		
+			}
 		}
 		if (outputList.isEmpty()) {
 			return null;
@@ -278,6 +294,25 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			return outputList.get(0);
 		} else {
 			return outputList;
+		}
+	}
+
+	private Object getCallerAmongWrappers(List<ParameterWrapper> wrappers) {
+		if (wrappers == null || wrappers.isEmpty()) {
+			return null;
+		} else {
+			Object higherLevelObject = null;
+			for (ParameterWrapper wrapper : wrappers) {
+				if (higherLevelObject == null) {
+					higherLevelObject = wrapper.value;
+				} else {
+					Object newValue = wrapper.value;
+					if (newValue.getClass().isAssignableFrom(higherLevelObject.getClass())) {
+						higherLevelObject = newValue;
+					}
+				}
+			}
+			return higherLevelObject;
 		}
 	}
 
