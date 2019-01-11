@@ -38,6 +38,8 @@ import repicea.multiprocess.JavaProcess;
 import repicea.multiprocess.JavaProcess.JVM_OPTION;
 import repicea.net.server.BasicClient;
 import repicea.net.server.JavaLocalGatewayServer;
+import repicea.net.server.ServerConfiguration;
+import repicea.net.server.ServerConfiguration.Protocol;
 
 @SuppressWarnings("serial")
 public class REnvironment extends ConcurrentHashMap<Integer, Object> implements REpiceaCodeTranslator {
@@ -533,7 +535,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		} else {
 			port = 18011;		// default port
 		}
-		JavaLocalGatewayServer server = new JavaLocalGatewayServer(port, new REnvironment());
+		JavaLocalGatewayServer server = new JavaLocalGatewayServer(new ServerConfiguration(port, Protocol.TCP), new REnvironment());
 		server.startApplication();
 	}
 	

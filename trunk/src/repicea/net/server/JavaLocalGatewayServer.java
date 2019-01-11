@@ -110,8 +110,8 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	 * @param translator an instance that implements the REpiceaCodeTranslator interface
 	 * @throws Exception
 	 */
-	public JavaLocalGatewayServer(int outerPort, REpiceaCodeTranslator translator) throws Exception {
-		this(outerPort, translator, true); // true: the server shuts down when the connection is lost
+	public JavaLocalGatewayServer(ServerConfiguration servConf, REpiceaCodeTranslator translator) throws Exception {
+		this(servConf, translator, true); // true: the server shuts down when the connection is lost
 	}
 
 	/**
@@ -132,8 +132,9 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	 * @param shutdownOnClosedConnection by default this parameter is set to true so that if the connection is lost, the server is shutdown.
 	 * @throws Exception
 	 */
-	protected JavaLocalGatewayServer(int outerPort, REpiceaCodeTranslator translator, boolean shutdownOnClosedConnection) throws Exception {
-		super(new ServerConfiguration(1, 0, outerPort, null), false); // false: the client is not a Java application
+	protected JavaLocalGatewayServer(ServerConfiguration servConf, REpiceaCodeTranslator translator, boolean shutdownOnClosedConnection) throws Exception {
+//		super(new ServerConfiguration(1, 0, outerPort, null), false); // false: the client is not a Java application
+		super(servConf, false);
 		this.translator = translator;
 		this.shutdownOnClosedConnection = shutdownOnClosedConnection;
 	}
