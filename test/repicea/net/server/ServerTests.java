@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import repicea.lang.codetranslator.REnvironment;
 import repicea.net.server.AbstractServer.ServerReply;
+import repicea.net.server.ServerConfiguration.Protocol;
 
 public class ServerTests {
 
@@ -34,7 +35,7 @@ public class ServerTests {
 	@Test
 	public void testLocalServerMultipleRequests() throws Exception {
 		REnvironment env = new REnvironment();
-		JavaLocalGatewayServer server = new JavaLocalGatewayServer(18000, env, false);	// false: will not shutdown after loosing the connection	
+		JavaLocalGatewayServer server = new JavaLocalGatewayServer(new ServerConfiguration(18000, Protocol.TCP), env, false);	// false: will not shutdown after loosing the connection	
 		System.out.println("Server instantiated");
 		server.startApplication();
 		 

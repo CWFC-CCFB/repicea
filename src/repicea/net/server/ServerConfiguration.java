@@ -25,10 +25,15 @@ public class ServerConfiguration implements Serializable {
 
 	private static final long serialVersionUID = 20111222L;
 	
+	public static enum Protocol {TCP, UDP}
+
 	protected final int numberOfClientThreads;
 	protected final int maxSizeOfWaitingList;
 	protected final int outerPort;
 	protected final Integer innerPort;
+	
+	protected final Protocol protocol;
+
 	
 	/**
 	 * Constructor. 
@@ -38,6 +43,7 @@ public class ServerConfiguration implements Serializable {
 	 * @param internalPort port on which the server interface can be accessed
 	 */
 	public ServerConfiguration(int numberOfClientThreads, int maxSizeOfWaitingList, int outerPort, Integer internalPort) {
+		protocol = Protocol.TCP;
 		if (numberOfClientThreads < 0 || numberOfClientThreads > 10) {
 			throw new InvalidParameterException("Number of client threads should be between 1 and 10");
 		} else {
@@ -60,5 +66,20 @@ public class ServerConfiguration implements Serializable {
 		}
 	}
 
-
+	/**
+	 * Configuration for local server
+	 * @param outerPort
+	 * @param protocol either TCP or UDP
+	 */
+	public ServerConfiguration(int outerPort, Protocol protocol) {
+		this.protocol = protocol;
+		if (outerPort < 1024 || outerPort > 49151) {
+			throw new InvalidParameterException("The outer port must be between 1024 and 49151");
+		} else {
+			this.outerPort = outerPort;
+		}
+		innerPort = null;
+		numberOfClientThreads = 1;
+		maxSizeOfWaitingList = 0;
+	}
 }	

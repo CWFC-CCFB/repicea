@@ -36,6 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import repicea.app.AbstractGenericEngine;
 import repicea.net.SocketWrapper;
 import repicea.net.TCPSocketWrapper;
+import repicea.net.server.ServerConfiguration.Protocol;
 import repicea.net.server.ServerTask.ServerTaskID;
 
 public abstract class AbstractServer extends AbstractGenericEngine implements PropertyChangeListener {
@@ -52,13 +53,17 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	private class CallReceiverThread extends Thread {
 
 		private boolean shutdownCall;
-		private ServerSocket serverSocket;
-		private LinkedBlockingQueue<SocketWrapper> clientQueue;
-		private int maxNumberOfWaitingClients;
+		private final ServerSocket serverSocket;
+		private final LinkedBlockingQueue<SocketWrapper> clientQueue;
+		private final int maxNumberOfWaitingClients;
 
-		private CallReceiverThread(ServerSocket serverSocket, 
-				LinkedBlockingQueue<SocketWrapper> clientQueue, 
-				int maxNumberOfWaitingClients) {
+		/**
+		 * General constructor. 
+		 * @param serverSocket a ServerSocket instance if null then the protocol is assumed to be UDP with a single client
+		 * @param clientQueue
+		 * @param maxNumberOfWaitingClients
+		 */
+		private CallReceiverThread(ServerSocket serverSocket, LinkedBlockingQueue<SocketWrapper> clientQueue, int maxNumberOfWaitingClients) {
 			shutdownCall = false;
 			this.serverSocket = serverSocket;
 			this.clientQueue = clientQueue;
@@ -74,20 +79,32 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 			try {
 				while (!shutdownCall) {
 					SocketWrapper clientSocket;
-					clientSocket = new TCPSocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
-					if (maxNumberOfWaitingClients > 0 && clientQueue.size() < maxNumberOfWaitingClients) {
-						clientSocket.writeObject(ServerReply.CallAccepted);
-						clientQueue.add(clientSocket);
-					} else if (AbstractServer.this.isThereAtLeastOneThreadWaiting()) {	// there is no waiting list here
-						clientSocket.writeObject(ServerReply.CallAccepted);
-						clientQueue.add(clientSocket);
+					if (serverSocket != null) {
+						clientSocket = new TCPSocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
+						if (maxNumberOfWaitingClients > 0 && clientQueue.size() < maxNumberOfWaitingClients) {
+							clientSocket.writeObject(ServerReply.CallAccepted);
+							clientQueue.add(clientSocket);
+						} else if (AbstractServer.this.isThereAtLeastOneThreadWaiting()) {	// there is no waiting list here
+							clientSocket.writeObject(ServerReply.CallAccepted);
+							clientQueue.add(clientSocket);
+						} else {
+							clientSocket.writeObject(ServerReply.IAmBusyCallBackLater);
+						}
 					} else {
-						clientSocket.writeObject(ServerReply.IAmBusyCallBackLater);
+						// TODO implement the UDP here
+//						clientSocket = new UDPSocketWrapper();
+//						clientQueue.add(clientSocket);
 					}
 				}
 				System.out.println("Call receiver thread shut down");
 			} catch (Exception e) {
 				if (!shutdownCall) {
+					e.printStackTrace();
+				}
+			} finally {
+				try {
+					serverSocket.close();
+				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
@@ -147,8 +164,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 			}
 		}
 	}
+	
 
-	private ServerSocket serverSocket;
+//	private ServerSocket serverSocket;
 	private ArrayList<ClientThread> clientThreads;
 	protected final LinkedBlockingQueue<SocketWrapper> clientQueue;
 	private CallReceiverThread callReceiver;
@@ -161,7 +179,6 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	private List<PropertyChangeListener> listeners;
 
-	
 	/**
 	 * Constructor.
 	 * @param port the port of communication
@@ -175,9 +192,11 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		clientThreads = new ArrayList<ClientThread>();
 		clientQueue = new LinkedBlockingQueue<SocketWrapper>();
 		try {
-			serverSocket = new ServerSocket(configuration.outerPort);					// five sockets are open
-//			callReceiver = new CallReceiverThread(serverSocket, clientQueue, configuration.numberOfClientThreads);
-			callReceiver = new CallReceiverThread(serverSocket, clientQueue, configuration.maxSizeOfWaitingList);
+			if (configuration.protocol == Protocol.TCP) {
+				callReceiver = new CallReceiverThread(new ServerSocket(configuration.outerPort), clientQueue, configuration.maxSizeOfWaitingList);
+			} else {
+				callReceiver = new CallReceiverThread(null, clientQueue, configuration.maxSizeOfWaitingList);
+			}
 			for (int i = 0; i < configuration.numberOfClientThreads; i++) {
 				clientThreads.add(createClientThread(this, i + 1));		// i + 1 serves as id
 			}
@@ -322,7 +341,6 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		callReceiver.shutdownCall = true;
 		callReceiver.clientQueue.clear();
 		try {
-			serverSocket.close();
 			callReceiver.join();
 		} catch (Exception e) {
 			e.printStackTrace();
