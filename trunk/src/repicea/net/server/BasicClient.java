@@ -27,6 +27,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import repicea.net.SocketWrapper;
+import repicea.net.TCPSocketWrapper;
 import repicea.net.server.AbstractServer.ServerReply;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -104,7 +105,7 @@ public class BasicClient implements Closeable {
 			throw new BasicClientException(ExceptionType.ConnectionFailed);
 		} 
 		
-		socketWrapper = new SocketWrapper(socket, isAJavaApplication);
+		socketWrapper = new TCPSocketWrapper(socket, isAJavaApplication);
 
 		if (isAJavaApplication) {
 			ServerReply replyFromServer = (ServerReply) readObjectFromServer();

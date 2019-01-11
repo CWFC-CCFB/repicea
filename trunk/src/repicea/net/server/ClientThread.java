@@ -63,7 +63,7 @@ public abstract class ClientThread extends PropertyChangeEventGeneratingClass im
 				try {
 					firePropertyChange("status", null, "Waiting");
 					socketWrapper = caller.getWaitingClients();
-					clientAddress = socketWrapper.getSocket().getInetAddress();
+					clientAddress = socketWrapper.getInetAddress();
 					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 
 					firePropertyChange("status", null, "Processing request");

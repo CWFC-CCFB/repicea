@@ -45,7 +45,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 				try {
 					firePropertyChange("status", null, "Waiting");
 					socketWrapper = caller.getWaitingClients();
-					InetAddress clientAddress = socketWrapper.getSocket().getInetAddress();
+					InetAddress clientAddress = socketWrapper.getInetAddress();
 					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
 					
 					while (!socketWrapper.isClosed()) {
