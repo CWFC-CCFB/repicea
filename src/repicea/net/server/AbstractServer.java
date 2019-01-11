@@ -35,6 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import repicea.app.AbstractGenericEngine;
 import repicea.net.SocketWrapper;
+import repicea.net.TCPSocketWrapper;
 import repicea.net.server.ServerTask.ServerTaskID;
 
 public abstract class AbstractServer extends AbstractGenericEngine implements PropertyChangeListener {
@@ -73,7 +74,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 			try {
 				while (!shutdownCall) {
 					SocketWrapper clientSocket;
-					clientSocket = new SocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
+					clientSocket = new TCPSocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
 					if (maxNumberOfWaitingClients > 0 && clientQueue.size() < maxNumberOfWaitingClients) {
 						clientSocket.writeObject(ServerReply.CallAccepted);
 						clientQueue.add(clientSocket);
@@ -128,7 +129,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 					InetAddress socketAddress = socket.getInetAddress();
 					boolean isLocal = socketAddress.isLoopbackAddress(); 
 					if (isLocal) {
-						interfaceSocket = new SocketWrapper(socket, true);
+						interfaceSocket = new TCPSocketWrapper(socket, true);
 						eventConnector = new ServerSideRemoteEventConnector(interfaceSocket, AbstractServer.this);
 						eventConnector.sendLocalListeners(getAllListeners());
 						eventConnector.connectRemoteListeners();			// lock here until close call from the interface

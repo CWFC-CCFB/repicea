@@ -27,6 +27,7 @@ import java.net.SocketAddress;
 import repicea.app.AbstractGenericEngine;
 import repicea.gui.REpiceaShowableUI;
 import repicea.net.SocketWrapper;
+import repicea.net.TCPSocketWrapper;
 import repicea.net.server.gui.InterfaceTask.InterfaceRelatedTask;
 
 public class ServerInterfaceEngine extends AbstractGenericEngine implements REpiceaShowableUI {
@@ -67,7 +68,7 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements REpi
 		SocketAddress socketAddress = new InetSocketAddress(localAddress, communicationPort);
 		Socket socket = new Socket();
 		socket.connect(socketAddress, 5000);
-		this.socket = new SocketWrapper(socket, true);	// java application is expected 
+		this.socket = new TCPSocketWrapper(socket, true);	// java application is expected 
 		connector = new InterfaceSideRemoteEventConnector(this);
 		try {
 			connector.connectRemoteListeners();
