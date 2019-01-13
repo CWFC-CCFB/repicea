@@ -36,6 +36,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import repicea.app.AbstractGenericEngine;
 import repicea.net.SocketWrapper;
 import repicea.net.TCPSocketWrapper;
+import repicea.net.UDPSocketWrapper;
 import repicea.net.server.ServerConfiguration.Protocol;
 import repicea.net.server.ServerTask.ServerTaskID;
 
@@ -81,19 +82,18 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 					SocketWrapper clientSocket;
 					if (serverSocket != null) {
 						clientSocket = new TCPSocketWrapper(serverSocket.accept(), AbstractServer.this.isCallerAJavaApplication);
-						if (maxNumberOfWaitingClients > 0 && clientQueue.size() < maxNumberOfWaitingClients) {
-							clientSocket.writeObject(ServerReply.CallAccepted);
-							clientQueue.add(clientSocket);
-						} else if (AbstractServer.this.isThereAtLeastOneThreadWaiting()) {	// there is no waiting list here
-							clientSocket.writeObject(ServerReply.CallAccepted);
-							clientQueue.add(clientSocket);
-						} else {
-							clientSocket.writeObject(ServerReply.IAmBusyCallBackLater);
-						}
 					} else {
-						// TODO implement the UDP here
-//						clientSocket = new UDPSocketWrapper();
-//						clientQueue.add(clientSocket);
+						clientSocket = new UDPSocketWrapper(AbstractServer.this.configuration.outerPort, AbstractServer.this.isCallerAJavaApplication); // this should block
+						shutdownCall = true;
+					}
+					if (maxNumberOfWaitingClients > 0 && clientQueue.size() < maxNumberOfWaitingClients) {
+						clientSocket.writeObject(ServerReply.CallAccepted);
+						clientQueue.add(clientSocket);
+					} else if (AbstractServer.this.isThereAtLeastOneThreadWaiting()) {	// there is no waiting list here
+						clientSocket.writeObject(ServerReply.CallAccepted);
+						clientQueue.add(clientSocket);
+					} else {
+						clientSocket.writeObject(ServerReply.IAmBusyCallBackLater);
 					}
 				}
 				System.out.println("Call receiver thread shut down");
@@ -103,7 +103,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 				}
 			} finally {
 				try {
-					serverSocket.close();
+					if (serverSocket != null) {
+						serverSocket.close();
+					}	
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

@@ -25,39 +25,16 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.SocketException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
-
-import repicea.app.AbstractGenericTask;
 
 /**
- * The SocketWrapper handles the output and input streams of socket. 
- * @author Mathieu Fortin - December 2011
+ * The TCPSocketWrapper class handles the output and input of a TCP/IP socket. 
+ * @author Mathieu Fortin - December 2011 (refactoring January 2019)
  */
 public class TCPSocketWrapper implements SocketWrapper {
 	
-	@SuppressWarnings("serial")
-	private class SocketWrapperTask extends AbstractGenericTask {
-
-		Object result;
-		
-		@Override
-		protected void doThisJob() throws Exception {
-			if (TCPSocketWrapper.this.isJavaObjectExpected) {
-				result = TCPSocketWrapper.this.getObjectInputStream().readObject();
-			} else {
-				result = TCPSocketWrapper.this.readString();
-			}
-		}
-		
-	}
-	
 	private final byte[] buffer = new byte[100000];
 	private final boolean isJavaObjectExpected;
-	
-	private Socket socket;
+	private final Socket socket;
 	
 	private InputStream basicIn;
 	private OutputStream basicOut;
@@ -71,62 +48,33 @@ public class TCPSocketWrapper implements SocketWrapper {
 	 * the incoming stream is converted to String by default.
 	 * @param socket a Socket instance
 	 * @param isJavaObjectExpected a boolean.
-	 * @throws SocketException 
 	 */
 	public TCPSocketWrapper(Socket socket, boolean isJavaObjectExpected) {
 		this.socket = socket;
 		this.isJavaObjectExpected = isJavaObjectExpected;
 	}
 
-//	/**
-//	 * Simple constructor for Java calling applications.
-//	 * @param socket
-//	 * @throws SocketException 
-//	 */
-//	public SocketWrapper(Socket socket) {
-//		this(socket, true);
-//	}
-	
 	private Socket getSocket() {return socket;}
 
-	/**
-	 * This method reads the object from the server. There is no timeout.
-	 * @return the object
-	 * @throws Exception
-	 * @throws InterruptedException
-	 * @throws ExecutionException
-	 * @throws TimeoutException
-	 */
+	@Override
 	public Object readObject() throws Exception {
 		return readObject(0);
 	}
 		
 	
-	/**
-	 * This method reads the object from the server. There is a timeout after a given number of
-	 * seconds. If the number of sectonds is equal to or smaller than 0, then there is no timeout.
-	 * @param  numberOfSeconds number of seconds to wait before throwing a TimeoutException
-	 * @return the object
-	 * @throws Exception if the thread has not correctly terminated
-	 * @throws InterruptedException if the thread was interrupted
-	 * @throws ExecutionException if the execution failed
-	 * @throws TimeoutException if the client has been wainting for more than 10 sec.
-	 */
-	public Object readObject(int numberOfSeconds) throws Exception, InterruptedException, ExecutionException, TimeoutException {
-		SocketWrapperTask t = new SocketWrapperTask();
-		t.execute();
-		if (numberOfSeconds > 0) {
-			t.get(numberOfSeconds, TimeUnit.SECONDS);
+	@Override
+	public Object readObject(int numberOfSeconds) throws Exception {
+		socket.setSoTimeout(numberOfSeconds * 1000);
+		Object result;
+		if (isJavaObjectExpected) {
+			result = getObjectInputStream().readObject();
 		} else {
-			t.get();
+			result = readString();
 		}
-		if (t.isCorrectlyTerminated()) {
-			return t.result;
-		} else {
-			throw t.getFailureReason();
-		}
+		return result;
 	}
 	
+	@Override
 	public void writeObject(Object obj) throws IOException {
 		if (isJavaObjectExpected) {
 			getObjectOutputStream().writeObject(obj);
@@ -163,27 +111,10 @@ public class TCPSocketWrapper implements SocketWrapper {
 		writeBytes(str.getBytes());
 	}
 	
-	
-//	private int read() throws IOException {
-//		return getBasicInputStream().read();
-//	}
-	
-//	private void write(int b) throws IOException {
-//		getBasicOutputStream().write(b);
-//	}
-
-//	public void writeBytes(byte[] buffer, int off, int len) throws IOException {
-//		getBasicOutputStream().write(buffer, off, len);
-//	}
-	
 	private void writeBytes(byte[] buffer) throws IOException {
 		getBasicOutputStream().write(buffer);
 	}
 	
-//	public void flush() throws IOException {
-//		getBasicOutputStream().flush();
-//	}
-
 	@Override
 	public boolean isClosed() {return socket.isClosed();}
 	

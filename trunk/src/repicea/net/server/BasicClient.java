@@ -20,15 +20,17 @@ package repicea.net.server;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.net.SocketAddress;
 import java.security.InvalidParameterException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 
 import repicea.net.SocketWrapper;
 import repicea.net.TCPSocketWrapper;
+import repicea.net.UDPSocketWrapper;
 import repicea.net.server.AbstractServer.ServerReply;
+import repicea.net.server.ServerConfiguration.Protocol;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -68,19 +70,20 @@ public class BasicClient implements Closeable {
 	
 	
 	private SocketWrapper socketWrapper;
+	private final Protocol protocol;
 	private boolean open;
 	private final int timeout;
 	private boolean bypassTimeout;
 
-
+	
 	/**
 	 * Constructor.
 	 * @param socketAddress the SocketAddress instance that corresponds to the server
 	 * @param timeoutSeconds the number of seconds to wait for server reply before throwing a TimeoutException
 	 * @throws BasicClientException 
 	 */
-	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds) throws BasicClientException {
-		this(socketAddress, timeoutSeconds, true);
+	protected BasicClient(InetSocketAddress socketAddress, int timeoutSeconds) throws BasicClientException {
+		this(socketAddress, timeoutSeconds, Protocol.TCP, true);
 	}
 
 	/**
@@ -90,22 +93,27 @@ public class BasicClient implements Closeable {
 	 * @param isAJavaApplication a boolean that should be set to true by default (false mode is used only for test purpose)
 	 * @throws BasicClientException 
 	 */
-	@SuppressWarnings("resource")
-	protected BasicClient(SocketAddress socketAddress, int timeoutSeconds, boolean isAJavaApplication) throws BasicClientException {
+	protected BasicClient(InetSocketAddress socketAddress, int timeoutSeconds, Protocol protocol, boolean isAJavaApplication) throws BasicClientException {
+		this.protocol = protocol;
 		if (timeoutSeconds < 0) {
 			throw new InvalidParameterException("The timeout delay must be equal to or greater than 0!");
 		}
 		this.timeout = timeoutSeconds;
 		this.bypassTimeout = false;
-		Socket socket = new Socket();
 		try {
-			socket.connect(socketAddress, 5000);
-		} catch (IOException e) {
+			if (this.protocol == Protocol.TCP) {
+				Socket socket = new Socket();
+				socket.connect(socketAddress, 5000);
+				socketWrapper = new TCPSocketWrapper(socket, isAJavaApplication);
+			} else {
+				socketWrapper = new UDPSocketWrapper(socketAddress, isAJavaApplication);
+			}
+			
+		} catch (Exception e) {
 			close();
 			throw new BasicClientException(ExceptionType.ConnectionFailed);
 		} 
 		
-		socketWrapper = new TCPSocketWrapper(socket, isAJavaApplication);
 
 		if (isAJavaApplication) {
 			ServerReply replyFromServer = (ServerReply) readObjectFromServer();

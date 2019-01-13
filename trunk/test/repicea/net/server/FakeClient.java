@@ -1,11 +1,13 @@
 package repicea.net.server;
 
-import java.net.SocketAddress;
+import java.net.InetSocketAddress;
+
+import repicea.net.server.ServerConfiguration.Protocol;
 
 public class FakeClient extends BasicClient {
 
-	protected FakeClient(SocketAddress socketAddress, boolean isAJavaApplication) throws BasicClientException {
-		super(socketAddress, 30, isAJavaApplication);
+	protected FakeClient(InetSocketAddress socketAddress, Protocol protocol, boolean isAJavaApplication) throws BasicClientException {
+		super(socketAddress, 30, protocol, isAJavaApplication);
 	}
 	
 	protected Object sendFakeRequest() throws BasicClientException {
@@ -20,6 +22,13 @@ public class FakeClient extends BasicClient {
 	
 	protected Object createAnArrayList() throws BasicClientException {
 		String request = "create;repicea.net.server.FakeArrayList";
+		Object result = processRequest(request);
+		return result;
+	}
+	
+	protected Object sendTimeToServer() throws BasicClientException {
+		long currentTime = System.currentTimeMillis();
+		String request = "time".concat(((Long) currentTime).toString());
 		Object result = processRequest(request);
 		return result;
 	}
