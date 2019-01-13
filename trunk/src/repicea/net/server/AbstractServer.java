@@ -343,9 +343,15 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		callReceiver.shutdownCall = true;
 		callReceiver.clientQueue.clear();
 		try {
-			callReceiver.join();
-		} catch (Exception e) {
-			e.printStackTrace();
+			callReceiver.serverSocket.close();
+		} catch (IOException e) {
+			callReceiver.interrupt();
+		} finally {
+			try {
+				callReceiver.join(5000);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 		super.requestShutdown();
 	}
