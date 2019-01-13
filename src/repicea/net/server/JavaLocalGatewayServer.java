@@ -52,7 +52,8 @@ public class JavaLocalGatewayServer extends AbstractServer {
 						try {
 							Object somethingInParticular = processRequest();
 							if (somethingInParticular != null) {
-								if (somethingInParticular.equals(BasicClient.ClientRequest.closeConnection)) {
+								if (somethingInParticular.equals(BasicClient.ClientRequest.closeConnection) 
+										|| somethingInParticular.equals(BasicClient.ClientRequest.closeConnection.name())) {
 									socketWrapper.writeObject(ServerReply.ClosingConnection);
 									closeSocket();
 									caller.requestShutdown();
