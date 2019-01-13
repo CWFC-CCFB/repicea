@@ -46,7 +46,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 					firePropertyChange("status", null, "Waiting");
 					socketWrapper = caller.getWaitingClients();
 					InetAddress clientAddress = socketWrapper.getInetAddress();
-					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());
+					firePropertyChange("status", null, "Connected to client: " + clientAddress.getHostAddress());		// for TCP the client is known for UDP we are not connected yet TODO: find a way to lock the UDP socket until the connection is set
 					
 					while (!socketWrapper.isClosed()) {
 						try {
@@ -95,6 +95,12 @@ public class JavaLocalGatewayServer extends AbstractServer {
 				return crudeRequest;
 			} else if (crudeRequest instanceof String) {
 				String request = (String) crudeRequest;
+				if (request.startsWith("time")) {
+					long startMillisec = Long.parseLong(request.substring(4));
+					long finalTime = System.currentTimeMillis();
+					double elapsedTime =  (finalTime - startMillisec);
+					System.out.println("Elapsed time single received packet:" + elapsedTime);
+				}
 				return JavaLocalGatewayServer.this.translator.processCode(request);
 			}
 			return null;
