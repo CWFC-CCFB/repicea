@@ -190,8 +190,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		} else if (requestStrings[0].equals(MethodCode)) {
 			return processMethod(requestStrings);
 		} else if (requestStrings[0].equals(SynchronizeEnvironment)) {
-			synchronizeEnvironment(requestStrings);
-			return null;
+			return synchronizeEnvironment(requestStrings);
+//			return null;
 		} else {
 			try {
 				return BasicClient.ClientRequest.valueOf(request);
@@ -202,12 +202,15 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 
 	}
 	
-	private void synchronizeEnvironment(String[] requestStrings) {
+	private Object synchronizeEnvironment(String[] requestStrings) {
 		Map<Integer, Object> actualMap = new HashMap<Integer, Object>();
 		for (int i = 1; i < requestStrings.length; i++) {
-			Object caller = findObjectInEnvironment(requestStrings[i]).get(0).value;
-			if (caller != null) {
-				actualMap.put(System.identityHashCode(caller), caller);
+			List<ParameterWrapper> wrappers = findObjectInEnvironment(requestStrings[i]);
+			if (wrappers != null) {
+				for (ParameterWrapper wrapper : wrappers) {
+					Object caller = wrapper.value;
+					actualMap.put(System.identityHashCode(caller), caller);
+				}
 			}
 		}
 		Map<Integer, Object> toBeRemoved = new HashMap<Integer, Object>();
@@ -219,6 +222,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		for (Object value : toBeRemoved.values()) {
 			remove(System.identityHashCode(value), value);
 		}
+		JavaObjectList outputList = new JavaObjectList();
+		registerMethodOutput(size(), outputList);
+		return outputList;
 	}
 
 
