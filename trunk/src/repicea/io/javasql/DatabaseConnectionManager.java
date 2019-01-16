@@ -137,7 +137,7 @@ public class DatabaseConnectionManager {
 	 */
 	private static Connection getConnectionFromThisMSACCESSDataBase(String dataBaseUrl) throws IOException {
 		try {
-			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+			ClassLoader.getSystemClassLoader().loadClass("net.ucanaccess.jdbc.UcanaccessDriver");
 			FileType fileType = GFileFilter.getFileType(dataBaseUrl);
 			if (fileType == FileType.ACCDB) {
 				String connectionString = "jdbc:ucanaccess://" + dataBaseUrl;
