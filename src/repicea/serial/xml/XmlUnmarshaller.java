@@ -107,7 +107,7 @@ public final class XmlUnmarshaller {
 				return newInstance;
 			} else if (clazz.equals(Class.class)) {
 				String className = XmlMarshallingUtilities.getClassName(xmlList.getEntries().get(0).value.toString());
-				Object newInstance = Class.forName(className);
+				Object newInstance = Class.forName(className, true, ClassLoader.getSystemClassLoader());
 				return newInstance;
 			} else {													// any other case
 				Constructor<?> emptyCstor = XmlMarshallingUtilities.getEmptyConstructor(clazz);
