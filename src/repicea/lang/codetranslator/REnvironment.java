@@ -418,19 +418,21 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Object createObjectFromRequestStrings(String[] requestStrings) throws ClassNotFoundException, NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	private Object createObjectFromRequestStrings(String[] requestStrings) throws Exception {
 		JavaObjectList outputList = new JavaObjectList();
 		Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass(requestStrings[1]);
 		List[] outputLists = marshallParameters(requestStrings, 2);
 		List<Class<?>> parameterTypes = outputLists[0];
 		ParameterList parameters = (ParameterList) outputLists[1];
 		if (parameters.isEmpty()) { // constructor with no argument then
-			Object newInstance = clazz.newInstance();
+//			Object newInstance = clazz.newInstance();
+			Object newInstance = this.getNewInstance(clazz, null, null);
 			registerNewInstance(newInstance, outputList);
 		} else {
 			for (int i = 0; i < parameters.getInnerSize(); i++) {
-				Constructor<?> constructor = clazz.getConstructor(parameterTypes.toArray(new Class[]{}));
-				Object newInstance = constructor.newInstance(parameters.getParameterArray(i));
+				Object newInstance = getNewInstance(clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));
+//				Constructor<?> constructor = clazz.getConstructor(parameterTypes.toArray(new Class[]{}));
+//				Object newInstance = constructor.newInstance(parameters.getParameterArray(i));
 				registerNewInstance(newInstance, outputList);
 			}
 		}
@@ -443,10 +445,25 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		}
 	}
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object getNewInstance(Class clazz, Class[] paramTypes, Object[] paramValues) throws Exception {
+		if (paramTypes == null) {
+			return clazz.newInstance();
+		} else {
+			if (clazz.isEnum()) {
+				Method met = clazz.getMethod("valueOf", String.class);
+				return met.invoke(null, paramValues[0].toString());
+			} else {
+				Constructor<?> constructor = clazz.getConstructor(paramTypes);
+				return constructor.newInstance(paramValues);
+			}
+		}
+	}
+	
+	
 	private void registerNewInstance(Object newInstance, JavaObjectList outputList) {
 		put(System.identityHashCode(newInstance), newInstance);
 		outputList.add(new ParameterWrapper(newInstance.getClass(), newInstance));
-		
 	}
 	
 	
