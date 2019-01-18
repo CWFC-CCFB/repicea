@@ -306,7 +306,7 @@ public class TestRecordReader extends REpiceaRecordReader {
 	}
 
 	@Override
-	protected void readLineRecord(Object[] oArray) throws VariableValueException, Exception {}
+	protected void readLineRecord(Object[] oArray, int lineCounter) throws VariableValueException, Exception {}
 
 	@Override
 	protected List<ImportFieldElement> defineFieldsToImport() throws Exception {

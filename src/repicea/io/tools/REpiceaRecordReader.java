@@ -108,7 +108,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 							}
 						}
 						checkInputFieldsFormat(oArray);
-						readLineRecord(oArray);
+						readLineRecord(oArray, lineCounter);
 						numberLinesRead++;
 						firePropertyChange(REpiceaProgressBarDialog.PROGRESS, 0, (int) (numberLinesRead * factor));
 					}
@@ -446,7 +446,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	/**
 	 * This method read the line record and set the values in the appropriate fields. To be defined in derived classes.
 	 */
-	protected abstract void readLineRecord(Object[] oArray) throws VariableValueException, Exception;
+	protected abstract void readLineRecord(Object[] oArray, int lineCounter) throws VariableValueException, Exception;
 
 	protected ImportFieldManager getImportFieldManager() {return importFieldManager;}
 
