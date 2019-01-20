@@ -20,7 +20,6 @@ package repicea.lang.codetranslator;
 
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -249,9 +248,20 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 
 	
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private Object processMethod(String[] requestStrings) throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-		List<ParameterWrapper> wrappers = findObjectInEnvironment(requestStrings[1]);
-		Object caller = getCallerAmongWrappers(wrappers);
+	private Object processMethod(String[] requestStrings) throws Exception {
+		Class clazz = null;
+		List<ParameterWrapper> wrappers = null;
+		if (requestStrings[1].startsWith("java.object")) {			// presumably non-static method
+			wrappers = findObjectInEnvironment(requestStrings[1]);
+			Object caller = getCallerAmongWrappers(wrappers);
+			clazz = caller.getClass();
+		} else if (requestStrings[1].startsWith("java.class")) { 	// static method
+			String prefix = "java.class";
+			String className = requestStrings[1].substring(prefix.length());
+			clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+			wrappers = new ArrayList<ParameterWrapper>();
+			wrappers.add(new ParameterWrapper(clazz, null));
+		}
 		List[] outputLists = marshallParameters(requestStrings, 3);
 		List<Class<?>> parameterTypes = outputLists[0];
 		ParameterList parameters = (ParameterList) outputLists[1];
@@ -259,15 +269,15 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		Method met;
 		try {
 			if (parameters.isEmpty()) {
-				met = caller.getClass().getMethod(methodName, (Class[]) null);
+				met = clazz.getMethod(methodName, (Class[]) null);
 			} else {
-				met = caller.getClass().getMethod(methodName, parameterTypes.toArray(new Class[]{}));
+				met = clazz.getMethod(methodName, parameterTypes.toArray(new Class[]{}));
 			}
 		} catch (NoSuchMethodException e) {		
 			if (parameters.isEmpty()) {
 				throw e;
 			} else {	// the exception might arise from the fact that the types are from derived classes
-				met = findNearestMethod(caller, methodName, parameterTypes);
+				met = findNearestMethod(clazz, methodName, parameterTypes);
 			}
 		} 			
 		
@@ -325,8 +335,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	}
 
 	@SuppressWarnings("rawtypes")
-	private Method findNearestMethod(Object caller, String methodName, List<Class<?>> parameterTypes) throws NoSuchMethodException {
-		Method[] methods = caller.getClass().getMethods();
+	private Method findNearestMethod(Class clazz, String methodName, List<Class<?>> parameterTypes) throws NoSuchMethodException {
+		Method[] methods = clazz.getMethods();
 		List<MethodWrapper> possibleMatches = new ArrayList<MethodWrapper>();
 		for (Method method : methods) {
 			if (method.getName().equals(methodName)) {	// possible match
@@ -338,7 +348,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			}
 		}
 		if (possibleMatches.isEmpty()) {
-			throw new NoSuchMethodException("Method " + methodName + "cannot be found in the class " + caller.getClass().getSimpleName());
+			throw new NoSuchMethodException("Method " + methodName + "cannot be found in the class " + clazz.getSimpleName());
 		} else {
 			Collections.sort(possibleMatches);
 		}
@@ -426,7 +436,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		ParameterList parameters = (ParameterList) outputLists[1];
 		if (parameters.isEmpty()) { // constructor with no argument then
 //			Object newInstance = clazz.newInstance();
-			Object newInstance = this.getNewInstance(clazz, null, null);
+			Object newInstance = getNewInstance(clazz, null, null);
 			registerNewInstance(newInstance, outputList);
 		} else {
 			for (int i = 0; i < parameters.getInnerSize(); i++) {
