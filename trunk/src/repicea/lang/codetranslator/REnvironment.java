@@ -176,21 +176,33 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			}
 		}
 	}
+	
+	private class NullWrapper {
+		
+		final Class<?> type; 
+		
+		private NullWrapper(Class<?> type) {
+			this.type = type;
+		}
+		
+	}
+
+	
 		
 	private static String ConstructCode = "create";
+	private static String ConstructNullCode = "createnull";
 	private static String MethodCode = "method";
 	private static String SynchronizeEnvironment = "sync";
 
 	@Override
 	public Object processCode(String request) throws Exception {
 		String[] requestStrings = request.split(";");
-		if (requestStrings[0].equals(ConstructCode)) {
+		if (requestStrings[0].startsWith(ConstructCode)) {	// can be either create or createnull here
 			return createObjectFromRequestStrings(requestStrings); 
 		} else if (requestStrings[0].equals(MethodCode)) {
 			return processMethod(requestStrings);
 		} else if (requestStrings[0].equals(SynchronizeEnvironment)) {
 			return synchronizeEnvironment(requestStrings);
-//			return null;
 		} else {
 			try {
 				return BasicClient.ClientRequest.valueOf(request);
@@ -236,7 +248,13 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				int hashcodeForThisJavaObject = Integer.parseInt(newArgs[i]);
 				if (containsKey(hashcodeForThisJavaObject)) {
 					Object value = get(hashcodeForThisJavaObject);
-					Class<?> type = value.getClass();
+					Class<?> type;
+					if (value instanceof NullWrapper) {
+						type = ((NullWrapper) value).type;
+						value = null;
+					} else {
+						type = value.getClass();
+					}
 					wrappers.add(new ParameterWrapper(type, value));
 				} else {
 					throw new InvalidParameterException("This object does not exist: " + string);
@@ -430,19 +448,27 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object createObjectFromRequestStrings(String[] requestStrings) throws Exception {
 		JavaObjectList outputList = new JavaObjectList();
+		boolean isNull = requestStrings[0].equals(ConstructNullCode);
 		Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass(requestStrings[1]);
 		List[] outputLists = marshallParameters(requestStrings, 2);
 		List<Class<?>> parameterTypes = outputLists[0];
 		ParameterList parameters = (ParameterList) outputLists[1];
 		if (parameters.isEmpty()) { // constructor with no argument then
-//			Object newInstance = clazz.newInstance();
-			Object newInstance = getNewInstance(clazz, null, null);
+			Object newInstance;
+			if (isNull) {
+				newInstance = new NullWrapper(clazz);
+			} else {
+				 newInstance = getNewInstance(clazz, null, null);
+			}
 			registerNewInstance(newInstance, outputList);
 		} else {
 			for (int i = 0; i < parameters.getInnerSize(); i++) {
-				Object newInstance = getNewInstance(clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));
-//				Constructor<?> constructor = clazz.getConstructor(parameterTypes.toArray(new Class[]{}));
-//				Object newInstance = constructor.newInstance(parameters.getParameterArray(i));
+				Object newInstance;
+				if (isNull) {
+					newInstance = new NullWrapper(clazz);
+				} else {
+					newInstance = getNewInstance(clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));
+				}
 				registerNewInstance(newInstance, outputList);
 			}
 		}
