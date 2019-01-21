@@ -1,7 +1,7 @@
 package repicea.io.tools;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -18,7 +18,7 @@ public class REpiceaExportToolTests {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
 		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
 		exportTool.setFilename(filename);
-		Set<Enum> options = new HashSet<Enum>();
+		List<Enum> options = new ArrayList<Enum>();
 		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
 		try {
 			exportTool.setSelectedOptions(options);
@@ -36,7 +36,7 @@ public class REpiceaExportToolTests {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
 		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
 		exportTool.setFilename(filename);
-		Set<Enum> options = new HashSet<Enum>();
+		List<Enum> options = new ArrayList<Enum>();
 		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
 		try {
 			exportTool.setSaveFileEnabled(false);

@@ -28,9 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 
@@ -180,7 +178,7 @@ public class REpiceaExportToolDialog extends REpiceaDialog implements ActionList
 			optionList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		}
 		
-		Set<Enum> selectedOptions = getCaller().getSelectedExportOptions();
+		List<Enum> selectedOptions = getCaller().getSelectedExportOptions();
 		List<Integer> selectedIndices = new ArrayList<Integer>();
 		
 		for (Enum selectedOption : selectedOptions) {
@@ -191,7 +189,7 @@ public class REpiceaExportToolDialog extends REpiceaDialog implements ActionList
 		
 		if (selectedOptions.isEmpty()) {
 			try {
-				Set<Enum> defaultOptions = new HashSet<Enum>();
+				List<Enum> defaultOptions = new ArrayList<Enum>();
 				defaultOptions.add(availableOptions.get(0));
 				getCaller().setSelectedOptions(defaultOptions);
 				selectedIndices.add(0);

@@ -25,10 +25,8 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.CancellationException;
 
 import javax.swing.event.CaretEvent;
@@ -259,7 +257,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	@SuppressWarnings("rawtypes")
 	private List<Enum> availableExportOptions;
 	@SuppressWarnings("rawtypes")
-	protected Set<Enum> selectedExportOptions;
+	protected List<Enum> selectedExportOptions;
 	
 	protected transient REpiceaExportToolDialog guiInterface;
 	
@@ -275,7 +273,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	@SuppressWarnings("rawtypes")
 	protected REpiceaExportTool(boolean multipleSelection) {
 		this.multipleSelection = multipleSelection;
-		selectedExportOptions = new HashSet<Enum>();
+		selectedExportOptions = new ArrayList<Enum>();
 		availableExportOptions = defineAvailableExportOptions();	
 		if (availableExportOptions == null || availableExportOptions.isEmpty()) {
 			throw new InvalidParameterException("There is no valid export option!");
@@ -369,7 +367,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	
 	
 	@SuppressWarnings("rawtypes")
-	protected Set<Enum> getSelectedExportOptions() {return selectedExportOptions;}
+	protected List<Enum> getSelectedExportOptions() {return selectedExportOptions;}
 	
 	/**
 	 * This method sets the export options. If the selectedOption Enum variable is not part of the 
@@ -378,7 +376,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	 * @throws Exception
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setSelectedOptions(Set<Enum> selectedOptions) throws Exception {
+	public void setSelectedOptions(List<Enum> selectedOptions) throws Exception {
 		selectedExportOptions.clear();
 		for (Enum selectedOption : selectedOptions) {
 			if (availableExportOptions.contains(selectedOption)) {
@@ -471,7 +469,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 				guiInterface.optionList.setSelectedIndex(availableExportOptions.indexOf(lastSelectedValue));
 			} else {
 				selectedExportOptions.clear();
-				Set<Enum> selectedOptions = new HashSet<Enum>();
+				List<Enum> selectedOptions = new ArrayList<Enum>();
 				for (Object selectedValue : objs) {
 					selectedOptions.add((Enum) selectedValue);  
 				}
