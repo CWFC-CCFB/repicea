@@ -19,6 +19,7 @@
 package repicea.lang.codetranslator;
 
 import java.io.File;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.security.InvalidParameterException;
@@ -32,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import repicea.console.JavaProcessWrapper;
 import repicea.lang.REpiceaClassLoader;
 import repicea.lang.REpiceaSystem;
+import repicea.lang.reflect.ReflectUtility;
 import repicea.math.Matrix;
 import repicea.multiprocess.JavaProcess;
 import repicea.multiprocess.JavaProcess.JVM_OPTION;
@@ -49,6 +51,17 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private static final String PORT = "-port";
 
+//	private final static Map<String, Class<?>> ClassNameToPrimitiveMap = new HashMap<String, Class<?>>();
+//	static {
+//		ClassNameToPrimitiveMap.put("double", double.class);
+//		ClassNameToPrimitiveMap.put("int", int.class);
+//		ClassNameToPrimitiveMap.put("long", long.class);
+//		ClassNameToPrimitiveMap.put("float", float.class);
+//		ClassNameToPrimitiveMap.put("String", String.class);
+//		ClassNameToPrimitiveMap.put("boolean", boolean.class);
+//		ClassNameToPrimitiveMap.put("char", char.class);
+//	}
+
 
 	private final static Map<String, Class<?>> PrimitiveTypeMap = new HashMap<String, Class<?>>();
 	static {
@@ -58,29 +71,6 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		PrimitiveTypeMap.put("logical", boolean.class);
 	}
 
-	private	final static Map<Class<?>, Class<?>> JavaWrapperToPrimitiveMap	= new HashMap<Class<?>, Class<?>>();
-	static {
-		JavaWrapperToPrimitiveMap.put(Double.class, double.class);
-		JavaWrapperToPrimitiveMap.put(Integer.class, int.class);
-		JavaWrapperToPrimitiveMap.put(Long.class, long.class);
-		JavaWrapperToPrimitiveMap.put(Float.class, float.class);
-		JavaWrapperToPrimitiveMap.put(String.class, String.class);
-		JavaWrapperToPrimitiveMap.put(Boolean.class, boolean.class);
-		JavaWrapperToPrimitiveMap.put(Character.class, char.class);
-	}
-
-	private	final static Map<Class<?>, Class<?>> PrimitiveToJavaWrapperMap	= new HashMap<Class<?>, Class<?>>();
-	static {
-		PrimitiveToJavaWrapperMap.put(double.class, Double.class);
-		PrimitiveToJavaWrapperMap.put(int.class, Integer.class);
-		PrimitiveToJavaWrapperMap.put( long.class, Long.class);
-		PrimitiveToJavaWrapperMap.put(float.class, Float.class);
-		PrimitiveToJavaWrapperMap.put(String.class, String.class);
-		PrimitiveToJavaWrapperMap.put(boolean.class, Boolean.class);
-		PrimitiveToJavaWrapperMap.put( char.class, Character.class);
-	}
-
-	
 	
 	static class MethodWrapper implements Comparable<MethodWrapper> {
 
@@ -161,7 +151,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 		@Override
 		public String toString() {
-			if (JavaWrapperToPrimitiveMap.containsKey(type)) {
+			if (REpiceaClassLoader.JavaWrapperToPrimitiveMap.containsKey(type)) {
 				if (type.equals(Double.class) || type.equals(Float.class)) {
 					return "numeric" + ((Number) value).toString();
 				} else if (type.equals(Integer.class) || type.equals(Long.class)) {
@@ -191,6 +181,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 	private static String ConstructCode = "create";
 	private static String ConstructNullCode = "createnull";
+	private static String ConstructArrayCode = "createarray";
 	private static String MethodCode = "method";
 	private static String SynchronizeEnvironment = "sync";
 
@@ -375,7 +366,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private void registerMethodOutput(Object result, JavaObjectList outputList) {
 		if (result != null) {
-			if (!JavaWrapperToPrimitiveMap.containsKey(result.getClass())) {
+			if (!REpiceaClassLoader.JavaWrapperToPrimitiveMap.containsKey(result.getClass())) {
 				put(System.identityHashCode(result), result);
 			}
 			outputList.add(new ParameterWrapper(result.getClass(), result));
@@ -403,13 +394,13 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	}
 
 	private boolean implementThisClassAsAnInterface(Class<?> refcl1, Class<?> cl) {
-		if (JavaWrapperToPrimitiveMap.containsKey(refcl1)) {
-			if (cl.equals(JavaWrapperToPrimitiveMap.get(refcl1))) {
+		if (REpiceaClassLoader.JavaWrapperToPrimitiveMap.containsKey(refcl1)) {
+			if (cl.equals(REpiceaClassLoader.JavaWrapperToPrimitiveMap.get(refcl1))) {
 				return true;
 			}
 		}
-		if (PrimitiveToJavaWrapperMap.containsKey(refcl1)) {
-			if (cl.equals(PrimitiveToJavaWrapperMap.get(refcl1))) {
+		if (REpiceaClassLoader.PrimitiveToJavaWrapperMap.containsKey(refcl1)) {
+			if (cl.equals(REpiceaClassLoader.PrimitiveToJavaWrapperMap.get(refcl1))) {
 				return true;
 			}
 		}
@@ -448,17 +439,31 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object createObjectFromRequestStrings(String[] requestStrings) throws Exception {
 		JavaObjectList outputList = new JavaObjectList();
+		
 		boolean isNull = requestStrings[0].equals(ConstructNullCode);
-		Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass(requestStrings[1]);
+		boolean isArray = requestStrings[0].equals(ConstructArrayCode);
+		if (isNull && isArray) {
+			throw new InvalidParameterException("An array instance cannot be null!");
+		}
+		
+		String className = requestStrings[1];
+		Class<?> clazz;
+		if (ReflectUtility.PrimitiveTypeMap.containsKey(className)) {
+			clazz = ReflectUtility.PrimitiveTypeMap.get(className);
+		} else {
+			clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+		}
+		
 		List[] outputLists = marshallParameters(requestStrings, 2);
 		List<Class<?>> parameterTypes = outputLists[0];
 		ParameterList parameters = (ParameterList) outputLists[1];
+		
 		if (parameters.isEmpty()) { // constructor with no argument then
 			Object newInstance;
 			if (isNull) {
 				newInstance = new NullWrapper(clazz);
 			} else {
-				 newInstance = getNewInstance(clazz, null, null);
+				newInstance = getNewInstance(isArray, clazz, null, null);
 			}
 			registerNewInstance(newInstance, outputList);
 		} else {
@@ -467,7 +472,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				if (isNull) {
 					newInstance = new NullWrapper(clazz);
 				} else {
-					newInstance = getNewInstance(clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));
+					newInstance = getNewInstance(isArray, clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));
 				}
 				registerNewInstance(newInstance, outputList);
 			}
@@ -482,10 +487,17 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	private Object getNewInstance(Class clazz, Class[] paramTypes, Object[] paramValues) throws Exception {
+	private Object getNewInstance(boolean isArray, Class clazz, Class[] paramTypes, Object[] paramValues) throws Exception {
 		if (paramTypes == null) {
+			if (isArray) {
+				throw new InvalidParameterException("Constructing an array requires at least one parameter, namely an integer that determines the size of the array!");
+			}
 			return clazz.newInstance();
 		} else {
+			if (isArray) {
+				int[] dimensions = (int[]) ReflectUtility.convertArrayType(paramValues, int.class);
+				return Array.newInstance(clazz, dimensions);
+			}
 			if (clazz.isEnum()) {
 				Method met = clazz.getMethod("valueOf", String.class);
 				return met.invoke(null, paramValues[0].toString());

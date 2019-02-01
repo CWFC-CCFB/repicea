@@ -18,6 +18,7 @@
  */
 package repicea.io;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -55,6 +56,18 @@ public class GExportRecord {
 			for (int i=0; i<fieldList.size(); i++) {
 				oVec.add(fieldList.get(i).getName());
 			}
+		}
+		return oVec;
+	}
+	
+	/**
+	 * this method returns a List instance that contains all the values in this record.
+	 * @return a List of objects
+	 */
+	public List<Object> getValues() {
+		List<Object> oVec = new ArrayList<Object>();
+		for (GExportFieldDetails details : fieldList) {
+			oVec.add(details.getValue());
 		}
 		return oVec;
 	}
