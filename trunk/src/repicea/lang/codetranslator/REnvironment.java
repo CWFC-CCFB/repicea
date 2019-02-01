@@ -162,7 +162,12 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 					return "character" + value.toString();
 				}
 			} else {
-				return "JavaObject" + ";" + type.getName() + "@" + System.identityHashCode(value);
+				String className = type.getName();
+				if (className.endsWith(";")) {
+					className = className.substring(0, className.length() - 1);
+				}
+				System.out.println(className);
+				return "JavaObject" + ";" + className + "@" + System.identityHashCode(value);
 			}
 		}
 	}
@@ -188,7 +193,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	@Override
 	public Object processCode(String request) throws Exception {
 		String[] requestStrings = request.split(";");
-		if (requestStrings[0].startsWith(ConstructCode)) {	// can be either create or createnull here
+		if (requestStrings[0].startsWith(ConstructCode)) {	// can be either create, createarray or createnull here
 			return createObjectFromRequestStrings(requestStrings); 
 		} else if (requestStrings[0].equals(MethodCode)) {
 			return processMethod(requestStrings);
