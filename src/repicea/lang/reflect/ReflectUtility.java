@@ -18,7 +18,9 @@
  */
 package repicea.lang.reflect;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -26,6 +28,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import repicea.lang.REpiceaClassLoader;
 
 public class ReflectUtility {
 
@@ -80,4 +84,70 @@ public class ReflectUtility {
 		return PrimitiveWrappers.contains(clazz) || PrimitiveTypeMap.values().contains(clazz);
 	}
 	
+	
+	/**
+	 * This method returns the dimensions of an array. The array is assumed to be consistent, ie. the
+	 * row lengths do not change across the row.
+	 * @param array an array
+	 * @return an array of integer
+	 */
+	public static int[] getDimensions(Object[] array) {
+		String className = array.getClass().getName();
+		int nbDimensions = className.lastIndexOf("[") + 1;
+		int[] dimensions = new int[nbDimensions];
+		Object current = array;
+		for (int dim = 0; dim < nbDimensions; dim++) {
+			dimensions[dim] = Array.getLength(current);
+			current = Array.get(current, 0);
+		}
+		return dimensions;
+	}
+	
+	
+	/**
+	 * This method is used to convert an array of particular class into an array of another
+	 * class. Typically, it could be used to convert an array of Object into an array of double
+	 * if all the elements of the original array are instances of double.
+	 * @param currentArray
+	 * @param clazz
+	 * @return an Object 
+	 */
+	public static Object convertArrayType(Object[] currentArray, Class<?> clazz) {
+		if (currentArray == null || currentArray.length == 0) {
+			throw new InvalidParameterException("The array is either null or empty!");
+		} else {
+			int[] dimensions = getDimensions(currentArray);
+			Object newArray =  Array.newInstance(clazz, dimensions);
+			for (int i = 0; i < currentArray.length; i++) {
+				if (currentArray[i].getClass().isArray()) {
+					Array.set(newArray, i, convertArrayType((Object[]) currentArray[i], clazz));
+				} else {
+					Object currentValue = currentArray[i];
+					if (REpiceaClassLoader.PrimitiveToJavaWrapperMap.containsKey(clazz)) {
+						if (clazz.equals(double.class)) {
+							Array.set(newArray, i, ((Number) currentValue).doubleValue());
+						} else if (clazz.equals(int.class)) {
+							Array.set(newArray, i, ((Number) currentValue).intValue());
+						} else if (clazz.equals(long.class)) {
+							Array.set(newArray, i, ((Number) currentValue).longValue());
+						} else if (clazz.equals(float.class)) {
+							Array.set(newArray, i, ((Number) currentValue).floatValue());
+						} else if (clazz.equals(String.class)) {
+							Array.set(newArray, i, currentValue.toString());
+						} else if (clazz.equals(char.class)) {
+							Array.set(newArray, i, ((Character) currentValue).charValue());
+						} else if (clazz.equals(boolean.class)) {
+							Array.set(newArray, i, ((Boolean) currentValue).booleanValue());
+						} else {
+							throw new InvalidParameterException("The primitive type is not recognized!");
+						}
+					} else {
+						Array.set(newArray, i, clazz.cast(currentArray[i]));
+					}
+				}
+			}
+			return newArray;
+		}
+	}
+
 }

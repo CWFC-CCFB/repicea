@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.Language;
 
@@ -33,6 +32,18 @@ import repicea.util.REpiceaTranslator.Language;
  */
 public class REpiceaSystem {
 
+	
+	private static String jreVersion;
+	
+	private static String revision;
+
+	static {
+		String completeJREVersion = System.getProperty("java.version");
+		jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
+		revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
+	}
+
+	
 	/**
 	 * This method returns the temporary input/output directory. It is preferable to the System.getProperty("java.io.tmpdir") method
 	 * because it makes sure the path ends with a file separator.
@@ -83,14 +94,14 @@ public class REpiceaSystem {
 		setLanguageFromMain(args, null);
 	}
 
-	/**
-	 * This method returns the three digits of the JVM version
-	 * @return a 1x3 array of integers
-	 */
-	public static int[] getJVMVersion() {
-		String jvmVersion = ObjectUtility.getJVMVersion();
-		return parseJVMVersion(jvmVersion);
-	}
+//	/**
+//	 * This method returns the three digits of the JVM version
+//	 * @return a 1x3 array of integers
+//	 */
+//	public static int[] getJVMVersion() {
+//		String jvmVersion = ObjectUtility.getJVMVersion();
+//		return parseJVMVersion(jvmVersion);
+//	}
 
 	private static int[] parseJVMVersion(String jvmVersion) {
 		int[] version = new int[3];
@@ -111,7 +122,7 @@ public class REpiceaSystem {
 	 * @return a boolean
 	 */
 	public static boolean isCurrentJVMGreaterThanThisVersion(String targetJVM, boolean upToThirdDigit) {
-		int[] currentVersion = getJVMVersion();
+		int[] currentVersion = parseJVMVersion(getJVMVersion());
 		int[] targetVersion = parseJVMVersion(targetJVM);
 		if (currentVersion[0] > targetVersion[0]) {
 			return true;
@@ -172,6 +183,21 @@ public class REpiceaSystem {
 			return null;
 		}
 	}
+	
+	
+	/**
+	 * This method returns the version of the virtual machine.
+	 * @return a String
+	 */
+	public static String getJVMVersion() {return jreVersion;}
+	
+	/**
+	 * This method returns the revision of the virtual machine.
+	 * @return a String
+	 */
+	public static String getJVMRevision() {return revision;}
+
+	
 //	public static void main(String[] args) {
 //		String[] argTest = "repicea-console.jar -l cd".split(" ");
 //			REpiceaSystem.setLanguageFromMain(argTest);

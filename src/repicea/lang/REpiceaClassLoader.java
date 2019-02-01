@@ -23,12 +23,39 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.security.InvalidParameterException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * The REpiceaClassLoader class allows for the specification of a directory that contains java libraries.
  * @author Mathieu Fortin - December 2018
  */
 public class REpiceaClassLoader extends URLClassLoader {
+	
+	public final static Map<Class<?>, Class<?>> JavaWrapperToPrimitiveMap = new HashMap<Class<?>, Class<?>>();
+	static {
+		JavaWrapperToPrimitiveMap.put(Double.class, double.class);
+		JavaWrapperToPrimitiveMap.put(Integer.class, int.class);
+		JavaWrapperToPrimitiveMap.put(Long.class, long.class);
+		JavaWrapperToPrimitiveMap.put(Float.class, float.class);
+		JavaWrapperToPrimitiveMap.put(String.class, String.class);
+		JavaWrapperToPrimitiveMap.put(Boolean.class, boolean.class);
+		JavaWrapperToPrimitiveMap.put(Character.class, char.class);
+	}
+
+	public final static Map<Class<?>, Class<?>> PrimitiveToJavaWrapperMap = new HashMap<Class<?>, Class<?>>();
+	static {
+		PrimitiveToJavaWrapperMap.put(double.class, Double.class);
+		PrimitiveToJavaWrapperMap.put(int.class, Integer.class);
+		PrimitiveToJavaWrapperMap.put(long.class, Long.class);
+		PrimitiveToJavaWrapperMap.put(float.class, Float.class);
+		PrimitiveToJavaWrapperMap.put(String.class, String.class);
+		PrimitiveToJavaWrapperMap.put(boolean.class, Boolean.class);
+		PrimitiveToJavaWrapperMap.put(char.class, Character.class);
+	}
+
+	
+	
 	
 	private boolean hasExtensionDirectoryBeenRead = false;
 	

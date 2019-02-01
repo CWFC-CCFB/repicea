@@ -40,15 +40,6 @@ public final class ObjectUtility {
 
 	private static final double verySmall = 10E-8;
 	
-	private static String jreVersion;
-	
-	private static String revision;
-
-	static {
-		String completeJREVersion = System.getProperty("java.version");
-		jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
-		revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
-	}
 
 	/**
 	 * This method makes it possible to clone a Map type object
@@ -401,16 +392,8 @@ public final class ObjectUtility {
 		return strings;
 	}
 
-	/**
-	 * This method returns the version of the virtual machine.
-	 * @return a String
-	 */
-	public static String getJVMVersion() {return jreVersion;}
 	
-	/**
-	 * This method returns the revision of the virtual machine.
-	 * @return a String
-	 */
-	public static String getJVMRevision() {return revision;}
+	
+	
 	
 }
