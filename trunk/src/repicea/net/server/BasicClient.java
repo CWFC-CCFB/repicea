@@ -22,9 +22,8 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.security.InvalidParameterException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
 
 import repicea.net.SocketWrapper;
 import repicea.net.TCPSocketWrapper;
@@ -155,7 +154,7 @@ public class BasicClient implements Closeable {
 	
 	
 	private BasicClientException handleException(Exception e) {
-		if (e instanceof InterruptedException || e instanceof ExecutionException || e instanceof TimeoutException) {
+		if (e instanceof SocketTimeoutException) {
 			return new BasicClientException(ExceptionType.ConnectionTooLong);
 		} else {
 			return new BasicClientException(ExceptionType.UnknownErrorWhileConnected);

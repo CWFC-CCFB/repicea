@@ -41,7 +41,7 @@ public interface SocketWrapper extends Closeable {
 	 * seconds. If the number of seconds is equal to or smaller than 0, then there is no timeout.
 	 * @param  numberOfSeconds number of seconds to wait before throwing a TimeoutException
 	 * @return the object that was read from the socket
-	 * @throws Exception if the thread has not correctly terminated
+	 * @throws Exception 
 	 */
 	public Object readObject(int timeout) throws Exception;
 	
