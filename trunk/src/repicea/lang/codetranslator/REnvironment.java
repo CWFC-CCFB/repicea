@@ -50,6 +50,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private static final String FIRSTCALL = "-firstcall";
 	
 	private static final String PORT = "-port";
+	
+	private static final String MEMORY = "-mem";
 
 //	private final static Map<String, Class<?>> ClassNameToPrimitiveMap = new HashMap<String, Class<?>>();
 //	static {
@@ -589,6 +591,17 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				newCommands.add(PORT);
 				newCommands.add(port);
 			}
+			
+			String memorySizeStr = REpiceaSystem.retrieveArgument(MEMORY, arguments);
+			Integer memorySize = null;
+			if (memorySizeStr != null) {
+				try {
+					memorySize = Integer.parseInt(memorySizeStr);
+				} catch (Exception e) {
+					memorySize = null;
+				}
+			}
+			
 			File jarFile = new File(REnvironment.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
 			File rootPath = jarFile.getParentFile();
 
@@ -596,6 +609,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
 			JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
 			rGatewayProcess.setOption(JVM_OPTION.SystemClassLoader, "-Djava.system.class.loader=repicea.lang.REpiceaClassLoader");
+			if (memorySize != null) {
+				rGatewayProcess.setJVMMemory(memorySize);
+			}
 			rGatewayProcessWrapper.run();
 			System.exit(0);
 		}
