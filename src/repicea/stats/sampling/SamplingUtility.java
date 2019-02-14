@@ -20,7 +20,9 @@ package repicea.stats.sampling;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 public class SamplingUtility {
@@ -53,6 +55,23 @@ public class SamplingUtility {
 			sample.add(population.get(ind));
 		}
 		return sample;
+	}
+	
+	/**
+	 * This method returns the list of different observations and their frequency. 
+	 * @param list a population or a sample
+	 * @return a Map with observation as keys and frequencies as values
+	 */
+	@SuppressWarnings("rawtypes")
+	public static Map<Object, Integer> getObservationFrequencies(List list) {
+		Map<Object, Integer> frequencyMap = new HashMap<Object, Integer>();
+		for (Object obj : list) {
+			if (!frequencyMap.containsKey(obj)) {
+				frequencyMap.put(obj, 0);
+			}
+			frequencyMap.put(obj, frequencyMap.get(obj) + 1);
+		}
+		return frequencyMap;
 	}
 	
 	
