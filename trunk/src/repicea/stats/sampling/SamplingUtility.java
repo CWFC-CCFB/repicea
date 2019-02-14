@@ -20,6 +20,7 @@ package repicea.stats.sampling;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,14 +43,7 @@ public class SamplingUtility {
 			throw new InvalidParameterException("The sample size must be greater than 0 and smaller than or equal to the population size!");
 		}
 		
-		List<Integer> sampleIndex = new ArrayList<Integer>();
-		int index;
-		while (sampleIndex.size() < sampleSize) {
-			index = (int) Math.floor(random.nextDouble() * population.size());
-			if (withReplacement || !sampleIndex.contains(index)) {
-				sampleIndex.add(index);
-			}
-		}
+		List<Integer> sampleIndex = getSampleIndex(sampleSize, population.size(), withReplacement);
 		List sample = new ArrayList();
 		for (Integer ind : sampleIndex) {
 			sample.add(population.get(ind));
@@ -63,7 +57,7 @@ public class SamplingUtility {
 	 * @return a Map with observation as keys and frequencies as values
 	 */
 	@SuppressWarnings("rawtypes")
-	public static Map<Object, Integer> getObservationFrequencies(List list) {
+	public static Map<Object, Integer> getObservationFrequencies(Collection list) {
 		Map<Object, Integer> frequencyMap = new HashMap<Object, Integer>();
 		for (Object obj : list) {
 			if (!frequencyMap.containsKey(obj)) {
@@ -86,4 +80,43 @@ public class SamplingUtility {
 		return getSample(population, sampleSize, false);
 	}
 	
+
+	private static List<Integer> getSampleIndex(int sampleSize, int populationSize, boolean withReplacement) {
+		List<Integer> sampleIndex = new ArrayList<Integer>();
+		int index;
+		while (sampleIndex.size() < sampleSize) {
+			index = (int) Math.floor(random.nextDouble() * populationSize);
+			if (withReplacement || !sampleIndex.contains(index)) {
+				sampleIndex.add(index);
+			}
+		}
+		return sampleIndex;
+	}
+
+	
+	/**
+	 * This method returns a sample from a population drawn without replacement..
+	 * @param population a Map instance with the population
+	 * @param sampleSize an integer 
+	 * @return a Map instance containing the sample
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Map getSample(Map population, int sampleSize) {
+		if (sampleSize <= 0 || sampleSize > population.size()) {
+			throw new InvalidParameterException("The sample size must be greater than 0 and smaller than or equal to the population size!");
+		}
+		List keys = new ArrayList();
+		for (Object key : population.keySet()) {
+			keys.add(key);
+		}
+		List<Integer> sampleIndex = getSampleIndex(sampleSize, population.size(), false);
+		Map sample = new HashMap();
+		for (Integer ind : sampleIndex) {
+			Object key = keys.get(ind);
+			Object value = population.get(key);
+			sample.put(key, value);
+		}
+		return sample;
+	}
+
 }
