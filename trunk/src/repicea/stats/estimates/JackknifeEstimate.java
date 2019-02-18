@@ -48,11 +48,11 @@ public class JackknifeEstimate extends ResamplingBasedEstimate {
 	@Override
 	public Matrix getVariance() {
 		long nCombinations = MathUtility.Factorial(n) / (MathUtility.Factorial(d) * MathUtility.Factorial(n-d));
-		int n = getNumberOfRealizations();
-		if (nCombinations != n) {
+		int nRealizations = getNumberOfRealizations();
+		if (nCombinations != nRealizations) {
 			throw new InvalidParameterException("The number of realizations is inconsistent with the n and d parameters of the constructor!");
 		}
-		Matrix ss = getDistribution().getVariance().scalarMultiply(n - 1);	// sum of squared difference
+		Matrix ss = getDistribution().getVariance().scalarMultiply(getNumberOfRealizations() - 1);	// sum of squared difference
 		double scalingFactor = ((double) n - d) / (d * nCombinations);
 		return ss.scalarMultiply(scalingFactor);
 	}
