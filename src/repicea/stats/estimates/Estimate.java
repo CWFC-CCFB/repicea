@@ -37,7 +37,12 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	 * The type of estimator.
 	 * @author Mathieu Fortin - March 2012
 	 */
-	public static enum EstimatorType {MonteCarlo, LeastSquares, LikelihoodBased, MomentBased, Unknown}
+	public static enum EstimatorType {
+		Resampling, 
+		LeastSquares, 
+		LikelihoodBased, 
+		MomentBased, 
+		Unknown}
 
 	protected Estimate(D distribution) {
 		super(distribution);
