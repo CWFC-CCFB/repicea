@@ -46,4 +46,27 @@ public class MathUtility {
 		}
 	}
 	
+	
+	/**
+	 * This method returns the ratio of two factorial factorial of parameter i.
+	 * @param i an integer
+	 * @return the result as an integer
+	 */
+	public static long FactorialRatio(int i, int j) {
+		if (i < 0 || j < 0) {
+			throw new InvalidParameterException("Parameters i and j must be equal to or greater than 0!");
+		} else if (j > i) {
+			throw new InvalidParameterException("Parameter j must be smaller than parameter i!");
+		} else {
+			if (j == 0) {
+				j = 1;
+			}
+			long result = 1;
+			for (int k = i; k > j; k--) {
+				result *= k;
+			}
+			return result;
+		}
+	}
+
 }

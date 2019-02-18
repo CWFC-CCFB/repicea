@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import repicea.math.MathUtility;
 import repicea.math.Matrix;
 
 /**
@@ -246,33 +247,51 @@ public class StatisticalUtility {
 		}
 	}
 
+//	/**
+//	 * This method returns a sample from a population. 
+//	 * @param observations a list of observations that compose the population
+//	 * @param sampleSize the sample size (n)
+//	 * @param withReplacement a boolean to indicate whether the sample is with or without replacement
+//	 * @return a List that contains the sample
+//	 */
+//	public static List<Object> getSampleFromPopulation(List<?> observations, int sampleSize, boolean withReplacement) {
+//		if (sampleSize < 1) {
+//			throw new InvalidParameterException("The sample size must be at least of 1.");
+//		}
+//		List<Integer> sampleIndex = new ArrayList<Integer>();
+//		int index;
+//		while (sampleIndex.size() < sampleSize) {
+//			index = (int) Math.floor(getRandom().nextDouble() * observations.size());
+//			if (!sampleIndex.contains(index) || withReplacement) {
+//				sampleIndex.add(index);
+//			}
+//		}
+//		ArrayList<Object> sample = new ArrayList<Object>();
+//		for (Integer ind : sampleIndex) {
+//			sample.add(observations.get(ind));
+//		}
+//		return sample;
+//	}
+
 	/**
-	 * This method returns a sample from a population. 
-	 * @param observations a list of observations that compose the population
-	 * @param sampleSize the sample size (n)
-	 * @param withReplacement a boolean to indicate whether the sample is with or without replacement
-	 * @return a List that contains the sample
+	 * This method returns the number of combinations.
+	 * @param n the number of units
+	 * @param d the number of units drawn in each combination
+	 * @return a long
 	 */
-	public static List<Object> getSampleFromPopulation(List<?> observations, int sampleSize, boolean withReplacement) {
-		if (sampleSize < 1) {
-			throw new InvalidParameterException("The sample size must be at least of 1.");
+	public static long getCombinations(int n, int d) {
+		if (n < 1 || d < 1) {
+			throw new InvalidParameterException("Parameters n and d must be equal to or greater than 1!");
+		} else if (d > n) {
+			throw new InvalidParameterException("Parameters d must be equal to or smaller than parameter n!");
 		}
-		List<Integer> sampleIndex = new ArrayList<Integer>();
-		int index;
-		while (sampleIndex.size() < sampleSize) {
-			index = (int) Math.floor(getRandom().nextDouble() * observations.size());
-			if (!sampleIndex.contains(index) || withReplacement) {
-				sampleIndex.add(index);
-			}
+		if (n - d > d) {
+			return MathUtility.FactorialRatio(n, n - d) / MathUtility.Factorial(d);
+		} else {
+			return MathUtility.FactorialRatio(n, d) / MathUtility.Factorial(n - d);
 		}
-		ArrayList<Object> sample = new ArrayList<Object>();
-		for (Integer ind : sampleIndex) {
-			sample.add(observations.get(ind));
-		}
-		return sample;
 	}
 
-	
 //	public static void main(String[] args) {
 //		List<Integer> population = new ArrayList<Integer>();
 //		for (int i = 1; i <= 10; i++) {
