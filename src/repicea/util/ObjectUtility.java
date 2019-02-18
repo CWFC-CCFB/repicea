@@ -74,12 +74,30 @@ public final class ObjectUtility {
 	}
 
 
+	/**
+	 * This method copies all the element of a vector into a new vector.
+	 * @param oVec the source vector
+	 * @return a new Vector instance
+	 */
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static Vector copyVector(Vector oVec) {
 		Vector returnVec = new Vector();
 		for (int i = 0; i < oVec.size(); i++) 
 			returnVec.add(oVec.get(i));
 		return returnVec;
+	}
+
+	/**
+	 * This method copies all the element of a List into a new ArrayList instance.
+	 * @param oList the source List instance
+	 * @return a new ArrayList instance
+	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static List copyList(List oList) {
+		List returnList = new ArrayList();
+		for (int i = 0; i < oList.size(); i++) 
+			returnList.add(oList.get(i));
+		return returnList;
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
