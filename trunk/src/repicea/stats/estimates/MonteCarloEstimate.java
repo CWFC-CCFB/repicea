@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -24,7 +24,6 @@ import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -32,7 +31,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * This estimate contains the realizations of a Monte Carlo simulations.
  * @author Mathieu Fortin - October 2011
  */
-public class MonteCarloEstimate extends Estimate<EmpiricalDistribution> {
+public class MonteCarloEstimate extends ResamplingBasedEstimate {
 	
 	private static final long serialVersionUID = 20110912L;
 	
@@ -60,33 +59,9 @@ public class MonteCarloEstimate extends Estimate<EmpiricalDistribution> {
 	 * Constructor.
 	 */
 	public MonteCarloEstimate() {
-		super(new EmpiricalDistribution());
-		estimatorType = EstimatorType.MonteCarlo;
+		super();
 	}
 	
-	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
-	
-	
-	public void addRealization(Matrix value) {
-		if (checkConformity(value)) {
-			getDistribution().addRealization(value);
-		} else {
-			throw new InvalidParameterException("The matrix is not conform to previous observations!");
-		}
-	}
-	
-	private boolean checkConformity(Matrix value) {
-		List<Matrix> observations = getDistribution().getRealizations();
-		if (observations.isEmpty()) {
-			return true; 
-		} else {
-			Matrix firstObservation = observations.get(0);
-			return (firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols);
-		}
-	}
-	
-	public List<Matrix> getRealizations() {return getDistribution().getRealizations();}
-
 	/**
 	 * This method returns a MonteCarloEstimate instance that results from the subtraction of two 
 	 * MonteCarloEstimate instances with the same number of realizations. 
