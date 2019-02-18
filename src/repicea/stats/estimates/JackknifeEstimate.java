@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 
 import repicea.math.MathUtility;
 import repicea.math.Matrix;
+import repicea.stats.StatisticalUtility;
 
 /**
  * The JackknifeEstimate class implements the variance calculation typical of
@@ -48,7 +49,7 @@ public class JackknifeEstimate extends ResamplingBasedEstimate {
 	@Override
 	public Matrix getVariance() {
 		long nCombinations = MathUtility.Factorial(n) / (MathUtility.Factorial(d) * MathUtility.Factorial(n-d));
-		int nRealizations = getNumberOfRealizations();
+		long nRealizations = StatisticalUtility.getCombinations(n, d);
 		if (nCombinations != nRealizations) {
 			throw new InvalidParameterException("The number of realizations is inconsistent with the n and d parameters of the constructor!");
 		}
