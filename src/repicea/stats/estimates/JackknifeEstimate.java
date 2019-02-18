@@ -20,7 +20,6 @@ package repicea.stats.estimates;
 
 import java.security.InvalidParameterException;
 
-import repicea.math.MathUtility;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 
