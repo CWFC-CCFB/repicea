@@ -31,7 +31,7 @@ import repicea.stats.RandomVariable;
 public abstract class Estimate<D extends Distribution> extends RandomVariable<D> {
 	
 	static {
-		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates$EstimatorType", "MonteCarlo", "Resampling");
+		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates.Estimate.EstimatorType", "MonteCarlo", "Resampling");
 	}
 	
 	
