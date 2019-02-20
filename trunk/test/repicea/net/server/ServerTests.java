@@ -16,13 +16,13 @@ public class ServerTests {
 
 	@Test
 	public void testDistantTCPServerWithSingleRequest() throws Exception {
-		ServerConfiguration configuration = new ServerConfiguration(1, 0, 18001, 18805);
+		ServerConfiguration configuration = new ServerConfiguration(1, 0, 18002, 18805);
 		System.out.println("Configuration instantiated");
 		FakeDistantServer server = new FakeDistantServer(configuration);		
 		System.out.println("Server instantiated");
 		server.startApplication();
 		 
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18001);
+		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18002);
 		FakeClient client = new FakeClient(socketAddress, Protocol.TCP, true);	// true: is a Java application
 		Object callback = client.sendFakeRequest();
 		Assert.assertTrue(callback != null);
@@ -35,11 +35,11 @@ public class ServerTests {
 	@Test
 	public void testLocalTCPServerMultipleRequests() throws Exception {
 		REnvironment env = new REnvironment();
-		JavaLocalGatewayServer server = new JavaLocalGatewayServer(new ServerConfiguration(18000, Protocol.TCP), env, false);	// false: will not shutdown after loosing the connection	
+		JavaLocalGatewayServer server = new JavaLocalGatewayServer(new ServerConfiguration(18001, Protocol.TCP), env, false);	// false: will not shutdown after loosing the connection	
 		System.out.println("Server instantiated");
 		server.startApplication();
 		 
-		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18000);
+		InetSocketAddress socketAddress = new InetSocketAddress(InetAddress.getLoopbackAddress(), 18001);
 		FakeClient client = new FakeClient(socketAddress, Protocol.TCP, false);	// false: it does as if was not a Java application
 		client.sendTimeToServer();
 

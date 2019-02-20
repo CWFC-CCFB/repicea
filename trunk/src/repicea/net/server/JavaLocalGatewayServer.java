@@ -150,5 +150,4 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	protected ClientThread createClientThread(AbstractServer server, int id) {
 		return new JavaGatewayClientThread(server, id);
 	}
-
 }

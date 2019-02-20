@@ -54,7 +54,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	private class CallReceiverThread extends Thread {
 
 		private boolean shutdownCall;
-		private final ServerSocket serverSocket;
+		protected final ServerSocket serverSocket;
 		private final LinkedBlockingQueue<SocketWrapper> clientQueue;
 		private final int maxNumberOfWaitingClients;
 
@@ -343,7 +343,9 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 		callReceiver.shutdownCall = true;
 		callReceiver.clientQueue.clear();
 		try {
-			callReceiver.serverSocket.close();
+			if (callReceiver.serverSocket != null) {
+				callReceiver.serverSocket.close();
+			}
 		} catch (IOException e) {
 			callReceiver.interrupt();
 		} finally {
