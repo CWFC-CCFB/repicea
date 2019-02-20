@@ -19,6 +19,7 @@
 package repicea.stats.estimates;
 
 import repicea.math.Matrix;
+import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.stats.Distribution;
 import repicea.stats.RandomVariable;
 
@@ -28,6 +29,11 @@ import repicea.stats.RandomVariable;
  * @param <D> a Distribution derived instance which represents the assumed distribution for the estimate
  */
 public abstract class Estimate<D extends Distribution> extends RandomVariable<D> {
+	
+	static {
+		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.stats.estimates$EstimatorType", "MonteCarlo", "Resampling");
+	}
+	
 	
 	private static final long serialVersionUID = 20120825L;
 	
