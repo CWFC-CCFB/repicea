@@ -27,7 +27,7 @@ public class ServerTests {
 		Object callback = client.sendFakeRequest();
 		Assert.assertTrue(callback != null);
 		Assert.assertTrue(callback.equals(ServerReply.ClosingConnection));
-		client.close();
+//		client.close();
 		System.out.println("TCP Server basic implementation answer, reply and close successfully tested!");
 	}
 	
@@ -83,7 +83,7 @@ public class ServerTests {
 			expCapacity++;
 		}
 
-		client.close();			
+//		client.close();			
 		System.out.println("TCP Server implementation with multiple requests (3) successfully tested!");
 	}
 
