@@ -18,6 +18,8 @@
  */
 package repicea.stats.estimates;
 
+import java.util.List;
+
 import repicea.math.Matrix;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.stats.Distribution;
@@ -38,11 +40,13 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	private static final long serialVersionUID = 20120825L;
 	
 	protected EstimatorType estimatorType;
+
+	protected List<String> rowIndex;
 	
 	/**
 	 * The type of estimator.
 	 * @author Mathieu Fortin - March 2012
-	 */
+s	 */
 	public static enum EstimatorType {
 		Resampling, 
 		LeastSquares, 
@@ -60,8 +64,23 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	 * @return an EstimatorType instance
 	 */
 	public EstimatorType getEstimatorType() {return estimatorType;}
-	
 
+	/**
+	 * This method makes it possible to set an optional row index. This is useful when the 
+	 * response is a vector.
+	 * @param rowIndex a List of String instance
+	 */
+	public void setRowIndex(List<String> rowIndex) {
+		this.rowIndex = rowIndex;
+	}
+
+	
+	/**
+	 * This method returns the row index. 
+	 * @return a List of String instance or null if the row index has not been set.
+	 */
+	public List<String> getRowIndex() {return rowIndex;}
+	
 	/**
 	 * This method returns a random deviate from this estimate. This method
 	 * is useful for Monte Carlo simulations.
