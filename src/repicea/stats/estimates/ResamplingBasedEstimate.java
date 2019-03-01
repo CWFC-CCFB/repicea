@@ -25,7 +25,7 @@ import repicea.stats.distributions.EmpiricalDistribution;
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
 @SuppressWarnings("serial")
-abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> {
+abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> implements NumberOfRealizationsProvider {
 	
 	/**
 	 * Constructor.
@@ -66,10 +66,7 @@ abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> {
 	 */
 	public List<Matrix> getRealizations() {return getDistribution().getRealizations();}
 
-	/**
-	 * This method returns the number of realizations in the empirical distribution.
-	 * @return an integer
-	 */
+	@Override
 	public int getNumberOfRealizations() {return getDistribution().getNumberOfRealizations();}
 
 }

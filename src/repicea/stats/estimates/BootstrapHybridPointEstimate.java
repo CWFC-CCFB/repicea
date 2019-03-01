@@ -26,7 +26,7 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
 @SuppressWarnings("serial")
-public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
+public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
 
 	public class VariancePointEstimate {
 		private final Matrix modelRelatedVariance;
@@ -197,7 +197,8 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution>{
 		return getVarianceOfTotalEstimate().getTotalVariance();
 	}
 	
-	protected int getNumberOfRealizations() {
+	@Override
+	public int getNumberOfRealizations() {
 		return estimates.size();
 	}
 	
