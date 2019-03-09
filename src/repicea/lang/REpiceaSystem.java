@@ -39,8 +39,13 @@ public class REpiceaSystem {
 
 	static {
 		String completeJREVersion = System.getProperty("java.version");
-		jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
-		revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
+		try {
+			jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
+			revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
+		} catch (Exception e) {
+			jreVersion = completeJREVersion;
+			revision = "unknown";
+		}
 	}
 
 	
