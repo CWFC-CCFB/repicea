@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import repicea.lang.REpiceaClassLoader;
 
 public class ReflectUtility {
 
@@ -57,7 +56,28 @@ public class ReflectUtility {
 		PrimitiveTypeMap.put("boolean", boolean.class);
 	}
 
-	
+	public final static Map<Class<?>, Class<?>> JavaWrapperToPrimitiveMap = new HashMap<Class<?>, Class<?>>();
+	static {
+		JavaWrapperToPrimitiveMap.put(Double.class, double.class);
+		JavaWrapperToPrimitiveMap.put(Integer.class, int.class);
+		JavaWrapperToPrimitiveMap.put(Long.class, long.class);
+		JavaWrapperToPrimitiveMap.put(Float.class, float.class);
+		JavaWrapperToPrimitiveMap.put(String.class, String.class);
+		JavaWrapperToPrimitiveMap.put(Boolean.class, boolean.class);
+		JavaWrapperToPrimitiveMap.put(Character.class, char.class);
+	}
+
+	public final static Map<Class<?>, Class<?>> PrimitiveToJavaWrapperMap = new HashMap<Class<?>, Class<?>>();
+	static {
+		PrimitiveToJavaWrapperMap.put(double.class, Double.class);
+		PrimitiveToJavaWrapperMap.put(int.class, Integer.class);
+		PrimitiveToJavaWrapperMap.put(long.class, Long.class);
+		PrimitiveToJavaWrapperMap.put(float.class, Float.class);
+		PrimitiveToJavaWrapperMap.put(String.class, String.class);
+		PrimitiveToJavaWrapperMap.put(boolean.class, Boolean.class);
+		PrimitiveToJavaWrapperMap.put(char.class, Character.class);
+	}
+
 	
 	/**
 	 * This static method returns all the fields from a class including those
@@ -123,7 +143,7 @@ public class ReflectUtility {
 					Array.set(newArray, i, convertArrayType((Object[]) currentArray[i], clazz));
 				} else {
 					Object currentValue = currentArray[i];
-					if (REpiceaClassLoader.PrimitiveToJavaWrapperMap.containsKey(clazz)) {
+					if (PrimitiveToJavaWrapperMap.containsKey(clazz)) {
 						if (clazz.equals(double.class)) {
 							Array.set(newArray, i, ((Number) currentValue).doubleValue());
 						} else if (clazz.equals(int.class)) {

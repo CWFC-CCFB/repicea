@@ -57,6 +57,10 @@ public final class JavaProcess extends AbstractIndependentProcess {
 	public static enum JVM_OPTION {Memory, 
 		ClassPath, 
 		FileEncoding, 
+		/**
+		 * @deprecated Java 9 no longer accepts customized classloaders
+		 */
+		@Deprecated
 		SystemClassLoader,
 		SplashWindow};
 	
@@ -130,10 +134,14 @@ public final class JavaProcess extends AbstractIndependentProcess {
 		finalCommands.add("java");
 		if (!jvmOptions.isEmpty()) {
 			for (String optionalCommand : jvmOptions.values()) {
-				finalCommands.add(optionalCommand);
+				for (String optCommand : optionalCommand.split(" ")) {
+					finalCommands.add(optCommand);
+				}
 			}
 		}
-		finalCommands.add("-jar");
+		if (getName().endsWith(".jar")) {
+			finalCommands.add("-jar");
+		}
 		finalCommands.addAll(commands);
 		ProcessBuilder pb = new ProcessBuilder(finalCommands);
 		pb.redirectErrorStream(true);
@@ -156,7 +164,17 @@ public final class JavaProcess extends AbstractIndependentProcess {
 			jvmOptions.put(JVM_OPTION.Memory, "-Xmx" + nbMegaJVM + "m");
 		}
 	}
-	
+
+	/**
+	 * This method sets the classpath. It has no effect if the first element of the command list is a jar file.
+	 * @param classPath the complete classpath
+	 */
+	public void setClassPath(String classPath) {
+		if (classPath != null) {
+			jvmOptions.put(JVM_OPTION.ClassPath, "-cp " + classPath);
+		}
+	}
+
 	/**
 	 * This method sets the JVM options
 	 * @param optionName a JVM_OPTION enum instance

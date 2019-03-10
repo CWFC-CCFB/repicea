@@ -31,12 +31,11 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.console.JavaProcessWrapper;
-import repicea.lang.REpiceaClassLoader;
+//import repicea.lang.REpiceaClassLoader;
 import repicea.lang.REpiceaSystem;
 import repicea.lang.reflect.ReflectUtility;
 import repicea.math.Matrix;
 import repicea.multiprocess.JavaProcess;
-import repicea.multiprocess.JavaProcess.JVM_OPTION;
 import repicea.net.server.BasicClient;
 import repicea.net.server.JavaLocalGatewayServer;
 import repicea.net.server.ServerConfiguration;
@@ -44,6 +43,7 @@ import repicea.net.server.ServerConfiguration.Protocol;
 
 @SuppressWarnings("serial")
 public class REnvironment extends ConcurrentHashMap<Integer, Object> implements REpiceaCodeTranslator {
+
 
 	private static final String EXTENSION = "-ext";
 	
@@ -153,7 +153,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 		@Override
 		public String toString() {
-			if (REpiceaClassLoader.JavaWrapperToPrimitiveMap.containsKey(type)) {
+			if (ReflectUtility.JavaWrapperToPrimitiveMap.containsKey(type)) {
 				if (type.equals(Double.class) || type.equals(Float.class)) {
 					return "numeric" + ((Number) value).toString();
 				} else if (type.equals(Integer.class) || type.equals(Long.class)) {
@@ -372,7 +372,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private void registerMethodOutput(Object result, JavaObjectList outputList) {
 		if (result != null) {
-			if (!REpiceaClassLoader.JavaWrapperToPrimitiveMap.containsKey(result.getClass())) {
+			if (!ReflectUtility.JavaWrapperToPrimitiveMap.containsKey(result.getClass())) {
 				put(System.identityHashCode(result), result);
 			}
 			outputList.add(new ParameterWrapper(result.getClass(), result));
@@ -400,13 +400,13 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	}
 
 	private boolean implementThisClassAsAnInterface(Class<?> refcl1, Class<?> cl) {
-		if (REpiceaClassLoader.JavaWrapperToPrimitiveMap.containsKey(refcl1)) {
-			if (cl.equals(REpiceaClassLoader.JavaWrapperToPrimitiveMap.get(refcl1))) {
+		if (ReflectUtility.JavaWrapperToPrimitiveMap.containsKey(refcl1)) {
+			if (cl.equals(ReflectUtility.JavaWrapperToPrimitiveMap.get(refcl1))) {
 				return true;
 			}
 		}
-		if (REpiceaClassLoader.PrimitiveToJavaWrapperMap.containsKey(refcl1)) {
-			if (cl.equals(REpiceaClassLoader.PrimitiveToJavaWrapperMap.get(refcl1))) {
+		if (ReflectUtility.PrimitiveToJavaWrapperMap.containsKey(refcl1)) {
+			if (cl.equals(ReflectUtility.PrimitiveToJavaWrapperMap.get(refcl1))) {
 				return true;
 			}
 		}
@@ -576,58 +576,61 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	 * @throws Exception
 	 */
 	public static void main(String[] args) throws Exception {
-		List<String> arguments = REpiceaSystem.setClassicalOptions(args);
-		String firstCall = REpiceaSystem.retrieveArgument(FIRSTCALL, arguments);
-		if (firstCall != null && firstCall.toLowerCase().trim().equals("true")) {
-			List<String> newCommands = new ArrayList<String>();
-			String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
-			newCommands.add("repicea.jar");
-			if (extensionPath != null) {
-				newCommands.add(EXTENSION);
-				newCommands.add(extensionPath);
-			}
-			String port = REpiceaSystem.retrieveArgument(PORT, arguments);
-			if (port != null) {
-				newCommands.add(PORT);
-				newCommands.add(port);
-			}
-			
-			String memorySizeStr = REpiceaSystem.retrieveArgument(MEMORY, arguments);
-			Integer memorySize = null;
-			if (memorySizeStr != null) {
-				try {
-					memorySize = Integer.parseInt(memorySizeStr);
-				} catch (Exception e) {
-					memorySize = null;
+		JavaLocalGatewayServer server = null;
+		try {
+			List<String> arguments = REpiceaSystem.setClassicalOptions(args);
+			String firstCall = REpiceaSystem.retrieveArgument(FIRSTCALL, arguments);
+			if (firstCall != null && firstCall.toLowerCase().trim().equals("true")) {
+				List<String> newCommands = new ArrayList<String>();
+				newCommands.add("repicea.lang.codetranslator.REnvironment");
+				String classPath = "repicea.jar";
+				String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
+				if (extensionPath != null) {
+					if (new File(extensionPath).exists()) {
+						classPath  = classPath + ":" + extensionPath + File.separator + "*";
+					}
 				}
-			}
-			
-			File jarFile = new File(REnvironment.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
-			File rootPath = jarFile.getParentFile();
+				
+				String port = REpiceaSystem.retrieveArgument(PORT, arguments);
+				if (port != null) {
+					newCommands.add(PORT);
+					newCommands.add(port);
+				}
+				
+				String memorySizeStr = REpiceaSystem.retrieveArgument(MEMORY, arguments);
+				Integer memorySize = null;
+				if (memorySizeStr != null) {
+					try {
+						memorySize = Integer.parseInt(memorySizeStr);
+					} catch (Exception e) {
+						memorySize = null;
+					}
+				}
+				
+				File jarFile = new File(REnvironment.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath());
+				File rootPath = jarFile.getParentFile();
 
-//			System.out.println("Bootstrapping repicea.jar at expected location " + rootPath.getAbsolutePath());
-			JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
-			JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
-			rGatewayProcess.setOption(JVM_OPTION.SystemClassLoader, "-Djava.system.class.loader=repicea.lang.REpiceaClassLoader");
-			if (memorySize != null) {
-				rGatewayProcess.setJVMMemory(memorySize);
+				JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
+				JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
+				rGatewayProcess.setClassPath(classPath);
+				if (memorySize != null) {
+					rGatewayProcess.setJVMMemory(memorySize);
+				}
+				rGatewayProcessWrapper.run();
+				System.exit(0);
 			}
-			rGatewayProcessWrapper.run();
-			System.exit(0);
+			String portStr = REpiceaSystem.retrieveArgument(PORT, arguments);
+			int port;
+			if (portStr != null) {
+				port = Integer.parseInt(portStr);
+			} else {
+				port = 18011;		// default port
+			}
+			server = new JavaLocalGatewayServer(new ServerConfiguration(port, Protocol.TCP), new REnvironment());
+			server.startApplication();
+		} catch (Exception e) {
+			System.exit(1);
 		}
-		String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
-		if (extensionPath != null) {
-			((REpiceaClassLoader) ClassLoader.getSystemClassLoader()).setExtensionPath(new File(extensionPath));
-		}
-		String portStr = REpiceaSystem.retrieveArgument(PORT, arguments);
-		int port;
-		if (portStr != null) {
-			port = Integer.parseInt(portStr);
-		} else {
-			port = 18011;		// default port
-		}
-		JavaLocalGatewayServer server = new JavaLocalGatewayServer(new ServerConfiguration(port, Protocol.TCP), new REnvironment());
-		server.startApplication();
 	}
 	
 	
