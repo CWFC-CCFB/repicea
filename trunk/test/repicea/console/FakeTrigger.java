@@ -1,6 +1,7 @@
 package repicea.console;
 
 import repicea.lang.REpiceaSystem;
+import repicea.multiprocess.JavaProcessWrapper;
 
 public class FakeTrigger extends Trigger {
 

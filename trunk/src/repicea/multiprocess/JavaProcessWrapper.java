@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.console;
+package repicea.multiprocess;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -24,7 +24,6 @@ import java.io.File;
 import java.util.List;
 
 import repicea.app.AbstractGenericTask;
-import repicea.multiprocess.JavaProcess;
 import repicea.multiprocess.JavaProcess.JVM_OPTION;
 
 public class JavaProcessWrapper extends AbstractGenericTask implements PropertyChangeListener {
@@ -66,7 +65,7 @@ public class JavaProcessWrapper extends AbstractGenericTask implements PropertyC
 
 
 	@Override
-	protected void doThisJob() throws Exception {
+	public void doThisJob() throws Exception {
 		System.out.println("Launching " + getName() + "...");
 		for (JVM_OPTION option : internalProcess.getJVMSettings().keySet()) {
 			System.out.println(option.name() + " = " + internalProcess.getJVMSettings().get(option).toString());

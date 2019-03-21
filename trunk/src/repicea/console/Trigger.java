@@ -27,6 +27,7 @@ import repicea.app.Logger;
 import repicea.app.SettingMemory;
 import repicea.console.TriggerTask.TaskID;
 import repicea.gui.REpiceaShowableUI;
+import repicea.multiprocess.JavaProcessWrapper;
 
 public abstract class Trigger extends AbstractGenericEngine implements REpiceaShowableUI {
 
