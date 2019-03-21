@@ -30,12 +30,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import repicea.console.JavaProcessWrapper;
-//import repicea.lang.REpiceaClassLoader;
 import repicea.lang.REpiceaSystem;
 import repicea.lang.reflect.ReflectUtility;
 import repicea.math.Matrix;
 import repicea.multiprocess.JavaProcess;
+import repicea.multiprocess.JavaProcessWrapper;
 import repicea.net.server.BasicClient;
 import repicea.net.server.JavaLocalGatewayServer;
 import repicea.net.server.ServerConfiguration;
@@ -52,17 +51,6 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private static final String PORT = "-port";
 	
 	private static final String MEMORY = "-mem";
-
-//	private final static Map<String, Class<?>> ClassNameToPrimitiveMap = new HashMap<String, Class<?>>();
-//	static {
-//		ClassNameToPrimitiveMap.put("double", double.class);
-//		ClassNameToPrimitiveMap.put("int", int.class);
-//		ClassNameToPrimitiveMap.put("long", long.class);
-//		ClassNameToPrimitiveMap.put("float", float.class);
-//		ClassNameToPrimitiveMap.put("String", String.class);
-//		ClassNameToPrimitiveMap.put("boolean", boolean.class);
-//		ClassNameToPrimitiveMap.put("char", char.class);
-//	}
 
 
 	private final static Map<String, Class<?>> PrimitiveTypeMap = new HashMap<String, Class<?>>();

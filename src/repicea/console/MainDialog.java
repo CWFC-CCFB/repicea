@@ -50,6 +50,7 @@ import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.UIControlManager.CommonMenuTitle;
 import repicea.multiprocess.IndependentProcess.StateValue;
+import repicea.multiprocess.JavaProcessWrapper;
 import repicea.net.BrowserCaller;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.Language;
