@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,16 +20,17 @@ package repicea.simulation;
 
 
 /**
- * This class defines the method to access the logistic model predictions. 
+ * This REpiceaBinaryEventPredictor class implements logistic and other models that aim at 
+ * predicting the occurrence of binary event.  
  * @author Mathieu Fortin - November 2012
  * @param <S> a class that represents the stand or the plot
  * @param <T> a class that represents the tree
  */
-public abstract class REpiceaLogisticPredictor<S, T> extends REpiceaPredictor {
+public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor {
 
 	private static final long serialVersionUID = 20131015L;
 
-	protected REpiceaLogisticPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled, boolean isResidualVariabilityEnabled) {
+	protected REpiceaBinaryEventPredictor(boolean isParametersVariabilityEnabled, boolean isRandomEffectsVariabilityEnabled, boolean isResidualVariabilityEnabled) {
 		super(isParametersVariabilityEnabled, isRandomEffectsVariabilityEnabled, isResidualVariabilityEnabled);
 	}
 
