@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2015 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -31,14 +31,14 @@ import repicea.stats.distributions.GaussianErrorTermList.IndexableErrorTerm;
 import repicea.stats.estimates.GaussianEstimate;
 
 /**
- * The HDRelationshipModel class is the basic class for all HD relationships based on linear mixed-effects modelling.
+ * The HDRelationshipPredictor class is the basic class for all HD relationships based on linear mixed-effects modelling.
  * @author Mathieu Fortin - August 2015
  *
  * @param <Stand> a HDRelationshipStand-derived class
  * @param <Tree> a HDRelationshipTree-derived class
  */
 @SuppressWarnings("serial")
-public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tree extends HDRelationshipTree> extends REpiceaPredictor {
+public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand, Tree extends HDRelationshipTree> extends REpiceaPredictor {
 
 	protected static class RegressionElements {
 		public Matrix vectorZ;
@@ -60,7 +60,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 * @param isVariabilityEnabledEnabled enables the variability in the parameter estimates, the random effects and the
 	 * residual errors at the same time
 	 */
-	protected HDRelationshipModel(boolean isVariabilityEnabledEnabled) {
+	protected HDRelationshipPredictor(boolean isVariabilityEnabledEnabled) {
 		this(isVariabilityEnabledEnabled, isVariabilityEnabledEnabled, isVariabilityEnabledEnabled);
 	}
 
@@ -70,7 +70,7 @@ public abstract class HDRelationshipModel<Stand extends HDRelationshipStand, Tre
 	 * @param isRandomEffectVariabilityEnabled enables the variability in the random effects
 	 * @param isResidualErrorVariabilityEnabled enables the variability in the residual errors
 	 */
-	protected HDRelationshipModel(boolean isParameterVariabilityEnabled, boolean isRandomEffectVariabilityEnabled, boolean isResidualErrorVariabilityEnabled) {
+	protected HDRelationshipPredictor(boolean isParameterVariabilityEnabled, boolean isRandomEffectVariabilityEnabled, boolean isResidualErrorVariabilityEnabled) {
 		super(isParameterVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualErrorVariabilityEnabled);
 	}
 
