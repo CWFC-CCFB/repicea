@@ -1,4 +1,4 @@
-package repicea.stats.distributions;
+package repicea.math;
 
 import java.io.IOException;
 
@@ -6,7 +6,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.io.javacsv.CSVReader;
-import repicea.stats.distributions.utility.GammaUtility;
 import repicea.util.ObjectUtility;
 
 public class GammaUtilityTest {
@@ -20,7 +19,7 @@ public class GammaUtilityTest {
 		while ((record = reader.nextRecord()) != null) {
 			double x = Double.parseDouble(record[1].toString());
 			double expectedValue = Double.parseDouble(record[2].toString());
-			double actualValue = GammaUtility.gamma(x);
+			double actualValue = GammaFunction.gamma(x);
 			Assert.assertEquals("Testing observation" + i, expectedValue, actualValue, 1E-8);
 			i++;
 		}

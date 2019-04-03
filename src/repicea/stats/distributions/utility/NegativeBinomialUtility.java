@@ -20,6 +20,8 @@ package repicea.stats.distributions.utility;
 
 import java.security.InvalidParameterException;
 
+import repicea.math.GammaFunction;
+
 public class NegativeBinomialUtility {
 	
 	/**
@@ -40,7 +42,7 @@ public class NegativeBinomialUtility {
 		double dispersionTimesMean = dispersion * mean;
 		double inverseDispersion = 1/dispersion;
 
-		prob = Math.exp(GammaUtility.logGamma(y + inverseDispersion) - GammaUtility.logGamma(y + 1.0) - GammaUtility.logGamma(inverseDispersion)) 
+		prob = Math.exp(GammaFunction.logGamma(y + inverseDispersion) - GammaFunction.logGamma(y + 1.0) - GammaFunction.logGamma(inverseDispersion)) 
 				*  Math.pow(dispersionTimesMean,y) / (Math.pow(1+dispersionTimesMean,y + inverseDispersion));
 		return prob;
 	}
