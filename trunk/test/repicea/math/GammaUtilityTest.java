@@ -26,4 +26,20 @@ public class GammaUtilityTest {
 		reader.close();
 		System.out.println("GammaUtility successfully tested on " + i + " observations");
 	}
+	
+	
+	@Test
+	public void testInverseGammaFunction() {
+		for (double d = 2; d < 15; d+=0.5) {
+			double gammaValue = GammaFunction.gamma(d);
+			double actual = GammaFunction.inverseGamma(gammaValue);
+			System.out.println("Expected = " + d + "; Gamma value = " + gammaValue + "; Actual = " + actual);
+			double tolerance = 1E-2;
+			if (d == 2) {
+				tolerance = 2.5E-2;
+			}
+			Assert.assertEquals("Testing value d = " + d, d, actual, tolerance);
+		}
+	}
+	
 }
