@@ -69,11 +69,86 @@ public class GammaFunction {
 		return Math.log(gamma(z));
 	}
 	
+
+	private static final double K = 1.461632;
+	private static final double SQRT_TWICE_PI = Math.sqrt(2 * Math.PI);
+	private static final double C = SQRT_TWICE_PI / Math.exp(1) - gamma(K);
+
+	/**
+	 * This method implements the approximation of the inverse Gamma function designed by 
+	 * David W. Cantrell (see http://mathforum.org/kb/message.jspa?messageID=342551&tstart=0).
+	 * @param z a double equal or greater than 1.
+	 * @return a double
+	 */
+	public static double inverseGamma(double z) {
+		if (z < 1) {
+			throw new InvalidParameterException("The method does not accept argument smaller than 1!");
+		}
+		double l_x = Math.log((z + C) / SQRT_TWICE_PI);
+		double w_x = lambertW(l_x/Math.exp(1));
+		return l_x/w_x + .5;
+	}
+	
+	/**
+	 * This method implements the Lambert W function.
+	 * Code taken from http://keithbriggs.info/software.html  
+	 * @param z
+	 * @return
+	 */
+	private static double lambertW(double z) {
+		final double eps = 4e-16;
+		final double em1 = 0.3678794411714423215955237701614608; 
+		double p,e,t,w;
+		if (z < -em1 || Double.isInfinite(z) || Double.isNaN(z)) { 
+			throw new InvalidParameterException("The parameter z must be greater than -0.367879!"); 
+		}
+		if (z == 0d) {
+			return 0d;
+		}
+		if (z < -em1 + 1e-4) { // series near -em1 in sqrt(q)
+			double q = z + em1;
+			double r = Math.sqrt(q);
+			double q2=q*q;
+			double q3=q2*q;
+			return 	-1.0
+					+2.331643981597124203363536062168*r
+					-1.812187885639363490240191647568*q
+					+1.936631114492359755363277457668*r*q
+					-2.353551201881614516821543561516*q2
+					+3.066858901050631912893148922704*r*q2
+					-4.175335600258177138854984177460*q3
+					+5.858023729874774148815053846119*r*q3
+					-8.401032217523977370984161688514*q3*q;  // error approx 1e-16
+		}
+		/* initial approx for iteration... */
+		if (z < 1.0) { /* series near 0 */
+			p = Math.sqrt(2d * (2.7182818284590452353602874713526625*z + 1.0));
+			w = -1.0 + p * (1.0 + p * (-0.333333333333333333333 + p*0.152777777777777777777777)); 
+		} else {
+			w = Math.log(z); /* asymptotic */
+		}
+		if (z > 3.0) {
+			w -= Math.log(w); /* useful? */
+		}
+		for (int i=0; i<10; i++) { /* Halley iteration */
+			e = Math.exp(w); 
+			t = w*e - z;
+			p = w + 1d;
+			t /= e * p - 0.5 * (p + 1.0) * t/p; 
+			w -= t;
+			if (Math.abs(t) < eps * (1.0 + Math.abs(w))) {
+				return w; /* rel-abs error */
+			}
+		}
+		/* should never get here */
+		throw new InvalidParameterException("Unable to reach convergence for z = " + z);
+	}
 	
 //	public static void main(String[] args) {
+//		double fake = C;
 //		double z = 10;
-//		double expected = Math.exp(Gamma.logGamma(z));
 //		double actual = GammaFunction.gamma(z);
+//		double zBack = GammaFunction.inverseGamma(actual);
 //		int u = 0;
 //	}
 	
