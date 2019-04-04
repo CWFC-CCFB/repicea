@@ -71,5 +71,21 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 		}
 	}
 
-	
+	/**
+	 * This method scans the parameters and finds the first object that is an instance of
+	 * this class.
+	 * @param clazz the class of object to be looked for
+	 * @param parms the parameters
+	 * @return the first object of this class or null otherwise
+	 */
+	public static Object findFirstParameterOfThisClass(Class<?> clazz, Object... parms) {
+		if (parms != null && parms.length > 0) {
+			for  (Object obj : parms) {
+				if (clazz.isInstance(obj)) {
+					return obj;
+				}
+			}
+		}
+		return null;
+	}
 }
