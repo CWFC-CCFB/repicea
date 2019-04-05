@@ -2,6 +2,7 @@ package repicea.net.server;
 
 import java.net.InetSocketAddress;
 
+import repicea.lang.codetranslator.REnvironment;
 import repicea.net.server.ServerConfiguration.Protocol;
 
 public class FakeClient extends BasicClient {
@@ -21,7 +22,7 @@ public class FakeClient extends BasicClient {
 	}	
 	
 	protected Object createAnArrayList() throws BasicClientException {
-		String request = "create;repicea.net.server.FakeArrayList";
+		String request = "create" + REnvironment.MainSplitter + "repicea.net.server.FakeArrayList";
 		Object result = processRequest(request);
 		return result;
 	}
@@ -34,26 +35,33 @@ public class FakeClient extends BasicClient {
 	}
 
 	protected Object createAVectorWithArguments() throws BasicClientException {
-		String request = "create;java.util.Vector;integer3";
+		String request = "create" + REnvironment.MainSplitter + 
+				"java.util.Vector" + REnvironment.MainSplitter + "integer3";
 		Object result = processRequest(request);
 		return result;
 	}
 
 	protected Object addThisToArrayList(Object arrayList, String toBeAdded) throws BasicClientException {
-		String request = "method;" + arrayList.toString().replace("JavaObject;repicea.net.server.FakeArrayList@", "java.objecthashcode") + ";add;" + toBeAdded;
+		String request = "method" + REnvironment.MainSplitter + 
+				arrayList.toString().replace("JavaObject" + REnvironment.MainSplitter + "repicea.net.server.FakeArrayList@", "java.objecthashcode") + REnvironment.MainSplitter +
+				"add" + REnvironment.MainSplitter + toBeAdded;
 		Object result = processRequest(request);
 		return result;
 	}
 
 	protected Object testThisDoubleWrapper(Object arrayList) throws BasicClientException {
-		String request = "method;" + arrayList.toString().replace("JavaObject;repicea.net.server.FakeArrayList@", "java.objecthashcode") +
-				";processThisDouble;" + "numeric0";
+		String request = "method" + REnvironment.MainSplitter + 
+				arrayList.toString().replace("JavaObject" + REnvironment.MainSplitter + "repicea.net.server.FakeArrayList@", "java.objecthashcode") + REnvironment.MainSplitter +
+				"processThisDouble" + REnvironment.MainSplitter + "numeric0";
 		Object result = processRequest(request);
 		return result;
 	}
 
 	protected Object createMultipleVectorWithArguments() throws BasicClientException {
-		String request = "create;java.util.Vector;integer3,4,5";
+		String request = "create" + REnvironment.MainSplitter +
+				"java.util.Vector" + REnvironment.MainSplitter + 
+				"integer3" + REnvironment.SubSplitter + 
+				"4" + REnvironment.SubSplitter + "5";
 		Object result = processRequest(request);
 		return result;
 	}
