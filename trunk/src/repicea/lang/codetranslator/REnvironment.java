@@ -92,7 +92,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 		@Override
 		public String toString() {
-			String output = "JavaList;" ;
+			String output = "JavaList" + MainSplitter;
 			for (ParameterWrapper obj : this) {
 				String toBeAdded = obj.toString();
 				if (toBeAdded.startsWith("JavaObject" + MainSplitter)) {
