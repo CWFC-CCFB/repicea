@@ -156,8 +156,10 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				}
 			} else {
 				String className = type.getName();
-				if (className.endsWith(MainSplitter)) {
+				if (className.endsWith(";")) {
 					className = className.substring(0, className.length() - 1);
+				} else if (className.endsWith(MainSplitter)) {
+					className = className.substring(0, className.length() - MainSplitter.length());
 				}
 				return "JavaObject" + MainSplitter + className + "@" + System.identityHashCode(value);
 			}
