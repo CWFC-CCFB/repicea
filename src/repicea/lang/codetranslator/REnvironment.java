@@ -52,9 +52,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private static final String MEMORY = "-mem";
 
-	protected static final String MainSplitter = "/;";
+	public static final String MainSplitter = "/;";
 	
-	protected static final String SubSplitter = "/,";
+	public static final String SubSplitter = "/,";
 
 	private final static Map<String, Class<?>> PrimitiveTypeMap = new HashMap<String, Class<?>>();
 	static {

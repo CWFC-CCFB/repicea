@@ -48,7 +48,7 @@ public class ServerTests {
 		double diff = (System.currentTimeMillis() - start) * .001;
 		System.out.println("Time to process the creation of an ArrayList instance in TCP : " + diff);
 		Assert.assertTrue(arrayListRepresentation != null);
-		Assert.assertTrue(arrayListRepresentation.toString().startsWith("JavaObject;repicea.net.server.FakeArrayList"));
+		Assert.assertTrue(arrayListRepresentation.toString().startsWith("JavaObject" + REnvironment.MainSplitter + "repicea.net.server.FakeArrayList"));
 		int hashCode = Integer.parseInt(arrayListRepresentation.toString().substring(arrayListRepresentation.toString().indexOf("@") + 1));
 		ArrayList trueArrayList = (ArrayList) env.get(hashCode);
 		
@@ -74,7 +74,7 @@ public class ServerTests {
 
 		callback = client.createMultipleVectorWithArguments();			// creating several objects at once
 		Assert.assertTrue(callback != null);
-		String[] objectReps = callback.toString().split(",");
+		String[] objectReps = callback.toString().split(REnvironment.SubSplitter);
 		int expCapacity = 3;
 		for (String objRep : objectReps) {
 			hashCode = Integer.parseInt(objRep.toString().substring(objRep.toString().indexOf("@") + 1));
@@ -110,7 +110,7 @@ public class ServerTests {
 		double diff = (System.currentTimeMillis() - start) * .001;
 		System.out.println("Time to process the creation of an ArrayList instance in UDP : " + diff);
 		Assert.assertTrue(arrayListRepresentation != null);
-		Assert.assertTrue(arrayListRepresentation.toString().startsWith("JavaObject;repicea.net.server.FakeArrayList"));
+		Assert.assertTrue(arrayListRepresentation.toString().startsWith("JavaObject" + REnvironment.MainSplitter + "repicea.net.server.FakeArrayList"));
 		int hashCode = Integer.parseInt(arrayListRepresentation.toString().substring(arrayListRepresentation.toString().indexOf("@") + 1));
 		ArrayList trueArrayList = (ArrayList) env.get(hashCode);
 		
@@ -136,7 +136,7 @@ public class ServerTests {
 
 		callback = client.createMultipleVectorWithArguments();			// creating several objects at once
 		Assert.assertTrue(callback != null);
-		String[] objectReps = callback.toString().split(",");
+		String[] objectReps = callback.toString().split(REnvironment.SubSplitter);
 		int expCapacity = 3;
 		for (String objRep : objectReps) {
 			hashCode = Integer.parseInt(objRep.toString().substring(objRep.toString().indexOf("@") + 1));
