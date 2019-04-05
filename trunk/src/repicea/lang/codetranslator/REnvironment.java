@@ -52,6 +52,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private static final String MEMORY = "-mem";
 
+	protected static final String MainSplitter = "/;";
+	
+	protected static final String SubSplitter = "/,";
 
 	private final static Map<String, Class<?>> PrimitiveTypeMap = new HashMap<String, Class<?>>();
 	static {
@@ -92,10 +95,10 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			String output = "JavaList;" ;
 			for (ParameterWrapper obj : this) {
 				String toBeAdded = obj.toString();
-				if (toBeAdded.startsWith("JavaObject" + ";")) {
-					toBeAdded = toBeAdded.substring(("JavaObject" + ";").length());
+				if (toBeAdded.startsWith("JavaObject" + MainSplitter)) {
+					toBeAdded = toBeAdded.substring(("JavaObject" + MainSplitter).length());
 				}
-				output = output + toBeAdded + ",";	
+				output = output + toBeAdded + SubSplitter;	
 			}
 			return output;
 		}
@@ -153,10 +156,10 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				}
 			} else {
 				String className = type.getName();
-				if (className.endsWith(";")) {
+				if (className.endsWith(MainSplitter)) {
 					className = className.substring(0, className.length() - 1);
 				}
-				return "JavaObject" + ";" + className + "@" + System.identityHashCode(value);
+				return "JavaObject" + MainSplitter + className + "@" + System.identityHashCode(value);
 			}
 		}
 	}
@@ -181,7 +184,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 
 	@Override
 	public Object processCode(String request) throws Exception {
-		String[] requestStrings = request.split(";");
+		String[] requestStrings = request.split(MainSplitter);
 		if (requestStrings[0].startsWith(ConstructCode)) {	// can be either create, createarray or createnull here
 			return createObjectFromRequestStrings(requestStrings); 
 		} else if (requestStrings[0].equals(MethodCode)) {
@@ -228,7 +231,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		List<ParameterWrapper> wrappers = new ArrayList<ParameterWrapper>();
 		String prefix = "java.objecthashcode";
 		if (string.startsWith(prefix)) {
-			String[] newArgs = string.substring(prefix.length()).split(",");
+			String[] newArgs = string.substring(prefix.length()).split(SubSplitter);
 			for (int i = 0; i < newArgs.length; i++) {
 				int hashcodeForThisJavaObject = Integer.parseInt(newArgs[i]);
 				if (containsKey(hashcodeForThisJavaObject)) {
@@ -542,7 +545,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	
 	private List<ParameterWrapper> createFromPrimitiveClass(String primitiveTypeClass, String args) {
 		List<ParameterWrapper> wrappers = new ArrayList<ParameterWrapper>();
-		String[] newArgs = args.substring(primitiveTypeClass.length()).split(",");
+		String[] newArgs = args.substring(primitiveTypeClass.length()).split(SubSplitter);
 		for (String value : newArgs) {
 			if (primitiveTypeClass == "character") {
 				wrappers.add(new ParameterWrapper(String.class, value));
