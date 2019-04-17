@@ -50,6 +50,6 @@ public interface ManagementTypeProvider {
 	 * This method returns the current management of the stand. 
 	 * @return a ManagementType enum
 	 */
-	public ManagementType getManagement();
+	public ManagementType getManagementType();
 
 }
