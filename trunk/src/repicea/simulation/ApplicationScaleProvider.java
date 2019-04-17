@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-simulation library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
  *
@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.simulation.covariateproviders.standlevel;
+package repicea.simulation;
 
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
