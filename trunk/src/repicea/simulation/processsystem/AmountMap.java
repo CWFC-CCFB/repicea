@@ -28,7 +28,7 @@ import java.util.Map;
  * @param <E> an Enum class
  */
 @SuppressWarnings("serial")
-public class AmountMap<E extends Enum<?>> extends HashMap<E, Double> {
+public class AmountMap<E extends Enum<?>> extends HashMap<E, Double> implements Cloneable {
 
 	@Override
 	public void putAll(Map<? extends E, ? extends Double> map) {
@@ -62,6 +62,13 @@ public class AmountMap<E extends Enum<?>> extends HashMap<E, Double> {
 		}
 		return outputMap;
 	}
-	
-	
+
+	@Override
+	public AmountMap<E> clone() {
+		AmountMap<E> outputMap = new AmountMap<E>();
+		for (E key : keySet()) {
+			outputMap.put(key, get(key));
+		}
+		return outputMap;
+	}
 }
