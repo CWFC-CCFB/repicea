@@ -18,8 +18,13 @@
  */
 package repicea.simulation.processsystem;
 
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
+
+import lerfob.carbonbalancetool.productionlines.CarbonUnit.Element;
+import repicea.math.Matrix;
+import repicea.stats.estimates.MonteCarloEstimate;
 
 /**
  * The AmountMap class contains all the quantities that can be contained in a ProcessUnit instance.
@@ -71,4 +76,56 @@ public class AmountMap<E extends Enum<?>> extends HashMap<E, Double> implements 
 		}
 		return outputMap;
 	}
+	
+	
+	/**
+	 * This method scales the AmountMap instances contained in more complex Map instances. It is recursive.
+	 * @param oMap
+	 * @param scalar the multiplier factor
+	 * @return a new Map instance
+	 * @throws IllegalAccessException 
+	 * @throws InstantiationException 
+	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public static Map scaleMap(Map oMap, double scalar) {
+		try {
+			Map newMap = oMap.getClass().newInstance();
+			for (Object key : oMap.keySet()) {
+				Object value = oMap.get(key);
+				if (value instanceof AmountMap) {
+					newMap.put(key, ((AmountMap) value).multiplyByAScalar(scalar));
+				} else {
+					Map innerMap = (Map) value;
+					newMap.put(key, scaleMap(innerMap, scalar));
+				}
+			}
+			return newMap;
+		} catch (Exception e) {
+			throw new InvalidParameterException("Unable to scale the Map instance!");
+		}
+	}
+
+	/**
+	 * Adds the values to MonteCarloEstimate instances. If the map of MonteCarlo instances does not 
+	 * contain the key E, then the MonteCarloEstimate instance is created.
+	 * @param receivingMap
+	 */
+	public void addToMonteCarloEstimate(Map<E, MonteCarloEstimate> receivingMap) {
+		if (receivingMap == null) {
+			throw new InvalidParameterException("The receivingMap parameter cannot be null!");
+		}
+		Matrix value;
+		for (E element : keySet()) {
+			value = new Matrix(1,1);
+			value.m_afData[0][0] = get(element);
+			if (!receivingMap.containsKey(element)) {
+				receivingMap.put(element, new MonteCarloEstimate());
+			}
+			receivingMap.get(element).addRealization(value);
+		}
+	}
+
+	
+	
+	
 }
