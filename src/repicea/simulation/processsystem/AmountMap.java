@@ -22,10 +22,6 @@ import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
-import lerfob.carbonbalancetool.productionlines.CarbonUnit.Element;
-import repicea.math.Matrix;
-import repicea.stats.estimates.MonteCarloEstimate;
-
 /**
  * The AmountMap class contains all the quantities that can be contained in a ProcessUnit instance.
  * @author Mathieu Fortin - January 2014
@@ -105,25 +101,25 @@ public class AmountMap<E extends Enum<?>> extends HashMap<E, Double> implements 
 		}
 	}
 
-	/**
-	 * Adds the values to MonteCarloEstimate instances. If the map of MonteCarlo instances does not 
-	 * contain the key E, then the MonteCarloEstimate instance is created.
-	 * @param receivingMap
-	 */
-	public void addToMonteCarloEstimate(Map<E, MonteCarloEstimate> receivingMap) {
-		if (receivingMap == null) {
-			throw new InvalidParameterException("The receivingMap parameter cannot be null!");
-		}
-		Matrix value;
-		for (E element : keySet()) {
-			value = new Matrix(1,1);
-			value.m_afData[0][0] = get(element);
-			if (!receivingMap.containsKey(element)) {
-				receivingMap.put(element, new MonteCarloEstimate());
-			}
-			receivingMap.get(element).addRealization(value);
-		}
-	}
+//	/**
+//	 * Adds the values to MonteCarloEstimate instances. If the map of MonteCarlo instances does not 
+//	 * contain the key E, then the MonteCarloEstimate instance is created.
+//	 * @param receivingMap
+//	 */
+//	public void addToMonteCarloEstimate(Map<E, MonteCarloEstimate> receivingMap) {
+//		if (receivingMap == null) {
+//			throw new InvalidParameterException("The receivingMap parameter cannot be null!");
+//		}
+//		Matrix value;
+//		for (E element : keySet()) {
+//			value = new Matrix(1,1);
+//			value.m_afData[0][0] = get(element);
+//			if (!receivingMap.containsKey(element)) {
+//				receivingMap.put(element, new MonteCarloEstimate());
+//			}
+//			receivingMap.get(element).addRealization(value);
+//		}
+//	}
 
 	
 	
