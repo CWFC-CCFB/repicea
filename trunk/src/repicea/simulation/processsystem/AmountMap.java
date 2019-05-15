@@ -18,7 +18,6 @@
  */
 package repicea.simulation.processsystem;
 
-import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,29 +75,28 @@ public class AmountMap<E extends Enum<?>> extends HashMap<E, Double> implements 
 	
 	/**
 	 * This method scales the AmountMap instances contained in more complex Map instances. It is recursive.
+	 * IMPORTANT: the original map is changed. This avoid creating new instances which raise an exception
+	 * when the Map class does not have any empty constructor.
 	 * @param oMap
 	 * @param scalar the multiplier factor
-	 * @return a new Map instance
-	 * @throws IllegalAccessException 
-	 * @throws InstantiationException 
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static Map scaleMap(Map oMap, double scalar) {
-		try {
-			Map newMap = oMap.getClass().newInstance();
-			for (Object key : oMap.keySet()) {
-				Object value = oMap.get(key);
-				if (value instanceof AmountMap) {
-					newMap.put(key, ((AmountMap) value).multiplyByAScalar(scalar));
-				} else {
-					Map innerMap = (Map) value;
-					newMap.put(key, scaleMap(innerMap, scalar));
-				}
+	public static void scaleMap(Map oMap, double scalar) {
+//		try {
+//			Map newMap = oMap.getClass().newInstance();
+		for (Object key : oMap.keySet()) {
+			Object value = oMap.get(key);
+			if (value instanceof AmountMap) {
+				oMap.put(key, ((AmountMap) value).multiplyByAScalar(scalar));
+			} else {
+				Map innerMap = (Map) value;
+				scaleMap(innerMap, scalar);
 			}
-			return newMap;
-		} catch (Exception e) {
-			throw new InvalidParameterException("Unable to scale the Map instance!");
 		}
+//			return newMap;
+//		} catch (Exception e) {
+//			throw new InvalidParameterException("Unable to scale the Map instance!");
+//		}
 	}
 
 //	/**
