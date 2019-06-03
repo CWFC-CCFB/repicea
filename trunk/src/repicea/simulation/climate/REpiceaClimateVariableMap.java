@@ -19,6 +19,7 @@
 package repicea.simulation.climate;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import repicea.simulation.climate.REpiceaClimateVariableMap.ClimateVariable;
 
@@ -47,4 +48,21 @@ public class REpiceaClimateVariableMap extends HashMap<ClimateVariable, Double> 
 		MeanSeasonalPrecMm;
 	}
 
+
+	/**
+	 * This interface ensures that the REpiceaClimateVariableMap instance
+	 * can be updated according to climate change forecasts. 
+	 * @author Mathieu Fortin - June 2019
+	 */
+	public static interface UpdatableClimateVariableMap {
+		
+		/**
+		 * Performs the change on the climate variable following a linear extrapolation pattern.
+		 * @param annualChanges a Map with the annual change for one or many climate variables
+		 * @param dateYr the current date (years)
+		 */
+		public void updateClimateVariableMapAccordingToClimateChange(Map<ClimateVariable, Double> annualChanges, int dateYr);
+		
+	}
+	
 }
