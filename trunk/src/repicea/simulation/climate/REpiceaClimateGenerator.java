@@ -25,12 +25,12 @@ import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesP
  * a REpiceaClimateVariableMap instance.
  * @author Mathieu Fortin - June 2019
  */
-public interface REpiceaClimateGenerator {
+public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvider> {
 
 	/**
 	 * Returns a map of climate variables depending on the geographical coordinates of the plot.
 	 * @param plot a GeographicalCoordinatesProvider instance
-	 * @return a REpiceaClimateVariableMap instance
+	 * @return a REpiceaClimateVariableMap-derived instance
 	 */
-	public REpiceaClimateVariableMap getClimateVariables(GeographicalCoordinatesProvider plot);
+	public REpiceaClimateVariableMap getClimateVariables(P plot);
 }
