@@ -20,12 +20,12 @@ package repicea.simulation.climate;
 
 import java.util.HashMap;
 
-import repicea.simulation.climate.REpiceaClimateVariableMap.Variable;
+import repicea.simulation.climate.REpiceaClimateVariableMap.ClimateVariable;
 
 @SuppressWarnings("serial")
-public class REpiceaClimateVariableMap extends HashMap<Variable, Double> {
+public class REpiceaClimateVariableMap extends HashMap<ClimateVariable, Double> {
 	
-	public static enum Variable {
+	public static enum ClimateVariable {
 		/**
 		 * Mean annual temperature (C)
 		 */
