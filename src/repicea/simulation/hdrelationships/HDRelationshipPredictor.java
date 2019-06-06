@@ -38,7 +38,7 @@ import repicea.stats.estimates.GaussianEstimate;
  * @param <Tree> a HDRelationshipTree-derived class
  */
 @SuppressWarnings("serial")
-public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand, Tree extends HDRelationshipTree> extends REpiceaPredictor {
+public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand, Tree extends HDRelationshipTree> extends REpiceaPredictor implements HeightPredictor<Stand, Tree> {
 
 	protected static class RegressionElements {
 		public Matrix vectorZ;
@@ -74,14 +74,8 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 		super(isParameterVariabilityEnabled, isRandomEffectVariabilityEnabled, isResidualErrorVariabilityEnabled);
 	}
 
-	/**
-	 * This method calculates the height for individual trees and also implements the Monte Carlo simulation automatically. In case of 
-	 * exception, it also returns -1. If the predicted height is lower than 1.3, this method returns 1.3.
-	 * @param stand a MonteCarloSimulationCompliantObject instance which stands for the stand or the plot
-	 * @param tree a MonteCarloSimulationCompliantObject instance which stands for the tree
-	 * @return the predicted height (m)
-	 */
-	public double predictHeight(Stand stand, Tree tree) {
+	@Override
+	public double predictHeightM(Stand stand, Tree tree) {
 		try {
 			if (!hasSubjectBeenTestedForBlups(stand)) {
 				predictHeightRandomEffects(stand);	// this method now deals with the blups and the residual error so that if observed height is greater than 1.3 m there is no need to avoid predicting the height
