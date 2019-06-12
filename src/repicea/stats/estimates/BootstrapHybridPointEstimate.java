@@ -215,5 +215,16 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> 
 		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
 	}
 
-		
+	/**
+	 * Returns the sample size the individual point estimates are based on or -1 if 
+	 * no point estimate is available at the moment.
+	 * @return an integer
+	 */
+	public int getSampleSize() {
+		if (estimates == null || estimates.isEmpty()) {
+			return -1;
+		} else {
+			return estimates.get(0).getObservations().size();
+		}
+	}
 }
