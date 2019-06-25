@@ -85,13 +85,13 @@ public class MemoryWatchDog {
 	
 	
 	/**
-	 * This method checks if the available memory is still above the threshold is used. If not, the garbage collector is called and the
+	 * Checks if the available memory is still above the threshold is used. If not, the garbage collector is called and the
 	 * test is run again. If the available memory is still below the threshold after calling the garbage collector, an ExpectedMemoryCapacityException is thrown.
 	 * @return the number of Mg still available
 	 * @throws a ExpectedMemoryCapacityException object
 	 */
 	public static double checkAvailableMemory() throws ExpectedMemoryCapacityException {
-		double currentUsedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) * MEGA_FACTOR;
+		double currentUsedMemory = checkUsedMemory();
 		if (currentUsedMemory > MAXIMUM_PROPORTION_USED * MAXIMUM_MEMORY_AVAILABLE || 
 				MAXIMUM_MEMORY_AVAILABLE - currentUsedMemory < MINIMUM_FREE_SPACE) {
 			System.gc();
@@ -104,6 +104,17 @@ public class MemoryWatchDog {
 			}			
 		}
 		return MAXIMUM_MEMORY_AVAILABLE - currentUsedMemory;
+	}
+	
+	
+
+	/**
+	 * Checks the memory that is currently used.
+	 * @return the memory load in Mg
+	 */
+	public static double checkUsedMemory() {
+		double currentUsedMemory = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) * MEGA_FACTOR;
+		return currentUsedMemory;
 	}
 	
 }

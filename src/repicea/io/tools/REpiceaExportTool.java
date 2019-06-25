@@ -426,7 +426,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	 */
 	public void setFilename(String filename) {
 		if (!filename.trim().isEmpty() && GFileFilter.getFileType(filename) == FileType.UNKNOWN) {
-			filename += "." + GFileFilter.CSV.getExtension();
+			filename += GFileFilter.CSV.getExtension();
 		} 
 		this.filename = filename;
 	}
