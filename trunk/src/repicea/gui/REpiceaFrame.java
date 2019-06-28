@@ -24,8 +24,6 @@ import java.awt.Window;
 import java.awt.event.ActionListener;
 
 import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * This class is the main class for any JFrame. It implements a window listener that calls a cancelAction 
@@ -52,7 +50,7 @@ public abstract class REpiceaFrame extends JFrame implements REpiceaWindow, Acti
 		new REpiceaWindowHandler(this);
 		new REpiceaWindowShutdown(this);
 		setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-		setLookAndFeel();
+//		setLookAndFeel();
 		setIcon();
 	}
 
@@ -64,24 +62,24 @@ public abstract class REpiceaFrame extends JFrame implements REpiceaWindow, Acti
 	}
 	
 		
-	/**
-	 * This method sets the look and feel to the system look and feel.
-	 */
-	protected void setLookAndFeel() {
-		try {
-			String lookAndFeelName = UIManager.getSystemLookAndFeelClassName();
-			UIManager.setLookAndFeel(lookAndFeelName);
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		} catch (InstantiationException e) {
-			e.printStackTrace();
-		} catch (IllegalAccessException e) {
-			e.printStackTrace();
-		} catch (UnsupportedLookAndFeelException e) {
-			e.printStackTrace();
-		}
-		
-	}
+//	/**
+//	 * This method sets the look and feel to the system look and feel.
+//	 */
+//	protected void setLookAndFeel() {
+//		try {
+//			String lookAndFeelName = UIManager.getSystemLookAndFeelClassName();
+//			UIManager.setLookAndFeel(lookAndFeelName);
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//		} catch (InstantiationException e) {
+//			e.printStackTrace();
+//		} catch (IllegalAccessException e) {
+//			e.printStackTrace();
+//		} catch (UnsupportedLookAndFeelException e) {
+//			e.printStackTrace();
+//		}
+//		
+//	}
 
 	/**
 	 * This method sets the Icon of the frame.
