@@ -25,10 +25,10 @@ import java.util.Map;
 
 import repicea.simulation.MonteCarloSimulationCompliantObject;
 
-public class DisturbanceOccurrences<C> {
+public class DisturbanceOccurrences {
 	
 	private final List<Integer> datesYr;
-	private final DisturbanceAffectedProvider<C> parms;
+	private final DisturbanceAffectedProvider parms;
 	private final Map<String, Boolean> outcomeMap;
 	
 	/**
@@ -36,7 +36,7 @@ public class DisturbanceOccurrences<C> {
 	 * @param parms
 	 * @param dateYr
 	 */
-	public DisturbanceOccurrences(DisturbanceAffectedProvider<C> parms, List<Integer> datesYr) {
+	public DisturbanceOccurrences(DisturbanceAffectedProvider parms, List<Integer> datesYr) {
 		this(parms);
 		for (Integer dateYr : datesYr) {
 			addOccurrenceDateYr(dateYr);
@@ -48,7 +48,7 @@ public class DisturbanceOccurrences<C> {
 	 * Basic constructor
 	 * @param parms
 	 */
-	public DisturbanceOccurrences(DisturbanceAffectedProvider<C> parms) {
+	public DisturbanceOccurrences(DisturbanceAffectedProvider parms) {
 		this.parms = parms;
 		this.datesYr = new ArrayList<Integer>();
 		this.outcomeMap = new HashMap<String, Boolean>();
@@ -59,7 +59,7 @@ public class DisturbanceOccurrences<C> {
 	 * @param parms
 	 * @param dateYr
 	 */
-	public DisturbanceOccurrences(DisturbanceAffectedProvider<C> parms, int dateYr) {
+	public DisturbanceOccurrences(DisturbanceAffectedProvider parms, int dateYr) {
 		this(parms);
 		addOccurrenceDateYr(dateYr);
 	}
@@ -72,13 +72,13 @@ public class DisturbanceOccurrences<C> {
 	 * @param plot an ExtPlot instance
 	 * @return a boolean
 	 */
-	public synchronized boolean isThisPlotAffected(C stand, MonteCarloSimulationCompliantObject plot) {
+	public synchronized boolean isThisPlotAffected(MonteCarloSimulationCompliantObject plot) {
 		if (!outcomeMap.containsKey(plot.getSubjectId())) {
 			boolean outcome;
 			if (parms == null) { // former implementation
 				outcome = true;
 			} else {
-				outcome = parms.isThisPlotAffected(stand, plot);
+				outcome = parms.isThisPlotAffected(plot);
 			}
 			outcomeMap.put(plot.getSubjectId(), outcome);
 		}
