@@ -16,19 +16,20 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.simulation.disturbances;
+package repicea.simulation.covariateproviders.standlevel;
 
-import repicea.simulation.MonteCarloSimulationCompliantObject;
-
-public interface DisturbanceAffectedProvider extends DisturbanceTypeProvider {
+/**
+ * This interface ensures the plot instance can tell whether or not it is going
+ * to be sprayed against defoliator in the upcoming interval.
+ * @author Mathieu Fortin - July 2019
+ */
+public interface SprayedAgainstDefoliatorProvider {
 
 	/**
-	 * Returns true if the plot if affected by the disturbance provided that it has occurred
-	 * @param compositeStand
-	 * @param plot
+	 * This method returns a boolean if the stand is going to be sprayed in
+	 * the upcoming interval.
 	 * @return a boolean
 	 */
-	public boolean isThisPlotAffected(MonteCarloSimulationCompliantObject plot);
-	
+	public boolean isSprayed();
 
 }
