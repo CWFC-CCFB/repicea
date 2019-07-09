@@ -18,6 +18,8 @@
  */
 package repicea.simulation.covariateproviders.standlevel;
 
+import repicea.simulation.disturbances.DisturbanceTypeProvider.DisturbanceType;
+
 /**
  * This interface ensures the instance can provide either the time since the last
  * disturbance or at least the time since the first known date.
@@ -30,7 +32,7 @@ public interface NaturalDisturbanceInformationProvider {
 	 * @param currentDateYrs the current date
 	 * @return an Integer instance or null
 	 */
-	public Integer getTimeSinceLastDisturbanceYrs(int currentDateYrs);
+	public Integer getTimeSinceLastDisturbanceYrs(DisturbanceType type, int currentDateYrs);
 	
 	/**
 	 * This method returns the time since the first known date. This is a work-around if the 
@@ -38,6 +40,6 @@ public interface NaturalDisturbanceInformationProvider {
 	 * @param currentDateYrs the current date
 	 * @return a positive integer
 	 */
-	public int getTimeSinceFirstKnownDateYrs(int currentDateYrs);
+	public int getTimeSinceFirstKnownDateYrs(DisturbanceType type, int currentDateYrs);
 	
 }
