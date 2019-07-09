@@ -40,6 +40,6 @@ public interface NaturalDisturbanceInformationProvider {
 	 * @param currentDateYrs the current date
 	 * @return a positive integer
 	 */
-	public int getTimeSinceFirstKnownDateYrs(DisturbanceType type, int currentDateYrs);
+	public int getTimeSinceFirstKnownDateYrs(int currentDateYrs);
 	
 }
