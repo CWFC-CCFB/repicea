@@ -120,7 +120,7 @@ public class DisturbanceOccurrences {
 	 * @return a boolean
 	 */
 	public boolean isThereAnyOccurrence() {
-		return datesYr.isEmpty();
+		return !datesYr.isEmpty();
 	}
 	
 	
