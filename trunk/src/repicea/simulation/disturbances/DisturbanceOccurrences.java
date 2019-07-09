@@ -122,6 +122,12 @@ public class DisturbanceOccurrences {
 	public boolean isThereAnyOccurrence() {
 		return !datesYr.isEmpty();
 	}
-	
-	
+
+	/**
+	 * Return the number of occurrences.
+	 * @return an integer
+	 */
+	public int getNumberOfOccurrences() {
+		return datesYr.size();
+	}
 }
