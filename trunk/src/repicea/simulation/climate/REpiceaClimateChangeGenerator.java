@@ -31,6 +31,15 @@ import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesP
  */
 public interface REpiceaClimateChangeGenerator<P extends GeographicalCoordinatesProvider> extends REpiceaClimateGenerator<P> {
 
+	
+	public static enum RepresentativeConcentrationPathway {
+		RCP2_6,
+		RCP4_5,
+		RCP6_0,
+		RCP8_5;
+	}
+	
+	
 	/**
 	 * Returns Map of the annual changes for the different climate variable for a MonteCarloSimulationCompliantObject
 	 * instance, typically a plot.
