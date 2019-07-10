@@ -23,7 +23,7 @@ package repicea.simulation.covariateproviders.standlevel;
  * @author Mathieu Fortin - July 2019
  *
  */
-public interface SeasonalMeanTemperatureProvider {
+public interface MeanSeasonalTemperatureProvider {
 
 	
 	/**
