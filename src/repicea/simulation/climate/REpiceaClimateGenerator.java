@@ -39,5 +39,5 @@ public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvid
 	 * @param plot a GeographicalCoordinatesProvider instance
 	 * @return a REpiceaClimateVariableMap-derived instance
 	 */
-	public REpiceaClimateVariableMap getClimateVariables(P plot, RepresentativeConcentrationPathway rcp);
+	public REpiceaClimateVariableMap getClimateVariables(P plot);
 }
