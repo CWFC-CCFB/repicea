@@ -32,12 +32,6 @@ import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesP
 public interface REpiceaClimateChangeGenerator<P extends GeographicalCoordinatesProvider> extends REpiceaClimateGenerator<P> {
 
 	
-	public static enum RepresentativeConcentrationPathway {
-		RCP2_6,
-		RCP4_5,
-		RCP6_0,
-		RCP8_5;
-	}
 	
 	
 	/**

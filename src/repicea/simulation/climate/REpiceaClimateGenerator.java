@@ -27,10 +27,17 @@ import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesP
  */
 public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvider> {
 
+	public static enum RepresentativeConcentrationPathway {
+		RCP2_6,
+		RCP4_5,
+		RCP6_0,
+		RCP8_5;
+	}
+
 	/**
 	 * Returns a map of climate variables depending on the geographical coordinates of the plot.
 	 * @param plot a GeographicalCoordinatesProvider instance
 	 * @return a REpiceaClimateVariableMap-derived instance
 	 */
-	public REpiceaClimateVariableMap getClimateVariables(P plot);
+	public REpiceaClimateVariableMap getClimateVariables(P plot, RepresentativeConcentrationPathway rcp);
 }
