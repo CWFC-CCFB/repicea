@@ -68,9 +68,6 @@ public class REpiceaClimateChangeTrend extends ArrayList<REpiceaClimateChangeTre
 	 * @return the change
 	 */
 	public double getChangeFromTo(int startDateYr, int endDateYr, ClimateVariable variable) {
-		if (startDateYr >= endDateYr) {
-			throw new InvalidParameterException("The start date must be prior to the end date!");
-		}
 		double increase = 0d;
 		for (REpiceaClimateChangeTrendSegment segment : this) {
 			int nbYears = 0;
