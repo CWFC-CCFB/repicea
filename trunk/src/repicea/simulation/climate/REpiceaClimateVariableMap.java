@@ -22,30 +22,44 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.simulation.climate.REpiceaClimateVariableMap.ClimateVariable;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
 public class REpiceaClimateVariableMap extends HashMap<ClimateVariable, Double> {
 	
-	public static enum ClimateVariable {
+	public static enum ClimateVariable implements TextableEnum {
 		/**
 		 * Mean annual temperature (C)
 		 */
-		MeanAnnualTempC,
+		MeanAnnualTempC("Mean annual temperature (\u00B0C)", "Temp\u00E9rature annuelle moyenne (\u00B0C)"),
 		
 		/**
 		 * Mean annual precipitation (mm)
 		 */
-		MeanAnnualPrecMm,
+		MeanAnnualPrecMm("Mean annual precipitation (mm)", "Pr\u00Ecipitations annuelles moyennes (mm)"),
 		
 		/**
 		 * Mean temperature of the growing season (C)
 		 */
-		MeanSeasonalTempC,
+		MeanGrowingSeasonTempC("Mean growing season temperature (\u00B0C)", "Moyenne des temp\u00E9rature de la saison de croissance (\u00B0C)"),
 		
 		/**
 		 * Mean precipitation of the growing season (mm)
 		 */
-		MeanSeasonalPrecMm;
+		MeanGrowingSeasonPrecMm("Mean growing season precipitation (mm)", "Moyenne des pr\u00E9cipitations de la saison de croissance (mm)");
+
+		ClimateVariable(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+		
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 
 

@@ -19,6 +19,8 @@
 package repicea.simulation.climate;
 
 import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesProvider;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * The REpiceaClimateGenerator interface ensures that the climate generator returns 
@@ -27,11 +29,23 @@ import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesP
  */
 public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvider> {
 
-	public static enum RepresentativeConcentrationPathway {
-		RCP2_6,
-		RCP4_5,
-		RCP6_0,
-		RCP8_5;
+	public static enum RepresentativeConcentrationPathway implements TextableEnum {
+		RCP2_6("RCP 2.6", "RCP 2.6"),
+		RCP4_5("RCP 4.5", "RCP 4.5"),
+		RCP6_0("RCP 6.0", "RCP 6.0"),
+		RCP8_5("RCP 8.5", "RCP 8.5");
+
+		RepresentativeConcentrationPathway(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+		
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 
 	/**
