@@ -37,7 +37,7 @@ public interface REpiceaClimateChangeGenerator<P extends GeographicalCoordinates
 	 * @param obj a MonteCarloSimulationCompliantObject instance
 	 * @return a Map of ClimateVariable (key) and Double (value)
 	 */
-	public REpiceaClimateVariableChangeMap getAnnualChangesForThisStand(MonteCarloSimulationCompliantObject obj);
+	public REpiceaClimateChangeTrend getClimateTrendForThisStand(MonteCarloSimulationCompliantObject obj);
 	
 	
 }
