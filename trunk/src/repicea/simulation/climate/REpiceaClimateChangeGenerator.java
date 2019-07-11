@@ -18,10 +18,7 @@
  */
 package repicea.simulation.climate;
 
-import java.util.Map;
-
 import repicea.simulation.MonteCarloSimulationCompliantObject;
-import repicea.simulation.climate.REpiceaClimateVariableMap.ClimateVariable;
 import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesProvider;
 
 /**
@@ -40,7 +37,7 @@ public interface REpiceaClimateChangeGenerator<P extends GeographicalCoordinates
 	 * @param obj a MonteCarloSimulationCompliantObject instance
 	 * @return a Map of ClimateVariable (key) and Double (value)
 	 */
-	public Map<ClimateVariable, Double> getAnnualChangesForThisStand(MonteCarloSimulationCompliantObject obj);
+	public REpiceaClimateVariableChangeMap getAnnualChangesForThisStand(MonteCarloSimulationCompliantObject obj);
 	
 	
 }
