@@ -19,7 +19,6 @@
 package repicea.simulation.climate;
 
 import java.util.HashMap;
-import java.util.Map;
 
 import repicea.simulation.climate.REpiceaClimateVariableMap.ClimateVariable;
 import repicea.util.REpiceaTranslator;
@@ -75,7 +74,7 @@ public class REpiceaClimateVariableMap extends HashMap<ClimateVariable, Double> 
 		 * @param annualChanges a Map with the annual change for one or many climate variables
 		 * @param dateYr the current date (years)
 		 */
-		public REpiceaClimateVariableMap getUpdatedClimateVariableMap(Map<ClimateVariable, Double> annualChanges, int dateYr);
+		public REpiceaClimateVariableMap getUpdatedClimateVariableMap(REpiceaClimateVariableChangeMap annualChanges, int dateYr);
 		
 	}
 	
