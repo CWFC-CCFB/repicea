@@ -298,12 +298,7 @@ public abstract class AbstractGenericEngine {
 	 * This method cancels the current task if the queue is not empty.
 	 */
 	public void cancelRunningTask() {
-//		queue.clear();
 		worker.requestCancel();
-//		if (!queue.isEmpty()) {
-//			worker.requestCancel();
-//			setCancelRequest(true);
-//		} 
 	}
 
 	/**
@@ -319,11 +314,5 @@ public abstract class AbstractGenericEngine {
 	}
 
 	
-//	/**
-//	 * This method sets the cancel request to false or true.
-//	 * @param bool a boolean
-//	 */
-//	protected void setCancelRequest(boolean bool) {
-//	}
 	
 }
