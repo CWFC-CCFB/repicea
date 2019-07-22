@@ -85,14 +85,12 @@ public class SettingMemory implements Memorizable, Closeable {
 	protected void saveSettings() {
 		FileOutputStream fos = null;
 		try {
-//			fos = new FileOutputStream(getRandomAccessFile().getFD());
 			fos = new FileOutputStream(filename);
 			ObjectOutputStream out = new ObjectOutputStream(fos);
 			out.writeObject(getMemorizerPackage());
 			out.close();
 		} catch(IOException ex) {
-			ex.printStackTrace();
-			throw new InvalidParameterException("The parameters cannot be saved!");
+			System.out.println("The settings cannot be saved!");
 		} finally {
 			if (fos != null) {
 				try {
@@ -104,14 +102,6 @@ public class SettingMemory implements Memorizable, Closeable {
 		}
 	}
 	
-//	private RandomAccessFile getRandomAccessFile() throws IOException {
-//		if (raf == null) {
-//			raf = new RandomAccessFile(new File(filename), "rw");
-//			lock = raf.getChannel().lock();
-//		}
-//		return raf;
-//	}
-	
 	
 	/**
 	 * This method deserializes the settings.
@@ -120,7 +110,6 @@ public class SettingMemory implements Memorizable, Closeable {
 		FileInputStream fis = null;
 		ObjectInputStream in = null;
 		try {
-//			fis = new FileInputStream(getRandomAccessFile().getFD());
 			fis = new FileInputStream(filename);
 			in = new ObjectInputStream(fis);
 			Object obj = in.readObject();
