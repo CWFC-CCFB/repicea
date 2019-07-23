@@ -575,12 +575,12 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			String firstCall = REpiceaSystem.retrieveArgument(FIRSTCALL, arguments);
 			if (firstCall != null && firstCall.toLowerCase().trim().equals("true")) {
 				List<String> newCommands = new ArrayList<String>();
-				newCommands.add("repicea.lang.codetranslator.REnvironment");
+				newCommands.add(REnvironment.class.getName());
 				String classPath = "repicea.jar";
 				String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
 				if (extensionPath != null) {
 					if (new File(extensionPath).exists()) {
-						classPath  = classPath + ":" + extensionPath + File.separator + "*";
+						classPath  = classPath + ";" + extensionPath + File.separator + "*";
 					}
 				}
 				
