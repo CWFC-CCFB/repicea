@@ -202,7 +202,17 @@ public class REpiceaSystem {
 	 */
 	public static String getJVMRevision() {return revision;}
 
-	
+	/**
+	 * Returns true if the OS is Windows or false otherwise.
+	 * @return a boolean
+	 */
+	public static boolean isRunningOnWindows() {
+		if (System.getProperty("os.name").startsWith("Windows")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
 //	public static void main(String[] args) {
 //		String[] argTest = "repicea-console.jar -l cd".split(" ");
 //			REpiceaSystem.setLanguageFromMain(argTest);

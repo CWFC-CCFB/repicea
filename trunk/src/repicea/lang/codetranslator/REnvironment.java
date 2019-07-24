@@ -64,6 +64,21 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		PrimitiveTypeMap.put("logical", boolean.class);
 	}
 
+	static class InternalShutDownHook extends Thread {
+		
+		final JavaProcessWrapper rGatewayProcessWrapper;
+		
+		InternalShutDownHook(JavaProcessWrapper rGatewayProcessWrapper) {
+			this.rGatewayProcessWrapper = rGatewayProcessWrapper;
+		}
+		
+		@Override
+		public void run() {
+			rGatewayProcessWrapper.cancel();
+		}
+		
+	}
+
 	
 	static class MethodWrapper implements Comparable<MethodWrapper> {
 
@@ -184,6 +199,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private static String MethodCode = "method";
 	private static String SynchronizeEnvironment = "sync";
 
+	
+
+	
 	@Override
 	public Object processCode(String request) throws Exception {
 		String[] requestStrings = request.split(MainSplitter);
@@ -563,6 +581,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		return wrappers;
 	}
 
+	
 	/**
 	 * Main entry point for creating a REnvironment hosted by a Java local gateway server.
 	 * @param args
@@ -580,7 +599,11 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				String extensionPath = REpiceaSystem.retrieveArgument(EXTENSION, arguments);
 				if (extensionPath != null) {
 					if (new File(extensionPath).exists()) {
-						classPath  = classPath + ";" + extensionPath + File.separator + "*";
+						String classPathSeparator = ":";
+						if (REpiceaSystem.isRunningOnWindows()) {
+							classPathSeparator = ";";
+						}
+						classPath  = classPath + classPathSeparator + extensionPath + File.separator + "*";
 					}
 				}
 				
@@ -604,6 +627,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				File rootPath = jarFile.getParentFile();
 
 				JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
+				Runtime.getRuntime().addShutdownHook(new InternalShutDownHook(rGatewayProcessWrapper));
 				JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
 				rGatewayProcess.setClassPath(classPath);
 				if (memorySize != null) {
