@@ -97,11 +97,6 @@ s	 */
 	 * @return an Estimate
 	 */
 	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
-		if (this instanceof MonteCarloEstimate && ((MonteCarloEstimate) this).isCompatible(estimate2)) {
-			try {
-				return ((MonteCarloEstimate) this).subtract((MonteCarloEstimate) estimate2);
-			} catch (Exception e) {}
-		}
 		Matrix diff = getMean().subtract(estimate2.getMean());
 		Matrix variance = getVariance().add(estimate2.getVariance());
 		return new GaussianEstimate(diff, variance);
@@ -113,11 +108,6 @@ s	 */
 	 * @return an Estimate
 	 */
 	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
-		if (this instanceof MonteCarloEstimate && ((MonteCarloEstimate) this).isCompatible(estimate2)) {
-			try {
-				return ((MonteCarloEstimate) this).add((MonteCarloEstimate) estimate2);
-			} catch (Exception e) {}
-		}
 		Matrix diff = getMean().add(estimate2.getMean());
 		Matrix variance = getVariance().add(estimate2.getVariance());
 		return new GaussianEstimate(diff, variance);
@@ -130,11 +120,6 @@ s	 */
 	 * @return an Estimate
 	 */
 	public Estimate<?> getProductEstimate(double scalar) {
-		if (this instanceof MonteCarloEstimate) {
-			try {
-				return ((MonteCarloEstimate) this).multiply(scalar);
-			} catch (Exception e) {}
-		}
 		Matrix diff = getMean().scalarMultiply(scalar);
 		Matrix variance = getVariance().scalarMultiply(scalar * scalar);
 		return new GaussianEstimate(diff, variance);
@@ -147,5 +132,16 @@ s	 */
 	 * @return a ConfidenceInterval instance 
 	 */
 	public abstract ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha);
+	
+	/**
+	 * This method checks if the two point estimates are compatible. The basic
+	 * check consists of comparing the classes. Then, the matrix data is checked
+	 * for consistency with previous data.
+	 * @param estimate
+	 * @return a boolean
+	 */
+	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+		return false;
+	};
 	
 }

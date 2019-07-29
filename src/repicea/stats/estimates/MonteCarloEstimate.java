@@ -161,7 +161,8 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 		return subEstimate;
 	}
 	
-	protected boolean isCompatible(Estimate<?> estimate) {
+	@Override
+	protected boolean isMergeableEstimate(Estimate<?> estimate) {
 		if (estimate instanceof MonteCarloEstimate) {
 			if (((MonteCarloEstimate) estimate).getNumberOfRealizations() == getNumberOfRealizations()) {
 				return true;
@@ -181,4 +182,31 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
 		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
 	}
+	
+	
+	@Override
+	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
+		if (this.isMergeableEstimate(estimate2)) {
+			return subtract((MonteCarloEstimate) estimate2);
+		} else {
+			return super.getDifferenceEstimate(estimate2);
+		}
+	}
+
+	@Override
+	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
+		if (this.isMergeableEstimate(estimate2)) {
+			return add((MonteCarloEstimate) estimate2);
+		} else {
+			return super.getSumEstimate(estimate2);
+		}
+	}
+
+	@Override
+	public Estimate<?> getProductEstimate(double scalar) {
+		return multiply(scalar);
+	}
+
+	
+	
 }

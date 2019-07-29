@@ -18,8 +18,11 @@
  */
 package repicea.stats.estimates;
 
+import java.security.InvalidParameterException;
+
 import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
+import repicea.stats.sampling.PopulationUnit;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
 /**
@@ -81,7 +84,47 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 			sample.addRealization(obs.getData());
 		}		
 	}
-	
-	// TODO adapt other public methods
-	
+
+	@Override
+	protected PopulationMeanEstimate add(PointEstimate<?> pointEstimate) {
+		if (isMergeableEstimate(pointEstimate)) {
+			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
+			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
+			for (int i = 0; i < getObservations().size(); i++) {
+				PopulationUnit thisUnit = getObservations().get(i);
+				PopulationUnit thatUnit = meanEstimate.getObservations().get(i);
+				newEstimate.addObservation(new PopulationUnitWithEqualInclusionProbability(thisUnit.getData().add(thatUnit.getData())));
+			}
+			return newEstimate;
+		} else {
+			throw new InvalidParameterException("Incompatible point estimates!");
+		}
+	}
+
+	@Override
+	protected PopulationMeanEstimate subtract(PointEstimate<?> pointEstimate) {
+		if (isMergeableEstimate(pointEstimate)) {
+			PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
+			PopulationMeanEstimate meanEstimate = (PopulationMeanEstimate) pointEstimate;
+			for (int i = 0; i < getObservations().size(); i++) {
+				PopulationUnit thisUnit = getObservations().get(i);
+				PopulationUnit thatUnit = meanEstimate.getObservations().get(i);
+				newEstimate.addObservation(new PopulationUnitWithEqualInclusionProbability(thisUnit.getData().subtract(thatUnit.getData())));
+			}
+			return newEstimate;
+		} else {
+			throw new InvalidParameterException("Incompatible point estimates!");
+		}
+	}
+
+	@Override
+	protected PopulationMeanEstimate multiply(double scalar) {
+		PopulationMeanEstimate newEstimate = new PopulationMeanEstimate();
+		for (int i = 0; i < getObservations().size(); i++) {
+			PopulationUnit thisUnit = getObservations().get(i);
+			newEstimate.addObservation(new PopulationUnitWithEqualInclusionProbability(thisUnit.getData().scalarMultiply(scalar)));
+		}
+		return newEstimate;
+	}
+
 }
