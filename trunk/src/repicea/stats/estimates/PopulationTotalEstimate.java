@@ -18,6 +18,8 @@
  */
 package repicea.stats.estimates;
 
+import java.security.InvalidParameterException;
+
 import repicea.math.Matrix;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
@@ -96,4 +98,65 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 	}
 
 	
+	@Override
+	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+		boolean isMergeable = super.isMergeableEstimate(estimate);
+		if (isMergeable) {
+			PopulationTotalEstimate est = (PopulationTotalEstimate) estimate;
+			for (int i = 0; i < getObservations().size(); i++) {
+				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
+				PopulationUnitWithUnequalInclusionProbability thatUnit = est.getObservations().get(i);
+				if (thisUnit.getInclusionProbability() != thatUnit.getInclusionProbability()) {
+					return false;
+				}
+			}
+		}
+		return isMergeable;
+	}
+
+	
+	@Override
+	protected PopulationTotalEstimate add(PointEstimate<?> pointEstimate) {
+		if (isMergeableEstimate(pointEstimate)) {
+			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate();
+			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
+			for (int i = 0; i < getObservations().size(); i++) {
+				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
+				PopulationUnitWithUnequalInclusionProbability thatUnit = totalEstimate.getObservations().get(i);
+				newEstimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(thisUnit.getData().add(thatUnit.getData()), 
+						thisUnit.getInclusionProbability()));
+			}
+			return newEstimate;
+		} else {
+			throw new InvalidParameterException("Incompatible point estimates!");
+		}
+	}
+
+	@Override
+	protected PopulationTotalEstimate subtract(PointEstimate<?> pointEstimate) {
+		if (isMergeableEstimate(pointEstimate)) {
+			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate();
+			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
+			for (int i = 0; i < getObservations().size(); i++) {
+				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
+				PopulationUnitWithUnequalInclusionProbability thatUnit = totalEstimate.getObservations().get(i);
+				newEstimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(thisUnit.getData().subtract(thatUnit.getData()), 
+						thisUnit.getInclusionProbability()));
+			}
+			return newEstimate;
+		} else {
+			throw new InvalidParameterException("Incompatible point estimates!");
+		}
+	}
+
+	@Override
+	protected PopulationTotalEstimate multiply(double scalar) {
+		PopulationTotalEstimate newEstimate = new PopulationTotalEstimate();
+		for (int i = 0; i < getObservations().size(); i++) {
+			PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
+			newEstimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(thisUnit.getData().scalarMultiply(scalar), thisUnit.getInclusionProbability()));
+		}
+		return newEstimate;
+	}
+
 }

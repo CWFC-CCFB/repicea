@@ -81,18 +81,13 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 		}
 	}
 
-	/**
-	 * This method checks if the two point estimates are compatible. The basic
-	 * check consists of comparing the classes. Then, the matrix data is checked
-	 * for consistency with previous data.
-	 * @param estimate
-	 * @return a boolean
-	 */
-	protected boolean isCompatible(PointEstimate<?> estimate) {
+	@Override
+	protected boolean isMergeableEstimate(Estimate<?> estimate) {
 		if (estimate.getClass().equals(getClass())) {
-			if (observations.size() == estimate.observations.size()) {
-				if (nRows == estimate.nRows) {
-					if (nCols == estimate.nCols) {
+			PointEstimate pe = (PointEstimate) estimate;
+			if (observations.size() == pe.observations.size()) {
+				if (nRows == pe.nRows) {
+					if (nCols == pe.nCols) {
 						return true;
 					}
 				}
@@ -119,6 +114,13 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 		Matrix upperBoundValue = getQuantileForProbability(1d - .5 * (1d - oneMinusAlpha));
 		return new ConfidenceInterval(lowerBoundValue, upperBoundValue, oneMinusAlpha);
 	}
+
+	
+	protected abstract PointEstimate<?> add(PointEstimate<?> pointEstimate);
+
+	protected abstract PointEstimate<?> subtract(PointEstimate<?> pointEstimate);
+
+	protected abstract PointEstimate<?> multiply(double scalar);
 
 
 }

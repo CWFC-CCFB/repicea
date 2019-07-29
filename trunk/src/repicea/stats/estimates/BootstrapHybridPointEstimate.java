@@ -25,8 +25,7 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
-@SuppressWarnings("serial")
-public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
+public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
 
 	public class VariancePointEstimate {
 		private final Matrix modelRelatedVariance;
@@ -74,13 +73,23 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> 
 	 * @param estimate a PointEstimate instance
 	 */
 	public void addPointEstimate(PointEstimate<?> estimate) {
-		if (estimates.isEmpty() || estimates.get(0).isCompatible(estimate)) {
+		if (estimates.isEmpty() || estimates.get(0).isMergeableEstimate(estimate)) {
 			estimates.add(estimate);
 		} else {
 			throw new InvalidParameterException("The point estimate is not compatible with the previous estimates!");
 		}
 	}
 	
+	@Override
+	protected boolean isMergeableEstimate(Estimate<?> estimate) {
+		if (estimate instanceof BootstrapHybridPointEstimate) {
+			if (((BootstrapHybridPointEstimate) estimate).getNumberOfRealizations() == getNumberOfRealizations()) {
+				if (estimates.get(0).isMergeableEstimate(((BootstrapHybridPointEstimate) estimate).estimates.get(0)));
+				return true;
+			};
+		}
+		return false;
+	}
 	
 	/**
 	 * This method is useful for large simulations. The simulation can be run in different threads or batches
@@ -227,4 +236,83 @@ public class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> 
 			return estimates.get(0).getObservations().size();
 		}
 	}
+	
+	
+	
+	
+	/**
+	 * This method returns a MonteCarloEstimate instance that results from the subtraction of two 
+	 * MonteCarloEstimate instances with the same number of realizations. 
+	 * @param estimate1 the first estimate
+	 * @param estimate2 the estimate that is subtracted to the first estimate
+	 * @return a MonteCarloEstimate instance
+	 */
+	protected BootstrapHybridPointEstimate subtract(BootstrapHybridPointEstimate estimate2) {
+		if (getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
+			throw new InvalidParameterException("The number of realizations is not consistent!");
+		}
+		BootstrapHybridPointEstimate outputEstimate = new BootstrapHybridPointEstimate();
+		for (int i = 0; i < getNumberOfRealizations(); i++) {
+			outputEstimate.addPointEstimate(estimates.get(i).subtract(estimate2.estimates.get(i)));
+		}
+		return outputEstimate;
+	}
+	
+	/**
+	 * This method returns a MonteCarloEstimate instance that results from the sum of two 
+	 * MonteCarloEstimate instances with the same number of realizations. 
+	 * @param estimate1 the first estimate
+	 * @param estimate2 the estimate that is added to the first estimate
+	 * @return a MonteCarloEstimate instance
+	 */
+	protected BootstrapHybridPointEstimate add(BootstrapHybridPointEstimate estimate2) {
+		if (getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
+			throw new InvalidParameterException("The number of realizations is not consistent!");
+		}
+		BootstrapHybridPointEstimate outputEstimate = new BootstrapHybridPointEstimate();
+		for (int i = 0; i < getNumberOfRealizations(); i++) {
+			outputEstimate.addPointEstimate(estimates.get(i).add(estimate2.estimates.get(i)));
+		}
+		return outputEstimate;
+	}
+
+	/**
+	 * This method returns a MonteCarloEstimate instance that results from the product of original 
+	 * MonteCarloEstimate instance and a scalar. 
+	 * @param estimate1 the first estimate
+	 * @param scalar the multiplication factor
+	 * @return a MonteCarloEstimate instance
+	 */
+	protected BootstrapHybridPointEstimate multiply(double scalar) {
+		BootstrapHybridPointEstimate outputEstimate = new BootstrapHybridPointEstimate();
+		for (int i = 0; i < getNumberOfRealizations(); i++) {
+			outputEstimate.addPointEstimate(estimates.get(i).multiply(scalar));
+		}
+		return outputEstimate;
+	}
+
+	@Override
+	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
+		if (this.isMergeableEstimate(estimate2)) {
+			return subtract((BootstrapHybridPointEstimate) estimate2);
+		} else {
+			return super.getDifferenceEstimate(estimate2);
+		}
+	}
+
+	@Override
+	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
+		if (this.isMergeableEstimate(estimate2)) {
+			return add((BootstrapHybridPointEstimate) estimate2);
+		} else {
+			return super.getSumEstimate(estimate2);
+		}
+	}
+
+	@Override
+	public Estimate<?> getProductEstimate(double scalar) {
+		return multiply(scalar);
+	}
+
+	
 }
