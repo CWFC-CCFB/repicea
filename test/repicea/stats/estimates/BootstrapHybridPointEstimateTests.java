@@ -35,6 +35,7 @@ public class BootstrapHybridPointEstimateTests {
 		
 		double expectedVariance = pe.getVariance().m_afData[0][0];
 		double actualVariance = bhpe.getVariance().m_afData[0][0];
+		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
 		
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-8);
 	}
@@ -69,5 +70,39 @@ public class BootstrapHybridPointEstimateTests {
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-1);
 	}
 
+	
+// 	FIXME this test is not properly built	MF2019-07-29
+//	@Test
+//	public void simpleTestWithCompleteVariability() {
+//
+//		BootstrapHybridPointEstimate bhpe = new BootstrapHybridPointEstimate(); 
+//		for (int i = 0; i < 1000; i++) {
+//			PopulationMeanEstimate pe = new PopulationMeanEstimate();
+//			Matrix obs;
+//			double mean = 12 + RANDOM.nextGaussian() * .5; 
+//			for (int j = 0; j < 100; j++) {
+//				obs = new Matrix(1,1);
+//				obs.m_afData[0][0] = RANDOM.nextGaussian() * 4 + mean;
+//				pe.addObservation(new PopulationUnitWithEqualInclusionProbability(obs));
+//			}
+//			bhpe.addPointEstimate(pe);
+//		}
+//		
+//		double expectedMean = 12d;
+//		double actualMean = bhpe.getMean().m_afData[0][0];
+//		
+//		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 1E-1);
+//		
+//		
+//		double expectedVariance = 0.25;
+//		VariancePointEstimate varPointEstimate = bhpe.getVarianceOfTotalEstimate();
+//		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance().m_afData[0][0]);
+//		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance().m_afData[0][0]);
+//		double actualVariance = varPointEstimate.getTotalVariance().m_afData[0][0];
+//		
+//		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-1);
+//	}
+
+	
 	
 }
