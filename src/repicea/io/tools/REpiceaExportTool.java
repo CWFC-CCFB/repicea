@@ -220,17 +220,18 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 		StandMQD("MQDiameter", "DMQ"),
 		StandVolume("Vol_HA", "Vol_HA"),
 		TotalStandVolume("VolTotHA", "VolTotHA"),
-		DominantHeight("DomHeight", "HDom"),
+		DominantHeight("DomHeightM", "HDomM"),
 		NumberOfPlots("NbPlots", "NbPlac"),
-		paiSurvivor("PAISurv", "AACSurv"),
-		paiMortality("PAIMort", "AACMort"),
-		paiRecruitment("PAIRecr", "AACRecr"),
+		paiSurvivor("PAISurvM2Ha", "AACSurvM2Ha"),
+		paiMortality("PAIMortM2Ha", "AACMortM2Ha"),
+		paiRecruitment("PAIRecrM2Ha", "AACRecrM2Ha"),
 		NumberOfDecades("nbDecades", "nbDecen"),
 		SpruceBudworm("SBW", "TBE"),
 		TreatmentType("treatType", "traitType"),
 		PesticideSpraying("InsSpray", "EpandPest"),
-		SiteIndex("SiteIndex", "SiteIndex"),
-		AboveGroundBiomass("AbGrBiom", "AbGrBiom");
+		SiteIndex("SiteIndexM", "SiteIndexM"),
+		AboveGroundBiomass("AbGrBiom", "AbGrBiom"),
+		AverageProduction("ProductivityM3HaYr","ProductiviteM3HaAn");
 		
 
 		FieldName(String englishText, String frenchText) {
