@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,18 +18,27 @@
  */
 package repicea.simulation.covariateproviders.standlevel;
 
+import java.util.List;
+
 /**
  * The StochasticInformationProvider interface provides basic information about the simulation mode.
  * @author Mathieu Fortin - November 2014
  */
 public interface StochasticInformationProvider<Realization> {
 
-	/**
-	 * This method returns the number of realizations to be made.
-	 * @return an integer
-	 */
-	public int getNumberRealizations();
+//	/**
+//	 * This method returns the number of realizations to be made.
+//	 * @return an integer
+//	 */
+//	public default int getNumberRealizations() {
+//		return getRealizationIds().size();
+//	}
 
+	/**
+	 * Returns the ids of the different realizations
+	 * @return a List of Integer
+	 */
+	public List<Integer> getRealizationIds();
 	
 	/**
 	 * This method returns true if the instance is running in stochastic mode or false it is in deterministic mode.
