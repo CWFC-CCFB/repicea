@@ -26,13 +26,13 @@ import java.util.List;
  */
 public interface StochasticInformationProvider<Realization> {
 
-//	/**
-//	 * This method returns the number of realizations to be made.
-//	 * @return an integer
-//	 */
-//	public default int getNumberRealizations() {
-//		return getRealizationIds().size();
-//	}
+	/**
+	 * This method returns the number of realizations to be made.
+	 * @return an integer
+	 */
+	public default int getNumberRealizations() {
+		return getRealizationIds().size();
+	}
 
 	/**
 	 * Returns the ids of the different realizations
