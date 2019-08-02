@@ -66,14 +66,15 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 			}
 		} 
 		
-		Matrix outputMatrix = new Matrix(getNumberOfObservations(), possibleValues.size());
-		for (int i = 0; i < getNumberOfObservations(); i++) {
-			int position = possibleValues.indexOf(dataSet.getValueAt(i, fieldIndex));
-			if (position >= 0 && position < outputMatrix.m_iCols) {
-				outputMatrix.m_afData[i][position] = 1d;
-			}
-		}
-		return outputMatrix;
+//		Matrix outputMatrix = new Matrix(getNumberOfObservations(), possibleValues.size());
+//		for (int i = 0; i < getNumberOfObservations(); i++) {
+//			int position = possibleValues.indexOf(dataSet.getValueAt(i, fieldIndex));
+//			if (position >= 0 && position < outputMatrix.m_iCols) {
+//				outputMatrix.m_afData[i][position] = 1d;
+//			}
+//		}
+//		return outputMatrix;
+		return dataSet.getDummyMatrix(possibleValues, fieldIndex);
 	}
 
 	

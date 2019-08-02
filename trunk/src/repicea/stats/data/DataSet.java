@@ -199,6 +199,16 @@ public class DataSet implements Loadable, Saveable {
 		return possibleValues;
 	}
 
+	protected Matrix getDummyMatrix(List possibleValues, int fieldIndex) {
+		Matrix outputMatrix = new Matrix(getNumberOfObservations(), possibleValues.size());
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			int position = possibleValues.indexOf(getValueAt(i, fieldIndex));
+			if (position >= 0 && position < outputMatrix.m_iCols) {
+				outputMatrix.m_afData[i][position] = 1d;
+			}
+		}
+		return outputMatrix;
+	}
 	
 	public void addObservation(Object[] observationFrame) {
 		observations.add(new Observation(observationFrame));
