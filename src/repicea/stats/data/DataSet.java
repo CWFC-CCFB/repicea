@@ -24,77 +24,73 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import repicea.app.AbstractGenericTask;
+import repicea.gui.REpiceaUIObject;
+import repicea.gui.components.REpiceaTable;
+import repicea.gui.components.REpiceaTableModel;
+import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.io.FormatField;
 import repicea.io.FormatReader;
 import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
-import repicea.io.Loadable;
 import repicea.io.Saveable;
 import repicea.math.Matrix;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * The DataSet class contains many observations and implements the method to read a dataset with a FormatReader instance.
  * @author Mathieu Fortin - November 2012
  */
-public class DataSet implements Loadable, Saveable {
+public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIObject {
 
+	private static enum MessageID implements TextableEnum {
+
+		ReadingFileMessage("Reading file...", "Lecture du fichier...");
+
+		MessageID(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+
+		@Override
+		public String toString() {return REpiceaTranslator.getString(this);}
+	}
+	
+	
+	
 	protected List<String> fieldNames;
 	protected List<Class<?>> fieldTypes;
 	private List<Observation> observations;
-
-	/**
-	 * General constructor.
-	 * @param filename the name of the file to be read
-	 */
-	public DataSet(String filename) {
-		this();
-		try {
-			load(filename);
-			indexFieldType();
-		} catch (Exception e) {
-			System.out.println("An error occured while reading the file : " + filename);
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Basic constructor for derived classes.
-	 */
-	protected DataSet() {
+	private final String originalFilename;
+	
+	private transient REpiceaTable table;
+	
+	protected DataSet(String filename) {
+		this.originalFilename = filename;
 		fieldNames = new ArrayList<String>();
 		fieldTypes = new ArrayList<Class<?>>();
 		observations = new ArrayList<Observation>();
 	}
+
 	
-	@Override
-	public void load(String filename) {
-		fieldNames.clear();
-		observations.clear();
-
-		try {
-			FormatReader<?> reader = FormatReader.createFormatReader(filename);
-			FormatField field;
-			for (int i = 0; i < reader.getHeader().getNumberOfFields(); i++) {
-				field = reader.getHeader().getField(i);
-				fieldNames.add(field.getName());
-			}
-
-			Object[] lineRead = reader.nextRecord();
-			while (lineRead != null) {
-				for (int i = 0; i < fieldNames.size(); i++) {
-					try {
-						lineRead[i] = Double.parseDouble(lineRead[i].toString());
-					} catch (Exception e) {
-						lineRead[i] = lineRead[i].toString();
-					}
-				}
-				addObservation(lineRead);
-				lineRead = reader.nextRecord();
-			}
-		} catch (IOException e1) {
-			e1.printStackTrace();
+	/**
+	 * General constructor.
+	 * @param filename the name of the file to be read
+	 * @param autoLoad true if the file is to be read now. Typically, this boolean is set to false when the swingworker is
+	 * launched from a window that retrieves some events.
+	 */
+	public DataSet(String filename, boolean autoLoad) {
+		this(filename);
+		if (autoLoad) {
+			run();
 		}
 	}
+	
 
 	/**
 	 * This method returns any object in the dataset at row i and column j.
@@ -261,7 +257,121 @@ public class DataSet implements Loadable, Saveable {
 			e1.printStackTrace();
 		}
 	}
+
+	
+	@Override
+	protected void doThisJob() throws Exception {
+		fieldNames.clear();
+		observations.clear();
+
+		try {
+			FormatReader<?> reader = FormatReader.createFormatReader(originalFilename);
+			FormatField field;
+			for (int i = 0; i < reader.getHeader().getNumberOfFields(); i++) {
+				field = reader.getHeader().getField(i);
+				fieldNames.add(field.getName());
+			}
+
+			int nbRecords = reader.getRecordCount();
+			int recordsRead = 0;
+			
+			firePropertyChange(REpiceaProgressBarDialog.LABEL, 0d, MessageID.ReadingFileMessage.toString());
+			
+			Object[] lineRead = reader.nextRecord();
+			while (lineRead != null) {
+				for (int i = 0; i < fieldNames.size(); i++) {
+					try {
+						lineRead[i] = Double.parseDouble(lineRead[i].toString());
+					} catch (Exception e) {
+						lineRead[i] = lineRead[i].toString();
+					}
+				}
+				addObservation(lineRead);
+				recordsRead++;
+				int progress = (int) ((recordsRead * 100d) / nbRecords);
+				firePropertyChange(REpiceaProgressBarDialog.PROGRESS, recordsRead, progress);
+				lineRead = reader.nextRecord();
+			}
+			
+			indexFieldType();
+
+		} catch (IOException e1) {
+			e1.printStackTrace();
+		}
+	}
+
+	/**
+	 * Returns the field names in a list. The list is a new list so that changes will
+	 * not affect the fieldNames member.
+	 * @return a List instance
+	 */
+	public List<String> getFieldNames() {
+		List<String> fieldNames = new ArrayList<String>();
+		fieldNames.addAll(this.fieldNames);
+		return fieldNames;
+	}
+	
+	public List<Class<?>> getFieldTypes() {
+		List<Class<?>> fieldTypes = new ArrayList<Class<?>>();
+		fieldTypes.addAll(this.fieldTypes);
+		return fieldTypes;
+	}
+	
+	@Override
+	public REpiceaTable getUI() {
+		if (table == null) {
+			REpiceaTableModel model = new REpiceaTableModel(this);
+			table = new REpiceaTable(model, false);	// no pop up 
+		}
+		return table;
+	}
+
+
+	@Override
+	public boolean isVisible() {
+		return table.isVisible();
+	}
+
+
+	/**
+	 * Returns the observations of the data set.
+	 * @return a List of Observation instances
+	 */
+	public List<Observation> getObservations() {
+		return observations;
+	}
 	
 	
+//	private static class FakeDialog extends REpiceaDialog {
+//
+//		REpiceaTable table;
+//		FakeDialog(REpiceaTable table) {
+//			this.table = table;
+//			initUI();
+//			pack();
+//			setVisible(true);
+//		}
+//		
+//		@Override
+//		public void listenTo() {}
+//
+//		@Override
+//		public void doNotListenToAnymore() {}
+//
+//		@Override
+//		protected void initUI() {
+//			getContentPane().setLayout(new BorderLayout());
+//			JScrollPane scrollPane = new JScrollPane(table);
+//			getContentPane().add(scrollPane, BorderLayout.CENTER);
+//		}
+//	}
+//	
+//	public static void main(String[] args) {
+//		String filename = ObjectUtility.getPackagePath(DataSet.class) + "trees.csv";
+//		DataSet dataSet = new DataSet(filename, false);
+//		new REpiceaProgressBarDialog("Reading inventory", "...", dataSet, false);
+//		new FakeDialog(dataSet.getUI());
+//		System.exit(0);
+//	}
 	
 }

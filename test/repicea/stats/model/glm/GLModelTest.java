@@ -15,7 +15,7 @@ public class GLModelTest {
     public void TestWithSimpleGLModel() throws Exception {
 		double expectedLlk = -1091.9193286646055;
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
-		DataSet dataSet = new DataSet(filename);
+		DataSet dataSet = new DataSet(filename, true);
 		
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 		glm.doEstimation();
