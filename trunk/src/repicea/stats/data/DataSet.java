@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,13 +18,20 @@
  */
 package repicea.stats.data;
 
+import java.awt.BorderLayout;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import javax.swing.JScrollPane;
 
 import repicea.app.AbstractGenericTask;
+import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaUIObject;
 import repicea.gui.components.REpiceaTable;
 import repicea.gui.components.REpiceaTableModel;
@@ -35,6 +42,7 @@ import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
 import repicea.io.Saveable;
 import repicea.math.Matrix;
+import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -61,7 +69,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		public String toString() {return REpiceaTranslator.getString(this);}
 	}
 	
-	
+
 	
 	protected List<String> fieldNames;
 	protected List<Class<?>> fieldTypes;
@@ -140,6 +148,47 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		Observation.comparableFields = fieldIndices;
 		Collections.sort(observations);
 	}
+	
+	/**
+	 * Split the data set into different data sets following the values of the fields specified in the
+	 * fieldIndicesForSplitting parameters. 
+	 * @param fieldIndicesForSplitting
+	 * @param fieldIndicesForSorting
+	 * @return a Map of DataSet
+	 */
+	public Map<DataGroup, DataSet> splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
+		Map<DataGroup, DataSet> outputMap = new HashMap<DataGroup, DataSet>();
+		for (Observation obs : observations) {
+			DataGroup id = new DataGroup();
+			for (Integer index : fieldIndicesForSplitting) {
+				id.add(obs.values.get(index));
+			}
+			if (!outputMap.containsKey(id)) {
+				DataSet ds = new DataSet("");
+				ds.fieldNames.addAll(this.fieldNames);
+				ds.fieldTypes.addAll(this.fieldTypes);
+				outputMap.put(id, ds);
+			} 
+			DataSet ds = outputMap.get(id);
+			ds.observations.add(obs);
+		}
+		if (fieldIndicesForSorting != null && !fieldIndicesForSorting.isEmpty()) {
+			for (DataSet ds : outputMap.values()) {
+				ds.sortObservations(fieldIndicesForSorting);
+			}
+		}
+		return outputMap;
+	}
+	
+	protected DataPattern getPatternForThisField(int fieldIndex) {
+		DataPattern pattern = new DataPattern();
+		for (Observation obs : observations) {
+			pattern.add(obs.values.get(fieldIndex));
+		}
+		return pattern; 
+	}
+	
+	
 	
 	/**
 	 * This method returns the number of observations in the dataset.
@@ -342,36 +391,58 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	}
 	
 	
-//	private static class FakeDialog extends REpiceaDialog {
-//
-//		REpiceaTable table;
-//		FakeDialog(REpiceaTable table) {
-//			this.table = table;
-//			initUI();
-//			pack();
-//			setVisible(true);
-//		}
-//		
-//		@Override
-//		public void listenTo() {}
-//
-//		@Override
-//		public void doNotListenToAnymore() {}
-//
-//		@Override
-//		protected void initUI() {
-//			getContentPane().setLayout(new BorderLayout());
-//			JScrollPane scrollPane = new JScrollPane(table);
-//			getContentPane().add(scrollPane, BorderLayout.CENTER);
-//		}
-//	}
-//	
-//	public static void main(String[] args) {
-//		String filename = ObjectUtility.getPackagePath(DataSet.class) + "trees.csv";
-//		DataSet dataSet = new DataSet(filename, false);
-//		new REpiceaProgressBarDialog("Reading inventory", "...", dataSet, false);
-//		new FakeDialog(dataSet.getUI());
-//		System.exit(0);
-//	}
+	private static class FakeDialog extends REpiceaDialog {
+
+		REpiceaTable table;
+		FakeDialog(REpiceaTable table) {
+			this.table = table;
+			initUI();
+			pack();
+			setVisible(true);
+		}
+		
+		@Override
+		public void listenTo() {}
+
+		@Override
+		public void doNotListenToAnymore() {}
+
+		@Override
+		protected void initUI() {
+			getContentPane().setLayout(new BorderLayout());
+			JScrollPane scrollPane = new JScrollPane(table);
+			getContentPane().add(scrollPane, BorderLayout.CENTER);
+		}
+	}
+	
+	protected static DataSet recomposeDataSet(Collection<DataSet> dataSets) {
+		DataSet ds = new DataSet("");
+		int i = 0;
+		for (DataSet subDs : dataSets) {
+			if (i == 0) {
+				ds.fieldNames.addAll(subDs.fieldNames);
+				ds.fieldTypes.addAll(subDs.fieldTypes);
+			}
+			ds.observations.addAll(subDs.observations);
+			i++;
+		}
+		return ds;
+	}
+	
+	protected static void addCorrectedField(Map<DataGroup, DataSet> dataSetMap, 
+			List<DataGroup> groups,
+			Object pattern,
+			String fieldName,
+			String correctionMethod) {
+		for (DataGroup dg : groups) {
+			DataSet ds = dataSetMap.get(dg);
+			Object[] field = DataPattern.getHomogeneousField(ds.getNumberOfObservations(), pattern);
+			ds.addField(fieldName, field);
+			field = DataPattern.getHomogeneousField(ds.getNumberOfObservations(), correctionMethod);
+			ds.addField(fieldName.concat("Met"), field);
+		}
+	}
+	
+	
 	
 }
