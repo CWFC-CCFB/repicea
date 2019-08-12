@@ -23,7 +23,7 @@ public class FGMCopulaGLModelTest {
 		double expectedCopulaValue = 0.18072198394164396;
 		double expectedLlk = -1077.1623243630413;
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
-		DataSet dataSet = new DataSet(filename);
+		DataSet dataSet = new DataSet(filename, true);
 		
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 		
@@ -51,7 +51,7 @@ public class FGMCopulaGLModelTest {
 		double expectedCopulaValue = -0.17037528040263983;
 		double expectedLlk = -1062.135150078125;
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
-		DataSet dataSet = new DataSet(filename);
+		DataSet dataSet = new DataSet(filename, true);
 		
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 		

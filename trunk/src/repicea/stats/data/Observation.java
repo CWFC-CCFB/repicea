@@ -50,4 +50,7 @@ public class Observation implements Comparable {
 		return 0;
 	}
 
+	public Object[] toArray() {return values.toArray();}
+
+	
 }
