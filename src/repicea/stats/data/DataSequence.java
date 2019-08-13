@@ -18,8 +18,9 @@
  */
 package repicea.stats.data;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
-class DataGroup extends ArrayList<Object> {
+public class DataSequence extends HashMap<Object, List<Object>> {
 
 }

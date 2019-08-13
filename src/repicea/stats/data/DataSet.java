@@ -18,20 +18,13 @@
  */
 package repicea.stats.data;
 
-import java.awt.BorderLayout;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-
-import javax.swing.JScrollPane;
 
 import repicea.app.AbstractGenericTask;
-import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaUIObject;
 import repicea.gui.components.REpiceaTable;
 import repicea.gui.components.REpiceaTableModel;
@@ -42,7 +35,6 @@ import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
 import repicea.io.Saveable;
 import repicea.math.Matrix;
-import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -73,7 +65,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	
 	protected List<String> fieldNames;
 	protected List<Class<?>> fieldTypes;
-	private List<Observation> observations;
+	protected List<Observation> observations;
 	private final String originalFilename;
 	
 	private transient REpiceaTable table;
@@ -109,7 +101,30 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	protected Object getValueAt(int i, int j) {
 		return observations.get(i).values.get(j);
 	}
-		
+
+	protected Object getValueAt(int i, String fieldName) {
+		int j = getIndexOfThisField(fieldName);
+		if (j != -1) {
+			return observations.get(i).values.get(j);
+		} else {
+			return null;
+		}
+	}
+
+	protected void setValueAt(int i, int j, Object value) {
+		if (value.getClass().equals(fieldTypes.get(j))) {
+			observations.get(i).values.remove(j);
+			observations.get(i).values.add(j, value);
+		}
+	}
+
+	protected void setValueAt(int i, String fieldName, Object value) {
+		int j = getIndexOfThisField(fieldName);
+		if (j != -1) {
+			setValueAt(i, j, value);
+		}
+	}
+	
 	private void indexFieldType() {
 		fieldTypes.clear();
 		for (int j = 0; j < fieldNames.size(); j++) {
@@ -156,8 +171,8 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	 * @param fieldIndicesForSorting
 	 * @return a Map of DataSet
 	 */
-	public Map<DataGroup, DataSet> splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
-		Map<DataGroup, DataSet> outputMap = new HashMap<DataGroup, DataSet>();
+	public DataSetGroupMap splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
+		DataSetGroupMap outputMap = new DataSetGroupMap();
 		for (Observation obs : observations) {
 			DataGroup id = new DataGroup();
 			for (Integer index : fieldIndicesForSplitting) {
@@ -391,58 +406,35 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	}
 	
 	
-	private static class FakeDialog extends REpiceaDialog {
-
-		REpiceaTable table;
-		FakeDialog(REpiceaTable table) {
-			this.table = table;
-			initUI();
-			pack();
-			setVisible(true);
-		}
-		
-		@Override
-		public void listenTo() {}
-
-		@Override
-		public void doNotListenToAnymore() {}
-
-		@Override
-		protected void initUI() {
-			getContentPane().setLayout(new BorderLayout());
-			JScrollPane scrollPane = new JScrollPane(table);
-			getContentPane().add(scrollPane, BorderLayout.CENTER);
-		}
-	}
+//	private static class FakeDialog extends REpiceaDialog {
+//
+//		REpiceaTable table;
+//		FakeDialog(REpiceaTable table) {
+//			this.table = table;
+//			initUI();
+//			pack();
+//			setVisible(true);
+//		}
+//		
+//		@Override
+//		public void listenTo() {}
+//
+//		@Override
+//		public void doNotListenToAnymore() {}
+//
+//		@Override
+//		protected void initUI() {
+//			getContentPane().setLayout(new BorderLayout());
+//			JScrollPane scrollPane = new JScrollPane(table);
+//			getContentPane().add(scrollPane, BorderLayout.CENTER);
+//		}
+//	}
 	
-	protected static DataSet recomposeDataSet(Collection<DataSet> dataSets) {
-		DataSet ds = new DataSet("");
-		int i = 0;
-		for (DataSet subDs : dataSets) {
-			if (i == 0) {
-				ds.fieldNames.addAll(subDs.fieldNames);
-				ds.fieldTypes.addAll(subDs.fieldTypes);
-			}
-			ds.observations.addAll(subDs.observations);
-			i++;
-		}
-		return ds;
-	}
 	
-	protected static void addCorrectedField(Map<DataGroup, DataSet> dataSetMap, 
-			List<DataGroup> groups,
-			Object pattern,
-			String fieldName,
-			String correctionMethod) {
-		for (DataGroup dg : groups) {
-			DataSet ds = dataSetMap.get(dg);
-			Object[] field = DataPattern.getHomogeneousField(ds.getNumberOfObservations(), pattern);
-			ds.addField(fieldName, field);
-			field = DataPattern.getHomogeneousField(ds.getNumberOfObservations(), correctionMethod);
-			ds.addField(fieldName.concat("Met"), field);
-		}
-	}
 	
+	
+	
+
 	
 	
 }
