@@ -11,15 +11,6 @@ public class DataPatternMap extends HashMap<DataPattern, List<DataGroup>> {
 		this.dataSetGroupMap = dataSetGroupMap;
 	}
 
-//	/*
-//	 * Make sure the key set is disconnected from the map to avoid concurrent changes.
-//	 */
-//	@Override
-//	public Set<DataPattern> keySet() {
-//		Set<DataPattern> dataPatterns = new HashSet<DataPattern>();
-//		dataPatterns.addAll(super.keySet());
-//		return dataPatterns;
-//	}
 	
 	
 }

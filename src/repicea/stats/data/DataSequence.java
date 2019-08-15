@@ -20,10 +20,10 @@ package repicea.stats.data;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-public class DataSequence extends HashMap<Object, List<Object>> {
-	
-	
+public class DataSequence extends HashMap<Object, Map> {
+		
 	public static class ActionOnPattern {
 		protected void doAction(DataPattern pattern, Object... parms) {}
 	}
@@ -34,11 +34,13 @@ public class DataSequence extends HashMap<Object, List<Object>> {
 	private final boolean isEmptyPatternAccepted;
 	private final Mode mode;
 	private final ActionOnPattern action;
+	protected final String name;
 	
-	public DataSequence(boolean isEmptyPatternAccepted, Mode mode, ActionOnPattern action) {
+	public DataSequence(String name, boolean isEmptyPatternAccepted, Mode mode, ActionOnPattern action) {
 		this.isEmptyPatternAccepted = isEmptyPatternAccepted;
 		this.mode = mode;
 		this.action = action;
+		this.name = name;
 	}
 
 	
@@ -51,7 +53,7 @@ public class DataSequence extends HashMap<Object, List<Object>> {
 			}
 			return fit;
 		case Partial:
-			Integer index = doesPartlyFitInThisSequence(pattern, exclusions);
+			Integer index = doesPartOfPatternFitThisSequence(pattern, exclusions);
 			if (index != null) {
 				action.doAction(pattern, index);
 			}
@@ -72,7 +74,7 @@ public class DataSequence extends HashMap<Object, List<Object>> {
 			for (int i = 1; i < cleanPattern.size(); i++) {
 				Object obj0 = cleanPattern.get(i - 1);
 				Object obj1 = cleanPattern.get(i);
-				if (!containsKey(obj0) || !get(obj0).contains(obj1)) {
+				if (!containsKey(obj0) || !get(obj0).containsKey(obj1)) {
 					return false;
 				} 
 			}
@@ -80,19 +82,42 @@ public class DataSequence extends HashMap<Object, List<Object>> {
 		}
 	}
 
-	private Integer doesPartlyFitInThisSequence(DataPattern pattern, List<Object> exclusions) {
-		if (pattern.size() > 2) {
-			for (int i = 1; i < pattern.size(); i++) {
-				Object obj0 = pattern.get(i - 1);
-				Object obj1 = pattern.get(i);
-				if (containsKey(obj0) && get(obj0).contains(obj1)) {
-					return i;
-				} 
+	private Integer doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
+		Integer i = null;
+		boolean sequenceCompleted = false;
+		outerloop:
+		for (i = 0; i < pattern.size(); i++) {
+			if (containsKey(pattern.get(i))) {
+				int j = i;
+				Map oMap = this;
+				while (j < pattern.size()) {
+					Object obj = pattern.get(j);
+					if (oMap.containsKey(obj)) {
+						if (oMap.get(obj) == null) {
+							sequenceCompleted = true;
+							break outerloop;
+						} else {
+							oMap = (Map) oMap.get(obj);
+							j++;
+						}
+					} else {
+						break;
+					}
+				}  
 			}
-		} 
-		return null;
+		}
+		if (sequenceCompleted) {
+			return i;
+		} else {
+			return null;
+		}
 	}
 
-	
-	
+	protected static Map<Object, Map> convertListToMap(List<Object> list) {
+		Map<Object, Map> outputMap = new HashMap<Object, Map>();
+		for (Object obj : list) {
+			outputMap.put(obj, null);
+		}
+		return outputMap;
+	}
 }

@@ -21,5 +21,13 @@ package repicea.stats.data;
 import java.util.ArrayList;
 
 class DataGroup extends ArrayList<Object> {
-
+	
+	DataGroup(Object...objects) {
+		if (objects != null && objects.length > 0) {
+			for (Object obj : objects) {
+				add(obj);
+			}
+		}
+	}
+	
 }

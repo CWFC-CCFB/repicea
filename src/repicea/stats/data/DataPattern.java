@@ -27,14 +27,14 @@ import java.util.Map;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.stats.data.DataSequence.ActionOnPattern;
 import repicea.stats.data.DataSequence.Mode;
+import repicea.stats.data.DataSet.ActionType;
 import repicea.stats.data.DataSetGroupMap.PatternMode;
 import repicea.util.ObjectUtility;
 
 public class DataPattern extends ArrayList<Object> implements Cloneable {
 
-	protected enum Action {Replace,
-		Add;
-	}
+	protected final static String JavaComments = "JavaComments";
+	
 	
 	protected final int fieldIndex;
 	protected final DataPatternMap dataPatternMap;
@@ -88,40 +88,6 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 			return this;
 		}
 	}
-	
-
-
-//	protected boolean doesFitInThisSequence(DataSequence sequence, List<Object> exclusions, boolean isEmptyPatternAccepted) {
-//		DataPattern cleanPattern = getTrimmedPattern(exclusions);
-//		if (cleanPattern == null || cleanPattern.isEmpty()) {
-//			return isEmptyPatternAccepted;
-//		} else  if (cleanPattern.size() == 1) {
-//			Object singleObj = cleanPattern.get(0);
-//			return sequence.containsKey(singleObj);
-//		} else {
-//			for (int i = 1; i < cleanPattern.size(); i++) {
-//				Object obj0 = cleanPattern.get(i - 1);
-//				Object obj1 = cleanPattern.get(i);
-//				if (!sequence.containsKey(obj0) || !sequence.get(obj0).contains(obj1)) {
-//					return false;
-//				} 
-//			}
-//			return true;
-//		}
-//	}
-
-//	protected Integer doesPartlyFitInThisSequence(DataSequence sequence, List<Object> exclusions, boolean isEmptyPatternAccepted) {
-//		if (size() > 2) {
-//			for (int i = 1; i < size(); i++) {
-//				Object obj0 = get(i - 1);
-//				Object obj1 = get(i);
-//				if (sequence.containsKey(obj0) && sequence.get(obj0).contains(obj1)) {
-//					return i;
-//				} 
-//			}
-//		} 
-//		return null;
-//	}
 
 	/**
 	 * Returns the object that is prevalent in terms of frequency. A greater
@@ -212,16 +178,6 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 		return field;
 	}
 
-	@Override
-	public Object set(int i, Object newValue) {
-		List<DataGroup> groups = dataPatternMap.get(this);
-		for (DataGroup group : groups) {
-			DataSet ds = dataPatternMap.dataSetGroupMap.get(group);
-			ds.setValueAt(i, fieldIndex, newValue);
-		}
-		return null;
-	}
-
 	protected void comment(String str) {
 		for (int i = 0; i < size(); i++) {
 			comment(i, str);
@@ -230,37 +186,24 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 
 	protected void comment(int i, String str) {
 		DataSet originalDataSet = dataPatternMap.dataSetGroupMap.originalDataSet; 
-		if (!originalDataSet.getFieldNames().contains("JavaComments")) {
+		if (!originalDataSet.getFieldNames().contains(JavaComments)) {
 			int size = originalDataSet.getNumberOfObservations();
 			Object[] values = new Object[size];
 			for (int j = 0; j < values.length; j++) {
 				values[j] = "";
 			}
-			originalDataSet.addField("JavaComments", values);
+			originalDataSet.addField(JavaComments, values);
 		}
-		updateField(i, "JavaComments", str, Action.Add);
+		updateField(i, JavaComments, str, ActionType.Add);
 	}
 	
-	protected void updateField(int i, String fieldName, Object newValue, Action action) {
+	protected void updateField(int i, String fieldName, Object newValue, ActionType action) {
 		List<DataGroup> groups = dataPatternMap.get(this);
 		for (DataGroup group : groups) {
 			DataSet ds = dataPatternMap.dataSetGroupMap.get(group);
-			Object formerValue = ds.getValueAt(i, fieldName);
-			if (action == Action.Replace) {
-				ds.setValueAt(i, fieldName, newValue);
-			} else if (action == Action.Add) {
-				Object addedNewValue;
-				if (formerValue instanceof Number && newValue instanceof Number) {
-					addedNewValue = ((Number) newValue).doubleValue() + ((Number) formerValue).doubleValue();
-				} else {
-					addedNewValue = formerValue.toString().concat(newValue.toString());
-				}
-				ds.setValueAt(i, fieldName, addedNewValue);
-			}
+			ds.setValueAt(i, fieldName, newValue, action);
 		}
 	}
-	
-	
 	
 	@Override
 	public DataPattern clone() {
@@ -268,8 +211,6 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 		clone.addAll(this);
 		return clone;
 	}
-	
-	
 	
 	public static void main(String[] args) throws IOException {
 		String filename = ObjectUtility.getPackagePath(DataSet.class) + "trees.csv";
@@ -326,7 +267,7 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 			}
 		};
 		
-		DataSequence acceptableDataSequence = new DataSequence(true, Mode.Total, action);
+		DataSequence acceptableDataSequence = new DataSequence("normal sequence", true, Mode.Total, action);
 
 		List<Object> alives = new ArrayList<Object>();
 		alives.addAll(aliveStatuses);
@@ -341,7 +282,7 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 			possibleOutcomes.addAll(aliveStatuses);
 			possibleOutcomes.addAll(deadStatuses);
 			possibleOutcomes.addAll(terminalStatuses);
-			acceptableDataSequence.put(obj, possibleOutcomes);
+			acceptableDataSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
 
 //		possibleOutcomes = new ArrayList<Object>();
@@ -362,18 +303,18 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 			possibleOutcomes = new ArrayList<Object>();
 			possibleOutcomes.addAll(deadStatuses);
 			possibleOutcomes.addAll(terminalStatuses);
-			acceptableDataSequence.put(obj, possibleOutcomes);
+			acceptableDataSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
 
 		possibleOutcomes = new ArrayList<Object>();
 		possibleOutcomes.add("GM");
-		acceptableDataSequence.put("GM", possibleOutcomes);
+		acceptableDataSequence.put("GM", DataSequence.convertListToMap(possibleOutcomes));
 		
 		for (Object obj : terminalStatuses) {
 			possibleOutcomes = new ArrayList<Object>();
 			possibleOutcomes.addAll(terminalStatuses);
 			possibleOutcomes.addAll(deadStatuses);
-			acceptableDataSequence.put(obj, possibleOutcomes);
+			acceptableDataSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
 		
 		
@@ -383,7 +324,7 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 				int observationIndex = (Integer) parms[0];
 				for (int i = 0; i < pattern.size(); i++) {
 					if (i >= observationIndex) {
-						pattern.updateField(i, "NO_ARBRE", 1000, Action.Add);
+						pattern.updateField(i, "NO_ARBRE", 1000, ActionType.Add);
 						pattern.comment(i, "renumbered");
 					} else {
 						pattern.comment(i, "status = C");
@@ -392,7 +333,7 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 			}
 		};
 		
-		DataSequence twoDifferentTreesSequence = new DataSequence(false, Mode.Partial, action);
+		DataSequence twoDifferentTreesSequence = new DataSequence("two trees confounded", false, Mode.Partial, action);
 		List<Object> deadOrMissingStatuses = new ArrayList<Object>();
 		deadOrMissingStatuses.addAll(terminalStatuses);
 		deadOrMissingStatuses.add("NA");
@@ -400,24 +341,92 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 			possibleOutcomes = new ArrayList<Object>();
 			possibleOutcomes.addAll(recruitStatuses);
 			possibleOutcomes.addAll(recruitDeadStatuses);
-			twoDifferentTreesSequence.put(obj, possibleOutcomes);
+			twoDifferentTreesSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
-		
 
-		DataSequence measurementErrorSequence = new DataSequence(false, Mode.Partial, action);
-		List<Object> deadOrMissingStatuses = new ArrayList<Object>();
-		deadOrMissingStatuses.addAll(terminalStatuses);
-		deadOrMissingStatuses.add("NA");
-		for (Object obj : deadOrMissingStatuses) {
+		
+		action = new ActionOnPattern() {
+			@Override
+			protected void doAction(DataPattern pattern, Object... parms) {
+				int observationIndex = (Integer) parms[0];
+				for (int i = 0; i < pattern.size(); i++) {
+					if (i == observationIndex) {
+						pattern.updateField(i, "ETAT", 10.0, ActionType.Replace);
+						pattern.comment(i, "status dead changed for alive");
+					} else {
+						pattern.comment(i, "status = C");
+					}
+				}
+			}
+		};
+		DataSequence measurementErrorSequence1 = new DataSequence("measurement error", false, Mode.Partial, action);
+		for (Object obj : deadStatuses) {
 			possibleOutcomes = new ArrayList<Object>();
-			possibleOutcomes.addAll(recruitStatuses);
-			possibleOutcomes.addAll(recruitDeadStatuses);
-			twoDifferentTreesSequence.put(obj, possibleOutcomes);
+			possibleOutcomes.addAll(aliveStatuses);
+			Map<Object, Map> oMap = new HashMap<Object, Map>();
+			oMap.put(10.0, DataSequence.convertListToMap(possibleOutcomes));
+			measurementErrorSequence1.put(obj, oMap);
 		}
 
-		
-		dataSetGroupMap.patternize(PatternMode.Sequence, 3, exclusions, acceptableDataSequence, twoDifferentTreesSequence);
+		action = new ActionOnPattern() {
+			@Override
+			protected void doAction(DataPattern pattern, Object... parms) {
+				int observationIndex = (Integer) parms[0];
+				for (int i = 0; i < pattern.size(); i++) {
+					if (i == observationIndex + 1) {
+						pattern.updateField(i, "ETAT", 10.0, ActionType.Replace);
+						pattern.comment(i, "status dead changed for alive");
+					} else {
+						pattern.comment(i, "status = C");
+					}
+				}
+			}
+		};
+		DataSequence measurementErrorSequence2 = new DataSequence("measurement error", false, Mode.Partial, action);
+		List<Object> aliveAndRecruits = new ArrayList<Object>();
+		aliveAndRecruits.addAll(aliveStatuses);
+		aliveAndRecruits.addAll(recruitStatuses);
+		for (Object obj : aliveAndRecruits) {
+			possibleOutcomes = new ArrayList<Object>();
+			possibleOutcomes.add(10.0);
+			Map<Object, Map> oMap = new HashMap<Object, Map>();
+			oMap.put(14.0, DataSequence.convertListToMap(possibleOutcomes));
+			measurementErrorSequence1.put(obj, oMap);
+		}
 
+		List<DataSequence> sequences = new ArrayList<DataSequence>();
+		sequences.add(acceptableDataSequence);
+		sequences.add(twoDifferentTreesSequence);
+		sequences.add(measurementErrorSequence1);
+		sequences.add(measurementErrorSequence2);
+		
+		dataSetGroupMap.patternize(PatternMode.Sequence, 
+				3, 
+				exclusions, 
+				sequences);
+
+		DataSet ds = dataSetGroupMap.get(new DataGroup(312, 4));
+		ds.setValueAt(0, "ETAT", 10.0, ActionType.Replace);
+		ds.setValueAt(0, JavaComments, "status dead manually changed for alive", ActionType.Add);
+		// TODO fill other JavaComments with 
+		ds = dataSetGroupMap.get(new DataGroup(446, 23));
+		ds.setValueAt(0, "ETAT", 10.0, ActionType.Replace);
+		ds.setValueAt(0, JavaComments, "status dead manually changed for alive", ActionType.Add);
+		ds = dataSetGroupMap.get(new DataGroup(746, 64));
+		ds.setValueAt(0, "ETAT", 30.0, ActionType.Replace);
+		ds.setValueAt(0, JavaComments, "status dead manually changed for alive", ActionType.Add);
+		ds = dataSetGroupMap.get(new DataGroup(808, 2));
+		ds.setValueAt(2, "NO_ARBRE", 1000, ActionType.Add);
+		ds.setValueAt(2, JavaComments, "manually renumbered", ActionType.Replace);
+		ds.setValueAt(3, "NO_ARBRE", 1000, ActionType.Add);
+		ds.setValueAt(3, JavaComments, "manually renumbered", ActionType.Replace);
+		ds = dataSetGroupMap.get(new DataGroup(1086, 99));
+		ds.setValueAt(2, "NO_ARBRE", 1000, ActionType.Add);
+		ds.setValueAt(2, JavaComments, "manually renumbered", ActionType.Replace);
+		ds.setValueAt(3, "NO_ARBRE", 1000, ActionType.Add);
+		ds.setValueAt(3, JavaComments, "manually renumbered", ActionType.Replace);
+		
+		
 		
 //		dataSetGroupMap.patternize(PatternMode.Homogenize, 3, exclusions);
 
