@@ -44,6 +44,10 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  */
 public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIObject {
 
+	protected static enum ActionType {Replace,
+		Add;
+	}
+
 	private static enum MessageID implements TextableEnum {
 
 		ReadingFileMessage("Reading file...", "Lecture du fichier...");
@@ -105,25 +109,47 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	protected Object getValueAt(int i, String fieldName) {
 		int j = getIndexOfThisField(fieldName);
 		if (j != -1) {
-			return observations.get(i).values.get(j);
+			return getValueAt(i,j);
 		} else {
 			return null;
 		}
 	}
 
-	protected void setValueAt(int i, int j, Object value) {
+	private void setValueAt(int i, int j, Object value) {
 		if (value.getClass().equals(fieldTypes.get(j))) {
 			observations.get(i).values.remove(j);
 			observations.get(i).values.add(j, value);
 		}
 	}
-
-	protected void setValueAt(int i, String fieldName, Object value) {
-		int j = getIndexOfThisField(fieldName);
-		if (j != -1) {
-			setValueAt(i, j, value);
+	
+	protected void setValueAt(int i, int j, Object newValue, ActionType actionType) {
+		if (actionType == ActionType.Replace) {
+			setValueAt(i, j, newValue);
+		} else if (actionType == ActionType.Add) {
+			Object formerValue = getValueAt(i, j);
+			Object addedNewValue;
+			if (formerValue instanceof Number && newValue instanceof Number) {
+				addedNewValue = ((Number) newValue).doubleValue() + ((Number) formerValue).doubleValue();
+			} else {
+				addedNewValue = formerValue.toString().concat(newValue.toString());
+			}
+			setValueAt(i, j, addedNewValue);
 		}
 	}
+
+	protected void setValueAt(int i, String fieldName, Object value, ActionType actionType) {
+		int j = getIndexOfThisField(fieldName);
+		if (j != -1) {
+			setValueAt(i, j, value, actionType);
+		}
+	}
+
+//	protected void setValueAt(int i, String fieldName, Object value) {
+//		int j = getIndexOfThisField(fieldName);
+//		if (j != -1) {
+//			setValueAt(i, j, value);
+//		}
+//	}
 	
 	private void indexFieldType() {
 		fieldTypes.clear();

@@ -115,9 +115,8 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 		if (mode == PatternMode.Homogenize) {
 			homogenizePattern(unsolvedPatterns, patterns, exclusions, "speciesCorr");
 		} else if (mode == PatternMode.Sequence) {
-			DataSequence acceptedSequences = (DataSequence) parms[0];
-			DataSequence twoTreesSequences = (DataSequence) parms[1];
-			checkSequences(unsolvedPatterns, patterns, exclusions, acceptedSequences, twoTreesSequences);
+			List<DataSequence> sequences = (List) parms[0];
+			checkSequences(unsolvedPatterns, patterns, exclusions, sequences);
 		}
 		
 		for (DataPattern pattern : unsolvedPatterns) { 
@@ -131,7 +130,7 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 	private void checkSequences(List<DataPattern> unsolvedPatterns, 
 			Map<DataPattern, List<DataGroup>> patterns,
 			List<Object> exclusions,
-			DataSequence... sequences) {
+			List<DataSequence> sequences) {
 		for (DataPattern pattern : patterns.keySet()) {
 			boolean fit = false;
 			for (DataSequence seq : sequences) {
@@ -141,29 +140,9 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 					break;
 				}
 			}
-			
-//			Integer observationIndex = null;
-//			if (acceptableSequences.doesFitInThisSequence(pattern, exclusions, true)) {
-//				pattern.comment("status = C");
-//				unsolvedPatterns.remove(pattern);
-//			} else if ((observationIndex = perhapsTwoTreesSequences.doesPartlyFitInThisSequence(pattern, exclusions)) != null) {
-//				for (int i = 0; i < pattern.size(); i++) {
-//					if (i >= observationIndex) {
-//						pattern.updateField(i, "NO_ARBRE", 1000, Action.Add);
-//						pattern.comment(i, "renumbered");
-//					} else {
-//						pattern.comment(i, "status = C");
-//					}
-//				}
-////				List<DataGroup> groups  = patterns.get(pattern);
-////				addOffsetToField("NO_ARBRE", observationIndex, 1000, groups);
-////				addCorrectedField(PatternMode.Sequence, groups, observationIndex, "statusCorr", "renumberedTree");
-//				unsolvedPatterns.remove(pattern);
-//			} else {
 			if (!fit) {
 				pattern.comment("status = NC");
 			}
-//			}
 		}
 	}
 
