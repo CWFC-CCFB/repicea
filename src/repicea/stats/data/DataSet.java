@@ -172,7 +172,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	 * @return a Map of DataSet
 	 */
 	public DataSetGroupMap splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
-		DataSetGroupMap outputMap = new DataSetGroupMap();
+		DataSetGroupMap outputMap = new DataSetGroupMap(this);
 		for (Observation obs : observations) {
 			DataGroup id = new DataGroup();
 			for (Integer index : fieldIndicesForSplitting) {
@@ -180,8 +180,8 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			}
 			if (!outputMap.containsKey(id)) {
 				DataSet ds = new DataSet("");
-				ds.fieldNames.addAll(this.fieldNames);
-				ds.fieldTypes.addAll(this.fieldTypes);
+				ds.fieldNames = this.fieldNames;
+				ds.fieldTypes = this.fieldTypes;
 				outputMap.put(id, ds);
 			} 
 			DataSet ds = outputMap.get(id);
@@ -194,16 +194,6 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 		return outputMap;
 	}
-	
-	protected DataPattern getPatternForThisField(int fieldIndex) {
-		DataPattern pattern = new DataPattern();
-		for (Observation obs : observations) {
-			pattern.add(obs.values.get(fieldIndex));
-		}
-		return pattern; 
-	}
-	
-	
 	
 	/**
 	 * This method returns the number of observations in the dataset.
@@ -274,15 +264,19 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		observations.add(new Observation(observationFrame));
 	}
 	
-	public void addField(String name, Object[] field) {
-		if (field.length != observations.size()) {
-			throw new InvalidParameterException("The number of observations in the new field does not match the number of observations in the dataset!");
-		}
+	private void addFieldName(String name) {
 		int index = 0;
 		while (fieldNames.contains(name)) {
 			name = name.concat(((Integer) index).toString());
 		}
 		fieldNames.add(name);
+	}
+	
+	public void addField(String name, Object[] field) {
+		if (field.length != observations.size()) {
+			throw new InvalidParameterException("The number of observations in the new field does not match the number of observations in the dataset!");
+		}
+		addFieldName(name);
 		
 		for (int i = 0; i < field.length; i++) {
 			observations.get(i).values.add(field[i]);

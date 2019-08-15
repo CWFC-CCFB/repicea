@@ -29,29 +29,21 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 		Homogenize,
 		Sequence;
 	}
-	
-	
-	
-	protected DataSet recomposeDataSet() {
-		DataSet ds = new DataSet("");
-		int i = 0;
-		for (DataSet subDs : values()) {
-			if (i == 0) {
-				ds.fieldNames.addAll(subDs.fieldNames);
-				ds.fieldTypes.addAll(subDs.fieldTypes);
-			}
-			ds.observations.addAll(subDs.observations);
-			i++;
-		}
-		return ds;
-	}
 
+	protected final DataSet originalDataSet;
 	
-	public Map<DataPattern, List<DataGroup>> getPatternAbundance(int fieldIndexForPattern) {
-		Map<DataPattern, List<DataGroup>> patternMap = new HashMap<DataPattern, List<DataGroup>>();
+	protected DataSetGroupMap(DataSet originalDataSet) {
+		this.originalDataSet = originalDataSet;
+	}
+	
+	public DataPatternMap getPatternAbundance(int fieldIndexForPattern) {
+		DataPatternMap patternMap = new DataPatternMap(this);
 		for (DataGroup id : keySet()) {
 			DataSet ds = get(id);
-			DataPattern pattern = ds.getPatternForThisField(fieldIndexForPattern);
+			DataPattern pattern = new DataPattern(fieldIndexForPattern, patternMap);
+			for (Observation obs : ds.observations) {
+				pattern.add(obs.values.get(fieldIndexForPattern));
+			}
 			if (!patternMap.containsKey(pattern)) {
 				patternMap.put(pattern, new ArrayList<DataGroup>());
 			}
@@ -79,24 +71,9 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 		}
 	}
 
-	protected void addOffsetToField(String fieldName, 
-			int indexFromWhichChange,
-			int offset,
-			List<DataGroup> groups) {
-		for (DataGroup dg : groups) {
-			DataSet ds = get(dg);
-			for (int i = 0; i < ds.getNumberOfObservations(); i++) {
-				if (i >= indexFromWhichChange) {
-					Double currentValue = (Double) ds.getValueAt(i, fieldName);
-					ds.setValueAt(i, fieldName, currentValue + offset);
-				}
-			}
-		}
-	}
-
 	
 	protected void homogenizePattern(List<DataPattern> unsolvedPatterns, 
-			Map<DataPattern, List<DataGroup>> patterns, 
+			DataPatternMap patterns, 
 			List<Object> exclusions,
 			String corrFieldName) {
 		for (DataPattern pattern : patterns.keySet()) {
@@ -130,7 +107,7 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 	
 	
 	protected void patternize(PatternMode mode, int indexFieldPattern, List<Object> exclusions, Object...parms) {
-		Map<DataPattern, List<DataGroup>> patterns = getPatternAbundance(indexFieldPattern);
+		DataPatternMap patterns = getPatternAbundance(indexFieldPattern);
 
 		List<DataPattern> unsolvedPatterns = new ArrayList<DataPattern>();
 		unsolvedPatterns.addAll(patterns.keySet());
@@ -154,23 +131,39 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 	private void checkSequences(List<DataPattern> unsolvedPatterns, 
 			Map<DataPattern, List<DataGroup>> patterns,
 			List<Object> exclusions,
-			DataSequence acceptedSequences,
-			DataSequence twoTreesSequences) {
+			DataSequence... sequences) {
 		for (DataPattern pattern : patterns.keySet()) {
-			Integer observationIndex = null;
-			if (pattern.doesFitInThisSequence(acceptedSequences, exclusions, true)) {
-				List<DataGroup> groups  = patterns.get(pattern);
-				addCorrectedField(PatternMode.Sequence, groups, null, "statusCorr", "correct");
-				unsolvedPatterns.remove(pattern);
-			} else if ((observationIndex = pattern.doesPartlyFitInThisSequence(twoTreesSequences, exclusions, false)) != null) {
-				List<DataGroup> groups  = patterns.get(pattern);
-				addOffsetToField("NO_ARBRE", observationIndex, 1000, groups);
-				addCorrectedField(PatternMode.Sequence, groups, observationIndex, "statusCorr", "renumberedTree");
-				unsolvedPatterns.remove(pattern);
-			} else {
-				List<DataGroup> groups  = patterns.get(pattern);
-				addCorrectedField(PatternMode.Sequence, groups, null, "statusCorr", "incorrect");
+			boolean fit = false;
+			for (DataSequence seq : sequences) {
+				fit = seq.testPattern(pattern, exclusions);
+				if (fit) {
+					unsolvedPatterns.remove(pattern);
+					break;
+				}
 			}
+			
+//			Integer observationIndex = null;
+//			if (acceptableSequences.doesFitInThisSequence(pattern, exclusions, true)) {
+//				pattern.comment("status = C");
+//				unsolvedPatterns.remove(pattern);
+//			} else if ((observationIndex = perhapsTwoTreesSequences.doesPartlyFitInThisSequence(pattern, exclusions)) != null) {
+//				for (int i = 0; i < pattern.size(); i++) {
+//					if (i >= observationIndex) {
+//						pattern.updateField(i, "NO_ARBRE", 1000, Action.Add);
+//						pattern.comment(i, "renumbered");
+//					} else {
+//						pattern.comment(i, "status = C");
+//					}
+//				}
+////				List<DataGroup> groups  = patterns.get(pattern);
+////				addOffsetToField("NO_ARBRE", observationIndex, 1000, groups);
+////				addCorrectedField(PatternMode.Sequence, groups, observationIndex, "statusCorr", "renumberedTree");
+//				unsolvedPatterns.remove(pattern);
+//			} else {
+			if (!fit) {
+				pattern.comment("status = NC");
+			}
+//			}
 		}
 	}
 
