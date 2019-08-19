@@ -36,10 +36,11 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 		this.originalDataSet = originalDataSet;
 	}
 	
-	public DataPatternMap getPatternAbundance(int fieldIndexForPattern) {
+	public DataPatternMap getPatternAbundance(String fieldName) {
 		DataPatternMap patternMap = new DataPatternMap(this);
 		for (DataGroup id : keySet()) {
 			DataSet ds = get(id);
+			int fieldIndexForPattern = ds.getIndexOfThisField(fieldName);
 			DataPattern pattern = new DataPattern(fieldIndexForPattern, patternMap);
 			for (Observation obs : ds.observations) {
 				pattern.add(obs.values.get(fieldIndexForPattern));
@@ -106,8 +107,9 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 	}
 	
 	
-	protected void patternize(PatternMode mode, int indexFieldPattern, List<Object> exclusions, Object...parms) {
-		DataPatternMap patterns = getPatternAbundance(indexFieldPattern);
+	protected void patternize(PatternMode mode, String fieldName, List<Object> exclusions, Object...parms) {
+		
+		DataPatternMap patterns = getPatternAbundance(fieldName);
 
 		List<DataPattern> unsolvedPatterns = new ArrayList<DataPattern>();
 		unsolvedPatterns.addAll(patterns.keySet());
