@@ -43,6 +43,15 @@ public class DataSequence extends HashMap<Object, Map> {
 		this.name = name;
 	}
 
+	/*
+	 * For test purpose only
+	 */
+	DataSequence() {
+		this.isEmptyPatternAccepted = false;
+		this.mode = null;
+		this.action = null;
+		this.name = "";
+	}
 	
 	public boolean testPattern(DataPattern pattern, List<Object> exclusions) {
 		switch (mode) {
@@ -63,7 +72,7 @@ public class DataSequence extends HashMap<Object, Map> {
 	}
 	
 	
-	private boolean doesFitInThisSequence(DataPattern pattern, List<Object> exclusions) {
+	protected boolean doesFitInThisSequence(DataPattern pattern, List<Object> exclusions) {
 		DataPattern cleanPattern = pattern.getTrimmedPattern(exclusions);
 		if (cleanPattern == null || cleanPattern.isEmpty()) {
 			return isEmptyPatternAccepted;

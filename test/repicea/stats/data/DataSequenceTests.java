@@ -53,12 +53,12 @@ public class DataSequenceTests {
 			possibleOutcomes.addAll(aliveStatuses);
 			possibleOutcomes.addAll(deadStatuses);
 			possibleOutcomes.addAll(terminalStatuses);
-			dataSequence.put(obj, possibleOutcomes);
+			dataSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
 		for (Object obj : deadStatuses) {
 			possibleOutcomes = new ArrayList<Object>();
 			possibleOutcomes.addAll(terminalStatuses);
-			dataSequence.put(obj, possibleOutcomes);
+			dataSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
 		
 		DataPattern pattern = new DataPattern();
@@ -68,7 +68,8 @@ public class DataSequenceTests {
 		pattern.add(16.0);
 		pattern.add(26.0);
 		
-		boolean isOk = pattern.doesFitInThisSequence(dataSequence, null, false);
+		boolean isOk = dataSequence.doesFitInThisSequence(pattern, null);
+
 		Assert.assertTrue(isOk);
 		
 		pattern.clear();
@@ -78,7 +79,7 @@ public class DataSequenceTests {
 		pattern.add(10.0);
 		pattern.add(26.0);
 
-		isOk = pattern.doesFitInThisSequence(dataSequence, null, false);
+		isOk = dataSequence.doesFitInThisSequence(pattern, null);
 		Assert.assertTrue(!isOk);
 	}
 }
