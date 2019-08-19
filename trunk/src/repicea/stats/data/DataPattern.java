@@ -44,7 +44,10 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 		this.dataPatternMap = dataPatternMap;
 	}
 	
-	private DataPattern() {
+	/*
+	 * For test purpose and cloning only
+	 */
+	protected DataPattern() {
 		fieldIndex = -1;
 		dataPatternMap = null;
 	}
