@@ -225,10 +225,10 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 		exclusions.add("NA");
 		
 		List<Integer> fieldsForSplitting = new ArrayList<Integer>();
-		fieldsForSplitting.add(1);
-		fieldsForSplitting.add(4);
+		fieldsForSplitting.add(1);	// field i
+		fieldsForSplitting.add(3);	// field NO_ARBRE
 		List<Integer> fieldsForSorting = new ArrayList<Integer>();
-		fieldsForSorting.add(2);
+		fieldsForSorting.add(2);	// field year
 		DataSetGroupMap dataSetGroupMap = dataSet.splitAndOrder(fieldsForSplitting, fieldsForSorting);
 		
 		
@@ -404,32 +404,225 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 		sequences.add(measurementErrorSequence2);
 		
 		dataSetGroupMap.patternize(PatternMode.Sequence, 
-				3, 
+				"ETAT", 
 				exclusions, 
 				sequences);
 
-		DataSet ds = dataSetGroupMap.get(new DataGroup(312, 4));
-		ds.setValueAt(0, "ETAT", 10.0, ActionType.Replace);
-		ds.setValueAt(0, JavaComments, "status dead manually changed for alive", ActionType.Add);
-		// TODO fill other JavaComments with 
-		ds = dataSetGroupMap.get(new DataGroup(446, 23));
-		ds.setValueAt(0, "ETAT", 10.0, ActionType.Replace);
-		ds.setValueAt(0, JavaComments, "status dead manually changed for alive", ActionType.Add);
-		ds = dataSetGroupMap.get(new DataGroup(746, 64));
-		ds.setValueAt(0, "ETAT", 30.0, ActionType.Replace);
-		ds.setValueAt(0, JavaComments, "status dead manually changed for alive", ActionType.Add);
-		ds = dataSetGroupMap.get(new DataGroup(808, 2));
-		ds.setValueAt(2, "NO_ARBRE", 1000, ActionType.Add);
-		ds.setValueAt(2, JavaComments, "manually renumbered", ActionType.Replace);
-		ds.setValueAt(3, "NO_ARBRE", 1000, ActionType.Add);
-		ds.setValueAt(3, JavaComments, "manually renumbered", ActionType.Replace);
-		ds = dataSetGroupMap.get(new DataGroup(1086, 99));
-		ds.setValueAt(2, "NO_ARBRE", 1000, ActionType.Add);
-		ds.setValueAt(2, JavaComments, "manually renumbered", ActionType.Replace);
-		ds.setValueAt(3, "NO_ARBRE", 1000, ActionType.Add);
-		ds.setValueAt(3, JavaComments, "manually renumbered", ActionType.Replace);
-		
-		
+		DataSet ds = dataSetGroupMap.get(new DataGroup(312.0, 4.0));	// 3 obs
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(443.0, 42.0));			// 4 obs - 7
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(446.0, 23.0));			// 4 obs - 11
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(746.0, 64.0));			// 2 obs - 13
+		ds.correctValue(0, "ETAT", 30.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(985.0, 2.0));			// 4 obs - 17	
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1085.0, 57.0));			// 4 obs - 21
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1099.0, 14.0));			// 3 obs - 24
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1325.0, 67.0));			// 2 obs - 26
+		ds.correctValue(0, "ETAT", 30.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1605.0, 127.0));			// 2 obs - 28
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1614.0, 2.0));			// 4 obs - 32
+		ds.correctValue(2, "ETAT", 10.0, "harvested status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1616.0, 25.0));			// 4 obs - 36
+		ds.correctValue(2, "ETAT", 10.0, "harvested status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1938.0, 16.0));			// 3 obs - 39
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2086.0, 42.0));			// 2 obs - 41	 
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2126.0, 62.0));			// 2 obs - 43
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2294.0, 44.0));			// 3 obs - 46
+		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2422.0, 18.0));			// 4 obs - 50
+		ds.correctValue(2, "ETAT", 10.0, "harvested status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2427.0, 5.0));			// 4 obs - 54
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2500.0, 45.0));			// 2 obs - 56
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2508.0, 36.0));			// 3 obs - 59
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3086.0, 24.0));			// 3 obs - 62
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3099.0, 6.0));			// 5 obs - 67
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3320.0, 9.0));			// 3 obs - 70
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3468.0, 13.0));			// 4 obs - 74
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3490.0, 17.0));			// 2 obs - 76
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3490.0, 20.0));			// 2 obs - 78
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3647.0, 68.0));			// 3 obs - 81
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3655.0, 7.0));			// 3 obs - 84
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3718.0, 66.0));			// 3 obs - 87
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3754.0, 10.0));			// 2 obs - 89
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3762.0, 86.0));			// 2 obs - 91
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3762.0, 87.0));			// 2 obs - 93
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3784.0, 28.0));			// 4 obs - 97
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3810.0, 51.0));			// 3 obs - 100
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3811.0, 26.0));			// 2 obs - 102
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3811.0, 27.0));			// 2 obs - 104
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3811.0, 28.0));			// 2 obs - 106
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 11.0));			// 3 obs - 109
+		ds.correctValue(2, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 10.0));			// 3 obs - 112
+		ds.correctValue(2, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 12.0));			// 2 obs - 114
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 13.0));			// 2 obs - 116
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 14.0));			// 2 obs - 118
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 15.0));			// 2 obs - 120
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3840.0, 16.0));			// 2 obs - 122
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3847.0, 1.0));			// 3 obs - 125
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3855.0, 7.0));			// 3 obs - 128
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3941.0, 49.0));			// 4 obs - 132
+		ds.correctValue(1, "ETAT", 10.0, "intruder status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3941.0, 5.0));			// 4 obs - 136
+		ds.correctValue(1, "ETAT", 10.0, "intruder status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3957.0, 55.0));			// 3 obs - 139
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3987.0, 9.0));			// 3 obs - 142
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4010.0, 13.0));			// 4 obs - 146
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4078.0, 107.0));			// 3 obs - 149
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4079.0, 3.0));			// 3 obs - 152
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4139.0, 42.0));			// 4 obs - 156
+		ds.correctValue(2, "ETAT", 10.0, "missing status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4203.0, 28.0));			// 5 obs - 161
+		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4327.0, 25.0));			// 3 obs - 164
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4538.0, 20.0));			// 4 obs - 168
+		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1864.0, 47.0));			// 3 obs - 171
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4679.0, 5.0));			// 5 obs - 176
+		ds.correctValue(3, "ETAT", 10.0, "forgotten status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4679.0, 7.0));			// 5 obs - 181
+		ds.correctValue(3, "ETAT", 10.0, "forgotten status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4679.0, 9.0));			// 3 obs - 184
+		ds.correctValue(1, "ETAT", 10.0, "forgotten status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4679.0, 10.0));			// 3 obs - 187
+		ds.correctValue(1, "ETAT", 10.0, "forgotten status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4700.0, 17.0));			// 5 obs - 192
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4786.0, 32.0));			// 3 obs - 195
+		ds.correctValue(1, "ETAT", 10.0, "missing status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4791.0, 20.0));			// 3 obs - 198
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4810.0, 26.0));			// 2 obs - 200
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(387.0, 29.0));			// 4 obs - 204
+		ds.correctValue(3, "NO_ARBRE", 1029.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1029.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(808.0, 2.0));			// 4 obs - 208
+		ds.correctValue(3, "NO_ARBRE", 1002.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1002.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1086.0, 99.0));			// 4 obs - 212
+		ds.correctValue(3, "NO_ARBRE", 1099.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1099.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1660.0, 63.0));			// 3 obs - 215
+		ds.correctValue(0, "ETAT", 40.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1925.0, 30.0));			// 4 obs - 219
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2181.0, 37.0));			// 4 obs - 223
+		ds.correctValue(3, "NO_ARBRE", 1037.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1037.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2295.0, 9.0));			// 4 obs - 227
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2755.0, 73.0));			// 3 obs - 230
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2872.0, 11.0));			// 3 obs - 233
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(2874.0, 1.0));			// 3 obs - 236
+		ds.correctValue(2, "NO_ARBRE", 1001.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3970.0, 41.0));			// 4 obs - 240
+		ds.correctValue(3, "NO_ARBRE", 1041.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1041.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3970.0, 42.0));			// 4 obs - 244
+		ds.correctValue(3, "NO_ARBRE", 1042.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1042.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3970.0, 43.0));			// 4 obs - 248
+		ds.correctValue(3, "NO_ARBRE", 1043.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1043.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3971.0, 87.0));			// 4 obs - 252
+		ds.correctValue(3, "NO_ARBRE", 1087.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1087.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3971.0, 88.0));			// 4 obs - 256
+		ds.correctValue(3, "NO_ARBRE", 1088.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1088.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3971.0, 89.0));			// 4 obs - 260
+		ds.correctValue(3, "NO_ARBRE", 1089.0, "manually renumbered", true, "status = C");
+		ds.correctValue(2, "NO_ARBRE", 1089.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5143.0, 55.0));			// 2 obs - 262
+		ds.correctValue(0, "ETAT", 30.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5189.0, 24.0));			// 5 obs - 267
+		ds.correctValue(4, "NO_ARBRE", 1024.0, "manually renumbered", true, "status = C");
+		ds.correctValue(3, "NO_ARBRE", 1024.0, "manually renumbered", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5218.0, 25.0));			// 5 obs - 272
+		ds.correctValue(1, "ETAT", 10.0, "intruder status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5252.0, 43.0));			// 2 obs - 274
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5257.0, 3.0));			// 4 obs - 278
+		ds.correctValue(0, "ETAT", 14.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5257.0, 5.0));			// 4 obs - 282
+		ds.correctValue(0, "ETAT", 14.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5257.0, 9.0));			// 4 obs - 286
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5257.0, 16.0));			// 4 obs - 290
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 8.0));			// 4 obs - 294
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 15.0));			// 4 obs - 298
+		ds.correctValue(0, "ETAT", 14.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 19.0));			// 4 obs - 302
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 31.0));			// 4 obs - 306
+		ds.correctValue(0, "ETAT", 14.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 37.0));			// 4 obs - 310
+		ds.correctValue(0, "ETAT", 10.0, "accepted as is", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 41.0));			// 3 obs - 313
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 42.0));			// 3 obs - 316
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 43.0));			// 3 obs - 319
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 44.0));			// 3 obs - 322
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5258.0, 45.0));			// 3 obs - 325
+		ds.correctValue(1, "ETAT", 10.0, "recruit status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5303.0, 4.0));			// 3 obs - 328
+		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(5444.0, 21.0));			// 2 obs - 330
+		ds.correctValue(0, "ETAT", 40.0, "dead status manually changed for alive", true, "status = C");
 		
 //		dataSetGroupMap.patternize(PatternMode.Homogenize, 3, exclusions);
 
@@ -437,7 +630,7 @@ public class DataPattern extends ArrayList<Object> implements Cloneable {
 		
 //		DataSet correctedDataSet = dataSetGroupMap.recomposeDataSet();
 
-		String exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "src") + "corrected.csv";
+		String exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "corrected.csv";
 		dataSet.save(exportCorrectedFilename);
 //		new FakeDialog(dataSet.getUI());
 		System.exit(0);

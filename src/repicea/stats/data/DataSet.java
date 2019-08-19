@@ -197,7 +197,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	 * @param fieldIndicesForSorting
 	 * @return a Map of DataSet
 	 */
-	public DataSetGroupMap splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
+	DataSetGroupMap splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
 		DataSetGroupMap outputMap = new DataSetGroupMap(this);
 		for (Observation obs : observations) {
 			DataGroup id = new DataGroup();
@@ -425,6 +425,19 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		return observations;
 	}
 	
+	void correctValue(int i, String fieldName, Object newValue, String javaComment, boolean setOtherObservationsToOk, String javaCommentOtherObservations) {
+		for (int j = 0; j < this.getNumberOfObservations(); j++) {
+			if (j == i) {
+				setValueAt(j, fieldName, newValue, ActionType.Replace);
+				setValueAt(j, DataPattern.JavaComments, javaComment, ActionType.Replace);
+			} else {
+				if (setOtherObservationsToOk) {
+					setValueAt(j, DataPattern.JavaComments, javaCommentOtherObservations, ActionType.Replace);
+				}
+			}
+			 
+		}
+	}
 	
 //	private static class FakeDialog extends REpiceaDialog {
 //
