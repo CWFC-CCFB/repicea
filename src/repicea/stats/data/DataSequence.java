@@ -22,7 +22,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataSequence extends HashMap<Object, Map> {
+class DataSequence extends HashMap<Object, Map> {
 		
 	public static class ActionOnPattern {
 		protected void doAction(DataPattern pattern, Object... parms) {}

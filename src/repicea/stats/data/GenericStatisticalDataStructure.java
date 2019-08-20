@@ -149,7 +149,8 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 
 				int indexOfThisField = dataSet.getIndexOfThisField(effect);
 				Class fieldType = dataSet.getFieldTypeOfThisField(indexOfThisField);
-				if (fieldType == Double.class) {
+//				if (fieldType == Double.class) {
+				if (Number.class.isAssignableFrom(fieldType)) {		// it is either a double or an integer
 					matrixTmp = dataSet.getVectorOfThisField(indexOfThisField);
 				} else {
 					matrixTmp = computeDummyVariables(indexOfThisField, refClass);

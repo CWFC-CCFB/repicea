@@ -23,7 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class DataSetGroupMap extends HashMap<DataGroup, DataSet> { 
+class DataSetGroupMap extends HashMap<DataGroup, DataSet> { 
 
 	protected static enum PatternMode {
 		Homogenize,
@@ -36,7 +36,7 @@ public class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 		this.originalDataSet = originalDataSet;
 	}
 	
-	public DataPatternMap getPatternAbundance(String fieldName) {
+	DataPatternMap getPatternAbundance(String fieldName) {
 		DataPatternMap patternMap = new DataPatternMap(this);
 		for (DataGroup id : keySet()) {
 			DataSet ds = get(id);

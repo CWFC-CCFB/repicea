@@ -3,7 +3,7 @@ package repicea.stats.data;
 import java.util.HashMap;
 import java.util.List;
 
-public class DataPatternMap extends HashMap<DataPattern, List<DataGroup>> {
+class DataPatternMap extends HashMap<DataPattern, List<DataGroup>> {
 
 	protected final DataSetGroupMap dataSetGroupMap;
 	
