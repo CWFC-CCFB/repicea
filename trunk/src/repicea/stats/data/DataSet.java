@@ -154,18 +154,53 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	private void indexFieldType() {
 		fieldTypes.clear();
 		for (int j = 0; j < fieldNames.size(); j++) {
-			if (isDouble(j)) {
+			if (isInteger(j)) {
+				fieldTypes.add(Integer.class);
+			} else if (isDouble(j)) {
 				fieldTypes.add(Double.class);
+				reconvertToDoubleIfNeedsBe(j);
 			} else {
 				fieldTypes.add(String.class);
+				reconvertToStringIfNeedsBe(j);
 			}
 		}
 	}
 	
+	private boolean isInteger(int j) {
+		boolean isInteger = true;
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			if (!(getValueAt(i,j) instanceof Integer)) {
+					isInteger = false;
+					break;
+			} 
+		}
+		return isInteger;
+	}
+
+
+	private void reconvertToStringIfNeedsBe(int j) {
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			Object value = getValueAt(i,j);
+			if ((value instanceof Number)) {
+				setValueAt(i,j, value.toString());
+			}
+		} 
+	}
+
+	private void reconvertToDoubleIfNeedsBe(int j) {
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			Object value = getValueAt(i,j);
+			if ((value instanceof Integer)) {
+				setValueAt(i,j, ((Integer) value).toString());
+			}
+		} 
+	}
+
+
 	private boolean isDouble(int indexJ) {
 		boolean isDouble = true;
-		for (int i = 0; i < observations.size(); i++) {
-			if (!(getValueAt(i,indexJ) instanceof Double)) {
+		for (int i = 0; i < getNumberOfObservations(); i++) {
+			if (!(getValueAt(i,indexJ) instanceof Number)) {
 					isDouble = false;
 					break;
 			} 
@@ -249,7 +284,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	protected Matrix getVectorOfThisField(int j) {
 		Matrix output = new Matrix(observations.size(), 1);
 		for (int i = 0; i < observations.size(); i++) {
-			output.m_afData[i][0] = (Double) getValueAt(i,j);
+			output.m_afData[i][0] = ((Number) getValueAt(i,j)).doubleValue();
 		}
 		return output;
 	}
@@ -365,9 +400,13 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			while (lineRead != null) {
 				for (int i = 0; i < fieldNames.size(); i++) {
 					try {
-						lineRead[i] = Double.parseDouble(lineRead[i].toString());
-					} catch (Exception e) {
-						lineRead[i] = lineRead[i].toString();
+						lineRead[i] = Integer.parseInt(lineRead[i].toString());
+					} catch (NumberFormatException e1) {
+						try {
+							lineRead[i] = Double.parseDouble(lineRead[i].toString());
+						} catch (NumberFormatException e2) {
+							lineRead[i] = lineRead[i].toString();
+						}
 					}
 				}
 				addObservation(lineRead);
@@ -378,6 +417,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			}
 			
 			indexFieldType();
+			
 
 		} catch (IOException e1) {
 			e1.printStackTrace();
