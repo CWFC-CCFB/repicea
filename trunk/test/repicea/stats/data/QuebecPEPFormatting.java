@@ -19,9 +19,9 @@ class QuebecPEPFormatting {
 		String fieldName = "NO_ARBRE";
 		DataSet ds = dataSetGroupMap.get(group);	
 		for (int i = ds.getNumberOfObservations() - 1; i >= 0; i--) {
-			Double currentValue = (Double) ds.getValueAt(i, fieldName);
+			Integer currentValue = (Integer) ds.getValueAt(i, fieldName);
 			if (i >= index) {
-				ds.correctValue(i, fieldName, currentValue + 1000d, "manually renumbered", true, "status = C");
+				ds.correctValue(i, fieldName, currentValue + 1000, "manually renumbered", true, "status = C");
 			}
 		}
 		return ds.getNumberOfObservations();
@@ -31,15 +31,15 @@ class QuebecPEPFormatting {
 		String fieldName = "ETAT";
 		DataSet ds = dataSetGroupMap.get(group);	
 		Object currentValue = ds.getValueAt(0, fieldName);
-		ds.correctValue(0, fieldName, currentValue, "accepted as is", true, "status = C");
+		ds.correctValue(0, fieldName, currentValue, "accepted as is", true, "accepted as is");
 		return ds.getNumberOfObservations();
 	}
 	
-	static int ReplaceFirstStatusBy(DataSetGroupMap dataSetGroupMap, DataGroup group, double newStatus) {
+	static int ReplaceFirstStatusBy(DataSetGroupMap dataSetGroupMap, DataGroup group, Object newStatus) {
 		return ReplaceThisStatusBy(dataSetGroupMap, group, 0, newStatus, "dead status manually changed for alive");
 	}
 
-	static int ReplaceThisStatusBy(DataSetGroupMap dataSetGroupMap, DataGroup group, int index, double newStatus, String message) {
+	static int ReplaceThisStatusBy(DataSetGroupMap dataSetGroupMap, DataGroup group, int index, Object newStatus, String message) {
 		String fieldName = "ETAT";
 		DataSet ds = dataSetGroupMap.get(group);	
 		ds.correctValue(index, fieldName, newStatus, message, true, "status = C");
@@ -60,35 +60,35 @@ class QuebecPEPFormatting {
 		
 		
 		List<Object> terminalStatuses = new ArrayList<Object>();
-		terminalStatuses.add(23.0);
-		terminalStatuses.add(24.0);
-		terminalStatuses.add(25.0);
-		terminalStatuses.add(26.0);
-		terminalStatuses.add(29.0);
+		terminalStatuses.add("23");
+		terminalStatuses.add("24");
+		terminalStatuses.add("25");
+		terminalStatuses.add("26");
+		terminalStatuses.add("29");
 		List<Object> deadStatuses = new ArrayList<Object>();
-		deadStatuses.add(14.0);
-		deadStatuses.add(16.0);
+		deadStatuses.add("14");
+		deadStatuses.add("16");
 		List<Object> forgottenDeadStatuses = new ArrayList<Object>();
-		deadStatuses.add(34.0);
-		deadStatuses.add(36.0);
+		deadStatuses.add("34");
+		deadStatuses.add("36");
 		List<Object> recruitDeadStatuses = new ArrayList<Object>();
-		deadStatuses.add(44.0);
-		deadStatuses.add(46.0);
+		deadStatuses.add("44");
+		deadStatuses.add("46");
 		List<Object> renumberedDeadStatuses = new ArrayList<Object>();
-		deadStatuses.add(54.0);
-		deadStatuses.add(56.0);
+		deadStatuses.add("54");
+		deadStatuses.add("56");
 		List<Object> aliveStatuses = new ArrayList<Object>();
-		aliveStatuses.add(10.0);
-		aliveStatuses.add(12.0);
+		aliveStatuses.add("10");
+		aliveStatuses.add("12");
 		List<Object> forgottenStatuses = new ArrayList<Object>();
-		forgottenStatuses.add(30.0);
-		forgottenStatuses.add(32.0);
+		forgottenStatuses.add("30");
+		forgottenStatuses.add("32");
 		List<Object> recruitStatuses = new ArrayList<Object>();
-		recruitStatuses.add(40.0);
-		recruitStatuses.add(42.0);
+		recruitStatuses.add("40");
+		recruitStatuses.add("42");
 		List<Object> renumberedStatuses = new ArrayList<Object>();
-		renumberedStatuses.add(50.0);
-		renumberedStatuses.add(52.0);
+		renumberedStatuses.add("50");
+		renumberedStatuses.add("52");
 		
 		ActionOnPattern action = new ActionOnPattern() {
 			@Override
@@ -153,7 +153,7 @@ class QuebecPEPFormatting {
 			protected void doAction(DataPattern pattern, Object... parms) {
 				int observationIndex = (Integer) parms[0];
 				for (int i = 0; i < pattern.size(); i++) {
-					if (i >= observationIndex) {
+					if (i >= observationIndex + 1) {
 						pattern.updateField(i, "NO_ARBRE", 1000, ActionType.Add);
 						pattern.comment(i, "renumbered");
 					} else {
@@ -181,7 +181,7 @@ class QuebecPEPFormatting {
 				int observationIndex = (Integer) parms[0];
 				for (int i = 0; i < pattern.size(); i++) {
 					if (i == observationIndex) {
-						pattern.updateField(i, "ETAT", 10.0, ActionType.Replace);
+						pattern.updateField(i, "ETAT", "10", ActionType.Replace);
 						pattern.comment(i, "status dead changed for alive");
 					} else {
 						pattern.comment(i, "status = C");
@@ -194,7 +194,7 @@ class QuebecPEPFormatting {
 			possibleOutcomes = new ArrayList<Object>();
 			possibleOutcomes.addAll(aliveStatuses);
 			Map<Object, Map> oMap = new HashMap<Object, Map>();
-			oMap.put(10.0, DataSequence.convertListToMap(possibleOutcomes));
+			oMap.put("10", DataSequence.convertListToMap(possibleOutcomes));
 			measurementErrorSequence1.put(obj, oMap);
 		}
 
@@ -204,7 +204,7 @@ class QuebecPEPFormatting {
 				int observationIndex = (Integer) parms[0];
 				for (int i = 0; i < pattern.size(); i++) {
 					if (i == observationIndex + 1) {
-						pattern.updateField(i, "ETAT", 10.0, ActionType.Replace);
+						pattern.updateField(i, "ETAT", "10", ActionType.Replace);
 						pattern.comment(i, "status dead changed for alive");
 					} else {
 						pattern.comment(i, "status = C");
@@ -218,10 +218,10 @@ class QuebecPEPFormatting {
 		aliveAndRecruits.addAll(recruitStatuses);
 		for (Object obj : aliveAndRecruits) {
 			possibleOutcomes = new ArrayList<Object>();
-			possibleOutcomes.add(10.0);
+			possibleOutcomes.add("10");
 			Map<Object, Map> oMap = new HashMap<Object, Map>();
-			oMap.put(14.0, DataSequence.convertListToMap(possibleOutcomes));
-			measurementErrorSequence1.put(obj, oMap);
+			oMap.put("14", DataSequence.convertListToMap(possibleOutcomes));
+			measurementErrorSequence2.put(obj, oMap);
 		}
 
 		List<DataSequence> sequences = new ArrayList<DataSequence>();
@@ -238,263 +238,301 @@ class QuebecPEPFormatting {
 	}
 	
 	
-	public static void main(String[] args) throws IOException {
-		String filename = ObjectUtility.getPackagePath(DataSet.class) + "trees.csv";
+	private static void StatusCorrection() throws IOException {
+		String filename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "trees.csv";
 		DataSet dataSet = new DataSet(filename, false);
 		new REpiceaProgressBarDialog("Reading inventory", "...", dataSet, false);
 
 		DataSetGroupMap dataSetGroupMap = CheckStatus(dataSet);
-		// for species
 		
 		int nbManuallyChanged = 0;
 		
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(312.0, 4.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(446.0, 23.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(746.0, 64.0), 30.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(985.0, 2.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1099.0, 14.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1325.0, 67.0), 30.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1605.0, 127.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1864.0, 47.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1938.0, 16.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2086.0, 42.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2126.0, 62.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2427.0, 5.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2500.0, 45.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2508.0, 36.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2755.0, 73.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2872.0, 11.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3099.0, 6.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3320.0, 9.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3468.0, 13.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3490.0, 17.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3490.0, 20.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3647.0, 68.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3655.0, 7.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3784.0, 28.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3810.0, 51.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3847.0, 1.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3855.0, 7.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3957.0, 55.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3987.0, 9.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4010.0, 13.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4078.0, 107.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4079.0, 3.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4327.0, 25.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4700.0, 17.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4791.0, 20.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4810.0, 26.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5143.0, 55.0), 30.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5303.0, 4.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5444.0, 21.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5632.0, 36.0), 30.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6454.0, 37.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6559.0, 23.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6717.0, 44.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6895.0, 44.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7011.0, 53.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7116.0, 7.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7301.0, 34.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7306.0, 7.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7453.0, 13.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7481.0, 7.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(8047.0, 60.0), 50.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(8048.0, 39.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(8152.0, 13.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9128.0, 1.0), 40.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9208.0, 5.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9481.0, 14.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9550.0, 51.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9582.0, 28.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9585.0, 6.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9957.0, 42.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10078.0, 39.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10146.0, 26.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10323.0, 8.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10780.0, 14.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 2.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 3.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 15.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 16.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 17.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 19.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 20.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 21.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845.0, 22.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11014.0, 1.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11040.0, 31.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11516.0, 22.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11925.0, 31.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12156.0, 35.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12339.0, 3.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12339.0, 5.0), 10.0);
-		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12492.0, 94.0), 40.0);
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(312, 4), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(446, 23), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(746, 64), "30");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1099, 14), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1325, 67), "30");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1605, 127), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1864, 47), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(1938, 16), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2086, 42), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2126, 62), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2427, 5), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2500, 45), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2508, 36), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2755, 73), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(2872, 11), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3099, 6), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3320, 9), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3468, 13), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3490, 17), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3490, 20), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3647, 68), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3655, 7), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3784, 28), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3810, 51), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3847, 1), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3855, 7), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3957, 55), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(3987, 9), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4010, 13), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4078, 107), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4079, 3), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4327, 25), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4700, 17), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4791, 20), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(4810, 26), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5143, 55), "30");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5303, 4), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5444, 21), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5632, 36), "30");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(5995, 88), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6454, 37), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6559, 23), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6717, 44), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(6895, 44), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7011, 53), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7116, 7), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7301, 34), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7306, 7), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7453, 13), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(7481, 7), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(8047, 60), "50");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(8048, 39), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(8152, 13), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9128, 1), "40");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9208, 5), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9481, 14), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9550, 51), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9582, 28), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9585, 6), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(9957, 42), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10078, 39), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10146, 26), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10323, 8), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10780, 14), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 2), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 3), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 15), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 16), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 17), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 19), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 20), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 21), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(10845, 22), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11014, 1), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11040, 31), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11516, 22), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11925, 31), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12156, 35), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12339, 3), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12339, 5), "10");
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(12492, 94), "40");
 
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(387.0, 29.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(808.0, 2.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(1086.0, 99.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(1235.0, 32.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(1878.0, 46.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2181.0, 37.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2267.0, 30.0), 3);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2267.0, 31.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2874.0, 1.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3970.0, 41.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3970.0, 42.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3970.0, 43.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3971.0, 87.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3971.0, 88.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3971.0, 89.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5189.0, 24.0), 3);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5258.0, 30.0), 3);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5635.0, 19.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5825.0, 27.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(6378.0, 2.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(6378.0, 3.0), 2);
-		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(7778.0, 22.0), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(387, 29), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(808, 2), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(1086, 99), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(1235, 32), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(1878, 46), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2181, 37), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2267, 30), 3);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2267, 31), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(2874, 1), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3970, 41), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3970, 42), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3970, 43), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3971, 87), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3971, 88), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(3971, 89), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5189, 24), 3);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5258, 30), 3);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5635, 19), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(5825, 27), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(6378, 2), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(6378, 3), 2);
+		nbManuallyChanged += ManuallyRenumberFrom(dataSetGroupMap, new DataGroup(7778, 22), 2);
 
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(443.0, 42.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(1085.0, 57.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(1660.0, 63.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(1925.0, 30.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(2295.0, 9.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257.0, 3.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257.0, 5.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257.0, 9.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257.0, 16.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258.0, 8.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258.0, 15.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258.0, 19.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258.0, 31.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258.0, 37.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5995.0, 88.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(6005.0, 41.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(6009.0, 82.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 11.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 23.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 35.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 42.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 52.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 57.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 59.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 64.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 65.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 77.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 81.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 89.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 101.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 106.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 107.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292.0, 108.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 1.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 9.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 11.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 18.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 36.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 37.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 39.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293.0, 41.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7588.0, 8.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7588.0, 24.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7588.0, 41.0));
-		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(11073.0, 9.0));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(1660, 63));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(1925, 30));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(2295, 9));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257, 3));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257, 5));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257, 9));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5257, 16));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258, 8));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258, 15));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258, 19));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258, 31));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5258, 37));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(6005, 41));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 11));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 23));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 35));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 42));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 52));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 57));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 59));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 64));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 65));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 77));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 81));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 89));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 101));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 106));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 107));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7292, 108));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 1));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 9));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 11));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 18));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 36));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 37));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 39));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7293, 41));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7588, 8));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7588, 24));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(7588, 41));
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(11073, 9));
 
 
 		
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(1614.0, 2.0), 2, 10, "harvested status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(1616.0, 25.0), 2, 10, "harvested status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(2294.0, 44.0), 1, 10, "dead status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(2422.0, 18.0), 2, 10, "harvested status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3086.0, 24.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3718.0, 66.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3754.0, 10.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3762.0, 86.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3762.0, 87.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3811.0, 26.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3811.0, 27.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3811.0, 28.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 10.0), 2, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 11.0), 2, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 12.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 13.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 14.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 15.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840.0, 16.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3941.0, 49.0), 1, 10, "intruder status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3941.0, 5.0), 1, 10, "intruder status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4139.0, 42.0), 2, 10, "missing status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679.0, 5.0), 3, 10, "forgotten status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679.0, 7.0), 3, 10, "forgotten status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679.0, 9.0), 1, 10, "forgotten status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679.0, 10.0), 1, 10, "forgotten status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4786.0, 32.0), 1, 10, "missing status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5218.0, 25.0), 1, 10, "intruder status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5252.0, 43.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258.0, 41.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258.0, 42.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258.0, 43.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258.0, 44.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258.0, 45.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5698.0, 23.0), 1, 10, "forgotten status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(6834.0, 8.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(6846.0, 17.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(7293.0, 44.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(7293.0, 45.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(7293.0, 46.0), 1, 10, "recruit status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(12029.0, 21.0), 2, 10, "harvest status manually changed for alive");
-		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(12276.0, 29.0), 0, 10, "harvest status manually changed for alive");
-
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(443, 42), 1, "10", "disapperead status manually replaced by alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(1085, 57), 1, "10", "disapperead status manually replaced by alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(1614, 2), 2, "10", "harvested status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(1616, 25), 2, "10", "harvested status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(2294, 44), 1, "10", "dead status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(2422, 18), 2, "10", "harvested status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3086, 24), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3718, 66), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3754, 10), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3762, 86), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3762, 87), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3811, 26), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3811, 27), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3811, 28), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 10), 2, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 11), 2, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 12), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 13), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 14), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 15), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(3840, 16), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4139, 42), 2, "10", "missing status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679, 5), 3, "10", "forgotten status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679, 7), 3, "10", "forgotten status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679, 9), 1, "10", "forgotten status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4679, 10), 1, "10", "forgotten status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(4786, 32), 1, "10", "missing status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5218, 25), 1, "10", "intruder status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5252, 43), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258, 41), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258, 42), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258, 43), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258, 44), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5258, 45), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(5698, 23), 1, "10", "forgotten status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(6009, 82), 1, "10", "forgotten status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(6834, 8), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(6846, 17), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(7293, 44), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(7293, 45), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(7293, 46), 1, "10", "recruit status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(12029, 21), 2, "10", "harvest status manually changed for alive");
+		nbManuallyChanged += ReplaceThisStatusBy(dataSetGroupMap, new DataGroup(12276, 29), 0, "10", "harvest status manually changed for alive");
 
 		DataSet ds;
-		ds = dataSetGroupMap.get(new DataGroup(1418.0, 18.0));			
-		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(985, 2));			
+		ds.correctValue(1, "ETAT", "10", "disappeared status manually changed for alive", true, "status = C");
+		ds.correctValue(0, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
 		nbManuallyChanged += ds.getNumberOfObservations();
-		ds = dataSetGroupMap.get(new DataGroup(4203.0, 28.0));			
-		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(1418, 18));			
+		ds.correctValue(2, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(1, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
 		nbManuallyChanged += ds.getNumberOfObservations();
-		ds = dataSetGroupMap.get(new DataGroup(4538.0, 20.0));			
-		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3941, 5));			
+		ds.correctValue(2, "ETAT", "10", "forgotten status manually changed for alive", true, "status = C");
+		ds.correctValue(1, "ETAT", "10", "intruder status manually changed for alive", true, "status = C");
 		nbManuallyChanged += ds.getNumberOfObservations();
-		ds = dataSetGroupMap.get(new DataGroup(6137.0, 20.0));			
-		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(3941, 49));			
+		ds.correctValue(2, "ETAT", "10", "forgotten status manually changed for alive", true, "status = C");
+		ds.correctValue(1, "ETAT", "10", "intruder status manually changed for alive", true, "status = C");
 		nbManuallyChanged += ds.getNumberOfObservations();
-		ds = dataSetGroupMap.get(new DataGroup(9837.0, 4.0));			
-		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(0, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4203, 28));			
+		ds.correctValue(1, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(2, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
 		nbManuallyChanged += ds.getNumberOfObservations();
-
-		ds = dataSetGroupMap.get(new DataGroup(11859.0, 50.0));			
-		ds.correctValue(2, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
-		ds.correctValue(1, "ETAT", 10.0, "dead status manually changed for alive", true, "status = C");
+		ds = dataSetGroupMap.get(new DataGroup(4538, 20));			
+		ds.correctValue(1, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(2, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		nbManuallyChanged += ds.getNumberOfObservations();
+		ds = dataSetGroupMap.get(new DataGroup(6137, 20));			
+		ds.correctValue(2, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(1, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(0, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		nbManuallyChanged += ds.getNumberOfObservations();
+		ds = dataSetGroupMap.get(new DataGroup(9837, 4));			
+		ds.correctValue(1, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(0, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		nbManuallyChanged += ds.getNumberOfObservations();
+		ds = dataSetGroupMap.get(new DataGroup(11859, 50));			
+		ds.correctValue(2, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
+		ds.correctValue(1, "ETAT", "10", "dead status manually changed for alive", true, "status = C");
 		nbManuallyChanged += ds.getNumberOfObservations();
 
 		System.out.println("Number of observations manually changed = " + nbManuallyChanged);
 		
-		String exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "corrected.csv";
+		dataSetGroupMap = CheckStatus(dataSet);
+		
+		nbManuallyChanged = 0;
+		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11857, 7), "10");	// this one is manually changed in the first place
+		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5698, 23));
+		System.out.println("Number of observations manually changed = " + nbManuallyChanged);
+		
+		String exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "statusCorrected.csv";
 		dataSet.save(exportCorrectedFilename);
 		
+		System.exit(0);
 		
-		dataSetGroupMap = CheckStatus(dataSet);
+//		dataSetGroupMap.patternize(PatternMode.Homogenize, 3, exclusions);
 
+	}
+
+	private static void SpeciesCorrection() throws IOException {
+		String filename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "statusCorrected.csv";
+		DataSet dataSet = new DataSet(filename, false);
+		new REpiceaProgressBarDialog("Reading inventory", "...", dataSet, false);
+
+		CheckSpecies(dataSet);
 		
+		String exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "speciesCorrected.csv";
+		dataSet.save(exportCorrectedFilename);
 		
+		System.exit(0);
 		
 //		dataSetGroupMap.patternize(PatternMode.Homogenize, 3, exclusions);
 
 		
+	}
+	
+	
+	private static DataSetGroupMap CheckSpecies(DataSet dataSet) {
+		List<Object> exclusions = new ArrayList<Object>();
+		exclusions.add("NA");
 		
-//		DataSet correctedDataSet = dataSetGroupMap.recomposeDataSet();
-
-		exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "corrected2.csv";
-		dataSet.save(exportCorrectedFilename);
-//		new FakeDialog(dataSet.getUI());
-		System.exit(0);
+		List<Integer> fieldsForSplitting = new ArrayList<Integer>();
+		fieldsForSplitting.add(1);	// field i
+		fieldsForSplitting.add(3);	// field NO_ARBRE
+		List<Integer> fieldsForSorting = new ArrayList<Integer>();
+		fieldsForSorting.add(2);	// field year
+		DataSetGroupMap dataSetGroupMap = dataSet.splitAndOrder(fieldsForSplitting, fieldsForSorting);
+		return dataSetGroupMap;
 	}
 
+	public static void main(String[] args) throws IOException {
+//		StatusCorrection();
+		
+		
+		
+	}
 
 }

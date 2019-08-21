@@ -110,7 +110,7 @@ class DataSetGroupMap extends HashMap<DataGroup, DataSet> {
 	protected void patternize(PatternMode mode, String fieldName, List<Object> exclusions, Object...parms) {
 		
 		DataPatternMap patterns = getPatternAbundance(fieldName);
-
+		
 		List<DataPattern> unsolvedPatterns = new ArrayList<DataPattern>();
 		unsolvedPatterns.addAll(patterns.keySet());
 		
