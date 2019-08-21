@@ -119,8 +119,17 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		if (value.getClass().equals(fieldTypes.get(j))) {
 			observations.get(i).values.remove(j);
 			observations.get(i).values.add(j, value);
+		} 
+	}
+	
+	private Object addTwoNumbers(Number number1, Number number2) {
+		if (number1 instanceof Integer && number2 instanceof Integer) {
+			return number1.intValue() + number2.intValue();
+		} else {
+			return number1.doubleValue() + number2.doubleValue();
 		}
 	}
+	
 	
 	protected void setValueAt(int i, int j, Object newValue, ActionType actionType) {
 		if (actionType == ActionType.Replace) {
@@ -129,9 +138,13 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			Object formerValue = getValueAt(i, j);
 			Object addedNewValue;
 			if (formerValue instanceof Number && newValue instanceof Number) {
-				addedNewValue = ((Number) newValue).doubleValue() + ((Number) formerValue).doubleValue();
+				addedNewValue = addTwoNumbers((Number) newValue, (Number) formerValue);
 			} else {
-				addedNewValue = formerValue.toString().concat(newValue.toString());
+				if (formerValue.toString().isEmpty()) {
+					addedNewValue = newValue.toString();
+				} else {
+					addedNewValue = formerValue.toString().concat(" - " + newValue.toString());
+				}
 			}
 			setValueAt(i, j, addedNewValue);
 		}
@@ -154,17 +167,41 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	private void indexFieldType() {
 		fieldTypes.clear();
 		for (int j = 0; j < fieldNames.size(); j++) {
-			if (isInteger(j)) {
-				fieldTypes.add(Integer.class);
-			} else if (isDouble(j)) {
-				fieldTypes.add(Double.class);
-				reconvertToDoubleIfNeedsBe(j);
-			} else {
-				fieldTypes.add(String.class);
-				reconvertToStringIfNeedsBe(j);
-			}
+			setClassOfThisField(j);
+//			if (isInteger(j)) {
+//				fieldTypes.add(Integer.class);
+//			} else if (isDouble(j)) {
+//				fieldTypes.add(Double.class);
+//				reconvertToDoubleIfNeedsBe(j);
+//			} else {
+//				fieldTypes.add(String.class);
+//				reconvertToStringIfNeedsBe(j);
+//			}
 		}
 	}
+	
+	private void setClassOfThisField(int fieldIndex) {
+		if (isInteger(fieldIndex)) {
+			setFieldType(fieldIndex, Integer.class);
+		} else if (isDouble(fieldIndex)) {
+			setFieldType(fieldIndex, Double.class);
+			reconvertToDoubleIfNeedsBe(fieldIndex);
+		} else {
+			setFieldType(fieldIndex, String.class);
+			reconvertToStringIfNeedsBe(fieldIndex);
+		}
+	}
+
+	private void setFieldType(int fieldIndex, Class clazz) {
+		if (fieldIndex < fieldTypes.size()) {
+			fieldTypes.set(fieldIndex, clazz);	
+		} else if (fieldIndex == fieldTypes.size()) {
+			fieldTypes.add(clazz);	
+		} else {
+			throw new InvalidParameterException("The field type cannot be set!");
+		}
+	}
+	
 	
 	private boolean isInteger(int j) {
 		boolean isInteger = true;
@@ -343,11 +380,12 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			observations.get(i).values.add(field[i]);
 		}
 		
-		if (isDouble(fieldNames.size() - 1)) {
-			fieldTypes.add(Double.class);
-		} else {
-			fieldTypes.add(String.class);
-		}
+		setClassOfThisField(fieldNames.size() - 1);
+//		if (isDouble(fieldNames.size() - 1)) {
+//			fieldTypes.add(Double.class);
+//		} else {
+//			fieldTypes.add(String.class);
+//		}
 	}
 
 	@Override
@@ -466,7 +504,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	}
 	
 	void correctValue(int i, String fieldName, Object newValue, String javaComment, boolean setOtherObservationsToOk, String javaCommentOtherObservations) {
-		for (int j = 0; j < this.getNumberOfObservations(); j++) {
+		for (int j = 0; j < getNumberOfObservations(); j++) {
 			if (j == i) {
 				setValueAt(j, fieldName, newValue, ActionType.Replace);
 				setValueAt(j, DataPattern.JavaComments, javaComment, ActionType.Replace);
