@@ -36,7 +36,7 @@ class DataSequence extends HashMap<Object, Map> {
 	private final ActionOnPattern action;
 	protected final String name;
 	
-	public DataSequence(String name, boolean isEmptyPatternAccepted, Mode mode, ActionOnPattern action) {
+	DataSequence(String name, boolean isEmptyPatternAccepted, Mode mode, ActionOnPattern action) {
 		this.isEmptyPatternAccepted = isEmptyPatternAccepted;
 		this.mode = mode;
 		this.action = action;
@@ -62,11 +62,11 @@ class DataSequence extends HashMap<Object, Map> {
 			}
 			return fit;
 		case Partial:
-			Integer index = doesPartOfPatternFitThisSequence(pattern, exclusions);
-			if (index != null) {
-				action.doAction(pattern, index);
+			Object outcome = doesPartOfPatternFitThisSequence(pattern, exclusions);
+			if (outcome != null) {
+				action.doAction(pattern, outcome);
 			}
-			return  index != null;
+			return  outcome != null;
 		}
 		return false;
 	}
@@ -91,7 +91,7 @@ class DataSequence extends HashMap<Object, Map> {
 		}
 	}
 
-	private Integer doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
+	protected Object doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
 		Integer i = null;
 		boolean sequenceCompleted = false;
 		outerloop:

@@ -61,12 +61,7 @@ public class DataSequenceTests {
 			dataSequence.put(obj, DataSequence.convertListToMap(possibleOutcomes));
 		}
 		
-		DataPattern pattern = new DataPattern();
-		pattern.add(10.0);
-		pattern.add(10.0);
-		pattern.add(10.0);
-		pattern.add(16.0);
-		pattern.add(26.0);
+		DataPattern pattern = new DataPattern(null, 10.0, 10.0, 10.0, 16.0, 26.0);
 		
 		boolean isOk = dataSequence.doesFitInThisSequence(pattern, null);
 
