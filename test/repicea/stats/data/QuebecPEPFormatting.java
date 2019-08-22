@@ -10,7 +10,6 @@ import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.stats.data.DataSequence.ActionOnPattern;
 import repicea.stats.data.DataSequence.Mode;
 import repicea.stats.data.DataSet.ActionType;
-import repicea.stats.data.DataSetGroupMap.PatternMode;
 import repicea.util.ObjectUtility;
 
 class QuebecPEPFormatting {
@@ -224,16 +223,14 @@ class QuebecPEPFormatting {
 			measurementErrorSequence2.put(obj, oMap);
 		}
 
+
 		List<DataSequence> sequences = new ArrayList<DataSequence>();
 		sequences.add(acceptableDataSequence);
 		sequences.add(twoDifferentTreesSequence);
 		sequences.add(measurementErrorSequence1);
 		sequences.add(measurementErrorSequence2);
 		
-		dataSetGroupMap.patternize(PatternMode.Sequence, 
-				"ETAT", 
-				exclusions, 
-				sequences);
+		dataSetGroupMap.patternize("ETAT", exclusions, sequences);
 		return dataSetGroupMap;
 	}
 	
@@ -487,6 +484,9 @@ class QuebecPEPFormatting {
 		nbManuallyChanged += ReplaceFirstStatusBy(dataSetGroupMap, new DataGroup(11857, 7), "10");	// this one is manually changed in the first place
 		nbManuallyChanged += AcceptedAsIs(dataSetGroupMap, new DataGroup(5698, 23));
 		System.out.println("Number of observations manually changed = " + nbManuallyChanged);
+
+		int index = dataSet.fieldNames.indexOf(DataPattern.JavaComments);
+		dataSet.fieldNames.set(index, DataPattern.JavaComments.concat("Status"));
 		
 		String exportCorrectedFilename = ObjectUtility.getPackagePath(DataSet.class).replace("bin", "test") + "statusCorrected.csv";
 		dataSet.save(exportCorrectedFilename);
@@ -509,7 +509,6 @@ class QuebecPEPFormatting {
 		
 		System.exit(0);
 		
-//		dataSetGroupMap.patternize(PatternMode.Homogenize, 3, exclusions);
 
 		
 	}
@@ -525,14 +524,155 @@ class QuebecPEPFormatting {
 		List<Integer> fieldsForSorting = new ArrayList<Integer>();
 		fieldsForSorting.add(2);	// field year
 		DataSetGroupMap dataSetGroupMap = dataSet.splitAndOrder(fieldsForSplitting, fieldsForSorting);
+		
+		ActionOnPattern action = new ActionOnPattern() {
+			@Override
+			protected void doAction(DataPattern pattern, Object... parms) {
+				Object species = parms[0];
+				for (int i = 0; i < pattern.size(); i++) {
+					if (!pattern.get(i).equals(species)) {
+						pattern.updateField(i, "ESSENCE", species, ActionType.Replace);
+						pattern.comment(i, "species set according to homogeneous method");
+					}
+				}
+			}
+
+		};
+		
+		DataHomogeneousSequence homogeneousSequence = new DataHomogeneousSequence("Homogeneous", action) {
+			@Override
+			protected Object doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
+				List<Object> clone = pattern.getCleanPattern(exclusions);
+				if (clone.isEmpty()) {
+					return null;
+				} else if (clone.size() == 1) {
+					return clone.get(0);
+				} else {
+					for (int i = 1; i < clone.size(); i++) {
+						if (!clone.get(i).equals(clone.get(i - 1))) {
+							return null;
+						}
+					}
+					return clone.get(0);
+				}
+			}
+		};
+		
+		action = new ActionOnPattern() {
+			@Override
+			protected void doAction(DataPattern pattern, Object... parms) {
+				Object species = parms[0];
+				for (int i = 0; i < pattern.size(); i++) {
+					if (!pattern.get(i).equals(species)) {
+						pattern.updateField(i, "ESSENCE", species, ActionType.Replace);
+						pattern.comment(i, "species set to according to emerging method");
+					}
+				}
+			}
+
+		};
+
+		DataHomogeneousSequence emergingObjectSequence = new DataHomogeneousSequence("Emerging object", action) {
+			@Override
+			protected Object doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
+				DataPattern clone = pattern.getCleanPattern(exclusions);
+				Map<Object, Double> rankingMap = new HashMap<Object, Double>();
+				for (int i = 0; i < clone.size(); i++) {
+					Object obj = clone.get(i);
+					double previousValue = 0d;
+					if (rankingMap.containsKey(obj)) {
+						previousValue = rankingMap.get(obj);
+					} 
+					rankingMap.put(obj, previousValue + i * .5 + 1);
+				}
+				double maxValue = 1d;
+				Object winningObject = null;
+				for (Object obj : rankingMap.keySet()) {
+					double rank = rankingMap.get(obj);
+					if (rank > maxValue + 1) {
+						maxValue = rank;
+						winningObject = obj;
+					}
+				}
+				return winningObject;
+			}
+		};
+		
+		action = new ActionOnPattern() {
+			@Override
+			protected void doAction(DataPattern pattern, Object... parms) {
+				Object species = parms[0];
+				for (int i = 0; i < pattern.size(); i++) {
+					if (!pattern.get(i).equals(species)) {
+						pattern.updateField(i, "ESSENCE", species, ActionType.Replace);
+						pattern.comment(i, "species set according to last-but-similar method");
+					}
+				}
+			}
+
+		};
+		DataHomogeneousSequence lastButSimilarSequence = new DataHomogeneousSequence("Last but similar", action) {
+			@Override
+			protected Object doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
+				DataPattern clone = pattern.getCleanPattern(exclusions);
+				DataPattern subPattern = clone.getSubDataPattern(0, 2);
+				
+				if (subPattern.isEmpty()) {
+					return null;
+				} else if (subPattern.size() == 1) {
+					return clone.get(0);
+				} else {
+					for (int i = 1; i < subPattern.size(); i++) {
+						if (!subPattern.get(i).equals(subPattern.get(i - 1))) {
+							return null;
+						}
+					}
+					return clone.get(0);
+				}
+			}
+		};
+
+		action = new ActionOnPattern() {
+			@Override
+			protected void doAction(DataPattern pattern, Object... parms) {
+				Object species = parms[0];
+				for (int i = 0; i < pattern.size(); i++) {
+					if (!pattern.get(i).equals(species)) {
+						pattern.updateField(i, "ESSENCE", species, ActionType.Replace);
+						pattern.comment(i, "species set according to last-in-sequence method");
+					}
+				}
+			}
+
+		};		DataHomogeneousSequence lastInSequence = new DataHomogeneousSequence("Last in sequence", action) {
+			@Override
+			protected Object doesPartOfPatternFitThisSequence(DataPattern pattern, List<Object> exclusions) {
+				DataPattern clone = pattern.getCleanPattern(exclusions);
+				if (clone.size() > 0) {
+					return clone.get(clone.size() - 1);
+				} else {
+					return null;
+				}
+			}
+		};
+		
+		
+		
+		List<DataSequence> sequences = new ArrayList<DataSequence>();
+		sequences.add(homogeneousSequence);
+		sequences.add(emergingObjectSequence);
+		sequences.add(lastButSimilarSequence);
+		sequences.add(lastInSequence);
+		
+		dataSetGroupMap.patternize("ESSENCE", exclusions, sequences);
+		
+		
 		return dataSetGroupMap;
 	}
 
 	public static void main(String[] args) throws IOException {
 //		StatusCorrection();
-		
-		
-		
+		SpeciesCorrection();
 	}
 
 }

@@ -19,9 +19,7 @@
 package repicea.stats.data;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.stats.data.DataSet.ActionType;
 
@@ -30,20 +28,21 @@ class DataPattern extends ArrayList<Object> implements Cloneable {
 	protected final static String JavaComments = "JavaComments";
 	
 	
-	protected final int fieldIndex;
+//	protected final int fieldIndex;
 	protected final DataPatternMap dataPatternMap;
 	
-	protected DataPattern(int fieldIndex, DataPatternMap dataPatternMap) {
-		this.fieldIndex = fieldIndex;
+	protected DataPattern(DataPatternMap dataPatternMap) {
+//		this.fieldIndex = fieldIndex;
 		this.dataPatternMap = dataPatternMap;
 	}
 	
-	/*
-	 * For test purpose and cloning only
-	 */
-	protected DataPattern() {
-		fieldIndex = -1;
-		dataPatternMap = null;
+	protected DataPattern(DataPatternMap dataPatternMap, Object...objects) {
+		this(dataPatternMap);
+		if (objects != null && objects.length > 0) {
+			for (Object obj : objects) {
+				add(obj);
+			}
+		}
 	}
 	
 	/**
@@ -51,8 +50,8 @@ class DataPattern extends ArrayList<Object> implements Cloneable {
 	 * @param exclusions
 	 * @return
 	 */
-	private DataPattern getCleanClone(List<Object> exclusions) {
-		DataPattern clone = new DataPattern();
+	protected DataPattern getCleanPattern(List<Object> exclusions) {
+		DataPattern clone = new DataPattern(null);
 		for (Object obj : this) {
 			if (exclusions == null || !exclusions.contains(obj)) {
 				clone.add(obj);
@@ -68,7 +67,7 @@ class DataPattern extends ArrayList<Object> implements Cloneable {
 	 */
 	protected DataPattern getTrimmedPattern(List<Object> exclusions) {
 		if (exclusions != null && !exclusions.isEmpty()) {
-			DataPattern cleanPattern = new DataPattern();
+			DataPattern cleanPattern = new DataPattern(null);
 			int i = 0;
 			while (i < size() && exclusions.contains(get(i))) {
 				i++;
@@ -86,94 +85,14 @@ class DataPattern extends ArrayList<Object> implements Cloneable {
 		}
 	}
 
-	/**
-	 * Returns the object that is prevalent in terms of frequency. A greater
-	 * weight is given to last measurement under the assumption that the ranking
-	 * has been done according to the date.
-	 * @param exclusions
-	 * @return
-	 */
-	protected Object getEmergingObject(List<Object> exclusions) {
-		DataPattern clone = getCleanClone(exclusions);
-		Map<Object, Double> rankingMap = new HashMap<Object, Double>();
-		for (int i = 0; i < clone.size(); i++) {
-			Object obj = clone.get(i);
-			double previousValue = 0d;
-			if (rankingMap.containsKey(obj)) {
-				previousValue = rankingMap.get(obj);
-			} 
-			rankingMap.put(obj, previousValue + i * .5 + 1);
-		}
-		double maxValue = 1d;
-		Object winningObject = null;
-		for (Object obj : rankingMap.keySet()) {
-			double rank = rankingMap.get(obj);
-			if (rank > maxValue + 1) {
-				maxValue = rank;
-				winningObject = obj;
-			}
-		}
-		return winningObject;
-	}
-	
 	protected DataPattern getSubDataPattern(int start, int end) {
-		DataPattern subPattern = new DataPattern();
+		DataPattern subPattern = new DataPattern(null);
 		for (Object obj : this) {
 			subPattern.add(obj.toString().substring(start, end));
 		}
 		return subPattern;
 	}
 	
-	/**
-	 * Uses a sub pattern typically the first two characters of a String to see
-	 * if there is a homogeneous pattern.
-	 * @param exclusions
-	 * @param start
-	 * @param end
-	 * @return
-	 */
-	protected Object getLastButSimilar(List<Object> exclusions, int start, int end) {
-		DataPattern clone = getCleanClone(exclusions);
-		DataPattern subPattern = clone.getSubDataPattern(start, end);
-		if (subPattern.getHomogeneousObject(null) != null) {
-			return clone.get(clone.size() - 1);
-		} else {
-			return null;
-		}
-	}
-	
-	protected Object getLastObject(List<Object> exclusions) {
-		DataPattern clone = getCleanClone(exclusions);
-		if (clone.size() > 0) {
-			return clone.get(clone.size() - 1);
-		} else {
-			return null;
-		}
-	}
-	
-	protected Object getHomogeneousObject(List<Object> exclusions) {
-		List<Object> clone = getCleanClone(exclusions);
-		if (clone.isEmpty()) {
-			return null;
-		} else if (clone.size() == 1) {
-			return clone.get(0);
-		} else {
-			for (int i = 1; i < clone.size(); i++) {
-				if (!clone.get(i).equals(clone.get(i - 1))) {
-					return null;
-				}
-			}
-			return clone.get(0);
-		}
-	}
-	
-	protected static Object[] getHomogeneousField(int numberOfObservations, Object value) {
-		Object[] field = new Object[numberOfObservations];
-		for (int i = 0; i < field.length; i++) {
-			field[i] = value;
-		}
-		return field;
-	}
 
 	protected void comment(String str) {
 		for (int i = 0; i < size(); i++) {
@@ -204,11 +123,10 @@ class DataPattern extends ArrayList<Object> implements Cloneable {
 	
 	@Override
 	public DataPattern clone() {
-		DataPattern clone = new DataPattern(fieldIndex, dataPatternMap);
+		DataPattern clone = new DataPattern(dataPatternMap);
 		clone.addAll(this);
 		return clone;
 	}
-	
 	
 	
 
