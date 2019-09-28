@@ -1,0 +1,2 @@
+sampleSize;trueMean;empMean;trueVariance;empVariance;goodmanVariance;naiveVariance;propagationVariance
+25;400.0;399.8622176051085;2668.30528;2684.5185672979264;2668.4027081646523;2693.098095158266;2680.7330924985094

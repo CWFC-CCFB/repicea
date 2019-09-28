@@ -92,6 +92,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 * @param iCols number of columns
 	 */
 	public Matrix(int iRows, int iCols) {
+		if (iRows <= 0 || iCols <= 0) {
+			throw new InvalidParameterException("The number of rows or columns must be equal to or greater than 1!");
+		}
 		m_afData = new double[iRows][iCols];
 		m_iRows = iRows;
 		m_iCols = iCols;
