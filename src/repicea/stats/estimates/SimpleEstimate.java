@@ -39,7 +39,17 @@ public class SimpleEstimate extends Estimate<UnknownDistribution> implements Cen
 		super(new UnknownDistribution());
 		estimatorType = EstimatorType.Unknown;
 	}
-	
+
+	/**
+	 * Public constructor 2 with mean and variance
+	 * @param mean a Matrix instance
+	 * @param variance a Matrix instance
+	 */
+	public SimpleEstimate(Matrix mean, Matrix variance) {
+		this();
+		setMean(mean);
+		setVariance(variance);
+	}
 
 	@Override
 	public void setMean(Matrix mean) {

@@ -18,6 +18,7 @@
  */
 package repicea.stats.estimates;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.Matrix;
@@ -142,6 +143,38 @@ s	 */
 	 */
 	protected boolean isMergeableEstimate(Estimate<?> estimate) {
 		return false;
-	};
+	}
 	
+
+	/**
+	 * Returns an estimate of the product of two parametric univariate estimate. The variance
+	 * estimator is based on Goodman's estimator.
+	 * @param estimate an Estimate instance
+	 * @return a SimpleEstimate instance
+	 */
+	public SimpleEstimate getProductEstimate(Estimate<?> estimate) {
+		if (estimate.getDistribution().isUnivariate() && getDistribution().isUnivariate()) {
+			Matrix alphaMean = getMean();
+			Matrix betaMean = estimate.getMean();
+			Matrix alphaVariance = getVariance();
+			Matrix betaVariance = estimate.getVariance();
+			Matrix newMean = alphaMean.multiply(betaMean);
+			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
+					add(betaMean.elementWisePower(2d).multiply(alphaVariance)).
+					subtract(alphaVariance.multiply(betaVariance));
+			return new SimpleEstimate(newMean, newVariance);
+		}
+		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");
+	}
+	
+	public static SimpleEstimate getProductOfManyEstimates(List<Estimate> estimates) {
+		Estimate currentEstimate = null;
+		for (int i = 1; i < estimates.size(); i++) {
+			if (i == 1) {
+				currentEstimate = estimates.get(i-1);
+			} 
+			currentEstimate = currentEstimate.getProductEstimate(estimates.get(i));
+		}
+		return (SimpleEstimate) currentEstimate;
+	}
 }

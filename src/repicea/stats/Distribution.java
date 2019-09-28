@@ -69,6 +69,14 @@ public interface Distribution extends CentralMomentsGettable, Serializable {
 	public boolean isMultivariate();
 	
 	
+	/**
+	 * Returns true if the GaussianFunction instance is univariate.
+	 * @return a boolean
+	 */
+	public default boolean isUnivariate() {
+		return !isMultivariate();
+	}
+	
 	/** 
 	 * This method returns the type of the distribution.
 	 * @return a Type enum

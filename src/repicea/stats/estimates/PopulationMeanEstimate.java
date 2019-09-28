@@ -72,8 +72,8 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 
 	@Override
 	public Matrix getRandomDeviate() {
-		getDistribution().setMean(getMean());
-		getDistribution().setMean(getVariance());
+		getDistribution().setMean(getMean());		// the mean and variance and not tied to the the distribution
+		getDistribution().setVariance(getVariance());	// consequently, they have to be specified before drawing the random deviates
 		return super.getRandomDeviate();
 	}
 
