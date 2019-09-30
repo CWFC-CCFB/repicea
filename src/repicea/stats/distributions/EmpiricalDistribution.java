@@ -71,22 +71,22 @@ public class EmpiricalDistribution implements Distribution, Serializable {
 			Matrix sum = null;
 			for (Matrix mat : observations) {
 				if (sum == null) {
-					sum = ((Matrix) mat).getDeepClone();
+					sum = mat.getDeepClone();
 				} else {
-					sum = sum.add((Matrix) mat);
+					sum = sum.add(mat);
 				}
 			}
-			return (Matrix) sum.scalarMultiply(1d / observations.size());
+			return sum.scalarMultiply(1d / observations.size());
 		}
 	}
 
 	@Override
 	public Matrix getVariance() {
-		Matrix mean = (Matrix) getMean();
+		Matrix mean = getMean();
 		Matrix sse = null;
 		Matrix error;
 		for (Matrix mat : observations) {
-			error = ((Matrix) mat).subtract(mean);
+			error = mat.subtract(mean);
 			if (sse == null) {
 				sse = error.multiply(error.transpose());
 			} else {
@@ -104,7 +104,7 @@ public class EmpiricalDistribution implements Distribution, Serializable {
 	@Override
 	public boolean isMultivariate() {
 		if (observations != null && observations.size() > 0) {
-			return observations.get(0) instanceof Matrix && ((Matrix) observations.get(0)).m_iRows > 1;
+			return observations.get(0) instanceof Matrix && observations.get(0).m_iRows > 1;
 		} else {
 			return false;
 		}
