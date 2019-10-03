@@ -92,5 +92,33 @@ public class REpiceaRandom extends Random {
 		}
 		return output;
 	}
+
+	
+	/**
+	 * Returns a random deviate from the standard Student's t distribution. The algorithm behind 
+	 * the random deviate generation is that of Bailey (1994) based on polar generation.
+	 * @see Bailey, R.W. 1994. Polar generation of random variances with the t-distribution. 
+	 * Mathematics of Computation 62(206): 779-781.
+	 */
+	public double nextStudentT(double degreesOfFreedom) {
+		double W = 2d;
+		double U = 0;
+		while (W > 1) {
+			U = nextDouble();
+			double V = nextDouble();
+			U = 2 * U - 1;
+			V = 2 * V - 1;
+			W = U * U + V * V;
+		}
+		double C2 = U * U / W;
+		double R2 = degreesOfFreedom * (Math.pow(W, - 2d / degreesOfFreedom) - 1);
+		double result;
+		if (nextDouble() < .5) {
+			result = Math.sqrt(R2*C2);
+		} else {
+			result = - Math.sqrt(R2*C2);
+		}
+		return result;
+	}
 	
 }

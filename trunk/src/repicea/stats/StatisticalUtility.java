@@ -32,8 +32,8 @@ import repicea.math.Matrix;
  */
 public class StatisticalUtility {
 
-	private static Random random;
-
+	private static REpiceaRandom random;
+	
 	public static enum TypeMatrixR {LINEAR, LINEAR_LOG, COMPOUND_SYMMETRY, POWER, ARMA}
 	
 	
@@ -153,9 +153,9 @@ public class StatisticalUtility {
 	 * This method returns a Random generator.
 	 * @return a Random instance
 	 */
-	public static Random getRandom() {
+	public static REpiceaRandom getRandom() {
 		if (random == null) {
-			random = new Random();
+			random = new REpiceaRandom();
 		}
 		return random;
 	}
