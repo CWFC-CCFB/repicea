@@ -90,9 +90,8 @@ public class ProductOfEstimates {
 		System.out.println("Running simulation for sample size = " + sampleSize + " ...");
 		double alpha = 20d;
 		double beta = 10d;
-//		double gamma = 2d;
-//		double trueMean = alpha * beta * gamma;
-		double trueMean = alpha * beta;
+		double gamma = 2d;
+		double trueMean = alpha * beta * gamma;
 		
 		double aVar = 30;
 		double bVar = 9;
@@ -110,10 +109,13 @@ public class ProductOfEstimates {
 		MonteCarloEstimate varPropagation = new MonteCarloEstimate();		
 		MonteCarloEstimate aMonteCarlo = new MonteCarloEstimate();		
 		MonteCarloEstimate bMonteCarlo = new MonteCarloEstimate();		
-//		MonteCarloEstimate cMonteCarlo = new MonteCarloEstimate();
-//		MonteCarloEstimate muMonteCarlo = new MonteCarloEstimate();		
-//		MonteCarloEstimate varMonteCarlo = new MonteCarloEstimate();		
-//		MonteCarloEstimate coverage = new MonteCarloEstimate();
+		MonteCarloEstimate cMonteCarlo = new MonteCarloEstimate();
+		MonteCarloEstimate muMonteCarlo = new MonteCarloEstimate();		
+		MonteCarloEstimate varMonteCarlo = new MonteCarloEstimate();		
+		MonteCarloEstimate coverage = new MonteCarloEstimate();
+		MonteCarloEstimate muRescaledMonteCarlo = new MonteCarloEstimate();		
+		MonteCarloEstimate varRescaledMonteCarlo = new MonteCarloEstimate();		
+		MonteCarloEstimate rescaledCoverage = new MonteCarloEstimate();
 		
 		for (int real = 0; real < nbMaxRealization; real++) {
 			if (real%1000 == 0) {
@@ -122,15 +124,15 @@ public class ProductOfEstimates {
 			List<Estimate> estimates = new ArrayList<Estimate>();
 			estimates.add(getEstimate(sampleSize, alpha, aVar)); 
 			estimates.add(getEstimate(sampleSize, beta, bVar)); 
-//			estimates.add(getEstimate(sampleSize, gamma, cVar)); 
+			estimates.add(getEstimate(sampleSize, gamma, cVar)); 
 
 			Matrix a = estimates.get(0).getMean().matrixStack(estimates.get(0).getVariance(), true);
 			Matrix b = estimates.get(1).getMean().matrixStack(estimates.get(1).getVariance(), true);
-//			Matrix c = estimates.get(2).getMean().matrixStack(estimates.get(2).getVariance(), true);
+			Matrix c = estimates.get(2).getMean().matrixStack(estimates.get(2).getVariance(), true);
 			
 			aMonteCarlo.addRealization(a);
 			bMonteCarlo.addRealization(b);
-//			cMonteCarlo.addRealization(c);
+			cMonteCarlo.addRealization(c);
 			
 			SimpleEstimate productGoodman = Estimate.getProductOfManyEstimates(estimates);
 			muGoodman.addRealization(productGoodman.getMean());
@@ -144,15 +146,38 @@ public class ProductOfEstimates {
 			muPropagation.addRealization(productPropagation.getMean());
 			varPropagation.addRealization(productPropagation.getVariance());
 			
-//			MonteCarloEstimate productMC = getMonteCarloEstimate(estimates, 10000);
-//			muMonteCarlo.addRealization(productMC.getMean());
-//			varMonteCarlo.addRealization(productMC.getVariance());
-//			ConfidenceInterval ci = productMC.getConfidenceIntervalBounds(.95);
-//			Matrix in = new Matrix(1,1);
-//			if (ci.getLowerLimit().m_afData[0][0] <= trueMean && trueMean <= ci.getUpperLimit().m_afData[0][0]) {
-//				in.m_afData[0][0] = 1d;
-//			}
-//			coverage.addRealization(in);
+			MonteCarloEstimate productMC = getMonteCarloEstimate(estimates, 5000);
+			muMonteCarlo.addRealization(productMC.getMean());
+			varMonteCarlo.addRealization(productMC.getVariance());
+			ConfidenceInterval ci = productMC.getConfidenceIntervalBounds(.95);
+			Matrix in = new Matrix(1,1);
+			if (ci.getLowerLimit().m_afData[0][0] <= trueMean && trueMean <= ci.getUpperLimit().m_afData[0][0]) {
+				in.m_afData[0][0] = 1d;
+			}
+			coverage.addRealization(in);
+
+			
+			MonteCarloEstimate scaledProductMC = new MonteCarloEstimate();
+			double scalingFactor = Math.sqrt(productGoodman.getVariance().m_afData[0][0] / productNaive.getVariance().m_afData[0][0]);
+			double mean = productMC.getMean().m_afData[0][0];
+			Matrix newReal;
+			for (Matrix r : productMC.getRealizations()) {
+				newReal = new Matrix(1,1);
+				double rValue = r.m_afData[0][0];
+				newReal.m_afData[0][0] = scalingFactor * (rValue - mean) + mean;
+				scaledProductMC.addRealization(newReal);
+			}
+			muRescaledMonteCarlo.addRealization(scaledProductMC.getMean());
+			varRescaledMonteCarlo.addRealization(scaledProductMC.getVariance());
+			
+			
+			ci = scaledProductMC.getConfidenceIntervalBounds(.95);
+			in = new Matrix(1,1);
+			if (ci.getLowerLimit().m_afData[0][0] <= trueMean && trueMean <= ci.getUpperLimit().m_afData[0][0]) {
+				in.m_afData[0][0] = 1d;
+			}
+			rescaledCoverage.addRealization(in);
+			
 		}
 
 		String filename = ObjectUtility.getPackagePath(ProductOfEstimates.class).replace("bin", "test").concat("simulation" + sampleSize + ".csv");
@@ -166,38 +191,34 @@ public class ProductOfEstimates {
 		formatFields.add(new CSVField("goodmanVariance"));
 		formatFields.add(new CSVField("naiveVariance"));
 		formatFields.add(new CSVField("propagationVariance"));
-		formatFields.add(new CSVField("aMean"));
-		formatFields.add(new CSVField("aVar"));
-		formatFields.add(new CSVField("bMean"));
-		formatFields.add(new CSVField("bVar"));
-//		formatFields.add(new CSVField("cMean"));
-//		formatFields.add(new CSVField("cVar"));
-
+		formatFields.add(new CSVField("MeanMC"));
+		formatFields.add(new CSVField("VarMC"));
+		formatFields.add(new CSVField("coverage"));
+		formatFields.add(new CSVField("MeanRescaledMC"));
+		formatFields.add(new CSVField("VarRescaledMC"));
+		formatFields.add(new CSVField("rescaledCoverage"));
+		
 		writer.setFields(formatFields);
 		
 		
-		Object[] record = new Object[12];
+		Object[] record = new Object[14];
 		record[0] = sampleSize;
 		record[1] = trueMean;
 		record[2] = muGoodman.getMean().m_afData[0][0];
 		double trueMeanAB = alpha * beta;
-//		double trueVarianceAB = alpha * alpha * varMuB + varMuA * beta * beta + varMuA * varMuB; 
-		double trueVariance = alpha * alpha * varMuB + varMuA * beta * beta + varMuA * varMuB; 
-//		double trueVariance = trueMeanAB * trueMeanAB * varMuC + trueVarianceAB * gamma * gamma + trueVarianceAB * varMuC; 
+		double trueVarianceAB = alpha * alpha * varMuB + varMuA * beta * beta + varMuA * varMuB; 
+		double trueVariance = trueMeanAB * trueMeanAB * varMuC + trueVarianceAB * gamma * gamma + trueVarianceAB * varMuC; 
 		record[3] = trueVariance;
 		record[4] = muGoodman.getVariance().m_afData[0][0];
 		record[5] = varGoodman.getMean().m_afData[0][0];
 		record[6] = varNaive.getMean().m_afData[0][0];
 		record[7] = varPropagation.getMean().m_afData[0][0];
-//		record[8] = muMonteCarlo.getMean().m_afData[0][0];
-//		record[9] = varMonteCarlo.getMean().m_afData[0][0];
-//		record[10] = coverage.getMean().m_afData[0][0];
-		record[8] = aMonteCarlo.getMean().m_afData[0][0];
-		record[9] = aMonteCarlo.getMean().m_afData[1][0];
-		record[10] = bMonteCarlo.getMean().m_afData[0][0];
-		record[11] = bMonteCarlo.getMean().m_afData[1][0];
-//		record[12] = cMonteCarlo.getMean().m_afData[0][0];
-//		record[13] = cMonteCarlo.getMean().m_afData[1][0];
+		record[8] = muMonteCarlo.getMean().m_afData[0][0];
+		record[9] = varMonteCarlo.getMean().m_afData[0][0];
+		record[10] = coverage.getMean().m_afData[0][0];
+		record[11] = muRescaledMonteCarlo.getMean().m_afData[0][0];
+		record[12] = varRescaledMonteCarlo.getMean().m_afData[0][0];
+		record[13] = rescaledCoverage.getMean().m_afData[0][0];
 		
 		writer.addRecord(record);
 		writer.close();
@@ -205,8 +226,8 @@ public class ProductOfEstimates {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		runSimulation(10, 1000000);
-		runSimulation(25, 1000000);
+//		runSimulation(10, 100000);
+		runSimulation(25, 100000);
 //		runSimulation(50, 50000);
 //		runSimulation(100, 50000);
 	}
