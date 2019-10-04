@@ -38,7 +38,7 @@ public class CSVHeader extends FormatHeader<CSVField> {
 		super();
 		if (token != null && !token.isEmpty()) {
 			this.token = token.substring(0, 1);	// pick the first character only
-			if (!this.token.equals(";") && this.token.equals(",")) {
+			if (!this.token.equals(";") && !this.token.equals(",")) {
 				throw new InvalidParameterException("The only available field splitter for the CSV writer is either , or ;");
 			}
 		}
