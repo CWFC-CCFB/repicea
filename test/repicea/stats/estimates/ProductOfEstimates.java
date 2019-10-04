@@ -215,11 +215,15 @@ public class ProductOfEstimates {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		runSimulation(10000, true, true, true, "LLL");
-//		runSimulation(10, 100000);
-//		runSimulation(25, 100000);
-//		runSimulation(50, 50000);
-//		runSimulation(100, 50000);
+		int nbRealizations = 10000;
+//		runSimulation(nbRealizations, true, true, true, "LLL");
+//		runSimulation(nbRealizations, false, true, true, "HLL");
+//		runSimulation(nbRealizations, true, false, true, "LHL");
+//		runSimulation(nbRealizations, true, true, false, "LLH");
+//		runSimulation(nbRealizations, false, false, true, "HHL");
+//		runSimulation(nbRealizations, false, true, false, "HLH");
+//		runSimulation(nbRealizations, true, false, false, "LHH");
+		runSimulation(nbRealizations, false, false, false, "HHH");
 	}
 	
 }
