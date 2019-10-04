@@ -1,0 +1,2 @@
+sampleSize,trueMean,empMean,trueVariance,empVariance,goodmanVariance,naiveVariance,propagationVariance,MeanMC,VarMC,coverage,MeanRescaledMC,VarRescaledMC,rescaledCoverage
+LHH,400.0,399.7785566729566,31996.96,31922.856164763067,31990.87152406342,35237.65796020343,33601.2951582954,399.7728258327417,35234.77921913534,0.9477300000000001,NaN,NaN,0.93098
