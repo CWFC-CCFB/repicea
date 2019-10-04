@@ -21,13 +21,17 @@ package repicea.stats;
 import java.security.InvalidParameterException;
 import java.util.Random;
 
+import repicea.math.Matrix;
 import repicea.stats.distributions.utility.NegativeBinomialUtility;
 
-@SuppressWarnings("serial")
 public class REpiceaRandom extends Random {
 	
 	private static final double OneThird = 1d/3;
-		
+	
+	protected REpiceaRandom() {
+		super();
+	}
+	
 	private double getRandomGammaForShapeGreaterThanOrEqualToOne(double shape) {
 		double d = shape - OneThird;
 		double c = 1d / Math.sqrt(9 * d);
@@ -97,10 +101,11 @@ public class REpiceaRandom extends Random {
 	/**
 	 * Returns a random deviate from the standard Student's t distribution. The algorithm behind 
 	 * the random deviate generation is that of Bailey (1994) based on polar generation.
+	 * @param df the degrees of freedom
 	 * @see Bailey, R.W. 1994. Polar generation of random variances with the t-distribution. 
 	 * Mathematics of Computation 62(206): 779-781.
 	 */
-	public double nextStudentT(double degreesOfFreedom) {
+	public double nextStudentT(double df) {
 		double W = 2d;
 		double U = 0;
 		while (W > 1) {
@@ -111,7 +116,7 @@ public class REpiceaRandom extends Random {
 			W = U * U + V * V;
 		}
 		double C2 = U * U / W;
-		double R2 = degreesOfFreedom * (Math.pow(W, - 2d / degreesOfFreedom) - 1);
+		double R2 = df * (Math.pow(W, - 2d / df) - 1);
 		double result;
 		if (nextDouble() < .5) {
 			result = Math.sqrt(R2*C2);
@@ -120,5 +125,44 @@ public class REpiceaRandom extends Random {
 		}
 		return result;
 	}
+
+	
+	/**
+	 * This method returns a Chi squared random value.
+	 * @param df the degrees of freedom
+	 * @return a double
+	 */
+	public double nextChiSquare(int df) {
+		if (df <= 0) {
+			throw new InvalidParameterException("The number of degrees of freedom should be larger than 0");
+		}
+		double sumSquared = 0;
+		for (int i = 0; i < df; i++) {
+			double gaussian = nextGaussian();
+			sumSquared += gaussian * gaussian;
+		}
+		return sumSquared;
+	}
+
+	/**
+	 * This method returns the matrix A in the Bartlett decomposition.
+	 * @param df degrees of freedom
+	 * @param dim the dimensions of the matrix
+	 * @return a Matrix
+	 */
+	public Matrix nextBartlettDecompositionMatrix(int df, int dim) {
+		Matrix aMat = new Matrix(dim, dim);
+		for (int i = 0; i < aMat.m_iRows; i++) {
+			for (int j = 0; j <= i; j++) {
+				if (i == j) {
+					aMat.m_afData[i][j] = Math.sqrt(nextChiSquare(df - i));	
+				} else {
+					aMat.m_afData[i][j] = nextGaussian();
+				}
+			}
+		}
+		return aMat;
+	}
+
 	
 }
