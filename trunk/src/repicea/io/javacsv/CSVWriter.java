@@ -39,12 +39,12 @@ public class CSVWriter extends FormatWriter<CSVHeader> {
 	
 	private BufferedWriter bufferedWriter;
 	
-	public CSVWriter(File csvFile, boolean append) throws IOException {
+	public CSVWriter(File csvFile, boolean append, String token) throws IOException {
 		super(csvFile, append);
 		if (GFileFilter.getFileType(getFilename()) != FileType.CSV) {
 			throw new IOException("CSVWriter.c. The file is not a .csv file");
 		}
-		setFormatHeader(new CSVHeader());
+		setFormatHeader(new CSVHeader(token));
 
 		File outputFile = new File(getFilename());
 		if (outputFile.exists() && appendFile) {
@@ -61,6 +61,15 @@ public class CSVWriter extends FormatWriter<CSVHeader> {
 		bufferedWriter = new BufferedWriter(outputStreamWriter);
 	}
 
+	/**
+	 * CSVWriter constructor using the default splitter ";".
+	 * @param csvFile
+	 * @param append
+	 * @throws IOException
+	 */
+	public CSVWriter(File csvFile, boolean append) throws IOException {
+		this(csvFile, append, null);
+	}
 
 	@Override
 	public void addRecord(Object[] record) throws IOException {

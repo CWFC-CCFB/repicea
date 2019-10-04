@@ -20,6 +20,7 @@ package repicea.io.javacsv;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,10 +34,20 @@ public class CSVHeader extends FormatHeader<CSVField> {
 	
 	private String token = ";";			// default value
 	
-	protected CSVHeader() {
+	protected CSVHeader(String token) {
 		super();
+		if (token != null && !token.isEmpty()) {
+			this.token = token.substring(0, 1);	// pick the first character only
+			if (!this.token.equals(";") && this.token.equals(",")) {
+				throw new InvalidParameterException("The only available field splitter for the CSV writer is either , or ;");
+			}
+		}
 	}
-	
+
+	protected CSVHeader() {
+		this(null);
+	}
+
 	protected void read(BufferedReader bufferedReader) throws IOException {
 		String firstLine = bufferedReader.readLine();
 
