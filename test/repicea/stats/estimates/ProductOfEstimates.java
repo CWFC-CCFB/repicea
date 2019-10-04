@@ -12,8 +12,8 @@ import repicea.util.ObjectUtility;
 
 public class ProductOfEstimates {
 
-	private static double LowFactor = 0.05;
-	private static double HighFactor = 0.20;
+	private static double LowFactor = 0.10;
+	private static double HighFactor = 0.30;
 	private static enum Method {Naive, Propagation}
 	
 	
