@@ -25,44 +25,7 @@ import repicea.math.Matrix;
 
 public class ChiSquaredUtility {
 
-	private static final Random RANDOM = new Random();
-	
-	/**
-	 * This method returns a Chi squared random value.
-	 * @param df the degrees of freedom
-	 * @return a double
-	 */
-	public static double randomValue(int df) {
-		if (df <= 0) {
-			throw new InvalidParameterException("The number of degrees of freedom should be larger than 0");
-		}
-		double sumSquared = 0;
-		for (int i = 0; i < df; i++) {
-			double gaussian = RANDOM.nextGaussian();
-			sumSquared += gaussian * gaussian;
-		}
-		return sumSquared;
-	}
-	
-	/**
-	 * This method returns the matrix A in the Bartlett decomposition.
-	 * @param degreesOfFreedom
-	 * @param dim the dimensions of the matrix
-	 * @return a Matrix
-	 */
-	public static Matrix getBartlettDecompositionMatrix(int degreesOfFreedom, int dim) {
-		Matrix aMat = new Matrix(dim, dim);
-		for (int i = 0; i < aMat.m_iRows; i++) {
-			for (int j = 0; j <= i; j++) {
-				if (i == j) {
-					aMat.m_afData[i][j] = Math.sqrt(randomValue(degreesOfFreedom - i));	
-				} else {
-					aMat.m_afData[i][j] = RANDOM.nextGaussian();
-				}
-			}
-		}
-		return aMat;
-	}
+
 	
 	
 }

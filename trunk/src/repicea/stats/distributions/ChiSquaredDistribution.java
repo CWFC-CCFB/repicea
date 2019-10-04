@@ -22,7 +22,7 @@ import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
-import repicea.stats.distributions.utility.ChiSquaredUtility;
+import repicea.stats.StatisticalUtility;
 
 /**
  * The ChiSquareDistribution class represents a univariate Chi Square distribution with a given degrees of freedom.
@@ -174,11 +174,11 @@ public final class ChiSquaredDistribution implements Distribution {
 				lowerTriangleChol = mean.getLowerCholTriangle();
 				upperTriangleChol = lowerTriangleChol.transpose();
 			}
-			Matrix aMat = ChiSquaredUtility.getBartlettDecompositionMatrix(getDegreesOfFreedom(), mean.m_iRows);
+			Matrix aMat = StatisticalUtility.getRandom().nextBartlettDecompositionMatrix(getDegreesOfFreedom(), mean.m_iRows);
 			Matrix randomMat = lowerTriangleChol.multiply(aMat).multiply(aMat.transpose()).multiply(upperTriangleChol).scalarMultiply(1d/getDegreesOfFreedom());
 			return randomMat;
 		} else {
-			double factor = ChiSquaredUtility.randomValue(getDegreesOfFreedom()) / getDegreesOfFreedom();
+			double factor = StatisticalUtility.getRandom().nextChiSquare(getDegreesOfFreedom()) / getDegreesOfFreedom();
 			return mean.scalarMultiply(factor);
 		}
 	}

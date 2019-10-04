@@ -18,6 +18,7 @@
  */
 package repicea.simulation;
 
+import repicea.stats.StatisticalUtility;
 
 /**
  * This REpiceaBinaryEventPredictor class implements logistic and other models that aim at 
@@ -60,7 +61,7 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 		if (eventProbability < 0 || eventProbability > 1) {
 			return null;
 		} else if (isResidualVariabilityEnabled) {
-			double residualError = random.nextDouble();
+			double residualError = StatisticalUtility.getRandom().nextDouble();
 			if (residualError < eventProbability) {
 				return true;
 			} else {
