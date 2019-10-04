@@ -54,13 +54,9 @@ public final class ChiSquaredDistribution implements Distribution {
 		if (meanValue < 0) {
 			throw new InvalidParameterException("The variance estimate must be larger than 0!");
 		}
-//		double var = 2d / (2 + degreesOfFreedom) * meanValue * meanValue;
 		Matrix mean = new Matrix(1,1);
 		mean.m_afData[0][0] = meanValue;
 		this.mean = mean;
-//		Matrix variance = new Matrix(1,1);
-//		variance.m_afData[0][0] = var;
-//		setVariance(variance);
 	}
 
 	
@@ -83,29 +79,6 @@ public final class ChiSquaredDistribution implements Distribution {
 		this.mean = meanValues.getDeepClone();
 	}
 
-
-//	/**
-//	 * Constructor with mean and variance.
-//	 * @param degreesOfFreedom the degrees of freedom
-//	 * @param estimate the estimate of the mean
-//	 * @param var the variance
-//	 */
-//	public ChiSquaredDistribution(int degreesOfFreedom, double estimate, double var) { 	
-	// TODO this constructor should not include the degrees of freedom and could use the Satterthwaite approximation
-//		this(degreesOfFreedom);
-//		if (estimate < 0) {
-//			throw new InvalidParameterException("The variance estimate must be larger than 0!");
-//		}
-//		if (var < 0) {
-//			throw new InvalidParameterException("The variance must be larger than 0!");
-//		}
-//		Matrix mean = new Matrix(1,1);
-//		mean.m_afData[0][0] = estimate;
-//		setMean(mean);
-//		Matrix variance = new Matrix(1,1);
-//		variance.m_afData[0][0] = var;
-//		setVariance(variance);
-//	}
 
 	/**
 	 * This method returns the degrees of freedom.
