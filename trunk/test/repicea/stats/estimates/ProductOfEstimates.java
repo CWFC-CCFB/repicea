@@ -12,8 +12,8 @@ import repicea.util.ObjectUtility;
 
 public class ProductOfEstimates {
 
-	private static double LowFactor = 0.10;
-	private static double HighFactor = 0.30;
+	private static double LowFactor = 0.05;
+	private static double HighFactor = 0.20;
 	private static enum Method {Naive, Propagation}
 	
 	
@@ -33,6 +33,9 @@ public class ProductOfEstimates {
 					add(betaMean.elementWisePower(2d).multiply(alphaVariance));
 			if (method == Method.Naive) {
 				newVariance = newVariance.add(alphaVariance.multiply(betaVariance));
+			}
+			if (newVariance.m_afData[0][0] < 0) {
+				int u = 0;
 			}
 			currentEstimate = new SimpleEstimate(newMean, newVariance);
 		}
@@ -148,6 +151,9 @@ public class ProductOfEstimates {
 			
 			MonteCarloEstimate scaledProductMC = new MonteCarloEstimate();
 			double scalingFactor = Math.sqrt(productGoodman.getVariance().m_afData[0][0] / productNaive.getVariance().m_afData[0][0]);
+			if (Double.isNaN(scalingFactor)) {
+				int u = 0;
+			}
 			double mean = productMC.getMean().m_afData[0][0];
 			Matrix newReal;
 			for (Matrix r : productMC.getRealizations()) {
@@ -215,11 +221,11 @@ public class ProductOfEstimates {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		int nbRealizations = 100000;
-		runSimulation(nbRealizations, true, true, true, "LLL");
-		runSimulation(nbRealizations, false, true, true, "HLL");
-		runSimulation(nbRealizations, true, false, true, "LHL");
-		runSimulation(nbRealizations, true, true, false, "LLH");
+		int nbRealizations = 50000;
+//		runSimulation(nbRealizations, true, true, true, "LLL");
+//		runSimulation(nbRealizations, false, true, true, "HLL");
+//		runSimulation(nbRealizations, true, false, true, "LHL");
+//		runSimulation(nbRealizations, true, true, false, "LLH");
 		runSimulation(nbRealizations, false, false, true, "HHL");
 		runSimulation(nbRealizations, false, true, false, "HLH");
 		runSimulation(nbRealizations, true, false, false, "LHH");
