@@ -162,6 +162,9 @@ s	 */
 			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
 					add(betaMean.elementWisePower(2d).multiply(alphaVariance)).
 					subtract(alphaVariance.multiply(betaVariance));
+			if (newVariance.m_afData[0][0] < 0) {
+				int u = 0;
+			}
 			return new SimpleEstimate(newMean, newVariance);
 		}
 		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");

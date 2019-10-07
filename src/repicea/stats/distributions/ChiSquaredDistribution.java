@@ -152,6 +152,9 @@ public final class ChiSquaredDistribution implements Distribution {
 			return randomMat;
 		} else {
 			double factor = StatisticalUtility.getRandom().nextChiSquare(getDegreesOfFreedom()) / getDegreesOfFreedom();
+			if (factor < 0 || mean.m_afData[0][0] < 0) {
+				int u = 0;
+			}
 			return mean.scalarMultiply(factor);
 		}
 	}
