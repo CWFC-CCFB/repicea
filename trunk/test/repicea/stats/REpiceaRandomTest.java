@@ -108,4 +108,28 @@ public class REpiceaRandomTest {
 		Assert.assertEquals("Testing mean for gamma random values", expectedVariance, actual, 1E-1);
 	}
 
+	@Test
+	public void testBetaMeanAndVariance() {
+		double scale1 = 1d;
+		double scale2 = 2d;	
+		double expectedMean = scale1 / (scale1 + scale2);
+		double expectedVariance = scale1 * scale2 / ((scale1 + scale2) * (scale1 + scale2) * (scale1 + scale2 + 1));
+		REpiceaRandom randomGenerator = new REpiceaRandom();
+		int maxIter = 500000;
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		Matrix realization;
+		for (int i = 0; i < maxIter; i++) {
+			realization = new Matrix(1,1);
+			realization.m_afData[0][0] = randomGenerator.nextBeta(scale1, scale2);
+			estimate.addRealization(realization);
+		}
+		double actualMean = estimate.getMean().m_afData[0][0];
+		double actualVariance = estimate.getVariance().m_afData[0][0];
+		System.out.println ("Simulated mean = " + actualMean + "; Expected variance = " + expectedMean);
+		Assert.assertEquals("Testing mean for gamma random values", expectedMean, actualMean, 5E-3);
+		System.out.println ("Simulated variance = " + actualVariance + "; Expected variance = " + expectedVariance);
+		Assert.assertEquals("Testing mean for gamma random values", expectedVariance, actualVariance, 1E-3);
+	}
+
+
 }

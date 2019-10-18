@@ -61,9 +61,24 @@ public class REpiceaRandom extends Random {
 			return x * Math.pow(nextDouble(), 1d/shape);
 		}
 	}
+
 	
 	/**
-	 * THis method returns a random gamma distributed value following Marsaglia and Tsang's method. The 
+	 * Returns a random deviate from a beta distribution.
+	 *  with scales scale1 and beta.
+	 * @param scale1 a double larger than 0
+	 * @param scale2 a double larger than 0
+	 * @return a double
+	 */
+	public double nextBeta(double scale1, double scale2) {
+		double x = nextGamma(scale1, 1d);
+		double y = nextGamma(scale2, 1d);
+		return x / (x + y);
+	}
+	
+	
+	/**
+	 * Returns a random gamma distributed value following Marsaglia and Tsang's method. The 
 	 * mean of the distribution is obtained through the product of the shape and the scale.
 	 * @param shape a double larger than 0
 	 * @param scale a double larger than 0
