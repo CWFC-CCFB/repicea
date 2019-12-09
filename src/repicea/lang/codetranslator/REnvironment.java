@@ -64,26 +64,21 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		PrimitiveTypeMap.put("logical", boolean.class);
 	}
 
-	final static class InternalShutDownHook extends Thread {
+	static class InternalShutDownHook extends Thread {
 		
 		final JavaProcessWrapper rGatewayProcessWrapper;
-		final List<Runnable> jobsToEndBeforeClosing;
 		
 		InternalShutDownHook(JavaProcessWrapper rGatewayProcessWrapper) {
 			this.rGatewayProcessWrapper = rGatewayProcessWrapper;
-			jobsToEndBeforeClosing = new ArrayList<Runnable>();
 		}
 		
 		@Override
 		public void run() {
-			for (Runnable toRun : jobsToEndBeforeClosing) {
-				toRun.run();
-			}
 			rGatewayProcessWrapper.cancel();
 		}
 		
 	}
-	
+
 	
 	static class MethodWrapper implements Comparable<MethodWrapper> {
 
@@ -196,7 +191,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 	}
 
-	private static InternalShutDownHook ShutDownHook;
+	
 		
 	private static String ConstructCode = "create";
 	private static String ConstructNullCode = "createnull";
@@ -588,22 +583,6 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 
 	
 	/**
-	 * Registers a job to be closed before the JVM is shutdown. This method process the jobs in order they
-	 * are provided.
-	 * @param toRun
-	 * @return true if the job has been registered or false otherwise
-	 */
-	public static boolean registerShutdownHook(Runnable toRun) {
-		if (REnvironment.ShutDownHook == null) {
-			return false;
-		} else {
-			REnvironment.ShutDownHook.jobsToEndBeforeClosing.add(toRun);
-			return true;
-		}
-	}
-	
-	
-	/**
 	 * Main entry point for creating a REnvironment hosted by a Java local gateway server.
 	 * @param args
 	 * @throws Exception
@@ -648,8 +627,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				File rootPath = jarFile.getParentFile();
 
 				JavaProcessWrapper rGatewayProcessWrapper = new JavaProcessWrapper("RGateway Server", newCommands, rootPath);
-				REnvironment.ShutDownHook = new InternalShutDownHook(rGatewayProcessWrapper);
-				Runtime.getRuntime().addShutdownHook(REnvironment.ShutDownHook);
+				Runtime.getRuntime().addShutdownHook(new InternalShutDownHook(rGatewayProcessWrapper));
 				JavaProcess rGatewayProcess = rGatewayProcessWrapper.getInternalProcess();
 				rGatewayProcess.setClassPath(classPath);
 				if (memorySize != null) {
