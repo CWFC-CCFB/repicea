@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2019 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -397,17 +397,6 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 	}
 
-	/**
-	 * This method checks if the matrix is empty, ie it has no column and no row.
-	 * @return true if the matrix is empty or false otherwise
-	 */
-	public boolean isEmpty() {
-		if (this.m_iCols == 0 || this.m_iRows == 0) {
-			return true;
-		} else {
-			return false;
-		}
-	}
 	
 	/**
 	 * This method checks if this is a row vector
