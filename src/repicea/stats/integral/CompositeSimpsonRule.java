@@ -30,7 +30,7 @@ import java.util.List;
 public final class CompositeSimpsonRule extends NumericalIntegrationMethod {
 
 	private static final double EPSILON = 1E-12;
-	private int numberOfSubintervals;
+	private final int numberOfSubintervals;
 
 	
 	/**

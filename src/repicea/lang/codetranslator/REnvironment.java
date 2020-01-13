@@ -21,6 +21,7 @@ package repicea.lang.codetranslator;
 import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.security.InvalidParameterException;
@@ -201,6 +202,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private static String ConstructNullArrayCode = "createnullarray";
 	private static String MethodCode = "method";
 	private static String SynchronizeEnvironment = "sync";
+	private static String FieldCode = "field";
 
 	
 
@@ -212,6 +214,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			return createObjectFromRequestStrings(requestStrings); 
 		} else if (requestStrings[0].equals(MethodCode)) {
 			return processMethod(requestStrings);
+		} else if (requestStrings[0].equals(FieldCode)) {
+			return processField(requestStrings);
 		} else if (requestStrings[0].equals(SynchronizeEnvironment)) {
 			return synchronizeEnvironment(requestStrings);
 		} else {
@@ -276,6 +280,90 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	}
 
 	
+	@SuppressWarnings({ "rawtypes"})
+	private Object processField(String[] requestStrings) throws Exception {
+		Class clazz = null;
+		List<ParameterWrapper> wrappers = null;
+		boolean lookingForStaticMethod = false;
+		if (requestStrings[1].startsWith("java.object")) {			// presumably non-static method
+			wrappers = findObjectInEnvironment(requestStrings[1]);
+			Object caller = getCallerAmongWrappers(wrappers);
+			clazz = caller.getClass();
+		} else {
+			wrappers = createFromPrimitiveClass(getPrimitiveClass(requestStrings[1]), requestStrings[1]);
+			ParameterWrapper caller = wrappers.get(0);
+			if (wrappers.size() == 1 && caller.type.equals(String.class)) { // could be a call to a static method
+				try {
+					String className = caller.value.toString();
+					clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+					lookingForStaticMethod = true;
+					wrappers = new ArrayList<ParameterWrapper>();
+					wrappers.add(new ParameterWrapper(clazz, null));
+				} catch (ClassNotFoundException e) {
+					clazz = ReflectUtility.PrimitiveToJavaWrapperMap.get(caller.type);
+				}
+			} else {
+				clazz = ReflectUtility.PrimitiveToJavaWrapperMap.get(caller.type);
+			}
+		}
+		List[] outputLists = marshallParameters(requestStrings, 3);
+		List<Class<?>> parameterTypes = outputLists[0];
+		if (parameterTypes.size() > 1) {
+			throw new InvalidParameterException("While setting a field, there cannot be more than a single argument to the function!");
+		}
+		ParameterList parameters = (ParameterList) outputLists[1];
+		String fieldName = requestStrings[2];
+		Field field;
+		try {
+			field = clazz.getField(fieldName);
+		} catch (NoSuchFieldException e) {
+			if (clazz.equals(String.class)) {
+				throw new NoSuchFieldException(e.getMessage() + " - NOTE: the source was treated as a String object!");
+			} else {
+				throw e;
+			}
+		} 			
+
+		if (lookingForStaticMethod) {
+			if (!Modifier.isStatic(field.getModifiers())) {		// checks if the field is truly static or throws an exception otherwise
+				throw new InvalidParameterException("The field is not a static field!");
+			}
+		}
+		
+		JavaObjectList outputList = new JavaObjectList();
+		if (parameters.isEmpty()) {
+			for (int j = 0; j < wrappers.size(); j++) {
+				Object result = field.get(wrappers.get(j).value);
+				registerMethodOutput(result, outputList);
+			}
+		} else {
+			if (wrappers.size() > 1 && parameters.getInnerSize() > 1 && wrappers.size() != parameters.getInnerSize()) {
+				throw new InvalidParameterException("The length of the java.arraylist object is different of the length of the vectors in the parameters!");
+			} else {
+				int maxSize = Math.max(wrappers.size(), parameters.getInnerSize());
+				for (int i = 0; i < maxSize; i++) {
+					int j = i;
+					if (parameters.getInnerSize() == 1) {
+						j = 0;
+					}
+					int k = i;
+					if (wrappers.size() == 1) {
+						k = 0;
+					}
+					field.set(wrappers.get(k).value, parameters.getParameterArray(j)[0]);
+//					registerMethodOutput(result, outputList);
+				}		
+			}
+		}
+		if (outputList.isEmpty()) {
+			return null;
+		} else if (outputList.size() == 1) {
+			return outputList.get(0);
+		} else {
+			return outputList;
+		}
+	}
+
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private Object processMethod(String[] requestStrings) throws Exception {
 		Class clazz = null;

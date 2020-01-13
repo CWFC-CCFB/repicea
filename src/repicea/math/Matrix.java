@@ -49,8 +49,8 @@ public final class Matrix implements Serializable, DeepCloneable {
 	private static final double EPSILON = 1E-12;
 	
 	public double[][] m_afData;
-	public int m_iRows;
-	public int m_iCols;
+	public final int m_iRows;
+	public final int m_iCols;
 	
 	/**
 	 * Constructor 1. Creates a matrix from a two-dimension array.

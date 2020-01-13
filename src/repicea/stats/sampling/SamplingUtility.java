@@ -24,12 +24,11 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+
+import repicea.stats.StatisticalUtility;
 
 public class SamplingUtility {
 
-	private static Random random = new Random();
-	
 	/**
 	 * This method returns a sample from a population.
 	 * @param population a List instance with the population
@@ -85,7 +84,7 @@ public class SamplingUtility {
 		List<Integer> sampleIndex = new ArrayList<Integer>();
 		int index;
 		while (sampleIndex.size() < sampleSize) {
-			index = (int) Math.floor(random.nextDouble() * populationSize);
+			index = (int) Math.floor(StatisticalUtility.getRandom().nextDouble() * populationSize);
 			if (withReplacement || !sampleIndex.contains(index)) {
 				sampleIndex.add(index);
 			}
