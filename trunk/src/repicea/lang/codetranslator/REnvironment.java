@@ -22,6 +22,7 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -180,9 +181,10 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			}
 		}
 	}
+
 	
 	private class NullWrapper {
-		
+
 		final Class<?> type; 
 		
 		private NullWrapper(Class<?> type) {
@@ -196,6 +198,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private static String ConstructCode = "create";
 	private static String ConstructNullCode = "createnull";
 	private static String ConstructArrayCode = "createarray";
+	private static String ConstructNullArrayCode = "createnullarray";
 	private static String MethodCode = "method";
 	private static String SynchronizeEnvironment = "sync";
 
@@ -277,16 +280,27 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 	private Object processMethod(String[] requestStrings) throws Exception {
 		Class clazz = null;
 		List<ParameterWrapper> wrappers = null;
+		boolean lookingForStaticMethod = false;
 		if (requestStrings[1].startsWith("java.object")) {			// presumably non-static method
 			wrappers = findObjectInEnvironment(requestStrings[1]);
 			Object caller = getCallerAmongWrappers(wrappers);
 			clazz = caller.getClass();
-		} else if (requestStrings[1].startsWith("java.class")) { 	// static method
-			String prefix = "java.class";
-			String className = requestStrings[1].substring(prefix.length());
-			clazz = ClassLoader.getSystemClassLoader().loadClass(className);
-			wrappers = new ArrayList<ParameterWrapper>();
-			wrappers.add(new ParameterWrapper(clazz, null));
+		} else {
+			wrappers = createFromPrimitiveClass(getPrimitiveClass(requestStrings[1]), requestStrings[1]);
+			ParameterWrapper caller = wrappers.get(0);
+			if (wrappers.size() == 1 && caller.type.equals(String.class)) { // could be a call to a static method
+				try {
+					String className = caller.value.toString();
+					clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+					lookingForStaticMethod = true;
+					wrappers = new ArrayList<ParameterWrapper>();
+					wrappers.add(new ParameterWrapper(clazz, null));
+				} catch (ClassNotFoundException e) {
+					clazz = ReflectUtility.PrimitiveToJavaWrapperMap.get(caller.type);
+				}
+			} else {
+				clazz = ReflectUtility.PrimitiveToJavaWrapperMap.get(caller.type);
+			}
 		}
 		List[] outputLists = marshallParameters(requestStrings, 3);
 		List<Class<?>> parameterTypes = outputLists[0];
@@ -306,6 +320,12 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				met = findNearestMethod(clazz, methodName, parameterTypes);
 			}
 		} 			
+
+		if (lookingForStaticMethod) {	
+			if (!Modifier.isStatic(met.getModifiers())) {		// checks if the method is truly static or throws an exception otherwise
+				throw new InvalidParameterException("The method is not a static method!");
+			}
+		}
 		
 		JavaObjectList outputList = new JavaObjectList();
 		if (parameters.isEmpty()) {
@@ -459,9 +479,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		
 		boolean isNull = requestStrings[0].equals(ConstructNullCode);
 		boolean isArray = requestStrings[0].equals(ConstructArrayCode);
-		if (isNull && isArray) {
-			throw new InvalidParameterException("An array instance cannot be null!");
-		}
+		boolean isNullArray = requestStrings[0].equals(ConstructNullArrayCode);
 		
 		String className = requestStrings[1];
 		Class<?> clazz;
@@ -488,6 +506,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				Object newInstance;
 				if (isNull) {
 					newInstance = new NullWrapper(clazz);
+				} else if (isNullArray) {
+					Object fakeInstance = getNewInstance(true, clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));	// true: is array
+					newInstance = new NullWrapper(fakeInstance.getClass());
 				} else {
 					newInstance = getNewInstance(isArray, clazz, parameterTypes.toArray(new Class[]{}), parameters.getParameterArray(i));
 				}
