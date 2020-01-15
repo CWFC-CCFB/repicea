@@ -340,7 +340,7 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	/**
 	 * This method makes it possible to determine whether or not this TreeLogger
 	 * class is compatible with the reference object
-	 * @param referent a TreeLoggerCompatibilityCheck instance
+	 * @param check a TreeLoggerCompatibilityCheck instance
 	 * @return a boolean
 	 */
 	public abstract boolean isCompatibleWith(TreeLoggerCompatibilityCheck check);

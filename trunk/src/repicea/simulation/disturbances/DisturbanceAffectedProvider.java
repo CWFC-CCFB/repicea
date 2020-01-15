@@ -24,7 +24,6 @@ public interface DisturbanceAffectedProvider extends DisturbanceTypeProvider {
 
 	/**
 	 * Returns true if the plot if affected by the disturbance provided that it has occurred
-	 * @param compositeStand
 	 * @param plot
 	 * @return a boolean
 	 */

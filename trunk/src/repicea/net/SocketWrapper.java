@@ -39,7 +39,7 @@ public interface SocketWrapper extends Closeable {
 	/**
 	 * This method reads an object from the socket. There is a timeout after a given number of
 	 * seconds. If the number of seconds is equal to or smaller than 0, then there is no timeout.
-	 * @param  numberOfSeconds number of seconds to wait before throwing a TimeoutException
+	 * @param  timeout number of seconds to wait before throwing a TimeoutException
 	 * @return the object that was read from the socket
 	 * @throws Exception 
 	 */

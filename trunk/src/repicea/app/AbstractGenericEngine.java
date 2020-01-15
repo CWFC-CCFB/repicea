@@ -177,8 +177,7 @@ public abstract class AbstractGenericEngine {
 	 * This method is called whenever an exception is thrown while running a task. If 
 	 * the Engine has a user interface and this interface is visible, an error message
 	 * is displayed. The queue of tasks is cleared.
-	 * @param taskName the name of the task that failed
-	 * @param failureReason the exception that was thrown
+	 * @param task a GenericTask instance
 	 */
 	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
 		String message = null;

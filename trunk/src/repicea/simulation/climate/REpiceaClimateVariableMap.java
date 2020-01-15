@@ -71,7 +71,7 @@ public class REpiceaClimateVariableMap extends HashMap<ClimateVariable, Double> 
 		
 		/**
 		 * Performs the change on the climate variable following a linear extrapolation pattern.
-		 * @param annualChanges a Map with the annual change for one or many climate variables
+		 * @param climateChangeTrend a REpiceaClimateChangeTrend instance
 		 * @param dateYr the current date (years)
 		 */
 		public REpiceaClimateVariableMap getUpdatedClimateVariableMap(REpiceaClimateChangeTrend climateChangeTrend, int dateYr);

@@ -34,7 +34,7 @@ public class DisturbanceOccurrences {
 	/**
 	 * Constructor for multiple occurrences
 	 * @param parms
-	 * @param dateYr
+	 * @param datesYr a List of dates (integers)
 	 */
 	public DisturbanceOccurrences(DisturbanceAffectedProvider parms, List<Integer> datesYr) {
 		this(parms);
@@ -68,8 +68,7 @@ public class DisturbanceOccurrences {
 	/**
 	 * This method checks whether a particular plot is affected by the disturbance. It assumes
 	 * that the method isThereADisturbance of the DisturbanceParameters class has returned true. 
-	 * @param model an ExtModel instance
-	 * @param plot an ExtPlot instance
+	 * @param plot a MonteCarloSimulationCompliantObject instance
 	 * @return a boolean
 	 */
 	public synchronized boolean isThisPlotAffected(MonteCarloSimulationCompliantObject plot) {

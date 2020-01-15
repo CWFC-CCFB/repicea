@@ -28,11 +28,6 @@ import java.util.Map;
  * The AbstractMathematicalFunction class suits mathematical function that can be derived. The return value
  * can be an complex object to enable the nesting of different mathematical functions.
  * @author Mathieu Fortin - June 2011
- *
- * @param <ParameterID>	definition of the parameter index 
- * @param <ParameterClass> class of the parameters
- * @param <VariableID> definition of the variable index
- * @param <VariableClass> class of the variables
  */
 @SuppressWarnings("serial")
 public abstract class AbstractMathematicalFunction implements EvaluableFunction<Double>, DerivableMathematicalFunction, Serializable {

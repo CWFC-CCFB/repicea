@@ -27,7 +27,7 @@ public interface SamplingUnitIDProvider {
 
 	/**
 	 * This method returns the id of the sample plot that contains this tree.
-	 * @return
+	 * @return the id of the sample plot
 	 */
 	public String getSamplingUnitID();
 	

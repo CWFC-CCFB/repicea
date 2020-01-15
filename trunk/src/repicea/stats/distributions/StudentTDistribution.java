@@ -28,8 +28,6 @@ import repicea.stats.StatisticalUtility;
  * This class implements the standard Student's t distribution. The algorithm behind 
  * the random deviate generation is that of Bailey (1994) based on polar generation.
  * @author Mathieu Fortin - October 2019
- * @see Bailey, R.W. 1994. Polar generation of random variances with the t-distribution. 
- * Mathematics of Computation 62(206): 779-781.
  */
 @SuppressWarnings("serial")
 public class StudentTDistribution implements Distribution {
@@ -46,7 +44,8 @@ public class StudentTDistribution implements Distribution {
 	 * they are assumed to be independent, i.e. the non zero off diagonal elements in the variance 
 	 * matrix will not be considered.
 	 * @param mu the mean of the function
-	 * @param sigma2 the variance of the function
+	 * @param variance the variance of the distribution
+	 * @param degreesOfFreedom the degrees of freedom of the distribution
 	 */
 	public StudentTDistribution(Matrix mu, Matrix variance, int degreesOfFreedom) {
 		this.degreesOfFreedom = degreesOfFreedom;

@@ -38,7 +38,7 @@ public class ServerConfiguration implements Serializable {
 	/**
 	 * Constructor. 
 	 * @param numberOfClientThreads number of threads that can answer calls.
-	 * @param waitingListSize number of pending calls
+	 * @param maxSizeOfWaitingList number of pending calls
 	 * @param outerPort port on which the server exchange the information with the clients
 	 * @param internalPort port on which the server interface can be accessed
 	 */

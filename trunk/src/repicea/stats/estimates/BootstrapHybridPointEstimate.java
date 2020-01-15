@@ -243,9 +243,8 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	/**
 	 * This method returns a MonteCarloEstimate instance that results from the subtraction of two 
 	 * MonteCarloEstimate instances with the same number of realizations. 
-	 * @param estimate1 the first estimate
-	 * @param estimate2 the estimate that is subtracted to the first estimate
-	 * @return a MonteCarloEstimate instance
+	 * @param estimate2 the estimate that is subtracted from this estimate
+	 * @return a BootstrapHybridPointEstimate instance
 	 */
 	protected BootstrapHybridPointEstimate subtract(BootstrapHybridPointEstimate estimate2) {
 		if (getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
@@ -261,9 +260,8 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	/**
 	 * This method returns a MonteCarloEstimate instance that results from the sum of two 
 	 * MonteCarloEstimate instances with the same number of realizations. 
-	 * @param estimate1 the first estimate
-	 * @param estimate2 the estimate that is added to the first estimate
-	 * @return a MonteCarloEstimate instance
+	 * @param estimate2 the estimate that is added to this estimate
+	 * @return a BootstrapHybridPointEstimate instance
 	 */
 	protected BootstrapHybridPointEstimate add(BootstrapHybridPointEstimate estimate2) {
 		if (getNumberOfRealizations() != estimate2.getNumberOfRealizations()) {
@@ -279,9 +277,8 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	/**
 	 * This method returns a MonteCarloEstimate instance that results from the product of original 
 	 * MonteCarloEstimate instance and a scalar. 
-	 * @param estimate1 the first estimate
 	 * @param scalar the multiplication factor
-	 * @return a MonteCarloEstimate instance
+	 * @return a BootstrapHybridPointEstimate instance
 	 */
 	protected BootstrapHybridPointEstimate multiply(double scalar) {
 		BootstrapHybridPointEstimate outputEstimate = new BootstrapHybridPointEstimate();
