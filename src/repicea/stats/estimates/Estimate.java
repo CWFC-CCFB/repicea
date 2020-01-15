@@ -117,7 +117,7 @@ s	 */
 	
 	/**
 	 * This method returns an difference estimate.
-	 * @param estimate2 an Estimate to be subtracted from this estimate.
+	 * @param scalar a double to be multiplied by this estimate
 	 * @return an Estimate
 	 */
 	public Estimate<?> getProductEstimate(double scalar) {
@@ -162,9 +162,6 @@ s	 */
 			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
 					add(betaMean.elementWisePower(2d).multiply(alphaVariance)).
 					subtract(alphaVariance.multiply(betaVariance));
-			if (newVariance.m_afData[0][0] < 0) {
-				int u = 0;
-			}
 			return new SimpleEstimate(newMean, newVariance);
 		}
 		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");

@@ -60,7 +60,7 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	 * @param titleString the title of the progress bar
 	 * @param labelString the message
 	 * @param jobToRun the SwingWorker instance that contains the job to be executed
-	 * @param boolean setIndeterminate true to set the progress bar in indeterminate mode
+	 * @param setIndeterminate true to set the progress bar in indeterminate mode
 	 */
 	@SuppressWarnings("rawtypes")
 	public REpiceaProgressBarDialog(Window owner, String titleString, String labelString, SwingWorker jobToRun, boolean setIndeterminate) {

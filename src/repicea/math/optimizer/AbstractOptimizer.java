@@ -105,7 +105,7 @@ public abstract class AbstractOptimizer {
 
 	/**
 	 * This method sets the verbose to true or false.
-	 * @param verbose true to get the information about the subiteration or false (DEFAULT VALUE).
+	 * @param verboseEnabled true to get the information about the subiteration or false (DEFAULT VALUE).
 	 */
 	public void setVerboseEnabled(boolean verboseEnabled) {this.verboseEnabled = verboseEnabled;}
 
@@ -134,7 +134,7 @@ public abstract class AbstractOptimizer {
 	
 	/**
 	 * This method optimizes the likelihood of the StatisticalModel instance.
-	 * @param model a SimpleMathematicalExpression object
+	 * @param function a AbstractMathematicalFunction object
 	 * @param indicesOfParametersToOptimize	a List instance that contains the indices of the parameters to be optimized
 	 */
 	public abstract boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;

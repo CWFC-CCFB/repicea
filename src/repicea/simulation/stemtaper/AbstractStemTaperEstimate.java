@@ -45,7 +45,6 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 
 	/**
 	 * Constructor.
-	 * @param numberOfRealizations the number of realizations (an integer)
 	 * @param computedHeights a List instance containing the heights (m) of the cross sections
 	 */
 	public AbstractStemTaperEstimate(List<Double> computedHeights) {

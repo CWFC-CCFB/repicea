@@ -368,7 +368,7 @@ public final class ObjectUtility {
 	 * possibility of having the \" character.
 	 * @param lineRead the string
 	 * @param token the field separator
-	 * @return
+	 * @return a List of String instances
 	 */
 	public static List<String> splitLine(String lineRead, String token) {
 		List<String> strings = new ArrayList<String>();

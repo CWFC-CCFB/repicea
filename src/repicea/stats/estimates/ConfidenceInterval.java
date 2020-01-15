@@ -74,7 +74,7 @@ public class ConfidenceInterval {
 	
 	/**
 	 * This method returns true if one of the bound of the confidence intervals contains a NaN
-	 * @return
+	 * @return a boolean
 	 */
 	public boolean isThereAnyNaN() {
 		return getLowerLimit().doesContainAnyNaN() || getUpperLimit().doesContainAnyNaN();

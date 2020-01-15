@@ -54,7 +54,7 @@ public class TreeLoggerManager {
 	/**
 	 * This method returns the TreeLoggerDescription instances that are compatible with
 	 * the reference object.
-	 * @param referent 
+	 * @param check a TreeLoggerCompatibilityCheck instance
 	 * @return a List of TreeLoggerDescription instances
 	 */
 	@SuppressWarnings("rawtypes")

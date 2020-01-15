@@ -36,9 +36,6 @@ public class StandardGaussianDistribution implements Distribution {
 	/**
 	 * This constructor creates a Gaussian function with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 
 	 * positive definite.
-	 * @param mu the mean of the function
-	 * @param sigma2 the variance of the function
-	 * @throws UnsupportedOperationException if the matrix sigma2 is not positive definite
 	 */
 	protected StandardGaussianDistribution() {
 		Matrix mu = new Matrix(1,1);

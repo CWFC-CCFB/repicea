@@ -113,7 +113,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	
 	/**
 	 * Constructor.
-	 * @param outerPort a port for communication between the local server and the other application.
+	 * @param servConf a ServerConfiguration instance
 	 * @param translator an instance that implements the REpiceaCodeTranslator interface
 	 * @throws Exception
 	 */
@@ -134,7 +134,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 
 	/**
 	 * Hidden constructor for test purpose
-	 * @param outerPort a port for communication between the local server and the other application.
+	 * @param servConf a ServerConfiguration instance
 	 * @param translator an instance that implements the REpiceaCodeTranslator interface
 	 * @param shutdownOnClosedConnection by default this parameter is set to true so that if the connection is lost, the server is shutdown.
 	 * @throws Exception

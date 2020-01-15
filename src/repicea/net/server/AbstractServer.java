@@ -183,9 +183,8 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 
 	/**
 	 * Constructor.
-	 * @param port the port of communication
 	 * @param configuration a ServerConfiguration instance that defines the number of threads, the reference path and the filename of the exception rules
-	 * @param exceptionRuleFilename the filename of the referenceRule if any (optional, can be null)
+	 * @param isCallerAJavaApplication true if the client is a Java app 
 	 * @throws Exception
 	 */
 	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {

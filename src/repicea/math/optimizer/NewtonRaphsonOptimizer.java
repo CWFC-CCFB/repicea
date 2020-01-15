@@ -43,11 +43,19 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	}
 
 	/**
-	 * This method optimize the log-likelihood function using the Newton-Raphson optimisation step.
 	 * @param model the model that provides the log-likelihood function
+	 */
+	
+	
+	/**
+	 * This method optimize the log-likelihood function using the Newton-Raphson optimisation step.
+	 * @param function an AbstractMathematicalFunction instance
+	 * @param indicesOfParametersToOptimize a list of the indices of the parameters to be optimized
 	 * @param originalBeta the vector that contains the parameters of the previous outer optimisation
 	 * @param optimisationStep the optimisation step from the Newton-Raphson algorithm
 	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimisation
+	 * @param lineSearchMethod
+	 * @return the value of the function
 	 * @throws OptimisationException if the inner optimisation is not successful
 	 */
 	protected double runInnerOptimisation(AbstractMathematicalFunction function, 

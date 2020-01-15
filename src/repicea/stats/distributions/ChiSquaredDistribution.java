@@ -63,7 +63,7 @@ public final class ChiSquaredDistribution implements Distribution {
 	/**
 	 * Constructor for multivariate Chi-squared distribution (Wishart distribution). 
 	 * @param degreesOfFreedom the degrees of freedom
-	 * @param meanValue the mean value
+	 * @param meanValues the mean value
 	 */
 	public ChiSquaredDistribution(int degreesOfFreedom, Matrix meanValues) {
 		if (degreesOfFreedom < 1) {
@@ -152,9 +152,6 @@ public final class ChiSquaredDistribution implements Distribution {
 			return randomMat;
 		} else {
 			double factor = StatisticalUtility.getRandom().nextChiSquare(getDegreesOfFreedom()) / getDegreesOfFreedom();
-			if (factor < 0 || mean.m_afData[0][0] < 0) {
-				int u = 0;
-			}
 			return mean.scalarMultiply(factor);
 		}
 	}
