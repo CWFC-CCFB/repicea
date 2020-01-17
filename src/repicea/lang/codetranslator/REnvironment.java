@@ -712,7 +712,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 						if (REpiceaSystem.isRunningOnWindows()) {
 							classPathSeparator = ";";
 						}
-						classPath  = classPath + classPathSeparator + extensionPath + File.separator + "*";
+						classPath  = classPath + classPathSeparator + extensionPath;// + File.separator + "*";
 					}
 				}
 				
