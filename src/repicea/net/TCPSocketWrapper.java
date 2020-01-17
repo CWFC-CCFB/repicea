@@ -120,7 +120,7 @@ public class TCPSocketWrapper implements SocketWrapper {
 	
 	@Override
 	public void close() throws IOException {
-		getObjectOutputStream().flush();
+//		getObjectOutputStream().flush();  20200117MF removed because it caused a deadlock on Windows OS and does not seem necessary
 		socket.close();
 	}
 	
