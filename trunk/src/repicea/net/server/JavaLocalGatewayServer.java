@@ -21,9 +21,11 @@ package repicea.net.server;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 
 import repicea.lang.codetranslator.REpiceaCodeTranslator;
 import repicea.net.SocketWrapper;
+import repicea.net.TCPSocketWrapper;
 import repicea.net.server.BasicClient.ClientRequest;
 
 /**
@@ -32,6 +34,45 @@ import repicea.net.server.BasicClient.ClientRequest;
  * @author Mathieu Fortin - December 2018
  */
 public class JavaLocalGatewayServer extends AbstractServer {
+	
+	
+	class REpiceaBackDoorCancellationThread extends Thread {
+		private final ServerSocket emergencySocket;
+		
+		REpiceaBackDoorCancellationThread(int port) throws IOException {
+			emergencySocket = new ServerSocket(port);
+			start();
+		}
+		
+		@Override
+		public void run() {
+			while (true) {
+				SocketWrapper clientSocket = null;
+				try {
+					clientSocket = new TCPSocketWrapper(emergencySocket.accept(), false);
+					clientSocket.writeObject(ServerReply.CallAccepted);
+					Object request = clientSocket.readObject();
+					if (request.toString().equals("emergencyShutdown")) {
+						System.exit(1);
+					}
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				} catch (Exception e2) {
+					e2.printStackTrace();
+				} finally {
+					try {
+						if (clientSocket != null  && !clientSocket.isClosed()) {
+							clientSocket.close();
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+	}
+	
+	
 	
 	private class JavaGatewayClientThread extends ClientThread {
 
@@ -66,7 +107,6 @@ public class JavaLocalGatewayServer extends AbstractServer {
 							}
 						} catch (Exception e) {		// something wrong happened during the processing of the request
 							try {
-//								e.printStackTrace();
 								if (e instanceof IOException) {	// seems that the connection was lost
 									closeSocket();
 								} else if (!socketWrapper.isClosed()) {
@@ -106,6 +146,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 			}
 			return null;
 		}
+
 	}
 
 	protected final REpiceaCodeTranslator translator;	
@@ -144,6 +185,7 @@ public class JavaLocalGatewayServer extends AbstractServer {
 		super(servConf, false);
 		this.translator = translator;
 		this.shutdownOnClosedConnection = shutdownOnClosedConnection;
+		new REpiceaBackDoorCancellationThread(50000);
 	}
 
 	@Override
