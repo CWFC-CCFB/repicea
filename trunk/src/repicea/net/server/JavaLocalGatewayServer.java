@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
+import java.net.Socket;
 
 import repicea.lang.codetranslator.REpiceaCodeTranslator;
 import repicea.net.SocketWrapper;
@@ -37,9 +38,13 @@ public class JavaLocalGatewayServer extends AbstractServer {
 	
 	
 	class REpiceaBackDoorCancellationThread extends Thread {
+		
 		private final ServerSocket emergencySocket;
+		private final int port;
 		
 		REpiceaBackDoorCancellationThread(int port) throws IOException {
+			super("Back door cancellation thread");
+			this.port = port;
 			emergencySocket = new ServerSocket(port);
 			start();
 		}
@@ -54,6 +59,9 @@ public class JavaLocalGatewayServer extends AbstractServer {
 					Object request = clientSocket.readObject();
 					if (request.toString().equals("emergencyShutdown")) {
 						System.exit(1);
+					} else if (request.toString().equals("softExit")) {
+						emergencySocket.close();
+						break;
 					}
 				} catch (IOException e1) {
 					e1.printStackTrace();
@@ -69,6 +77,16 @@ public class JavaLocalGatewayServer extends AbstractServer {
 					}
 				}
 			}
+		}
+
+		protected void softExit() {
+			try {
+				Socket socket = new Socket(InetAddress.getLoopbackAddress(), port);
+				SocketWrapper socketWrapper = new TCPSocketWrapper(socket, false);
+				socketWrapper.readObject();
+				socketWrapper.writeObject("softExit");
+				socketWrapper.close();
+			} catch (Exception e) {}
 		}
 	}
 	
@@ -151,6 +169,8 @@ public class JavaLocalGatewayServer extends AbstractServer {
 
 	protected final REpiceaCodeTranslator translator;	
 	protected final boolean shutdownOnClosedConnection;
+	protected final REpiceaBackDoorCancellationThread backdoorThread;
+	protected boolean bypassShutdownForTesting;
 	
 	/**
 	 * Constructor.
@@ -185,11 +205,28 @@ public class JavaLocalGatewayServer extends AbstractServer {
 		super(servConf, false);
 		this.translator = translator;
 		this.shutdownOnClosedConnection = shutdownOnClosedConnection;
-		new REpiceaBackDoorCancellationThread(50000);
+		backdoorThread = new REpiceaBackDoorCancellationThread(50000);
 	}
 
 	@Override
 	protected ClientThread createClientThread(AbstractServer server, int id) {
 		return new JavaGatewayClientThread(server, id);
 	}
+
+	
+	
+	@Override
+	protected void shutdown(int shutdownCode) {
+		if (backdoorThread.isAlive()) {
+			backdoorThread.softExit();
+		}
+		if (bypassShutdownForTesting) {
+			return;
+		}
+		super.shutdown(shutdownCode);
+	}
+	
+	
+	
+	
 }

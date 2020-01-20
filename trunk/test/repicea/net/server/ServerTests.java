@@ -85,6 +85,8 @@ public class ServerTests {
 
 //		client.close();			
 		System.out.println("TCP Server implementation with multiple requests (3) successfully tested!");
+		server.bypassShutdownForTesting = true;
+		server.requestShutdown();
 	}
 
 
@@ -147,6 +149,8 @@ public class ServerTests {
 
 //		client.close();			
 		System.out.println("UDP Server implementation with multiple requests (3) successfully tested!");
+		server.bypassShutdownForTesting = true;
+		server.requestShutdown();
 	}
 
 	
