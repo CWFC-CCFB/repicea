@@ -30,6 +30,7 @@ import java.lang.reflect.Method;
 import java.util.Hashtable;
 
 import javax.swing.ButtonGroup;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -226,9 +227,9 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		slider.setMinorTickSpacing(minorTickSpacing);
 		slider.setMajorTickSpacing(majorTickSpacing);
 		slider.setValue(caller.settings.getAllocatedMemoryJVM());
-		@SuppressWarnings("unchecked")
-		Hashtable<Integer, JLabel> valueTable = slider.createStandardLabels(majorTickSpacing, minimum);
-		for (JLabel label : valueTable.values()) {
+		Hashtable<Integer, JComponent> valueTable = slider.createStandardLabels(majorTickSpacing, minimum);
+		for (JComponent comp : valueTable.values()) {
+			JLabel label = (JLabel) comp; // 2020-02-20 This cast is required for compatibility with Java 11 and 13
 			label.setText(label.getText() + MessageID.JVMMemorySuffixe.toString());
 		}
 		slider.setLabelTable(valueTable);
