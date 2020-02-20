@@ -2,7 +2,7 @@
   DBFField
 	Class represents a "field" (or column) definition of a DBF data structure.
 
-  This file is part of JavaDBF packege.
+  This file is part of JavaDBF package.
 
   author: anil@linuxense.com
   license: LGPL (http://www.gnu.org/copyleft/lesser.html)
