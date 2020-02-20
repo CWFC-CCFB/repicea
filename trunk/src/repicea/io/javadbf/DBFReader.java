@@ -1,9 +1,9 @@
 /*
   DBFReader
   Class for reading the records assuming that the given
-	InputStream comtains DBF data.
+	InputStream contains DBF data.
 
-  This file is part of JavaDBF packege.
+  This file is part of JavaDBF package.
 
   Author: anil@linuxense.com
   License: LGPL (http://www.gnu.org/copyleft/lesser.html)

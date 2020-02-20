@@ -21,8 +21,10 @@ by a GNU Lesser General Public License.
 
 This library includes the JavaDBF library (copyright anil@linuxense.com) and requires the 
 ucanaccess library version 2.0.3 (http://ucanaccess.sourceforge.net/site.html) to work properly. 
+These two libraries are protected by a GNU Lesser General Public License. 
 
-This library also requires the Apache Commons Mathematics Library (http://commons.apache.org/proper/commons-math/), 
-which is protected by an Apache License.
+It also requires the jabx library version 2.3.2 (Copyright (c) 2017 Oracle and/or its affiliates, 
+https://eclipse-ee4j.github.io/jaxb-ri/) if the JVM is running under Java 11 or 13. 
+The jabx library is protected by the Eclipse Distribution License 
+(see https://www.eclipse.org/org/documents/edl-v10.php).
 
-All these libraries  are protected by a GNU Lesser General Public License. 
