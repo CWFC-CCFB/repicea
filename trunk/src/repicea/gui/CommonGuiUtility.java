@@ -20,9 +20,7 @@ package repicea.gui;
 
 import java.awt.Component;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.FlowLayout;
-import java.awt.FontMetrics;
 import java.awt.Image;
 import java.awt.Window;
 import java.io.File;
@@ -37,7 +35,6 @@ import javax.swing.BoxLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -365,19 +362,19 @@ public class CommonGuiUtility {
 		}
 	}
 
-	
-	/**
-	 * This method sets the number of column of a particular component
-	 * @param component a JComponent instance
-	 * @param numberOfColumns the number of columns
-	 */
-	public static void setNumberOfColumns(JComponent component, int numberOfColumns) {
-		FontMetrics fm = component.getFontMetrics(component.getFont());
-		int height = fm.getHeight() + 5;
-		int width = fm.stringWidth("e") * numberOfColumns + 10;
-		Dimension dim = new Dimension(width, height);
-		component.setPreferredSize(dim);
-	}
+//	THIS METHOD DOES NOT WORK PROPERLY. THE FIELD ARE TOO SHORT IN HEIGHT	
+//	/**
+//	 * This method sets the number of column of a particular component
+//	 * @param component a JComponent instance
+//	 * @param numberOfColumns the number of columns
+//	 */
+//	public static void setNumberOfColumns(JComponent component, int numberOfColumns) {
+//		FontMetrics fm = component.getFontMetrics(component.getFont());
+//		int height = fm.getHeight() + 5;
+//		int width = fm.stringWidth("e") * numberOfColumns + 10;
+//		Dimension dim = new Dimension(width, height);
+//		component.setPreferredSize(dim);
+//	}
 	
 	/**
 	 * This method causes a JOptionPane.showErrorMessage to be sent on the Event Dispatch Thread.

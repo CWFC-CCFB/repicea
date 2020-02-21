@@ -31,7 +31,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.PlainDocument;
 
-import repicea.gui.CommonGuiUtility;
 import repicea.gui.components.NumberFormatFieldFactory.NumberFieldDocument.NumberFieldEvent;
 
 /**
@@ -379,7 +378,8 @@ public class NumberFormatFieldFactory {
 		document.nullAllowed = nullAllowed;
 		JFormattedNumericField field = new JFormattedNumericField(type);
 		if (numberOfColumns > 0) {
-			CommonGuiUtility.setNumberOfColumns(field, numberOfColumns);
+			field.setColumns(numberOfColumns);
+//			CommonGuiUtility.setNumberOfColumns(field, numberOfColumns);
 		} else if (numberOfColumns < 0) {
 			throw new InvalidParameterException("The number of columns must be equal to or greater than 0!");
 		}
