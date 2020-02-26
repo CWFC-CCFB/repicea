@@ -95,6 +95,13 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 	}
 	
+	public DataSet(List<String> fieldNames) {
+		this((String) null);
+		for (String fieldName : fieldNames) {
+			addFieldName(fieldName);
+		}
+	}
+	
 
 	/**
 	 * This method returns any object in the dataset at row i and column j.
@@ -157,26 +164,10 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 	}
 
-//	protected void setValueAt(int i, String fieldName, Object value) {
-//		int j = getIndexOfThisField(fieldName);
-//		if (j != -1) {
-//			setValueAt(i, j, value);
-//		}
-//	}
-	
 	private void indexFieldType() {
 		fieldTypes.clear();
 		for (int j = 0; j < fieldNames.size(); j++) {
 			setClassOfThisField(j);
-//			if (isInteger(j)) {
-//				fieldTypes.add(Integer.class);
-//			} else if (isDouble(j)) {
-//				fieldTypes.add(Double.class);
-//				reconvertToDoubleIfNeedsBe(j);
-//			} else {
-//				fieldTypes.add(String.class);
-//				reconvertToStringIfNeedsBe(j);
-//			}
 		}
 	}
 	

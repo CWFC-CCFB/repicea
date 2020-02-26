@@ -50,7 +50,42 @@ public class Observation implements Comparable {
 		return 0;
 	}
 
+	/**
+	 * Converts this observation to an array of Object instances
+	 * @return an Array of Object instances
+	 */
 	public Object[] toArray() {return values.toArray();}
 
-	
+
+	/**
+	 * Checks if two observations have the same values.
+	 * @param obs an Observation instance
+	 * @return a boolean
+	 */
+	public boolean isEqualToThisObservation(Observation obs) {
+		if (obs == null) {
+			return false;
+		} else {
+			if (values.size() != obs.values.size()) {
+				return false;
+			} 
+			for (int i = 0; i < values.size(); i++) {
+				Object thisValue = values.get(i);
+				Object thatValue = obs.values.get(i);
+				Class thisClass = thisValue.getClass();
+				if (!thisClass.equals(thatValue.getClass())) {
+					return false;
+ 				} else {
+ 					if (thisClass.equals(Double.class)) {
+ 						if (Math.abs((Double) thisValue - (Double) thatValue) > 1E-8) {
+ 							return false;
+ 						}
+ 					} else if (!thisValue.equals(thatValue)) {
+ 						return false;
+ 					}
+ 				}
+			}
+			return true;
+		}
+	}
 }
