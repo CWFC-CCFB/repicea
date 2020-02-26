@@ -164,7 +164,12 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 	}
 
-	private void indexFieldType() {
+	/**
+	 * Indexes the different field types. More specifically, it goes 
+	 * through the columns and find the appropriate class for a particular
+	 * field. This method should be called after adding all the observations.
+	 */
+	public void indexFieldType() {
 		fieldTypes.clear();
 		for (int j = 0; j < fieldNames.size(); j++) {
 			setClassOfThisField(j);
