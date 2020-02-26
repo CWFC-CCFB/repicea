@@ -355,6 +355,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	}
 	
 	public void addObservation(Object[] observationFrame) {
+		parseDifferentFields(observationFrame);
 		observations.add(new Observation(observationFrame));
 	}
 	
@@ -432,17 +433,6 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			
 			Object[] lineRead = reader.nextRecord();
 			while (lineRead != null) {
-				for (int i = 0; i < fieldNames.size(); i++) {
-					try {
-						lineRead[i] = Integer.parseInt(lineRead[i].toString());
-					} catch (NumberFormatException e1) {
-						try {
-							lineRead[i] = Double.parseDouble(lineRead[i].toString());
-						} catch (NumberFormatException e2) {
-							lineRead[i] = lineRead[i].toString();
-						}
-					}
-				}
 				addObservation(lineRead);
 				recordsRead++;
 				int progress = (int) ((recordsRead * 100d) / nbRecords);
@@ -458,6 +448,21 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 	}
 
+	private void parseDifferentFields(Object[] lineRead) {
+		for (int i = 0; i < fieldNames.size(); i++) {
+			try {
+				lineRead[i] = (Integer) Integer.parseInt(lineRead[i].toString());
+			} catch (NumberFormatException e1) {
+				try {
+					lineRead[i] = (Double) Double.parseDouble(lineRead[i].toString());
+				} catch (NumberFormatException e2) {
+					lineRead[i] = lineRead[i].toString();
+				}
+			}
+		}
+	}
+	
+	
 	/**
 	 * Returns the field names in a list. The list is a new list so that changes will
 	 * not affect the fieldNames member.
