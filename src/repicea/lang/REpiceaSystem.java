@@ -19,10 +19,15 @@
 package repicea.lang;
 
 import java.io.File;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.Language;
 
@@ -213,9 +218,63 @@ public class REpiceaSystem {
 			return false;
 		}
 	}
-//	public static void main(String[] args) {
+	
+	
+	public static List<String> getClassPathURLs() {
+		if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.8.0")) {
+			return null;
+		} else {
+			ClassLoader cl = ClassLoader.getSystemClassLoader();
+			Method met;
+			try {
+				met = cl.getClass().getMethod("getURLs");
+				URL[] urls = (URL[]) met.invoke(cl);
+				ArrayList<String> urlStrings = new ArrayList<String>();
+				for (URL url : urls) {
+					urlStrings.add(url.toString());
+				}
+				return urlStrings;
+			} catch (NoSuchMethodException | SecurityException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+				return null;
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+				return null;
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+		
+	}
+	
+	
+	public static boolean addToClassPath(String filename) throws IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		File f = new File(filename);
+		if (f.exists()) {
+			URL thisURL = f.toURI().toURL();
+			ClassLoader sc = ClassLoader.getSystemClassLoader();
+			if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.8.0")) {
+				
+			} else {
+				Class superClassLoaderClass = sc.getClass().getSuperclass();
+				Method met = superClassLoaderClass.getDeclaredMethod("addURL", URL.class);
+				met.setAccessible(true);
+				met.invoke(sc, thisURL);
+				return true;
+			}
+		} else {
+			throw new IOException("The file or directory " + filename + " does not exist!");
+		}
+		return false;
+	}
+	
+	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
 //		String[] argTest = "repicea-console.jar -l cd".split(" ");
 //			REpiceaSystem.setLanguageFromMain(argTest);
-//	}
+	}
 	
 }
