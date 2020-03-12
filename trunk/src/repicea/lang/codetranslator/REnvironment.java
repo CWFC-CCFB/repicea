@@ -742,6 +742,9 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 				if (memorySize != null) {
 					rGatewayProcess.setJVMMemory(memorySize);
 				}
+				if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.8")) {
+					rGatewayProcess.setOpenModuleForVersionsLaterThan8Enabled(true);
+				}
 				rGatewayProcessWrapper.run();
 				System.exit(0);
 			}

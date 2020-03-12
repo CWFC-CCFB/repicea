@@ -36,7 +36,7 @@ import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
 public class XmlDeserializer { 
 
 	static {
-		if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.7")) {
+		if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.7")) {
 			XmlSerializerChangeMonitor.registerClassNameChange("java.util.HashMap$Entry", "java.util.AbstractMap$SimpleEntry");
 		}
 	}
