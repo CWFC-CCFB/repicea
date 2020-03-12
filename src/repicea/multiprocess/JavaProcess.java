@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import repicea.lang.REpiceaSystem;
+
 /**
  * This class has a design similar to the SwingWorker class. It embeds a process that is to be a Java process. The 
  * commands in the constructor majes it possible to specified the runnable jar and its options. </br>
@@ -62,7 +64,8 @@ public final class JavaProcess extends AbstractIndependentProcess {
 		 */
 		@Deprecated
 		SystemClassLoader,
-		SplashWindow};
+		SplashWindow,
+		OpenInternalLoader};
 	
 	private List<String> commands;
 	private Map<String, String> environment;
@@ -139,6 +142,7 @@ public final class JavaProcess extends AbstractIndependentProcess {
 				}
 			}
 		}
+		
 		if (getName().endsWith(".jar")) {
 			finalCommands.add("-jar");
 		}
@@ -176,6 +180,16 @@ public final class JavaProcess extends AbstractIndependentProcess {
 		}
 	}
 
+	/**
+	 * Open the internal loader for versions later than 8.
+	 * @param bool it is set to false by default
+	 */
+	public void setOpenModuleForVersionsLaterThan8Enabled(boolean bool) {
+		if (bool && REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.8")) {
+			jvmOptions.put(JVM_OPTION.OpenInternalLoader, "--add-opens java.base/jdk.internal.loader=ALL-UNNAMED");
+		}
+	}
+	
 	/**
 	 * This method sets the JVM options
 	 * @param optionName a JVM_OPTION enum instance

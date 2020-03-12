@@ -130,7 +130,7 @@ public class REpiceaSystem {
 	 * @param upToThirdDigit a boolean true to test up to the third digit
 	 * @return a boolean
 	 */
-	public static boolean isCurrentJVMGreaterThanThisVersion(String targetJVM, boolean upToThirdDigit) {
+	public static boolean isCurrentJVMLaterThanThisVersion(String targetJVM, boolean upToThirdDigit) {
 		int currentVersion = parseJVMVersion(getJVMVersion());
 		int targetVersion = parseJVMVersion(targetJVM);
 		if (currentVersion > targetVersion) {
@@ -147,8 +147,8 @@ public class REpiceaSystem {
 	 * @param targetJVM a String
 	 * @return a boolean
 	 */
-	public static boolean isCurrentJVMGreaterThanThisVersion(String targetJVM) {
-		return isCurrentJVMGreaterThanThisVersion(targetJVM, false);
+	public static boolean isCurrentJVMLaterThanThisVersion(String targetJVM) {
+		return isCurrentJVMLaterThanThisVersion(targetJVM, false);
 	}
 
 
@@ -221,7 +221,7 @@ public class REpiceaSystem {
 	 */
 	public static List<String> getClassPathURLs() throws Exception {
 		URL[] urls;
-		if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.8.0")) {
+		if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.8.0")) {
 			Object urlClassPath = getURLClassPathWithJava9andLaterVersions();
 			Method met = urlClassPath.getClass().getMethod("getURLs");
 			urls = (URL[]) met.invoke(urlClassPath);
@@ -248,7 +248,7 @@ public class REpiceaSystem {
 			URL thisURL = f.toURI().toURL();
 			Object target;
 			Class<?> targetClass;
-			if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.8.0")) {
+			if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.8.0")) {
 				target = getURLClassPathWithJava9andLaterVersions();
 				targetClass = target.getClass();
 			} else {

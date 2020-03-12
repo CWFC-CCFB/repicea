@@ -191,7 +191,7 @@ public class XmlMarshallingUtilities {
 	}
 	
 	static XmlList getNextEntryFromJava7MapEntry(XmlList list) {
-		if (list.className.equals("java.util.HashMap$Entry") && REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.7")) {
+		if (list.className.equals("java.util.HashMap$Entry") && REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.7")) {
 			for (XmlEntry entry : list.list) {
 				if (entry.fieldName.equals("next") && entry.value instanceof XmlList) {
 					return (XmlList) entry.value;
