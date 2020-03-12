@@ -20,14 +20,14 @@ package repicea.lang;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.Language;
 
@@ -42,6 +42,7 @@ public class REpiceaSystem {
 	
 	private static String revision;
 
+	
 	static {
 		String completeJREVersion = System.getProperty("java.version");
 		try {
@@ -113,16 +114,14 @@ public class REpiceaSystem {
 //		return parseJVMVersion(jvmVersion);
 //	}
 
-	private static int[] parseJVMVersion(String jvmVersion) {
-		int[] version = new int[3];
+	private static int parseJVMVersion(String jvmVersion) {
 		String[] splittedDigits = jvmVersion.split("\\.");
-		version[0] = Integer.parseInt(splittedDigits[0]);
-		version[1] = Integer.parseInt(splittedDigits[1]);
-		version[2] = 0;
-		if (splittedDigits.length > 2) {
-			version[2] = Integer.parseInt(splittedDigits[2]);
+		int firstInteger = Integer.parseInt(splittedDigits[0]);
+		if (firstInteger != 1) {
+			return firstInteger;	// prior to Java 11 the string is something like 1.8.0. After that it is something like 11.0.6
+		} else {
+			return Integer.parseInt(splittedDigits[1]);
 		}
-		return version;
 	}
 	
 	/**
@@ -132,13 +131,9 @@ public class REpiceaSystem {
 	 * @return a boolean
 	 */
 	public static boolean isCurrentJVMGreaterThanThisVersion(String targetJVM, boolean upToThirdDigit) {
-		int[] currentVersion = parseJVMVersion(getJVMVersion());
-		int[] targetVersion = parseJVMVersion(targetJVM);
-		if (currentVersion[0] > targetVersion[0]) {
-			return true;
-		} else if (currentVersion[1] > targetVersion[1]) {
-			return true;
-		} else if (upToThirdDigit && currentVersion[2] > targetVersion[2]) {
+		int currentVersion = parseJVMVersion(getJVMVersion());
+		int targetVersion = parseJVMVersion(targetJVM);
+		if (currentVersion > targetVersion) {
 			return true;
 		} else {
 			return false;
@@ -219,62 +214,64 @@ public class REpiceaSystem {
 		}
 	}
 	
-	
-	public static List<String> getClassPathURLs() {
+	/**
+	 * Provides the different URLs in the class path.
+	 * @return a List of String
+	 * @throws Exception
+	 */
+	public static List<String> getClassPathURLs() throws Exception {
+		URL[] urls;
 		if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.8.0")) {
-			return null;
+			Object urlClassPath = getURLClassPathWithJava9andLaterVersions();
+			Method met = urlClassPath.getClass().getMethod("getURLs");
+			urls = (URL[]) met.invoke(urlClassPath);
 		} else {
-			ClassLoader cl = ClassLoader.getSystemClassLoader();
-			Method met;
-			try {
-				met = cl.getClass().getMethod("getURLs");
-				URL[] urls = (URL[]) met.invoke(cl);
-				ArrayList<String> urlStrings = new ArrayList<String>();
-				for (URL url : urls) {
-					urlStrings.add(url.toString());
-				}
-				return urlStrings;
-			} catch (NoSuchMethodException | SecurityException e) {
-				e.printStackTrace();
-				return null;
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-				return null;
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-				return null;
-			} catch (InvocationTargetException e) {
-				e.printStackTrace();
-				return null;
-			}
+			URLClassLoader cl = (URLClassLoader) ClassLoader.getSystemClassLoader();
+			urls = cl.getURLs();
 		}
-		
+		ArrayList<String> urlStrings = new ArrayList<String>();
+		for (URL url : urls) {
+			urlStrings.add(url.toString());
+		}
+		return urlStrings;
 	}
 	
-	
-	public static boolean addToClassPath(String filename) throws IOException, NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+	/**
+	 * Dynamically adds a directory or a JAR file to the class path. The JVM must implement
+	 * the following option: --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
+	 * @param filename a String that stands for the filename.
+	 * @throws Exception
+	 */
+	public static void addToClassPath(String filename) throws Exception {
 		File f = new File(filename);
 		if (f.exists()) {
 			URL thisURL = f.toURI().toURL();
-			ClassLoader sc = ClassLoader.getSystemClassLoader();
+			Object target;
+			Class<?> targetClass;
 			if (REpiceaSystem.isCurrentJVMGreaterThanThisVersion("1.8.0")) {
-				
+				target = getURLClassPathWithJava9andLaterVersions();
+				targetClass = target.getClass();
 			} else {
-				Class superClassLoaderClass = sc.getClass().getSuperclass();
-				Method met = superClassLoaderClass.getDeclaredMethod("addURL", URL.class);
-				met.setAccessible(true);
-				met.invoke(sc, thisURL);
-				return true;
+				target = ClassLoader.getSystemClassLoader();
+				targetClass = target.getClass().getSuperclass();
 			}
+			Method met = targetClass.getDeclaredMethod("addURL", URL.class);
+			met.setAccessible(true);
+			met.invoke(target, thisURL);
+
 		} else {
 			throw new IOException("The file or directory " + filename + " does not exist!");
 		}
-		return false;
 	}
 	
-	public static void main(String[] args) throws NoSuchMethodException, SecurityException, IOException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {
-//		String[] argTest = "repicea-console.jar -l cd".split(" ");
-//			REpiceaSystem.setLanguageFromMain(argTest);
+	
+	
+	private final static Object getURLClassPathWithJava9andLaterVersions() throws Exception {
+		ClassLoader cl = ClassLoader.getSystemClassLoader();
+		Field field = cl.getClass().getDeclaredField("ucp");
+		field.setAccessible(true);
+		return field.get(cl);
 	}
+	
 	
 }

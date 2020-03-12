@@ -1,8 +1,6 @@
 package repicea.lang;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.junit.Assert;
@@ -13,7 +11,7 @@ import repicea.util.ObjectUtility;
 public class REpiceaSystemTests {
 
 	@Test
-	public void addToClassPathSimpleTest() throws NoSuchMethodException, SecurityException, IllegalAccessException, IllegalArgumentException, InvocationTargetException, IOException {
+	public void addToClassPathSimpleTest() throws Exception {
 		String rootPath = ObjectUtility.getTrueRootPath(REpiceaSystem.class);
 		File rp = new File(rootPath);
 		File aboveRootPath = rp.getParentFile();
@@ -31,8 +29,9 @@ public class REpiceaSystemTests {
 	}
 	
 	@Test
-	public void getURLsFromClassPath() {
+	public void getURLsFromClassPath() throws Exception {
 		List<String> list = REpiceaSystem.getClassPathURLs();
+		Assert.assertTrue("list size", list.size() > 0);
 	}
 
 }
