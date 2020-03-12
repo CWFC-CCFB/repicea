@@ -27,7 +27,7 @@ public class StudentTDistributionTest {
 		double expectedMean = dist.getMean().m_afData[0][0];
 		double expectedVariance = dist.getVariance().m_afData[0][0];
 		Assert.assertEquals("Testing the mean", expectedMean, mean, 2E-3);
-		Assert.assertEquals("Testing the variance", expectedVariance, variance, 5E-2);
+		Assert.assertEquals("Testing the variance", expectedVariance, variance, 1E-1);
 		Assert.assertEquals("Testing quantile 0.025", quantile025, -3.182446, 5E-2);
 		Assert.assertEquals("Testing quantile 0.975", quantile975, 3.182446, 5E-2);
 	}
@@ -96,7 +96,7 @@ public class StudentTDistributionTest {
 		double expectedVariance = dist.getVariance().m_afData[0][0];
 		double expectedQuantile025 = -2.228139 * Math.sqrt(20) + 10;
 		double expectedQuantile975 = 2.228139 * Math.sqrt(20) + 10;
-		Assert.assertEquals("Testing the mean", expectedMean, actualMean, 2E-3);
+		Assert.assertEquals("Testing the mean", expectedMean, actualMean, 1E-2);
 		Assert.assertEquals("Testing the variance", expectedVariance, actualVariance, 5E-2);
 		Assert.assertEquals("Testing quantile 0.025", quantile025, expectedQuantile025, 5E-2);
 		Assert.assertEquals("Testing quantile 0.975", quantile975, expectedQuantile975, 5E-2);
