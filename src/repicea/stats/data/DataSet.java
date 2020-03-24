@@ -95,6 +95,10 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 	}
 	
+	/**
+	 * An empty dataset ready to be filled with observations.
+	 * @param fieldNames a List of String instances that represent the field names
+	 */
 	public DataSet(List<String> fieldNames) {
 		this((String) null);
 		for (String fieldName : fieldNames) {
