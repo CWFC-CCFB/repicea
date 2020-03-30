@@ -263,10 +263,8 @@ public class ImportTests {
 	 * @throws IOException
 	 * 
 	 */
-	@Ignore
 	@Test
 	public void MSACCESSReaderAndWriterReadTheSameTest() throws IOException {
-		// TODO the writing does not seem to work.
 		ImportTests.ReaderAndWriterReadTheSameTest("TEST6152.accdb");
 	}
 	
