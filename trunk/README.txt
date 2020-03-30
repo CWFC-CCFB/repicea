@@ -1,4 +1,4 @@
-Copyright (C) 2009-2015 Mathieu Fortin for Rouge Epicea.
+Copyright (C) 2009-2020 Mathieu Fortin for Rouge Epicea.
 
 Email: mathieu.fortin.re@gmail.com
 
@@ -19,9 +19,9 @@ Please see the license at http://www.gnu.org/copyleft/lesser.html.
 This library uses some icons from the GTK library which are protected 
 by a GNU Lesser General Public License. 
 
-This library includes the JavaDBF library (copyright anil@linuxense.com) and requires the 
-ucanaccess library version 2.0.3 (http://ucanaccess.sourceforge.net/site.html) to work properly. 
-These two libraries are protected by a GNU Lesser General Public License. 
+This library relies on 
+    - the JavaDBF library (copyright anil@linuxense.com) which is licensed under GNU Lesser General Public License.
+    - the ucanaccess library version 5.0.0 (https://sourceforge.net/projects/ucanaccess/) which is licensed under Apache License, Version 2.0
 
 It also requires the jabx library version 2.3.2 (Copyright (c) 2017 Oracle and/or its affiliates, 
 https://eclipse-ee4j.github.io/jaxb-ri/) if the JVM is running under Java 11 or 13. 
