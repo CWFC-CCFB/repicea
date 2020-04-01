@@ -138,8 +138,8 @@ public class DatabaseConnectionManager {
 	private static Connection getConnectionFromThisMSACCESSDataBase(String dataBaseUrl) throws IOException {
 		try {
 			ClassLoader.getSystemClassLoader().loadClass("net.ucanaccess.jdbc.UcanaccessDriver");
-			FileType fileType = GFileFilter.getFileType(dataBaseUrl);
-			if (fileType == FileType.ACCDB) {
+			FileType f = GFileFilter.getFileType(dataBaseUrl);
+			if (f == FileType.ACCDB || f == FileType.MDB) {
 				String connectionString = "jdbc:ucanaccess://" + dataBaseUrl;
 				String user = System.getProperty("user.name");
 				return DriverManager.getConnection(connectionString, user, "");

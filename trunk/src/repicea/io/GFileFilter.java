@@ -40,6 +40,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 		CSV("delimited text file (*.csv)", "Fichier texte d\u00E9limit\u00E9 (*.csv)"),
 		IFE("ImportFieldElements file (*.ife)",	"Fichier ImportFieldElements (*.ife)"),
 		ACCDB("Microsoft Access 2007 DataBase (*.accdb", "Base de donn\u00E9e Microsoft Access 2007 (*.accdb)"),
+		MDB("Microsoft Access DataBase (*.mdb", "Base de donn\u00E9e Microsoft Access (*.mdb)"),
 		XML("XML file (*.xml)", "Fichier XML (*.xml)"),
 		JAVACLASS("Java class file (*.class)", "Fichier de classe Java (*.class)"),
 		HTML("Hypertext Markup Language (*.html)", "Langage Hypertext Markup (*.html)"),
@@ -74,6 +75,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 				FileFilterMap.put(JAVACLASS, GFileFilter.JAVACLASS);
 				FileFilterMap.put(HTML, GFileFilter.HTML);
 				FileFilterMap.put(TXT, GFileFilter.TXT);
+				FileFilterMap.put(MDB,  GFileFilter.MDB);
 			}
 			return FileFilterMap;
 		}
@@ -91,7 +93,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 	public final static GFileFilter DBF = new GFileFilter(".dbf", FileType.DBF);
 	public final static GFileFilter CSV = new GFileFilter(".csv", FileType.CSV);
 	public final static GFileFilter IFE = new GFileFilter(".ife", FileType.IFE);
-//	public final static GFileFilter MDB = new GFileFilter(".mdb", FileType.MDB);
+	public final static GFileFilter MDB = new GFileFilter(".mdb", FileType.MDB);
 	public final static GFileFilter ACCDB = new GFileFilter(".accdb", FileType.ACCDB);
 	public final static GFileFilter XML = new GFileFilter(".xml", FileType.XML);
 	public final static GFileFilter JAVACLASS = new GFileFilter(".class", FileType.JAVACLASS);

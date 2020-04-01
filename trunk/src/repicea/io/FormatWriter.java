@@ -133,11 +133,12 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	 */
 	public static FormatWriter<? extends FormatHeader<? extends FormatField>> createFormatWriter(boolean append, String... fileSpec) throws IOException {
 		try {
-			if (GFileFilter.getFileType(fileSpec[0]) == FileType.DBF) {
+			FileType f = GFileFilter.getFileType(fileSpec[0]);
+			if (f == FileType.DBF) {
 				return new DBFWriter(new File(fileSpec[0]), append);
-			} else if (GFileFilter.getFileType(fileSpec[0]) == FileType.CSV) {
+			} else if (f == FileType.CSV) {
 				return new CSVWriter(new File(fileSpec[0]), append);
-			} else if (GFileFilter.getFileType(fileSpec[0]) == FileType.ACCDB) {
+			} else if (f == FileType.ACCDB || f == FileType.MDB) {
 				return new SQLWriter(new File(fileSpec[0]), fileSpec[1], append);
 			} else {
 				throw new IOException("Unknown file format!");

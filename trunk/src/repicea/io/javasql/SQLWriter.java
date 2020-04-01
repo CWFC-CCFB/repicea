@@ -26,7 +26,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.List;
-import java.util.Vector;
 
 import repicea.io.FormatField;
 import repicea.io.FormatWriter;
@@ -56,9 +55,9 @@ public class SQLWriter extends FormatWriter<SQLHeader> {
 		super(dataBaseFile, true);		// append the database by default
 		this.table = table;
 		
-		FileType fileType = GFileFilter.getFileType(getFilename());
-		if (fileType != FileType.ACCDB) {
-			throw new IOException("SQLWriter.c. The file is not a .accdb file");
+		FileType f = GFileFilter.getFileType(getFilename());
+		if (f != FileType.ACCDB && f != FileType.MDB) {
+			throw new IOException("SQLWriter.c. The file is not a .accdb or a .mdb file");
 		}
 		setFormatHeader(new SQLHeader());
 
@@ -87,12 +86,8 @@ public class SQLWriter extends FormatWriter<SQLHeader> {
 		try {
 			super.setFields(fields);
 			String sqlStatementStr = "CREATE TABLE " + table + " (";
-			String fieldName;
-			String fileTypeString;
 			for (int i = 0; i < getHeader().getNumberOfFields(); i++) {				
-				fieldName = getHeader().getField(i).getName(); 
-				fileTypeString = getHeader().getField(i).getTypeCode(); 
-				sqlStatementStr += fieldName + " " + fileTypeString;
+				sqlStatementStr += getHeader().getField(i).getStatement();
 				if (i == getHeader().getNumberOfFields() - 1) {
 					sqlStatementStr += ")";
 				} else {
@@ -153,63 +148,64 @@ public class SQLWriter extends FormatWriter<SQLHeader> {
 	public FormatField convertGExportFieldDetailsToFormatField(GExportFieldDetails details) {
 		String name = details.getName();
 		Object value = details.getValue();
+		int precision = details.getLength();
 		if (value instanceof String) {
-			return new SQLField(name, java.sql.Types.VARCHAR);
+			return new SQLField(name, "varchar", precision);	
 		} else if (value instanceof Double) {
-			return new SQLField(name, java.sql.Types.DOUBLE);
+			return new SQLField(name, "double", precision);
 		} else if (value instanceof Integer) {
-			return new SQLField(name, java.sql.Types.INTEGER);
+			return new SQLField(name, "integer", precision);
 		} else if (value instanceof Float){
-			return new SQLField(name, java.sql.Types.FLOAT);
+			return new SQLField(name, "float", precision);
 		} else {
 			return null;
 		}
 	}
 
-	public static void main(String[] args) {
-		String dataBaseUrl = "D:/Travail/MRNF - Projets/lac.mdb";
-		String table = "chapeaux";
-		try {
-			Runnable task = new Runnable() {
-				public void run() {
-					String dataBaseUrl = "D:/Travail/MRNF - Projets/lac.mdb";
-					String table = "chapeaux";
-					try {
-						SQLReader sqlReader = new SQLReader(dataBaseUrl, table);
-						Object[] readObjs = sqlReader.nextRecord();
-						while (readObjs != null) {
-							readObjs = sqlReader.nextRecord();
-						}
-						sqlReader.close();
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-					
-				}
-			};
-			new Thread(task).start();
-			SQLWriter sqlWriter = new SQLWriter(new File(dataBaseUrl), table, true);
-			Vector<FormatField> oVec = new Vector<FormatField>();
-			oVec.add(new SQLField("ChapeauID", java.sql.Types.INTEGER));
-			oVec.add(new SQLField("ChapeauName", java.sql.Types.VARCHAR, 30));
-//			sqlWriter.setFields(oVec);
-			for (int i = 0; i < 10000; i++) {
-				Object[] objs = new Object[2];
-				objs[0] = 1;
-				objs[1] = "Mon chapeau";
-				sqlWriter.addRecord(objs);
-				objs[0] = 2;
-				objs[1] = "Mon beau chapeau";
-				sqlWriter.addRecord(objs);
-				objs[0] = 3;
-				objs[1] = "Mon beau chapeau pointu";
-				sqlWriter.addRecord(objs);
-			}
-			sqlWriter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
+//	public static void main(String[] args) {
+//		String dataBaseUrl = "D:/Travail/MRNF - Projets/lac.mdb";
+//		String table = "chapeaux";
+//		try {
+//			Runnable task = new Runnable() {
+//				public void run() {
+//					String dataBaseUrl = "D:/Travail/MRNF - Projets/lac.mdb";
+//					String table = "chapeaux";
+//					try {
+//						SQLReader sqlReader = new SQLReader(dataBaseUrl, table);
+//						Object[] readObjs = sqlReader.nextRecord();
+//						while (readObjs != null) {
+//							readObjs = sqlReader.nextRecord();
+//						}
+//						sqlReader.close();
+//					} catch (IOException e) {
+//						e.printStackTrace();
+//					}
+//					
+//				}
+//			};
+//			new Thread(task).start();
+//			SQLWriter sqlWriter = new SQLWriter(new File(dataBaseUrl), table, true);
+//			Vector<FormatField> oVec = new Vector<FormatField>();
+//			oVec.add(new SQLField("ChapeauID", "integer", 10));
+//			oVec.add(new SQLField("ChapeauName", "varchar", 30));
+////			sqlWriter.setFields(oVec);
+//			for (int i = 0; i < 10000; i++) {
+//				Object[] objs = new Object[2];
+//				objs[0] = 1;
+//				objs[1] = "Mon chapeau";
+//				sqlWriter.addRecord(objs);
+//				objs[0] = 2;
+//				objs[1] = "Mon beau chapeau";
+//				sqlWriter.addRecord(objs);
+//				objs[0] = 3;
+//				objs[1] = "Mon beau chapeau pointu";
+//				sqlWriter.addRecord(objs);
+//			}
+//			sqlWriter.close();
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//	}
 	
 	
 }

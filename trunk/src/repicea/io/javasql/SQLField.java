@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea-iotools library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2020 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,59 +18,69 @@
  */
 package repicea.io.javasql;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import repicea.io.FormatField;
 
 public class SQLField extends FormatField {
 
-	private int type;		// following java.sql.Type
-	private int length;
-	
-	/**
-	 * General constructor 1.
-	 * @param name the name of the field
-	 * @param type the type of the field according to java.sql.Type
-	 */
-	public SQLField(String name, int type) {
-		setName(name);
-		this.type = type;
-		this.length = 256;
+	private static Map<Class, String> classToTypeMap = new HashMap<Class, String>();
+	static {
+		classToTypeMap.put(String.class, "VARCHAR");
+		classToTypeMap.put(Double.class, "DOUBLE");
+		classToTypeMap.put(Float.class, "FLOAT");
+		classToTypeMap.put(Integer.class, "INTEGER");
 	}
+	
+	private static Map<String, Class> typeToClassMap = new HashMap<String, Class>();
+	static {
+		typeToClassMap.put("VARCHAR", String.class);
+		typeToClassMap.put("DOUBLE", Double.class);
+		typeToClassMap.put("FLOAT", Float.class);
+		typeToClassMap.put("INTEGER", Integer.class);
+		typeToClassMap.put("TIMESTAMP", String.class);
+	}
+	
+	private final Class clazz;
+	private final int precision;
 	
 
 	/**
-	 * Special constructor adapted to text fields.
+	 * General constructor.
 	 * @param name the name of the field
-	 * @param type the type of the field according to java.sql.Type
-	 * @param length the length of the text field.
+	 * @param className the name of the class
+	 * @param precision the length of the text field or the precision of the double.
 	 */
-	public SQLField(String name, int type, int length) {
+	public SQLField(String name, String typeName, int precision) {
 		setName(name);
-		this.type = type;
-		this.length = length;
+		this.clazz = typeToClassMap.get(typeName);
+		this.precision = precision;
 	}
 
-	/**
-	 * Returns the type of the field (see java.sql.Type).
-	 * @return an Integer
-	 */
-	public int getType() {
-		return type;
-	}
 	
 	/**
 	 * This method returns the string code associated with the type.
 	 * @return a String
 	 */
-	public String getTypeCode() {
-		if (getType() == java.sql.Types.DOUBLE) {
-			return "double";
-		} else if (getType() == java.sql.Types.FLOAT) {
-			return "float";
-		} else if (getType() == java.sql.Types.INTEGER) {
-			return "integer";
-		} else if (getType() == java.sql.Types.VARCHAR) {
-			return "varchar(" + length + ")";
-		} else return null;
+	public String getTypeName() {
+		return classToTypeMap.get(clazz);
+	}
+	
+	protected String getStatement() {
+		String statement = getName() + " " + getTypeName();
+		if (getTypeName().toLowerCase().equals("varchar")) {
+			statement += "(" + precision + ")";
+		}
+		return statement;
+	}
+
+	/**
+	 * Return the precision of the field.
+	 * @return an integer
+	 */
+	public int getPrecision() {
+		return precision;
 	}
 
 }

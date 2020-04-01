@@ -49,7 +49,6 @@ public class SQLReader extends FormatReader<SQLHeader> {
 		super(dataBaseUrl);
 		try {
 			DatabaseConnectionManager.registerConnectionUser(this, dataBaseUrl);
-//			dbConnection = DatabaseConnector.getConnectionFromThisMSACCESSDataBase(dataBaseUrl)	
 			dbConnection = DatabaseConnectionManager.getUserConnection(this);
 			statement = dbConnection.createStatement();
 			this.table = table;
@@ -68,9 +67,6 @@ public class SQLReader extends FormatReader<SQLHeader> {
 	public void close() throws IOException {
 		try {
 			DatabaseConnectionManager.removeUser(this);
-//			if (dbConnection != null && !dbConnection.isClosed()) {
-//				dbConnection.close();
-//			}
 		} catch (SQLException e) {
 			throw new IOException("Error while closing the database!" + e);
 		}
@@ -99,7 +95,7 @@ public class SQLReader extends FormatReader<SQLHeader> {
 			for (int i = 0; i < numberOfFields; i++) {
 				objs[i] = resultSet.getObject(i + 1);
 				if (objs[i] == null) {
-					if (getHeader().getField(i).getType() == java.sql.Types.VARCHAR) {		// patch because empty strings are returned as null
+					if (getHeader().getField(i).getTypeName().toLowerCase().equals("varchar")) { // patch because empty strings are returned as null
 						objs[i] = "";
 					}
 				}
@@ -111,21 +107,12 @@ public class SQLReader extends FormatReader<SQLHeader> {
 		}
 	}
 
-	public int getRow() {
+	/**
+	 * Returns the row index at which the reader is. The indices starts from 1.
+	 * @return an integer
+	 */
+	public int getRowIndex() {
 		return rowIndex;
-	}
-	
-	public static void main(String[] args) throws IOException {
-		String url = "D:/Travail/MRNF - Projets/Lac.mdb";
-		for (int i = 0; i < 1000; i++) {
-			System.out.println(((Integer) i).toString());
-			SQLReader reader = new SQLReader(url, "2_Tiges");
-			Object[] objs = reader.nextRecord();
-			while (objs != null) {
-				objs = reader.nextRecord();
-			}
-			reader.close();
-		}
 	}
 	
 	

@@ -4,13 +4,8 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
-import repicea.io.FileUtility;
-import repicea.io.FormatReader;
-import repicea.io.FormatWriter;
-import repicea.io.GFileFilter;
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
 import repicea.io.javasql.SQLReader;
@@ -66,13 +61,12 @@ public class ImportTests {
 	 * @throws IOException
 	 * .MDB NO LONGER SUPPORTED
 	 */
-	@Ignore
 	@Test
 	public void CSVReaderAndSQLReaderReadTheSameTestAccessVersion() throws IOException {
 		String filePath = ObjectUtility.getPackagePath(ImportTests.class);
 		
-		String sourcePath = filePath + "TEST6152.mdb";
-		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.mdb";
+		String sourcePath = filePath + "TEST6152.accdb";
+		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
 
 		if (!FileUtility.copy(sourcePath, targetPath)) {
 			throw new IOException("Unable to copy the database file to tmp directory!");
@@ -179,12 +173,22 @@ public class ImportTests {
 		outputSpec[0] = outputFilename;
 		if (fileFilter.equals(GFileFilter.ACCDB)) {
 			String targetPath = REpiceaSystem.getJavaIOTmpDir() + "tmp.accdb";
-			System.out.println("File copied");
 			if (!FileUtility.copy(inputFilename, targetPath)) {
 				throw new IOException("Unable to copy the database file to tmp directory!");
 			}
+			System.out.println("File copied");
 
 			inputSpec[1] = "TEST6152";
+			outputSpec[0] = targetPath;
+			outputSpec[1] = "copy";
+		} else if (fileFilter.equals(GFileFilter.MDB)) {
+			String targetPath = REpiceaSystem.getJavaIOTmpDir() + "tmp.mdb";
+			if (!FileUtility.copy(inputFilename, targetPath)) {
+				throw new IOException("Unable to copy the database file to tmp directory!");
+			}
+			System.out.println("File copied");
+
+			inputSpec[1] = "Sommaire_programme";
 			outputSpec[0] = targetPath;
 			outputSpec[1] = "copy";
 		}
@@ -268,5 +272,6 @@ public class ImportTests {
 		ImportTests.ReaderAndWriterReadTheSameTest("TEST6152.accdb");
 	}
 	
+
 
 }
