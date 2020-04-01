@@ -119,11 +119,12 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	 */
 	public static FormatReader createFormatReader(String... fileSpec) throws IOException {
 		try {
-			if (GFileFilter.getFileType(fileSpec[0]) == FileType.DBF) {
+			FileType f = GFileFilter.getFileType(fileSpec[0]);
+			if (f == FileType.DBF) {
 				return new DBFReader(fileSpec[0]);
-			} else if (GFileFilter.getFileType(fileSpec[0]) == FileType.CSV) {
+			} else if (f == FileType.CSV) {
 				return new CSVReader(fileSpec[0]);
-			} else if (GFileFilter.getFileType(fileSpec[0]) == FileType.ACCDB) {
+			} else if (f == FileType.ACCDB || f == FileType.MDB) {
 				return new SQLReader(fileSpec[0], fileSpec[1]);
 			} else {
 				throw new IOException("Unknown file format!");

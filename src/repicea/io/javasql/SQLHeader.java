@@ -37,11 +37,13 @@ public class SQLHeader extends FormatHeader<SQLField> {
 		ResultSet rs = stmt.executeQuery("select * from " + table);
 		ResultSetMetaData rsmd = rs.getMetaData();
 	    int numColumns = rsmd.getColumnCount();
-
 	    for (int i = 1; i < numColumns+1; i++) {
 	        String fieldName = rsmd.getColumnName(i);
-	        int fieldType = rsmd.getColumnType(i);
-	        addField(new SQLField(fieldName, fieldType));
+//	        String className = rsmd.getColumnClassName(i);
+	        String columnTypeName = rsmd.getColumnTypeName(i);
+	        int length = rsmd.getPrecision(i);
+//	        int fieldType = rsmd.getColumnType(i);
+	        addField(new SQLField(fieldName, columnTypeName, length));
 	    }
 
 	    rs = stmt.executeQuery("SELECT COUNT(*) FROM " + table);
