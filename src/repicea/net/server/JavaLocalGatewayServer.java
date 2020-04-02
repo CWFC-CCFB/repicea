@@ -36,6 +36,25 @@ import repicea.net.server.BasicClient.ClientRequest;
  */
 public class JavaLocalGatewayServer extends AbstractServer {
 	
+	/**
+	 * A wrapper for Exception.
+	 * @author Mathieu Fortin
+	 */
+	final class JavaGatewayException extends Exception {
+		
+		final Throwable nestedException;
+		
+		JavaGatewayException(Throwable e) {
+			super(e);
+			this.nestedException = e;
+		}
+
+		
+		public String toString() {
+			return this.getClass().getName() + "_" + nestedException.toString();
+		}
+	}
+
 	
 	class REpiceaBackDoorCancellationThread extends Thread {
 		
@@ -129,9 +148,9 @@ public class JavaLocalGatewayServer extends AbstractServer {
 									closeSocket();
 								} else if (!socketWrapper.isClosed()) {
 									if (e instanceof InvocationTargetException) {
-										socketWrapper.writeObject(((InvocationTargetException) e).getTargetException());
+										socketWrapper.writeObject(new JavaGatewayException(((InvocationTargetException) e).getTargetException()));
 									} else {
-										socketWrapper.writeObject(e);
+										socketWrapper.writeObject(new JavaGatewayException(e));
 									}
 								}
 							} catch (IOException e1) {}
