@@ -215,6 +215,14 @@ public class REpiceaSystem {
 	}
 	
 	/**
+	 * Returns the architecture of the JVM, i.e. either 32-Bit, 64-Bit or unknown.
+	 * @return a String
+	 */
+	public static String getJavaArchitecture() {
+		return System.getProperty("sun.arch.data.model");
+	}
+	
+	/**
 	 * Provides the different URLs in the class path.
 	 * @return a List of String
 	 * @throws Exception
