@@ -134,7 +134,8 @@ public final class JavaProcess extends AbstractIndependentProcess {
 	@Override
 	protected Process createIndependentProcess() throws IOException {
 		List<String> finalCommands = new ArrayList<String>();
-		finalCommands.add("java");
+		String javaPath = System.getProperty("java.home") + File.separator + "bin" + File.separator + "java";	// to make sure the JVM is of the same version
+		finalCommands.add(javaPath);
 		if (!jvmOptions.isEmpty()) {
 			for (String optionalCommand : jvmOptions.values()) {
 				for (String optCommand : optionalCommand.split(" ")) {
