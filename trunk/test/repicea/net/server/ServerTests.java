@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.lang.codetranslator.REnvironment;
