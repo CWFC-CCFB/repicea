@@ -135,15 +135,14 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 	 */
 	protected double residualImplementation(Tree tree, double predictedHeightWithoutResidual) {
 		double residualForThisPrediction = 0d; 
-		boolean initialPredictionForObservedHeights = wasThisTreeInitiallyMeasured(tree) && !doesThisSubjectHaveResidualErrorTerm(tree);
-		if (initialPredictionForObservedHeights) {	// means the height has been observed but its residual has not been calculated yet
+		if (wasThisTreeInitiallyMeasured(tree) && !doesThisSubjectHaveResidualErrorTerm(tree)) {	// means the height has been observed but its residual has not been calculated yet
 			double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
 			double diff = observedHeights.get(tree.getSubjectId()) - predictedHeightWithoutResidual;
 			double dNormResidual = diff / Math.pow(variance, 0.5);
 			GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, diff);
 			setSpecificResiduals(tree, errorTerm);	// the residual is set in the simulatedResidualError member
 		}
-		if (isResidualVariabilityEnabled || initialPredictionForObservedHeights) {
+		if (isResidualVariabilityEnabled) {
 			Matrix residuals = getResidualErrorForThisSubject(tree, getErrorGroup(tree));
 			int index = getGaussianErrorTerms(tree).getDistanceIndex().indexOf(tree.getErrorTermIndex());
 			residualForThisPrediction = residuals.m_afData[index][0]; 
