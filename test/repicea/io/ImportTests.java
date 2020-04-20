@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.io.javacsv.CSVReader;
@@ -267,6 +268,7 @@ public class ImportTests {
 	 * @throws IOException
 	 * 
 	 */
+	@Ignore // just too long on Windows
 	@Test
 	public void MSACCESSReaderAndWriterReadTheSameTest() throws IOException {
 		ImportTests.ReaderAndWriterReadTheSameTest("TEST6152.accdb");

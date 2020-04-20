@@ -11,17 +11,14 @@ import repicea.util.ObjectUtility;
 public class REpiceaSystemTests {
 
 	@Test
-	public void addToClassPathSimpleTest() throws Exception {
-		String rootPath = ObjectUtility.getTrueRootPath(REpiceaSystem.class);
-		File rp = new File(rootPath);
-		File aboveRootPath = rp.getParentFile();
-		String path = aboveRootPath.getAbsolutePath() +
-				File.separator + "externallibraries" +
-				File.separator + "mrnf-foresttools.jar";
-		REpiceaSystem.addToClassPath(path);
+	public void addToClassPathSimpleTest1() throws Exception {
+		String pathToTest1 = ObjectUtility.getPackagePath(getClass()).replace("bin", "test") + "addurltest1";
+		REpiceaSystem.addToClassPath(pathToTest1);
 		ClassLoader cl = ClassLoader.getSystemClassLoader();
 		try {
-			cl.loadClass("canforservutility.biosim.BioSimClient");
+			Class clazz = cl.loadClass("hw.HelloWorldTest1");
+			clazz.newInstance();
+			System.out.println("Succeeded!");
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -32,6 +29,22 @@ public class REpiceaSystemTests {
 	public void getURLsFromClassPath() throws Exception {
 		List<String> list = REpiceaSystem.getClassPathURLs();
 		Assert.assertTrue("list size", list.size() > 0);
+	}
+
+
+	@Test
+	public void addToClassPathSimpleTest2() throws Exception {
+		String pathToTest2 = ObjectUtility.getPackagePath(getClass()).replace("bin", "test") + "addurltest2" + File.separator + "helloworldtest2.jar";
+		REpiceaSystem.addToClassPath(pathToTest2);
+		ClassLoader cl = ClassLoader.getSystemClassLoader();
+		try {
+			Class clazz = cl.loadClass("hw2.HelloWorldTest2");
+			clazz.newInstance();
+			System.out.println("Succeeded!");
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
 	}
 
 }
