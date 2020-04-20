@@ -116,4 +116,10 @@ public class SQLReader extends FormatReader<SQLHeader> {
 	}
 	
 	
+	public static void main(String[] args) throws IOException {
+		String filename = "C:\\Users\\admin\\Documents\\7_Developpement\\ModellingProjects\\PEPquebec\\DonneesPEP20190327\\PEP.MDB";
+		SQLReader reader = new SQLReader(filename, "STATION_PE");
+	}
+	
+	
 }
