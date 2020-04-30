@@ -228,7 +228,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		for (int i = 0; i < getNumberOfObservations(); i++) {
 			Object value = getValueAt(i,j);
 			if ((value instanceof Integer)) {
-				setValueAt(i,j, ((Integer) value).toString());
+				setValueAt(i,j, ((Integer) value).doubleValue()); // MF2020-04-30 Bug corrected 
 			}
 		} 
 	}
