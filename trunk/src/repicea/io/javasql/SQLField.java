@@ -49,7 +49,7 @@ public class SQLField extends FormatField {
 	/**
 	 * General constructor.
 	 * @param name the name of the field
-	 * @param className the name of the class
+	 * @param typeName the type of field
 	 * @param precision the length of the text field or the precision of the double.
 	 */
 	public SQLField(String name, String typeName, int precision) {
