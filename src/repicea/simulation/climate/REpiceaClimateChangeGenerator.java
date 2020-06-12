@@ -19,7 +19,7 @@
 package repicea.simulation.climate;
 
 import repicea.simulation.MonteCarloSimulationCompliantObject;
-import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesProvider;
+import repicea.simulation.covariateproviders.plotlevel.GeographicalCoordinatesProvider;
 
 /**
  * The REpiceaClimateChangeGenerator interface ensures that the climate generator also predicts 
