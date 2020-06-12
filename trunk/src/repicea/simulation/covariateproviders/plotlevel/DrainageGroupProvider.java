@@ -38,6 +38,6 @@ public interface DrainageGroupProvider {
 	 * This method returns the drainage group: xeric, mesic, subhydric or hydric.
 	 * @return a DrainageCategoryProvider enum 
 	 */
-	public DrainageGroupProvider getDrainageGroup();
+	public DrainageGroup getDrainageGroup();
 
 }
