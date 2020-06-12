@@ -20,13 +20,13 @@ package repicea.simulation.covariateproviders.plotlevel;
 
 /**
  * This interface ensures that the stand object can provide its
- * drainage category: xeric, mesic, subhydric or hydric.
+ * drainage group: xeric, mesic, subhydric or hydric.
  * @author Mathieu Fortin - November 2012 (refactored June 2020)
  * 		
  */
-public interface DrainageCategoryProvider {
+public interface DrainageGroupProvider {
 
-	public static enum DrainageCategory {
+	public static enum DrainageGroup {
 		Xeric,
 		Mesic,
 		Subhydric,
@@ -35,9 +35,9 @@ public interface DrainageCategoryProvider {
 	
 	
 	/**
-	 * This method returns the drainage category: xeric, mesic, subhydric or hydric.
+	 * This method returns the drainage group: xeric, mesic, subhydric or hydric.
 	 * @return a DrainageCategoryProvider enum 
 	 */
-	public DrainageCategoryProvider getDrainageClass();
+	public DrainageGroupProvider getDrainageGroup();
 
 }
