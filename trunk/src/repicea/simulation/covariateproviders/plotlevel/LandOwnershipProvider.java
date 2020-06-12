@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.simulation.covariateproviders.standlevel;
+package repicea.simulation.covariateproviders.plotlevel;
 
 import java.util.HashMap;
 import java.util.Map;

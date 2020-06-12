@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.simulation.covariateproviders.standlevel;
+package repicea.simulation.covariateproviders.plotlevel;
 
 /**
  * The LandUseProvider interface ensures that the plot instance knows its land use.

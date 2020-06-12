@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.simulation.covariateproviders.standlevel;
+package repicea.simulation.covariateproviders.plotlevel;
 
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;

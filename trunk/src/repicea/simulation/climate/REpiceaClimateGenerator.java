@@ -18,7 +18,7 @@
  */
 package repicea.simulation.climate;
 
-import repicea.simulation.covariateproviders.standlevel.GeographicalCoordinatesProvider;
+import repicea.simulation.covariateproviders.plotlevel.GeographicalCoordinatesProvider;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
