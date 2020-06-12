@@ -18,6 +18,8 @@
  */
 package repicea.simulation.covariateproviders.plotlevel;
 
+import repicea.math.Matrix;
+
 /**
  * This interface ensures that the stand object can provide its
  * drainage group: xeric, mesic, subhydric or hydric.
@@ -31,6 +33,16 @@ public interface DrainageGroupProvider {
 		Mesic,
 		Subhydric,
 		Hydric;
+
+		private final Matrix dummy;
+		
+		DrainageGroup() {
+			dummy = new Matrix(1,4);
+			dummy.m_afData[0][this.ordinal()] = 1d;
+		}
+
+		public Matrix getDrainageDummy() {return dummy;}
+
 	}
 	
 	
