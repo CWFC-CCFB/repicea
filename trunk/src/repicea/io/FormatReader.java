@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 
 import repicea.io.GFileFilter.FileType;
 import repicea.io.javacsv.CSVReader;
@@ -44,8 +45,8 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 		this.filename = filename;
 		isSystemResource = false;
 		File file = new File(filename);
-		if (!file.exists()) {			// then try to load it as a system resource
-			InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(filename);
+		if (!file.exists()) {			// then try to load it as a resource
+			InputStream in = getInputStream();
 			if (in == null) {
 				throw new IOException("The file " + filename + " does not exist and cannot be loaded as a ressource!");
 			} else {
@@ -53,6 +54,16 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 				isSystemResource = true;
 			}
 		}
+	}
+	
+	
+	private InputStream getInputStream() throws IOException {
+//		InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(getFilename());
+		InputStream in = getClass().getResourceAsStream(File.separator + filename);
+//		URL url = getClass().getResource(File.separator + filename);
+//		Object obj = url.getContent();
+//		InputStream in = (InputStream) obj;
+		return in;
 	}
 	
 	/**
@@ -63,7 +74,9 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	protected InputStream openStream() throws IOException {
 		InputStream in;
 		if (isSystemResource()) {
-			in = ClassLoader.getSystemResourceAsStream(getFilename());
+			in = getInputStream();
+//			in = getClass().getResourceAsStream(File.separator + getFilename());
+//			in = ClassLoader.getSystemResourceAsStream(getFilename());
 		} else {
 			in = new FileInputStream(getFilename());
 		}
