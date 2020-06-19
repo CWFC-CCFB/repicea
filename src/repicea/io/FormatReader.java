@@ -23,7 +23,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 
 import repicea.io.GFileFilter.FileType;
 import repicea.io.javacsv.CSVReader;
@@ -58,7 +57,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	
 	
 	private InputStream getInputStream() throws IOException {
-		InputStream in = ClassLoader.getSystemClassLoader().getResourceAsStream(getFilename());
+		InputStream in = ClassLoader.getSystemResourceAsStream(getFilename());
 //		InputStream in = getClass().getResourceAsStream(File.separator + filename);
 //		URL url = getClass().getResource(File.separator + filename);
 //		Object obj = url.getContent();
