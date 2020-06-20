@@ -466,7 +466,8 @@ public class CommonGuiUtility {
 	 */
 	public static ImageIcon retrieveIcon(Class<?> clazz, String iconName) {
 		String iconPath = ObjectUtility.getRelativePackagePath(clazz) + iconName;
-		InputStream iconInputStream = ClassLoader.getSystemResourceAsStream(iconPath);
+//		InputStream iconInputStream = ClassLoader.getSystemResourceAsStream(iconPath);
+		InputStream iconInputStream = CommonGuiUtility.class.getResourceAsStream("/" + iconPath);
 		try {
 			Image image = ImageIO.read(iconInputStream);
 			return new ImageIcon(image);

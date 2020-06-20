@@ -129,7 +129,8 @@ public class REpiceaSplashWindow extends JDialog {
 		if (new File(imagePath).exists()) {
 			icon = new ImageIcon(this.imagePath.toString());		 
 		} else {
-			InputStream in = ClassLoader.getSystemResourceAsStream(imagePath);
+//			InputStream in = ClassLoader.getSystemResourceAsStream(imagePath);
+			InputStream in = getClass().getResourceAsStream("/" + imagePath);
 			Image image = ImageIO.read(in);
 			icon = new ImageIcon(image);
 		}

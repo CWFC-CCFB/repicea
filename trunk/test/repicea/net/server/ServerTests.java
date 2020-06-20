@@ -91,6 +91,7 @@ public class ServerTests {
 	}
 
 
+	@Ignore
 	@SuppressWarnings({"rawtypes" })
 	@Test
 	public void testLocalUDPServerMultipleRequests() throws Exception {
