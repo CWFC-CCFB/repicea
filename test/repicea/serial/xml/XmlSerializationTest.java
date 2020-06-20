@@ -331,7 +331,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 		
 		Object ahCopy = deserializer.readObject();
@@ -352,7 +353,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 		
 		Object ahCopy = deserializer.readObject();
@@ -373,7 +375,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 
 		Object ahCopy = deserializer.readObject();
@@ -395,7 +398,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 
 		Object ahCopy = deserializer.readObject();
@@ -422,7 +426,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(toSerialize);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 
 		List ahCopy = (List) deserializer.readObject();
@@ -448,7 +453,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(toSerialize);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 		
 		List ahCopy = (List) deserializer.readObject();
@@ -472,7 +478,8 @@ public class XmlSerializationTest {
 		serializer.writeObject(clazz);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 		
 		Class deserializedClass = (Class) deserializer.readObject();
@@ -486,7 +493,8 @@ public class XmlSerializationTest {
 		Class clazz = FakeClassForSerializationTest.class;
 
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "formerOriginalFakeClassObj.xml";
-		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
+		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
 		XmlDeserializer deserializer = new XmlDeserializer(is);
 		
 		Class deserializedClass = (Class) deserializer.readObject();

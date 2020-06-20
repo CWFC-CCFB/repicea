@@ -78,7 +78,8 @@ public class UIControlManager {
 	private static BufferedImage getREpiceaIcon() {
 		String path = ObjectUtility.getRelativePackagePath(UIControlManager.class);
 		String iconFilename = path + "LogoRougeEpicea.png";
-		InputStream in = ClassLoader.getSystemResourceAsStream(iconFilename);
+//		InputStream in = ClassLoader.getSystemResourceAsStream(iconFilename);
+		InputStream in = UIControlManager.class.getResourceAsStream("/" + iconFilename);
 		try {
 			return ImageIO.read(in);
 		} catch (IOException e) {

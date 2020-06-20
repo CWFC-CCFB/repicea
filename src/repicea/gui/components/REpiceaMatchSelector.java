@@ -151,7 +151,8 @@ public class REpiceaMatchSelector<E extends Enum<E>> implements REpiceaShowableU
 		try {
 			deserializer = new XmlDeserializer(filename);
 		} catch (Exception e) {
-			InputStream is = ClassLoader.getSystemResourceAsStream(filename);
+//			InputStream is = ClassLoader.getSystemResourceAsStream(filename);
+			InputStream is = getClass().getResourceAsStream("/" + filename);
 			if (is == null) {
 				throw new IOException("The filename is not a file and cannot be converted into a stream!");
 			} else {
