@@ -57,8 +57,8 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	
 	
 	private InputStream getInputStream() throws IOException {
-		InputStream in = ClassLoader.getSystemResourceAsStream(getFilename());
-//		InputStream in = getClass().getResourceAsStream(File.separator + filename);
+//		InputStream in = ClassLoader.getSystemResourceAsStream(getFilename());
+		InputStream in = getClass().getResourceAsStream(File.separator + filename);
 //		URL url = getClass().getResource(File.separator + filename);
 //		Object obj = url.getContent();
 //		InputStream in = (InputStream) obj;
