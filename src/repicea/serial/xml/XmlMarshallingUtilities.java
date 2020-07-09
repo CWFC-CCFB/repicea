@@ -118,7 +118,8 @@ public class XmlMarshallingUtilities {
 		if (xmlList.isPrimitive) {
 			return ReflectUtility.PrimitiveTypeMap.get(xmlList.className);
 		} else {
-			return Class.forName(getClassName(xmlList.className), true, ClassLoader.getSystemClassLoader());
+//			return Class.forName(getClassName(xmlList.className), true, ClassLoader.getSystemClassLoader());
+			return Class.forName(getClassName(xmlList.className));
 //			return ClassLoader.getSystemClassLoader().loadClass(getClassName(xmlList.className));
 		}
 	}

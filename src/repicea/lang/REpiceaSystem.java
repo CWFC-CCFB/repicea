@@ -33,6 +33,9 @@ import repicea.util.REpiceaTranslator.Language;
 
 /**
  * The REpiceaSystem offers some additional features to the System class.
+ * Among others, it allows for dynamic classpath. The methods deliberately
+ * call the system class loader and add the path to the class path at this 
+ * level.
  * @author Mathieu Fortin - November 2014
  */
 public class REpiceaSystem {

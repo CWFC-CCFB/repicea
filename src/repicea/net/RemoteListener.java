@@ -82,7 +82,8 @@ public abstract class RemoteListener implements Serializable {
 	public boolean isTheOwnerOfThisClass(Class<?> clazz) {
 		Class<?> remoteOwnerClass;
 		try {
-			remoteOwnerClass = ClassLoader.getSystemClassLoader().loadClass(getRemoteOwnerClassName());
+//			remoteOwnerClass = ClassLoader.getSystemClassLoader().loadClass(getRemoteOwnerClassName());
+			remoteOwnerClass = Class.forName(getRemoteOwnerClassName());
 			return clazz.isAssignableFrom(remoteOwnerClass);
 		} catch (ClassNotFoundException e) {
 			e.printStackTrace();

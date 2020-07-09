@@ -33,7 +33,8 @@ public class TreeLoggerManager {
 		availableTreeLoggers = new ArrayList<TreeLoggerDescription>();
 		for (String treeLoggerName : TreeLoggerClassNames) {
 			try {
-				Class<?> treeLoggerClass = ClassLoader.getSystemClassLoader().loadClass(treeLoggerName);
+//				Class<?> treeLoggerClass = ClassLoader.getSystemClassLoader().loadClass(treeLoggerName);
+				Class<?> treeLoggerClass = Class.forName(treeLoggerName);
 				availableTreeLoggers.add(new TreeLoggerDescription(treeLoggerClass.getName()));
 			} catch (Exception e) {
 				System.out.println("Unable to load tree logger : " + treeLoggerName);
