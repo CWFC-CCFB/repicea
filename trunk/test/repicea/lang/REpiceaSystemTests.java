@@ -14,9 +14,10 @@ public class REpiceaSystemTests {
 	public void addToClassPathSimpleTest1() throws Exception {
 		String pathToTest1 = ObjectUtility.getPackagePath(getClass()).replace("bin", "test") + "addurltest1";
 		REpiceaSystem.addToClassPath(pathToTest1);
-		ClassLoader cl = ClassLoader.getSystemClassLoader();
+//		ClassLoader cl = ClassLoader.getSystemClassLoader();
 		try {
-			Class clazz = cl.loadClass("hw.HelloWorldTest1");
+//			Class clazz = cl.loadClass("hw.HelloWorldTest1");
+			Class clazz = Class.forName("hw.HelloWorldTest1");
 			clazz.newInstance();
 			System.out.println("Succeeded!");
 		} catch (ClassNotFoundException e) {
@@ -36,9 +37,10 @@ public class REpiceaSystemTests {
 	public void addToClassPathSimpleTest2() throws Exception {
 		String pathToTest2 = ObjectUtility.getPackagePath(getClass()).replace("bin", "test") + "addurltest2" + File.separator + "helloworldtest2.jar";
 		REpiceaSystem.addToClassPath(pathToTest2);
-		ClassLoader cl = ClassLoader.getSystemClassLoader();
+//		ClassLoader cl = ClassLoader.getSystemClassLoader();
 		try {
-			Class clazz = cl.loadClass("hw2.HelloWorldTest2");
+//			Class clazz = cl.loadClass("hw2.HelloWorldTest2");
+			Class clazz = Class.forName("hw2.HelloWorldTest2");
 			clazz.newInstance();
 			System.out.println("Succeeded!");
 		} catch (ClassNotFoundException e) {

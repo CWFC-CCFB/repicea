@@ -295,7 +295,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			if (wrappers.size() == 1 && caller.type.equals(String.class)) { // could be a call to a static method
 				try {
 					String className = caller.value.toString();
-					clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+//					clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+					clazz = Class.forName(className);
 					lookingForStaticMethod = true;
 					wrappers = new ArrayList<ParameterWrapper>();
 					wrappers.add(new ParameterWrapper(clazz, null));
@@ -379,7 +380,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 			if (wrappers.size() == 1 && caller.type.equals(String.class)) { // could be a call to a static method
 				try {
 					String className = caller.value.toString();
-					clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+//					clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+					clazz = Class.forName(className);
 					lookingForStaticMethod = true;
 					wrappers = new ArrayList<ParameterWrapper>();
 					wrappers.add(new ParameterWrapper(clazz, null));
@@ -574,7 +576,8 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 		if (ReflectUtility.PrimitiveTypeMap.containsKey(className)) {
 			clazz = ReflectUtility.PrimitiveTypeMap.get(className);
 		} else {
-			clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+//			clazz = ClassLoader.getSystemClassLoader().loadClass(className);
+			clazz = Class.forName(className);
 		}
 		
 		List[] outputLists = marshallParameters(requestStrings, 2);

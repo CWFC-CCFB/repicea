@@ -39,7 +39,8 @@ public class BrowserCaller {
 				String cmd = "rundll32 url.dll, FileProtocolHandler "+ url;
 				runtime.exec(cmd);
 			} else if(os.startsWith("Mac OS")) {				//Block for Mac OS
-				Class fileMgr = ClassLoader.getSystemClassLoader().loadClass("com.apple.eio.FileManager");
+//				Class fileMgr = ClassLoader.getSystemClassLoader().loadClass("com.apple.eio.FileManager");
+				Class fileMgr = Class.forName("com.apple.eio.FileManager");
 				Method openURL = fileMgr.getDeclaredMethod("openURL", new Class[] {String.class});
 				openURL.invoke(null, new Object[] {url});
 			} else { 	//Block for UNIX Platform

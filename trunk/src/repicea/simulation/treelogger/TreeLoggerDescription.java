@@ -35,7 +35,8 @@ public class TreeLoggerDescription {
 	@SuppressWarnings({ "unchecked", "unused" })
 	public TreeLoggerDescription(String className) {
 		try {
-			Class<? extends TreeLogger<?, ?>> clazz = (Class<? extends TreeLogger<?,?>>) ClassLoader.getSystemClassLoader().loadClass(className);
+			Class<? extends TreeLogger<?, ?>> clazz = (Class<? extends TreeLogger<?,?>>) Class.forName(className);
+//			Class<? extends TreeLogger<?, ?>> clazz = (Class<? extends TreeLogger<?,?>>) ClassLoader.getSystemClassLoader().loadClass(className);
 			this.treeLoggerClassName = className;
 		} catch (Exception e) {
 			throw new InvalidParameterException("Class name " + className + " is not a valid TreeLogger class");
@@ -58,7 +59,8 @@ public class TreeLoggerDescription {
 	@SuppressWarnings("unchecked")
 	public Class<? extends TreeLogger<?,?>> getTreeLoggerClass() {
 		try {
-			return (Class<? extends TreeLogger<?,?>>) ClassLoader.getSystemClassLoader().loadClass(treeLoggerClassName);
+//			return (Class<? extends TreeLogger<?,?>>) ClassLoader.getSystemClassLoader().loadClass(treeLoggerClassName);
+			return (Class<? extends TreeLogger<?,?>>) Class.forName(treeLoggerClassName);
 		} catch (ClassNotFoundException e) {
 			throw new InvalidParameterException("Class name " + treeLoggerClassName + " is not a valid TreeLogger class");
 		}

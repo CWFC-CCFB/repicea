@@ -355,7 +355,8 @@ public abstract class TreeLoggerParameters<LC extends LogCategory>	implements Me
 	@SuppressWarnings("unchecked")
 	public TreeLogger<TreeLoggerParameters<?>,?> createTreeLoggerInstance() {
 		try {
-			Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass(treeLoggerClass);
+//			Class<?> clazz = ClassLoader.getSystemClassLoader().loadClass(treeLoggerClass);
+			Class<?> clazz = Class.forName(treeLoggerClass);
 			TreeLogger<TreeLoggerParameters<?>,?> treeLogger = (TreeLogger<TreeLoggerParameters<?>,?>) clazz.newInstance();
 			treeLogger.setTreeLoggerParameters(this);
 			return treeLogger;
