@@ -18,7 +18,9 @@
  */
 package repicea.simulation.climate;
 
-class REpiceaClimateChangeTrendSegment {
+import java.io.Serializable;
+
+class REpiceaClimateChangeTrendSegment implements Serializable {
 
 	final int startDateYr;
 	final int endDateYr;
