@@ -39,6 +39,10 @@ public interface CommercialVolumeM3Provider {
 		} else {
 			throw new InvalidParameterException("The instance should implement either the CommercialUnderbarkVolumeM3Provider or CommercialOverbarkVolumeM3Provider interface!");
 		}
-
 	}
+	
+	public default boolean isCommercialVolumeOverbark() {
+		return !isCommercialVolumeUnderbark();
+	}
+
 }

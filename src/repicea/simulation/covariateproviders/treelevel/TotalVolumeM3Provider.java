@@ -38,7 +38,10 @@ public interface TotalVolumeM3Provider {
 		} else {
 			throw new InvalidParameterException("The instance should implement either the TotalUnderbarkVolumeM3Provider or TotalOverbarkVolumeM3Provider interface!");
 		}
-
+	}
+	
+	public default boolean isTotalVolumeOverbark() {
+		return !isTotalVolumeUnderbark();
 	}
 
 }
