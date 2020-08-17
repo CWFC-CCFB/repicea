@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This interface ensures the tree instance can provide its total above ground volume.
  * @author Mathieu Fortin - March 2013
  */
-public interface TotalOverbarkVolumeM3Provider {
+public interface TotalOverbarkVolumeM3Provider extends TotalVolumeM3Provider {
 
 	/**
 	 * This method returns the total above ground volume WITHOUT any expansion factor.

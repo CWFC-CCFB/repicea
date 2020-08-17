@@ -146,7 +146,6 @@ public class AllometryCalculator {
 				} else {
 					volume += ((CommercialUnderbarkVolumeM3Provider) t).getCommercialUnderbarkVolumeM3() * t.getNumber();
 				}
-				volume += t.getCommercialUnderbarkVolumeM3() * t.getNumber(); 
 			}
 		}
 		return volume;
