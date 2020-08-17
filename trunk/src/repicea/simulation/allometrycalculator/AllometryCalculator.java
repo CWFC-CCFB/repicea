@@ -128,7 +128,7 @@ public class AllometryCalculator {
 	 * @param trees a Collection object that should contains AllometryCalculableTree instances
 	 * @return the total commercial volume in m3 (double)
 	 */
-	public double getCommercialVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
+	public double getCommercialUnderbarkVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
 
 		checkCollection(trees);
 
@@ -147,14 +147,14 @@ public class AllometryCalculator {
 	 * @param trees a Collection object that should contains AllometryCalculableTree instances
 	 * @return the total volume in m3 (double)
 	 */
-	public double getTotalVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
+	public double getTotalUnderbarkVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
 
 		checkCollection(trees);
 
 		double volume = 0;
 		for (AllometryCalculableTree t : trees) {
 			if (t.getNumber() > 0) {
-				volume += t.getTotalVolumeDm3() * t.getNumber() * 0.001;		// factor to ensure the conversion from dm3 to m3
+				volume += t.getTotalUnderbarkVolumeDm3() * t.getNumber() * 0.001;		// factor to ensure the conversion from dm3 to m3
 			}
 		}
 		return volume;
