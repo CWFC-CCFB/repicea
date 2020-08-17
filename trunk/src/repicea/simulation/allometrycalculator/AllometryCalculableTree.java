@@ -18,10 +18,10 @@
  */
 package repicea.simulation.allometrycalculator;
 
-import repicea.simulation.covariateproviders.treelevel.CommercialUnderbarkVolumeM3Provider;
+import repicea.simulation.covariateproviders.treelevel.CommercialVolumeM3Provider;
 import repicea.simulation.covariateproviders.treelevel.HeightMProvider;
+import repicea.simulation.covariateproviders.treelevel.TotalVolumeM3Provider;
 import repicea.simulation.covariateproviders.treelevel.TreeWeightProvider;
-import repicea.simulation.covariateproviders.treelevel.TotalUnderbarkVolumeM3Provider;
 
 /**
  * The AllometryCalculableTree is an interface that enables the calculation of basal area,
@@ -31,8 +31,8 @@ import repicea.simulation.covariateproviders.treelevel.TotalUnderbarkVolumeM3Pro
 public interface AllometryCalculableTree extends LightAllometryCalculableTree,
 												TreeWeightProvider,
 												HeightMProvider,
-												CommercialUnderbarkVolumeM3Provider,
-												TotalUnderbarkVolumeM3Provider {
+												CommercialVolumeM3Provider,
+												TotalVolumeM3Provider {
 	
 	
 	

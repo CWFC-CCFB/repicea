@@ -22,7 +22,7 @@ package repicea.simulation.covariateproviders.treelevel;
  * This interface ensures the tree instance can provide its own commercial volume.
  * @author Mathieu Fortin - November 2012
  */
-public interface CommercialOverbarkVolumeM3Provider {
+public interface CommercialOverbarkVolumeM3Provider extends CommercialVolumeM3Provider {
 
 	/**
 	 * This method returns the overbark commercial volume, i.e. volume up to a particular 
