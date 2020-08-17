@@ -18,7 +18,7 @@
  */
 package repicea.simulation.treelogger;
 
-import repicea.simulation.covariateproviders.treelevel.CommercialVolumeM3Provider;
+import repicea.simulation.covariateproviders.treelevel.CommercialUnderbarkVolumeM3Provider;
 import repicea.simulation.covariateproviders.treelevel.ExpansionFactorProvider;
 import repicea.simulation.covariateproviders.treelevel.SpeciesNameProvider;
 import repicea.simulation.covariateproviders.treelevel.TreeWeightProvider;
@@ -30,7 +30,7 @@ import repicea.simulation.covariateproviders.treelevel.TreeWeightProvider;
  * 
  * @author Mathieu Fortin and Jean-Francois Lavoie - January 2012
  */
-public interface LoggableTree extends CommercialVolumeM3Provider,
+public interface LoggableTree extends CommercialUnderbarkVolumeM3Provider,
 										SpeciesNameProvider, 
 										ExpansionFactorProvider,
 										TreeWeightProvider {
