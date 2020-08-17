@@ -24,11 +24,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import repicea.simulation.covariateproviders.treelevel.CommercialOverbarkVolumeM3Provider;
-import repicea.simulation.covariateproviders.treelevel.CommercialUnderbarkVolumeM3Provider;
-import repicea.simulation.covariateproviders.treelevel.TotalOverbarkVolumeM3Provider;
-import repicea.simulation.covariateproviders.treelevel.TotalUnderbarkVolumeM3Provider;
-
 /**
  * This calculator provides the basic allometric features, such as the basal area, the mean quadratic diameter, etc.
  * @author Mathieu Fortin - October 2011
@@ -131,21 +126,16 @@ public class AllometryCalculator {
 	 * NOTE: The commercial volume is defined as the  volume for trees that are equal to or greater than 
 	 * a particular dbh (e.g. 9.1 cm in dbh for Quebec).
 	 * @param trees a Collection object that should contains AllometryCalculableTree instances
-	 * @param overbark a boolean 
 	 * @return the commercial volume in m3 (double)
 	 */
-	public double getCommercialVolumeM3(Collection<? extends AllometryCalculableTree> trees, boolean overbark) {
+	public double getCommercialVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
 
 		checkCollection(trees);
 
 		double volume = 0;
 		for (AllometryCalculableTree t : trees) {
 			if (t.getNumber() > 0) {
-				if (overbark) {
-					volume += ((CommercialOverbarkVolumeM3Provider) t).getCommercialOverbarkVolumeM3() * t.getNumber();
-				} else {
-					volume += ((CommercialUnderbarkVolumeM3Provider) t).getCommercialUnderbarkVolumeM3() * t.getNumber();
-				}
+				volume += t.getCommercialVolumeM3() * t.getNumber();
 			}
 		}
 		return volume;
@@ -157,18 +147,14 @@ public class AllometryCalculator {
 	 * @param trees a Collection object that should contains AllometryCalculableTree instances
 	 * @return the total volume in m3 (double)
 	 */
-	public double getTotalVolumeM3(Collection<? extends AllometryCalculableTree> trees, boolean overbark) {
+	public double getTotalVolumeM3(Collection<? extends AllometryCalculableTree> trees) {
 
 		checkCollection(trees);
 
 		double volume = 0;
 		for (AllometryCalculableTree t : trees) {
 			if (t.getNumber() > 0) {
-				if (overbark) {
-					volume += ((TotalOverbarkVolumeM3Provider) t).getTotalOverbarkVolumeM3() * t.getNumber() * 0.001;		// factor to ensure the conversion from dm3 to m3
-				} else {
-					volume += ((TotalUnderbarkVolumeM3Provider) t).getTotalUnderbarkVolumeM3() * t.getNumber();
-				}
+				volume += t.getTotalVolumeM3() * t.getNumber();		
 			}
 		}
 		return volume;

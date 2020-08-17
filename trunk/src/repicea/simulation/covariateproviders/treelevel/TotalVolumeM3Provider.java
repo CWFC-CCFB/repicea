@@ -18,6 +18,27 @@
  */
 package repicea.simulation.covariateproviders.treelevel;
 
-public abstract interface TotalVolumeM3Provider {
+import java.security.InvalidParameterException;
+
+public interface TotalVolumeM3Provider {
+
+	public default double getTotalVolumeM3() {
+		if (isTotalVolumeUnderbark()) {
+			return ((TotalUnderbarkVolumeM3Provider) this).getTotalUnderbarkVolumeM3();
+		} else {
+			return ((TotalOverbarkVolumeM3Provider) this).getTotalOverbarkVolumeM3();
+		}
+	}
+	
+	public default boolean isTotalVolumeUnderbark() {
+		if (this instanceof TotalUnderbarkVolumeM3Provider) {
+			return true;
+		} else if (this instanceof TotalOverbarkVolumeM3Provider) {
+			return false;
+		} else {
+			throw new InvalidParameterException("The instance should implement either the TotalUnderbarkVolumeM3Provider or TotalOverbarkVolumeM3Provider interface!");
+		}
+
+	}
 
 }

@@ -18,6 +18,27 @@
  */
 package repicea.simulation.covariateproviders.treelevel;
 
-public abstract interface CommercialVolumeM3Provider {
+import java.security.InvalidParameterException;
 
+public interface CommercialVolumeM3Provider {
+
+	
+	public default double getCommercialVolumeM3() {
+		if (isCommercialVolumeUnderbark()) {
+			return ((CommercialUnderbarkVolumeM3Provider) this).getCommercialUnderbarkVolumeM3();
+		} else {
+			return ((CommercialOverbarkVolumeM3Provider) this).getCommercialOverbarkVolumeM3();
+		}
+	}
+	
+	public default boolean isCommercialVolumeUnderbark() {
+		if (this instanceof CommercialUnderbarkVolumeM3Provider) {
+			return true;
+		} else if (this instanceof CommercialOverbarkVolumeM3Provider) {
+			return false;
+		} else {
+			throw new InvalidParameterException("The instance should implement either the CommercialUnderbarkVolumeM3Provider or CommercialOverbarkVolumeM3Provider interface!");
+		}
+
+	}
 }
