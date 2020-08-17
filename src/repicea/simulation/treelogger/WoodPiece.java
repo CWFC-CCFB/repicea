@@ -56,7 +56,7 @@ public abstract class WoodPiece implements Serializable {
 	 * @param logCategory a TreeLogCategory instance
 	 * @param tree a LoggableTree instance
 	 */
-	protected WoodPiece(LogCategory logCategory, LoggableTree tree) {
+	private WoodPiece(LogCategory logCategory, LoggableTree tree) {
 		this.logCategory = logCategory;
 		this.tree = tree;
 		properties = new HashMap<Property, Double>();
@@ -67,10 +67,10 @@ public abstract class WoodPiece implements Serializable {
 	 * Constructor based on the loggable tree. This constructor checks if the tree is a Numberable instance. If so, the number of
 	 * tree is recorded in the expansionFactor variable.
 	 * @param logCategory a TreeLogCategory instance
-	 * @param id an Integer that represents the id of this piece
 	 * @param tree a LoggableTree instance
+	 * @param id an Integer that represents the id of this piece
 	 */
-	protected WoodPiece(LogCategory logCategory, int id, LoggableTree tree) {
+	private WoodPiece(LogCategory logCategory, LoggableTree tree, int id) {
 		this(logCategory, tree);
 		this.id = id;
 	}
@@ -80,12 +80,12 @@ public abstract class WoodPiece implements Serializable {
 	 * Constructor based on the loggable tree. This constructor checks if the tree is a Numberable instance. If so, the number of
 	 * tree is recorded in the expansionFactor variable.
 	 * @param logCategory a TreeLogCategory instance
-	 * @param id an Integer that represents the id of this piece
 	 * @param tree a LoggableTree instance
+	 * @param id an Integer that represents the id of this piece
 	 * @param rank an Integer that is the rank of this log in the tree from the stump to the top
 	 */
-	protected WoodPiece(LogCategory logCategory, int id, LoggableTree tree, int rank) {
-		this(logCategory, id, tree);
+	private WoodPiece(LogCategory logCategory, LoggableTree tree, int id, int rank) {
+		this(logCategory, tree, id);
 		this.rank = rank;
 	}
 	
@@ -100,12 +100,27 @@ public abstract class WoodPiece implements Serializable {
 	 * @param withBark a boolean that indicates whether or not the piece was calculated with bark
 	 * @param withPith a boolean that indicates whether or not the piece was calculated with pith
 	 */
+	@Deprecated
 	protected WoodPiece(LogCategory logCategory, int id, LoggableTree tree, int rank, boolean withBark, boolean withPith) {
-		this(logCategory, id, tree, rank);
+		this(logCategory, tree, id, rank);
 		this.withBark = withBark;
 		this.withPith = withPith;
 	}
 	
+	
+	/**
+	 * Constructor #2. 
+	 * @param logCategory a TreeLogCategory instance
+	 * @param tree a LoggableTree instance
+	 * @param withBark a boolean that indicates whether or not the piece was calculated with bark
+	 * @param volumeOfThisWoodPieceM3 the volume of a single log (NOTE: without any weighting)
+	 */
+	protected WoodPiece(LogCategory logCategory, LoggableTree tree, boolean withBark, double volumeOfThisWoodPieceM3) {
+		this(logCategory, tree);
+		this.withBark = withBark;
+		this.withPith = true;
+		this.setVolumeM3(volumeOfThisWoodPieceM3, withBark);
+	}
 	
 	/**
 	 * This method returns the expansion factor for the number of stems. That is the number of stems
@@ -126,20 +141,25 @@ public abstract class WoodPiece implements Serializable {
 	}
 	
 	/**
-	 * This method calculates the volume of this wood piece, without consideration for any expansion factor. For instance, if the
+	 * This method sets the overbark volume of this wood piece, without consideration for any expansion factor. For instance, if the
 	 * LoggableTree is a Numberable instance, this volume correspond to the log coming from a single tree.
 	 * @param volumeOfThisWoodPieceM3 the volume (m3) which is a double
 	 */
-	protected void setVolumeM3(double volumeOfThisWoodPieceM3) {
-		setProperty(Property.totalVolume_m3, volumeOfThisWoodPieceM3);
+	protected void setVolumeM3(double volumeOfThisWoodPieceM3, boolean overbark) {
+		if (overbark) {
+			setProperty(Property.totalVolume_m3, volumeOfThisWoodPieceM3);
+		} else {
+			setProperty(Property.woodVolume_m3, volumeOfThisWoodPieceM3);
+		}
 	}
 	
 	/**
 	 * This method returns the volume (m3) of this wood piece without any expansion factor.
 	 * @return a double
 	 */
-	public double getVolumeM3() {
-		Double volumeM3 = getProperty(Property.totalVolume_m3);
+	public double getUnderbarkVolumeM3() {
+//		Double volumeM3 = getProperty(Property.totalVolume_m3);
+		Double volumeM3 = getProperty(Property.woodVolume_m3);
 		if (volumeM3 == null) {
 			return -1d;
 		} else {
@@ -200,8 +220,8 @@ public abstract class WoodPiece implements Serializable {
 	 * This method returns the weighted volume of this WoodPiece instance in m3. It should include all expansion factors.
 	 * @return the volume in m3 (double)
 	 */
-	public double getWeightedVolumeM3() {
-		return getVolumeM3() * getNumberOfStemsExpansionFactor() * getPlotWeightExpansionFactor();
+	public double getWeightedUnderbarkVolumeM3() {
+		return getUnderbarkVolumeM3() * getNumberOfStemsExpansionFactor() * getPlotWeightExpansionFactor();
 	}
 	
 	

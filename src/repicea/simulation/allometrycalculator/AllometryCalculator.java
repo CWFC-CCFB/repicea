@@ -123,7 +123,7 @@ public class AllometryCalculator {
 	
 	/**
 	 * This method computes the commercial volume for a collection of commercial trees.
-	 * NOTE: The commercial volume is defined as the volume for trees that are equal to or greater than 
+	 * NOTE: The commercial volume is defined as the overbark volume for trees that are equal to or greater than 
 	 * a particular dbh (e.g. 9.1 cm in dbh for Quebec).
 	 * @param trees a Collection object that should contains AllometryCalculableTree instances
 	 * @return the total commercial volume in m3 (double)
@@ -135,7 +135,7 @@ public class AllometryCalculator {
 		double volume = 0;
 		for (AllometryCalculableTree t : trees) {
 			if (t.getNumber() > 0) {
-				volume += t.getCommercialVolumeM3() * t.getNumber();
+				volume += t.getCommercialUnderbarkVolumeM3() * t.getNumber();
 			}
 		}
 		return volume;
