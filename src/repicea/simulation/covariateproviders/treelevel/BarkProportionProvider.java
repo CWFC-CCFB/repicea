@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2020 Mathieu Fortin  
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,17 +19,17 @@
 package repicea.simulation.covariateproviders.treelevel;
 
 /**
- * This interface ensures the tree instance can provide its own commercial volume.
- * @author Mathieu Fortin - November 2012
+ * This interface ensures the instance can provide the bark proportion with respect to
+ * the wood volume.
+ * @author Mathieu Fortin - August 2020
  */
-public interface CommercialUnderbarkVolumeM3Provider extends CommercialVolumeM3Provider {
+public interface BarkProportionProvider {
 
 	/**
-	 * This method returns the underbark commercial volume, i.e. volume up to a particular 
-	 * small-end diameter, for the CalculableTree instance. The volume is returned WITHOUT 
-	 * any expansion factor.
-	 * @return the merchantable volume in m3 (double)
+	 * Returns the bark proportion with respect to the wood volume.
+	 * @return the bark proportion 
 	 */
-	public double getCommercialUnderbarkVolumeM3();
+	public double getBarkProportionOfWoodVolume();
 
+	
 }
