@@ -30,7 +30,8 @@ import java.util.Map;
 public abstract class WoodPiece implements Serializable {
 
 	public static enum Property {
-//		totalVolume_m3,
+		@Deprecated
+		totalVolume_m3,
 		woodVolume_m3,
 		barkVolume_m3,
 		juvenileWoodVolume_m3,
