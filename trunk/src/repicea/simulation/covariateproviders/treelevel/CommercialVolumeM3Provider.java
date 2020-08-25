@@ -18,31 +18,24 @@
  */
 package repicea.simulation.covariateproviders.treelevel;
 
-import java.security.InvalidParameterException;
-
+/**
+ * This interface ensures the tree instance can provide its commercial volume. 
+ * This volume can be either under or over bark. By default, it is assumed to
+ * be under bark.
+ * @author Mathieu Fortin - August 2020
+ *
+ */
 public interface CommercialVolumeM3Provider {
 
-	
-	public default double getCommercialVolumeM3() {
-		if (isCommercialVolumeUnderbark()) {
-			return ((CommercialUnderbarkVolumeM3Provider) this).getCommercialUnderbarkVolumeM3();
-		} else {
-			return ((CommercialOverbarkVolumeM3Provider) this).getCommercialOverbarkVolumeM3();
-		}
-	}
-	
-	public default boolean isCommercialVolumeUnderbark() {
-		if (this instanceof CommercialUnderbarkVolumeM3Provider) {
-			return true;
-		} else if (this instanceof CommercialOverbarkVolumeM3Provider) {
-			return false;
-		} else {
-			throw new InvalidParameterException("The instance should implement either the CommercialUnderbarkVolumeM3Provider or CommercialOverbarkVolumeM3Provider interface!");
-		}
-	}
+	/**
+	 * This method calculates the commercial volume, that is the volume from
+	 * the stump up to a small-end diameter that defines the commercial limit.
+	 * @return a double -- the volume (m3)
+	 */
+	public double getCommercialVolumeM3();
 	
 	public default boolean isCommercialVolumeOverbark() {
-		return !isCommercialVolumeUnderbark();
+		return false;
 	}
 
 }

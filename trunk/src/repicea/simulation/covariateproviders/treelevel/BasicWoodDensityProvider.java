@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2020 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,16 +19,17 @@
 package repicea.simulation.covariateproviders.treelevel;
 
 /**
- * This interface ensures the tree instance can provide its total above ground volume.
- * @author Mathieu Fortin - March 2013
+ * This interface ensures the instance can provide its basic wood density.
+ * @author Mathieu Fortin - August 2013
  */
-public interface TotalUnderbarkVolumeM3Provider extends TotalVolumeM3Provider {
+public interface BasicWoodDensityProvider {
+
 
 	/**
-	 * This method returns the total above ground volume WITHOUT any expansion factor.
-	 * @return the volume (dm3)
+	 * This method returns the basic wood density calculated as 
+	 * the oven dry weight / green volume (e.g. 30% of moisture content). 
+	 * @return the basic wood density (Mg/m3)
 	 */
-	public double getTotalUnderbarkVolumeM3();
-	
-	
+	public double getBasicWoodDensity();
+
 }

@@ -18,30 +18,22 @@
  */
 package repicea.simulation.covariateproviders.treelevel;
 
-import java.security.InvalidParameterException;
-
+/**
+ * This interface ensures the tree instance can provide its
+ * total volume. This volume can be either over or under bark. 
+ * The default method assumes it is under bark.
+ * @author Mathieu Fortin - August 2020
+ */
 public interface TotalVolumeM3Provider {
 
-	public default double getTotalVolumeM3() {
-		if (isTotalVolumeUnderbark()) {
-			return ((TotalUnderbarkVolumeM3Provider) this).getTotalUnderbarkVolumeM3();
-		} else {
-			return ((TotalOverbarkVolumeM3Provider) this).getTotalOverbarkVolumeM3();
-		}
-	}
-	
-	public default boolean isTotalVolumeUnderbark() {
-		if (this instanceof TotalUnderbarkVolumeM3Provider) {
-			return true;
-		} else if (this instanceof TotalOverbarkVolumeM3Provider) {
-			return false;
-		} else {
-			throw new InvalidParameterException("The instance should implement either the TotalUnderbarkVolumeM3Provider or TotalOverbarkVolumeM3Provider interface!");
-		}
-	}
+	/**
+	 * This method calculates the total volume of the tree.
+	 * @return a double - the volume (m3)
+	 */
+	public double getTotalVolumeM3();
 	
 	public default boolean isTotalVolumeOverbark() {
-		return !isTotalVolumeUnderbark();
+		return false;
 	}
 
 }
