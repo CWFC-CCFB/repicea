@@ -33,9 +33,10 @@ public interface CommercialVolumeM3Provider {
 	 * @return a double -- the volume (m3)
 	 */
 	public double getCommercialVolumeM3();
-	
-	public default boolean isCommercialVolumeOverbark() {
-		return false;
-	}
+
+	public boolean isCommercialVolumeOverbark();
+//	public default boolean isCommercialVolumeOverbark() {
+//		return false;
+//	}
 
 }
