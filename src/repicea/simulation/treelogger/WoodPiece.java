@@ -182,7 +182,7 @@ public abstract class WoodPiece implements Serializable {
 	public double getBarkVolumeM3() {
 		Double volumeM3 = getProperty(Property.barkVolume_m3);
 		if (volumeM3 == null) {
-			throw new InvalidParameterException("The bark volume has not been set!");
+			return 0d;
 		} else {
 			return volumeM3;
 		}
