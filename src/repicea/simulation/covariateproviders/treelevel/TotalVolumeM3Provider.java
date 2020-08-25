@@ -32,9 +32,6 @@ public interface TotalVolumeM3Provider {
 	 */
 	public double getTotalVolumeM3();
 
-	public double isTotalVolumeOverbark();
-//	public default boolean isTotalVolumeOverbark() {
-//		return false;
-//	}
+	public boolean isTotalVolumeOverbark();
 
 }
