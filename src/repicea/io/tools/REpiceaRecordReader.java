@@ -21,6 +21,7 @@ package repicea.io.tools;
 import java.awt.Window;
 import java.io.FileNotFoundException;
 import java.io.Serializable;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -34,6 +35,7 @@ import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
+import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
@@ -194,7 +196,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	private GroupingRegistryReader groupingRegistryReader;
 	
 	private boolean isPopUpWindowEnabled;
-	private boolean guiMode;
+	private UseMode guiMode;
 	
 	private transient Window windowOwner;
 	
@@ -202,7 +204,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * Constructor for GUI mode.
 	 */
 	protected REpiceaRecordReader() {
-		guiMode = false;
+		guiMode = UseMode.PURE_SCRIPT_MODE;
 	}
 
 
@@ -212,10 +214,12 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
-	public void initGUIMode(Window guiOwner, String... fileSpec) throws Exception {
-		
+	public void initGUIMode(Window guiOwner, UseMode useMode, String... fileSpec) throws Exception {
+		if (useMode == null || useMode == UseMode.PURE_SCRIPT_MODE) {
+			throw new InvalidParameterException("The use mode with the initGUIMode should be either UseMode.GUI_MODE or UseMode.ASSISTED_SCRIPT_MODE!");
+		}
 		this.windowOwner = guiOwner;
-		this.guiMode = true;
+		this.guiMode = useMode;
 		
 		importFieldManager = new ImportFieldManager(defineFieldsToImport(), fileSpec);
 		importFieldManager.setStratumFieldEnum(defineGroupFieldEnum());
@@ -265,8 +269,8 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
-	public void initGUIMode(String... fileSpec) throws Exception {
-		initGUIMode(null, fileSpec);
+	public void initGUIMode(UseMode useMode, String... fileSpec) throws Exception {
+		initGUIMode(null, useMode, fileSpec);
 	}
 
 	/**
@@ -311,7 +315,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	public void readRecordsForThisGroupId(int groupId) throws Exception {
 		InternalTask task = new InternalTask(groupId); 
 
-		if (guiMode) {
+		if (guiMode == UseMode.GUI_MODE) {
 			String title = REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress);
 			String message = REpiceaTranslator.getString(MessageID.ReadingFile);
 			new REpiceaProgressBarDialog(windowOwner, title, message, task, false);

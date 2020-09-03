@@ -29,6 +29,7 @@ import repicea.io.tools.ImportFieldElement;
 import repicea.io.tools.ImportFieldElement.FieldType;
 import repicea.io.tools.LevelProviderEnum;
 import repicea.io.tools.REpiceaRecordReader;
+import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -340,14 +341,14 @@ public class TestRecordReader extends REpiceaRecordReader {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		setLookAndFeel();
-		String sourcePath = ObjectUtility.getPackagePath(ImportTests.class) + "TEST6152.accdb";
+		String sourcePath = ObjectUtility.getPackagePath(ImportTests.class) + "TEST6152.csv";
 		
 		String testIfe = ObjectUtility.getPackagePath(TestRecordReader.class) + "test.ife";
 		
 		TestRecordReader reader = new TestRecordReader();
 		reader.setPopUpWindowEnabled(true);
 		try {
-			reader.initGUIMode(sourcePath, "TEST6152");
+			reader.initGUIMode(UseMode.GUI_MODE, sourcePath, "TEST6152");
 		} catch (CancellationException e) {
 		} catch (Exception e2) {
 			e2.printStackTrace();
