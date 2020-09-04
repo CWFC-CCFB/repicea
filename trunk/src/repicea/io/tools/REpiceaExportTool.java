@@ -24,7 +24,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -50,16 +50,27 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * The REpiceaExportTool class is an abstract class that can save a file from particular record sets.
- * The UI interface of this class also provides an export option list and a file selection panel. The export options are 
- * defined in the abstract method defineExportOptions() while the record sets are built through the
- * setRecordSet(Enum selectedExportOption) method. By default, the format is dbf, the user can select other format though. </br>
+ * The UI interface of this class also provides an export option list and a file selection panel. The export 
+ * options are defined in the abstract method defineExportOptions() while the record sets are built through the
+ * createRecordSets(List<Enum> selectedExportOptions) method. By default, the format is dbf, the user can select 
+ * other format though. </br>
+ * </br>
+ * Each record set is given a worker that computes the record and passes them to an associated thread that write
+ * them down in a file. The first worker has a queue from which the saving thread picks the records. Consequently,
+ * the exportRecordSets method returns a series of empty REpiceaRecordSet instances. If the saving is disabled 
+ * through the setSaveFileEnabled method, then the exportRecordSets method returns a series of complete 
+ * REpiceaRecordSet instances. </br>
+ * </br>
  * To use this class, first define a derived class that implements the two abstract methods. To export a dbf file,
  * first instantiate an object of the derived class. Then use the three following method: </br>
  * </br>
  * {@code setFilename(myFile);} </br>
  * {@code setSelectedOptions(mySelectedOptions);} </br>
  * {@code exportRecordSets();} </br>
- * @author Mathieu Fortin - April 2016
+ * 
+ * @author Mathieu Fortin - April 2016 
+ * @author Mathieu Fortin - refactoring September 2020 
+ * 
  */
 public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, CaretListener, ListSelectionListener {
 	
@@ -191,6 +202,14 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 			}
 			recordSet.addAll(incomingRecordSet);
 		}
+		
+		protected final InternalWorkerForSaveMethod getSaveThread() {return saveThread;}
+		
+		protected final void terminateSaveThreadIfAny() throws Exception {
+			if (getSaveThread() != null) {
+				getSaveThread().terminate();
+			}
+		}
 	}
 	
 	
@@ -313,46 +332,73 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	 * @throws Exception if the worker does not terminate correctly
 	 */
 	@SuppressWarnings("rawtypes")
-	protected final REpiceaRecordSet createRecordSet(Enum selectedOption) throws Exception {
+	protected final Map<Enum, REpiceaRecordSet> createRecordSets(List<Enum> selectedOptions) throws Exception {
+		Map<Enum, InternalSwingWorkerForRecordSet> workers = new LinkedHashMap<Enum, InternalSwingWorkerForRecordSet>();
+		Map<Enum, REpiceaRecordSet> recordSetMap = new LinkedHashMap<Enum, REpiceaRecordSet>();
 		
-		if (!availableExportOptions.contains(selectedOption)) {
-			throw new InvalidParameterException("Export option " + selectedOption.name() + " is not recognized!");
-		}
+		REpiceaRecordSet recordSet;
+		InternalSwingWorkerForRecordSet buildRecordSetWorker;
 		
-		REpiceaRecordSet recordSet = new REpiceaRecordSet();
-		InternalSwingWorkerForRecordSet buildRecordSetWorker = instantiateInternalSwingWorkerForRecordSet(selectedOption, recordSet);
-		InternalWorkerForSaveMethod saveRecordSetWorker = null;
-		if (saveFileEnabled) {
-			saveRecordSetWorker = new InternalWorkerForSaveMethod(getExportFilename(selectedOption), recordSet);
-			saveRecordSetWorker.start();
-			buildRecordSetWorker.addSaveThread(saveRecordSetWorker);
-		}
-		
-		if (guiInterface != null && guiInterface.isVisible()) {
-			// will be executed in the EventDispatchThread but the window will block because it is model
-			guiInterface.showProgressBar(buildRecordSetWorker, selectedOption, true);	// true : is creating dataset
-		} else {
-			buildRecordSetWorker.run();	// is executed in the current thread
-		}
-		
-		if (!buildRecordSetWorker.isCorrectlyTerminated()) {
-			recordSet.clear();
-		 	saveRecordSetWorker.terminate();
-			throw buildRecordSetWorker.getFailureReason();
-		} else if (buildRecordSetWorker.hasBeenCancelled()) {
-			recordSet.clear();
-		 	saveRecordSetWorker.terminate();
-		 	throw new CancellationException();
-		}
-
-		if (saveFileEnabled) {
-		 	saveRecordSetWorker.terminate();
-			saveRecordSetWorker.join();
-			if (saveRecordSetWorker.failure != null) {
-				throw saveRecordSetWorker.failure;
+		for (Enum selectedOption : selectedOptions) {
+			if (!availableExportOptions.contains(selectedOption)) {
+				throw new InvalidParameterException("Export option " + selectedOption.name() + " is not recognized!");
+			}
+			
+			recordSet = new REpiceaRecordSet();
+			buildRecordSetWorker = instantiateInternalSwingWorkerForRecordSet(selectedOption, recordSet);
+			workers.put(selectedOption, buildRecordSetWorker);
+			recordSetMap.put(selectedOption, recordSet);
+			InternalWorkerForSaveMethod saveRecordSetWorker = null;
+			if (saveFileEnabled) {
+				saveRecordSetWorker = new InternalWorkerForSaveMethod(getExportFilename(selectedOption), recordSet);
+				saveRecordSetWorker.start();
+				buildRecordSetWorker.addSaveThread(saveRecordSetWorker);
 			}
 		}
-		return recordSet;
+
+		if (guiInterface != null && guiInterface.isVisible()) {
+			// will be executed in the EventDispatchThread but the window will block because it is modal
+			guiInterface.showProgressBar(workers, true);	// true : is creating dataset
+		} else {
+			for (InternalSwingWorkerForRecordSet worker : workers.values()) {
+				worker.run();	// is executed in the current thread
+			}
+		}
+		
+		
+		
+		for (Enum selectedOption : selectedOptions) {
+			recordSet = recordSetMap.get(selectedOption);
+			buildRecordSetWorker = workers.get(selectedOption);
+			
+//			if (guiInterface != null && guiInterface.isVisible()) {
+//				// will be executed in the EventDispatchThread but the window will block because it is modal
+//				guiInterface.showProgressBar(buildRecordSetWorker, selectedOption, true);	// true : is creating dataset
+//			} else {
+//				buildRecordSetWorker.run();	// is executed in the current thread
+//			}
+
+			if (!buildRecordSetWorker.isCorrectlyTerminated()) {
+				recordSet.clear();
+				buildRecordSetWorker.terminateSaveThreadIfAny();
+				throw buildRecordSetWorker.getFailureReason();
+			} else if (buildRecordSetWorker.hasBeenCancelled()) {
+				recordSet.clear();
+				buildRecordSetWorker.terminateSaveThreadIfAny();
+				throw new CancellationException();
+			}
+
+			if (saveFileEnabled) {
+				buildRecordSetWorker.terminateSaveThreadIfAny();
+				InternalWorkerForSaveMethod saveRecordSetWorker = buildRecordSetWorker.getSaveThread();
+				saveRecordSetWorker.join();
+				if (saveRecordSetWorker.failure != null) {
+					throw saveRecordSetWorker.failure;
+				}
+			}
+		}
+		
+		return recordSetMap;
 	}
 	
 
@@ -372,7 +418,9 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	
 	/**
 	 * This method sets the export options. If the selectedOption Enum variable is not part of the 
-	 * available export options, an exception is thrown.
+	 * available export options, an exception is thrown. If multiple selections are not allowed, a 
+	 * list of two or more Enum will throw an exception. The multiple selection mode can be enabled 
+	 * through the setMultipleSelection method.
 	 * @param selectedOptions a set of Enum variables that should be among the available export options
 	 * @throws Exception
 	 */
@@ -414,10 +462,21 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	@SuppressWarnings("rawtypes")
 	protected List<Enum> getAvailableExportOptions() {return availableExportOptions;}
 	
-	protected boolean isAppendFileEnabled() {return appendFileEnabled;}											
+	protected boolean isAppendFileEnabled() {return appendFileEnabled;}	
+	
+	/**
+	 * If set to true, the export tool does not delete the file but rather it appends the records
+	 * to the existing file.
+	 * @param appendFileEnabled
+	 */
 	public void setAppendFileEnabled(boolean appendFileEnabled) {this.appendFileEnabled = appendFileEnabled;}	
 	
 	protected void setCanceled(boolean isCanceled) {this.isCanceled = isCanceled;}
+	
+	/**
+	 * Returns true if the cancel button of the dialog has been pressed.
+	 * @return a boolean
+	 */
 	public boolean isCanceled() {return isCanceled;}
 
 	/**
@@ -484,16 +543,22 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	}
 	
 	/**
-	 * This method creates the different record sets depending on the selected export options.
+	 * This method creates the different record sets depending on the selected export options. If 
+	 * the saving is enabled, and it is by default, then the method returns a series of empty
+	 * REpiceaRecordSet instance. These are empty because the saving thread picks all the records
+	 * to write them into a file. If the saving is disabled, then the REpiceaRecordSet instances are
+	 * full.
 	 * @throws Exception
+ 	 * @return a Map with the selected options (keys) and their associated record sets (values)
 	 */
 	@SuppressWarnings("rawtypes")
 	public Map<Enum, REpiceaRecordSet> exportRecordSets() throws Exception {
-		Map<Enum, REpiceaRecordSet> outputMap = new HashMap<Enum, REpiceaRecordSet>();
-		for (Enum selectedOutputOption : selectedExportOptions) {
-			outputMap.put(selectedOutputOption, createRecordSet(selectedOutputOption));
-		}
-		return outputMap;
+//		Map<Enum, REpiceaRecordSet> outputMap = new HashMap<Enum, REpiceaRecordSet>();
+//		for (Enum selectedOutputOption : selectedExportOptions) {
+//			outputMap.put(selectedOutputOption, createRecordSet(selectedOutputOption));
+//		}
+//		return outputMap;
+		return createRecordSets(selectedExportOptions);
 	}
 	
 	

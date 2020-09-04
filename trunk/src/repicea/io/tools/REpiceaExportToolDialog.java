@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.concurrent.CancellationException;
 
@@ -44,7 +45,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.SwingWorker;
 import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.AutomatedHelper;
@@ -54,7 +54,9 @@ import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
+import repicea.gui.genericwindows.REpiceaProgressBarDialog.REpiceaProgressBarDialogParameters;
 import repicea.io.GFileFilter;
+import repicea.io.tools.REpiceaExportTool.InternalSwingWorkerForRecordSet;
 import repicea.lang.MemoryWatchDog.ExpectedMemoryCapacityException;
 import repicea.net.BrowserCaller;
 import repicea.util.REpiceaTranslator;
@@ -400,8 +402,8 @@ public class REpiceaExportToolDialog extends REpiceaDialog implements ActionList
 		} else if (arg0.getSource().equals(browse)) {
 			try {
 				List<FileFilter> fileFilters = new ArrayList<FileFilter>();
-				fileFilters.add(GFileFilter.DBF);
 				fileFilters.add(GFileFilter.CSV);
+				fileFilters.add(GFileFilter.DBF);
 				FileChooserOutput fco = CommonGuiUtility.browseAction(this, 
 						JFileChooser.FILES_ONLY, 
 						getCaller().getFilename(), 
@@ -454,24 +456,29 @@ public class REpiceaExportToolDialog extends REpiceaDialog implements ActionList
 	}
 
 	@SuppressWarnings("rawtypes")
-	protected void showProgressBar(SwingWorker worker, Enum selectedOption, boolean isCreatingDataset) {
+//	protected void showProgressBar(SwingWorker worker, Enum selectedOption, boolean isCreatingDataset) {
+	protected void showProgressBar(Map<Enum, InternalSwingWorkerForRecordSet> workers, boolean isCreatingDataset) {
+		
+		List<REpiceaProgressBarDialogParameters> parms = new ArrayList<REpiceaProgressBarDialogParameters>();
+		
 		JDialog owner = null;
 		if (isVisible()) {
 			owner = this;
 		}
-		
-		String jobName = selectedOption.toString();
-		if (isCreatingDataset) {
-			jobName += " - " + REpiceaTranslator.getString(MessageID.ProgressMessageBuildingRecordSet);
-		} else {
-			jobName += " - " + REpiceaTranslator.getString(MessageID.ProgressMessageExport);
+
+		for (Enum selectedOption : workers.keySet()) {
+			String jobName = selectedOption.toString();
+			if (isCreatingDataset) {
+				jobName += " - " + REpiceaTranslator.getString(MessageID.ProgressMessageBuildingRecordSet);
+			} else {
+				jobName += " - " + REpiceaTranslator.getString(MessageID.ProgressMessageExport);
+			}
+			parms.add(new REpiceaProgressBarDialogParameters(jobName, workers.get(selectedOption), false));
 		}
 		
 		new REpiceaProgressBarDialog(owner, 
 				REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress),
-				jobName,
-				worker, 
-				false);
+				parms);
 	}
 
 	@Override
