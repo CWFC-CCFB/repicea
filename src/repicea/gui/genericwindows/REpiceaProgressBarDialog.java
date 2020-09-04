@@ -22,8 +22,13 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Window;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
@@ -33,6 +38,7 @@ import javax.swing.SwingWorker;
 
 import repicea.app.AbstractGenericTask;
 import repicea.gui.REpiceaDialog;
+import repicea.gui.REpiceaPanel;
 import repicea.gui.UIControlManager;
 
 
@@ -41,19 +47,104 @@ import repicea.gui.UIControlManager;
  * @author Mathieu Fortin - April 2010
  */
 @SuppressWarnings("serial")
-public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyChangeListener {
+public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyChangeListener, WindowListener {
 
 	public static final String PROGRESS = "progress";
 	public static final String LABEL = "label";
 	
 	
-	protected JProgressBar progressBar;
+//	protected JProgressBar progressBar;
 	private String titleString;
-	private JLabel label;
-	@SuppressWarnings("rawtypes")
-	private SwingWorker jobToRun;
+	private List<REpiceaProgressBarDialogParameters> parms;
+	private int currentJobId = 0;
+//	private JLabel label;
+//	@SuppressWarnings("rawtypes")
+//	private SwingWorker jobToRun;
 
 
+	static class ProgressBarPanel extends REpiceaPanel implements PropertyChangeListener {
+
+		final JProgressBar progressBar;
+		final JLabel label;
+		private SwingWorker jobToRun;
+		
+		ProgressBarPanel(REpiceaProgressBarDialogParameters parm) {
+			this.jobToRun = parm.jobToRun;
+			progressBar = new JProgressBar();
+			progressBar.setMinimum(0);
+			progressBar.setMaximum(100);
+			progressBar.setStringPainted(!parm.isIndeterminate);
+			progressBar.setIndeterminate(parm.isIndeterminate);
+			
+			label = UIControlManager.getLabel(parm.labelString);
+			initUI();
+		}
+
+		void initUI() {
+			setLayout(new BorderLayout());
+			JPanel mainPanel = new JPanel();
+			add(mainPanel, BorderLayout.NORTH);
+			
+			mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+
+			JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
+			labelPanel.add(label);
+
+			JPanel progressBarPanel = new JPanel(new BorderLayout());
+			progressBarPanel.add(progressBar, BorderLayout.CENTER);
+
+			mainPanel.add(labelPanel);
+			mainPanel.add(progressBarPanel);
+			
+		}
+
+		@Override
+		public void refreshInterface() {}
+
+		@Override
+		public void propertyChange(PropertyChangeEvent evt) {
+	        if (evt.getPropertyName().equals(PROGRESS)) {
+				progressBar.setValue((Integer) evt.getNewValue());
+			} else if (evt.getPropertyName().equals(LABEL)) {
+				label.setText(evt.getNewValue().toString());
+			}
+		}
+
+		@Override
+		public void listenTo() {
+			jobToRun.addPropertyChangeListener(this);
+		}
+
+		@Override
+		public void doNotListenToAnymore() {
+			jobToRun.removePropertyChangeListener(this);
+		}
+
+	}
+	
+	public static class REpiceaProgressBarDialogParameters {
+		final String labelString;
+		final SwingWorker jobToRun;
+		final boolean isIndeterminate;
+		
+		public REpiceaProgressBarDialogParameters(String labelString, SwingWorker jobToRun, boolean isIndeterminate) {
+			if (labelString == null) {
+				throw new InvalidParameterException("The labelString parameter cannot be null!");
+			}
+			if (jobToRun == null) {
+				throw new InvalidParameterException("The jobToRun parameter cannot be null!");
+			}
+			this.labelString = labelString;
+			this.jobToRun = jobToRun;
+			this.isIndeterminate = isIndeterminate;
+		}
+	}
+	
+	
+	
+	
+	
+	
 	/**
 	 * Constructor 1 with a Frame instance as owner.
 	 * @param owner the parent frame that calls the progress bar
@@ -61,11 +152,15 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	 * @param labelString the message
 	 * @param jobToRun the SwingWorker instance that contains the job to be executed
 	 * @param setIndeterminate true to set the progress bar in indeterminate mode
+	 * @deprecated Use the constructor with REpiceaProgressBarDialogParameters instead
 	 */
+	@Deprecated
 	@SuppressWarnings("rawtypes")
 	public REpiceaProgressBarDialog(Window owner, String titleString, String labelString, SwingWorker jobToRun, boolean setIndeterminate) {
 		super(owner);
-		init(titleString, labelString, jobToRun, setIndeterminate);
+		List<REpiceaProgressBarDialogParameters> parms = new ArrayList<REpiceaProgressBarDialogParameters>();
+		parms.add(new REpiceaProgressBarDialogParameters(labelString, jobToRun, setIndeterminate));
+		init(titleString, parms);
 	}
 
 
@@ -74,63 +169,51 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	 * @param titleString the title of the progress bar
 	 * @param labelString the message
 	 * @param jobToRun the SwingWorker instance that contains the job to be executed
+	 * @deprecated Use the constructor with REpiceaProgressBarDialogParameters instead
 	 */
 	@SuppressWarnings("rawtypes")
 	public REpiceaProgressBarDialog(String titleString, String labelString, SwingWorker jobToRun, boolean setIndeterminate) {
 		this(null, titleString, labelString, jobToRun, setIndeterminate);
 	}
 	
+
+	public REpiceaProgressBarDialog(Window owner, String titleString, List<REpiceaProgressBarDialogParameters> parms) {
+		super(owner);
+		init(titleString, parms);
+	}
+
 	
-	@SuppressWarnings("rawtypes")
-	private void init(String titleString, String labelString, SwingWorker jobToRun, boolean setIndeterminate) {
-		this.jobToRun = jobToRun;
-		progressBar = new JProgressBar();
-		progressBar.setMinimum(0);
-		progressBar.setMaximum(100);
-		progressBar.setStringPainted(!setIndeterminate);
-		progressBar.setIndeterminate(setIndeterminate);
-		
+	
+	private void init(String titleString, List<REpiceaProgressBarDialogParameters> parms) {
 		this.titleString = titleString;
-		this.label = UIControlManager.getLabel(labelString);
-		
+		this.parms = parms;
 		initUI();
 		setModal(true);
 		pack();
-		
-		this.jobToRun.execute();
-		
 		setVisible(true);
 	}
 	
-
+	@Override
 	protected void initUI() {
-		JPanel mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-		
-		setLayout(new BorderLayout());
-		JPanel labelPanel = new JPanel(new FlowLayout(FlowLayout.LEADING));
-		labelPanel.add(label);
-		
-		JPanel progressBarPanel = new JPanel(new BorderLayout());
-		progressBarPanel.add(progressBar, BorderLayout.CENTER);
-		
-		mainPanel.add(labelPanel);
-		mainPanel.add(progressBarPanel);
-		add(mainPanel, BorderLayout.NORTH);
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		for (REpiceaProgressBarDialogParameters parm : parms) {
+			getContentPane().add(new ProgressBarPanel(parm));
+		}
 		setTitle(titleString);
 		
 		Dimension dim = new Dimension(250,100);
-//		setPreferredSize(dim);
 		setMinimumSize(dim);
 		pack();
 	}
 
 	@Override
 	public void cancelAction() {
-		if (jobToRun instanceof AbstractGenericTask) {
-			((AbstractGenericTask) jobToRun).cancel();
-		} else {
-			jobToRun.cancel(true);
+		for (REpiceaProgressBarDialogParameters parm : parms) {
+			if (parm.jobToRun instanceof AbstractGenericTask) {
+				((AbstractGenericTask) parm.jobToRun).cancel();
+			} else {
+				parm.jobToRun.cancel(true);
+			}
 		}
 	}
 	
@@ -138,25 +221,61 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	public void propertyChange(PropertyChangeEvent evt) {
 		if (evt.getPropertyName().equals("state")) {
 			if (SwingWorker.StateValue.DONE == evt.getNewValue()) {
-				setVisible(false);
-				jobToRun = null;
-				dispose();
+				currentJobId++;
+				if (currentJobId < parms.size()) {
+					parms.get(currentJobId).jobToRun.execute();
+				} else {
+					setVisible(false);
+					dispose();
+				}
 			} 
-        } else if (evt.getPropertyName().equals(PROGRESS)) {
-			progressBar.setValue((Integer) evt.getNewValue());
-		} else if (evt.getPropertyName().equals(LABEL)) {
-			label.setText(evt.getNewValue().toString());
 		}
 	}
 
 	@Override
 	public void listenTo() {
-		jobToRun.addPropertyChangeListener(this);
+		addWindowListener(this);
+		for (REpiceaProgressBarDialogParameters parm : parms) {
+			parm.jobToRun.addPropertyChangeListener(this);
+		}
 	}
 
 	@Override
 	public void doNotListenToAnymore() {
-		jobToRun.removePropertyChangeListener(this);
+		removeWindowListener(this);
+		for (REpiceaProgressBarDialogParameters parm : parms) {
+			parm.jobToRun.removePropertyChangeListener(this);
+		}
+	}
+
+
+	@Override
+	public void windowActivated(WindowEvent arg0) {}
+
+
+	@Override
+	public void windowClosed(WindowEvent arg0) {}
+
+
+	@Override
+	public void windowClosing(WindowEvent arg0) {}
+
+
+	@Override
+	public void windowDeactivated(WindowEvent arg0) {}
+
+
+	@Override
+	public void windowDeiconified(WindowEvent arg0) {}
+
+
+	@Override
+	public void windowIconified(WindowEvent arg0) {}
+
+
+	@Override
+	public void windowOpened(WindowEvent arg0) {
+		parms.get(currentJobId).jobToRun.execute();
 	}
 
 

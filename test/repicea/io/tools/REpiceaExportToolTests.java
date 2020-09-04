@@ -23,6 +23,8 @@ public class REpiceaExportToolTests {
 		try {
 			exportTool.setSelectedOptions(options);
 			exportTool.exportRecordSets();
+			REpiceaRecordSet recordSet = exportTool.exportRecordSets().get(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
+			Assert.assertEquals("Testing if the map is empty (saving was enabled)", 0, recordSet.size());
 		} catch (Exception e) {
 			e.printStackTrace();
 			Assert.fail();
@@ -42,6 +44,51 @@ public class REpiceaExportToolTests {
 			exportTool.setSaveFileEnabled(false);
 			exportTool.setSelectedOptions(options);
 			REpiceaRecordSet recordSet = exportTool.exportRecordSets().get(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
+			Assert.assertEquals("Testing if the record set is still full (saving was disabled)", 200000, recordSet.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+
+	
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void exportTestWithTwoOptions() {
+		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
+		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
+		exportTool.setFilename(filename);
+		List<Enum> options = new ArrayList<Enum>();
+		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
+		options.add(REpiceaExportToolImpl.ExportOptions.TheOtherOne);
+		try {
+			exportTool.setSelectedOptions(options);
+			REpiceaRecordSet recordSet = exportTool.exportRecordSets().get(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
+			Assert.assertEquals("Testing if the map is empty (saving was enabled)", 0, recordSet.size());
+			recordSet = exportTool.exportRecordSets().get(REpiceaExportToolImpl.ExportOptions.TheOtherOne);
+			Assert.assertEquals("Testing if the map is empty (saving was enabled)", 0, recordSet.size());
+		} catch (Exception e) {
+			e.printStackTrace();
+			Assert.fail();
+		}
+	}
+	
+	
+	@SuppressWarnings("rawtypes")
+	@Test
+	public void exportTestWithTwoOptionsWithoutSaving() {
+		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
+		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
+		exportTool.setFilename(filename);
+		List<Enum> options = new ArrayList<Enum>();
+		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
+		options.add(REpiceaExportToolImpl.ExportOptions.TheOtherOne);
+		try {
+			exportTool.setSaveFileEnabled(false);
+			exportTool.setSelectedOptions(options);
+			REpiceaRecordSet recordSet = exportTool.exportRecordSets().get(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
+			Assert.assertEquals(200000, recordSet.size());
+			recordSet = exportTool.exportRecordSets().get(REpiceaExportToolImpl.ExportOptions.TheOtherOne);
 			Assert.assertEquals(200000, recordSet.size());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -55,7 +102,9 @@ public class REpiceaExportToolTests {
 			exportTool.showUI(null);
 		} catch (Exception e) {
 			e.printStackTrace();
+			System.exit(1);
 		}
+		System.exit(0);
 	}
 	
 }
