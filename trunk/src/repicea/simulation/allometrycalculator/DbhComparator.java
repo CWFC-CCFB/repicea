@@ -21,7 +21,6 @@ package repicea.simulation.allometrycalculator;
 import java.util.Comparator;
 
 import repicea.simulation.covariateproviders.treelevel.DbhCmProvider;
-import repicea.simulation.covariateproviders.treelevel.HeightMProvider;
 
 /**
  * The DbhComparator class implements the Comparator interface for DbhCmProvider instances. It includes
@@ -33,7 +32,7 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 
 	private final boolean ascending;
 	
-	private final HeightComparator heightComparator;
+//	private final HeightComparator heightComparator;
 	
 	/**
 	 * General constructor.
@@ -41,7 +40,7 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 	 */
 	public DbhComparator(boolean ascending) {
 		this.ascending = ascending;
-		heightComparator = new HeightComparator(ascending);
+//		heightComparator = new HeightComparator(ascending);
 	}
 	
 	/**
@@ -57,7 +56,8 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 			if (arg0.getDbhCm() < arg1.getDbhCm()) {
 				return -1;
 			} else if (arg0.getDbhCm() == arg1.getDbhCm()) {
-				return compareForHeight(arg0, arg1);
+				return 0; 			// MF2020-09-11 Bug fixed here: if all the trees are the same diameter, then the dominant height estimate was overestimated
+//				return compareForHeight(arg0, arg1);
 			} else {
 				return 1;
 			}
@@ -73,11 +73,11 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 		}
 	}
 	
-	private int compareForHeight(DbhCmProvider arg0, DbhCmProvider arg1) {
-		if (arg0 instanceof HeightMProvider && arg1 instanceof HeightMProvider) {
-			return heightComparator.compare((HeightMProvider) arg0, (HeightMProvider) arg1); 
-		} else {
-			return 0;
-		}
-	}
+//	private int compareForHeight(DbhCmProvider arg0, DbhCmProvider arg1) {
+//		if (arg0 instanceof HeightMProvider && arg1 instanceof HeightMProvider) {
+//			return heightComparator.compare((HeightMProvider) arg0, (HeightMProvider) arg1); 
+//		} else {
+//			return 0;
+//		}
+//	}
 }
