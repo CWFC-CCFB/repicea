@@ -65,7 +65,8 @@ public class DbhComparator implements Comparator<DbhCmProvider> {
 			if (arg0.getDbhCm() < arg1.getDbhCm()) {
 				return 1;
 			} else if (arg0.getDbhCm() == arg1.getDbhCm()) {
-				return compareForHeight(arg0, arg1);
+				return 0;			// MF2020-09-11 Bug fixed here: if all the trees are the same diameter, then the dominant height estimate was overestimated
+//				return compareForHeight(arg0, arg1);
 			} else {
 				return -1;
 			}
