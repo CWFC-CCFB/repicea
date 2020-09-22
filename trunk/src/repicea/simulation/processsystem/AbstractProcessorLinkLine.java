@@ -91,8 +91,8 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 			setLocation(midX - getSize().width / 2, midY - getSize().height / 2);
 			setStroke(g2);
 			int controlX1 = midX;
-			int controlX2 = midX;
 			int controlY1 = fatherLocation.y;
+			int controlX2 = midX;
 			int controlY2 = sonLocation.y;
 			if (sonLocation.x - fatherLocation.x < SystemLayout.convertToRelative(BezierFactor)) {
 				controlX1 = fatherLocation.x + SystemLayout.convertToRelative(BezierFactor);
@@ -112,7 +112,35 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 			g2.draw(curve);
 			g2.setStroke(UISetup.DefaultStroke);		// to the default value
 
-		}
+			double x95 = getBezierCoordinate(controlX1, controlX2, sonLocation.x, 0.90);
+			double y95 = getBezierCoordinate(controlY1, controlY2, sonLocation.y, 0.90);
+			double angle = Math.atan2(sonLocation.y - y95, x95 - sonLocation.x);
+
+            double arrowRatio = 0.5;
+            double arrowLength = 15d;
+
+            Path2D.Double arrow = new Path2D.Double();
+
+            double waisting = 0.30 * arrowLength;
+            
+            arrow.moveTo(sonLocation.x, sonLocation.y);
+            lineTo(arrow, sonLocation.x - arrowLength, 
+            		sonLocation.y + arrowLength * arrowRatio, 
+            		sonLocation.x, sonLocation.y, angle);
+            quadTo(arrow, sonLocation.x - arrowLength + waisting, sonLocation.y,
+            		sonLocation.x - arrowLength, sonLocation.y - arrowLength * arrowRatio,
+            		sonLocation.x, sonLocation.y,  angle);
+            arrow.lineTo (sonLocation.x, sonLocation.y);
+ 
+            // end of arrow is pinched in
+
+//            g2.setColor(Color.BLACK);
+            g2.fill (arrow);
+
+            // move stem back a bit
+//            g2.setColor ( Color.RED );
+//            g2.draw ( new Line2D.Float ( 50.0f, 0.0f, veeX - arrowLength * 0.5f, 0.0f ) );
+        }
 	}
 
 	protected AnchorProvider getFatherAnchor() {return fatherAnchor;}
@@ -136,6 +164,31 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 			}
 		}
 		return false;
+	}
+
+	
+	
+	double getBezierCoordinate(double x0, double x1, double x2, double t) {
+		double x = x0 * (1 - t) * (1 - t) + 2 * x1 * t * (1 - t) + x2 * t * t;
+		return x;
+	}
+
+	double[] rotatePointAroundReference(double x, double y, double xRef, double yRef, double angle) {
+		double xDiff = x - xRef;
+		double yDiff = y - yRef;
+		return new double[] {xDiff * Math.cos(angle - Math.PI) + yDiff * Math.sin(angle - Math.PI) + xRef, 
+				-xDiff * Math.sin(angle - Math.PI) + yDiff * Math.cos(angle - Math.PI) + yRef} ;
+	}
+	
+	void lineTo(Path2D.Double arrow, double x, double y, double xRef, double yRef, double angle) {
+		double[] newCoordinate = rotatePointAroundReference(x, y, xRef, yRef, angle);
+		arrow.lineTo(newCoordinate[0], newCoordinate[1]);
+	}
+
+	void quadTo(Path2D.Double arrow, double x1, double y1, double x2, double y2, double xRef, double yRef, double angle) {
+		double[] newCoordinate1 = rotatePointAroundReference(x1, y1, xRef, yRef, angle);
+		double[] newCoordinate2 = rotatePointAroundReference(x2, y2, xRef, yRef, angle);
+		arrow.quadTo(newCoordinate1[0], newCoordinate1[1], newCoordinate2[0], newCoordinate2[1]);
 	}
 
 }

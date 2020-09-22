@@ -61,9 +61,9 @@ public class UISetup {
 	
 	public static Border ButtonDefaultBorder = BorderFactory.createLineBorder(Color.BLACK, 1);
 	
-	public static Stroke BoldStroke = new BasicStroke(3);
+	public static Stroke BoldStroke = new BasicStroke(4);
 
-	public static Stroke DefaultStroke = new BasicStroke(1);
+	public static Stroke DefaultStroke = new BasicStroke(2);
 	
 	public static int XGap = 100;
 	
