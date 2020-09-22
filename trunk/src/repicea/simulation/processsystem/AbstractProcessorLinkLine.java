@@ -25,20 +25,51 @@ import java.awt.geom.Path2D;
 
 @SuppressWarnings("serial")
 public abstract class AbstractProcessorLinkLine extends AbstractPermissionProviderButton {
+
+	protected static enum AnchorPosition {
+		TOP,
+		RIGHT,
+		LEFT,
+		BOTTOM;
+	}
 	
 	protected final SystemPanel panel;
 	private final AnchorProvider fatherAnchor;
 	private AnchorProvider sonAnchor;
 	
 	private static final int BezierFactor = 50;
+
+	
+	private AnchorPosition fatherAnchorPosition;
+	private AnchorPosition sonAnchorPosition;
 	
 	protected AbstractProcessorLinkLine(SystemPanel panel, AnchorProvider fatherAnchor, AnchorProvider sonAnchor) {
 		super(panel.getListManager().getGUIPermission());
 		this.panel = panel;
 		this.fatherAnchor = fatherAnchor;
 		setSonAnchor(sonAnchor);
+		setAnchorPositions(AnchorPosition.RIGHT, AnchorPosition.LEFT);
 	}
 
+	protected void setAnchorPositions(AnchorPosition fatherAnchorPosition, AnchorPosition sonAnchorPosition) {
+		this.fatherAnchorPosition = fatherAnchorPosition;
+		this.sonAnchorPosition = sonAnchorPosition;
+	}
+
+	private final Point getAnchor(AnchorProvider provider, AnchorPosition position) {
+		switch(position) {
+		case RIGHT:
+			return provider.getRightAnchor();
+		case LEFT:
+			return provider.getLeftAnchor();
+		case TOP:
+			return provider.getTopAnchor();
+		case BOTTOM:
+			return provider.getBottomAnchor();
+		}
+		return null;
+	}
+	
 	protected void setSonAnchor(AnchorProvider sonAnchor) {this.sonAnchor = sonAnchor;}
 	
 	
@@ -52,8 +83,8 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 	
 	protected void draw(Graphics g) {
 		Graphics2D g2 = (Graphics2D) g;
-		Point fatherLocation = fatherAnchor.getRightAnchor();
-		Point sonLocation = sonAnchor.getLeftAnchor();
+		Point fatherLocation = getAnchor(fatherAnchor, fatherAnchorPosition);
+		Point sonLocation = getAnchor(sonAnchor, sonAnchorPosition);
 		if (sonLocation != null) {
 			int midX = (int) ((fatherLocation.x + sonLocation.x) * .5);
 			int midY = (int) ((fatherLocation.y + sonLocation.y) * .5);

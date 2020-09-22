@@ -41,6 +41,12 @@ public class PreProcessorLinkLine extends AbstractProcessorLinkLine {
 		public Point getLeftAnchor() {return lastKnownLocation;}
 
 		@Override
+		public Point getBottomAnchor() {return lastKnownLocation;}
+
+		@Override
+		public Point getTopAnchor() {return lastKnownLocation;}
+
+		@Override
 		public void mouseDragged(MouseEvent e) {
 			onGoingAction = true;
 			Component originComponent = (Component) e.getSource();
