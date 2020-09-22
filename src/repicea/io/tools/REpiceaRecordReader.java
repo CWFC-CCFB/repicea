@@ -214,6 +214,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
+	@SuppressWarnings("deprecation")
 	public void initGUIMode(Window guiOwner, UseMode useMode, String... fileSpec) throws Exception {
 		if (useMode == null || useMode == UseMode.PURE_SCRIPT_MODE) {
 			throw new InvalidParameterException("The use mode with the initGUIMode should be either UseMode.GUI_MODE or UseMode.ASSISTED_SCRIPT_MODE!");
@@ -312,6 +313,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param groupId a integer that corresponds to the group ID
 	 * @throws Exception
 	 */
+	@SuppressWarnings("deprecation")
 	public void readRecordsForThisGroupId(int groupId) throws Exception {
 		InternalTask task = new InternalTask(groupId); 
 

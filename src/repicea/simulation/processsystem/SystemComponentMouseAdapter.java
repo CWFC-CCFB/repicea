@@ -27,11 +27,12 @@ import java.security.InvalidParameterException;
 import javax.swing.AbstractButton;
 import javax.swing.JComboBox;
 import javax.swing.JSlider;
+import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
 import repicea.gui.CommonGuiUtility;
-import repicea.gui.Refreshable;
 import repicea.gui.REpiceaShowableUIWithParent;
+import repicea.gui.Refreshable;
 import repicea.gui.permissions.REpiceaGUIPermissionProvider;
 
 class SystemComponentMouseAdapter extends MouseAdapter {
@@ -52,8 +53,8 @@ class SystemComponentMouseAdapter extends MouseAdapter {
 	
 	@Override
 	public void mouseClicked(MouseEvent arg0) {
-		if (arg0.getClickCount() >= 2) {
-			REpiceaShowableUIWithParent showable = (REpiceaShowableUIWithParent) readWriteProvider;
+		REpiceaShowableUIWithParent showable = (REpiceaShowableUIWithParent) readWriteProvider;
+		if (SwingUtilities.isLeftMouseButton(arg0) && arg0.getClickCount() >= 2) {
 			SystemManagerDialog systemManagerDialog = (SystemManagerDialog) CommonGuiUtility.getParentComponent((Component) readWriteProvider, SystemManagerDialog.class);
 			boolean overallEnabling = systemManagerDialog.getCaller().getGUIPermission().isEnablingGranted();
 			boolean isEnablingGranted = readWriteProvider.getGUIPermission().isEnablingGranted() && overallEnabling;

@@ -35,6 +35,8 @@ import repicea.gui.permissions.REpiceaGUIPermission;
 public abstract class DnDCompatibleButton extends SelectableJButton {
 
 	protected static class InternalDragGestureImpl extends DragGestureImpl<Processor> {
+		
+		@Override
 		protected Processor adaptSourceToTransferable(DragGestureEvent event) {
 			Processor obj = ((DnDCompatibleButton) event.getComponent()).createNewProcessor();
 			return obj;

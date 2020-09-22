@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge Epicea.
  *
@@ -111,7 +111,7 @@ public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetLi
 				transferable = arg0.getTransferable();
 			}
 			P obj = (P) transferable.getTransferData(dataFlavor);
-			comp.acceptThisObject(obj, arg0);
+			comp.acceptThisObject(obj, new LocatedEvent(arg0));
 			((Container) comp).validate();
 			return;
 		} catch (Exception e) {

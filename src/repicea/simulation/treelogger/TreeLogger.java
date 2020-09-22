@@ -166,6 +166,7 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	 * in the priorToRunning() method while instructions after the completion of this task can be
 	 * implemented in the posteriorToRunning() method.
 	 */
+	@SuppressWarnings("deprecation")
 	protected void logTrees() {
 		priorToRunning();
 		loggerTask = new TreeLoggerTask<Tree>(this);

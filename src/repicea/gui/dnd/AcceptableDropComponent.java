@@ -18,8 +18,6 @@
  */
 package repicea.gui.dnd;
 
-import java.awt.dnd.DropTargetDropEvent;
-
 /**
  * This interface should be implemented by Component derived classes that accept a drop.
  * @author Mathieu Fortin - October 2012
@@ -31,8 +29,8 @@ public interface AcceptableDropComponent<P> {
 	/**
 	 * This method deals with the object being accepted from the drop.
 	 * @param obj an instance of class P
-	 * @param evt the DropTargetDropEvent that terminates the DnD
+	 * @param evt the LocatedEvent that terminates the DnD
 	 */
-	public void acceptThisObject(P obj, DropTargetDropEvent evt);
+	public void acceptThisObject(P obj, LocatedEvent evt);
 	
 }

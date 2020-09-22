@@ -304,6 +304,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		doNotListenToAnymore();
 		systemPanel.initUI();
 		systemPanel.refreshInterface();
+		systemPanel.setMode(toolPanel.getSelectedButton().getMode());
 		refreshTitle();
 		listenTo();
 	}
