@@ -21,7 +21,6 @@ package repicea.simulation.processsystem;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -45,6 +44,7 @@ import repicea.gui.REpiceaUIObject;
 import repicea.gui.Resettable;
 import repicea.gui.UIControlManager;
 import repicea.gui.dnd.DnDPanel;
+import repicea.gui.dnd.LocatedEvent;
 import repicea.simulation.processsystem.UISetup.BasicMode;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -166,7 +166,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 	}
 	
 	@Override
-	public void acceptThisObject(Processor obj, DropTargetDropEvent arg0) {
+	public void acceptThisObject(Processor obj, LocatedEvent arg0) {
 		Point dropLocation = this.getRelativePointFromDropEvent(arg0); // arg0.getLocation();
 		ProcessorButton button = obj.getUI(this);
 		Point originalLocation = new Point(dropLocation.x - button.getSize().width / 2, dropLocation.y - button.getSize().height / 2);
@@ -216,7 +216,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 			linkLines.add(linkLine);
 			linkLine.addMouseListener(this);
 			SystemManagerDialog dlg = ((SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class));
-			if (dlg != null) {
+			if (dlg != null && linkLine.shouldChangeBeRecorder()) {
 				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
 			}
 		} else {
@@ -229,7 +229,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 			linkLine.removeMouseListener(this);
 			linkLine.finalize();
 			SystemManagerDialog dlg = ((SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class));
-			if (dlg != null) {
+			if (dlg != null && linkLine.shouldChangeBeRecorder()) {
 				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
 			}
 		}
@@ -243,19 +243,25 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 					UIControlManager.InformationMessageTitle.Warning.toString(), 
 					JOptionPane.YES_NO_OPTION, 
 					JOptionPane.WARNING_MESSAGE) == 0) {
-				getViewport().setViewPositionVetoEnabled(true);	
-				if (selectedButton instanceof ProcessorButton) {
-					removeProcessorButton((ProcessorButton) selectedButton);
-				} else if (selectedButton instanceof ValidProcessorLinkLine) {
-					removeLinkLine((ValidProcessorLinkLine) selectedButton);
-				}
-				getListManager().checkForEndlessLoops();
-				refreshInterface();
-				sendVetoDisabledOnDispatchThread();
+				deleteFeature(selectedButton);
 			}
 		}
 	}
 
+	protected void deleteFeature(AbstractButton button) {
+		getViewport().setViewPositionVetoEnabled(true);	
+		if (button instanceof ProcessorButton) {
+			removeProcessorButton((ProcessorButton) button);
+		} else if (button instanceof ValidProcessorLinkLine) {
+			removeLinkLine((ValidProcessorLinkLine) button);
+		}
+		getListManager().checkForEndlessLoops();
+		refreshInterface();
+		sendVetoDisabledOnDispatchThread();
+		
+	}
+	
+	
 	
 	private AbstractButton getSelectedFeature() {
 		AbstractButton selectedButton = null;
@@ -306,7 +312,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void setMode(Enum mode) {
+	void setMode(Enum mode) {
 		if (mode != null) {
 			currentMode = mode; 
 			for (ProcessorButton button : processorButtons) {
@@ -315,6 +321,8 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 		}
 	}
 
+	Enum getMode() {return currentMode;}
+	
 	protected void registerLinkBeingCreated(PreProcessorLinkLine futureLink) {
 		if (this.futureLink != null) {
 			this.futureLink.finalize();

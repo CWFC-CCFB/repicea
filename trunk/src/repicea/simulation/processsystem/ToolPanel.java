@@ -196,7 +196,14 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 	}
 	
 	@Override
-	public void refreshInterface() {}
+	public void refreshInterface() {
+		for (ToolButton b : selectableButtons) {
+			if (b.getMode().equals(owner.getMode())) {
+				b.setSelected(true);
+				break;
+			}
+		}
+	}
 
 	@Override
 	public void listenTo() {
@@ -228,6 +235,15 @@ public class ToolPanel extends REpiceaPanel implements ActionListener, Resettabl
 		for (SelectableJButton button : selectableButtons) {
 			button.setSelected(selectedButton.equals(button));
 		}
+	}
+
+	ToolButton getSelectedButton() {
+		for (ToolButton button : selectableButtons) {
+			if (button.isSelected()) {
+				return button;
+			}
+		}
+		return null;
 	}
 
 	@Override

@@ -21,7 +21,6 @@ package repicea.gui.dnd;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
-import java.awt.dnd.DropTargetDropEvent;
 
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
@@ -111,7 +110,7 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 	
 	
 	@Override
-	public void acceptThisObject(D obj, DropTargetDropEvent evt) {
+	public void acceptThisObject(D obj, LocatedEvent evt) {
 		manager.registerObject(obj);
 		getViewport().setViewPositionVetoEnabled(true);
 		refreshInterface();
@@ -128,7 +127,7 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 		new InnerThread(doRun).start();
 	}
 
-	protected Point getRelativePointFromDropEvent(DropTargetDropEvent arg0) {
+	protected Point getRelativePointFromDropEvent(LocatedEvent arg0) {
 		Point dropPoint = arg0.getLocation();
 		Point offset = getViewport().getViewPosition();
 		return new Point(dropPoint.x + offset.x, dropPoint.y + offset.y);

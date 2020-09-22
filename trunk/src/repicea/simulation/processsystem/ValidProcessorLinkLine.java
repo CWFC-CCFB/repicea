@@ -66,4 +66,5 @@ public abstract class ValidProcessorLinkLine extends AbstractProcessorLinkLine i
 		getSonAnchor().removeComponentListener(this);
 	}
 
+	protected boolean shouldChangeBeRecorder() {return true;}
 }

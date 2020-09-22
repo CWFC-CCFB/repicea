@@ -327,7 +327,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	/**
 	 * This method instantiates a InternalSwingWorkerForRecordSet-derived class, which handles the construction
 	 * of the GRecordSet instance. If the worker does not terminate correctly, an exception is thrown.
-	 * @param selectedOption the selected option
+	 * @param selectedOptions a List of Enum instances
 	 * @return a GRecordSet instance
 	 * @throws Exception if the worker does not terminate correctly
 	 */

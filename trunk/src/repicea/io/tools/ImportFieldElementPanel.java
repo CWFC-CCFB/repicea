@@ -23,7 +23,6 @@ import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.dnd.DropTargetDropEvent;
 
 import javax.swing.BorderFactory;
 import javax.swing.JLabel;
@@ -36,6 +35,7 @@ import repicea.gui.REpiceaPanel;
 import repicea.gui.UIControlManager;
 import repicea.gui.dnd.AcceptableDropComponent;
 import repicea.gui.dnd.DropTargetImpl;
+import repicea.gui.dnd.LocatedEvent;
 import repicea.io.FormatField;
 import repicea.io.tools.ImportFieldManagerDialog.MessageID;
 import repicea.util.REpiceaTranslator;
@@ -57,7 +57,7 @@ class ImportFieldElementPanel extends REpiceaPanel {
 		}
 		
 		@Override
-		public void acceptThisObject(FormatField field, DropTargetDropEvent evt) {
+		public void acceptThisObject(FormatField field, LocatedEvent evt) {
 			caller.setFieldMatch(field);
 			refreshInterface();
 		}
