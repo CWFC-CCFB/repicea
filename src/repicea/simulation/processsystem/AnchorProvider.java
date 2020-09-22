@@ -24,5 +24,7 @@ public interface AnchorProvider {
 
 	public Point getRightAnchor();
 	public Point getLeftAnchor();
+	public Point getBottomAnchor();
+	public Point getTopAnchor();
 
 }
