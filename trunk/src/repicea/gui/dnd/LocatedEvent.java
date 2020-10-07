@@ -30,18 +30,25 @@ import java.util.EventObject;
 public class LocatedEvent extends EventObject {
 
 	private final Point location;
+	private final boolean absolute;
 
 	/**
-	 * General constructor.
+	 * Constructor for LocatedEvent object with absolute location. Typically, these objects are not
+	 * directly created through the GUI, but rather automatically created through an action.
 	 * @param source
 	 * @param location
 	 */
 	public LocatedEvent(Object source, Point location) {
+		this(source, location, true);
+	}
+	
+	private LocatedEvent(Object source, Point location, boolean absolute) {
 		super(source);
 		if (location == null) {
 			throw new InvalidParameterException("The location argument cannot be null!");
 		}
 		this.location = location;
+		this.absolute = absolute;
 	}
 
 	/**
@@ -50,7 +57,7 @@ public class LocatedEvent extends EventObject {
 	 * @param evt a DropTargetDropEvent instance
 	 */
 	public LocatedEvent(DropTargetDropEvent evt) {
-		this(evt.getSource(), evt.getLocation());
+		this(evt.getSource(), evt.getLocation(), false);
 	}
 	
 	/**
@@ -61,5 +68,6 @@ public class LocatedEvent extends EventObject {
 		return location;
 	}
 	
+	public boolean isAbsolute() {return absolute;}
 	
 }
