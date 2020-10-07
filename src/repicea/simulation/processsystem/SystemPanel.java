@@ -167,7 +167,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 	
 	@Override
 	public void acceptThisObject(Processor obj, LocatedEvent arg0) {
-		Point dropLocation = this.getRelativePointFromDropEvent(arg0); // arg0.getLocation();
+		Point dropLocation = getAbsoluteLocationFromDropEvent(arg0); // arg0.getLocation();
 		ProcessorButton button = obj.getUI(this);
 		Point originalLocation = new Point(dropLocation.x - button.getSize().width / 2, dropLocation.y - button.getSize().height / 2);
 		obj.setOriginalLocation(originalLocation);

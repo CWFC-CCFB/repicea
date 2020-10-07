@@ -110,7 +110,6 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 					controlX2, controlY2,
 					sonLocation.x, sonLocation.y);
 			g2.draw(curve);
-			g2.setStroke(UISetup.DefaultStroke);		// to the default value
 
 			double x95 = getBezierCoordinate(controlX1, controlX2, sonLocation.x, 0.90);
 			double y95 = getBezierCoordinate(controlY1, controlY2, sonLocation.y, 0.90);
@@ -132,14 +131,9 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
             		sonLocation.x, sonLocation.y,  angle);
             arrow.lineTo (sonLocation.x, sonLocation.y);
  
-            // end of arrow is pinched in
-
-//            g2.setColor(Color.BLACK);
             g2.fill (arrow);
 
-            // move stem back a bit
-//            g2.setColor ( Color.RED );
-//            g2.draw ( new Line2D.Float ( 50.0f, 0.0f, veeX - arrowLength * 0.5f, 0.0f ) );
+			g2.setStroke(UISetup.DefaultStroke);		// to the default value
         }
 	}
 

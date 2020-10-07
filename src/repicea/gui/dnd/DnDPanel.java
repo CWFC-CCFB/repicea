@@ -127,10 +127,19 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 		new InnerThread(doRun).start();
 	}
 
-	protected Point getRelativePointFromDropEvent(LocatedEvent arg0) {
+	/**
+	 * Returns the absolute point by adding the offset of upper left corner of the viewport position.
+	 * @param arg0
+	 * @return
+	 */
+	protected Point getAbsoluteLocationFromDropEvent(LocatedEvent arg0) {
 		Point dropPoint = arg0.getLocation();
-		Point offset = getViewport().getViewPosition();
-		return new Point(dropPoint.x + offset.x, dropPoint.y + offset.y);
+			if (arg0.isAbsolute()) {
+			return dropPoint;
+		} else {
+			Point offset = getViewport().getViewPosition();
+			return new Point(dropPoint.x + offset.x, dropPoint.y + offset.y);
+		}
 	}
 		
 	@Override
