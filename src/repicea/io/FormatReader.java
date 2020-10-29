@@ -36,15 +36,18 @@ import repicea.io.javasql.SQLReader;
 @SuppressWarnings("rawtypes")
 public abstract class FormatReader<H extends FormatHeader> implements Closeable {
 
-	private String filename;
+	public static final String NOT_USING_FILES = "%%%NotUsingFiles%%%";
+	
+	private final String filename;
 	private H header;
-	private boolean isSystemResource;
+	private final boolean isSystemResource;
 
 	protected FormatReader(String filename) throws IOException {
 		this.filename = filename;
-		isSystemResource = false;
 		File file = new File(filename);
-		if (!file.exists()) {			// then try to load it as a resource
+		if (file.exists()) {
+			isSystemResource = false;
+		} else {			// then try to load it as a resource
 			InputStream in = getInputStream();
 			if (in == null) {
 				throw new IOException("The file " + filename + " does not exist and cannot be loaded as a ressource!");
@@ -55,14 +58,20 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 		}
 	}
 	
+	/**
+	 * For FormatReader-derived class that do not depend on files.
+	 */
+	protected FormatReader() {
+		this.filename = NOT_USING_FILES;
+		isSystemResource = false;
+	}
+
 	
 	private InputStream getInputStream() throws IOException {
 		InputStream in = getClass().getResourceAsStream("/" + getFilename());
-//		URL url = getClass().getResource(File.separator + filename);
-//		Object obj = url.getContent();
-//		InputStream in = (InputStream) obj;
 		return in;
 	}
+	
 	
 	/**
 	 * This method opens the stream depending on its nature (a resource or a file)
@@ -73,8 +82,6 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 		InputStream in;
 		if (isSystemResource()) {
 			in = getInputStream();
-//			in = getClass().getResourceAsStream(File.separator + getFilename());
-//			in = ClassLoader.getSystemResourceAsStream(getFilename());
 		} else {
 			in = new FileInputStream(getFilename());
 		}
