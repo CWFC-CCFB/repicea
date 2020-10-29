@@ -36,8 +36,16 @@ import repicea.io.FormatReader;
 public class StreamImportFieldManager extends ImportFieldManager {
 
 	static class QueueReaderFormatField extends FormatField {
-		QueueReaderFormatField(String fieldName) {
-			super(fieldName);
+//		final ImportFieldElement ife;
+//		
+//		QueueReaderFormatField(ImportFieldElement ife) {
+//			super(ife.fieldID.name());
+//			this.ife = ife;
+//			this.ife.setFieldMatch(this);
+//		}
+		
+		QueueReaderFormatField(String name) {
+			super(name);
 		}
 	}
 	
@@ -51,13 +59,11 @@ public class StreamImportFieldManager extends ImportFieldManager {
 			super.addField(field);
 		}
 		
-		List<String> getFieldNames() {
-			List<String> fieldNames = new ArrayList<String>();
-			for (QueueReaderFormatField f : getFieldList()) {
-				fieldNames.add(f.getName());
-			}
-			return fieldNames;
-		}
+//		@Override 
+//		protected List<QueueReaderFormatField> getFieldList() {
+//			return super.getFieldList();
+//		}
+		
 	}
 	
 	/**
@@ -92,15 +98,11 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		 * @param record an array of Object instances.
 		 */
 		public void addRecord(Object[] record) {recordQueue.add(record);}
-		
-		/**
-		 * Return the list of the field names.
-		 * @return a List of String
-		 */
-		public List<String> getFieldNames() {return getHeader().getFieldNames();}
+
 	}
 	
 	private final QueueReader streamReader;
+	private final Enum groupFieldEnum;
 	
 	/**
 	 * Constructor. Takes the recordReader object and extracts all the ImportFieldElement. 
@@ -110,20 +112,79 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	 */
 	public StreamImportFieldManager(REpiceaRecordReader recordReader) throws Exception {
 		super(recordReader.defineFieldsToImport(), QueueReader.NOT_USING_FILES);
-		
 		streamReader = new QueueReader();
 		QueueReaderHeader header = streamReader.getHeader();
-		List<ImportFieldElement> fields = getFields();
-		for (int i = 0; i < fields.size(); i++) {
-			ImportFieldElement f = fields.get(i);
-			if (!f.fieldID.equals(recordReader.defineGroupFieldEnum())) {
-				QueueReaderFormatField sff = new QueueReaderFormatField(f.fieldID.name());
-				header.addField(sff);
-				f.setFieldMatch(sff);
-			}
+		groupFieldEnum = recordReader.defineGroupFieldEnum();
+		
+		List<ImportFieldElement> mandatoryFields = getFieldsByType(false);
+		int i = 0;
+		for (ImportFieldElement ife : mandatoryFields) {
+			QueueReaderFormatField f = new QueueReaderFormatField("Field" + i);
+			header.addField(f);
+			ife.setFieldMatch(f);
+			i++;
+		}
+		List<ImportFieldElement> optionalFields = getFieldsByType(true);
+		for (ImportFieldElement ife : optionalFields) {
+			QueueReaderFormatField f = new QueueReaderFormatField("Field" + i);
+			header.addField(f);
+			ife.setFieldMatch(FormatField.NON_AVAILABLE_FIELD);
+			i++;
 		}
 	}
 
+	private List<ImportFieldElement> getFieldsByType(boolean isOptional) {
+		List<ImportFieldElement> fields = new ArrayList<ImportFieldElement>();
+		for (ImportFieldElement ife : getFields()) {
+			if (!ife.fieldID.equals(groupFieldEnum)) {
+				if (ife.isOptional == isOptional) {
+					fields.add(ife);
+				}
+			}
+		}
+		return fields;
+	}
+	
+	
+	
+	/**
+	 * Return the list of the field names.
+	 * @return a List of String
+	 */
+	public List<String> getFieldDescriptions() {
+		List<String> fieldDescriptions = new ArrayList<String>();
+		for (ImportFieldElement f : getMandatoryAndOptionalFields()) {
+			fieldDescriptions.add(f.getShortDescription());
+		}
+		return fieldDescriptions;
+	}
+
+	
+	private List<ImportFieldElement> getMandatoryAndOptionalFields() {
+		List<ImportFieldElement> ifes = getFieldsByType(false);
+		ifes.addAll(getFieldsByType(true));
+		return ifes;
+	}
+
+	/**
+	 * Set the field matches manually if needed.
+	 * @param indices a list of integer
+	 * @return true if the field matches have been changed or false otherwise
+	 */
+	public boolean setFieldMatches(int[] indices) {
+		List<ImportFieldElement> ifes = getMandatoryAndOptionalFields();
+		if (indices != null) {
+			for (int i = 0; i < indices.length; i++) {
+				if (i < ifes.size()) {
+					int index = indices[i];
+					ifes.get(i).setMatchingFieldIndex(index);
+				}
+			}
+			return true;
+		}
+		return false;
+	}
+	
 	@Override
 	protected QueueReader instantiateFormatReader() {
 		return getFormatReader();

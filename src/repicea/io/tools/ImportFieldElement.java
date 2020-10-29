@@ -113,10 +113,14 @@ public final class ImportFieldElement implements Cloneable,
 	 */
 	public void setFieldMatch(FormatField formatField) {
 		fieldName = formatField.getName();
-		matchingFieldIndex = formatField.getIndex();
+//		matchingFieldIndex = formatField.getIndex();
+		setMatchingFieldIndex(formatField.getIndex());
 	}
 
-
+	void setMatchingFieldIndex(int index) {
+		matchingFieldIndex = index;
+	}
+	
 //	/**
 //	 * This method returns the level at which the field applies.
 //	 * @return an Enum variable
@@ -163,5 +167,18 @@ public final class ImportFieldElement implements Cloneable,
 		return guiInterface != null && guiInterface.isVisible();
 	}
 
+	/**
+	 * Provide the field enum, its type and the index of the field it is matched to.
+	 * @return a String
+	 */
+	public String getShortDescription() {
+		String optional;
+		if (isOptional) {
+			optional = " (optional)";
+		} else {
+			optional = " (mandatory)";
+		}
+		return getFieldID().name() + optional + "; " + fieldTypeClass.name() + "; Match: " + matchingFieldIndex;
+	}
 	
 }
