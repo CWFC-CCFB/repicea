@@ -36,26 +36,30 @@ public class StreamImportFieldManagerTest {
 		REpiceaRecordReader recordReader = new TestRecordReader();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		recordReader.initInScriptMode(ifm);
-		List<String> fieldNames = ifm.getFormatReader().getFieldNames();
+		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		System.out.println(fieldDescriptions);
 //		UNCOMMENT THESE TWO LINES TO UPDATE THE TEST
-//		XmlSerializer serializer = new XmlSerializer(referenceFilename);
+//		XmlSerializer serializer = new XmlSerializer(referenceFilename.replace("bin", "test"));
 //		serializer.writeObject(fieldNames);
 
 		XmlDeserializer deserializer = new XmlDeserializer(referenceFilename);
-		List<String> refFieldNames = (List) deserializer.readObject();
+		List<String> refFieldDescriptions = (List) deserializer.readObject();
 		
-		for (int i = 0; i < fieldNames.size(); i++) {
-			String fieldName = fieldNames.get(i);
-			String referenceFieldName = refFieldNames.get(i);
-			Assert.assertEquals("Testing fieldnames", referenceFieldName, fieldName);
+		for (int i = 0; i < fieldDescriptions.size(); i++) {
+			String fieldDescription = fieldDescriptions.get(i);
+			String referenceFieldDescription = refFieldDescriptions.get(i);
+			Assert.assertEquals("Testing fieldnames", referenceFieldDescription, fieldDescription);
 		}
 	}
 	
 	@Test
-	public void testingInterruption() throws Exception {
+	public void testingInputData() throws Exception {
 		TestRecordReader2 recordReader = new TestRecordReader2();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		recordReader.initInScriptMode(ifm);
+		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		System.out.println(fieldDescriptions);
+		
 		Object[] record = new Object[2];
 		record[0] = "plot1";
 		record[1] = "EPX";
@@ -63,6 +67,52 @@ public class StreamImportFieldManagerTest {
 		record = new Object[2];
 		record[0] = "plot2";
 		record[1] = "SAB";
+		ifm.getFormatReader().addRecord(record);
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing plot 1", recordReader.resultMap.get("plot1"), "EPX");
+		Assert.assertEquals("Testing plot 2", recordReader.resultMap.get("plot2"), "SAB");
+	}
+
+	@Test
+	public void testingInverseOrderInputData() throws Exception {
+		TestRecordReader2 recordReader = new TestRecordReader2();
+		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
+		ifm.setFieldMatches(new int[] {1,0});
+		recordReader.initInScriptMode(ifm);
+		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		System.out.println(fieldDescriptions);
+		
+		Object[] record = new Object[2];
+		record[1] = "plot1";
+		record[0] = "EPX";
+		ifm.getFormatReader().addRecord(record);
+		record = new Object[2];
+		record[1] = "plot2";
+		record[0] = "SAB";
+		ifm.getFormatReader().addRecord(record);
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing plot 1", recordReader.resultMap.get("plot1"), "EPX");
+		Assert.assertEquals("Testing plot 2", recordReader.resultMap.get("plot2"), "SAB");
+	}
+
+	@Test
+	public void testingLargerThanNeededInputData() throws Exception {
+		TestRecordReader2 recordReader = new TestRecordReader2();
+		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
+		ifm.setFieldMatches(new int[] {2,0});
+		recordReader.initInScriptMode(ifm);
+		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		System.out.println(fieldDescriptions);
+		
+		Object[] record = new Object[3];
+		record[2] = "plot1";
+		record[1] = "carotte";
+		record[0] = "EPX";
+		ifm.getFormatReader().addRecord(record);
+		record = new Object[3];
+		record[2] = "plot2";
+		record[1] = "patate";
+		record[0] = "SAB";
 		ifm.getFormatReader().addRecord(record);
 		recordReader.readAllRecords();
 		Assert.assertEquals("Testing plot 1", recordReader.resultMap.get("plot1"), "EPX");
