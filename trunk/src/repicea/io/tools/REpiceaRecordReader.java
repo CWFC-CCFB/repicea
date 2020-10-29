@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea-iotools library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2020 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -23,7 +23,6 @@ import java.io.FileNotFoundException;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CancellationException;
@@ -32,8 +31,6 @@ import repicea.app.AbstractGenericTask;
 import repicea.gui.UIControlManager;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.gui.genericwindows.REpiceaSimpleListDialog;
-import repicea.io.FormatField;
-import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
 import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.REpiceaTranslator;
@@ -56,56 +53,53 @@ public abstract class REpiceaRecordReader implements Serializable {
 			this.groupId = groupId;
 		}
 		
-		@SuppressWarnings("unchecked")
 		@Override
 		protected void doThisJob() throws Exception {
 			int lineCounter = 0;
 
 			List<ImportFieldElement> importFieldElements = importFieldManager.getFields();
-			List<Integer> index = groupingRegistryReader.getObservationIndicesForThisGroup(groupId);
+			List<Integer> rowIndex = groupingRegistryReader.getObservationIndicesForThisGroup(groupId);
 
 			Object[] oArray;
 
-			FormatReader<? extends FormatHeader<? extends FormatField>> reader = null;
+			FormatReader<?> reader = null;
 			try {
-				reader = FormatReader.createFormatReader(importFieldManager.getFileSpecifications());
+				reader = importFieldManager.instantiateFormatReader();
 				oArray = new Object[importFieldElements.size()];
 
-				if (index==null) {							// if the index is null a false index that contains all the observations is created
-					index = new ArrayList<Integer>();
+				if (rowIndex==null) {							// if the index is null a false index that contains all the observations is created
+					rowIndex = new ArrayList<Integer>();
 					for (int i = 0; i < reader.getRecordCount(); i++) {
-						index.add(i);
+						rowIndex.add(i);
 					}
 				}
 				
-				double factor = 100d / index.size();
+				double factor = 100d / rowIndex.size();
 				
 				// Now, lets start reading the rows
 				int numberOfLinesToSkip;
-				int lineNumber;
 				int numberLinesRead = 0;
 				Object[] rowObjects = null;
-				for (Iterator<Integer> iterRow = index.iterator(); iterRow.hasNext();) {
-					lineNumber = iterRow.next();
+				for (Integer lineNumber : rowIndex) {
 					numberOfLinesToSkip = lineNumber - lineCounter;
 					rowObjects = reader.nextRecord(numberOfLinesToSkip);
 					lineCounter = lineNumber + 1;  					// 1 is added to have the real reference line 1 is really line 1
 
 					if (rowObjects!=null) {
-						for (int i = 0; i < importFieldElements.size(); i++) {
-							ImportFieldElement impFieldElem = importFieldElements.get(i);
+						for (int j = 0; j < importFieldElements.size(); j++) {
+							ImportFieldElement impFieldElem = importFieldElements.get(j);
 							int iFieldIndex = impFieldElem.getMatchingFieldIndex();
 							if (!impFieldElem.isOptional) {										// if the field is not optional
 								try {
-									oArray[i] = rowObjects[iFieldIndex].toString().trim();
+									oArray[j] = rowObjects[iFieldIndex].toString().trim();
 								} catch (NullPointerException e) {
 									throw new NullPointerException("A null value has been found at line " + lineNumber + " in the DBF file : field " + impFieldElem.getFieldName());
 								}
 							} else {																// the field is then optional
 								if (iFieldIndex < 0 || rowObjects[iFieldIndex] == null || rowObjects[iFieldIndex].toString().isEmpty()) {			// if the field has not been specified or the selected field contains a null value
-									oArray[i] = null;
+									oArray[j] = null;
 								} else {
-									oArray[i] = rowObjects[iFieldIndex].toString().trim();
+									oArray[j] = rowObjects[iFieldIndex].toString().trim();
 								}
 							}
 						}
@@ -321,8 +315,8 @@ public abstract class REpiceaRecordReader implements Serializable {
 			String title = REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress);
 			String message = REpiceaTranslator.getString(MessageID.ReadingFile);
 			new REpiceaProgressBarDialog(windowOwner, title, message, task, false);
-		} else {
-			task.execute();
+		} else {	
+			task.run();
 		}
 		if (!task.get()) {
 			throw task.getFailureReason();

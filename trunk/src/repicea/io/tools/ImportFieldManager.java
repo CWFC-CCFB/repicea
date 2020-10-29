@@ -42,6 +42,7 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
 import repicea.io.GFileFilter;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.io.tools.StreamImportFieldManager.QueueReader;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlMarshallException;
@@ -119,7 +120,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	/**
 	 * Protected constructor for deserialization.
 	 */
-	private ImportFieldManager() {}
+	protected ImportFieldManager() {}
 	
 	/**
 	 * This method sets the index of the fields.
@@ -141,6 +142,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * @return an Array of String intances
 	 */
 	public String[] getFileSpecifications() {return fileSpec;}
+	
+	protected FormatReader instantiateFormatReader() throws IOException {
+		return FormatReader.createFormatReader(getFileSpecifications());
+	}
 	
 	protected boolean isUserValidated() {return userValidated;}
 	protected void setUserValidated(boolean userValidated) {this.userValidated = userValidated;}
@@ -167,16 +172,18 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	@SuppressWarnings("unchecked")
 	public void setFileSpecifications(String... fileSpec) throws IOException {
 		this.fileSpec = fileSpec;
-		try {
-			formatReader = FormatReader.createFormatReader(getFileSpecifications());
-			synchonizeImportFieldElementsWithAvailableFields();
-			formatReader.close();
-		} catch (FileNotFoundException e1) {
-			System.out.println("Could not find file : " + getFileSpecifications()[0]);
-			throw e1;
-		} catch (IOException e2) {
-			System.out.println("Error reading file : " + getFileSpecifications()[0]);
-			throw e2;
+		if (!QueueReader.NOT_USING_FILES.equals(fileSpec[0])) {
+			try {
+				formatReader = FormatReader.createFormatReader(getFileSpecifications());
+				synchonizeImportFieldElementsWithAvailableFields();
+				formatReader.close();
+			} catch (FileNotFoundException e1) {
+				System.out.println("Could not find file : " + getFileSpecifications()[0]);
+				throw e1;
+			} catch (IOException e2) {
+				System.out.println("Error reading file : " + getFileSpecifications()[0]);
+				throw e2;
+			}
 		}
 	}
 
