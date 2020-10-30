@@ -468,5 +468,17 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		return guiInterface != null && guiInterface.isVisible();
 	}
 
+	/**
+	 * Return the list of the description of the fields.
+	 * @return a List of String
+	 */
+	public List<String> getFieldDescriptions() {
+		List<String> fieldDescriptions = new ArrayList<String>();
+		for (ImportFieldElement f : getFields()) {
+			fieldDescriptions.add(f.getShortDescription());
+		}
+		return fieldDescriptions;
+	}
 
+	
 }
