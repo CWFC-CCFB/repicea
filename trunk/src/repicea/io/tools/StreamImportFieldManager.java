@@ -33,6 +33,7 @@ import repicea.io.FormatReader;
  * This can be useful if the records come from a stream.
  * @author Mathieu Fortin - October 2020
  */
+@SuppressWarnings("serial")
 public class StreamImportFieldManager extends ImportFieldManager {
 
 	static class QueueReaderFormatField extends FormatField {
@@ -102,7 +103,7 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	}
 	
 	private final QueueReader streamReader;
-	private final Enum groupFieldEnum;
+	private final Enum<?> groupFieldEnum;
 	
 	/**
 	 * Constructor. Takes the recordReader object and extracts all the ImportFieldElement. 
@@ -146,11 +147,7 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	}
 	
 	
-	
-	/**
-	 * Return the list of the field names.
-	 * @return a List of String
-	 */
+	@Override
 	public List<String> getFieldDescriptions() {
 		List<String> fieldDescriptions = new ArrayList<String>();
 		for (ImportFieldElement f : getMandatoryAndOptionalFields()) {
