@@ -32,6 +32,7 @@ import repicea.gui.UIControlManager;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.io.FormatReader;
+import repicea.io.tools.ImportFieldElement.FieldType;
 import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -381,34 +382,37 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param oArray the line record
 	 * @throws Exception
 	 */
-	protected void checkInputFieldsFormat(Object[] oArray) throws Exception {
+	protected final void checkInputFieldsFormat(Object[] oArray) throws Exception {
 		List<ImportFieldElement> oVecImport = getImportFieldManager().getFields(); 	// reference on the vector of field element in the SuccesDBFImport object
 		for (int i = 0; i < oVecImport.size(); i++) {				
-			if (oArray[i] != null) {								// if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
-				switch(oVecImport.get(i).getFieldType()) {
-				case Double:							// type = float
-					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = null;
-					} else {
-						oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
+			if (oArray[i] != null) { // if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
+				FieldType ft = oVecImport.get(i).getFieldType();
+				if (!ft.isAlreadyInTheAppropriateFormat(oArray[i])) { // if the object class is not the good one then we parse
+					switch(oVecImport.get(i).getFieldType()) {
+					case Double:							// type = float
+						if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+							oArray[i] = null;
+						} else {
+							oArray[i] = Double.parseDouble(oArray[i].toString().replace(",", "."));
+						}
+						break;
+					case Integer:
+						if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+							oArray[i] = null;
+						} else {
+							oArray[i] = (Integer) ((Double) Double.parseDouble(oArray[i].toString().replace(",","."))).intValue();
+						}
+						break;
+					case String:												// type = character
+						if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
+							oArray[i] = "";
+						} else {
+							oArray[i] = (oArray[i].toString()).trim();
+						}
+						break;
+					default:
+						throw new Exception("Unknown field type");
 					}
-					break;
-				case Integer:
-					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = null;
-					} else {
-						oArray[i] = (Integer) ((Double) Double.parseDouble(oArray[i].toString().replace(",","."))).intValue();
-					}
-					break;
-				case String:												// type = character
-					if (oArray[i].toString().isEmpty() || oArray[i].toString().trim().equals(".") || oArray[i].toString().trim().toUpperCase().equals("NA")) {
-						oArray[i] = "";
-					} else {
-						oArray[i] = (oArray[i].toString()).trim();
-					}
-					break;
-				default:
-					throw new Exception("Unknown field type");
 				}
 			}
 		}

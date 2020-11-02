@@ -36,9 +36,20 @@ public final class ImportFieldElement implements Cloneable,
 	private static final long serialVersionUID = 20100804L;
 	
 	public static enum FieldType {
-		String,
-		Double,
-		Integer
+		String(String.class),
+		Double(Double.class),
+		Integer(Integer.class);
+		
+		final Class clazz;
+		
+		FieldType(Class clazz) {
+			this.clazz = clazz;
+		}
+
+		boolean isAlreadyInTheAppropriateFormat(Object obj) {
+			return clazz.equals(obj.getClass());
+		}
+		
 	}
 	
 	
