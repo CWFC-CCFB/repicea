@@ -382,7 +382,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param oArray the line record
 	 * @throws Exception
 	 */
-	protected final void checkInputFieldsFormat(Object[] oArray) throws Exception {
+	protected void checkInputFieldsFormat(Object[] oArray) throws Exception {
 		List<ImportFieldElement> oVecImport = getImportFieldManager().getFields(); 	// reference on the vector of field element in the SuccesDBFImport object
 		for (int i = 0; i < oVecImport.size(); i++) {				
 			if (oArray[i] != null) { // if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
