@@ -216,7 +216,7 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 			linkLines.add(linkLine);
 			linkLine.addMouseListener(this);
 			SystemManagerDialog dlg = ((SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class));
-			if (dlg != null && linkLine.shouldChangeBeRecorder()) {
+			if (dlg != null && linkLine.shouldChangeBeRecorded()) {
 				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
 			}
 		} else {
@@ -229,21 +229,23 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 			linkLine.removeMouseListener(this);
 			linkLine.finalize();
 			SystemManagerDialog dlg = ((SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class));
-			if (dlg != null && linkLine.shouldChangeBeRecorder()) {
+			if (dlg != null && linkLine.shouldChangeBeRecorded()) {
 				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
 			}
 		}
 	}
 	
 	private void deleteAction() {
-		AbstractButton selectedButton = getSelectedFeature();
-		if (selectedButton != null) {
-			if (JOptionPane.showConfirmDialog(this, 
-					MessageID.AboutToDeleteAProcessor.toString(), 
-					UIControlManager.InformationMessageTitle.Warning.toString(), 
-					JOptionPane.YES_NO_OPTION, 
-					JOptionPane.WARNING_MESSAGE) == 0) {
-				deleteFeature(selectedButton);
+		if (this.getListManager().getGUIPermission().isEnablingGranted()) {
+			AbstractButton selectedButton = getSelectedFeature();
+			if (selectedButton != null) {
+				if (JOptionPane.showConfirmDialog(this, 
+						MessageID.AboutToDeleteAProcessor.toString(), 
+						UIControlManager.InformationMessageTitle.Warning.toString(), 
+						JOptionPane.YES_NO_OPTION, 
+						JOptionPane.WARNING_MESSAGE) == 0) {
+					deleteFeature(selectedButton);
+				}
 			}
 		}
 	}
@@ -258,7 +260,6 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 		getListManager().checkForEndlessLoops();
 		refreshInterface();
 		sendVetoDisabledOnDispatchThread();
-		
 	}
 	
 	
