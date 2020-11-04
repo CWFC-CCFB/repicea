@@ -105,7 +105,8 @@ public class Processor implements REpiceaUIObjectWithParent, REpiceaUIObject, Ca
 	protected final List<ProcessUnit> createProcessUnits(ProcessUnit inputUnit, int intake) {
 		if (inputUnit instanceof TestProcessUnit) {
 			List<ProcessUnit> outputUnits = new ArrayList<ProcessUnit>();
-			outputUnits.add(new TestProcessUnit(((TestProcessUnit) inputUnit).processorList));
+//			outputUnits.add(new TestProcessUnit(((TestProcessUnit) inputUnit).processorList));
+			outputUnits.add(((TestProcessUnit) inputUnit).createNewProcessUnitFromThisOne());
 			return outputUnits;
 		} else {
 			return createProcessUnitsFromThisProcessor(inputUnit, intake);
