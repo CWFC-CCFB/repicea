@@ -24,18 +24,24 @@ import java.util.List;
 @SuppressWarnings("rawtypes")
 public class TestProcessUnit extends ProcessUnit {
 
-	final List<Processor> processorList;
+	protected final List<Processor> processorList;
 	boolean partOfEndlessLoop;
 	
-	TestProcessUnit() {
+	protected TestProcessUnit() {
 		processorList = new ArrayList<Processor>();
 	}
 
-	TestProcessUnit(List<Processor> processorList) {
-		this();
-		this.processorList.addAll(processorList);
-	}
+//	protected TestProcessUnit(List<Processor> processorList) {
+//		this();
+//		this.processorList.addAll(processorList);
+//	}
 
+	protected TestProcessUnit createNewProcessUnitFromThisOne() {
+		TestProcessUnit tpu = new TestProcessUnit();
+		tpu.processorList.addAll(processorList);
+		return tpu;
+	}
+	
 	protected boolean recordProcessor(Processor processor) {
 		partOfEndlessLoop = processorList.contains(processor);
 		processorList.add(processor);
@@ -48,8 +54,8 @@ public class TestProcessUnit extends ProcessUnit {
 		return partOfEndlessLoop;
 	}
 	
-	protected void reset() {
-		partOfEndlessLoop = false;
-		processorList.clear();
-	}
+//	protected void reset() {
+//		partOfEndlessLoop = false;
+//		processorList.clear();
+//	}
 }

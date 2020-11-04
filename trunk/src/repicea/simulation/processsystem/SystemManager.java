@@ -214,28 +214,28 @@ public class SystemManager implements ListManager<Processor>,
 	
 	@SuppressWarnings({ "rawtypes"})
 	protected void checkForEndlessLoops() {
-//		List<List<Processor>> endlessLoopPatterns = new ArrayList<List<Processor>>();
 		for (Processor processor : getList()) {
 			processor.setPartOfEndlessLoop(false);
 		}
-		List<ProcessUnit> inputUnits = new ArrayList<ProcessUnit>();
-		inputUnits.add(new TestProcessUnit());
+//		List<ProcessUnit> inputUnits = new ArrayList<ProcessUnit>();
+//		addTestUnits(inputUnits);
+////		inputUnits.add(new TestProcessUnit());
+//		
+//		for (Processor processor : getPrimaryProcessors()) {
+//			processor.doProcess(inputUnits);
+//		}
+		List<ProcessUnit> inputUnits;
 		
-//		List<Processor> loopPattern;
 		for (Processor processor : getPrimaryProcessors()) {
+			inputUnits = new ArrayList<ProcessUnit>();
+			addTestUnits(inputUnits);
 			processor.doProcess(inputUnits);
-//			Collection<TestProcessUnit> resultingUnits = (Collection) processor.doProcess(inputUnits);
-//			for (TestProcessUnit test : resultingUnits) {
-//				if (test.partOfEndlessLoop) {
-//					loopPattern = new ArrayList<Processor>();
-//					loopPattern.addAll(test.processorList);
-//					if (!endlessLoopPatterns.contains(loopPattern)) {
-//						endlessLoopPatterns.add(loopPattern);
-//					}
-//				}
-//			}
 		}
-//		return endlessLoopPatterns;
+
+	}
+	
+	protected void addTestUnits(List<ProcessUnit> inputUnits) {
+		inputUnits.add(new TestProcessUnit());
 	}
 	
 	@SuppressWarnings("rawtypes")
