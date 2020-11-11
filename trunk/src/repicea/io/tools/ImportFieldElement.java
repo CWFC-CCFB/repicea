@@ -183,13 +183,13 @@ public final class ImportFieldElement implements Cloneable,
 	 * @return a String
 	 */
 	public String getShortDescription() {
-		String optional;
+		String prefix;
 		if (isOptional) {
-			optional = " (optional)";
+			prefix = "O_";
 		} else {
-			optional = " (mandatory)";
+			prefix = "M_";
 		}
-		return getFieldID().name() + optional + "; " + fieldTypeClass.name() + "; Match: " + matchingFieldIndex;
+		return prefix + getFieldID().name() + ";" + fieldTypeClass.name() + ";" + matchingFieldIndex;
 	}
 	
 }
