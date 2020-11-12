@@ -76,7 +76,7 @@ class GroupingRegistryReader extends AbstractGenericTask implements Serializable
 				Object[] rowObjects;
 				int indexOfStratumField = importFieldManager.getIndexOfThisField(importFieldManager.getStratumFieldEnum());
 
-				int iFieldStratum = importFieldManager.getFieldsFromImportFieldElementMap().get(indexOfStratumField).getMatchingFieldIndex();
+				int iFieldStratum = importFieldManager.getFields().get(indexOfStratumField).getMatchingFieldIndex();
 				String strStratum = null;
 				String strStratumLast = "";
 				boolean bStratumChanged = false; 

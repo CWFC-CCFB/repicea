@@ -35,34 +35,6 @@ public final class ImportFieldElement implements Cloneable,
 
 	private static final long serialVersionUID = 20100804L;
 	
-	public static class ImportFieldElementIDCard {
-		public final boolean isOptional;
-		public final String name;
-		public final String type;
-		public final int match;
-		
-		ImportFieldElementIDCard(ImportFieldElement ife) {
-			isOptional = ife.isOptional;
-			name = ife.getFieldID().name();
-			type = ife.getFieldType().name();
-			match = ife.getMatchingFieldIndex();
-		}
-		
-		@Override
-		public String toString() {
-			String optional;
-			if (isOptional) {
-				optional = " (optional)";
-			} else {
-				optional = " (mandatory)";
-			}
-			return name + optional + "; " + type + "; Match: " + match;
-		
-		}
-
-		
-	}
-	
 	public static enum FieldType {
 		String(String.class),
 		Double(Double.class),
@@ -77,7 +49,6 @@ public final class ImportFieldElement implements Cloneable,
 		boolean isAlreadyInTheAppropriateFormat(Object obj) {
 			return clazz.equals(obj.getClass());
 		}
-
 		
 	}
 	
@@ -211,8 +182,14 @@ public final class ImportFieldElement implements Cloneable,
 	 * Provide the field enum, its type and the index of the field it is matched to.
 	 * @return a String
 	 */
-	public ImportFieldElementIDCard getSummary() {
-		return new ImportFieldElementIDCard(this);
+	public String getShortDescription() {
+		String optional;
+		if (isOptional) {
+			optional = " (optional)";
+		} else {
+			optional = " (mandatory)";
+		}
+		return getFieldID().name() + optional + "; " + fieldTypeClass.name() + "; Match: " + matchingFieldIndex;
 	}
 	
 }
