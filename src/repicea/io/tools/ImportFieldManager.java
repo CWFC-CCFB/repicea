@@ -42,6 +42,7 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
 import repicea.io.GFileFilter;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 import repicea.io.tools.StreamImportFieldManager.QueueReader;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
@@ -472,10 +473,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * Return the list of the description of the fields.
 	 * @return a List of String
 	 */
-	public List<String> getFieldDescriptions() {
-		List<String> fieldDescriptions = new ArrayList<String>();
+	public List<ImportFieldElementIDCard> getFieldDescriptions() {
+		List<ImportFieldElementIDCard> fieldDescriptions = new ArrayList<ImportFieldElementIDCard>();
 		for (ImportFieldElement f : getFields()) {
-			fieldDescriptions.add(f.getShortDescription());
+			fieldDescriptions.add(f.getIDCard());
 		}
 		return fieldDescriptions;
 	}

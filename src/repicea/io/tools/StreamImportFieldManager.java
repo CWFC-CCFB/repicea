@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
+import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 
 /**
  * The StreamImportFieldManager class is a special type of ImportFieldManager that 
@@ -37,14 +38,6 @@ import repicea.io.FormatReader;
 public class StreamImportFieldManager extends ImportFieldManager {
 
 	static class QueueReaderFormatField extends FormatField {
-//		final ImportFieldElement ife;
-//		
-//		QueueReaderFormatField(ImportFieldElement ife) {
-//			super(ife.fieldID.name());
-//			this.ife = ife;
-//			this.ife.setFieldMatch(this);
-//		}
-		
 		QueueReaderFormatField(String name) {
 			super(name);
 		}
@@ -148,10 +141,10 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	
 	
 	@Override
-	public List<String> getFieldDescriptions() {
-		List<String> fieldDescriptions = new ArrayList<String>();
+	public List<ImportFieldElementIDCard> getFieldDescriptions() {
+		List<ImportFieldElementIDCard> fieldDescriptions = new ArrayList<ImportFieldElementIDCard>();
 		for (ImportFieldElement f : getMandatoryAndOptionalFields()) {
-			fieldDescriptions.add(f.getShortDescription());
+			fieldDescriptions.add(f.getIDCard());
 		}
 		return fieldDescriptions;
 	}
