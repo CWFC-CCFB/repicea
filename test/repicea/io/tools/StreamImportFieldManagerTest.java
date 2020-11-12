@@ -23,6 +23,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.util.ObjectUtility;
 
@@ -36,7 +37,7 @@ public class StreamImportFieldManagerTest {
 		REpiceaRecordReader recordReader = new TestRecordReader();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		recordReader.initInScriptMode(ifm);
-		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
 		System.out.println(fieldDescriptions);
 //		UNCOMMENT THESE TWO LINES TO UPDATE THE TEST
 //		XmlSerializer serializer = new XmlSerializer(referenceFilename.replace("bin", "test"));
@@ -46,7 +47,7 @@ public class StreamImportFieldManagerTest {
 		List<String> refFieldDescriptions = (List) deserializer.readObject();
 		
 		for (int i = 0; i < fieldDescriptions.size(); i++) {
-			String fieldDescription = fieldDescriptions.get(i);
+			String fieldDescription = fieldDescriptions.get(i).toString();
 			String referenceFieldDescription = refFieldDescriptions.get(i);
 			Assert.assertEquals("Testing fieldnames", referenceFieldDescription, fieldDescription);
 		}
@@ -57,7 +58,7 @@ public class StreamImportFieldManagerTest {
 		TestRecordReader2 recordReader = new TestRecordReader2();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		recordReader.initInScriptMode(ifm);
-		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
 		System.out.println(fieldDescriptions);
 		
 		Object[] record = new Object[2];
@@ -79,7 +80,7 @@ public class StreamImportFieldManagerTest {
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		ifm.setFieldMatches(new int[] {1,0});
 		recordReader.initInScriptMode(ifm);
-		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
 		System.out.println(fieldDescriptions);
 		
 		Object[] record = new Object[2];
@@ -101,7 +102,7 @@ public class StreamImportFieldManagerTest {
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		ifm.setFieldMatches(new int[] {2,0});
 		recordReader.initInScriptMode(ifm);
-		List<String> fieldDescriptions = ifm.getFieldDescriptions();
+		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
 		System.out.println(fieldDescriptions);
 		
 		Object[] record = new Object[3];
