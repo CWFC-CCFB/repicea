@@ -26,7 +26,6 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
-import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 
 /**
  * The StreamImportFieldManager class is a special type of ImportFieldManager that 

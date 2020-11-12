@@ -128,7 +128,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 */
 	public void setImportElementIndex() {
 		importFieldElementIndex = new ArrayList<Enum<?>>();
-		List<ImportFieldElement> vecOfElements = getFields(); 
+		List<ImportFieldElement> vecOfElements = getFieldsFromImportFieldElementMap(); 
 		for (int i = 0; i < vecOfElements.size(); i++) {				
 			importFieldElementIndex.add(vecOfElements.get(i).getFieldID());
 		}
@@ -152,7 +152,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	protected void setUserValidated(boolean userValidated) {this.userValidated = userValidated;}
 
 	protected ImportFieldElement checkFields() {
-		List<ImportFieldElement> vecOfFieldElements = getFields();
+		List<ImportFieldElement> vecOfFieldElements = getFieldsFromImportFieldElementMap();
 		// Check if all the needed fields have been selected or not
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
 			ImportFieldElement oElem = vecOfFieldElements.get(i);
@@ -196,7 +196,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * @throws IOException 
 	 */
 	private void synchonizeImportFieldElementsWithAvailableFields() throws IOException {
-		List<ImportFieldElement> vecOfFieldElements = getFields();
+		List<ImportFieldElement> vecOfFieldElements = getFieldsFromImportFieldElementMap();
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
 			ImportFieldElement oElem = vecOfFieldElements.get(i);
 			String fieldName = oElem.getFieldName();
@@ -281,7 +281,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
       		in.close();
       	} catch(Exception ex) {}
 		
-		List<ImportFieldElement> vecFields = getFields();
+		List<ImportFieldElement> vecFields = getFieldsFromImportFieldElementMap();
 		FakeField field;
 		String potentialFieldName;
 		for (int i = 0; i < vecFields.size(); i++) {
@@ -297,7 +297,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * This method saves the values of the properties.
 	 */
 	protected void saveDefaultValues() {
-		List<ImportFieldElement> vecFields = getFields();
+		List<ImportFieldElement> vecFields = getFieldsFromImportFieldElementMap();
 		for (int i = 0; i < vecFields.size(); i++) {
 			ImportFieldElement oElem = vecFields.get(i);
 			setProperty (oElem.propertyName, oElem.getFieldName());
@@ -321,7 +321,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	public ImportFieldElement getField(Enum fieldID) {
 		int index = getIndexOfThisField(fieldID);
 		if (index != -1) {
-			return getFields().get(index);
+			return getFieldsFromImportFieldElementMap().get(index);
 		} else {
 			return null;
 		}

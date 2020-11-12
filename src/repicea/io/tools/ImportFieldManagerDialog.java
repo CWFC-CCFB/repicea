@@ -268,7 +268,7 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 		fieldMatchPanel = new JPanel();
 		fieldMatchPanel.setLayout(new BoxLayout(fieldMatchPanel, BoxLayout.Y_AXIS));
 		
-		List<ImportFieldElement> vecOfFieldElements = caller.getFields();
+		List<ImportFieldElement> vecOfFieldElements = caller.getFieldsFromImportFieldElementMap();
 		ImportFieldElementPanel ifePanel;
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
 			ifePanel = vecOfFieldElements.get(i).getUI();
@@ -350,7 +350,7 @@ public class ImportFieldManagerDialog extends REpiceaDialog implements ActionLis
 
 	@Override
 	public void refreshInterface() {
-		List<ImportFieldElement> vecOfFieldElements = caller.getFields();
+		List<ImportFieldElement> vecOfFieldElements = caller.getFieldsFromImportFieldElementMap();
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
 			vecOfFieldElements.get(i).getUI().refreshInterface();
 		}
