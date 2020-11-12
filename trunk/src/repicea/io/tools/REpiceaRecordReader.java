@@ -58,7 +58,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 		protected void doThisJob() throws Exception {
 			int lineCounter = 0;
 
-			List<ImportFieldElement> importFieldElements = importFieldManager.getFieldsFromImportFieldElementMap();
+			List<ImportFieldElement> importFieldElements = importFieldManager.getFields();
 			List<Integer> rowIndex = groupingRegistryReader.getObservationIndicesForThisGroup(groupId);
 
 			Object[] oArray;
@@ -383,7 +383,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @throws Exception
 	 */
 	protected void checkInputFieldsFormat(Object[] oArray) throws Exception {
-		List<ImportFieldElement> oVecImport = getImportFieldManager().getFieldsFromImportFieldElementMap(); 	// reference on the vector of field element in the SuccesDBFImport object
+		List<ImportFieldElement> oVecImport = getImportFieldManager().getFields(); 	// reference on the vector of field element in the SuccesDBFImport object
 		for (int i = 0; i < oVecImport.size(); i++) {				
 			if (oArray[i] != null) { // if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
 				FieldType ft = oVecImport.get(i).getFieldType();

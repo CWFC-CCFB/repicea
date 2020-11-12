@@ -42,7 +42,6 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
 import repicea.io.GFileFilter;
 import repicea.io.IOUserInterfaceableObject;
-import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 import repicea.io.tools.StreamImportFieldManager.QueueReader;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
@@ -128,7 +127,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 */
 	public void setImportElementIndex() {
 		importFieldElementIndex = new ArrayList<Enum<?>>();
-		List<ImportFieldElement> vecOfElements = getFieldsFromImportFieldElementMap(); 
+		List<ImportFieldElement> vecOfElements = getFields(); 
 		for (int i = 0; i < vecOfElements.size(); i++) {				
 			importFieldElementIndex.add(vecOfElements.get(i).getFieldID());
 		}
@@ -152,7 +151,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	protected void setUserValidated(boolean userValidated) {this.userValidated = userValidated;}
 
 	protected ImportFieldElement checkFields() {
-		List<ImportFieldElement> vecOfFieldElements = getFieldsFromImportFieldElementMap();
+		List<ImportFieldElement> vecOfFieldElements = getFields();
 		// Check if all the needed fields have been selected or not
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
 			ImportFieldElement oElem = vecOfFieldElements.get(i);
@@ -196,7 +195,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * @throws IOException 
 	 */
 	private void synchonizeImportFieldElementsWithAvailableFields() throws IOException {
-		List<ImportFieldElement> vecOfFieldElements = getFieldsFromImportFieldElementMap();
+		List<ImportFieldElement> vecOfFieldElements = getFields();
 		for (int i = 0; i < vecOfFieldElements.size(); i++) {
 			ImportFieldElement oElem = vecOfFieldElements.get(i);
 			String fieldName = oElem.getFieldName();
@@ -220,15 +219,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	}
 
 	/**
-	 * Provide the ImportFieldElement instances that contain the information about the fields.
-	 * @return a List of ImportFieldElement instances
+	 * This method provides the vector of ImportFieldElement objects.
 	 */
-	public List<ImportFieldElement> getFields() {
-		return getFieldsFromImportFieldElementMap();
-	}
-	
 	@SuppressWarnings("rawtypes")
-	protected final List<ImportFieldElement> getFieldsFromImportFieldElementMap() {
+	public List<ImportFieldElement> getFields() {
 		List<ImportFieldElement> vec = new ArrayList<ImportFieldElement>();
 		
 		// first find out if there is more than one type of enum variables
@@ -249,8 +243,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		
 		return vec;
 	}
-	
-	
 	
 	protected Vector<FormatField> getFormatFields() {
 		Vector<FormatField> values = new Vector<FormatField>();
@@ -281,7 +273,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
       		in.close();
       	} catch(Exception ex) {}
 		
-		List<ImportFieldElement> vecFields = getFieldsFromImportFieldElementMap();
+		List<ImportFieldElement> vecFields = getFields();
 		FakeField field;
 		String potentialFieldName;
 		for (int i = 0; i < vecFields.size(); i++) {
@@ -297,7 +289,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * This method saves the values of the properties.
 	 */
 	protected void saveDefaultValues() {
-		List<ImportFieldElement> vecFields = getFieldsFromImportFieldElementMap();
+		List<ImportFieldElement> vecFields = getFields();
 		for (int i = 0; i < vecFields.size(); i++) {
 			ImportFieldElement oElem = vecFields.get(i);
 			setProperty (oElem.propertyName, oElem.getFieldName());
@@ -319,9 +311,9 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 */
 	@SuppressWarnings("rawtypes")
 	public ImportFieldElement getField(Enum fieldID) {
-		int index = getIndexOfThisField(fieldID);
+		int index = this.getIndexOfThisField(fieldID);
 		if (index != -1) {
-			return getFieldsFromImportFieldElementMap().get(index);
+			return this.getFields().get(index);
 		} else {
 			return null;
 		}
@@ -480,10 +472,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * Return the list of the description of the fields.
 	 * @return a List of String
 	 */
-	public List<ImportFieldElementIDCard> getFieldDescriptions() {
-		List<ImportFieldElementIDCard> fieldDescriptions = new ArrayList<ImportFieldElementIDCard>();
+	public List<String> getFieldDescriptions() {
+		List<String> fieldDescriptions = new ArrayList<String>();
 		for (ImportFieldElement f : getFields()) {
-			fieldDescriptions.add(f.getSummary());
+			fieldDescriptions.add(f.getShortDescription());
 		}
 		return fieldDescriptions;
 	}
