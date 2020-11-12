@@ -42,6 +42,7 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
 import repicea.io.GFileFilter;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 import repicea.io.tools.StreamImportFieldManager.QueueReader;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
@@ -219,10 +220,15 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	}
 
 	/**
-	 * This method provides the vector of ImportFieldElement objects.
+	 * Provide the ImportFieldElement instances that contain the information about the fields.
+	 * @return a List of ImportFieldElement instances
 	 */
-	@SuppressWarnings("rawtypes")
 	public List<ImportFieldElement> getFields() {
+		return getFieldsFromImportFieldElementMap();
+	}
+	
+	@SuppressWarnings("rawtypes")
+	protected final List<ImportFieldElement> getFieldsFromImportFieldElementMap() {
 		List<ImportFieldElement> vec = new ArrayList<ImportFieldElement>();
 		
 		// first find out if there is more than one type of enum variables
@@ -243,6 +249,8 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		
 		return vec;
 	}
+	
+	
 	
 	protected Vector<FormatField> getFormatFields() {
 		Vector<FormatField> values = new Vector<FormatField>();
@@ -311,9 +319,9 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 */
 	@SuppressWarnings("rawtypes")
 	public ImportFieldElement getField(Enum fieldID) {
-		int index = this.getIndexOfThisField(fieldID);
+		int index = getIndexOfThisField(fieldID);
 		if (index != -1) {
-			return this.getFields().get(index);
+			return getFields().get(index);
 		} else {
 			return null;
 		}
@@ -472,10 +480,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * Return the list of the description of the fields.
 	 * @return a List of String
 	 */
-	public List<String> getFieldDescriptions() {
-		List<String> fieldDescriptions = new ArrayList<String>();
+	public List<ImportFieldElementIDCard> getFieldDescriptions() {
+		List<ImportFieldElementIDCard> fieldDescriptions = new ArrayList<ImportFieldElementIDCard>();
 		for (ImportFieldElement f : getFields()) {
-			fieldDescriptions.add(f.getShortDescription());
+			fieldDescriptions.add(f.getSummary());
 		}
 		return fieldDescriptions;
 	}

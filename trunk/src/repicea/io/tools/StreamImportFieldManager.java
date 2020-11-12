@@ -26,6 +26,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
+import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 
 /**
  * The StreamImportFieldManager class is a special type of ImportFieldManager that 
@@ -37,13 +38,6 @@ import repicea.io.FormatReader;
 public class StreamImportFieldManager extends ImportFieldManager {
 
 	static class QueueReaderFormatField extends FormatField {
-//		final ImportFieldElement ife;
-//		
-//		QueueReaderFormatField(ImportFieldElement ife) {
-//			super(ife.fieldID.name());
-//			this.ife = ife;
-//			this.ife.setFieldMatch(this);
-//		}
 		
 		QueueReaderFormatField(String name) {
 			super(name);
@@ -136,7 +130,7 @@ public class StreamImportFieldManager extends ImportFieldManager {
 
 	private List<ImportFieldElement> getFieldsByType(boolean isOptional) {
 		List<ImportFieldElement> fields = new ArrayList<ImportFieldElement>();
-		for (ImportFieldElement ife : getFields()) {
+		for (ImportFieldElement ife : getFieldsFromImportFieldElementMap()) {		
 			if (!ife.fieldID.equals(groupFieldEnum)) {
 				if (ife.isOptional == isOptional) {
 					fields.add(ife);
@@ -147,21 +141,18 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	}
 	
 	
+	/**
+	 * Provide the ImportFieldElement instances that contain the information about the fields.
+	 * The mandatory fields are listed first followed by the optional fields.
+	 * @return a List of ImportFieldElement instances
+	 */
 	@Override
-	public List<String> getFieldDescriptions() {
-		List<String> fieldDescriptions = new ArrayList<String>();
-		for (ImportFieldElement f : getMandatoryAndOptionalFields()) {
-			fieldDescriptions.add(f.getShortDescription());
-		}
-		return fieldDescriptions;
-	}
-
-	
-	private List<ImportFieldElement> getMandatoryAndOptionalFields() {
+	public List<ImportFieldElement> getFields() {
 		List<ImportFieldElement> ifes = getFieldsByType(false);
 		ifes.addAll(getFieldsByType(true));
 		return ifes;
 	}
+	
 
 	/**
 	 * Set the field matches manually if needed.
@@ -169,7 +160,7 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	 * @return true if the field matches have been changed or false otherwise
 	 */
 	public boolean setFieldMatches(int[] indices) {
-		List<ImportFieldElement> ifes = getMandatoryAndOptionalFields();
+		List<ImportFieldElement> ifes = getFields();
 		if (indices != null) {
 			for (int i = 0; i < indices.length; i++) {
 				if (i < ifes.size()) {
