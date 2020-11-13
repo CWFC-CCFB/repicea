@@ -90,17 +90,22 @@ public abstract class REpiceaRecordReader implements Serializable {
 						for (int j = 0; j < importFieldElements.size(); j++) {
 							ImportFieldElement impFieldElem = importFieldElements.get(j);
 							int iFieldIndex = impFieldElem.getMatchingFieldIndex();
-							if (!impFieldElem.isOptional) {										// if the field is not optional
-								try {
-									oArray[j] = rowObjects[iFieldIndex].toString().trim();
-								} catch (NullPointerException e) {
-									throw new NullPointerException("A null value has been found at line " + lineNumber + " in the DBF file : field " + impFieldElem.getFieldName());
+							if (!impFieldElem.isOptional) {		// if the field is not optional
+								if (rowObjects[iFieldIndex] == null) {
+									throw new NullPointerException("A null value has been found at line " + lineNumber + " - field " + impFieldElem.getFieldName());
+								} else {
+									oArray[j] = rowObjects[iFieldIndex];
 								}
-							} else {																// the field is then optional
-								if (iFieldIndex < 0 || rowObjects[iFieldIndex] == null || rowObjects[iFieldIndex].toString().isEmpty()) {			// if the field has not been specified or the selected field contains a null value
+							} else {				// the field is then optional
+								if (iFieldIndex < 0) { // the field has not been matched
 									oArray[j] = null;
 								} else {
-									oArray[j] = rowObjects[iFieldIndex].toString().trim();
+									Object obj = rowObjects[iFieldIndex]; // no need to check if it is null in the next line: it is going to be set as null anyway in the else clause
+									if (obj instanceof String && obj.toString().isEmpty()) {	// the field contains an empty string
+										oArray[j] = null;
+									} else {
+										oArray[j] = rowObjects[iFieldIndex];
+									}
 								}
 							}
 						}
@@ -122,6 +127,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 				} else {
 					message = MessageID.ErrorWhileReading.toString() + importFieldManager.getFileSpecifications()[0] + " " + MessageID.AtLine.toString() + lineCounter;
 				}
+				e.printStackTrace();
 				throw new Exception(message);
 			} finally {
 				if (reader != null) {
