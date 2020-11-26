@@ -45,7 +45,6 @@ import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.Memorizable;
-import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * The REpiceaMatchSelectorDialog class is the user interface of the REpiceaMatchSelector.
@@ -82,8 +81,10 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 		tableModel = new REpiceaTableModel(columnNames);
 		tableModel.setEditableVetos(0, true);
 		table = new REpiceaTable(tableModel, false); // false : adding or deleting rows is disabled
-		TextableEnum[] possibleTreatments =  caller.potentialMatches.toArray(new TextableEnum[]{});
-		table.setDefaultEditor(Enum.class, new REpiceaCellEditor(new JComboBox<TextableEnum>(possibleTreatments), tableModel));
+		// MF2020-11-26 Bug fixed, the enum might not implement the TextableEnum interface. Anyway, it all goes through the toString method.
+		//		TextableEnum[] possibleTreatments =  caller.potentialMatches.toArray(new TextableEnum[]{});
+		Object[] possibleTreatments =  caller.potentialMatches.toArray();
+		table.setDefaultEditor(Enum.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
 		table.setRowSelectionAllowed(false);
 
 		init();
