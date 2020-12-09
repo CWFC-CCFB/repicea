@@ -31,30 +31,63 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		private final Matrix modelRelatedVariance;
 		private final Matrix samplingRelatedVariance;
 		private final Matrix totalVariance;
+		private final List<String> rowIndex;
+		private final List<List<String>> collapseIndexList;
 		
-		private VariancePointEstimate(Matrix modelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance) {
+		private VariancePointEstimate(Matrix modelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance, List<String> rowIndex) {
 			this.modelRelatedVariance = modelRelatedVariance;
 			this.samplingRelatedVariance = samplingRelatedVariance;
 			this.totalVariance = totalVariance; 
+			this.rowIndex = BootstrapHybridPointEstimate.this.rowIndex;  // reference to the original rowIndex in the estimate. 
+			this.collapseIndexList = BootstrapHybridPointEstimate.this.collapseIndexList;  // reference to the original list in the estimate. 
 		}
 
 		/**
 		 * This method returns the estimate of the total variance.
 		 * @return a Matrix instance
 		 */
-		public Matrix getTotalVariance() {return totalVariance;}
-
+		public Matrix getTotalVariance() {
+			return collapseVarianceMatrixIfNeeded(totalVariance);
+//			return totalVariance;
+		}
+		
+		private Matrix collapseVarianceMatrixIfNeeded(Matrix varianceMat) {
+			Matrix basicVariance = varianceMat;
+			if (!rowIndex.isEmpty()) {
+				if (rowIndex.size() == basicVariance.m_iRows && collapseIndexList != null) {
+					Matrix newVariance = new Matrix(collapseIndexList.size(), collapseIndexList.size());
+					for (int i = 0; i < newVariance.m_iRows; i++) {
+						List<String> requestedIndices_i = collapseIndexList.get(i);
+						for (int j = 0; j < newVariance.m_iRows; j++) {
+							List<String> requestedIndices_j = collapseIndexList.get(j);
+							newVariance.m_afData[i][0] = basicVariance.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
+									convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
+						}
+					}
+					return newVariance;
+				} 
+			}
+			return basicVariance;
+		}
+		
+		
 		/**
 		 * This method returns the estimate of the model-related variance.
 		 * @return a Matrix instance
 		 */
-		public Matrix getModelRelatedVariance() {return modelRelatedVariance;}
+		public Matrix getModelRelatedVariance() {
+			return collapseVarianceMatrixIfNeeded(modelRelatedVariance);
+//			return modelRelatedVariance;
+		}
 		
 		/**
 		 * This method returns the estimate of the sampling-related variance.
 		 * @return a Matrix instance
 		 */
-		public Matrix getSamplingRelatedVariance() {return samplingRelatedVariance;}
+		public Matrix getSamplingRelatedVariance() {
+			return collapseVarianceMatrixIfNeeded(samplingRelatedVariance);
+//			return samplingRelatedVariance;
+		}
 	
 	}
 	
@@ -137,7 +170,10 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			mean.addRealization(estimate.getMean());
 			variance.addRealization(estimate.getVariance());
 		}
-		return new VariancePointEstimate(mean.getVariance(), variance.getMean(), mean.getVariance().add(variance.getMean()));
+		return new VariancePointEstimate(mean.getVariance(), 
+				variance.getMean(), 
+				mean.getVariance().add(variance.getMean()),
+				rowIndex);
 	}
 
 	/**
@@ -194,7 +230,10 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			Matrix samplingRelatedComponent = meanDesignVariance;
 			Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
 			Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
-			VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, samplingRelatedComponent, totalVariance);
+			VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, 
+					samplingRelatedComponent, 
+					totalVariance,
+					rowIndex);
 			return varEst;
 		} catch (Exception e) {
 			throw new InvalidParameterException("An error occured while instantiating the correct PointEstimate class!");

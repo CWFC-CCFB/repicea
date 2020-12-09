@@ -19,6 +19,8 @@
 package repicea.stats.estimates;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
@@ -42,7 +44,9 @@ public abstract class Estimate<D extends Distribution> extends RandomVariable<D>
 	
 	protected EstimatorType estimatorType;
 
-	protected List<String> rowIndex;
+	protected final List<String> rowIndex;
+	
+	protected final List<List<String>> collapseIndexList;
 	
 	/**
 	 * The type of estimator.
@@ -57,6 +61,8 @@ s	 */
 
 	protected Estimate(D distribution) {
 		super(distribution);
+		rowIndex = new ArrayList<String>();
+		collapseIndexList = new ArrayList<List<String>>();
 	}
 	
 	
@@ -68,19 +74,27 @@ s	 */
 
 	/**
 	 * This method makes it possible to set an optional row index. This is useful when the 
-	 * response is a vector.
-	 * @param rowIndex a List of String instance
+	 * response is a vector. 
+	 * @param newRowIndex a List of String instance. A null value reset the 
 	 */
-	public void setRowIndex(List<String> rowIndex) {
-		this.rowIndex = rowIndex;
+	public void setRowIndex(List<String> newRowIndex) {
+		this.rowIndex.clear();
+		if (newRowIndex != null && !newRowIndex.isEmpty()) {
+			this.rowIndex.addAll(newRowIndex);
+		}
+		collapseIndexList.clear();
 	}
 
 	
 	/**
-	 * This method returns the row index. 
+	 * This method returns a copy of the row index. 
 	 * @return a List of String instance or null if the row index has not been set.
 	 */
-	public List<String> getRowIndex() {return rowIndex;}
+	public List<String> getRowIndex() {
+		List<String> rowIndexCopy = new ArrayList<String>();
+		rowIndexCopy.addAll(rowIndex);
+		return rowIndexCopy;
+	}
 	
 	/**
 	 * This method returns a random deviate from this estimate. This method
@@ -177,4 +191,72 @@ s	 */
 		}
 		return (SimpleEstimate) currentEstimate;
 	}
+	
+	/**
+	 * Set collapse index list. This list enabled the collapsing of the estimate into 
+	 * smaller mean and variance matrices. The desiredIndicesForCollapsing is checked
+	 * to make sure it complies with the current index.
+	 * @param desiredIndicesForCollapsing a List of List of String
+	 */
+	public void setCollapseIndexList(List<List<String>> desiredIndicesForCollapsing) {
+		List<String> copyOfIndex = new ArrayList<String>();
+		copyOfIndex.addAll(getRowIndex());
+		Collections.sort(copyOfIndex);
+		List<String> completeList = new ArrayList<String>();
+		for (List<String> l : desiredIndicesForCollapsing) {
+			completeList.addAll(l);
+		}
+		Collections.sort(completeList);
+		if (!completeList.equals(copyOfIndex)) {
+			throw new InvalidParameterException("Some indices are missing!");
+		} else {
+			collapseIndexList.clear();
+			collapseIndexList.addAll(desiredIndicesForCollapsing);
+		}
+	}
+	
+	protected final List<Integer> convertIndexIntoInteger(List<String> selectedIndices) {
+		List<Integer> outputList = new ArrayList<Integer>();
+		for (String s : selectedIndices) {
+			outputList.add(getRowIndex().indexOf(s));
+		}
+		return outputList;
+	}
+	
+	@Override
+	public Matrix getMean() {
+		Matrix basicMean = super.getMean();
+		if (!rowIndex.isEmpty()) {
+			if (rowIndex.size() == basicMean.m_iRows && collapseIndexList != null) {
+				Matrix newMean = new Matrix(collapseIndexList.size(), 1);
+				for (int i = 0; i < newMean.m_iRows; i++) {
+					List<String> requestedIndices = collapseIndexList.get(i);
+					newMean.m_afData[i][0] = basicMean.getSubMatrix(convertIndexIntoInteger(requestedIndices), null).getSumOfElements();
+				}
+				return newMean;
+			}			
+		}
+		return basicMean;
+	}
+
+	@Override
+	public Matrix getVariance() {
+		Matrix basicVariance = super.getVariance();
+		if (!rowIndex.isEmpty()) {
+			if (rowIndex.size() == basicVariance.m_iRows && collapseIndexList != null) {
+				Matrix newVariance = new Matrix(collapseIndexList.size(), collapseIndexList.size());
+				for (int i = 0; i < newVariance.m_iRows; i++) {
+					List<String> requestedIndices_i = collapseIndexList.get(i);
+					for (int j = 0; j < newVariance.m_iRows; j++) {
+						List<String> requestedIndices_j = collapseIndexList.get(j);
+						newVariance.m_afData[i][0] = basicVariance.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
+								convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
+					}
+				}
+				return newVariance;
+			} 
+		}
+		return basicVariance;
+	}
+	
 }
