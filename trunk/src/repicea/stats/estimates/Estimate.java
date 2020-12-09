@@ -249,7 +249,7 @@ s	 */
 					List<String> requestedIndices_i = collapseIndexList.get(i);
 					for (int j = 0; j < newVariance.m_iRows; j++) {
 						List<String> requestedIndices_j = collapseIndexList.get(j);
-						newVariance.m_afData[i][0] = basicVariance.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
+						newVariance.m_afData[i][j] = basicVariance.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
 								convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
 					}
 				}
