@@ -134,14 +134,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			addPointEstimate(pointEstimate);
 		}
 	}
-	
-	/**
-	 * This method returns the estimate of the total, which is the mean of the 
-	 * realized point estimates.
-	 * @return a Matrix instance
-	 */
+
 	@Override
-	public Matrix getMean() {
+	protected Matrix getMeanFromDistribution() {
 		Matrix mean = null;
 		for (PointEstimate<?> estimate : estimates) {
 			if (mean == null) {
@@ -153,6 +148,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		mean = mean.scalarMultiply(1d / estimates.size());
 		return mean;
 	}
+	
+	
+	
 
 	/**
 	 * This method returns the uncorrected variance of the total estimate. 
@@ -241,10 +239,10 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	}
 
 	@Override
-	public Matrix getVariance() {
-		return getVarianceOfTotalEstimate().getTotalVariance();
+	protected Matrix getVarianceFromDistribution() {
+		return getVarianceOfTotalEstimate().totalVariance;
 	}
-	
+
 	@Override
 	public int getNumberOfRealizations() {
 		return estimates.size();
