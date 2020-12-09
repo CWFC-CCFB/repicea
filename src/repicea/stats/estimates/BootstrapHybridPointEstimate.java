@@ -54,7 +54,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		private Matrix collapseVarianceMatrixIfNeeded(Matrix varianceMat) {
 			Matrix basicVariance = varianceMat;
 			if (!rowIndex.isEmpty()) {
-				if (rowIndex.size() == basicVariance.m_iRows && collapseIndexList != null) {
+				if (rowIndex.size() == basicVariance.m_iRows && !collapseIndexList.isEmpty()) {
 					Matrix newVariance = new Matrix(collapseIndexList.size(), collapseIndexList.size());
 					for (int i = 0; i < newVariance.m_iRows; i++) {
 						List<String> requestedIndices_i = collapseIndexList.get(i);

@@ -21,8 +21,6 @@ package repicea.io;
 
 import java.util.List;
 
-import repicea.io.FormatField;
-
 /**
  * This interface ensures the instance can provides and deserialize a record set.
  * @author Mathieu Fortin - July 2012
