@@ -224,7 +224,7 @@ s	 */
 	}
 	
 	@Override
-	public Matrix getMean() {
+	public final Matrix getMean() {
 		Matrix basicMean = super.getMean();
 		if (!rowIndex.isEmpty()) {
 			if (rowIndex.size() == basicMean.m_iRows && !collapseIndexList.isEmpty()) {
@@ -240,7 +240,7 @@ s	 */
 	}
 
 	@Override
-	public Matrix getVariance() {
+	public final Matrix getVariance() {
 		Matrix basicVariance = super.getVariance();
 		if (!rowIndex.isEmpty()) {
 			if (rowIndex.size() == basicVariance.m_iRows && !collapseIndexList.isEmpty()) {

@@ -61,7 +61,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	
 	
 	@Override
-	public Matrix getVariance() {
+	protected Matrix getVarianceFromDistribution() {
 		MonteCarloEstimate meanOfVariances = new MonteCarloEstimate();
 		MonteCarloEstimate varianceOfMeans = new MonteCarloEstimate();
 		for (PopulationMeanEstimate realization : realizations) {
@@ -80,8 +80,9 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 		return estimate;
 	}
 
+
 	@Override
-	public Matrix getMean() {
+	protected Matrix getMeanFromDistribution() {
 		Matrix mean = null;
 		for (PopulationMeanEstimate estimate : realizations) {
 			if (mean == null) {
@@ -92,5 +93,5 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 		}
 		return mean.scalarMultiply(1d / getNumberOfRealizations());
 	}
-
+	
 }

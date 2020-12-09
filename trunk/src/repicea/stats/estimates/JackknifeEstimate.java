@@ -46,7 +46,7 @@ public class JackknifeEstimate extends ResamplingBasedEstimate {
 	}
 
 	@Override
-	public Matrix getVariance() {
+	protected Matrix getVarianceFromDistribution() {
 		long nCombinations = StatisticalUtility.getCombinations(n, d);
 		long nRealizations = getNumberOfRealizations();
 		if (nCombinations != nRealizations) {
@@ -56,6 +56,7 @@ public class JackknifeEstimate extends ResamplingBasedEstimate {
 		double scalingFactor = ((double) n - d) / (d * nCombinations);
 		return ss.scalarMultiply(scalingFactor);
 	}
+	
 
 	@Override
 	public ConfidenceInterval getConfidenceIntervalBounds(double oneMinusAlpha) {

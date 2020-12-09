@@ -53,16 +53,16 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 		sample = new EmpiricalDistribution();
 	}
 	
-	
+
 	@Override
-	public Matrix getMean() {
+	protected Matrix getMeanFromDistribution() {
 		return sample.getMean();
 	}
-
+	
 	private int getSampleSize() {return sample.getNumberOfRealizations();}
 	
 	@Override
-	public Matrix getVariance() {
+	protected Matrix getVarianceFromDistribution() {
 		double smallAreaCorrectionFactor = 1d;
 		if (isPopulationSizeKnown()) {
 			smallAreaCorrectionFactor = 1d - getSampleSize()/getPopulationSize();

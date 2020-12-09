@@ -49,12 +49,19 @@ public abstract class RandomVariable<D extends Distribution> implements CentralM
 	
 	@Override
 	public Matrix getMean() {
-		return getDistribution().getMean();
+		return getMeanFromDistribution();
 	}
 
-	@Override
-	public Matrix getVariance() {
-		return getDistribution().getVariance();
+	protected Matrix getMeanFromDistribution() {
+		return getDistribution().getMean();
 	}
 	
+	@Override
+	public Matrix getVariance() {
+		return getVarianceFromDistribution();
+	}
+
+	protected Matrix getVarianceFromDistribution() {
+		return getDistribution().getVariance();
+	}
 }

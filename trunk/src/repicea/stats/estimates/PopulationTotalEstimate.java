@@ -46,12 +46,8 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		super(populationSize);
 	}
 
-	/**
-	 * This method returns the value of the Horvitz-Thompson estimator (tau hat).
-	 * @return a Matrix instance
-	 */
 	@Override
-	public Matrix getMean() {
+	protected Matrix getMeanFromDistribution() {
 		Matrix total = new Matrix(nRows, nCols);
 		int sampleSize = getObservations().size();
 		for (PopulationUnitWithUnequalInclusionProbability observation : getObservations()) {
@@ -59,13 +55,14 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		}
 		return total;
 	}
-
+	
+	
 	/**
 	 * This method returns the variance of the tau estimate.
 	 * @return a Matrix
 	 */
 	@Override
-	public Matrix getVariance() {
+	protected Matrix getVarianceFromDistribution() {
 		int n = getObservations().size();
 		PopulationUnitWithUnequalInclusionProbability obs_i;
 		PopulationUnitWithUnequalInclusionProbability obs_j;
