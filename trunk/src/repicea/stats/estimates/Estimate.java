@@ -227,7 +227,7 @@ s	 */
 	public Matrix getMean() {
 		Matrix basicMean = super.getMean();
 		if (!rowIndex.isEmpty()) {
-			if (rowIndex.size() == basicMean.m_iRows && collapseIndexList != null) {
+			if (rowIndex.size() == basicMean.m_iRows && !collapseIndexList.isEmpty()) {
 				Matrix newMean = new Matrix(collapseIndexList.size(), 1);
 				for (int i = 0; i < newMean.m_iRows; i++) {
 					List<String> requestedIndices = collapseIndexList.get(i);
@@ -243,7 +243,7 @@ s	 */
 	public Matrix getVariance() {
 		Matrix basicVariance = super.getVariance();
 		if (!rowIndex.isEmpty()) {
-			if (rowIndex.size() == basicVariance.m_iRows && collapseIndexList != null) {
+			if (rowIndex.size() == basicVariance.m_iRows && !collapseIndexList.isEmpty()) {
 				Matrix newVariance = new Matrix(collapseIndexList.size(), collapseIndexList.size());
 				for (int i = 0; i < newVariance.m_iRows; i++) {
 					List<String> requestedIndices_i = collapseIndexList.get(i);
