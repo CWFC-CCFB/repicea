@@ -190,57 +190,62 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
 	public final VariancePointEstimate getVarianceOfTotalEstimate() {
-		MonteCarloEstimate variance = new MonteCarloEstimate();
-		MonteCarloEstimate mean = new MonteCarloEstimate();
-		int nbObs = estimates.get(0).getObservations().size();
-//		double populationSize = estimates.get(0).populationSize;
-		EmpiricalDistribution[] observationMeans = new EmpiricalDistribution[nbObs];
-		for (int i = 0; i < nbObs; i++) {
-			observationMeans[i] = new EmpiricalDistribution();
-		}
-		for (PointEstimate<?> estimate : estimates) {
-			mean.addRealization(estimate.getMean());
-			variance.addRealization(estimate.getVariance());
+		if (getNumberOfRealizations() > 1) {
+			MonteCarloEstimate variance = new MonteCarloEstimate();
+			MonteCarloEstimate mean = new MonteCarloEstimate();
+			int nbObs = estimates.get(0).getObservations().size();
+//			double populationSize = estimates.get(0).populationSize;
+			EmpiricalDistribution[] observationMeans = new EmpiricalDistribution[nbObs];
 			for (int i = 0; i < nbObs; i++) {
-				observationMeans[i].addRealization(estimate.getObservations().get(i).getData());	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
+				observationMeans[i] = new EmpiricalDistribution();
 			}
-		}
-		PointEstimate<?> meanEstimate; 
-		try {
-			if (estimates.get(0).isPopulationSizeKnown()) {
-				double populationSize = estimates.get(0).getPopulationSize();
-				Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
-				meanEstimate = (PointEstimate<?>) cons.newInstance(populationSize);
-			} else {
-				meanEstimate = estimates.get(0).getClass().newInstance();
-			}
-			
-			PopulationUnit popUnit;
-			for (int i = 0; i < nbObs; i++) {
-				if (meanEstimate instanceof PopulationTotalEstimate) {
-					popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
-							((PopulationTotalEstimate) estimates.get(0)).getObservations().get(i).getInclusionProbability());
-					((PopulationTotalEstimate) meanEstimate).addObservation((PopulationUnitWithUnequalInclusionProbability) popUnit);
-				} else {
-					popUnit = new PopulationUnitWithEqualInclusionProbability(observationMeans[i].getMean());
-					((PopulationMeanEstimate) meanEstimate).addObservation((PopulationUnitWithEqualInclusionProbability) popUnit);
+			for (PointEstimate<?> estimate : estimates) {
+				mean.addRealization(estimate.getMean());
+				variance.addRealization(estimate.getVariance());
+				for (int i = 0; i < nbObs; i++) {
+					observationMeans[i].addRealization(estimate.getObservations().get(i).getData());	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
 				}
 			}
-			
-			Matrix meanContribution = mean.getVariance();
-			Matrix meanDesignVariance = meanEstimate.getVariance();
-			Matrix averageVariance = variance.getMean();
-			
-			Matrix samplingRelatedComponent = meanDesignVariance;
-			Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
-			Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
-			VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, 
-					samplingRelatedComponent, 
-					totalVariance,
-					rowIndex);
-			return varEst;
-		} catch (Exception e) {
-			throw new InvalidParameterException("An error occured while instantiating the correct PointEstimate class!");
+			PointEstimate<?> meanEstimate; 
+			try {
+				if (estimates.get(0).isPopulationSizeKnown()) {
+					double populationSize = estimates.get(0).getPopulationSize();
+					Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
+					meanEstimate = (PointEstimate<?>) cons.newInstance(populationSize);
+				} else {
+					meanEstimate = estimates.get(0).getClass().newInstance();
+				}
+				
+				PopulationUnit popUnit;
+				for (int i = 0; i < nbObs; i++) {
+					if (meanEstimate instanceof PopulationTotalEstimate) {
+						popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
+								((PopulationTotalEstimate) estimates.get(0)).getObservations().get(i).getInclusionProbability());
+						((PopulationTotalEstimate) meanEstimate).addObservation((PopulationUnitWithUnequalInclusionProbability) popUnit);
+					} else {
+						popUnit = new PopulationUnitWithEqualInclusionProbability(observationMeans[i].getMean());
+						((PopulationMeanEstimate) meanEstimate).addObservation((PopulationUnitWithEqualInclusionProbability) popUnit);
+					}
+				}
+				
+				Matrix meanContribution = mean.getVariance();
+				Matrix meanDesignVariance = meanEstimate.getVariance();
+				Matrix averageVariance = variance.getMean();
+				
+				Matrix samplingRelatedComponent = meanDesignVariance;
+				Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
+				Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
+				VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, 
+						samplingRelatedComponent, 
+						totalVariance,
+						rowIndex);
+				return varEst;
+			} catch (Exception e) {
+				throw new InvalidParameterException("An error occured while instantiating the correct PointEstimate class!");
+			}
+		} else {
+			System.out.println("The variance of the hybrid point estimate cannot be calculated because there is not enough realizations!");
+			return new VariancePointEstimate(null, null, null, rowIndex);
 		}
 	}
 
