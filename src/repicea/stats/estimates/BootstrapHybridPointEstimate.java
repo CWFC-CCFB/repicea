@@ -38,7 +38,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			super(totalVariance, null); // no mean here
 			this.modelRelatedVariance = modelRelatedVariance;
 			this.samplingRelatedVariance = samplingRelatedVariance;
-			setRowIndex(BootstrapHybridPointEstimate.this.rowIndex);  // reference to the original rowIndex in the estimate. 
+			if (totalVariance != null) {
+				setRowIndex(BootstrapHybridPointEstimate.this.rowIndex);  // reference to the original rowIndex in the estimate. 
+			}
 		}
 
 		/**
