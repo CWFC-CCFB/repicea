@@ -251,18 +251,22 @@ s	 */
 	}
 
 	protected final Matrix collapseSquareMatrix(Matrix originalMatrix, Map<String, List<String>> desiredIndicesForCollapsing) {
-		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
-		Collections.sort(newIndexRow);
-		Matrix collapsedMatrix = new Matrix(desiredIndicesForCollapsing.size(), desiredIndicesForCollapsing.size());
-		for (int i = 0; i < collapsedMatrix.m_iRows; i++) {
-			List<String> requestedIndices_i = desiredIndicesForCollapsing.get(newIndexRow.get(i));
-			for (int j = 0; j < collapsedMatrix.m_iRows; j++) {
-				List<String> requestedIndices_j = desiredIndicesForCollapsing.get(newIndexRow.get(j));
-				collapsedMatrix.m_afData[i][j] = originalMatrix.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
-						convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
+		if (originalMatrix == null) { // means the variance cannot be calculated as in the MonteCarloEstimate class if the nb realizations is smaller than 2.
+			return null;
+		} else {
+			List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
+			Collections.sort(newIndexRow);
+			Matrix collapsedMatrix = new Matrix(desiredIndicesForCollapsing.size(), desiredIndicesForCollapsing.size());
+			for (int i = 0; i < collapsedMatrix.m_iRows; i++) {
+				List<String> requestedIndices_i = desiredIndicesForCollapsing.get(newIndexRow.get(i));
+				for (int j = 0; j < collapsedMatrix.m_iRows; j++) {
+					List<String> requestedIndices_j = desiredIndicesForCollapsing.get(newIndexRow.get(j));
+					collapsedMatrix.m_afData[i][j] = originalMatrix.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
+							convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
+				}
 			}
+			return collapsedMatrix;
 		}
-		return collapsedMatrix;
 	}
 	
 	
