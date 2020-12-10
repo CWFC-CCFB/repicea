@@ -3,7 +3,9 @@ package repicea.stats.estimates;
 import java.lang.reflect.Constructor;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
@@ -27,19 +29,16 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  */
 public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
 
-	public class VariancePointEstimate {
+	public class VariancePointEstimate extends SimpleEstimate {
+		
 		private final Matrix modelRelatedVariance;
 		private final Matrix samplingRelatedVariance;
-		private final Matrix totalVariance;
-		private final List<String> rowIndex;
-		private final List<List<String>> collapseIndexList;
 		
 		private VariancePointEstimate(Matrix modelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance, List<String> rowIndex) {
+			super(totalVariance, null); // no mean here
 			this.modelRelatedVariance = modelRelatedVariance;
 			this.samplingRelatedVariance = samplingRelatedVariance;
-			this.totalVariance = totalVariance; 
-			this.rowIndex = BootstrapHybridPointEstimate.this.rowIndex;  // reference to the original rowIndex in the estimate. 
-			this.collapseIndexList = BootstrapHybridPointEstimate.this.collapseIndexList;  // reference to the original list in the estimate. 
+			setRowIndex(BootstrapHybridPointEstimate.this.rowIndex);  // reference to the original rowIndex in the estimate. 
 		}
 
 		/**
@@ -47,27 +46,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @return a Matrix instance
 		 */
 		public Matrix getTotalVariance() {
-			return collapseVarianceMatrixIfNeeded(totalVariance);
-//			return totalVariance;
-		}
-		
-		private Matrix collapseVarianceMatrixIfNeeded(Matrix varianceMat) {
-			Matrix basicVariance = varianceMat;
-			if (!rowIndex.isEmpty()) {
-				if (rowIndex.size() == basicVariance.m_iRows && !collapseIndexList.isEmpty()) {
-					Matrix newVariance = new Matrix(collapseIndexList.size(), collapseIndexList.size());
-					for (int i = 0; i < newVariance.m_iRows; i++) {
-						List<String> requestedIndices_i = collapseIndexList.get(i);
-						for (int j = 0; j < newVariance.m_iRows; j++) {
-							List<String> requestedIndices_j = collapseIndexList.get(j);
-							newVariance.m_afData[i][j] = basicVariance.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
-									convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
-						}
-					}
-					return newVariance;
-				} 
-			}
-			return basicVariance;
+			return getMean();
 		}
 		
 		
@@ -76,8 +55,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @return a Matrix instance
 		 */
 		public Matrix getModelRelatedVariance() {
-			return collapseVarianceMatrixIfNeeded(modelRelatedVariance);
-//			return modelRelatedVariance;
+			return modelRelatedVariance;
 		}
 		
 		/**
@@ -85,11 +63,39 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @return a Matrix instance
 		 */
 		public Matrix getSamplingRelatedVariance() {
-			return collapseVarianceMatrixIfNeeded(samplingRelatedVariance);
-//			return samplingRelatedVariance;
+			return samplingRelatedVariance;
 		}
-	
+
 	}
+	
+	public class CollapsedHybridPointEstimate extends SimpleEstimate {
+		final Matrix samplingRelatedVariance;
+		final Matrix modelRelatedVariance;
+		
+		CollapsedHybridPointEstimate(Matrix mean, Matrix variance, Matrix samplingRelatedVariance, Matrix modelRelatedVariance) {
+			super(mean, variance);
+			this.samplingRelatedVariance = samplingRelatedVariance;
+			this.modelRelatedVariance = modelRelatedVariance;
+		}
+		
+		/**
+		 * This method returns the estimate of the model-related variance.
+		 * @return a Matrix instance
+		 */
+		public Matrix getModelRelatedVariance() {
+			return modelRelatedVariance;
+		}
+		
+		/**
+		 * This method returns the estimate of the sampling-related variance.
+		 * @return a Matrix instance
+		 */
+		public Matrix getSamplingRelatedVariance() {
+			return samplingRelatedVariance;
+		}
+		
+	}
+	
 	
 	
 	private final List<PointEstimate<?>> estimates;
@@ -240,7 +246,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 
 	@Override
 	protected Matrix getVarianceFromDistribution() {
-		return getVarianceOfTotalEstimate().totalVariance;
+		return getVarianceOfTotalEstimate().getMean();
 	}
 
 	@Override
@@ -346,6 +352,22 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	@Override
 	public Estimate<?> getProductEstimate(double scalar) {
 		return multiply(scalar);
+	}
+
+	@Override
+	public Estimate<?> collapseEstimate(Map<String, List<String>> desiredIndicesForCollapsing) {
+		Estimate<?> simpleEstimate = collapseMeanAndVariance(desiredIndicesForCollapsing);
+		VariancePointEstimate vpe = getVarianceOfTotalEstimate();
+		Matrix collapsedSamplingRelatedVariance = collapseSquareMatrix(vpe.getSamplingRelatedVariance(), desiredIndicesForCollapsing);
+		Matrix collapsedModelRelatedVariance = collapseSquareMatrix(vpe.getModelRelatedVariance(), desiredIndicesForCollapsing);
+		CollapsedHybridPointEstimate outputEstimate = new CollapsedHybridPointEstimate(simpleEstimate.getMean(),
+				simpleEstimate.getVariance(),
+				collapsedSamplingRelatedVariance,
+				collapsedModelRelatedVariance);
+		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
+		Collections.sort(newIndexRow);
+		outputEstimate.setRowIndex(newIndexRow);
+		return outputEstimate;
 	}
 
 	
