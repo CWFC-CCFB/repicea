@@ -35,7 +35,7 @@ public class PopulationUnitWithUnequalInclusionProbability extends PopulationUni
 	 * Constructor. IMPORTANT: the inclusion probability is the individual inclusion probability 
 	 * of this unit. For instance, that would be the area of the plot divided by the total area, 
 	 * and not the plot area multiplied by the sample size. This product is actually handled internally.
-	 * @param obs the response that was observed in the unit.
+	 * @param obs the response that was observed in the unit (a column vector)
 	 * @param inclusionProbability the probability that this unit is part of the sample.
 	 */
 	public PopulationUnitWithUnequalInclusionProbability(Matrix obs, double inclusionProbability) {

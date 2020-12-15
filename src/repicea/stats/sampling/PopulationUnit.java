@@ -18,6 +18,8 @@
  */
 package repicea.stats.sampling;
 
+import java.security.InvalidParameterException;
+
 import repicea.math.Matrix;
 
 /**
@@ -35,6 +37,9 @@ public abstract class PopulationUnit {
 	 * @param obs
 	 */
 	protected PopulationUnit(Matrix obs) {
+		if (!obs.isColumnVector()) {
+			throw new InvalidParameterException("The obs parameter should be a column vector!");
+		}
 		this.data = obs;
 	}
 

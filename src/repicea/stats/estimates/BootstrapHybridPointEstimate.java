@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea-statistics library.
+ *
+ * Copyright (C) 2009-2020 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.stats.estimates;
 
 import java.lang.reflect.Constructor;
@@ -29,15 +47,36 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  */
 public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
 
-	public class VariancePointEstimate extends SimpleEstimate {
+	public interface BootstrapHybridVarianceEstimate {
+
+		/**
+		 * Provide the model-related variance. 
+		 * @return a Matrix instance
+		 */
+		public Matrix getModelRelatedVariance();
 		
-		private final Matrix modelRelatedVariance;
+		/**
+		 * Return the sampling-related variance.
+		 * @return a Matrix instance
+		 */
+		public Matrix getSamplingRelatedVariance();
+	}
+
+	public class VariancePointEstimate extends SimpleEstimate implements BootstrapHybridVarianceEstimate {
+		
+		private final Matrix grossModelRelatedVariance;
 		private final Matrix samplingRelatedVariance;
+		private final Matrix varianceBiasCorrection;
 		
-		private VariancePointEstimate(Matrix modelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance, List<String> rowIndex) {
+		private VariancePointEstimate(Matrix grossModelRelatedVariance, Matrix samplingRelatedVariance, Matrix totalVariance, List<String> rowIndex) {
 			super(totalVariance, null); // no mean here
-			this.modelRelatedVariance = modelRelatedVariance;
+			this.grossModelRelatedVariance = grossModelRelatedVariance;
 			this.samplingRelatedVariance = samplingRelatedVariance;
+			Matrix pointEstimate = BootstrapHybridPointEstimate.this.getMean().getDeepClone(); 
+			Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(samplingRelatedVariance);
+			Matrix numerator = grossModelRelatedVariance.multiply(samplingRelatedVariance);
+			Matrix correction = denominator.getInverseMatrix().multiply(numerator);
+			varianceBiasCorrection = correction.scalarMultiply(-1d);
 			if (totalVariance != null) {
 				setRowIndex(BootstrapHybridPointEstimate.this.rowIndex);  // reference to the original rowIndex in the estimate. 
 			}
@@ -51,33 +90,41 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			return getMean();
 		}
 		
-		
 		/**
 		 * This method returns the estimate of the model-related variance.
 		 * @return a Matrix instance
 		 */
+		@Override
 		public Matrix getModelRelatedVariance() {
-			return modelRelatedVariance;
+			return grossModelRelatedVariance.subtract(varianceBiasCorrection);
 		}
 		
 		/**
 		 * This method returns the estimate of the sampling-related variance.
 		 * @return a Matrix instance
 		 */
+		@Override
 		public Matrix getSamplingRelatedVariance() {
 			return samplingRelatedVariance;
 		}
+		
 
 	}
 	
-	public class CollapsedHybridPointEstimate extends SimpleEstimate {
+	public class CollapsedHybridPointEstimate extends SimpleEstimate implements BootstrapHybridVarianceEstimate {
 		final Matrix samplingRelatedVariance;
-		final Matrix modelRelatedVariance;
+		final Matrix grossModelRelatedVariance;
+		final Matrix correction;
 		
-		CollapsedHybridPointEstimate(Matrix mean, Matrix variance, Matrix samplingRelatedVariance, Matrix modelRelatedVariance) {
+		CollapsedHybridPointEstimate(Matrix mean, 
+				Matrix variance, 
+				Matrix samplingRelatedVariance, 
+				Matrix grossModelRelatedVariance,
+				Matrix correction) {
 			super(mean, variance);
 			this.samplingRelatedVariance = samplingRelatedVariance;
-			this.modelRelatedVariance = modelRelatedVariance;
+			this.grossModelRelatedVariance = grossModelRelatedVariance;
+			this.correction = correction;
 		}
 		
 		/**
@@ -85,16 +132,18 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @return a Matrix instance
 		 */
 		public Matrix getModelRelatedVariance() {
-			return modelRelatedVariance;
+			return grossModelRelatedVariance.subtract(correction);
 		}
 		
 		/**
 		 * This method returns the estimate of the sampling-related variance.
 		 * @return a Matrix instance
 		 */
+		@Override
 		public Matrix getSamplingRelatedVariance() {
 			return samplingRelatedVariance;
 		}
+		
 		
 	}
 	
@@ -163,12 +212,14 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	/**
 	 * This method returns the uncorrected variance of the total estimate. 
 	 * This estimator is based on the law of total variance. It tends to overestimate 
-	 * the true variance. 
+	 * the true variance. This method is deprecated and the getCorrectedVariance method
+	 * should be used in place.
 	 * @return a Matrix
 	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
+	@Deprecated
 	public final VariancePointEstimate getUncorrectedVariance() {
 		MonteCarloEstimate variance = new MonteCarloEstimate();
 		MonteCarloEstimate mean = new MonteCarloEstimate();
@@ -182,6 +233,77 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				rowIndex);
 	}
 
+	
+//	/**
+//	 * This method returns the corrected variance of the total estimate. 
+//	 * This estimator is unbiased. 
+//	 * @return a VariancePointEstimate
+//	 * 
+//	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
+//	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
+//	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
+//	 */
+//	public final VariancePointEstimate getFormerCorrectedVariance() {
+//		if (getNumberOfRealizations() > 1) {
+//			MonteCarloEstimate variance = new MonteCarloEstimate();
+//			MonteCarloEstimate mean = new MonteCarloEstimate();
+//			int nbObs = estimates.get(0).getObservations().size();
+//			EmpiricalDistribution[] observationMeans = new EmpiricalDistribution[nbObs];
+//			for (int i = 0; i < nbObs; i++) {
+//				observationMeans[i] = new EmpiricalDistribution();
+//			}
+//			for (PointEstimate<?> estimate : estimates) {
+//				mean.addRealization(estimate.getMean());
+//				variance.addRealization(estimate.getVariance());
+//				for (int i = 0; i < nbObs; i++) {
+//					observationMeans[i].addRealization(estimate.getObservations().get(i).getData());	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
+//				}
+//			}
+//			PointEstimate<?> meanEstimate; 
+//			try {
+//				if (estimates.get(0).isPopulationSizeKnown()) {
+//					double populationSize = estimates.get(0).getPopulationSize();
+//					Constructor<?> cons = estimates.get(0).getClass().getConstructor(double.class);
+//					meanEstimate = (PointEstimate<?>) cons.newInstance(populationSize);
+//				} else {
+//					meanEstimate = estimates.get(0).getClass().newInstance();
+//				}
+//				
+//				PopulationUnit popUnit;
+//				for (int i = 0; i < nbObs; i++) {
+//					if (meanEstimate instanceof PopulationTotalEstimate) {
+//						popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
+//								((PopulationTotalEstimate) estimates.get(0)).getObservations().get(i).getInclusionProbability());
+//						((PopulationTotalEstimate) meanEstimate).addObservation((PopulationUnitWithUnequalInclusionProbability) popUnit);
+//					} else {
+//						popUnit = new PopulationUnitWithEqualInclusionProbability(observationMeans[i].getMean());
+//						((PopulationMeanEstimate) meanEstimate).addObservation((PopulationUnitWithEqualInclusionProbability) popUnit);
+//					}
+//				}
+//				
+//				Matrix meanModelContribution = mean.getVariance();
+//				Matrix designVarianceOfMeanRealizedY = meanEstimate.getVariance();
+//				Matrix averageDesignVariance = variance.getMean();
+//				
+//				Matrix samplingRelatedComponent = designVarianceOfMeanRealizedY;
+//				Matrix modelRelatedComponent = meanModelContribution.add(designVarianceOfMeanRealizedY).subtract(averageDesignVariance);
+//				Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
+//				VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, 
+//						samplingRelatedComponent, 
+//						totalVariance,
+//						rowIndex);
+//				return varEst;
+//			} catch (Exception e) {
+//				throw new InvalidParameterException("An error occured while instantiating the correct PointEstimate class!");
+//			}
+//		} else {
+//			System.out.println("The variance of the hybrid point estimate cannot be calculated because there is not enough realizations!");
+//			return new VariancePointEstimate(null, null, null, rowIndex);
+//		}
+//	}
+
+	
+	
 	/**
 	 * This method returns the corrected variance of the total estimate. 
 	 * This estimator is unbiased. 
@@ -191,23 +313,24 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
-	public final VariancePointEstimate getVarianceOfTotalEstimate() {
+	public final VariancePointEstimate getCorrectedVariance() {
 		if (getNumberOfRealizations() > 1) {
 			MonteCarloEstimate variance = new MonteCarloEstimate();
 			MonteCarloEstimate mean = new MonteCarloEstimate();
-			int nbObs = estimates.get(0).getObservations().size();
-//			double populationSize = estimates.get(0).populationSize;
-			EmpiricalDistribution[] observationMeans = new EmpiricalDistribution[nbObs];
-			for (int i = 0; i < nbObs; i++) {
-				observationMeans[i] = new EmpiricalDistribution();
-			}
+			int sampleSize = estimates.get(0).getObservations().size();
+			EmpiricalDistribution observationMeans = new EmpiricalDistribution();
+//			Matrix inclusionProbabilities = null;
+			int nbElementsPerObs = 0;
 			for (PointEstimate<?> estimate : estimates) {
+				if (nbElementsPerObs == 0) {
+					nbElementsPerObs = estimate.getNumberOfElementsPerObservation();
+//					inclusionProbabilities = estimate.getInclusionProbabilities();
+				}
 				mean.addRealization(estimate.getMean());
 				variance.addRealization(estimate.getVariance());
-				for (int i = 0; i < nbObs; i++) {
-					observationMeans[i].addRealization(estimate.getObservations().get(i).getData());	// storing the realizations of the same observation in the same SampleMeanEstimate instance 
-				}
+				observationMeans.addRealization(estimate.getObservationVector());
 			}
+			
 			PointEstimate<?> meanEstimate; 
 			try {
 				if (estimates.get(0).isPopulationSizeKnown()) {
@@ -219,25 +342,53 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				}
 				
 				PopulationUnit popUnit;
-				for (int i = 0; i < nbObs; i++) {
+				Matrix observationMeanMatrix = observationMeans.getMean();
+				for (int i = 0; i < sampleSize; i++) {
+					Matrix meanForThisI = observationMeanMatrix.getSubMatrix(i * nbElementsPerObs,  (i + 1) * nbElementsPerObs - 1, 0, 0);
 					if (meanEstimate instanceof PopulationTotalEstimate) {
-						popUnit = new PopulationUnitWithUnequalInclusionProbability(observationMeans[i].getMean(),
+						popUnit = new PopulationUnitWithUnequalInclusionProbability(meanForThisI,
 								((PopulationTotalEstimate) estimates.get(0)).getObservations().get(i).getInclusionProbability());
 						((PopulationTotalEstimate) meanEstimate).addObservation((PopulationUnitWithUnequalInclusionProbability) popUnit);
 					} else {
-						popUnit = new PopulationUnitWithEqualInclusionProbability(observationMeans[i].getMean());
+						popUnit = new PopulationUnitWithEqualInclusionProbability(meanForThisI);
 						((PopulationMeanEstimate) meanEstimate).addObservation((PopulationUnitWithEqualInclusionProbability) popUnit);
 					}
 				}
+
+//				Matrix expandedInclusionProbabilities = inclusionProbabilities.getKroneckerProduct(new Matrix(nbElementsPerObs, nbElementsPerObs, 1d, 0d));
+//				Matrix crudeMean = observationMeans.getMean();
+//				Matrix crudeModelVariance = observationMeans.getVariance();
+//				Matrix internalModelVariance = crudeModelVariance.elementWiseDivide(expandedInclusionProbabilities);
+//				
+//				Matrix marginalModelVariance = new Matrix(nbElementsPerObs, nbElementsPerObs);
+//				for (int i = 0; i < sampleSize; i++) {
+//					for (int j = 0; j < sampleSize; j++) {
+//						Matrix subMatrix = internalModelVariance.getSubMatrix(i * nbElementsPerObs, 
+//								(i + 1) * nbElementsPerObs - 1,
+//								j * nbElementsPerObs,
+//								(j + 1) * nbElementsPerObs - 1);
+//						MatrixUtility.add(marginalModelVariance, subMatrix);
+//					}
+//				}
 				
-				Matrix meanContribution = mean.getVariance();
-				Matrix meanDesignVariance = meanEstimate.getVariance();
-				Matrix averageVariance = variance.getMean();
+//				double test = crudeModelVariance.scalarMultiply(1d/(sampleSize * sampleSize)).getSumOfElements();
+//				System.out.println("Marginal model-related variance = " + test);
 				
-				Matrix samplingRelatedComponent = meanDesignVariance;
-				Matrix modelRelatedComponent = meanContribution.add(meanDesignVariance).subtract(averageVariance);
-				Matrix totalVariance = modelRelatedComponent.add(samplingRelatedComponent);
-				VariancePointEstimate varEst = new VariancePointEstimate(modelRelatedComponent, 
+				Matrix meanModelContribution = mean.getVariance();
+				Matrix designVarianceOfMeanRealizedY = meanEstimate.getVariance();
+				Matrix averageDesignVariance = variance.getMean();
+				
+				Matrix samplingRelatedComponent = designVarianceOfMeanRealizedY;
+				Matrix grossModelRelatedComponent = meanModelContribution.add(designVarianceOfMeanRealizedY).subtract(averageDesignVariance);
+				Matrix totalVariance = grossModelRelatedComponent.add(samplingRelatedComponent);
+
+//				Matrix pointEstimate = mean.getMean();
+//				Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(samplingRelatedComponent);
+//				Matrix numerator = modelRelatedComponent.multiply(samplingRelatedComponent);
+//				double correction = numerator.m_afData[0][0]/denominator.m_afData[0][0];
+//				System.out.println("Estimated correction = " + correction);
+						
+				VariancePointEstimate varEst = new VariancePointEstimate(grossModelRelatedComponent, 
 						samplingRelatedComponent, 
 						totalVariance,
 						rowIndex);
@@ -253,7 +404,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 
 	@Override
 	protected Matrix getVarianceFromDistribution() {
-		return getVarianceOfTotalEstimate().getMean();
+		return getCorrectedVariance().getMean();
 	}
 
 	@Override
@@ -364,13 +515,15 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	@Override
 	public Estimate<?> collapseEstimate(Map<String, List<String>> desiredIndicesForCollapsing) {
 		Estimate<?> simpleEstimate = collapseMeanAndVariance(desiredIndicesForCollapsing);
-		VariancePointEstimate vpe = getVarianceOfTotalEstimate();
+		VariancePointEstimate vpe = getCorrectedVariance();
 		Matrix collapsedSamplingRelatedVariance = collapseSquareMatrix(vpe.getSamplingRelatedVariance(), desiredIndicesForCollapsing);
-		Matrix collapsedModelRelatedVariance = collapseSquareMatrix(vpe.getModelRelatedVariance(), desiredIndicesForCollapsing);
+		Matrix collapsedGrossModelRelatedVariance = collapseSquareMatrix(vpe.grossModelRelatedVariance, desiredIndicesForCollapsing);
+		Matrix collapsedVarianceBiasCorrection = collapseSquareMatrix(vpe.varianceBiasCorrection, desiredIndicesForCollapsing);
 		CollapsedHybridPointEstimate outputEstimate = new CollapsedHybridPointEstimate(simpleEstimate.getMean(),
 				simpleEstimate.getVariance(),
 				collapsedSamplingRelatedVariance,
-				collapsedModelRelatedVariance);
+				collapsedGrossModelRelatedVariance,
+				collapsedVarianceBiasCorrection);
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);
 		outputEstimate.setRowIndex(newIndexRow);
