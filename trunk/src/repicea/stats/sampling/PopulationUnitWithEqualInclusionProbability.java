@@ -28,6 +28,10 @@ import repicea.math.Matrix;
  */
 public class PopulationUnitWithEqualInclusionProbability extends PopulationUnit {
 
+	/**
+	 * Constructor
+	 * @param obs a column vector
+	 */
 	public PopulationUnitWithEqualInclusionProbability(Matrix obs) {
 		super(obs);
 	}

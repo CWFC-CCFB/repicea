@@ -46,6 +46,75 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 		estimatorType = EstimatorType.LeastSquares;
 	}
 
+	protected Matrix getObservationVector() {
+		Matrix outputMatrix = null;
+		int nbObservations = getObservations().size();
+		int nbElementsPerObs = 0;
+		for (int i = 0; i < nbObservations; i++) {
+			O obs = getObservations().get(i);
+			if (outputMatrix == null) {
+				nbElementsPerObs = obs.getData().m_iRows;
+				outputMatrix = new Matrix(nbElementsPerObs * nbObservations, 1);
+			}
+			outputMatrix.setSubMatrix(obs.getData(), i * nbElementsPerObs, 0);
+		}
+		return outputMatrix;
+	}
+	
+//	/**
+//	 * Returns a vector with the inclusion probabilities
+//	 * @return
+//	 */
+//	private Matrix getMarginalInclusionProbabilities() {
+//		int nbObservations = getObservations().size();
+//		Matrix outputMatrix = new Matrix(nbObservations, 1);
+//		for (int i = 0; i < nbObservations; i++) {
+//			O obs = getObservations().get(i);
+//			double inclusionProb = 1d;
+//			if (obs instanceof PopulationUnitWithUnequalInclusionProbability) {
+//				inclusionProb = ((PopulationUnitWithUnequalInclusionProbability) obs).getInclusionProbability();
+//			}
+//			outputMatrix.m_afData[i][0] = inclusionProb;
+//		}
+//		return outputMatrix;
+//	}
+	
+	
+	protected int getNumberOfElementsPerObservation() {
+		if (!getObservations().isEmpty()) {
+			return getObservations().get(0).getData().m_iRows;
+		} else {
+			return -1;
+		}
+		
+	}
+	
+//	/**
+//	 * Returns a Matrix of inclusion probabilities. If working with equal inclusion probabilities,
+//	 * this matrix reduces to n (the sample size) on the diagonal and n*(n-1) in the off-diagonal 
+//	 * elements. If working with unequal inclusion probabilities, the diagonal elements are n/N while
+//	 * the off diagonal elements are n/N * (n-1)/(N-1).
+//	 * @return a Matrix
+//	 */
+//	protected Matrix getInclusionProbabilities() {
+//		int sampleSize = getObservations().size();
+//		O anObservation = getObservations().get(0);
+//		int nbElementsPerObs = getNumberOfElementsPerObservation();
+//		Matrix margInclusionProb = getMarginalInclusionProbabilities();
+//		Matrix jointInclusionProbabilities;
+//		if (anObservation instanceof PopulationUnitWithUnequalInclusionProbability) {
+//			jointInclusionProbabilities = margInclusionProb.elementWiseDivide(margInclusionProb.scalarMultiply(-1).scalarAdd(1)).multiply(margInclusionProb.transpose()).scalarMultiply(sampleSize * (sampleSize - 1));
+//		} else {
+//			int dim = nbElementsPerObs * sampleSize;
+//			jointInclusionProbabilities = new Matrix(dim, dim, sampleSize * (sampleSize - 1), 0d);
+//		}
+//		for (int i = 0; i < margInclusionProb.m_iRows; i++) {	// replace the diagonal by the marginal full inclusion prob (including the sample size
+//			jointInclusionProbabilities.m_afData[i][i] = margInclusionProb.m_afData[i][0] * sampleSize;
+//		}
+//		return jointInclusionProbabilities;
+//	}
+
+	
 	/**
 	 * Constructor with population size.
 	 * @param populationSize the number of units in the population.
