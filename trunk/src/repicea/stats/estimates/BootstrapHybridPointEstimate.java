@@ -22,8 +22,8 @@ import java.lang.reflect.Constructor;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
@@ -62,9 +62,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 //			Matrix numerator = grossModelRelatedVariance.elementWiseMultiply(samplingRelatedVariance);
 //			Matrix correction = customizedElementWiseDivide(numerator, denominator);
 //			varianceBiasCorrection = correction.scalarMultiply(-1d);
-			if (totalVariance != null) {
-				setRowIndex(rowIndex);  
-			}
+//			if (totalVariance != null) {
+			setRowIndex(rowIndex);  
+//			}
 		}
 
 //		private Matrix customizedElementWiseDivide(Matrix mat1, Matrix mat2) {
@@ -388,7 +388,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	}
 
 	@Override
-	public Estimate<?> collapseEstimate(Map<String, List<String>> desiredIndicesForCollapsing) {
+	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		Estimate<?> simpleEstimate = collapseMeanAndVariance(desiredIndicesForCollapsing);
 		VariancePointEstimate vpe = getCorrectedVariance();
 		Matrix collapsedSamplingRelatedVariance = collapseSquareMatrix(vpe.getSamplingRelatedVariance(), desiredIndicesForCollapsing);
