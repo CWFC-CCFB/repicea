@@ -21,8 +21,8 @@ package repicea.stats.estimates;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -196,15 +196,15 @@ s	 */
 	
 	/**
 	 * Collapse the estimate following a map that contains the indices for each group.
-	 * @param desiredIndicesForCollapsing a Map with the keys being the new indices and 
+	 * @param desiredIndicesForCollapsing a LinkedHashMap with the keys being the new indices and 
 	 * the values being lists of indices to be collapsed.
 	 * @return an Estimate instance
 	 */
-	public Estimate<?> collapseEstimate(Map<String, List<String>> desiredIndicesForCollapsing) {
+	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		return collapseMeanAndVariance(desiredIndicesForCollapsing);
 	}
 	
-	protected final Estimate<?> collapseMeanAndVariance(Map<String, List<String>> desiredIndicesForCollapsing) {
+	protected final Estimate<?> collapseMeanAndVariance(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		if (rowIndex.isEmpty()) {
 			throw new InvalidParameterException("The row indices have not been set yet!");
 		}
@@ -239,7 +239,7 @@ s	 */
 	}
 
 	
-	protected final Matrix collapseRowVector(Matrix originalMatrix, Map<String, List<String>> desiredIndicesForCollapsing) {
+	protected final Matrix collapseRowVector(Matrix originalMatrix, LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);
 		Matrix collapsedMatrix = new Matrix(desiredIndicesForCollapsing.size(), 1);
@@ -250,7 +250,7 @@ s	 */
 		return collapsedMatrix;
 	}
 
-	protected final Matrix collapseSquareMatrix(Matrix originalMatrix, Map<String, List<String>> desiredIndicesForCollapsing) {
+	protected final Matrix collapseSquareMatrix(Matrix originalMatrix, LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
 		if (originalMatrix == null) { // means the variance cannot be calculated as in the MonteCarloEstimate class if the nb realizations is smaller than 2.
 			return null;
 		} else {

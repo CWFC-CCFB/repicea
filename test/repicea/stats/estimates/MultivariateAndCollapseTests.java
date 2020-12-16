@@ -1,9 +1,8 @@
 package repicea.stats.estimates;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,7 +32,7 @@ public class MultivariateAndCollapseTests {
 			rowIndex.add("" + i);
 		}
 		est.setRowIndex(rowIndex);
-		Map<String, List<String>> collapseIndices = new HashMap<String, List<String>>();
+		LinkedHashMap<String, List<String>> collapseIndices = new LinkedHashMap<String, List<String>>();
 		collapseIndices.put("all", rowIndex);
 		Estimate<?> collapsedEstimate = est.collapseEstimate(collapseIndices);
 		
@@ -65,7 +64,7 @@ public class MultivariateAndCollapseTests {
 			rowIndex.add("" + i);
 		}
 		est.setRowIndex(rowIndex);
-		Map<String, List<String>> collapseIndices = new HashMap<String, List<String>>();
+		LinkedHashMap<String, List<String>> collapseIndices = new LinkedHashMap<String, List<String>>();
 		collapseIndices.put("group1", new ArrayList<String>());
 		collapseIndices.put("group2", new ArrayList<String>());
 		for (int i = 0; i < rowIndex.size(); i++) {
