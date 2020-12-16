@@ -3,9 +3,12 @@ package repicea.stats.estimates;
 import java.util.Random;
 
 import org.junit.Assert;
+//import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.stats.Distribution;
+import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.BootstrapHybridPointEstimate.VariancePointEstimate;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
@@ -72,7 +75,7 @@ public class BootstrapHybridPointEstimateTests {
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-1);
 	}
 
-	
+//	@Ignore
 	@Test
 	public void simpleTestWithCompleteVariability() {
 		BootstrapHybridPointEstimate bhpe = new BootstrapHybridPointEstimate(); 
@@ -126,13 +129,71 @@ public class BootstrapHybridPointEstimateTests {
 
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 7E-2);
 
-		Matrix empiricalCorrection = varPointEstimate.getTotalVariance().subtract(varPointEstimate.getModelRelatedVariance()).subtract(varPointEstimate.getSamplingRelatedVariance());
-		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
-		System.out.println("Theoretical correction = " + theoreticalCorrection);
-		System.out.println("Empirical correction = " + empiricalCorrection);
-		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.m_afData[0][0], 1E-2);
+//		Matrix empiricalCorrection = varPointEstimate.getTotalVariance().subtract(varPointEstimate.getModelRelatedVariance()).subtract(varPointEstimate.getSamplingRelatedVariance());
+//		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
+//		System.out.println("Theoretical correction = " + theoreticalCorrection);
+//		System.out.println("Empirical correction = " + empiricalCorrection);
+//		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.m_afData[0][0], 1E-2);
 	}
 
+	@Test
+	public void multivariateTestWithCompleteVariability() {
+		BootstrapHybridPointEstimate bhpe = new BootstrapHybridPointEstimate(); 
+		int sampleSize = 10;
+		Matrix meanX = new Matrix(2,1);
+		meanX.m_afData[0][0] = 20;
+		meanX.m_afData[1][0] = 12;
+		Matrix varianceX = new Matrix(2,2);
+		varianceX.m_afData[0][0] = 10d * 10d;
+		varianceX.m_afData[1][1] = 4d * 4d;
+		varianceX.m_afData[1][0] = 4d * 10d * .5;
+		varianceX.m_afData[0][1] = varianceX.m_afData[1][0];
+
+		GaussianEstimate popUnitGenerator = new GaussianEstimate(meanX, varianceX);
+		PopulationMeanEstimate pe = new PopulationMeanEstimate();
+		for (int j = 0; j < sampleSize; j++) {
+			Matrix randomObs = popUnitGenerator.getRandomDeviate();
+			pe.addObservation(new PopulationUnitWithEqualInclusionProbability(randomObs));
+		}
+		
+		Matrix mu_x_hat = pe.getMean();
+		Matrix var_mu_x_hat = pe.getVariance();
+		
+		double meanModel = 0.7;
+		double stdModel = .15;
+		double stdRes = 1.1;
+		
+		for (int i = 0; i < 100000; i++) {
+			PopulationMeanEstimate peNew = new PopulationMeanEstimate();
+			Matrix obsNew;
+			Matrix slope = new Matrix(1,1,meanModel + RANDOM.nextGaussian() * stdModel,0); 
+			for (int j = 0; j < sampleSize; j++) {
+				Matrix x = pe.getObservations().get(j).getData();
+				obsNew =  x.multiply(slope).add(StatisticalUtility.drawRandomVector(x.m_iRows, Distribution.Type.GAUSSIAN).scalarMultiply(stdRes));
+				peNew.addObservation(new PopulationUnitWithEqualInclusionProbability(obsNew));
+			}
+			bhpe.addPointEstimate(peNew);
+		}
+		
+		Matrix expectedMean = mu_x_hat.scalarMultiply(meanModel);
+		Matrix actualMean = bhpe.getMean();
+
+		Assert.assertTrue("Testing mean estimates", !expectedMean.subtract(actualMean).getAbsoluteValue().anyElementLargerThan(3E-2));
+		
+		
+		Matrix expectedVariance = mu_x_hat.multiply( mu_x_hat.transpose()).scalarMultiply(stdModel * stdModel)
+				.add(var_mu_x_hat.scalarMultiply(meanModel * meanModel))
+				.subtract(var_mu_x_hat.scalarMultiply(stdModel * stdModel));	// when dealing with the estimate of the mean, the contribution of the residual error tends to 0, i.e. N * V.bar(e_i) / N^2 = V.bar(e_i) / N. MF2020-12-14
+
+		VariancePointEstimate varPointEstimate = bhpe.getCorrectedVariance();
+		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
+		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
+		Matrix actualVariance = varPointEstimate.getTotalVariance();
+		System.out.println("Total variance = " + actualVariance);
+		System.out.println("Expected variance = " + expectedVariance);
+
+		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(8E-2));
+	}
 	
 	
 }
