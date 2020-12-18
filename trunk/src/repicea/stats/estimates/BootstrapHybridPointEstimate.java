@@ -187,7 +187,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			mean.addRealization(estimate.getMean());
 			variance.addRealization(estimate.getVariance());
 		}
-		return new VariancePointEstimate(null, 
+		return new VariancePointEstimate(mean.getMean(), 
 				mean.getVariance().add(variance.getMean()),
 				mean.getVariance(), 
 				variance.getMean(), 
@@ -273,7 +273,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			}
 		} else {
 			System.out.println("The variance of the hybrid point estimate cannot be calculated because there is not enough realizations!");
-			return new VariancePointEstimate(null, null, null, null, rowIndex);
+			return new VariancePointEstimate(getMean(), null, null, null, rowIndex);
 		}
 	}
 
