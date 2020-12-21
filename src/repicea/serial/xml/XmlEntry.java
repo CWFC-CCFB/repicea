@@ -49,7 +49,7 @@ final class XmlEntry {
 //						value = marshaller.marshall(value);
 //					}
 //				}
-				if (!XmlMarshallingUtilities.isStringOrSimpleObject(value)) {
+				if (!XmlMarshallingUtilities.isStringOrPrimitive(value)) {
 					value = marshaller.marshall(value);
 				}
 			}

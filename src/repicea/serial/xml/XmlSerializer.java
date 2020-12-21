@@ -57,7 +57,7 @@ public class XmlSerializer {
 	public void writeObject(Object obj) throws XmlMarshallException {
 		try {
 			XmlMarshaller marshaller = new XmlMarshaller();
-			if (XmlMarshallingUtilities.isStringOrSimpleObject(obj)) { // then we embed the object into a wrapper
+			if (XmlMarshallingUtilities.isStringOrPrimitive(obj)) { // then we embed the object into a wrapper
 				FakeList wrapper = new FakeList();
 				wrapper.add(obj);
 				obj = wrapper;
