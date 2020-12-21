@@ -4,6 +4,7 @@ import java.awt.Window;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -564,6 +565,47 @@ public class XmlSerializationTest {
 		Assert.assertEquals("Testing values", 4d, (Double) deserializedObj, 1E-8);
 	}
 
+	@Test
+	public void testListOfClasses() throws FileNotFoundException, XmlMarshallException {
+		List<Class> myClasses = new ArrayList<Class>();
+		myClasses.add(Double.class);
+		myClasses.add(Double.class);
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(myClasses);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		List deserializedObj = (List) deserializer.readObject();
+		
+		Assert.assertEquals("Testing list size", myClasses.size(), deserializedObj.size());
+		Assert.assertEquals("Testing value 0", deserializedObj.get(0), Double.class);
+		Assert.assertEquals("Testing value 1", deserializedObj.get(1), Double.class);
+	}
+
+	@Test
+	public void testListOfArrays() throws FileNotFoundException, XmlMarshallException {
+		List myClasses = new ArrayList();
+		int[] myArray = new int[1];
+		myArray[0] = 18;
+		myClasses.add(myArray);
+		myClasses.add(myArray);
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(myClasses);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		List deserializedObj = (List) deserializer.readObject();
+		
+		Assert.assertEquals("Testing list size", myClasses.size(), deserializedObj.size());
+		Assert.assertEquals("Testing list size", Array.get(deserializedObj.get(0),0), 18);
+		Assert.assertEquals("Testing list size", Array.get(deserializedObj.get(1),0), 18);
+		
+	}
+
+	
+	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void deserializationOfHashMapInJava7() throws FileNotFoundException, XmlMarshallException {
