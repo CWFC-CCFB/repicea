@@ -82,7 +82,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 
 	
 	@Override
-	public List getPossibleValueForDummyVariable(String fieldName, String refClass) throws StatisticalDataException {
+	public List getPossibleValueForDummyVariable(String fieldName, String refClass) {
 		int fieldIndex = getDataSet().getIndexOfThisField(fieldName);
 		if (fieldIndex ==  -1) {
 			throw new InvalidParameterException("Field " + fieldName + " is not part of the DataSet instance!");
@@ -90,7 +90,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		List possibleValues = dataSet.getPossibleValuesInThisField(fieldIndex);
 		Collections.sort(possibleValues);
 		if (refClass != null && !possibleValues.contains(refClass)) {
-			throw new StatisticalDataException("Reference class category " + refClass + " does not belong to this class variable!");
+			throw new InvalidParameterException("Reference class category " + refClass + " does not belong to this class variable!");
 		}
 				
 		if (isInterceptModel()) {
