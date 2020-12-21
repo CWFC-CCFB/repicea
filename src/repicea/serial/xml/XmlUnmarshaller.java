@@ -70,6 +70,9 @@ public final class XmlUnmarshaller {
 			return retrieveObject(clazz, referenceHashCode);
 		} else {
 			if (xmlList.isArray) {											// array case
+				if (hasObjectBeenRegistered(Array.class, referenceHashCode)) {		// if the object has already been registered it is returned
+					return retrieveObject(Array.class, referenceHashCode);
+				}
 				List<Object> list = new ArrayList<Object>();
 				List<Object> mapEntriesPossiblyLost = new ArrayList<Object>();
 				for (XmlEntry entry : xmlList.getEntries()) {
@@ -98,7 +101,7 @@ public final class XmlUnmarshaller {
 				for (int i = 0; i < list.size(); i++) {
 					Array.set(arrayObject, i, list.get(i));
 				}
-				
+				registerObject(Array.class, xmlList.refHashCode, arrayObject);
 				return arrayObject;
 			} else if (Enum.class.isAssignableFrom(clazz)) {			// enum case
 				String enumName = XmlMarshallingUtilities.getEnumName(clazz.getName(), xmlList.getEntries().get(0).value.toString());
@@ -107,8 +110,8 @@ public final class XmlUnmarshaller {
 				return newInstance;
 			} else if (clazz.equals(Class.class)) {
 				String className = XmlMarshallingUtilities.getClassName(xmlList.getEntries().get(0).value.toString());
-//				Object newInstance = Class.forName(className, true, ClassLoader.getSystemClassLoader());
 				Object newInstance = Class.forName(className);
+				registerObject(clazz, xmlList.refHashCode, newInstance);
 				return newInstance;
 			} else {													// any other case
 				Constructor<?> emptyCstor = XmlMarshallingUtilities.getEmptyConstructor(clazz);
