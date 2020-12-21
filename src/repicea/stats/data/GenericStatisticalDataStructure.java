@@ -18,6 +18,7 @@
  */
 package repicea.stats.data;
 
+import java.security.InvalidParameterException;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -50,8 +51,40 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	}
 	
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	protected Matrix computeDummyVariables(int fieldIndex, String refClass) throws StatisticalDataException {
+	@SuppressWarnings({ "rawtypes"})
+	protected Matrix computeDummyVariables(String fieldName, String refClass) throws StatisticalDataException {
+		List possibleValues = getPossibleValueForDummyVariable(fieldName, refClass);
+		int fieldIndex = getDataSet().getIndexOfThisField(fieldName);
+//		List possibleValues = dataSet.getPossibleValuesInThisField(fieldIndex);
+//		Collections.sort(possibleValues);
+//		if (refClass != null && !possibleValues.contains(refClass)) {
+//			throw new StatisticalDataException("Reference class category " + refClass + " does not belong to this class variable!");
+//		}
+//				
+//		if (isInterceptModel()) {
+//			if (refClass != null) {
+//				possibleValues.remove(possibleValues.indexOf(refClass));
+//			} else {
+//				possibleValues.remove(0);
+//			}
+//		} 
+		
+//		Matrix outputMatrix = new Matrix(getNumberOfObservations(), possibleValues.size());
+//		for (int i = 0; i < getNumberOfObservations(); i++) {
+//			int position = possibleValues.indexOf(dataSet.getValueAt(i, fieldIndex));
+//			if (position >= 0 && position < outputMatrix.m_iCols) {
+//				outputMatrix.m_afData[i][position] = 1d;
+//			}
+//		}
+//		return outputMatrix;
+		return dataSet.getDummyMatrix(possibleValues, fieldIndex);
+	}
+
+	public List getPossibleValueForDummyVariable(String fieldName, String refClass) throws StatisticalDataException {
+		int fieldIndex = getDataSet().getIndexOfThisField(fieldName);
+		if (fieldIndex ==  -1) {
+			throw new InvalidParameterException("Field " + fieldName + " is not part of the DataSet instance!");
+		}
 		List possibleValues = dataSet.getPossibleValuesInThisField(fieldIndex);
 		Collections.sort(possibleValues);
 		if (refClass != null && !possibleValues.contains(refClass)) {
@@ -65,18 +98,9 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 				possibleValues.remove(0);
 			}
 		} 
-		
-//		Matrix outputMatrix = new Matrix(getNumberOfObservations(), possibleValues.size());
-//		for (int i = 0; i < getNumberOfObservations(); i++) {
-//			int position = possibleValues.indexOf(dataSet.getValueAt(i, fieldIndex));
-//			if (position >= 0 && position < outputMatrix.m_iCols) {
-//				outputMatrix.m_afData[i][position] = 1d;
-//			}
-//		}
-//		return outputMatrix;
-		return dataSet.getDummyMatrix(possibleValues, fieldIndex);
+		return possibleValues;
 	}
-
+	
 	
 	@Override
 	public boolean isInterceptModel() {return isInterceptModel;}
@@ -153,7 +177,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 				if (Number.class.isAssignableFrom(fieldType)) {		// it is either a double or an integer
 					matrixTmp = dataSet.getVectorOfThisField(indexOfThisField);
 				} else {
-					matrixTmp = computeDummyVariables(indexOfThisField, refClass);
+					matrixTmp = computeDummyVariables(effect, refClass);
 				}
 
 				if (subMatrixX == null) {
