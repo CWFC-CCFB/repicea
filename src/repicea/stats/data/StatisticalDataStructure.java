@@ -82,9 +82,8 @@ public interface StatisticalDataStructure {
 	 * @param fieldName the name of the field containing the variable.
 	 * @param refClass the name of the class that is the reference class (can be null).
 	 * @return a List of values
-	 * @throws StatisticalDataException
 	 */
-	public List getPossibleValueForDummyVariable(String fieldName, String refClass) throws StatisticalDataException;
+	public List getPossibleValueForDummyVariable(String fieldName, String refClass);
 
 
 }
