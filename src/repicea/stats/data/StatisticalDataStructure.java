@@ -19,6 +19,8 @@
 package repicea.stats.data;
 
 
+import java.util.List;
+
 import repicea.math.Matrix;
 
 /**
@@ -73,5 +75,16 @@ public interface StatisticalDataStructure {
 	 * @return a DataSet instance
 	 */
 	public DataSet getDataSet();
+	
+	
+	/**
+	 * This method provides the possible value for a particular dummy variable.
+	 * @param fieldName the name of the field containing the variable.
+	 * @param refClass the name of the class that is the reference class (can be null).
+	 * @return a List of values
+	 * @throws StatisticalDataException
+	 */
+	public List getPossibleValueForDummyVariable(String fieldName, String refClass) throws StatisticalDataException;
+
 
 }
