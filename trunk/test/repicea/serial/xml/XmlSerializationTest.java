@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -519,7 +520,50 @@ public class XmlSerializationTest {
 		Assert.assertEquals("hashMap value", originalHashMap.get(1), deserializedMap.get(1), 1E-8);
 	}
 	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Test
+	public void serializationConcurrentHashMap() throws FileNotFoundException, XmlMarshallException {
+		ConcurrentHashMap<Integer, Double> originalConcurrentHashMap = new ConcurrentHashMap<Integer, Double>();
+		originalConcurrentHashMap.put(1, 2d);
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(originalConcurrentHashMap);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		ConcurrentHashMap<Integer, Double> deserializedMap = (ConcurrentHashMap) deserializer.readObject();
+		
+		Assert.assertTrue(deserializedMap.size() == originalConcurrentHashMap.size());
+		Assert.assertEquals("hashMap value", originalConcurrentHashMap.get(1), deserializedMap.get(1), 1E-8);
+	}
 	
+	@Test
+	public void serializationObject() throws FileNotFoundException, XmlMarshallException {
+		Object obj = new Object();
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(obj);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		Object deserializedObj = deserializer.readObject();
+		
+		Assert.assertTrue(deserializedObj.getClass().equals(Object.class));
+	}
+
+	@Test
+	public void serializationOfPrimitive() throws FileNotFoundException, XmlMarshallException {
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(4d);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		Object deserializedObj = deserializer.readObject();
+		
+		Assert.assertTrue(deserializedObj instanceof Double);
+		Assert.assertEquals("Testing values", 4d, (Double) deserializedObj, 1E-8);
+	}
+
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
 	public void deserializationOfHashMapInJava7() throws FileNotFoundException, XmlMarshallException {

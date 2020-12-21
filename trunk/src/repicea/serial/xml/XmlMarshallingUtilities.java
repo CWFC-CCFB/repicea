@@ -183,12 +183,13 @@ public class XmlMarshallingUtilities {
 	}
 	
 	/**
-	 * This method returns true if the object is either a String or a simple Object instance
+	 * This method returns true if the object is either a String or a primitive type
 	 * @param obj the instance to be checked
 	 * @return a boolean
 	 */
-	static boolean isStringOrSimpleObject(Object obj) {
-		return obj.getClass().equals(String.class) || obj.getClass().getSuperclass() == null;
+	static boolean isStringOrPrimitive(Object obj) {
+//		return obj.getClass().equals(String.class) || obj.getClass().getSuperclass() == null;
+		return obj.getClass().equals(String.class) || obj.getClass().isPrimitive();
 	}
 	
 	static XmlList getNextEntryFromJava7MapEntry(XmlList list) {
