@@ -80,6 +80,8 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		return dataSet.getDummyMatrix(possibleValues, fieldIndex);
 	}
 
+	
+	@Override
 	public List getPossibleValueForDummyVariable(String fieldName, String refClass) throws StatisticalDataException {
 		int fieldIndex = getDataSet().getIndexOfThisField(fieldName);
 		if (fieldIndex ==  -1) {
