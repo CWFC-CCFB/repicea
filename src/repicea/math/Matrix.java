@@ -23,7 +23,6 @@ import java.security.InvalidParameterException;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -1069,10 +1068,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 			if (i > 0) {
 				outputString = outputString.concat(", ");
 			}
-			if (Math.abs(myArray[i]) > 1E3) {
-				outputString = outputString.concat("[" + ScientificFormatter.format(myArray[i]) + "]");
-			} else {
+			double absValue = Math.abs(myArray[i]);
+			if (absValue > 0.1 && absValue < 1E3) {
 				outputString = outputString.concat("[" + SimpleDecimalFormatter.format(myArray[i]) + "]");
+			} else {
+				outputString = outputString.concat("[" + ScientificFormatter.format(myArray[i]) + "]");
 			}
 				
 		}
@@ -1395,7 +1395,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	public static void main(String[] args) {
-		Matrix matrix = new Matrix(20,4, 1, 100);
+		Matrix matrix = new Matrix(5,4, 1, 100);
+		System.out.println(matrix);
+		matrix = new Matrix(5,4, -0.05, 5E-2);
 		System.out.println(matrix);
 	}
 	
