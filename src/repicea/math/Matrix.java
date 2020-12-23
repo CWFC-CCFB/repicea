@@ -20,6 +20,8 @@ package repicea.math;
 
 import java.io.Serializable;
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -40,6 +42,10 @@ public final class Matrix implements Serializable, DeepCloneable {
 	
 	public static int NB_ROWS_BEYOND_WHICH_MATRIX_INVERSION_TAKES_TOO_MUCH_TIME = 600;
 	
+	private static final NumberFormat ScientificFormatter = new DecimalFormat("0.##E0");
+	
+	private static final NumberFormat SimpleDecimalFormatter = NumberFormat.getNumberInstance();
+	static {SimpleDecimalFormatter.setMinimumFractionDigits(2);}
 	
 	/*
 	 * Members of this class
@@ -1042,16 +1048,33 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public String toString() {
 		String outputString = "{";
 		for (int i = 0; i < m_iRows; i ++) {
-			outputString += Arrays.toString(m_afData[i]);
+//			outputString += Arrays.toString(m_afData[i]);
+			outputString += convertArrayToString(m_afData[i]);
 			if (i == m_iRows - 1) {
 				outputString += "}";
 			} else {
-				outputString += ", ";
+				outputString += ", \n";
 			}
-			if (outputString.length() > 200) {
+			if (outputString.length() > 5000) {
 				outputString += "...";
 				break;
 			}
+		}
+		return outputString;
+	}
+
+	private String convertArrayToString(double[] myArray) {
+		String outputString = "";
+		for (int i = 0; i < myArray.length; i++) {
+			if (i > 0) {
+				outputString = outputString.concat(", ");
+			}
+			if (Math.abs(myArray[i]) > 1E3) {
+				outputString = outputString.concat("[" + ScientificFormatter.format(myArray[i]) + "]");
+			} else {
+				outputString = outputString.concat("[" + SimpleDecimalFormatter.format(myArray[i]) + "]");
+			}
+				
 		}
 		return outputString;
 	}
@@ -1370,4 +1393,10 @@ public final class Matrix implements Serializable, DeepCloneable {
 			return false;
 		}
 	}
+	
+	public static void main(String[] args) {
+		Matrix matrix = new Matrix(20,4, 1, 100);
+		System.out.println(matrix);
+	}
+	
 }
