@@ -158,8 +158,8 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		if (backup != null && !backup.isEmpty() && streamReader.recordQueue.isEmpty()) {
 			for (Object[] record : backup) {
 				streamReader.addRecord(record);
-				return true;
 			}
+			return true;
 		}
 		return false;
 	}
