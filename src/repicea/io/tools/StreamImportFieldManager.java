@@ -20,6 +20,7 @@ package repicea.io.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -93,10 +94,24 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		 */
 		public void addRecord(Object[] record) {recordQueue.add(record);}
 
+
+		/** 
+		 * Provide a copy of the record for eventual re-insertion.
+		 * @return a list of arrays of objects
+		 */
+		List<Object[]> getCopyOfRecords() {
+			List<Object[]> copy = new ArrayList<Object[]>();
+			for (Object[] record : recordQueue) {
+				copy.add(Arrays.copyOf(record, record.length));
+			}
+			return copy;
+		}
+		
 	}
 	
 	private final QueueReader streamReader;
 	private final Enum<?> groupFieldEnum;
+	private List<Object[]> backup;
 	
 	/**
 	 * Constructor. Takes the recordReader object and extracts all the ImportFieldElement. 
@@ -127,6 +142,29 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		}
 	}
 
+	/** 
+	 * Keep a copy of the records in a private member for eventual re insertion in the stream.
+	 */
+	public void backupStream() {
+		backup = streamReader.getCopyOfRecords();
+	}
+
+	/**
+	 * Reinsert the backup into the stream if the backup exists and the queue is null.
+	 * @return a boolean true if the backup has been reinserted or false if the backup is
+	 * null or the queue is not empty yet.
+	 */
+	public boolean restream() {
+		if (backup != null && !backup.isEmpty() && streamReader.recordQueue.isEmpty()) {
+			for (Object[] record : backup) {
+				streamReader.addRecord(record);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	
 	private List<ImportFieldElement> getFieldsByType(boolean isOptional) {
 		List<ImportFieldElement> fields = new ArrayList<ImportFieldElement>();
 		for (ImportFieldElement ife : getFields()) {

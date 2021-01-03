@@ -52,35 +52,26 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		
 		private final Matrix modelRelatedVariance;
 		private final Matrix samplingRelatedVariance;
-//		private final Matrix varianceBiasCorrection;
+		private final Matrix varianceBiasCorrection;
 		
 		private VariancePointEstimate(Matrix pointEstimate, Matrix totalVariance, Matrix modelRelatedVariance, Matrix samplingRelatedVariance, List<String> rowIndex) {
 			super(pointEstimate, totalVariance); 
+			if (pointEstimate == null) {
+				throw new InvalidParameterException("The pointEstimate argument cannot be null!");
+			}
 			this.modelRelatedVariance = modelRelatedVariance;
 			this.samplingRelatedVariance = samplingRelatedVariance;
-//			Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(samplingRelatedVariance);
-//			Matrix numerator = grossModelRelatedVariance.elementWiseMultiply(samplingRelatedVariance);
-//			Matrix correction = customizedElementWiseDivide(numerator, denominator);
-//			varianceBiasCorrection = correction.scalarMultiply(-1d);
-//			if (totalVariance != null) {
+			if (modelRelatedVariance != null && samplingRelatedVariance != null) {
+				Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(samplingRelatedVariance);
+				Matrix numerator = modelRelatedVariance.elementWiseMultiply(samplingRelatedVariance);
+				varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
+			} else {
+				varianceBiasCorrection = null;
+			}
 			setRowIndex(rowIndex);  
-//			}
 		}
 
-//		private Matrix customizedElementWiseDivide(Matrix mat1, Matrix mat2) {
-//			if (mat1.m_iRows != mat2.m_iRows || mat1.m_iCols != mat2.m_iCols) {
-//				throw new InvalidParameterException("The two matrix arguments do not have the same dimensions!");
-//			}
-//			Matrix outputMatrix = new Matrix(mat1.m_iRows, mat2.m_iCols); 
-//			for (int i = 0; i < mat1.m_iRows; i++) {
-//				for (int j = 0; j < mat1.m_iCols; j++) {
-//					if (mat2.m_afData[i][j] != 0) {
-//						outputMatrix.m_afData[i][j] = mat1.m_afData[i][j] / mat2.m_afData[i][j];
-//					}
-//				}
-//			}
-//			return outputMatrix;
-//		}
+		protected Matrix getVarianceBiasCorrection() {return varianceBiasCorrection;}
 
 		/**
 		 * This method returns the estimate of the total variance.
@@ -91,12 +82,20 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		}
 		
 		/**
-		 * Provide the model-related variance. 
+		 * Provide the model-related variance, which includes the variance bias correction. 
 		 * @return a Matrix instance
 		 */
 		public Matrix getModelRelatedVariance() {
-//			return grossModelRelatedVariance.subtract(varianceBiasCorrection);
 			return modelRelatedVariance;
+		}
+
+		
+		/**
+		 * Provide the model-related variance, without the variance bias correction. 
+		 * @return a Matrix instance
+		 */
+		public Matrix getNetModelRelatedVariance() {
+			return getModelRelatedVariance().subtract(getVarianceBiasCorrection());
 		}
 		
 		/**
