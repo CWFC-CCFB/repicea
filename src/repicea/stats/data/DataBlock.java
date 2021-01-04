@@ -77,7 +77,15 @@ public class DataBlock extends LinkedHashMap<String, DataBlock> {
 	}
 	
 	@Override
-	public String toString() {return hierarchicalLevel + " - " + subject + " " + super.toString();}
+	public String toString() {
+		if (isEmpty()) {
+			return hierarchicalLevel + " - " + subject + " " + indices.toString();
+		} else {
+			return hierarchicalLevel + " - " + subject + " " + super.toString();
+		}
+	}
+	
+	
 
 
 	/**
