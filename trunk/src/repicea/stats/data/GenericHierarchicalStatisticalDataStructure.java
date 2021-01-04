@@ -33,26 +33,36 @@ import repicea.util.ObjectUtility;
  */
 public class GenericHierarchicalStatisticalDataStructure extends GenericStatisticalDataStructure implements HierarchicalStatisticalDataStructure {
 	
-	protected Map<String, DataBlock> hierarchicalStructure;		// from outer to inner levels
+	protected final Map<String, DataBlock> hierarchicalStructure;		// from outer to inner levels
 	protected Map<String, List<String>> randomEffectsSpecifications;
 
 	
 	/**
 	 * The string represents the hierarchical level.
 	 */
-	protected Map<String, Matrix> matricesZ;
+	protected final Map<String, Matrix> matricesZ;
 
+	protected final boolean sorted;
+	
 	/**
 	 * General constructor. To be defined in derived class.
 	 * @param dataSet a DataSet instance
+	 * @param sorted a boolean. If true the dataset will be sorted according to the hierarchical structure
 	 */
-	public GenericHierarchicalStatisticalDataStructure(DataSet dataSet) {
+	public GenericHierarchicalStatisticalDataStructure(DataSet dataSet, boolean sorted) {
 		super(dataSet);
+		this.sorted = sorted;
 		hierarchicalStructure = new LinkedHashMap<String, DataBlock>();
 		matricesZ = new LinkedHashMap<String, Matrix>();
 	}
-	
 
+	/**
+	 * Constructor for hierarchically sorted dataset.
+	 * @param dataSet a DataSet instance
+	 */
+	public GenericHierarchicalStatisticalDataStructure(DataSet dataSet) {
+		this(dataSet, true);
+	}
 	
 	@Override
 	public void constructMatrices(String modelDefinition) throws StatisticalDataException {
@@ -84,7 +94,9 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 				hierarchicalLevels.add(level);
 			}
 			
-			sortDataAccordingToRandomEffects(hierarchicalLevels);		// we sort the data before setting the hierarchical structure
+			if (sorted) {
+				sortDataAccordingToRandomEffects(hierarchicalLevels);		// we sort the data before setting the hierarchical structure
+			}
 			
 			setHierarchicalStructureLevel(hierarchicalLevels);
 
@@ -95,10 +107,7 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 		return newModelDefinition;
 	}
 	
-	
-	
-	
-	
+		
 	private void sortDataAccordingToRandomEffects(List<String> hierarchicalLevels) {
 		List<Integer> indexList = new ArrayList<Integer>();
 		for (String levelName : hierarchicalLevels) {
