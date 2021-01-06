@@ -1047,12 +1047,15 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public String toString() {
 		String outputString = "{";
 		for (int i = 0; i < m_iRows; i ++) {
-//			outputString += Arrays.toString(m_afData[i]);
 			outputString += convertArrayToString(m_afData[i]);
 			if (i == m_iRows - 1) {
 				outputString += "}";
 			} else {
-				outputString += ", \n";
+				if (isColumnVector()) {
+					outputString += ", ";
+				} else {
+					outputString += ", \n";
+				}
 			}
 			if (outputString.length() > 5000) {
 				outputString += "...";
@@ -1066,7 +1069,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		String outputString = "";
 		for (int i = 0; i < myArray.length; i++) {
 			if (i > 0) {
-				outputString = outputString.concat(", ");
+				outputString = outputString.concat(" ");
 			}
 			double absValue = Math.abs(myArray[i]);
 			if (absValue > 0.1 && absValue < 1E3) {
@@ -1397,7 +1400,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public static void main(String[] args) {
 		Matrix matrix = new Matrix(5,4, 1, 100);
 		System.out.println(matrix);
-		matrix = new Matrix(5,4, -0.05, 5E-2);
+		matrix = new Matrix(4,3, -0.05, 5E-2);
+		System.out.println(matrix);
+		matrix = new Matrix(5,1, 0, 2);
 		System.out.println(matrix);
 	}
 	
