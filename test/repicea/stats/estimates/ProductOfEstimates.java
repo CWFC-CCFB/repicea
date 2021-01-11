@@ -35,7 +35,7 @@ public class ProductOfEstimates {
 				newVariance = newVariance.add(alphaVariance.multiply(betaVariance));
 			}
 			if (newVariance.m_afData[0][0] < 0) {
-				int u = 0;
+				throw new UnsupportedOperationException("The product of the estimates yields negative variance");
 			}
 			currentEstimate = new SimpleEstimate(newMean, newVariance);
 		}
@@ -72,7 +72,23 @@ public class ProductOfEstimates {
 		}
 	}
 	
-	public static void runSimulation(int nbMaxRealization, boolean lowAlpha, boolean lowBeta, boolean lowGamma, String simulationName) throws Exception {
+	
+	private static void runSimulation(int nbMaxRealization, 
+			boolean lowAlpha, 
+			boolean lowBeta, 
+			boolean lowGamma, 
+			String simulationName) throws Exception {
+		runSimulation(nbMaxRealization, lowAlpha, lowBeta, lowGamma, simulationName, 0d, 0d, 0d);
+	}
+
+	private static void runSimulation(int nbMaxRealization, 
+			boolean lowAlpha, 
+			boolean lowBeta, 
+			boolean lowGamma, 
+			String simulationName,
+			double biasAlpha,
+			double biasBeta,
+			double biasGamma) throws Exception {
 		System.out.println("Running simulation with lowAlpha = " + ((Boolean) lowAlpha).toString() + " lowBeta = " + ((Boolean) lowBeta).toString() + " lowGamma = " + ((Boolean) lowGamma).toString() + " ...");
 		int df = 300;
 		double alpha = 20d;
@@ -90,8 +106,6 @@ public class ProductOfEstimates {
 		GaussianEstimate trueAlphaMean = new GaussianEstimate(alpha, varAlpha);
 		GaussianEstimate trueBetaMean = new GaussianEstimate(beta, varBeta);
 		GaussianEstimate trueGammaMean = new GaussianEstimate(gamma, varGamma);
-
-		
 		
 		MonteCarloEstimate muGoodman = new MonteCarloEstimate();		
 		MonteCarloEstimate varGoodman = new MonteCarloEstimate();		
@@ -99,9 +113,6 @@ public class ProductOfEstimates {
 		MonteCarloEstimate varNaive = new MonteCarloEstimate();		
 		MonteCarloEstimate muPropagation = new MonteCarloEstimate();		
 		MonteCarloEstimate varPropagation = new MonteCarloEstimate();		
-//		MonteCarloEstimate aMonteCarlo = new MonteCarloEstimate();		
-//		MonteCarloEstimate bMonteCarlo = new MonteCarloEstimate();		
-//		MonteCarloEstimate cMonteCarlo = new MonteCarloEstimate();
 		MonteCarloEstimate muMonteCarlo = new MonteCarloEstimate();		
 		MonteCarloEstimate varMonteCarlo = new MonteCarloEstimate();		
 		MonteCarloEstimate coverage = new MonteCarloEstimate();
@@ -118,14 +129,6 @@ public class ProductOfEstimates {
 			estimates.add(getEstimate(trueBetaMean, trueVarBeta)); 
 			estimates.add(getEstimate(trueGammaMean, trueVarGamma)); 
 
-//			Matrix a = estimates.get(0).getMean().matrixStack(estimates.get(0).getVariance(), true);
-//			Matrix b = estimates.get(1).getMean().matrixStack(estimates.get(1).getVariance(), true);
-//			Matrix c = estimates.get(2).getMean().matrixStack(estimates.get(2).getVariance(), true);
-//			
-//			aMonteCarlo.addRealization(a);
-//			bMonteCarlo.addRealization(b);
-//			cMonteCarlo.addRealization(c);
-			
 			SimpleEstimate productGoodman = Estimate.getProductOfManyEstimates(estimates);
 			muGoodman.addRealization(productGoodman.getMean());
 			varGoodman.addRealization(productGoodman.getVariance());
@@ -152,7 +155,7 @@ public class ProductOfEstimates {
 			MonteCarloEstimate scaledProductMC = new MonteCarloEstimate();
 			double scalingFactor = Math.sqrt(productGoodman.getVariance().m_afData[0][0] / productNaive.getVariance().m_afData[0][0]);
 			if (Double.isNaN(scalingFactor)) {
-				int u = 0;
+				throw new UnsupportedOperationException("Trying to compute a negative square root when rescaling the Monte Carlo variance estimator");
 			}
 			double mean = productMC.getMean().m_afData[0][0];
 			Matrix newReal;
@@ -221,15 +224,15 @@ public class ProductOfEstimates {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		int nbRealizations = 50000;
+		int nbRealizations = 100000;
 		runSimulation(nbRealizations, true, true, true, "LLL");
 		runSimulation(nbRealizations, false, true, true, "HLL");
 		runSimulation(nbRealizations, true, false, true, "LHL");
 		runSimulation(nbRealizations, true, true, false, "LLH");
-//		runSimulation(nbRealizations, false, false, true, "HHL");
-//		runSimulation(nbRealizations, false, true, false, "HLH");
-//		runSimulation(nbRealizations, true, false, false, "LHH");
-//		runSimulation(nbRealizations, false, false, false, "HHH");
+		runSimulation(nbRealizations, false, false, true, "HHL");
+		runSimulation(nbRealizations, false, true, false, "HLH");
+		runSimulation(nbRealizations, true, false, false, "LHH");
+		runSimulation(nbRealizations, false, false, false, "HHH");
 	}
 	
 }
