@@ -103,9 +103,9 @@ public class ProductOfEstimates {
 		double varBeta = trueVarBeta.getMean().m_afData[0][0];
 		double varGamma = trueVarGamma.getMean().m_afData[0][0];
 		
-		GaussianEstimate trueAlphaMean = new GaussianEstimate(alpha, varAlpha);
-		GaussianEstimate trueBetaMean = new GaussianEstimate(beta, varBeta);
-		GaussianEstimate trueGammaMean = new GaussianEstimate(gamma, varGamma);
+		GaussianEstimate expectedAlpha = new GaussianEstimate(alpha * (1d + biasAlpha), varAlpha);
+		GaussianEstimate expectedBeta = new GaussianEstimate(beta * (1d + biasBeta), varBeta);
+		GaussianEstimate expectedGamma = new GaussianEstimate(gamma * (1d + biasGamma), varGamma);
 		
 		MonteCarloEstimate muGoodman = new MonteCarloEstimate();		
 		MonteCarloEstimate varGoodman = new MonteCarloEstimate();		
@@ -125,9 +125,9 @@ public class ProductOfEstimates {
 				System.out.println("Realization " + real);
 			}
 			List<Estimate> estimates = new ArrayList<Estimate>();
-			estimates.add(getEstimate(trueAlphaMean, trueVarAlpha)); 
-			estimates.add(getEstimate(trueBetaMean, trueVarBeta)); 
-			estimates.add(getEstimate(trueGammaMean, trueVarGamma)); 
+			estimates.add(getEstimate(expectedAlpha, trueVarAlpha)); 
+			estimates.add(getEstimate(expectedBeta, trueVarBeta)); 
+			estimates.add(getEstimate(expectedGamma, trueVarGamma)); 
 
 			SimpleEstimate productGoodman = Estimate.getProductOfManyEstimates(estimates);
 			muGoodman.addRealization(productGoodman.getMean());
@@ -225,14 +225,24 @@ public class ProductOfEstimates {
 	
 	public static void main(String[] args) throws Exception {
 		int nbRealizations = 100000;
-		runSimulation(nbRealizations, true, true, true, "LLL");
-		runSimulation(nbRealizations, false, true, true, "HLL");
-		runSimulation(nbRealizations, true, false, true, "LHL");
-		runSimulation(nbRealizations, true, true, false, "LLH");
-		runSimulation(nbRealizations, false, false, true, "HHL");
-		runSimulation(nbRealizations, false, true, false, "HLH");
-		runSimulation(nbRealizations, true, false, false, "LHH");
-		runSimulation(nbRealizations, false, false, false, "HHH");
+//		runSimulation(nbRealizations, true, true, true, "LLL");
+//		runSimulation(nbRealizations, false, true, true, "HLL");
+//		runSimulation(nbRealizations, true, false, true, "LHL");
+//		runSimulation(nbRealizations, true, true, false, "LLH");
+//		runSimulation(nbRealizations, false, false, true, "HHL");
+//		runSimulation(nbRealizations, false, true, false, "HLH");
+//		runSimulation(nbRealizations, true, false, false, "LHH");
+//		runSimulation(nbRealizations, false, false, false, "HHH");
+		
+		
+		runSimulation(nbRealizations, true, true, true, "LLL_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, false, true, true, "HLL_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, true, false, true, "LHL_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, true, true, false, "LLH_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, false, false, true, "HHL_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, false, true, false, "HLH_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, true, false, false, "LHH_b", 0.05, 0.01, -0.02);
+		runSimulation(nbRealizations, false, false, false, "HHH_b", 0.05, 0.01, -0.02);
 	}
 	
 }
