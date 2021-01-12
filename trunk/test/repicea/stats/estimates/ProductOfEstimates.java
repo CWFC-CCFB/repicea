@@ -95,9 +95,13 @@ public class ProductOfEstimates {
 		double varBeta = trueVarBeta.getMean().m_afData[0][0];
 		double varGamma = trueVarGamma.getMean().m_afData[0][0];
 
-		GaussianEstimate expectedAlpha = new GaussianEstimate(alpha * (1d + biasAlpha), varAlpha);
-		GaussianEstimate expectedBeta = new GaussianEstimate(beta * (1d + biasBeta), varBeta);
-		GaussianEstimate expectedGamma = new GaussianEstimate(gamma * (1d + biasGamma), varGamma);
+		double biasedAlpha = alpha * (1d + biasAlpha);
+		double biasedBeta = beta * (1d + biasBeta);
+		double biasedGamma = gamma * (1d + biasGamma);
+		
+		GaussianEstimate expectedAlpha = new GaussianEstimate(biasedAlpha, varAlpha);
+		GaussianEstimate expectedBeta = new GaussianEstimate(biasedBeta, varBeta);
+		GaussianEstimate expectedGamma = new GaussianEstimate(biasedGamma, varGamma);
 
 		MonteCarloEstimate muGoodman = new MonteCarloEstimate();		
 		MonteCarloEstimate varGoodman = new MonteCarloEstimate();		
@@ -139,9 +143,9 @@ public class ProductOfEstimates {
 		record[0] = simulationName;
 		record[1] = trueMean;
 		record[2] = muGoodman.getMean().m_afData[0][0];
-		double trueMeanAB = alpha * beta;
-		double trueVarianceAB = alpha * alpha * varBeta + varAlpha * beta * beta + varAlpha * varBeta; 
-		double trueVariance = trueMeanAB * trueMeanAB * varGamma + trueVarianceAB * gamma * gamma + trueVarianceAB * varGamma; 
+		double expMeanAB = biasedAlpha * biasedBeta;
+		double trueVarianceAB = biasedAlpha * biasedAlpha * varBeta + varAlpha * biasedBeta * biasedBeta + varAlpha * varBeta; 
+		double trueVariance = expMeanAB * expMeanAB * varGamma + trueVarianceAB * biasedGamma * biasedGamma + trueVarianceAB * varGamma; 
 		record[3] = trueVariance;
 		record[4] = muGoodman.getVariance().m_afData[0][0];
 		record[5] = varGoodman.getMean().m_afData[0][0];
