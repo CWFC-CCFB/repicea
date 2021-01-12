@@ -15,15 +15,15 @@ public class ProductOfEstimates {
 	private static double LowFactor = 0.05;
 	private static double HighFactor = 0.20;
 	private static enum Method {Naive, Propagation}
-	
-	
+
+
 	private static SimpleEstimate getEstimate(List<Estimate> estimates, Method method) {
 		Estimate currentEstimate = null;
 		for (int i = 1; i < estimates.size(); i++) {
 			if (i == 1) {
 				currentEstimate = estimates.get(i - 1);
 			}
-			
+
 			Matrix alphaMean = currentEstimate.getMean();
 			Matrix betaMean = estimates.get(i).getMean();
 			Matrix alphaVariance = currentEstimate.getVariance();
@@ -50,7 +50,7 @@ public class ProductOfEstimates {
 				if (i == 1) {
 					currentProduct = estimates.get(i - 1).getRandomDeviate().m_afData[0][0];
 				}
-				
+
 				currentProduct *= estimates.get(i).getRandomDeviate().m_afData[0][0];
 			}
 			Matrix obs = new Matrix(1,1);
@@ -71,15 +71,7 @@ public class ProductOfEstimates {
 			return new VarianceEstimate(df, HighFactor * HighFactor * mean * mean);
 		}
 	}
-	
-	
-	private static void runSimulation(int nbMaxRealization, 
-			boolean lowAlpha, 
-			boolean lowBeta, 
-			boolean lowGamma, 
-			String simulationName) throws Exception {
-		runSimulation(nbMaxRealization, lowAlpha, lowBeta, lowGamma, simulationName, 0d, 0d, 0d);
-	}
+
 
 	private static void runSimulation(int nbMaxRealization, 
 			boolean lowAlpha, 
@@ -102,11 +94,86 @@ public class ProductOfEstimates {
 		double varAlpha = trueVarAlpha.getMean().m_afData[0][0];
 		double varBeta = trueVarBeta.getMean().m_afData[0][0];
 		double varGamma = trueVarGamma.getMean().m_afData[0][0];
-		
+
 		GaussianEstimate expectedAlpha = new GaussianEstimate(alpha * (1d + biasAlpha), varAlpha);
 		GaussianEstimate expectedBeta = new GaussianEstimate(beta * (1d + biasBeta), varBeta);
 		GaussianEstimate expectedGamma = new GaussianEstimate(gamma * (1d + biasGamma), varGamma);
-		
+
+		MonteCarloEstimate muGoodman = new MonteCarloEstimate();		
+		MonteCarloEstimate varGoodman = new MonteCarloEstimate();		
+		MonteCarloEstimate mse = new MonteCarloEstimate();
+
+		List<Estimate> estimates = new ArrayList<Estimate>();
+		for (int real = 0; real < nbMaxRealization; real++) {
+			if (real%1000 == 0) {
+				System.out.println("Realization " + real);
+			}
+			estimates.clear();
+			estimates.add(getEstimate(expectedAlpha, trueVarAlpha)); 
+			estimates.add(getEstimate(expectedBeta, trueVarBeta)); 
+			estimates.add(getEstimate(expectedGamma, trueVarGamma)); 
+
+			SimpleEstimate productGoodman = Estimate.getProductOfManyEstimates(estimates);
+			muGoodman.addRealization(productGoodman.getMean());
+			varGoodman.addRealization(productGoodman.getVariance());
+			Matrix error = productGoodman.getMean().scalarAdd(- trueMean);
+			Matrix se = error.transpose().multiply(error);
+			mse.addRealization(se);
+		}
+
+		String filename = ObjectUtility.getPackagePath(ProductOfEstimates.class).replace("bin", "test").concat("simulation" + simulationName + ".csv");
+		CSVWriter writer = new CSVWriter(new File(filename), false, ","); // splitter is now "," and not ";"
+		List<FormatField> formatFields = new ArrayList<FormatField>();
+		formatFields.add(new CSVField("sampleSize"));
+		formatFields.add(new CSVField("trueMean"));
+		formatFields.add(new CSVField("empMean"));
+		formatFields.add(new CSVField("trueVariance"));
+		formatFields.add(new CSVField("empVariance"));
+		formatFields.add(new CSVField("goodmanVariance"));
+		formatFields.add(new CSVField("mse"));
+
+		writer.setFields(formatFields);
+
+
+		Object[] record = new Object[7];
+		record[0] = simulationName;
+		record[1] = trueMean;
+		record[2] = muGoodman.getMean().m_afData[0][0];
+		double trueMeanAB = alpha * beta;
+		double trueVarianceAB = alpha * alpha * varBeta + varAlpha * beta * beta + varAlpha * varBeta; 
+		double trueVariance = trueMeanAB * trueMeanAB * varGamma + trueVarianceAB * gamma * gamma + trueVarianceAB * varGamma; 
+		record[3] = trueVariance;
+		record[4] = muGoodman.getVariance().m_afData[0][0];
+		record[5] = varGoodman.getMean().m_afData[0][0];
+		record[6] = mse.getMean().m_afData[0][0];
+
+		writer.addRecord(record);
+		writer.close();
+	}
+
+	private static void runSimulation(int nbMaxRealization, 
+			boolean lowAlpha, 
+			boolean lowBeta, 
+			boolean lowGamma, 
+			String simulationName) throws Exception {
+		System.out.println("Running simulation with lowAlpha = " + ((Boolean) lowAlpha).toString() + " lowBeta = " + ((Boolean) lowBeta).toString() + " lowGamma = " + ((Boolean) lowGamma).toString() + " ...");
+		int df = 300;
+		double alpha = 20d;
+		double beta = 10d;
+		double gamma = 2d;
+		double trueMean = alpha * beta * gamma;
+
+		VarianceEstimate trueVarAlpha = ProductOfEstimates.getTrueVariance(df, alpha, lowAlpha);
+		VarianceEstimate trueVarBeta = ProductOfEstimates.getTrueVariance(df, beta, lowBeta);
+		VarianceEstimate trueVarGamma = ProductOfEstimates.getTrueVariance(df, gamma, lowGamma);
+		double varAlpha = trueVarAlpha.getMean().m_afData[0][0];
+		double varBeta = trueVarBeta.getMean().m_afData[0][0];
+		double varGamma = trueVarGamma.getMean().m_afData[0][0];
+
+		GaussianEstimate expectedAlpha = new GaussianEstimate(alpha, varAlpha);
+		GaussianEstimate expectedBeta = new GaussianEstimate(beta, varBeta);
+		GaussianEstimate expectedGamma = new GaussianEstimate(gamma, varGamma);
+
 		MonteCarloEstimate muGoodman = new MonteCarloEstimate();		
 		MonteCarloEstimate varGoodman = new MonteCarloEstimate();		
 		MonteCarloEstimate muNaive = new MonteCarloEstimate();		
@@ -119,7 +186,7 @@ public class ProductOfEstimates {
 		MonteCarloEstimate muRescaledMonteCarlo = new MonteCarloEstimate();		
 		MonteCarloEstimate varRescaledMonteCarlo = new MonteCarloEstimate();		
 		MonteCarloEstimate rescaledCoverage = new MonteCarloEstimate();
-		
+
 		for (int real = 0; real < nbMaxRealization; real++) {
 			if (real%1000 == 0) {
 				System.out.println("Realization " + real);
@@ -140,7 +207,7 @@ public class ProductOfEstimates {
 			SimpleEstimate productPropagation = getEstimate(estimates, Method.Propagation);
 			muPropagation.addRealization(productPropagation.getMean());
 			varPropagation.addRealization(productPropagation.getVariance());
-			
+
 			MonteCarloEstimate productMC = getMonteCarloEstimate(estimates, 5000);
 			muMonteCarlo.addRealization(productMC.getMean());
 			varMonteCarlo.addRealization(productMC.getVariance());
@@ -151,7 +218,7 @@ public class ProductOfEstimates {
 			}
 			coverage.addRealization(in);
 
-			
+
 			MonteCarloEstimate scaledProductMC = new MonteCarloEstimate();
 			double scalingFactor = Math.sqrt(productGoodman.getVariance().m_afData[0][0] / productNaive.getVariance().m_afData[0][0]);
 			if (Double.isNaN(scalingFactor)) {
@@ -167,15 +234,15 @@ public class ProductOfEstimates {
 			}
 			muRescaledMonteCarlo.addRealization(scaledProductMC.getMean());
 			varRescaledMonteCarlo.addRealization(scaledProductMC.getVariance());
-			
-			
+
+
 			ci = scaledProductMC.getConfidenceIntervalBounds(.95);
 			in = new Matrix(1,1);
 			if (ci.getLowerLimit().m_afData[0][0] <= trueMean && trueMean <= ci.getUpperLimit().m_afData[0][0]) {
 				in.m_afData[0][0] = 1d;
 			}
 			rescaledCoverage.addRealization(in);
-			
+
 		}
 
 		String filename = ObjectUtility.getPackagePath(ProductOfEstimates.class).replace("bin", "test").concat("simulation" + simulationName + ".csv");
@@ -195,10 +262,10 @@ public class ProductOfEstimates {
 		formatFields.add(new CSVField("MeanRescaledMC"));
 		formatFields.add(new CSVField("VarRescaledMC"));
 		formatFields.add(new CSVField("rescaledCoverage"));
-		
+
 		writer.setFields(formatFields);
-		
-		
+
+
 		Object[] record = new Object[14];
 		record[0] = simulationName;
 		record[1] = trueMean;
@@ -217,24 +284,24 @@ public class ProductOfEstimates {
 		record[11] = muRescaledMonteCarlo.getMean().m_afData[0][0];
 		record[12] = varRescaledMonteCarlo.getMean().m_afData[0][0];
 		record[13] = rescaledCoverage.getMean().m_afData[0][0];
-		
+
 		writer.addRecord(record);
 		writer.close();
 
 	}
-	
+
 	public static void main(String[] args) throws Exception {
 		int nbRealizations = 100000;
-//		runSimulation(nbRealizations, true, true, true, "LLL");
-//		runSimulation(nbRealizations, false, true, true, "HLL");
-//		runSimulation(nbRealizations, true, false, true, "LHL");
-//		runSimulation(nbRealizations, true, true, false, "LLH");
-//		runSimulation(nbRealizations, false, false, true, "HHL");
-//		runSimulation(nbRealizations, false, true, false, "HLH");
-//		runSimulation(nbRealizations, true, false, false, "LHH");
-//		runSimulation(nbRealizations, false, false, false, "HHH");
-		
-		
+		//		runSimulation(nbRealizations, true, true, true, "LLL");
+		//		runSimulation(nbRealizations, false, true, true, "HLL");
+		//		runSimulation(nbRealizations, true, false, true, "LHL");
+		//		runSimulation(nbRealizations, true, true, false, "LLH");
+		//		runSimulation(nbRealizations, false, false, true, "HHL");
+		//		runSimulation(nbRealizations, false, true, false, "HLH");
+		//		runSimulation(nbRealizations, true, false, false, "LHH");
+		//		runSimulation(nbRealizations, false, false, false, "HHH");
+
+
 		runSimulation(nbRealizations, true, true, true, "LLL_b", 0.05, 0.01, -0.02);
 		runSimulation(nbRealizations, false, true, true, "HLL_b", 0.05, 0.01, -0.02);
 		runSimulation(nbRealizations, true, false, true, "LHL_b", 0.05, 0.01, -0.02);
@@ -244,5 +311,5 @@ public class ProductOfEstimates {
 		runSimulation(nbRealizations, true, false, false, "LHH_b", 0.05, 0.01, -0.02);
 		runSimulation(nbRealizations, false, false, false, "HHH_b", 0.05, 0.01, -0.02);
 	}
-	
+
 }
