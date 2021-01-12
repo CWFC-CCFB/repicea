@@ -306,14 +306,14 @@ public class ProductOfEstimates {
 		//		runSimulation(nbRealizations, false, false, false, "HHH");
 
 
-		runSimulation(nbRealizations, true, true, true, "LLL_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, false, true, true, "HLL_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, true, false, true, "LHL_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, true, true, false, "LLH_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, false, false, true, "HHL_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, false, true, false, "HLH_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, true, false, false, "LHH_b", 0.05, 0.05, 0.05);
-		runSimulation(nbRealizations, false, false, false, "HHH_b", 0.05, 0.05, 0.05);
+		runSimulation(nbRealizations, true, true, true, "LLL_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, false, true, true, "HLL_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, true, false, true, "LHL_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, true, true, false, "LLH_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, false, false, true, "HHL_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, false, true, false, "HLH_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, true, false, false, "LHH_b", 0.02, 0.02, 0.02);
+		runSimulation(nbRealizations, false, false, false, "HHH_b", 0.02, 0.02, 0.02);
 	}
 
 }
