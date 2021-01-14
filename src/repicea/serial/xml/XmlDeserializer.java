@@ -107,9 +107,12 @@ public class XmlDeserializer {
 				unmarshalledObj = ((FakeList) unmarshalledObj).get(0);
 			}
 	 		return unmarshalledObj;
-		} catch (Exception e) {
-			e.printStackTrace();
-			throw new XmlMarshallException(e);
+		} catch (XmlMarshallException e1) {
+			e1.printStackTrace();
+			throw e1;
+		} catch (Exception e2) {
+			e2.printStackTrace();
+			throw new XmlMarshallException(e2);
 		}
 	}
 

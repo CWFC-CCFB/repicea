@@ -21,6 +21,7 @@ package repicea.serial.xml;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,6 +37,8 @@ import sun.reflect.ReflectionFactory;
  */
 public final class XmlUnmarshaller {
 
+	private Map<String, List<Class>> warnings = new HashMap<String, List<Class>>();
+	
 	private Map<Class<?>, Map<Integer, Object>> registeredObjects;
 	
 	public XmlUnmarshaller() {
@@ -141,9 +144,10 @@ public final class XmlUnmarshaller {
 				if (mapEntries != null) {
 					if (Map.class.isAssignableFrom(clazz)) {
 						((Map) newInstance).clear();
-						for (Object mapEntry : mapEntries) {
-							((Map) newInstance).put(((Entry) mapEntry).getKey(), ((Entry) mapEntry).getValue());
-						}
+						putEntriesIntoMap(clazz, newInstance, mapEntries);
+//						for (Object mapEntry : mapEntries) {
+//							((Map) newInstance).put(((Entry) mapEntry).getKey(), ((Entry) mapEntry).getValue()); // FIXME this does not work if the put method has been overriden
+//						}
 					} else if (Collection.class.isAssignableFrom(clazz)) {
 						try {
 							Field sizeField = findSizeField(clazz);
@@ -152,9 +156,10 @@ public final class XmlUnmarshaller {
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
-						for (Object listEntry : mapEntries) {
-							((Collection) newInstance).add(listEntry);
-						}
+						addEntriesToCollection(clazz, newInstance, mapEntries);
+//						for (Object listEntry : mapEntries) {
+//							((Collection) newInstance).add(listEntry);  // FIXME this does not work if the add method has been overriden
+//						}
 					}
 				}
 				if (newInstance instanceof PostXmlUnmarshalling) {
@@ -165,6 +170,52 @@ public final class XmlUnmarshaller {
 		}
 	}
 	
+	private void putEntriesIntoMap(Class clazz, Object newInstance, Object[] entries) throws XmlMarshallException {
+		if (entries != null && entries.length > 0) {
+			try {
+				Method putMethod = clazz.getMethod("put", Object.class, Object.class);
+				Class declaringClass = putMethod.getDeclaringClass();
+				if (declaringClass.getClassLoader() != null) {
+					issueWarning(clazz, "put");
+				};
+				for (Object mapEntry : entries) {
+					((Map) newInstance).put(((Entry) mapEntry).getKey(), ((Entry) mapEntry).getValue()); 
+				}
+			} catch (Exception e) {
+				throw new XmlMarshallException(e);
+			}
+		}
+	}
+
+	private void addEntriesToCollection(Class clazz, Object newInstance, Object[] entries) throws XmlMarshallException {
+		if (entries != null && entries.length > 0) {
+			try {
+				Method addMethod = clazz.getMethod("add", Object.class);
+				Class declaringClass = addMethod.getDeclaringClass();
+				if (declaringClass.getClassLoader() != null) {
+					issueWarning(clazz, "add");
+				};
+				for (Object listEntry : entries) {
+					((Collection) newInstance).add(listEntry);  // FIXME this does not work if the add method has been overriden
+				}
+			} catch (Exception e) {
+				throw new XmlMarshallException(e);
+			}
+		}
+	}
+	
+	private void issueWarning(Class clazz, String methodName) {
+		if (!warnings.containsKey(methodName)) {
+			warnings.put(methodName, new ArrayList<Class>());
+		}
+		List<Class> classes = warnings.get(methodName);
+		if (!classes.contains(clazz)) {
+			System.out.println("WARNING: The original " + methodName + " method has been overriden in " + clazz + ".");
+			System.out.println("This may lead to an unpredictable behaviour when deserializing.");
+			classes.add(clazz);
+		}
+	}
+
 	private boolean isExceptionField(Object newInstance, Field field) {
 		if (Map.class.isAssignableFrom(newInstance.getClass())) {
 			if (field.getName().equals("loadFactor")) {
@@ -196,4 +247,8 @@ public final class XmlUnmarshaller {
 		return sizeField;
 	}
 
+	private static class MyHashMapCall extends HashMap {
+		
+	}
+	
 }
