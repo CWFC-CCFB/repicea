@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -153,6 +154,67 @@ public class XmlSerializationTest {
 		
 	}
 	
+	private static class FakeClassDerivingFromMapAndOverringPut extends HashMap<String, Double> {
+		private double fakeField;
+		
+		public FakeClassDerivingFromMapAndOverringPut() {
+			super();
+			innerPut("Test1", 1d);
+			innerPut("Test2", 2d);
+		}
+		
+		private void innerPut(String key, Double value) {
+			super.put(key, value);
+		}
+		
+		@Override
+		public Double put(String key, Double value) {
+			return super.put(key, value);
+		}
+		
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof FakeClassDerivingFromMap) {
+				FakeClassDerivingFromMap map = (FakeClassDerivingFromMap) obj;
+				if (size() == map.size()) {
+					for (String key : keySet()) {
+						double thisDouble = get(key);
+						double thatDouble = map.get(key);
+						if (thisDouble != thatDouble) {
+							return false;
+						}
+					}
+					if (fakeField != map.fakeField) {
+						return false;
+					}
+					return true;
+				}
+			}
+			return false;
+		}
+		
+		
+	}
+
+	static class FakeClassDerivingFromListAndOverringAdd extends ArrayList<String> {
+		private double fakeField;
+		
+		public FakeClassDerivingFromListAndOverringAdd() {
+			super();
+			innerAdd("Test1");
+			innerAdd("Test2");
+		}
+		
+		private void innerAdd(String key) {
+			super.add(key);
+		}
+		
+		@Override
+		public boolean add(String key) {
+			return super.add(key);
+		}
+	}
+
 	private static class FakeClassWithEmptyList {
 		private List<String> list;
 		
@@ -642,7 +704,35 @@ public class XmlSerializationTest {
 	}
 	
 	
+	@Test
+	public void deserializationOfDerivedHashMapClassWithOverridenPutMethod() throws FileNotFoundException, XmlMarshallException {
+		
+		Map<String, Double> originalHashMap = new FakeClassDerivingFromMapAndOverringPut();
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serializedDerivedHashMapWithOverridenPutMethod.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(originalHashMap);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		FakeClassDerivingFromMapAndOverringPut deserializedMap = (FakeClassDerivingFromMapAndOverringPut) deserializer.readObject();
 
-	
+		Assert.assertEquals("Testing deserialized hash map size", 2, deserializedMap.size());
+	}
+
+	@Test
+	public void deserializationOfDerivedArrayListClassWithOverridenAddMethod() throws FileNotFoundException, XmlMarshallException {
+		
+		List<String> originalList = new FakeClassDerivingFromListAndOverringAdd();
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serializedDerivedArrayListWithOverridenAddMethod.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(originalList);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		List<String> deserializedList = (FakeClassDerivingFromListAndOverringAdd) deserializer.readObject();
+
+		Assert.assertEquals("Testing deserialized array list size", 2, deserializedList.size());
+	}
+
 	
 }
