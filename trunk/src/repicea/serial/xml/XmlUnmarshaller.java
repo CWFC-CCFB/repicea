@@ -240,9 +240,5 @@ public final class XmlUnmarshaller {
 		}
 		return sizeField;
 	}
-
-	private static class MyHashMapCall extends HashMap {
-		
-	}
 	
 }
