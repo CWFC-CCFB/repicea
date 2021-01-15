@@ -37,7 +37,7 @@ import sun.reflect.ReflectionFactory;
  */
 public final class XmlUnmarshaller {
 
-	private Map<String, List<Class>> warnings = new HashMap<String, List<Class>>();
+	private static Map<String, List<Class>> Warnings = new HashMap<String, List<Class>>();
 	
 	private Map<Class<?>, Map<Integer, Object>> registeredObjects;
 	
@@ -145,21 +145,15 @@ public final class XmlUnmarshaller {
 					if (Map.class.isAssignableFrom(clazz)) {
 						((Map) newInstance).clear();
 						putEntriesIntoMap(clazz, newInstance, mapEntries);
-//						for (Object mapEntry : mapEntries) {
-//							((Map) newInstance).put(((Entry) mapEntry).getKey(), ((Entry) mapEntry).getValue()); // FIXME this does not work if the put method has been overriden
-//						}
 					} else if (Collection.class.isAssignableFrom(clazz)) {
 						try {
 							Field sizeField = findSizeField(clazz);
 							sizeField.setAccessible(true);
 							sizeField.set(newInstance, (Integer) 0);	// force the size to be 0 otherwise the clear method may exceed the array length
 						} catch (Exception e) {
-							e.printStackTrace();
+							throw new XmlMarshallException("The XmlDeserializer did not manage to set the size in the Collection-derived " + clazz);
 						}
 						addEntriesToCollection(clazz, newInstance, mapEntries);
-//						for (Object listEntry : mapEntries) {
-//							((Collection) newInstance).add(listEntry);  // FIXME this does not work if the add method has been overriden
-//						}
 					}
 				}
 				if (newInstance instanceof PostXmlUnmarshalling) {
@@ -205,13 +199,13 @@ public final class XmlUnmarshaller {
 	}
 	
 	private void issueWarning(Class clazz, String methodName) {
-		if (!warnings.containsKey(methodName)) {
-			warnings.put(methodName, new ArrayList<Class>());
+		if (!Warnings.containsKey(methodName)) {
+			Warnings.put(methodName, new ArrayList<Class>());
 		}
-		List<Class> classes = warnings.get(methodName);
+		List<Class> classes = Warnings.get(methodName);
 		if (!classes.contains(clazz)) {
-			System.out.println("WARNING: The original " + methodName + " method has been overriden in " + clazz + ".");
-			System.out.println("This may lead to an unpredictable behaviour when deserializing.");
+			System.err.println("WARNING: The original " + methodName + " method has been overriden in " + clazz + ".");
+			System.err.println("This may lead to an unpredictable behaviour when deserializing.");
 			classes.add(clazz);
 		}
 	}
