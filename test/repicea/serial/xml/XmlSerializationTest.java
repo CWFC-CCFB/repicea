@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
-import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -197,6 +196,7 @@ public class XmlSerializationTest {
 	}
 
 	static class FakeClassDerivingFromListAndOverringAdd extends ArrayList<String> {
+		@SuppressWarnings("unused")
 		private double fakeField;
 		
 		public FakeClassDerivingFromListAndOverringAdd() {
@@ -734,5 +734,22 @@ public class XmlSerializationTest {
 		Assert.assertEquals("Testing deserialized array list size", 2, deserializedList.size());
 	}
 
+	/*
+	 * Just to make sure the error message is displayed only once.
+	 */
+	@Test
+	public void deserializationOfDerivedArrayListClassWithOverridenAddMethod2() throws FileNotFoundException, XmlMarshallException {
+		
+		List<String> originalList = new FakeClassDerivingFromListAndOverringAdd();
+		
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serializedDerivedArrayListWithOverridenAddMethod.xml";
+		XmlSerializer serializer = new XmlSerializer(pathname);
+		serializer.writeObject(originalList);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		List<String> deserializedList = (FakeClassDerivingFromListAndOverringAdd) deserializer.readObject();
+
+		Assert.assertEquals("Testing deserialized array list size", 2, deserializedList.size());
+	}
 	
 }
