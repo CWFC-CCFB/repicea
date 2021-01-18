@@ -14,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.math.Matrix;
 import repicea.util.ObjectUtility;
 
 public class XmlSerializationTest {
@@ -750,6 +751,20 @@ public class XmlSerializationTest {
 		List<String> deserializedList = (FakeClassDerivingFromListAndOverringAdd) deserializer.readObject();
 
 		Assert.assertEquals("Testing deserialized array list size", 2, deserializedList.size());
+	}
+	
+	@Test
+	public void deserializationOfAMatrix() throws FileNotFoundException, XmlMarshallException {
+		String pathname = ObjectUtility.getPackagePath(getClass()).replace("bin", "test") + "serializedMatrix.xml";
+//		Matrix myMatrix = new Matrix(2,4);
+//		XmlSerializer serializer = new XmlSerializer(pathname);
+//		serializer.writeObject(myMatrix);
+		
+		XmlDeserializer deserializer = new XmlDeserializer(pathname);
+		Matrix myDeserializedMatrix = (Matrix) deserializer.readObject();
+
+		Assert.assertEquals("Testing deserialized matrix nb rows", 2, myDeserializedMatrix.m_iRows);
+		Assert.assertEquals("Testing deserialized matrix nb cols", 4, myDeserializedMatrix.m_iCols);
 	}
 	
 }
