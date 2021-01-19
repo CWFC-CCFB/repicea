@@ -18,11 +18,16 @@
  */
 package repicea.serial.xml;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
+import java.security.InvalidParameterException;
+import java.util.zip.InflaterInputStream;
 
 import javax.xml.bind.JAXBContext;
+import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 
 import repicea.lang.REpiceaSystem;
@@ -49,21 +54,19 @@ public class XmlDeserializer {
 	private final ReadMode readMode;
 	
 	
-	
-	
 	/**
 	 * Constructor.
 	 * @param filename the file from which the object is deserialized
-	 * @throws FileNotFoundException
 	 */
-	public XmlDeserializer(String filename) throws FileNotFoundException {
+	public XmlDeserializer(String filename) {
 		file = new File(filename);
 		if (!file.isFile()) {
-			throw new FileNotFoundException("The file is either a directory or does not exist!");
+			throw new InvalidParameterException("The file is either a directory or does not exist!");
 		}
 		readMode = ReadMode.File;
 	}
 
+	
 	/**
 	 * Constructor.
 	 * @param is an InputStream instance from which the object is deserialized
@@ -73,8 +76,6 @@ public class XmlDeserializer {
 		this.is = is;
 		readMode = ReadMode.InputStream;
 	}
-
-	
 	
 	
 	/**
@@ -87,19 +88,33 @@ public class XmlDeserializer {
 		try {
 			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
 	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-	 		Object obj;
+	 		Object obj = null;
+	 		InflaterInputStream iis = null;
 	 		if (readMode == ReadMode.File) {
-	 			obj = jaxbUnmarshaller.unmarshal(file);
+	 			try {	// we first assume that the file is compressed
+	 				FileInputStream fis = new FileInputStream(file);
+	 				iis = new InflaterInputStream(fis);
+//		 			obj = jaxbUnmarshaller.unmarshal(file);
+		 			obj = jaxbUnmarshaller.unmarshal(iis);
+	 			} catch (UnmarshalException e) {
+	 				if (iis != null) { // we try to close the inflater and we move on to an uncompressed file
+	 					try {
+	 						iis.close();
+	 					} catch (Exception e2) {}
+	 				}
+		 			obj = jaxbUnmarshaller.unmarshal(file);
+	 			}
 	 		} else {
-	 			obj = jaxbUnmarshaller.unmarshal(is);
+	 			BufferedInputStream bis = new BufferedInputStream(is);
+	 			bis.mark(10000);	// we mark the buffered input stream for eventual reset in the case the file is not compress
+	 			iis = new InflaterInputStream(bis); 
+	 			try { // we first assume the stream comes from a compressed file
+		 			obj = jaxbUnmarshaller.unmarshal(iis);
+	 			} catch (Exception e) {
+	 				bis.reset();	// we reset the stream to beginning
+		 			obj = jaxbUnmarshaller.unmarshal(bis); // we now assume the stream comes from an uncompressed file
+	 			}
 	 		}
-//			XmlProcessor um;
-//			if (readMode == ReadMode.File) {
-//				um = new XmlProcessor(file);
-//			} else {
-//				um = new XmlProcessor(is);
-//			}
-//			XmlList obj = um.unmarshall();
 	 		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();
 	 		Object unmarshalledObj = null;
 			unmarshalledObj = unmarshaller.unmarshall((XmlList) obj);

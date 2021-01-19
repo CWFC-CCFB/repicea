@@ -19,7 +19,9 @@
 package repicea.serial.xml;
 
 import java.io.File;
-import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.security.InvalidParameterException;
+import java.util.zip.DeflaterOutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
@@ -34,19 +36,31 @@ import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
 public class XmlSerializer { 
 
 	private File file;
+	private final boolean enableCompression;
+	
 	
 	/**
 	 * Constructor.
 	 * @param filename the xml file that serves as output
-	 * @throws FileNotFoundException if something goes wrong with the file
+	 * @param enableCompression true to use compression or false otherwise
 	 */
-	public XmlSerializer(String filename) throws FileNotFoundException {
+	public XmlSerializer(String filename, boolean enableCompression) {
+		this.enableCompression = enableCompression;
 		file = new File(filename);
 		if (file.isDirectory()) {
-			throw new FileNotFoundException("The filename parameter denotes a directory!");
-			
+			throw new InvalidParameterException("The filename parameter denotes a directory!");
 		}
 	}
+
+	
+	/**
+	 * Constructor with compression.
+	 * @param filename the xml file that serves as output
+	 */
+	public XmlSerializer(String filename)  {
+		this(filename, true);
+	}
+	
 	
 	/**
 	 * This method writes an object to the xml file.
@@ -55,6 +69,7 @@ public class XmlSerializer {
 	 */
 	@SuppressWarnings("unchecked")
 	public void writeObject(Object obj) throws XmlMarshallException {
+		DeflaterOutputStream dos = null;
 		try {
 			XmlMarshaller marshaller = new XmlMarshaller();
 			if (XmlMarshallingUtilities.isStringOrPrimitive(obj)) { // then we embed the object into a wrapper
@@ -65,10 +80,24 @@ public class XmlSerializer {
 			Object xmlObject = marshaller.marshall(obj);
 			JAXBContext jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
 			Marshaller jabxMarshaller = jaxbContext.createMarshaller();
-			jabxMarshaller.marshal(xmlObject, file);
+			if (enableCompression) {
+				FileOutputStream fos = new FileOutputStream(file);
+				dos = new DeflaterOutputStream(fos);
+				jabxMarshaller.marshal(xmlObject, dos);
+			} else {
+				jabxMarshaller.marshal(xmlObject, file);
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new XmlMarshallException(e);
+		} finally {
+			if (dos != null) {
+				try {
+					dos.close();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 	}
@@ -77,5 +106,7 @@ public class XmlSerializer {
 //	public void close() {
 //		e.close();
 //	}
+
+	
 	
 }
