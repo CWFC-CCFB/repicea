@@ -767,4 +767,21 @@ public class XmlSerializationTest {
 		Assert.assertEquals("Testing deserialized matrix nb cols", 4, myDeserializedMatrix.m_iCols);
 	}
 	
+	@Test
+	public void serializationWithAndWithoutCompression() throws XmlMarshallException {
+		Matrix mat = new Matrix(100,100);
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedWithCompression.xml";
+		XmlSerializer ser1 = new XmlSerializer(filename1);
+		ser1.writeObject(mat);
+		File file1 = new File(filename1);
+		long file1size = file1.length();
+		String filename2 = ObjectUtility.getPackagePath(getClass()) + "serializedWithoutCompression.xml";
+		XmlSerializer ser2 = new XmlSerializer(filename2, false);
+		ser2.writeObject(mat);
+		File file2 = new File(filename2);
+		long file2size = file2.length();
+		double ratio = (double) file2size / file1size; 
+		Assert.assertTrue("Testing compression ratio", ratio > 75);
+	}
+	
 }
