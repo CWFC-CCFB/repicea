@@ -123,5 +123,12 @@ public class LogNormalEstimate extends Estimate<GaussianDistribution> implements
 		Matrix variance = getDistribution().getVariance();
 		return variance.expMatrix().scalarAdd(-1).elementWiseMultiply(getMeanFromDistribution().elementWisePower(2));
 	}
-	
+
+	@Override
+	public Matrix getRandomDeviate() {
+		return super.getRandomDeviate().expMatrix();
+	}
+
+
+
 }
