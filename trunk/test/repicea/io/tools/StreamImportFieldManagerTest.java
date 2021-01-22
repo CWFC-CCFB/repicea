@@ -34,7 +34,7 @@ public class StreamImportFieldManagerTest {
 	@Test
 	public void testingAutomaticHeader() throws Exception {
 		String referenceFilename = ObjectUtility.getPackagePath(getClass()) + "headerTest.xml";
-		REpiceaRecordReader recordReader = new TestRecordReader();
+		REpiceaRecordReader recordReader = new RecordReaderImpl();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		recordReader.initInScriptMode(ifm);
 		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
@@ -55,7 +55,7 @@ public class StreamImportFieldManagerTest {
 	
 	@Test
 	public void testingInputData() throws Exception {
-		TestRecordReader2 recordReader = new TestRecordReader2();
+		RecordReaderImpl2 recordReader = new RecordReaderImpl2();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		recordReader.initInScriptMode(ifm);
 		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
@@ -76,7 +76,7 @@ public class StreamImportFieldManagerTest {
 
 	@Test
 	public void testingInverseOrderInputData() throws Exception {
-		TestRecordReader2 recordReader = new TestRecordReader2();
+		RecordReaderImpl2 recordReader = new RecordReaderImpl2();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		ifm.setFieldMatches(new int[] {1,0});
 		recordReader.initInScriptMode(ifm);
@@ -98,7 +98,7 @@ public class StreamImportFieldManagerTest {
 
 	@Test
 	public void testingLargerThanNeededInputData() throws Exception {
-		TestRecordReader2 recordReader = new TestRecordReader2();
+		RecordReaderImpl2 recordReader = new RecordReaderImpl2();
 		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
 		ifm.setFieldMatches(new int[] {2,0});
 		recordReader.initInScriptMode(ifm);

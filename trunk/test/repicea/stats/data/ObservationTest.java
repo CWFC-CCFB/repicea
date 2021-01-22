@@ -3,7 +3,7 @@ package repicea.stats.data;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ObservationTests {
+public class ObservationTest {
 
 	
 	@Test

@@ -12,7 +12,7 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.BootstrapHybridPointEstimate.VariancePointEstimate;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
-public class BootstrapHybridPointEstimateTests {
+public class BootstrapHybridPointEstimateTest {
 
 	private static final Random RANDOM = new Random();
 	

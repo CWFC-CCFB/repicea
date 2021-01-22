@@ -13,7 +13,7 @@ import repicea.lang.codetranslator.REnvironment;
 import repicea.net.server.AbstractServer.ServerReply;
 import repicea.net.server.ServerConfiguration.Protocol;
 
-public class ServerTests {
+public class ServerTest {
 
 	@Test
 	public void testDistantTCPServerWithSingleRequest() throws Exception {

@@ -32,7 +32,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @author Mathieu Fortin - November 2012
  */
 @SuppressWarnings("serial")
-public class TestRecordReader3 extends REpiceaRecordReader {
+public class RecordReaderImpl3 extends REpiceaRecordReader {
 
 	private enum Level {
 		stratumLevel,
@@ -228,7 +228,7 @@ public class TestRecordReader3 extends REpiceaRecordReader {
 	
 	@Override
 	protected List<ImportFieldElement> defineFieldsToImport() throws Exception {
-		return TestRecordReader3.defineFields();
+		return RecordReaderImpl3.defineFields();
 	}
 
 	

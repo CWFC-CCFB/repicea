@@ -9,7 +9,7 @@ import org.junit.Test;
 import repicea.math.Matrix;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
-public class HorvitzThompsonTauEstimateTests {
+public class HorvitzThompsonTauEstimateTest {
 
 	@Test
 	public void simpleTotalAndVarianceEstimateTest() {

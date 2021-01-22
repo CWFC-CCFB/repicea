@@ -3,7 +3,7 @@ package repicea.stats;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class StatisticalUtilityTests {
+public class StatisticalUtilityTest {
 
 	@Test
 	public void testSimpleCombinationCounts() {

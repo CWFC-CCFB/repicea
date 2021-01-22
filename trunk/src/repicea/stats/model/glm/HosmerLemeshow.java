@@ -7,7 +7,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 
-public class HosmerLemeshowTest {
+public class HosmerLemeshow {
 
 	@SuppressWarnings("rawtypes")
 	protected class Couplet implements Comparable {
@@ -80,7 +80,7 @@ public class HosmerLemeshowTest {
 	 * @param glm
 	 * @param numberOfGroups
 	 */
-	public HosmerLemeshowTest(GeneralizedLinearModel glm, int numberOfGroups) {
+	public HosmerLemeshow(GeneralizedLinearModel glm, int numberOfGroups) {
 		if (numberOfGroups < 2) {
 			throw new InvalidParameterException("The number of groups must be larger than 2!");
 		}
@@ -116,7 +116,7 @@ public class HosmerLemeshowTest {
 	 * Constructor with number of groups set to 10.
 	 * @param glm a GeneralizedLinearModel instance
 	 */
-	public HosmerLemeshowTest(GeneralizedLinearModel glm) {
+	public HosmerLemeshow(GeneralizedLinearModel glm) {
 		this(glm, 10);
 	}
 	
