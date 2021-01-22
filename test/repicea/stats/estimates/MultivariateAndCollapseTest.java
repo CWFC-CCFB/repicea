@@ -11,7 +11,7 @@ import repicea.math.Matrix;
 import repicea.stats.Distribution.Type;
 import repicea.stats.StatisticalUtility;
 
-public class MultivariateAndCollapseTests {
+public class MultivariateAndCollapseTest {
 
 	@Test
 	public void completeCollapsingWithMonteCarloEstimateTest() {

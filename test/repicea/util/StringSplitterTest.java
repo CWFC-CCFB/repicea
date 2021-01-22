@@ -6,7 +6,7 @@ import java.util.List;
 import org.junit.Test;
 import org.junit.Assert;
 
-public class StringSplitterTests {
+public class StringSplitterTest {
 
 	@Test
 	public void simpleStringTest() {

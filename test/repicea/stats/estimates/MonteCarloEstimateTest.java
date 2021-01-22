@@ -8,7 +8,7 @@ import org.junit.Test;
 import repicea.math.Matrix;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
-public class MonteCarloEstimateTests {
+public class MonteCarloEstimateTest {
 
 	
 	@Test

@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import repicea.math.Matrix;
 
-public class TruncatedGaussianEstimateTests {
+public class TruncatedGaussianEstimateTest {
 
 	@Test
 	public void comparingMeanPositiveHalfDistributionTest() {

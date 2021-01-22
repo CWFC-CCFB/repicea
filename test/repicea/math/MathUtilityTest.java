@@ -3,7 +3,7 @@ package repicea.math;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class MathUtilityTests {
+public class MathUtilityTest {
 
 	@Test
 	public void testSimpleFactorials() {

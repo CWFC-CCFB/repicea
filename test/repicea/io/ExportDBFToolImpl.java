@@ -5,14 +5,11 @@ import java.util.Vector;
 import repicea.io.tools.ExportTool;
 
 @SuppressWarnings("deprecation")
-public class ExportDBFToolTest extends ExportTool {
+public class ExportDBFToolImpl extends ExportTool {
 
-
-	
-	
 	public enum Allo {allo, byebye, bonjour};
 	
-	protected ExportDBFToolTest() throws Exception {
+	protected ExportDBFToolImpl() throws Exception {
 		super();
 	}
 
@@ -29,9 +26,9 @@ public class ExportDBFToolTest extends ExportTool {
 
 
 	public static void main(String[] args) {
-		ExportDBFToolTest test;
+		ExportDBFToolImpl test;
 		try {
-			test = new ExportDBFToolTest();
+			test = new ExportDBFToolImpl();
 			test.showUI(null);
 		} catch (Exception e) {
 			e.printStackTrace();

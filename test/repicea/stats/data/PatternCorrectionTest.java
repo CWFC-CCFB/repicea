@@ -9,7 +9,7 @@ import org.junit.Test;
 import repicea.io.javacsv.CSVReader;
 import repicea.util.ObjectUtility;
 
-public class PatternCorrectionTests {
+public class PatternCorrectionTest {
 
 	@Ignore
 	@Test

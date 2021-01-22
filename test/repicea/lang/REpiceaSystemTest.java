@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import repicea.util.ObjectUtility;
 
-public class REpiceaSystemTests {
+public class REpiceaSystemTest {
 
 	@Test
 	public void addToClassPathSimpleTest1() throws Exception {

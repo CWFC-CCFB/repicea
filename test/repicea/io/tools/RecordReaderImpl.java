@@ -24,11 +24,8 @@ import java.util.concurrent.CancellationException;
 
 import javax.swing.UIManager;
 
-import repicea.io.ImportTests;
-import repicea.io.tools.ImportFieldElement;
+import repicea.io.ImportTst;
 import repicea.io.tools.ImportFieldElement.FieldType;
-import repicea.io.tools.LevelProviderEnum;
-import repicea.io.tools.REpiceaRecordReader;
 import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
@@ -39,7 +36,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * @author Mathieu Fortin - November 2012
  */
 @SuppressWarnings("serial")
-public class TestRecordReader extends REpiceaRecordReader {
+public class RecordReaderImpl extends REpiceaRecordReader {
 
 	private enum Level {
 		stratumLevel,
@@ -311,7 +308,7 @@ public class TestRecordReader extends REpiceaRecordReader {
 
 	@Override
 	protected List<ImportFieldElement> defineFieldsToImport() throws Exception {
-		return TestRecordReader.defineFields();
+		return RecordReaderImpl.defineFields();
 	}
 
 	private static void setLookAndFeel () {
@@ -341,11 +338,11 @@ public class TestRecordReader extends REpiceaRecordReader {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		setLookAndFeel();
-		String sourcePath = ObjectUtility.getPackagePath(ImportTests.class) + "TEST6152.csv";
+		String sourcePath = ObjectUtility.getPackagePath(ImportTst.class) + "TEST6152.csv";
 		
-		String testIfe = ObjectUtility.getPackagePath(TestRecordReader.class) + "test.ife";
-		
-		TestRecordReader reader = new TestRecordReader();
+		String testIfe = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "test.ife";
+
+		RecordReaderImpl reader = new RecordReaderImpl();
 		reader.setPopUpWindowEnabled(true);
 		try {
 			reader.initGUIMode(UseMode.GUI_MODE, sourcePath, "TEST6152");

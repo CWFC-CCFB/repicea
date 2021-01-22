@@ -9,7 +9,7 @@ import org.junit.Test;
 import repicea.math.Matrix;
 import repicea.util.ObjectUtility;
 
-public class JackknifeEstimateTests {
+public class JackknifeEstimateTest {
 
 	@SuppressWarnings("unchecked")
 	@Test

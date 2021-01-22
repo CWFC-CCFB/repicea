@@ -13,7 +13,7 @@ import repicea.io.javasql.SQLReader;
 import repicea.lang.REpiceaSystem;
 import repicea.util.ObjectUtility;
 
-public class ImportTests {
+public class ImportTst {
 	
 	/**
 	 * This test reads to copy of the same file: a DBF copy and a CSV copy. Each line read is compared across the files to make
@@ -22,7 +22,7 @@ public class ImportTests {
 	 */
 	@Test
 	public void CSVReaderAndDBFReaderReadTheSameTest() throws IOException {
-		String filePath = ObjectUtility.getPackagePath(ImportTests.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
 		DBFReader dbfReader = new DBFReader(filePath + "TEST6152.DBF");
 		CSVReader csvReader = new CSVReader(filePath + "TEST6152.csv");
 		assertEquals("Number of records", dbfReader.getRecordCount(), csvReader.getRecordCount());
@@ -64,7 +64,7 @@ public class ImportTests {
 	 */
 	@Test
 	public void CSVReaderAndSQLReaderReadTheSameTestAccessVersion() throws IOException {
-		String filePath = ObjectUtility.getPackagePath(ImportTests.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
 		
 		String sourcePath = filePath + "TEST6152.accdb";
 		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
@@ -114,7 +114,7 @@ public class ImportTests {
 	 */
 	@Test
 	public void CSVReaderAndSQLReaderReadTheSameTest2007AccessVersion() throws IOException {
-		String filePath = ObjectUtility.getPackagePath(ImportTests.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
 		
 		String sourcePath = filePath + "TEST6152.accdb";
 		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
@@ -167,7 +167,7 @@ public class ImportTests {
 		String[] inputSpec = new String[2];
 		String[] outputSpec = new String[2];
 
-		String filePath = ObjectUtility.getPackagePath(ImportTests.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
 		String inputFilename = filePath + filename;
 		String outputFilename = filePath + "tmp" + fileFilter.getExtension();
 		inputSpec[0] = inputFilename;
@@ -250,7 +250,7 @@ public class ImportTests {
 	 */
 	@Test
 	public void CSVReaderAndWriterReadTheSameTest() throws IOException {
-		ImportTests.ReaderAndWriterReadTheSameTest("TEST6152.csv");
+		ImportTst.ReaderAndWriterReadTheSameTest("TEST6152.csv");
 	}
 	
 
@@ -260,7 +260,7 @@ public class ImportTests {
 	 */
 	@Test
 	public void DBFReaderAndWriterReadTheSameTest() throws IOException {
-		ImportTests.ReaderAndWriterReadTheSameTest("TEST6152.DBF");
+		ImportTst.ReaderAndWriterReadTheSameTest("TEST6152.DBF");
 	}
 	
 	/**
@@ -271,7 +271,7 @@ public class ImportTests {
 	@Ignore // just too long on Windows
 	@Test
 	public void MSACCESSReaderAndWriterReadTheSameTest() throws IOException {
-		ImportTests.ReaderAndWriterReadTheSameTest("TEST6152.accdb");
+		ImportTst.ReaderAndWriterReadTheSameTest("TEST6152.accdb");
 	}
 	
 

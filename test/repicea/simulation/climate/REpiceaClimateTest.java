@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import repicea.simulation.climate.REpiceaClimateVariableMap.ClimateVariable;
 
-public class REpiceaClimateTests {
+public class REpiceaClimateTest {
 
 	@Test
 	public void testSimpleClimateChangeTrend() {

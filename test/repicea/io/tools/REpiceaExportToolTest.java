@@ -9,14 +9,14 @@ import org.junit.Test;
 import repicea.io.REpiceaRecordSet;
 import repicea.util.ObjectUtility;
 
-public class REpiceaExportToolTests {
+public class REpiceaExportToolTest {
 
 	
 	@SuppressWarnings("rawtypes")
 	@Test
 	public void simpleExportTest() {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
-		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
+		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTest.class) + "testExport.csv";
 		exportTool.setFilename(filename);
 		List<Enum> options = new ArrayList<Enum>();
 		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
@@ -36,7 +36,7 @@ public class REpiceaExportToolTests {
 	@Test
 	public void simpleExportTestWithoutSaving() {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
-		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
+		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTest.class) + "testExport.csv";
 		exportTool.setFilename(filename);
 		List<Enum> options = new ArrayList<Enum>();
 		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
@@ -56,7 +56,7 @@ public class REpiceaExportToolTests {
 	@Test
 	public void exportTestWithTwoOptions() {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
-		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
+		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTest.class) + "testExport.csv";
 		exportTool.setFilename(filename);
 		List<Enum> options = new ArrayList<Enum>();
 		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
@@ -78,7 +78,7 @@ public class REpiceaExportToolTests {
 	@Test
 	public void exportTestWithTwoOptionsWithoutSaving() {
 		REpiceaExportToolImpl exportTool = new REpiceaExportToolImpl();
-		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTests.class) + "testExport.csv";
+		String filename = ObjectUtility.getPackagePath(REpiceaExportToolTest.class) + "testExport.csv";
 		exportTool.setFilename(filename);
 		List<Enum> options = new ArrayList<Enum>();
 		options.add(REpiceaExportToolImpl.ExportOptions.TheOnlyOne);
