@@ -2,7 +2,7 @@
 
 	<property name="project.name" value="repicea" />
 	<property name="project.description" value="REpicea Utilitaries" />
-	<property name="ext.dir" value="../externallibraries" />
+	<property name="ext.dir" value="../externalLibraries" />
 	<property name="bin.dir" value="bin" />
 	<property name="src.dir" value="src" />
 	<property name="test.dir" value="test" />
