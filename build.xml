@@ -6,7 +6,7 @@
 	<property name="bin.dir" value="bin" />
 	<property name="src.dir" value="src" />
 	<property name="test.dir" value="test" />
-	<property name="test.rep.dir" value="../testreport" />
+	<property name="test.rep.dir" value="../testdev" />
 	<property name="java.doc.dir" value="../javadoc" />
 	<property name="test.prod.dir" value="../testprod" />
 	<property name="vendor" value="REpicea" />
