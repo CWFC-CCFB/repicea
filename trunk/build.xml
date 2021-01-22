@@ -77,6 +77,7 @@
 
 	<!-- COMPILE PRODUCTION TESTS -->
     <target name="compile-prodtest" description="Compile production tests">
+        <delete dir="${bin.dir}"/>
         <mkdir dir="${bin.dir}"/>
 		
         <javac srcdir="${test.dir}" destdir="${bin.dir}">
@@ -131,7 +132,7 @@
 
 
 	<!-- TEST PROD -->
-	<target name="test-prod" description="Run all JUnit tests with jar file" depends="jar,clean,compile-prodtest">
+	<target name="test-prod" description="Run all JUnit tests with jar file" depends="jar,compile-prodtest">
 		<mkdir dir="${test.prod.dir}"/>
 		<delete dir="${test.prod.dir}/${project.name}"/>
 		<mkdir dir="${test.prod.dir}/${project.name}"/>
