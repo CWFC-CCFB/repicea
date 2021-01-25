@@ -60,8 +60,14 @@ public class ProductOfEstimates {
 		return est;
 	}
 
-	private static GaussianEstimate getEstimate(GaussianEstimate trueMean, VarianceEstimate trueVariance) {
-		return new GaussianEstimate(trueMean.getRandomDeviate(), trueVariance.getRandomDeviate());
+	private static Estimate getEstimate(GaussianEstimate trueMean, VarianceEstimate trueVariance, boolean isLogNormal) {
+		if (isLogNormal) {
+			double mean = trueMean.getRandomDeviate().m_afData[0][0];
+			double variance = trueVariance.getRandomDeviate().m_afData[0][0];
+			return new LogNormalEstimate(mean, variance, false);
+		} else {
+			return new GaussianEstimate(trueMean.getRandomDeviate(), trueVariance.getRandomDeviate());
+		}
 	}
 
 	private static VarianceEstimate getTrueVariance(int df, double mean, boolean lowVariability) {
@@ -73,27 +79,30 @@ public class ProductOfEstimates {
 	}
 
 
-	private static void runSimulation(int nbMaxRealization, 
-			boolean lowAlpha, 
-			boolean lowBeta, 
-			boolean lowGamma) throws Exception {
-		runSimulation(nbMaxRealization, 
-			lowAlpha, 
-			lowBeta, 
-			lowGamma, 
-			0d,
-			0d,
-			0d);
+	private static void runSimulation(int nbMaxRealization,
+									  boolean lowAlpha,
+									  boolean lowBeta,
+									  boolean lowGamma,
+									  boolean useLogNormal) throws Exception {
+		runSimulation(nbMaxRealization,
+				lowAlpha,
+				lowBeta,
+				lowGamma,
+				0d,
+				0d,
+				0d,
+				useLogNormal);
 	}
 
-	private static void runSimulation(int nbMaxRealization, 
-			boolean lowAlpha, 
-			boolean lowBeta, 
-			boolean lowGamma, 
-			double biasAlpha,
-			double biasBeta,
-			double biasGamma) throws Exception {
-		String simulationName = getFilenameSuffix(lowAlpha, lowBeta, lowGamma, biasAlpha == 0d && biasBeta == 0d && biasGamma == 0d);
+	private static void runSimulation(int nbMaxRealization,
+									  boolean lowAlpha,
+									  boolean lowBeta,
+									  boolean lowGamma,
+									  double biasAlpha,
+									  double biasBeta,
+									  double biasGamma,
+									  boolean useLogNormal) throws Exception {
+		String simulationName = getFilenameSuffix(lowAlpha, lowBeta, lowGamma, biasAlpha == 0d && biasBeta == 0d && biasGamma == 0d, useLogNormal);
 		System.out.println("Running simulation with lowAlpha = " + ((Boolean) lowAlpha).toString() + " lowBeta = " + ((Boolean) lowBeta).toString() + " lowGamma = " + ((Boolean) lowGamma).toString() + " ...");
 		int df = 300;
 		double alpha = 20d;
@@ -135,9 +144,9 @@ public class ProductOfEstimates {
 				System.out.println("Realization " + real);
 			}
 			List<Estimate> estimates = new ArrayList<Estimate>();
-			estimates.add(getEstimate(expectedAlpha, trueVarAlpha)); 
-			estimates.add(getEstimate(expectedBeta, trueVarBeta)); 
-			estimates.add(getEstimate(expectedGamma, trueVarGamma)); 
+			estimates.add(getEstimate(expectedAlpha, trueVarAlpha, useLogNormal));
+			estimates.add(getEstimate(expectedBeta, trueVarBeta, useLogNormal));
+			estimates.add(getEstimate(expectedGamma, trueVarGamma, useLogNormal));
 
 			SimpleEstimate productGoodman = Estimate.getProductOfManyEstimates(estimates);
 			muGoodman.addRealization(productGoodman.getMean());
@@ -239,7 +248,7 @@ public class ProductOfEstimates {
 
 	}
 
-	private static String getFilenameSuffix(boolean b1, boolean b2, boolean b3, boolean b4) {
+	private static String getFilenameSuffix(boolean b1, boolean b2, boolean b3, boolean unbiased, boolean useLogNormals) {
 		String suffix = "";
 		if (b1) {
 			suffix += "H";
@@ -256,32 +265,59 @@ public class ProductOfEstimates {
 		} else {
 			suffix += "L";
 		}
-		if (!b4) {
+		if (!unbiased) {
 			suffix += "_b";
+		}
+		if (useLogNormals) {
+			suffix += "_ln";
 		}
 		return suffix;
 	}
 	
 	public static void main(String[] args) throws Exception {
 		int nbRealizations = 50000;
-		runSimulation(nbRealizations, true, true, true);
-		runSimulation(nbRealizations, false, true, true);
-		runSimulation(nbRealizations, true, false, true);
-		runSimulation(nbRealizations, true, true, false);
-		runSimulation(nbRealizations, false, false, true);
-		runSimulation(nbRealizations, false, true, false);
-		runSimulation(nbRealizations, true, false, false);
-		runSimulation(nbRealizations, false, false, false);
+
+		// Using Gaussian distributions
+//		runSimulation(nbRealizations, true, true, true, false);
+//		runSimulation(nbRealizations, false, true, true, false);
+//		runSimulation(nbRealizations, true, false, true, false);
+//		runSimulation(nbRealizations, true, true, false, false);
+//		runSimulation(nbRealizations, false, false, true, false);
+//		runSimulation(nbRealizations, false, true, false, false);
+//		runSimulation(nbRealizations, true, false, false, false);
+//		runSimulation(nbRealizations, false, false, false, false);
+//
+//
+//		runSimulation(nbRealizations, true, true, true, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, false, true, true, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, true, false, true, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, true, true, false, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, false, false, true, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, false, true, false, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, true, false, false, 0.02, 0.02, 0.02, false);
+//		runSimulation(nbRealizations, false, false, false, 0.02, 0.02, 0.02, false);
+
+		// Using log normal distributions
+//		runSimulation(nbRealizations, true, true, true, true);
+//		runSimulation(nbRealizations, false, true, true, true);
+//		runSimulation(nbRealizations, true, false, true, true);
+//		runSimulation(nbRealizations, true, true, false, true);
+//		runSimulation(nbRealizations, false, false, true, true);
+//		runSimulation(nbRealizations, false, true, false, true);
+//		runSimulation(nbRealizations, true, false, false, true);
+//		runSimulation(nbRealizations, false, false, false, true);
+//
+//
+//		runSimulation(nbRealizations, true, true, true, 0.02, 0.02, 0.02, true);
+//		runSimulation(nbRealizations, false, true, true, 0.02, 0.02, 0.02, true);
+//		runSimulation(nbRealizations, true, false, true, 0.02, 0.02, 0.02, true);
+//		runSimulation(nbRealizations, true, true, false, 0.02, 0.02, 0.02, true);
+//		runSimulation(nbRealizations, false, false, true, 0.02, 0.02, 0.02, true);
+//		runSimulation(nbRealizations, false, true, false, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, true, false, false, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, false, false, false, 0.02, 0.02, 0.02, true);
 
 
-		runSimulation(nbRealizations, true, true, true, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, false, true, true, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, true, false, true, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, true, true, false, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, false, false, true, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, false, true, false, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, true, false, false, 0.02, 0.02, 0.02);
-		runSimulation(nbRealizations, false, false, false, 0.02, 0.02, 0.02);
 	}
 
 }
