@@ -60,13 +60,13 @@ public class ProductOfEstimates {
 		return est;
 	}
 
-	private static Estimate getEstimate(GaussianEstimate trueMean, VarianceEstimate trueVariance, boolean isLogNormal) {
+	private static Estimate getEstimate(Estimate trueMean, VarianceEstimate trueVariance, boolean isLogNormal) {
+		double mean = trueMean.getRandomDeviate().m_afData[0][0];
+		double variance = trueVariance.getRandomDeviate().m_afData[0][0];
 		if (isLogNormal) {
-			double mean = trueMean.getRandomDeviate().m_afData[0][0];
-			double variance = trueVariance.getRandomDeviate().m_afData[0][0];
 			return new LogNormalEstimate(mean, variance, false);
 		} else {
-			return new GaussianEstimate(trueMean.getRandomDeviate(), trueVariance.getRandomDeviate());
+			return new GaussianEstimate(mean, variance);
 		}
 	}
 
@@ -120,10 +120,19 @@ public class ProductOfEstimates {
 		double biasedAlpha = alpha * (1d + biasAlpha);
 		double biasedBeta = beta * (1d + biasBeta);
 		double biasedGamma = gamma * (1d + biasGamma);
-		
-		GaussianEstimate expectedAlpha = new GaussianEstimate(biasedAlpha, varAlpha);
-		GaussianEstimate expectedBeta = new GaussianEstimate(biasedBeta, varBeta);
-		GaussianEstimate expectedGamma = new GaussianEstimate(biasedGamma, varGamma);
+
+		Estimate expectedAlpha;
+		Estimate expectedBeta;
+		Estimate expectedGamma;
+		if (useLogNormal) {
+			expectedAlpha = new LogNormalEstimate(biasedAlpha, varAlpha, false);
+			expectedBeta = new LogNormalEstimate(biasedBeta, varBeta, false);
+			expectedGamma = new LogNormalEstimate(biasedGamma, varGamma, false);
+		} else {
+			expectedAlpha = new GaussianEstimate(biasedAlpha, varAlpha);
+			expectedBeta = new GaussianEstimate(biasedBeta, varBeta);
+			expectedGamma = new GaussianEstimate(biasedGamma, varGamma);
+		}
 
 		MonteCarloEstimate muGoodman = new MonteCarloEstimate();		
 		MonteCarloEstimate varGoodman = new MonteCarloEstimate();		
@@ -286,8 +295,8 @@ public class ProductOfEstimates {
 //		runSimulation(nbRealizations, false, true, false, false);
 //		runSimulation(nbRealizations, true, false, false, false);
 //		runSimulation(nbRealizations, false, false, false, false);
-//
-//
+
+
 //		runSimulation(nbRealizations, true, true, true, 0.02, 0.02, 0.02, false);
 //		runSimulation(nbRealizations, false, true, true, 0.02, 0.02, 0.02, false);
 //		runSimulation(nbRealizations, true, false, true, 0.02, 0.02, 0.02, false);
@@ -298,22 +307,22 @@ public class ProductOfEstimates {
 //		runSimulation(nbRealizations, false, false, false, 0.02, 0.02, 0.02, false);
 
 		// Using log normal distributions
-//		runSimulation(nbRealizations, true, true, true, true);
-//		runSimulation(nbRealizations, false, true, true, true);
-//		runSimulation(nbRealizations, true, false, true, true);
-//		runSimulation(nbRealizations, true, true, false, true);
-//		runSimulation(nbRealizations, false, false, true, true);
-//		runSimulation(nbRealizations, false, true, false, true);
-//		runSimulation(nbRealizations, true, false, false, true);
-//		runSimulation(nbRealizations, false, false, false, true);
-//
-//
-//		runSimulation(nbRealizations, true, true, true, 0.02, 0.02, 0.02, true);
-//		runSimulation(nbRealizations, false, true, true, 0.02, 0.02, 0.02, true);
-//		runSimulation(nbRealizations, true, false, true, 0.02, 0.02, 0.02, true);
-//		runSimulation(nbRealizations, true, true, false, 0.02, 0.02, 0.02, true);
-//		runSimulation(nbRealizations, false, false, true, 0.02, 0.02, 0.02, true);
-//		runSimulation(nbRealizations, false, true, false, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, true, true, true, true);
+		runSimulation(nbRealizations, false, true, true, true);
+		runSimulation(nbRealizations, true, false, true, true);
+		runSimulation(nbRealizations, true, true, false, true);
+		runSimulation(nbRealizations, false, false, true, true);
+		runSimulation(nbRealizations, false, true, false, true);
+		runSimulation(nbRealizations, true, false, false, true);
+		runSimulation(nbRealizations, false, false, false, true);
+
+
+		runSimulation(nbRealizations, true, true, true, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, false, true, true, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, true, false, true, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, true, true, false, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, false, false, true, 0.02, 0.02, 0.02, true);
+		runSimulation(nbRealizations, false, true, false, 0.02, 0.02, 0.02, true);
 		runSimulation(nbRealizations, true, false, false, 0.02, 0.02, 0.02, true);
 		runSimulation(nbRealizations, false, false, false, 0.02, 0.02, 0.02, true);
 
