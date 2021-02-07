@@ -41,6 +41,17 @@
 	</path>
 
 
+	<!-- REVISION : retrieve the head revision and stores its number in a file -->
+	<target name="revision" description="Retrieve the head revision">
+	
+		<java classname="repicea.app.REpiceaJARSVNAppVersionCompiler" fork="true">
+			<classpath>
+				<pathelement location="${bin.dir}" />
+			</classpath>
+		</java>
+	</target>
+
+
 	<!-- ERASE THE BINARY DIRECTORY -->
     <target name="clean">
         <delete dir="${bin.dir}"/>
@@ -178,7 +189,7 @@
 
 
 	<!-- CREATE JAR FILE -->
-    <target name="jar" depends="compile">
+    <target name="jar" depends="compile,revision">
         <jar destfile="${ext.dir}/${project.name}.jar">
 			<fileset dir="${bin.dir}"/>
 			<fileset dir="${src.dir}" includes="**/*.java"/>
