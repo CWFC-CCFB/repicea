@@ -18,6 +18,8 @@
  */
 package repicea.simulation;
 
+import java.util.Map;
+
 import repicea.stats.StatisticalUtility;
 
 /**
@@ -44,9 +46,32 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 	 * @param parms some additional parameters
 	 * @return the event probability
 	 */
-	public abstract double predictEventProbability(S stand, T tree, Object... parms);
+	public abstract double predictEventProbability(S stand, T tree, Map<String, Object> parms);
 
 	
+	/**
+	 * This method returns the probability of event for a particular tree represented by the parameter
+	 * "tree".
+	 * @param stand a S-derived instance
+	 * @param tree a T-derived instance
+	 * @return the event probability
+	 */
+	public final double predictEventProbability(S stand, T tree) {
+		return predictEventProbability(stand, tree, null);
+	}
+	
+
+	/**
+	 * This method returns either a boolean if isResidualVariabilityEnabled was set to true
+	 * or the probability otherwise.
+	 * @param stand a S-derived instance
+	 * @param tree a T-derived instance
+	 * @return a Boolean or a double
+	 */
+	public final Object predictEvent(S stand, T tree) {
+		return predictEvent(stand, tree, null);
+	}
+
 	
 	/**
 	 * This method returns either a boolean if isResidualVariabilityEnabled was set to true
@@ -56,7 +81,7 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 	 * @param parms some additional parameters
 	 * @return a Boolean or a double
 	 */
-	public Object predictEvent(S stand, T tree, Object... parms) {
+	public Object predictEvent(S stand, T tree, Map<String, Object> parms) {
 		double eventProbability = predictEventProbability(stand, tree, parms);
 		if (eventProbability < 0 || eventProbability > 1) {
 			return null;
@@ -72,21 +97,21 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 		}
 	}
 
-	/**
-	 * This method scans the parameters and finds the first object that is an instance of
-	 * this class.
-	 * @param clazz the class of object to be looked for
-	 * @param parms the parameters
-	 * @return the first object of this class or null otherwise
-	 */
-	public static Object findFirstParameterOfThisClass(Class<?> clazz, Object... parms) {
-		if (parms != null && parms.length > 0) {
-			for  (Object obj : parms) {
-				if (clazz.isInstance(obj)) {
-					return obj;
-				}
-			}
-		}
-		return null;
-	}
+//	/**
+//	 * This method scans the parameters and finds the first object that is an instance of
+//	 * this class.
+//	 * @param clazz the class of object to be looked for
+//	 * @param parms the parameters
+//	 * @return the first object of this class or null otherwise
+//	 */
+//	public static Object findFirstParameterOfThisClass(Class<?> clazz, Object... parms) {
+//		if (parms != null && parms.length > 0) {
+//			for  (Object obj : parms) {
+//				if (clazz.isInstance(obj)) {
+//					return obj;
+//				}
+//			}
+//		}
+//		return null;
+//	}
 }
