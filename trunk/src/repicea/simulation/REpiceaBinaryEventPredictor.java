@@ -46,7 +46,7 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 	 * @param parms some additional parameters
 	 * @return the event probability
 	 */
-	public abstract double predictEventProbability(S stand, T tree, Map<String, Object> parms);
+	public abstract double predictEventProbability(S stand, T tree, Map<Integer, Object> parms);
 
 	
 	/**
@@ -81,7 +81,7 @@ public abstract class REpiceaBinaryEventPredictor<S, T> extends REpiceaPredictor
 	 * @param parms some additional parameters
 	 * @return a Boolean or a double
 	 */
-	public Object predictEvent(S stand, T tree, Map<String, Object> parms) {
+	public Object predictEvent(S stand, T tree, Map<Integer, Object> parms) {
 		double eventProbability = predictEventProbability(stand, tree, parms);
 		if (eventProbability < 0 || eventProbability > 1) {
 			return null;
