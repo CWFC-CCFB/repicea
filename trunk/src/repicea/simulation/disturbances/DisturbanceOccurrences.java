@@ -27,9 +27,9 @@ import repicea.simulation.MonteCarloSimulationCompliantObject;
 
 public class DisturbanceOccurrences {
 	
-	private final List<Integer> datesYr;
-	private final DisturbanceAffectedProvider parms;
-	private final Map<String, Boolean> outcomeMap;
+	protected final List<Integer> datesYr;
+	protected final DisturbanceAffectedProvider parms;
+	protected final Map<String, Boolean> outcomeMap;
 	
 	/**
 	 * Constructor for multiple occurrences

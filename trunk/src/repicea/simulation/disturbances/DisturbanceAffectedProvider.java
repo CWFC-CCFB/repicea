@@ -23,7 +23,7 @@ import repicea.simulation.MonteCarloSimulationCompliantObject;
 public interface DisturbanceAffectedProvider extends DisturbanceTypeProvider {
 
 	/**
-	 * Returns true if the plot is affected by the disturbance provided that it has occurred
+	 * Returns true if the plot is affected by the disturbance provided that has just occurred
 	 * @param plot a MonteCarloSimulationCompliantObject instance
 	 * @return a boolean
 	 */
