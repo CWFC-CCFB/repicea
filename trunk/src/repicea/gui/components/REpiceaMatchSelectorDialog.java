@@ -186,16 +186,22 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 
 		pane.add(Box.createVerticalStrut(10));
 		JScrollPane scrollPane = new JScrollPane(getTable());
-		pane.add(createSimplePanel(scrollPane, 20));
+		pane.add(createSimplePanel(scrollPane, 10));
 		pane.add(Box.createVerticalStrut(10));
 		return pane;
 	}
 	
 	
 	protected JPanel createSimplePanel(Component comp, int margin) {
-		JPanel pane = new JPanel(new FlowLayout(FlowLayout.LEFT));
-		pane.add(Box.createHorizontalStrut(margin));
-		pane.add(comp);
+//		JPanel pane = new JPanel(new FlowLayout(FlowLayout.LEFT));
+//		pane.add(Box.createHorizontalStrut(margin));
+//		pane.add(comp);
+//		return(pane);
+		JPanel pane = new JPanel();
+		pane.setLayout(new BorderLayout());
+		pane.add(Box.createHorizontalStrut(margin), BorderLayout.WEST);
+		pane.add(comp, BorderLayout.CENTER);
+		pane.add(Box.createHorizontalStrut(margin), BorderLayout.EAST);
 		return(pane);
 	}
 	
