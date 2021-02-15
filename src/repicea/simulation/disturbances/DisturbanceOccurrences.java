@@ -19,6 +19,7 @@
 package repicea.simulation.disturbances;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -87,32 +88,41 @@ public class DisturbanceOccurrences {
 	
 	public void addOccurrenceDateYr(int dateYr) {
 		datesYr.add(dateYr);
+		Collections.sort(datesYr); // to have them is ascending order.
 	}
 	
 	/**
-	 * Returns the date of the latest occurrence
-	 * @param currentDateYr the reference date
-	 * @return an integer
+	 * Return the date of the latest occurrence prior or concurrent to the currentDateYr.
+	 * @param currentDateYr the reference date (yr)
+	 * @return an integer which is the date or -1 if there is no occurrence
 	 */
 	public int getLastOccurrenceDateYrToDate(int currentDateYr) {
-//		int latestOccurrence = -1;
-//		for (Integer o : datesYr) {
-//			if (o < currentDateYr) {
-//				if (latestOccurrence == -1 || currentDateYr - o < latestOccurrence) {
-//					latestOccurrence = currentDateYr - o;
-//				}
-//			}
-//		}
 		int latestOccurrenceDate = -1;
 		for (Integer o : datesYr) {
 			if (o <= currentDateYr) {
 				if (latestOccurrenceDate == -1 || o > latestOccurrenceDate) {
 					latestOccurrenceDate = o;
 				}
+			} else {
+				break;	// means we are already beyond the currentDateYr parameter and there is no chance of having a date prior or concurrent to currentDateYr
 			}
 		}
 		return latestOccurrenceDate;
 	}
+
+	
+	/**
+	 * Return the date of the latest occurrence.
+	 * @return an integer which is the date or -1 if there is no occurrence
+	 */
+	public int getLastOccurrenceDateYr() {
+		if (!datesYr.isEmpty()) {
+			return datesYr.get(datesYr.size() - 1);
+		} else {
+			return -1;
+		}
+	}
+	
 	
 	/**
 	 * Returns true if there is at least one occurrence. 
