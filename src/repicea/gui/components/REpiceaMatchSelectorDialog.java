@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2017 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -24,6 +24,8 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -52,7 +54,7 @@ import repicea.serial.Memorizable;
  *
  */
 @SuppressWarnings("serial")
-public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserInterface, OwnedWindow, ActionListener {
+public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, OwnedWindow, ActionListener {
 	
 	private final REpiceaMatchSelector<?> caller;
 	private REpiceaTable table;
@@ -65,7 +67,7 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 	private final JButton cancelButton;
 	private boolean isCancelled;
 	
-	protected REpiceaMatchSelectorDialog(REpiceaMatchSelector<?> caller, Window parent, Object[] columnNames) {
+	protected REpiceaMatchSelectorDialog(REpiceaMatchSelector<E> caller, Window parent, Object[] columnNames) {
 		super(parent);
 		windowSettings = new WindowSettings(REpiceaSystem.getJavaIOTmpDir() + getClass().getSimpleName()+ ".ser", this);
 		this.caller = caller;
@@ -81,10 +83,11 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 		tableModel = new REpiceaTableModel(columnNames);
 		tableModel.setEditableVetos(0, true);
 		table = new REpiceaTable(tableModel, false); // false : adding or deleting rows is disabled
+		table.putClientProperty("terminateEditOnFocusLost", true);
 		// MF2020-11-26 Bug fixed, the enum might not implement the TextableEnum interface. Anyway, it all goes through the toString method.
 		//		TextableEnum[] possibleTreatments =  caller.potentialMatches.toArray(new TextableEnum[]{});
 		Object[] possibleTreatments =  caller.potentialMatches.toArray();
-		table.setDefaultEditor(Enum.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
+		table.setDefaultEditor(Object.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
 		table.setRowSelectionAllowed(false);
 
 		init();
@@ -130,16 +133,19 @@ public class REpiceaMatchSelectorDialog extends REpiceaDialog implements IOUserI
 	@Override
 	public void refreshInterface() {
 		tableModel.removeAll();
-		Object[] record;
+		List<Object> l = new ArrayList<Object>();
 		for (Object s : caller.matchMap.keySet()) {
-			record = new Object[2];
-			record[0] = s;
-			record[1] = caller.matchMap.get(s);
-			tableModel.addRow(record);
+			l.clear();
+			Object currentMatch = caller.matchMap.get(s);
+			l.add(s);
+			l.add(currentMatch);
+			if (currentMatch instanceof REpiceaMatchComplexObject) {
+				l.addAll(((REpiceaMatchComplexObject) currentMatch).getAdditionalFields());
+			}
+			tableModel.addRow(l.toArray());
 		}
 		super.refreshInterface();
 	}
-	
 
 	@Override
 	public void listenTo() {
