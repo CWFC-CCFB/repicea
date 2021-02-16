@@ -62,7 +62,7 @@
     <target name="compile" description="Compile src only" depends="clean">
         <mkdir dir="${bin.dir}"/>
 		
-        <javac srcdir="${src.dir}" destdir="${bin.dir}"/>
+        <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="on" />
 		
 		<copy todir="${bin.dir}">
 			<fileset dir="${src.dir}" excludes="**/*.java" />
