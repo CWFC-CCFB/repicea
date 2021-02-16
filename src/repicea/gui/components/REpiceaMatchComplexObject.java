@@ -24,7 +24,7 @@ import java.util.List;
  * The REpiceaMatchComplexObject allows to use complex object in the REpiceaMatchSelector class.
  * @author Mathieu Fortin - February 2021
  */
-public interface REpiceaMatchComplexObject {
+public interface REpiceaMatchComplexObject<E>  {
 
 	/**
 	 * Return the number of fields contain in this object
@@ -44,4 +44,10 @@ public interface REpiceaMatchComplexObject {
 	 * @param value the new value
 	 */
 	public void setValueAt(int indexOfThisAdditionalField, Object value);
+	
+	/**
+	 * Return a clone of this object
+	 * @return an instance of class E
+	 */
+	public E copy();
 }

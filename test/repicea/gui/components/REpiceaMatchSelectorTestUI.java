@@ -25,7 +25,7 @@ import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.Status
 
 public class REpiceaMatchSelectorTestUI {
 
-	static class MyComplexObjectClass implements REpiceaMatchComplexObject {
+	static class MyComplexObjectClass implements REpiceaMatchComplexObject<MyComplexObjectClass> {
 
 		String name;
 		int index;
@@ -54,9 +54,14 @@ public class REpiceaMatchSelectorTestUI {
 
 		@Override
 		public void setValueAt(int indexOfThisAdditionalField, Object value) {
-			if (index == 0) {
+			if (indexOfThisAdditionalField == 0) {
 				this.index = (Integer) value;
 			}
+		}
+
+		@Override
+		public MyComplexObjectClass copy() {
+			return new MyComplexObjectClass(name, index);
 		}
 		
 	}
