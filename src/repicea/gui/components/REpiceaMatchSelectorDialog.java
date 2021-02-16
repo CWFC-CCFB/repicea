@@ -20,16 +20,12 @@ package repicea.gui.components;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -38,6 +34,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 
 import repicea.gui.OwnedWindow;
+import repicea.gui.REpiceaControlPanel;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
@@ -54,7 +51,7 @@ import repicea.serial.Memorizable;
  *
  */
 @SuppressWarnings("serial")
-public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, OwnedWindow, ActionListener {
+public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, OwnedWindow {
 	
 	private final REpiceaMatchSelector<?> caller;
 	private REpiceaTable table;
@@ -63,8 +60,6 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	private final JMenuItem save;
 	private final JMenuItem saveAs;
 	private final WindowSettings windowSettings;
-	private final JButton okButton;
-	private final JButton cancelButton;
 	private boolean isCancelled;
 	
 	protected REpiceaMatchSelectorDialog(REpiceaMatchSelector<E> caller, Window parent, Object[] columnNames) {
@@ -75,9 +70,6 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 		save = UIControlManager.createCommonMenuItem(CommonControlID.Save);
 		saveAs = UIControlManager.createCommonMenuItem(CommonControlID.SaveAs);
 
-		okButton = UIControlManager.createCommonButton(CommonControlID.Ok);
-		cancelButton = UIControlManager.createCommonButton(CommonControlID.Cancel);
-		
 		new REpiceaIOFileHandlerUI(this, caller, save, saveAs, load);
 		
 		tableModel = new REpiceaTableModel(columnNames);
@@ -102,12 +94,12 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	
 	protected REpiceaMatchSelector<?> getCaller() {return caller;}
 	
-	protected JPanel getControlPanel() {
-		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		pane.add(okButton);
-		pane.add(cancelButton);
-		return pane;
-	}
+//	protected JPanel getControlPanel() {
+//		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+//		pane.add(okButton);
+//		pane.add(cancelButton);
+//		return pane;
+//	}
 	
 	
 	@Override
@@ -150,15 +142,13 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	@Override
 	public void listenTo() {
 		tableModel.addTableModelListener(caller);
-		okButton.addActionListener(this);
-		cancelButton.addActionListener(this);
+//		okButton.addActionListener(this);
+//		cancelButton.addActionListener(this);
 	}
 
 	@Override
 	public void doNotListenToAnymore() {
 		tableModel.removeTableModelListener(caller);
-		okButton.removeActionListener(this);
-		cancelButton.removeActionListener(this);
 	}
 
 	@Override
@@ -174,8 +164,7 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(getMainPanel(), BorderLayout.CENTER);		
 		
-		
-		getContentPane().add(getControlPanel(), BorderLayout.SOUTH);
+		getContentPane().add(new REpiceaControlPanel(this), BorderLayout.SOUTH);
 	}
 
 	protected REpiceaTable getTable() {return table;}
@@ -246,15 +235,5 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	public Memorizable getWindowOwner() {
 		return caller;
 	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource().equals(okButton)) {
-			okAction();
-		} else if (e.getSource().equals(cancelButton)) {
-			cancelAction();
-		}
-	}
-
 
 }
