@@ -193,10 +193,6 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	
 	
 	protected JPanel createSimplePanel(Component comp, int margin) {
-//		JPanel pane = new JPanel(new FlowLayout(FlowLayout.LEFT));
-//		pane.add(Box.createHorizontalStrut(margin));
-//		pane.add(comp);
-//		return(pane);
 		JPanel pane = new JPanel();
 		pane.setLayout(new BorderLayout());
 		pane.add(Box.createHorizontalStrut(margin), BorderLayout.WEST);

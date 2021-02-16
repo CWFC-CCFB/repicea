@@ -25,8 +25,10 @@ import java.io.InputStream;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 
 import javax.swing.event.TableModelEvent;
@@ -61,6 +63,10 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	protected transient REpiceaMatchSelectorDialog<E> guiInterface;
 	protected final Object[] columnNames;
 	
+	protected Map<Object, Map<E, E>> potentialMatchesByKey;
+	
+	
+	
 	/**
 	 * Official constructor.
 	 * @param toBeMatched an array of strings to be matched
@@ -72,13 +78,14 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	 */
 	public REpiceaMatchSelector(Object[] toBeMatched, E[] potentialMatchArray, int defaultMatchId, Object[] columnNames) {
 		potentialMatches = new ArrayList<E>();
-		addMatches(potentialMatchArray);
-		matchMap = new TreeMap<Object, E>();
-		E defaultMatch = potentialMatchArray[potentialMatchArray.length - 1]; // we pick the last element as a default match
+		addMatches(potentialMatchArray);		// remove duplicates
+		int defaultMatchIndex = potentialMatches.size() - 1; // default match is the last one
 		if (defaultMatchId >= 0 && defaultMatchId < potentialMatchArray.length) { // however if the defaultMatchId is appropriate this can be overriden
-			defaultMatch = potentialMatchArray[defaultMatchId];
+			defaultMatchIndex = defaultMatchId;
 		}
+		
 		int expectedNbCols = 2;
+		E defaultMatch = potentialMatches.get(defaultMatchIndex);
 		if (defaultMatch instanceof REpiceaMatchComplexObject) {
 			expectedNbCols = 2 + ((REpiceaMatchComplexObject) defaultMatch).getNbAdditionalFields();
 		}
@@ -86,8 +93,14 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 			throw new InvalidParameterException("The number of column names is inconsistent!");
 		}
 		this.columnNames = columnNames;
+		
+		instantiatePotentialMatchesByKey(toBeMatched);
+
+		matchMap = new TreeMap<Object, E>();
 		for (Object s : toBeMatched) {
-			matchMap.put(s, defaultMatch);
+			Map<E, E> tmpMap = getMatchesForThisKey(s);
+			E defaultMatchForThisKey = tmpMap.get(defaultMatch);
+			matchMap.put(s, defaultMatchForThisKey);
 		}
 	}
 
@@ -138,27 +151,58 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	}
 
 	
+	private void instantiatePotentialMatchesByKey(Object[] toBeMatched) {
+		potentialMatchesByKey = new HashMap<Object, Map<E, E>>();
+		for (Object obj : toBeMatched) {
+			Map<E, E> individualInstancesMap = new HashMap<E, E>();
+			for (E e : potentialMatches) {
+				E copy;
+				if (e instanceof REpiceaMatchComplexObject) {
+					copy = (E) ((REpiceaMatchComplexObject) e).copy();
+				} else {
+					copy = e;
+				}
+				individualInstancesMap.put(e, copy);
+				potentialMatchesByKey.put(obj, individualInstancesMap);
+			}
+		}
+	}
+	
+	
+	private Map<E, E> getMatchesForThisKey(Object key) {
+		if (potentialMatchesByKey == null) {	// if true, we have to ensure backward compatibility
+			Set<Object> keys = this.matchMap.keySet();	
+			instantiatePotentialMatchesByKey(keys.toArray());
+		}
+		return potentialMatchesByKey.get(key);
+	}
+	
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		if (e.getType() == TableModelEvent.UPDATE) {
 			if (e.getSource() instanceof REpiceaTableModel) {
 				REpiceaTableModel model = (REpiceaTableModel) e.getSource();
-				int currentRow = 0;
-				String s = (String) model.getValueAt(e.getLastRow(), currentRow++);
-				E match = (E) model.getValueAt(e.getLastRow(), currentRow++);
 				if (e.getColumn() == 1) {	// the event occurred in the match object
-					matchMap.put(s, match);
-					System.out.println("New match : " + s + " = " + match.toString());
-					if (match instanceof REpiceaMatchComplexObject) { // means there is more information in the match object and we need to update the table
-						getUI(null).doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
-						for (Object o : ((REpiceaMatchComplexObject) match).getAdditionalFields()) { // set the values that correspond to the new match
-							model.setValueAt(o, e.getLastRow(), currentRow++);
+					String s = (String) model.getValueAt(e.getLastRow(), 0);
+					E m = (E) model.getValueAt(e.getLastRow(), 1);
+					E trueMatch = getMatchesForThisKey(s).get(m);
+					matchMap.put(s, trueMatch);
+					getUI(null).doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
+					model.setValueAt(trueMatch, e.getLastRow(), 1);
+					System.out.println("New match : " + s + " = " + trueMatch.toString());
+					if (trueMatch instanceof REpiceaMatchComplexObject) { // means there is more information in the match object and we need to update the table
+						int currentColumn = 2;
+						for (Object o : ((REpiceaMatchComplexObject) trueMatch).getAdditionalFields()) { // set the values that correspond to the new match
+							model.setValueAt(o, e.getLastRow(), currentColumn++);
 						}
-						getUI(null).listenTo(); // finally re-enable the listeners
 					}
+					getUI(null).listenTo(); // finally re-enable the listeners
 				} else { // it comes from the additional columns
-					((REpiceaMatchComplexObject) match).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
+					String s = (String) model.getValueAt(e.getLastRow(), 0);
+					E m = (E) model.getValueAt(e.getLastRow(), 1);
+					((REpiceaMatchComplexObject) m).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
 							guiInterface.getTable().getValueAt(e.getLastRow(), e.getColumn()));
 				}
 			}
