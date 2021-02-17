@@ -25,14 +25,15 @@ package repicea.simulation.disturbances;
  */
 public final class DisturbanceParameter {
 	
-	public final static int ParmCurrentDateYr = 1;
-	public final static int ParmDisturbanceOccurrences = 2;
-	public final static int ParmSimpleRecurrenceBasedParameters = 3;
-	public final static int ParmTreatment = 4;
-	public final static int ParmAAC = 5;
-	public final static int ParmYear0 = 6;
-	public final static int ParmYear1 = 7;
-	public final static int ParmModulation = 8;
+	public final static String ParmCurrentDateYr = "CurrentDateYr";
+	public final static String ParmDisturbanceOccurrences = "DisturbanceOccurrences";
+	public final static String ParmSimpleRecurrenceBasedParameters = "SimpleRecurrenceBasedParameters";
+	public final static String ParmTreatment = "Treatment";
+	public final static String ParmAAC = "AAC";
+	public final static String ParmYear0 = "InitialDateYr";
+	public final static String ParmYear1 = "FinalDateYr";
+	public final static String ParmModulation = "Modulation";
+	public final static String ParmTimeStep = "TimeStepDurationYr";
 
 
 }
