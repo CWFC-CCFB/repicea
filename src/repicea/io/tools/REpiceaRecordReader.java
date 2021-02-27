@@ -65,7 +65,10 @@ public abstract class REpiceaRecordReader implements Serializable {
 
 			FormatReader<?> reader = null;
 			try {
-				reader = importFieldManager.instantiateFormatReader();
+				reader = importFieldManager.getFormatReader();
+				if (!reader.isAtBeginning()) {
+					reader.reset();
+				}
 				oArray = new Object[importFieldElements.size()];
 
 				if (rowIndex==null) {							// if the index is null a false index that contains all the observations is created
@@ -208,7 +211,14 @@ public abstract class REpiceaRecordReader implements Serializable {
 		guiMode = UseMode.PURE_SCRIPT_MODE;
 	}
 
-
+	/**
+	 * Provide the number of record in a file or a stream. 
+	 * @return an integer
+	 */
+	public int getTotalNbRecords() {
+		return importFieldManager.getFormatReader().getRecordCount();
+	}
+	
 	/**
 	 * This method initializes the RecordInstantiator object in GUI mode.
 	 * @param guiOwner a Window instance that can be null if the dialog has no owner

@@ -30,7 +30,8 @@ import repicea.io.javadbf.DBFReader;
 import repicea.io.javasql.SQLReader;
 
 /**
- * Format reader is a general class for all the readers that exists (e.g. DBFReader).
+ * Format reader is a general class for all the format-specific readers 
+ * (e.g. DBFReader, CSVReader).
  * @author Mathieu Fortin - September 2011
  */
 @SuppressWarnings("rawtypes")
@@ -41,7 +42,14 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	private final String filename;
 	private H header;
 	private final boolean isSystemResource;
-
+	protected int linePointer;
+	private boolean isClosed;
+	
+	/**
+	 * General constructor for files.
+	 * @param filename the filename.
+	 * @throws IOException
+	 */
 	protected FormatReader(String filename) throws IOException {
 		this.filename = filename;
 		File file = new File(filename);
@@ -56,6 +64,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 				isSystemResource = true;
 			}
 		}
+		isClosed = false;
 	}
 	
 	/**
@@ -64,6 +73,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	protected FormatReader() {
 		this.filename = NOT_USING_FILES;
 		isSystemResource = false;
+		isClosed = false;
 	}
 
 	
@@ -78,7 +88,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	 * @return an InputStream instance
 	 * @throws IOException
 	 */
-	protected InputStream openStream() throws IOException {
+	protected final InputStream openStream() throws IOException {
 		InputStream in;
 		if (isSystemResource()) {
 			in = getInputStream();
@@ -88,6 +98,18 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 		return in;
 	}
 
+	/**
+	 * Indicate whether the reader is at the beginning of the file or the stream.
+	 * @return a boolean
+	 */
+	public boolean isAtBeginning() {return linePointer == 0 && !isClosed();}
+
+	
+	/**
+	 * Reset the reader to the beginning of the file or the stream.
+	 * @throws IOException if it fails to reset the streams
+	 */
+	public abstract void reset() throws IOException;
 	
 	/**
 	 * This method returns the number of records that contains the file read by the FormatReader instance.
@@ -172,4 +194,22 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	 * @return a boolean
 	 */
 	protected boolean isSystemResource() {return isSystemResource;}
+	
+	/*
+	 * This method should close all internal streams.
+	 */
+	protected abstract void closeInternalStream();
+	
+	@Override
+	public final void close() {
+		isClosed = true;
+		closeInternalStream();
+	}
+	
+	/**
+	 * Indicate whether the stream has been closed.
+	 * @return a boolean
+	 */
+	public final boolean isClosed() {return isClosed;}
+	
 }

@@ -68,7 +68,10 @@ class GroupingRegistryReader extends AbstractGenericTask implements Serializable
 		if (stratumEnum != null && importFieldManager.getField(stratumEnum).getMatchingFieldIndex() != -1) {		// means a stratum field has been selected
 			List<Integer> index = null;
 			try {
-				FormatReader formatReader = importFieldManager.instantiateFormatReader();
+				FormatReader formatReader = importFieldManager.getFormatReader();
+				if (!formatReader.isAtBeginning()) {
+					formatReader.reset();
+				}
 				double progressFactor = (double) 100d / formatReader.getRecordCount();
 
 				// Now, lets start reading the rows

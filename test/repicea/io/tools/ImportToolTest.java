@@ -7,7 +7,7 @@ import java.util.List;
 
 import org.junit.Test;
 import repicea.io.FileUtility;
-import repicea.io.ImportTst;
+import repicea.io.ImportTest;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -22,7 +22,7 @@ public class ImportToolTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testStrataFileReading() throws Exception {
-		String sourcePath = ObjectUtility.getPackagePath(ImportTst.class) + "TEST6152.accdb";
+		String sourcePath = ObjectUtility.getPackagePath(ImportTest.class) + "TEST6152.accdb";
 		
 		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
 		String testIfe = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "test.ife";

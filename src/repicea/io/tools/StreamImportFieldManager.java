@@ -20,9 +20,8 @@ package repicea.io.tools;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.Vector;
 
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
@@ -53,12 +52,6 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		protected void addField(QueueReaderFormatField field) {
 			super.addField(field);
 		}
-		
-//		@Override 
-//		protected List<QueueReaderFormatField> getFieldList() {
-//			return super.getFieldList();
-//		}
-		
 	}
 	
 	/**
@@ -68,19 +61,22 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	 */
 	public static class QueueReader extends FormatReader<QueueReaderHeader> {
 
-		private final ConcurrentLinkedQueue<Object[]> recordQueue;
+		private final Vector<Object[]> recordQueue;
 		
 		QueueReader(){
 			setFormatHeader(new QueueReaderHeader());
-			recordQueue = new ConcurrentLinkedQueue<Object[]>();
+			recordQueue = new Vector<Object[]>();
+			linePointer = 0;
 		} 
 
 		@Override
-		public void close() throws IOException {}
-
-		@Override
 		public Object[] nextRecord(int skipThisNumberOfLines) throws IOException {
-			return recordQueue.poll();
+			linePointer += skipThisNumberOfLines;
+			if (linePointer >= recordQueue.size()) {
+				return null;
+			} else {
+				return recordQueue.get(linePointer++);
+			}
 		}
 		
 		@Override
@@ -94,24 +90,16 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		 */
 		public void addRecord(Object[] record) {recordQueue.add(record);}
 
+		@Override
+		public void reset() throws IOException {linePointer = 0;}
 
-		/** 
-		 * Provide a copy of the record for eventual re-insertion.
-		 * @return a list of arrays of objects
-		 */
-		List<Object[]> getCopyOfRecords() {
-			List<Object[]> copy = new ArrayList<Object[]>();
-			for (Object[] record : recordQueue) {
-				copy.add(Arrays.copyOf(record, record.length));
-			}
-			return copy;
-		}
-		
+		@Override
+		protected void closeInternalStream() {recordQueue.clear();}
 	}
 	
-	private final QueueReader streamReader;
+//	private final QueueReader streamReader;
 	private final Enum<?> groupFieldEnum;
-	private List<Object[]> backup;
+//	private List<Object[]> backup;
 	
 	/**
 	 * Constructor. Takes the recordReader object and extracts all the ImportFieldElement. 
@@ -121,8 +109,7 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	 */
 	public StreamImportFieldManager(REpiceaRecordReader recordReader) throws Exception {
 		super(recordReader.defineFieldsToImport(), QueueReader.NOT_USING_FILES);
-		streamReader = new QueueReader();
-		QueueReaderHeader header = streamReader.getHeader();
+		QueueReaderHeader header = getFormatReader().getHeader();
 		groupFieldEnum = recordReader.defineGroupFieldEnum();
 		
 		List<ImportFieldElement> mandatoryFields = getFieldsByType(false);
@@ -141,30 +128,14 @@ public class StreamImportFieldManager extends ImportFieldManager {
 			i++;
 		}
 	}
-
-	/** 
-	 * Keep a copy of the records in a private member for eventual re insertion in the stream.
-	 */
-	public void backupStream() {
-		backup = streamReader.getCopyOfRecords();
-	}
-
-	/**
-	 * Reinsert the backup into the stream if the backup exists and the queue is null.
-	 * @return a boolean true if the backup has been reinserted or false if the backup is
-	 * null or the queue is not empty yet.
-	 */
-	public boolean restream() {
-		if (backup != null && !backup.isEmpty() && streamReader.recordQueue.isEmpty()) {
-			for (Object[] record : backup) {
-				streamReader.addRecord(record);
-			}
-			return true;
-		}
-		return false;
+	
+	@Override
+	protected QueueReader getFormatReader() {
+		return (QueueReader) super.getFormatReader();
 	}
 	
-	
+
+
 	private List<ImportFieldElement> getFieldsByType(boolean isOptional) {
 		List<ImportFieldElement> fields = new ArrayList<ImportFieldElement>();
 		for (ImportFieldElement ife : getFields()) {
@@ -214,15 +185,10 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	}
 	
 	@Override
-	protected QueueReader instantiateFormatReader() {
-		return getFormatReader();
+	protected FormatReader<?> instantiateFormatReader() {
+		return new QueueReader();
 	}
 
-	/**
-	 * Return the QueueReader embedded in this instance.
-	 * @return a QueueReader instance
-	 */
-	public QueueReader getFormatReader() {return streamReader;}
 	
 
 	
