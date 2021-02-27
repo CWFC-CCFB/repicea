@@ -124,6 +124,17 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	protected ImportFieldManager() {}
 	
 	/**
+	 * Provide the number of records in the file. <br>
+	 * <br>
+	 * Note that it is the total number of records and not
+	 * only those of a particular stratum if a stratum field has been specified.
+	 * @return an integer
+	 */
+	public int getNumberOfRecords() {
+		return getFormatReader().getRecordCount();
+	}
+	
+	/**
 	 * This method sets the index of the fields.
 	 */
 	public void setImportElementIndex() {
