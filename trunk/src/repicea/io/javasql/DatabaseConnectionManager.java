@@ -138,7 +138,7 @@ public class DatabaseConnectionManager {
 	private static Connection getConnectionFromThisMSACCESSDataBase(String dataBaseUrl) throws IOException {
 		try {
 //			ClassLoader.getSystemClassLoader().loadClass("net.ucanaccess.jdbc.UcanaccessDriver");
-			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+//			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
 			FileType f = GFileFilter.getFileType(dataBaseUrl);
 			if (f == FileType.ACCDB || f == FileType.MDB) {
 				String connectionString = "jdbc:ucanaccess://" + dataBaseUrl;
@@ -150,9 +150,9 @@ public class DatabaseConnectionManager {
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new IOException("Error connecting to the database!");
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-			throw new IOException("Unable to load the odbc drivers!");
+//		} catch (ClassNotFoundException e) {
+//			e.printStackTrace();
+//			throw new IOException("Unable to load the odbc drivers!");
 		}
 	}
 

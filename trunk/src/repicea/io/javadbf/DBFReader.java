@@ -82,22 +82,28 @@ public class DBFReader extends FormatReader<DBFHeader> {
 	public DBFReader(String filename) throws IOException {
 		super(filename);
 		try {
-			dataInputStream = new DataInputStream(openStream());
-			setFormatHeader(new DBFHeader());
-			getHeader().read(this.dataInputStream);
-
-			/* it might be required to leap to the start of records at times */
-			int t_dataStartIndex = getHeader().headerLength - (32 + (32 * getFieldCount())) - 1;
-			if(t_dataStartIndex > 0) {
-				dataInputStream.skip( t_dataStartIndex);
-			}
+			reset();
 		} catch (IOException e) {
 			close();
 			throw new DBFException(e.getMessage());	
 		}
 	}
 	
-	
+	public void reset() throws IOException {
+		if (dataInputStream != null) {
+			close();
+		}
+		dataInputStream = new DataInputStream(openStream());
+		setFormatHeader(new DBFHeader());
+		getHeader().read(this.dataInputStream);
+
+		/* it might be required to leap to the start of records at times */
+		int t_dataStartIndex = getHeader().headerLength - (32 + (32 * getFieldCount())) - 1;
+		if(t_dataStartIndex > 0) {
+			dataInputStream.skip( t_dataStartIndex);
+		}
+		linePointer = 0;
+	}
 
 	/* 
 	 If the library is used in a non-latin environment use this method to set 
@@ -141,17 +147,6 @@ public class DBFReader extends FormatReader<DBFHeader> {
 	}
 
 	
-//	/**
-//		Returns the number of field in the DBF.
-//	*/
-//	@Override
-//	public int getFieldCount() throws DBFException {
-//		try {
-//			return super.getFieldCount();
-//		} catch (Exception e) {
-//			throw new DBFException(e.getMessage());
-//		}
-//	}
 
 	/**
 		Reads the returns the next row in the DBF stream.
@@ -160,17 +155,18 @@ public class DBFReader extends FormatReader<DBFHeader> {
 	*/
 	public Object[] nextRecord(int skipThisNumberOfLines) throws DBFException {
 		try {
+			int rowToReachBeforeReading = linePointer + skipThisNumberOfLines;
 			Object recordObjects[] = new Object[getFieldCount()];
 			boolean isDeleted = false;
 			boolean wentThroughLoopOnce = false;
-			int lineCount = 0;
+//			int lineCddount = 0;
 			do {
 				if (isDeleted || wentThroughLoopOnce) {
 					if (isDeleted)
 						dataInputStream.skip(getHeader().recordLength - 1);
-					else if (lineCount < skipThisNumberOfLines) {
+					else if (linePointer < rowToReachBeforeReading) {
 						dataInputStream.skip(getHeader().recordLength - 1);
-						lineCount++;
+						linePointer++;
 					}
 				}
 	
@@ -181,7 +177,7 @@ public class DBFReader extends FormatReader<DBFHeader> {
 
 				wentThroughLoopOnce = true;						// make sure the process went through this loop before checking 
 				isDeleted = (t_byte == '*');
-			} while (isDeleted || lineCount < skipThisNumberOfLines);
+			} while (isDeleted || linePointer < rowToReachBeforeReading);
 	
 			for (int i = 0; i < getFieldCount(); i++) {
 				switch (getHeader().getField(i).getDataType()) {
@@ -278,10 +274,10 @@ public class DBFReader extends FormatReader<DBFHeader> {
 	
 	
 	@Override
-	public void close() {
+	public void closeInternalStream() {
 		try {
 			dataInputStream.close(); 
 		} catch (IOException e) {}
 	}
-	
+
 }

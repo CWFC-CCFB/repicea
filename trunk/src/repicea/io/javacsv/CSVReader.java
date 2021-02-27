@@ -30,7 +30,6 @@ import repicea.util.ObjectUtility;
 public class CSVReader extends FormatReader<CSVHeader> {
 
 	private BufferedReader bufferedReader;
-	private int linePointer;
 	private final Charset currentCharset;
 
 	/**
@@ -55,14 +54,24 @@ public class CSVReader extends FormatReader<CSVHeader> {
 		} else {
 			currentCharset = Charset.defaultCharset();
 		}
+		reset();
+	}
+
+	@Override
+	public void reset() throws IOException {
+		if (bufferedReader != null) {
+			close();
+		}
 		bufferedReader = openReader();
 		setFormatHeader(new CSVHeader());
 		getHeader().read(bufferedReader);
 		bufferedReader = openReader();		// reopen the stream because the header has read the whole file
 		bufferedReader.readLine();			// skip the first line which is the header
-		linePointer = 1;
+		linePointer = 0;
 	}
-
+	
+	
+	
 	@Override
 	public Object[] nextRecord(int skipThisNumberOfLines) throws IOException {
 		int numberOfLinesSkipped = 0;
@@ -75,7 +84,7 @@ public class CSVReader extends FormatReader<CSVHeader> {
 		if (line != null) {								
 			List<String> splitter = ObjectUtility.splitLine(line, getHeader().getToken());
 			if (splitter.size() > getFieldCount()) {
-				throw new IOException("The number of fields in this line is larger than the number of fields in the header: line " + linePointer + ".");
+				throw new IOException("The number of fields in this line is larger than the number of fields in the header: line " + (linePointer + 1) + ".");
 			}
 			linePointer++;
 			return splitter.toArray();
@@ -90,8 +99,9 @@ public class CSVReader extends FormatReader<CSVHeader> {
 		return new BufferedReader(inputStreamReader);
 	}
 	
+	
 	@Override
-	public void close() {
+	protected void closeInternalStream() {
 		try {
 			bufferedReader.close();
 		} catch (IOException e) {}

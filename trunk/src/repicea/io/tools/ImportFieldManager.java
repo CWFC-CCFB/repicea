@@ -171,20 +171,20 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public void setFileSpecifications(String... fileSpec) throws IOException {
+	private void setFileSpecifications(String... fileSpec) throws IOException {
 		this.fileSpec = fileSpec;
-		if (!QueueReader.NOT_USING_FILES.equals(fileSpec[0])) {
-			try {
-				formatReader = FormatReader.createFormatReader(getFileSpecifications());
+		try {
+			formatReader = instantiateFormatReader();
+			if (!QueueReader.NOT_USING_FILES.equals(fileSpec[0])) {
 				synchonizeImportFieldElementsWithAvailableFields();
-				formatReader.close();
-			} catch (FileNotFoundException e1) {
-				System.out.println("Could not find file : " + getFileSpecifications()[0]);
-				throw e1;
-			} catch (IOException e2) {
-				System.out.println("Error reading file : " + getFileSpecifications()[0]);
-				throw e2;
 			}
+//			formatReader.close();
+		} catch (FileNotFoundException e1) {
+			System.out.println("Could not find file : " + getFileSpecifications()[0]);
+			throw e1;
+		} catch (IOException e2) {
+			System.out.println("Error reading file : " + getFileSpecifications()[0]);
+			throw e2;
 		}
 	}
 
@@ -364,35 +364,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		return (Map<Enum<?>, List<ImportFieldElement>>) obj;
 	}
 	
-//	/**
-//	 * This method is called by the UI. It loads a serialized Map and checks if the fields of this
-//	 * map are also present in the m_ImportVec member. If they are, their field names are imputed to the ImportFieldElement
-//	 * in the m_ImportVec member. This ensure that the requested structure of data remains even if the loaded map
-//	 * is totally inconsistent.
-//	 * @param filename the file containing the serialized Map
-//	 * @throws XmlMarshallException 
-//	 * @throws FileNotFoundException 
-//	 */
-//	protected void loadImportFieldElements(String filename) throws IOException, XmlMarshallException {
-//		Map<Enum<?>, List<ImportFieldElement>> loadedMap = ImportFieldManager.loadImportFieldElementMap(filename);
-//		for (Enum<?> enumVar : importFieldElementMap.keySet()) {
-//			List<ImportFieldElement> loadedImportFieldElements = loadedMap.get(enumVar);
-//			List<ImportFieldElement> importFieldElements = importFieldElementMap.get(enumVar);
-//			if (loadedImportFieldElements != null && !importFieldElements.isEmpty()) {
-//				for (ImportFieldElement ife : importFieldElements) {
-//					Enum<?> fieldID = ife.getFieldID();
-//					for (ImportFieldElement loadedIfe : loadedImportFieldElements) {
-//						if (loadedIfe.getFieldID() == fieldID) { // if the match is found then
-//							ife.setFieldMatch(new FakeField(loadedIfe.getFieldName()));
-//							break;
-//						}
-//					}
-//				}
-//			}
-//		}
-//		
-//		synchonizeImportFieldElementsWithAvailableFields();
-//	}
 
 	@Override
 	public ImportFieldManagerDialog getUI(Container parent) {
@@ -481,5 +452,11 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		return fieldDescriptions;
 	}
 
+	/**
+	 * Provide the FormatReader instance which is always re-instantiated when creating the instance or
+	 * when deserializing.
+	 * @return a FormatReader type instance
+	 */
+	protected FormatReader getFormatReader() {return formatReader;}
 	
 }

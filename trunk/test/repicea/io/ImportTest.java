@@ -3,9 +3,13 @@ package repicea.io;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import com.sun.prism.impl.Disposer.Record;
 
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
@@ -13,7 +17,7 @@ import repicea.io.javasql.SQLReader;
 import repicea.lang.REpiceaSystem;
 import repicea.util.ObjectUtility;
 
-public class ImportTst {
+public class ImportTest {
 	
 	/**
 	 * This test reads to copy of the same file: a DBF copy and a CSV copy. Each line read is compared across the files to make
@@ -22,7 +26,7 @@ public class ImportTst {
 	 */
 	@Test
 	public void CSVReaderAndDBFReaderReadTheSameTest() throws IOException {
-		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
 		DBFReader dbfReader = new DBFReader(filePath + "TEST6152.DBF");
 		CSVReader csvReader = new CSVReader(filePath + "TEST6152.csv");
 		assertEquals("Number of records", dbfReader.getRecordCount(), csvReader.getRecordCount());
@@ -64,7 +68,7 @@ public class ImportTst {
 	 */
 	@Test
 	public void CSVReaderAndSQLReaderReadTheSameTestAccessVersion() throws IOException {
-		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
 		
 		String sourcePath = filePath + "TEST6152.accdb";
 		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
@@ -114,7 +118,7 @@ public class ImportTst {
 	 */
 	@Test
 	public void CSVReaderAndSQLReaderReadTheSameTest2007AccessVersion() throws IOException {
-		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
 		
 		String sourcePath = filePath + "TEST6152.accdb";
 		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
@@ -167,7 +171,7 @@ public class ImportTst {
 		String[] inputSpec = new String[2];
 		String[] outputSpec = new String[2];
 
-		String filePath = ObjectUtility.getPackagePath(ImportTst.class);
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
 		String inputFilename = filePath + filename;
 		String outputFilename = filePath + "tmp" + fileFilter.getExtension();
 		inputSpec[0] = inputFilename;
@@ -225,24 +229,26 @@ public class ImportTst {
 		read2 = reader2.nextRecord();
 		int i = 0;
 		while (read1 != null || read2 != null) {
-			for (int j = 0; j < reader1.getFieldCount(); j++) {
-				Object comparCSV1;
-				Object comparCSV2;
-				if (read1[j] instanceof Double) {
-					comparCSV1 = Double.parseDouble(read1[j].toString());
-					comparCSV2 = Double.parseDouble(read2[j].toString());
-				} else {
-					comparCSV1 = read1[j].toString().trim();
-					comparCSV2 = read2[j].toString().trim();
-				}
-				assertEquals("Comparing record " + i + "; field no " + j, comparCSV1, comparCSV2);
-			}
+			CompareTwoRecords(read1, read2, reader1.getFieldCount());
 			read1 = reader1.nextRecord();
 			read2 = reader2.nextRecord();
 		}
 	}
 
-	
+	private static void CompareTwoRecords(Object[] read1, Object[] read2, int expectedFieldCount) {
+		for (int j = 0; j < expectedFieldCount; j++) {
+			Object comparCSV1;
+			Object comparCSV2;
+			if (read1[j] instanceof Double) {
+				comparCSV1 = Double.parseDouble(read1[j].toString());
+				comparCSV2 = Double.parseDouble(read2[j].toString());
+			} else {
+				comparCSV1 = read1[j].toString().trim();
+				comparCSV2 = read2[j].toString().trim();
+			}
+			assertEquals("Comparing records", comparCSV1, comparCSV2);
+		}
+	}
 	
 	/**
 	 * This test write a copy of a CSV file and tests if it is identical to this original.
@@ -250,7 +256,7 @@ public class ImportTst {
 	 */
 	@Test
 	public void CSVReaderAndWriterReadTheSameTest() throws IOException {
-		ImportTst.ReaderAndWriterReadTheSameTest("TEST6152.csv");
+		ImportTest.ReaderAndWriterReadTheSameTest("TEST6152.csv");
 	}
 	
 
@@ -260,7 +266,7 @@ public class ImportTst {
 	 */
 	@Test
 	public void DBFReaderAndWriterReadTheSameTest() throws IOException {
-		ImportTst.ReaderAndWriterReadTheSameTest("TEST6152.DBF");
+		ImportTest.ReaderAndWriterReadTheSameTest("TEST6152.DBF");
 	}
 	
 	/**
@@ -271,9 +277,87 @@ public class ImportTst {
 	@Ignore // just too long on Windows
 	@Test
 	public void MSACCESSReaderAndWriterReadTheSameTest() throws IOException {
-		ImportTst.ReaderAndWriterReadTheSameTest("TEST6152.accdb");
+		ImportTest.ReaderAndWriterReadTheSameTest("TEST6152.accdb");
 	}
 	
+	@Test
+	public void CSVReaderResetTest() throws IOException {
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
+		String inputFilename = filePath + "TEST6152.csv";
 
+		CSVReader reader = (CSVReader) FormatReader.createFormatReader(inputFilename);
+		List<Object[]> firstRun = new ArrayList<Object[]>();
+		for (int i = 0; i < 1000; i++) {
+			firstRun.add(reader.nextRecord());
+		}
+		List<Object[]> secondRun = new ArrayList<Object[]>();
+		reader.reset();
+		for (int i = 0; i < 1000; i++) {
+			secondRun.add(reader.nextRecord());
+		}
+		
+		for (int i = 0; i < 1000; i++) {
+			Object[] read1 = firstRun.get(i);
+			Object[] read2 = secondRun.get(i);
+			CompareTwoRecords(read1, read2, reader.getFieldCount());
+		}
+		
+	}
 
+	@Test
+	public void DBFReaderResetTest() throws IOException {
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
+		String inputFilename = filePath + "TEST6152.DBF";
+
+		DBFReader reader = (DBFReader) FormatReader.createFormatReader(inputFilename);
+		List<Object[]> firstRun = new ArrayList<Object[]>();
+		for (int i = 0; i < 1000; i++) {
+			firstRun.add(reader.nextRecord());
+		}
+		List<Object[]> secondRun = new ArrayList<Object[]>();
+		reader.reset();
+		for (int i = 0; i < 1000; i++) {
+			secondRun.add(reader.nextRecord());
+		}
+		
+		for (int i = 0; i < 1000; i++) {
+			Object[] read1 = firstRun.get(i);
+			Object[] read2 = secondRun.get(i);
+			CompareTwoRecords(read1, read2, reader.getFieldCount());
+		}
+		
+	}
+
+	
+	@Test
+	public void SQLReaderResetTest() throws IOException {
+		String filePath = ObjectUtility.getPackagePath(ImportTest.class);
+		
+		String sourcePath = filePath + "TEST6152.accdb";
+		String targetPath = REpiceaSystem.getJavaIOTmpDir() + "TEST6152.accdb";
+
+		if (!FileUtility.copy(sourcePath, targetPath)) {
+			throw new IOException("Unable to copy the database file to tmp directory!");
+		}
+		
+		SQLReader reader = (SQLReader) FormatReader.createFormatReader(targetPath, "TEST6152");
+		List<Object[]> firstRun = new ArrayList<Object[]>();
+		for (int i = 0; i < 1000; i++) {
+			firstRun.add(reader.nextRecord());
+		}
+		List<Object[]> secondRun = new ArrayList<Object[]>();
+		reader.reset();
+		for (int i = 0; i < 1000; i++) {
+			secondRun.add(reader.nextRecord());
+		}
+		
+		for (int i = 0; i < 1000; i++) {
+			Object[] read1 = firstRun.get(i);
+			Object[] read2 = secondRun.get(i);
+			CompareTwoRecords(read1, read2, reader.getFieldCount());
+		}
+
+		
+	}
+	
 }

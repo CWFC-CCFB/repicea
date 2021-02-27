@@ -24,7 +24,7 @@ import java.util.concurrent.CancellationException;
 
 import javax.swing.UIManager;
 
-import repicea.io.ImportTst;
+import repicea.io.ImportTest;
 import repicea.io.tools.ImportFieldElement.FieldType;
 import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.ObjectUtility;
@@ -338,7 +338,7 @@ public class RecordReaderImpl extends REpiceaRecordReader {
 	@SuppressWarnings("unused")
 	public static void main(String[] args) throws Exception {
 		setLookAndFeel();
-		String sourcePath = ObjectUtility.getPackagePath(ImportTst.class) + "TEST6152.csv";
+		String sourcePath = ObjectUtility.getPackagePath(ImportTest.class) + "TEST6152.csv";
 		
 		String testIfe = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "test.ife";
 

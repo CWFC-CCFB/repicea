@@ -35,7 +35,6 @@ public class SQLReader extends FormatReader<SQLHeader> {
 
 	private Connection dbConnection;
 	private String table;
-	private int rowIndex;
 	private Statement statement;
 	private ResultSet resultSet;
 	
@@ -54,7 +53,7 @@ public class SQLReader extends FormatReader<SQLHeader> {
 			this.table = table;
 			setFormatHeader(new SQLHeader());
 			getHeader().read(statement, table);
-			rowIndex = 1;
+			linePointer = 0;
 			statement.close();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -62,13 +61,19 @@ public class SQLReader extends FormatReader<SQLHeader> {
 			throw new IOException("Unable to connect to the database!" + e);
 		}
 	}
+
+	@Override
+	public void reset() throws IOException {
+		resultSet = null;		// the resultSet is set to null so that the next call to nextRecord(int) will re-instantiate this member 
+		linePointer = 0;
+	}
 	
 	@Override
-	public void close() throws IOException {
+	public void closeInternalStream() {
 		try {
 			DatabaseConnectionManager.removeUser(this);
 		} catch (SQLException e) {
-			throw new IOException("Error while closing the database!" + e);
+			System.out.println("Error while closing the database!");
 		}
 	}
 	
@@ -86,7 +91,7 @@ public class SQLReader extends FormatReader<SQLHeader> {
 				if (!resultSet.next()) {
 					return null;
 				} else {
-					rowIndex++;
+					linePointer++;
 				}
 			}
 			
@@ -112,14 +117,9 @@ public class SQLReader extends FormatReader<SQLHeader> {
 	 * @return an integer
 	 */
 	public int getRowIndex() {
-		return rowIndex;
+		return linePointer + 1;
 	}
-	
-	
-//	public static void main(String[] args) throws IOException {
-//		String filename = "C:\\Users\\admin\\Documents\\7_Developpement\\ModellingProjects\\PEPquebec\\DonneesPEP20190327\\PEP.MDB";
-//		SQLReader reader = new SQLReader(filename, "STATION_PE");
-//	}
+
 	
 	
 }
