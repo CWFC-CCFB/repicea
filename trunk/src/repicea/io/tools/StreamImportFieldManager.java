@@ -130,7 +130,7 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	}
 	
 	@Override
-	protected QueueReader getFormatReader() {
+	public QueueReader getFormatReader() {
 		return (QueueReader) super.getFormatReader();
 	}
 	
