@@ -468,6 +468,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * when deserializing.
 	 * @return a FormatReader type instance
 	 */
-	protected FormatReader getFormatReader() {return formatReader;}
+	public FormatReader getFormatReader() {return formatReader;}
 	
 }
