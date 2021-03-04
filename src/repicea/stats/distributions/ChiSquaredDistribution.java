@@ -55,7 +55,7 @@ public final class ChiSquaredDistribution implements Distribution {
 			throw new InvalidParameterException("The variance estimate must be larger than 0!");
 		}
 		Matrix mean = new Matrix(1,1);
-		mean.m_afData[0][0] = meanValue;
+		mean.setValueAt(0, 0, meanValue);
 		this.mean = mean;
 	}
 
@@ -111,10 +111,11 @@ public final class ChiSquaredDistribution implements Distribution {
 		double result;
 		for (int i = 0; i < nRows; i++) {
 			for (int j = i; j < nCols; j++) {
-				result = mean.m_afData[i][j] * mean.m_afData[i][j] + mean.m_afData[i][i] * mean.m_afData[j][j];  
-				varianceMat.m_afData[i][j] = result;
+				result = mean.getValueAt(i, j) * mean.getValueAt(i, j) + 
+						mean.getValueAt(i, i) * mean.getValueAt(j, j);  
+				varianceMat.setValueAt(i, j, result);
 				if (j != i) {
-					varianceMat.m_afData[j][i] = result;
+					varianceMat.setValueAt(j, i, result);
 				}
 			}
 		}

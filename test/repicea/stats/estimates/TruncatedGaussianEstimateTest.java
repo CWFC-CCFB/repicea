@@ -15,7 +15,7 @@ public class TruncatedGaussianEstimateTest {
 		int nbRealizations = 100000;
 		double fact = 1d/nbRealizations;
 		for (int i = 0; i < nbRealizations; i++) {
-			actualMean += estimate.getRandomDeviate().m_afData[0][0] * fact;
+			actualMean += estimate.getRandomDeviate().getValueAt(0, 0) * fact;
 		}
 		double expectedMean = Math.sqrt(2) / Math.sqrt(Math.PI);
 		Assert.assertEquals("Comparing mean of half-normal distribution", expectedMean, actualMean, 5E-3);}
@@ -28,7 +28,7 @@ public class TruncatedGaussianEstimateTest {
 		int nbRealizations = 100000;
 		double fact = 1d/nbRealizations;
 		for (int i = 0; i < nbRealizations; i++) {
-			actualMean += estimate.getRandomDeviate().m_afData[0][0] * fact;
+			actualMean += estimate.getRandomDeviate().getValueAt(0, 0) * fact;
 		}
 		double expectedMean = - Math.sqrt(2) / Math.sqrt(Math.PI);
 		Assert.assertEquals("Comparing mean of half-normal distribution", expectedMean, actualMean, 5E-3);

@@ -17,13 +17,13 @@ public class DistributionTest {
 		int nbReal = 1000000;
 		EmpiricalDistribution npDist = new EmpiricalDistribution(); 
 		Matrix mean = new Matrix(2,1);
-		mean.m_afData[0][0] = 2d;
-		mean.m_afData[1][0] = 3d;
+		mean.setValueAt(0, 0, 2d);
+		mean.setValueAt(1, 0, 3d);
 		Matrix variance = new Matrix(2,2);
-		variance.m_afData[0][0] = 0.5;
-		variance.m_afData[1][0] = 0.4;
-		variance.m_afData[0][1] = 0.4;
-		variance.m_afData[1][1] = 1d;
+		variance.setValueAt(0, 0, 0.5);
+		variance.setValueAt(1, 0, 0.4);
+		variance.setValueAt(0, 1, 0.4);
+		variance.setValueAt(1, 1, 1d);
 		
 		GaussianEstimate estimate = new GaussianEstimate(mean, variance);
 		
@@ -33,7 +33,7 @@ public class DistributionTest {
 		
 		Matrix simulatedMean = npDist.getMean();
 		Matrix res = simulatedMean.subtract(mean);
-		double sse = res.transpose().multiply(res).m_afData[0][0];
+		double sse = res.transpose().multiply(res).getValueAt(0, 0);
 		System.out.println("Squared difference of the means = " + sse);
 		
 		Assert.assertEquals("Testing the means", 0d, sse, 1E-4);
@@ -66,8 +66,8 @@ public class DistributionTest {
 		Matrix simulatedVariance = estimate.getVariance();
 		Matrix expectedMean = distribution.getMean();
 		Matrix expectedVariance = distribution.getVariance();
-		Assert.assertEquals("Testing the means", expectedMean.m_afData[0][0], simulatedMean.m_afData[0][0], 2E-3);
-		Assert.assertEquals("Testing the variances", expectedVariance.m_afData[0][0], simulatedVariance.m_afData[0][0], 2E-3);
+		Assert.assertEquals("Testing the means", expectedMean.getValueAt(0, 0), simulatedMean.getValueAt(0, 0), 2E-3);
+		Assert.assertEquals("Testing the variances", expectedVariance.getValueAt(0, 0), simulatedVariance.getValueAt(0, 0), 2E-3);
 
 	}
 

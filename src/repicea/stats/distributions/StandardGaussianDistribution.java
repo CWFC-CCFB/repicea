@@ -40,7 +40,7 @@ public class StandardGaussianDistribution implements Distribution {
 	protected StandardGaussianDistribution() {
 		Matrix mu = new Matrix(1,1);
 		Matrix sigma2 = new Matrix(1,1);
-		sigma2.m_afData[0][0] = 1d;
+		sigma2.setValueAt(0, 0, 1d);
 		setMean(mu);
 		setVariance(sigma2);
 	}
@@ -120,8 +120,9 @@ public class StandardGaussianDistribution implements Distribution {
 			throw new UnsupportedOperationException("Vector y is either null or its dimensions are different from those of mu!");
 		} else {
 			if (!isMultivariate()) {
-				double diff =  yValues.m_afData[0][0] - getMu().m_afData[0][0];
-				return 1d / Math.sqrt(2 * Math.PI * sigma2.m_afData[0][0]) * Math.exp(- 0.5 * diff * diff / getSigma2().m_afData[0][0]); 
+				double diff =  yValues.getValueAt(0, 0) - getMu().getValueAt(0, 0);
+				return 1d / Math.sqrt(2 * Math.PI * sigma2.getValueAt(0, 0)) * 
+						Math.exp(- 0.5 * diff * diff / getSigma2().getValueAt(0, 0)); 
 			} else {
 				int k = yValues.m_iRows;
 				Matrix residuals = yValues.subtract(getMu());

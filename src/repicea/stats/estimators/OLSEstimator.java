@@ -50,7 +50,7 @@ public class OLSEstimator implements Estimator {
 		model.setParameters(betaVector.getMean());
 		Matrix residual = model.getResiduals();
 		int degreesOfFreedom = model.getDataStructure().getNumberOfObservations() - betaVector.getMean().m_iRows;
-		double resVar = residual.transpose().multiply(residual).scalarMultiply(1d / degreesOfFreedom).m_afData[0][0];
+		double resVar = residual.transpose().multiply(residual).scalarMultiply(1d / degreesOfFreedom).getValueAt(0, 0);
 		residualVariance = new VarianceEstimate(degreesOfFreedom, resVar);
 		((GaussianEstimate) betaVector).setVariance(inverseProduct.scalarMultiply(resVar));
 		return true;

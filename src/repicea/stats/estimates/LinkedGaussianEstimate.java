@@ -31,10 +31,10 @@ public class LinkedGaussianEstimate extends GaussianEstimate {
 		variance.setSubMatrix(secondEstimate.getVariance(), nbParms1, nbParms1);
 		for (int i = nbParms1; i < (nbParms1 + nbParms2); i++) {
 			for (int j = 0; j < nbParms1; j++) {
-				double var1 = variance.m_afData[i][i];
-				double var2 = variance.m_afData[j][j];
-				variance.m_afData[i][j] = Math.sqrt(var1 * var2) * correlation;
-				variance.m_afData[j][i] = variance.m_afData[i][j];
+				double var1 = variance.getValueAt(i, i);
+				double var2 = variance.getValueAt(j, j);
+				variance.setValueAt(i, j, Math.sqrt(var1 * var2) * correlation);
+				variance.setValueAt(j, i, variance.getValueAt(i, j));
 			}
 		}
 

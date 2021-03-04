@@ -68,7 +68,7 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	 */
 	public double getResidualVariance() {
 		if (getEstimator() instanceof OLSEstimator) {
-			return ((OLSEstimator) getEstimator()).getResidualVariance().getMean().m_afData[0][0];
+			return ((OLSEstimator) getEstimator()).getResidualVariance().getMean().getValueAt(0, 0);
 		} else {
 			return -1d;
 		}

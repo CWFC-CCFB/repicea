@@ -160,21 +160,21 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 												Matrix lowerCholeskyTriangle) {
 		Integer parameterIndex = parameterIndices.get(0);
 		if (parameterIndices.size() == 1) {
-			return getOneDimensionIntegral(functionToEvaluate, parameterIndex, lowerCholeskyTriangle.m_afData[0][0]);
+			return getOneDimensionIntegral(functionToEvaluate, parameterIndex, lowerCholeskyTriangle.getValueAt(0, 0));
 		} else {
 			List<Integer> remainingIndices = parameterIndices.subList(1, parameterIndices.size());
 			double originalValue = functionToEvaluate.getParameterValue(parameterIndices.get(0));
 			double sum = 0;
 			double value;
 			for (int i = 0; i < getXValues().size(); i++) {
-				double tmp = getXValues().get(i) * lowerCholeskyTriangle.m_afData[0][0] * Math.sqrt(2d);
+				double tmp = getXValues().get(i) * lowerCholeskyTriangle.getValueAt(0, 0) * Math.sqrt(2d);
 				functionToEvaluate.setParameterValue(parameterIndex, originalValue + tmp);
 				List<Double> originalValues = new ArrayList<Double>();
 				for (Integer index : remainingIndices) {
 					double original = functionToEvaluate.getParameterValue(index);
 					originalValues.add(original);
 					int indexInCholesky = parameterIndices.indexOf(index);
-					functionToEvaluate.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.m_afData[indexInCholesky][0]);
+					functionToEvaluate.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.getValueAt(indexInCholesky, 0));
 				}
 				Matrix subCholesky = lowerCholeskyTriangle.getSubMatrix(1, lowerCholeskyTriangle.m_iRows - 1, 1, lowerCholeskyTriangle.m_iCols - 1);
 				value = getMultiDimensionIntegral(functionToEvaluate,

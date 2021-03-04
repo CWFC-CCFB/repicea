@@ -174,11 +174,11 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 				for (int i = 0; i < getNumberOfObservations(); i++) {
 					for (int j = 0; j < effects.size(); j++) {
 						if (effects.get(j).equals("1")) {
-							matrixZ.m_afData[i][j] = 1;
+							matrixZ.setValueAt(i, j, 1d);
 						} else {
 							String effectName = effects.get(j);
 							int indexOfEffectName = dataSet.getIndexOfThisField(effectName);
-							matrixZ.m_afData[i][j] = (Double) dataSet.getValueAt(i, indexOfEffectName);
+							matrixZ.setValueAt(i, j, (Double) dataSet.getValueAt(i, indexOfEffectName));
 						}
 					}
 				}

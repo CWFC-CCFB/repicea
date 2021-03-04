@@ -94,7 +94,7 @@ class SpearmanCorrelationCoefficient {
 		Matrix residuals = model.getResiduals();
 		List<SpearmanRankingUnit> spearmanRankingUnits = new ArrayList<SpearmanRankingUnit>();
 		for (int i = 0; i < residuals.m_iRows; i++) {
-			spearmanRankingUnits.add(new SpearmanRankingUnit(residuals.m_afData[i][0]));
+			spearmanRankingUnits.add(new SpearmanRankingUnit(residuals.getValueAt(i, 0)));
 		}
 		
 		CorrelationEstimate[] output;

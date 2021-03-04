@@ -100,16 +100,11 @@ public class HosmerLemeshow {
 	private void scanResponseVariable(GeneralizedLinearModel glm) {
 		Matrix responseVector = glm.y;
 		for (int i = 0; i < responseVector.m_iRows; i++) {
-			if (responseVector.m_afData[i][0] != 0d && responseVector.m_afData[i][0] != 1d) {
+			if (responseVector.getValueAt(i, 0) != 0d && responseVector.getValueAt(i, 0) != 1d) {
 				throw new InvalidParameterException("The response variable must be either 0 or 1!");
 			}
 		}
 	}
-
-
-
-
-
 
 
 	/**
@@ -127,7 +122,7 @@ public class HosmerLemeshow {
 		Matrix observed = glm.getDataStructure().getVectorY();
 		Matrix predicted = glm.getPredicted();
 		for (int i = 0; i < observed.m_iRows; i++) {
-			couplets.add(new Couplet(observed.m_afData[i][0], predicted.m_afData[i][0]));
+			couplets.add(new Couplet(observed.getValueAt(i, 0), predicted.getValueAt(i, 0)));
 		}
 		
 		Collections.sort(couplets);

@@ -38,7 +38,7 @@ public interface DrainageGroupProvider {
 		
 		DrainageGroup() {
 			dummy = new Matrix(1,4);
-			dummy.m_afData[0][this.ordinal()] = 1d;
+			dummy.setValueAt(0, ordinal(), 1d);
 		}
 
 		public Matrix getDrainageDummy() {return dummy;}

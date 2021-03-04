@@ -61,7 +61,7 @@ public class StudentTDistribution implements Distribution {
 		this.degreesOfFreedom = degreesOfFreedom;
 		Matrix mu = new Matrix(1,1);
 		Matrix variance = new Matrix(1,1);
-		variance.m_afData[0][0] = 1d;
+		variance.setValueAt(0, 0, 1d);
 		setMean(mu);
 		setVariance(variance);
 	}
@@ -77,8 +77,8 @@ public class StudentTDistribution implements Distribution {
 		Matrix realization = new Matrix(nbRows,1);
 		for (int i = 0; i < nbRows; i++) {
 			double deviate = StatisticalUtility.getRandom().nextStudentT(degreesOfFreedom);
-			double scaledDeviate = getStandardDeviation().m_afData[i][i] * deviate + getMean().m_afData[i][0]; 
-			realization.m_afData[i][0] = scaledDeviate;
+			double scaledDeviate = getStandardDeviation().getValueAt(i, i) * deviate + getMean().getValueAt(i, 0); 
+			realization.setValueAt(i, 0, scaledDeviate);
 		}
 		return realization;
 	}

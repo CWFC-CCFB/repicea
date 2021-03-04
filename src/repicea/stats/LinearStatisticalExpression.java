@@ -52,7 +52,7 @@ public final class LinearStatisticalExpression extends AbstractMathematicalFunct
 		}
 		
 		for (int i = 0; i < getNumberOfVariables(); i++) {
-			gradient.m_afData[i][0] = getVariableValue(i);							// update the value in the gradient matrix
+			gradient.setValueAt(i, 0, getVariableValue(i));							// update the value in the gradient matrix
 		}
 		
 		return gradient;

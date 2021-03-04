@@ -152,8 +152,8 @@ public class GenericHierarchicalSpatialDataStructure extends GenericHierarchical
 		for (int i = 0; i < nbDimensions - 1; i++) {
 			for (int j = i + 1; j < nbDimensions; j++) {
 				angleRadians = Math.atan(listDiff.get(j) / listDiff.get(i));
-				outputMatrix.m_afData[i][j] = angleRadians;
-				outputMatrix.m_afData[j][i] = angleRadians;
+				outputMatrix.setValueAt(i, j, angleRadians);
+				outputMatrix.setValueAt(j, i, angleRadians);
 			}
 		}
 		

@@ -62,7 +62,7 @@ public class FGMCopulaGLModelTest {
 			copulaModel.setConvergenceCriterion(1E-8);
 			copulaModel.gridSearch(copulaModel.getParameters().m_iRows - 1, -.25d, -.15d, .01);
 			copulaModel.doEstimation();
-			double actual = distanceCopula.getBeta().m_afData[0][0];
+			double actual = distanceCopula.getBeta().getValueAt(0, 0);
 			assertEquals(expectedCopulaValue, actual, 1E-5);
 			double actualLlk = copulaModel.getCompleteLogLikelihood().getValue();
 			assertEquals(expectedLlk, actualLlk, 1E-5);

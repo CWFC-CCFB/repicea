@@ -10,34 +10,34 @@ public class UniformDistributionTest {
 	@Test
 	public void simpleMeanTest() {
 		Matrix lowerBound = new Matrix(2,1);
-		lowerBound.m_afData[0][0] = -2d;
-		lowerBound.m_afData[1][0] = 1d;
+		lowerBound.setValueAt(0, 0, -2d);
+		lowerBound.setValueAt(1, 0, 1d);
 			
 		Matrix upperBound = new Matrix(2,1);
-		upperBound.m_afData[0][0] = 1d;
-		upperBound.m_afData[1][0] = 3d;
+		upperBound.setValueAt(0, 0, 1d);
+		upperBound.setValueAt(1, 0, 3d);
 		
 		UniformDistribution dist = new UniformDistribution(lowerBound, upperBound);
 		Matrix mean = dist.getMean();
-		Assert.assertEquals(-.5, mean.m_afData[0][0], 1E-8);
-		Assert.assertEquals(2d, mean.m_afData[1][0], 1E-8);
+		Assert.assertEquals(-.5, mean.getValueAt(0, 0), 1E-8);
+		Assert.assertEquals(2d, mean.getValueAt(1, 0), 1E-8);
 	}
 	
 	
 	@Test
 	public void simpleVarianceTest() {
 		Matrix lowerBound = new Matrix(2,1);
-		lowerBound.m_afData[0][0] = -2d;
-		lowerBound.m_afData[1][0] = 1d;
+		lowerBound.setValueAt(0, 0, -2d);
+		lowerBound.setValueAt(1, 0, 1d);
 			
 		Matrix upperBound = new Matrix(2,1);
-		upperBound.m_afData[0][0] = 1d;
-		upperBound.m_afData[1][0] = 3d;
+		upperBound.setValueAt(0, 0, 1d);
+		upperBound.setValueAt(1, 0, 3d);
 		
 		UniformDistribution dist = new UniformDistribution(lowerBound, upperBound);
 		Matrix variance = dist.getVariance();
-		Assert.assertEquals(.75, variance.m_afData[0][0], 1E-8);
-		Assert.assertEquals(1d/3, variance.m_afData[1][1], 1E-8);
+		Assert.assertEquals(.75, variance.getValueAt(0, 0), 1E-8);
+		Assert.assertEquals(1d/3, variance.getValueAt(1, 1), 1E-8);
 	}
 
 	
@@ -45,12 +45,12 @@ public class UniformDistributionTest {
 	@Test
 	public void simpleMonteCarloRandomDeviateTest() {
 		Matrix lowerBound = new Matrix(2,1);
-		lowerBound.m_afData[0][0] = -2d;
-		lowerBound.m_afData[1][0] = 1d;
+		lowerBound.setValueAt(0, 0, -2d);
+		lowerBound.setValueAt(1, 0, 1d);
 			
 		Matrix upperBound = new Matrix(2,1);
-		upperBound.m_afData[0][0] = 1d;
-		upperBound.m_afData[1][0] = 3d;
+		upperBound.setValueAt(0, 0, 1d);
+		upperBound.setValueAt(1, 0, 3d);
 		
 		UniformDistribution dist = new UniformDistribution(lowerBound, upperBound);
 		int nbMc = 1000000;
@@ -61,8 +61,8 @@ public class UniformDistributionTest {
 		meanMC = meanMC.scalarMultiply(1d/nbMc);
 		Matrix mean = dist.getMean();
 		Matrix relativeResult = meanMC.elementWiseDivide(mean);
-		Assert.assertEquals(1d, relativeResult.m_afData[0][0], 4E-3);
-		Assert.assertEquals(1d, relativeResult.m_afData[1][0], 4E-3);
+		Assert.assertEquals(1d, relativeResult.getValueAt(0, 0), 4E-3);
+		Assert.assertEquals(1d, relativeResult.getValueAt(1, 0), 4E-3);
 	}
 
 	

@@ -24,6 +24,7 @@ import java.util.Random;
 import repicea.math.Matrix;
 import repicea.stats.distributions.utility.NegativeBinomialUtility;
 
+@SuppressWarnings("serial")
 public class REpiceaRandom extends Random {
 	
 	private static final double OneThird = 1d/3;
@@ -170,9 +171,9 @@ public class REpiceaRandom extends Random {
 		for (int i = 0; i < aMat.m_iRows; i++) {
 			for (int j = 0; j <= i; j++) {
 				if (i == j) {
-					aMat.m_afData[i][j] = Math.sqrt(nextChiSquare(df - i));	
+					aMat.setValueAt(i, j, Math.sqrt(nextChiSquare(df - i)));	
 				} else {
-					aMat.m_afData[i][j] = nextGaussian();
+					aMat.setValueAt(i, j, nextGaussian());
 				}
 			}
 		}

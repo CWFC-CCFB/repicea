@@ -39,7 +39,7 @@ public class CorrelationEstimate extends SimpleEstimate {
 	public CorrelationEstimate(double mean, int sampleSize) {
 		super();
 		Matrix meanMat = new Matrix(1,1);
-		meanMat.m_afData[0][0] = mean;
+		meanMat.setValueAt(0, 0, mean);
 		setMean(meanMat);
 		this.sampleSize = sampleSize;
 	}
@@ -49,7 +49,7 @@ public class CorrelationEstimate extends SimpleEstimate {
 	 * @return a double
 	 */
 	public double getStudentT() {
-		double mean = getMean().m_afData[0][0];
+		double mean = getMean().getValueAt(0, 0);
 		return mean * Math.sqrt((double) (sampleSize - 2)/(1 - mean * mean));
 	}
 	
