@@ -81,12 +81,12 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 				i_index = heights.indexOf(originalHeightsToEvaluate.get(i));
 				if (isColumnVector) {
 					j_index = 0;
-					outputMatrix.m_afData[i][0] = originalPredictions.m_afData[i_index][j_index];
+					outputMatrix.setValueAt(i, 0, originalPredictions.getValueAt(i_index, j_index));
 				} else {		// is square then
 					for (int j = i; j < outputMatrix.m_iCols; j++) {
 						j_index = heights.indexOf(originalHeightsToEvaluate.get(j));
-						outputMatrix.m_afData[i][j] = originalPredictions.m_afData[i_index][j_index];
-						outputMatrix.m_afData[j][i] = originalPredictions.m_afData[i_index][j_index];
+						outputMatrix.setValueAt(i, j, originalPredictions.getValueAt(i_index, j_index));
+						outputMatrix.setValueAt(j, i, originalPredictions.getValueAt(i_index, j_index));
 					}
 				}
 			}

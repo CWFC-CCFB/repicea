@@ -49,16 +49,16 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 				pdfValue = new Matrix(1,1);
 				cdfValue = new Matrix(1,1);
 				if (isUpperBound()) {
-					cdfValue.m_afData[0][0] = 1d;
+					cdfValue.setValueAt(0, 0, 1d);
 				} else {
-					cdfValue.m_afData[0][0] = 0d;
+					cdfValue.setValueAt(0, 0, 0d);
 				}
 			} else {
 				pdfValue = new Matrix(1,1);
-				pdfValue.m_afData[0][0] = TruncatedGaussianDistribution.this.getProbabilityDensity(getBoundValue());
+				pdfValue.setValueAt(0, 0, TruncatedGaussianDistribution.this.getProbabilityDensity(getBoundValue()));
 				cdfValue = new Matrix(1,1);
-				double standardizedValue = (getBoundValue().m_afData[0][0] - TruncatedGaussianDistribution.this.getMu().m_afData[0][0])/Math.sqrt(TruncatedGaussianDistribution.this.getSigma2().m_afData[0][0]);
-				cdfValue.m_afData[0][0] = GaussianUtility.getCumulativeProbability(standardizedValue);
+				double standardizedValue = (getBoundValue().getValueAt(0, 0) - TruncatedGaussianDistribution.this.getMu().getValueAt(0, 0))/Math.sqrt(TruncatedGaussianDistribution.this.getSigma2().getValueAt(0, 0));
+				cdfValue.setValueAt(0, 0, GaussianUtility.getCumulativeProbability(standardizedValue));
 			}
 			isCompletelySet = true;
 		}
@@ -75,7 +75,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 		super();
 		setMean(new Matrix(1,1));
 		Matrix sigma2 = new Matrix(1,1);
-		sigma2.m_afData[0][0] = 1d;
+		sigma2.setValueAt(0, 0, 1d);
 		setVariance(sigma2);
 		lowerBound = new Bound(false);	// false: lower bound
 		upperBound = new Bound(true);	// true: upper bound
@@ -97,7 +97,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 
 	@Override
 	public Matrix getMean() {
-		double z = upperBound.getCdfValue().subtract(lowerBound.getCdfValue()).m_afData[0][0];
+		double z = upperBound.getCdfValue().subtract(lowerBound.getCdfValue()).getValueAt(0, 0);
 		Matrix diff = lowerBound.getPdfValue().subtract(upperBound.getPdfValue()).scalarMultiply(1d/z).multiply(getStandardDeviation());
 		Matrix mean = this.getMu().add(diff);
 		return mean;
@@ -105,7 +105,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 
 	@Override
 	public Matrix getVariance() {
-		double zFactor = 1/upperBound.getCdfValue().subtract(lowerBound.getCdfValue()).m_afData[0][0];
+		double zFactor = 1/upperBound.getCdfValue().subtract(lowerBound.getCdfValue()).getValueAt(0, 0);
 		Matrix mult1;
 		if (lowerBound.getBoundValue() != null) {
 			mult1 = lowerBound.getPdfValue().multiply(lowerBound.getBoundValue());
@@ -129,7 +129,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 		double random = StatisticalUtility.getRandom().nextDouble();
 		Matrix diff = upperBound.getCdfValue().subtract(lowerBound.getCdfValue()).scalarMultiply(random).add(lowerBound.getCdfValue());
 		Matrix deviate = new Matrix(1,1);
-		deviate.m_afData[0][0] = GaussianUtility.getQuantile(diff.m_afData[0][0]);
+		deviate.setValueAt(0, 0, GaussianUtility.getQuantile(diff.getValueAt(0, 0)));
 		deviate = deviate.multiply(getStandardDeviation()).add(getMu());
 		return deviate;
 	}

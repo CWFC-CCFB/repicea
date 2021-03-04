@@ -33,11 +33,11 @@ public class JackknifeEstimateTest {
 			clonedList.remove(i - 1);
 			tmpMat = new Matrix(clonedList);
 			realization = new Matrix(1,1);
-			realization.m_afData[0][0] = tmpMat.getSumOfElements() / tmpMat.m_iRows;
+			realization.setValueAt(0, 0, tmpMat.getSumOfElements() / tmpMat.m_iRows);
 			estimate.addRealization(realization);
 		}
 		
-		double variance = estimate.getVariance().m_afData[0][0];
+		double variance = estimate.getVariance().getValueAt(0, 0);
 		Assert.assertEquals("Testing variance", estimatedVariance, variance, 1E-8);
 	}
 
@@ -67,12 +67,12 @@ public class JackknifeEstimateTest {
 				clonedList.remove(j);
 				tmpMat = new Matrix(clonedList);
 				realization = new Matrix(1,1);
-				realization.m_afData[0][0] = tmpMat.getSumOfElements() / tmpMat.m_iRows;
+				realization.setValueAt(0, 0, tmpMat.getSumOfElements() / tmpMat.m_iRows);
 				estimate.addRealization(realization);
 			}
 		}
 		
-		double variance = estimate.getVariance().m_afData[0][0];
+		double variance = estimate.getVariance().getValueAt(0, 0);
 		Assert.assertEquals("Testing variance", estimatedVariance, variance, 1E-8);
 	}
 
@@ -104,13 +104,13 @@ public class JackknifeEstimateTest {
 					clonedList.remove(k);
 					tmpMat = new Matrix(clonedList);
 					realization = new Matrix(1,1);
-					realization.m_afData[0][0] = tmpMat.getSumOfElements() / tmpMat.m_iRows;
+					realization.setValueAt(0, 0, tmpMat.getSumOfElements() / tmpMat.m_iRows);
 					estimate.addRealization(realization);
 				}
 			}
 		}
 		
-		double variance = estimate.getVariance().m_afData[0][0];
+		double variance = estimate.getVariance().getValueAt(0, 0);
 		Assert.assertEquals("Testing variance", estimatedVariance, variance, 1E-8);
 	}
 

@@ -53,12 +53,12 @@ public class REpiceaRandomTest {
 		Matrix realization;
 		for (int i = 0; i < maxIter; i++) {
 			realization = new Matrix(1,1);
-			realization.m_afData[0][0] = randomGenerator.nextGamma(shape, scale);
+			realization.setValueAt(0, 0, randomGenerator.nextGamma(shape, scale));
 			estimate.addRealization(realization);
 		}
-		double actual = estimate.getVariance().m_afData[0][0];
+		double actual = estimate.getVariance().getValueAt(0, 0);
 		@SuppressWarnings("unused")
-		double mean = estimate.getMean().m_afData[0][0];
+		double mean = estimate.getMean().getValueAt(0, 0);
 		System.out.println ("Simulated variance = " + actual + "; Expected variance = " + variance);
 		Assert.assertEquals("Testing mean for gamma random values", variance, actual, 6E-2);
 	}
@@ -98,12 +98,12 @@ public class REpiceaRandomTest {
 		Matrix realization;
 		for (int i = 0; i < maxIter; i++) {
 			realization = new Matrix(1,1);
-			realization.m_afData[0][0] = randomGenerator.nextNegativeBinomial(expectedMean, dispersion);
+			realization.setValueAt(0, 0, randomGenerator.nextNegativeBinomial(expectedMean, dispersion));
 			estimate.addRealization(realization);
 		}
-		double actual = estimate.getVariance().m_afData[0][0];
+		double actual = estimate.getVariance().getValueAt(0, 0);
 		@SuppressWarnings("unused")
-		double mean = estimate.getMean().m_afData[0][0];
+		double mean = estimate.getMean().getValueAt(0, 0);
 		System.out.println ("Simulated variance = " + actual + "; Expected variance = " + expectedVariance);
 		Assert.assertEquals("Testing mean for gamma random values", expectedVariance, actual, 1E-1);
 	}
@@ -120,11 +120,11 @@ public class REpiceaRandomTest {
 		Matrix realization;
 		for (int i = 0; i < maxIter; i++) {
 			realization = new Matrix(1,1);
-			realization.m_afData[0][0] = randomGenerator.nextBeta(scale1, scale2);
+			realization.setValueAt(0, 0, randomGenerator.nextBeta(scale1, scale2));
 			estimate.addRealization(realization);
 		}
-		double actualMean = estimate.getMean().m_afData[0][0];
-		double actualVariance = estimate.getVariance().m_afData[0][0];
+		double actualMean = estimate.getMean().getValueAt(0, 0);
+		double actualVariance = estimate.getVariance().getValueAt(0, 0);
 		System.out.println ("Simulated mean = " + actualMean + "; Expected variance = " + expectedMean);
 		Assert.assertEquals("Testing mean for gamma random values", expectedMean, actualMean, 5E-3);
 		System.out.println ("Simulated variance = " + actualVariance + "; Expected variance = " + expectedVariance);

@@ -48,16 +48,16 @@ public class LogNormalEstimate extends Estimate<GaussianDistribution> implements
 		Matrix m = new Matrix(1,1);
 		Matrix v = new Matrix(1,1);
 		if (onLogScale) {
-			m.m_afData[0][0] = mean;
+			m.setValueAt(0, 0, mean);
 			setMeanOnLogScale(m);
-			v.m_afData[0][0] = variance;
+			v.setValueAt(0, 0, variance);
 			setVarianceOnLogScale(v);
 		} else {
 			double varianceOnLogScale = Math.log(variance / (mean * mean) + 1);
-			v.m_afData[0][0] = varianceOnLogScale;
+			v.setValueAt(0, 0, varianceOnLogScale);
 			setVarianceOnLogScale(v);
 			double meanOnLogScale = Math.log(mean) - varianceOnLogScale * .5;
-			m.m_afData[0][0] = meanOnLogScale;
+			m.setValueAt(0, 0, meanOnLogScale);
 			setMeanOnLogScale(m);
 		}
 	}

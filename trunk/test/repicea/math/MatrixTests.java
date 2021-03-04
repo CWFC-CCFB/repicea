@@ -46,36 +46,36 @@ public class MatrixTests {
 	public void blockedInversedMatrixTest() {
 		
 		Matrix mat = new Matrix(9,9);
-		mat.m_afData[0][0] = 5.49;
-		mat.m_afData[0][4] = 1.85;
-		mat.m_afData[1][1] = 3.90;
-		mat.m_afData[2][2] = 2.90;
-		mat.m_afData[2][3] = 1.02;
-		mat.m_afData[2][5] = 0.70;
-		mat.m_afData[2][6] = 0.76;
-		mat.m_afData[2][7] = 0.77;
-		mat.m_afData[2][8] = 0.80;
-		mat.m_afData[3][3] = 3.20;
-		mat.m_afData[3][5] = 0.89;
-		mat.m_afData[3][6] = 0.87;
-		mat.m_afData[3][7] = 0.89;
-		mat.m_afData[3][8] = 0.93;
-		mat.m_afData[4][4] = 4.55;
-		mat.m_afData[5][5] = 2.70;
-		mat.m_afData[5][6] = 0.66;
-		mat.m_afData[5][7] = 0.67;
-		mat.m_afData[5][8] = 0.70;
-		mat.m_afData[6][6] = 2.69;
-		mat.m_afData[6][7] = 0.66;
-		mat.m_afData[6][8] = 0.69;
-		mat.m_afData[7][7] = 2.70;
-		mat.m_afData[7][8] = 0.70;
-		mat.m_afData[8][8] = 2.76;
+		mat.setValueAt(0, 0, 5.49);
+		mat.setValueAt(0, 4, 1.85);
+		mat.setValueAt(1, 1, 3.90);
+		mat.setValueAt(2, 2, 2.90);
+		mat.setValueAt(2, 3, 1.02);
+		mat.setValueAt(2, 5, 0.70);
+		mat.setValueAt(2, 6, 0.76);
+		mat.setValueAt(2, 7, 0.77);
+		mat.setValueAt(2, 8, 0.80);
+		mat.setValueAt(3, 3, 3.20);
+		mat.setValueAt(3, 5, 0.89);
+		mat.setValueAt(3, 6, 0.87);
+		mat.setValueAt(3, 7, 0.89);
+		mat.setValueAt(3, 8, 0.93);
+		mat.setValueAt(4, 4, 4.55);
+		mat.setValueAt(5, 5, 2.70);
+		mat.setValueAt(5, 6, 0.66);
+		mat.setValueAt(5, 7, 0.67);
+		mat.setValueAt(5, 8, 0.70);
+		mat.setValueAt(6, 6, 2.69);
+		mat.setValueAt(6, 7, 0.66);
+		mat.setValueAt(6, 8, 0.69);
+		mat.setValueAt(7, 7, 2.70);
+		mat.setValueAt(7, 8, 0.70);
+		mat.setValueAt(8, 8, 2.76);
 		
 		for (int i = 0; i < mat.m_iRows; i++) {
 			for (int j = i; j < mat.m_iCols; j++) {
 				if (i != j) {
-					mat.m_afData[j][i] = mat.m_afData[i][j];
+					mat.setValueAt(j, i, mat.getValueAt(i, j));
 				}
 			}
 		}

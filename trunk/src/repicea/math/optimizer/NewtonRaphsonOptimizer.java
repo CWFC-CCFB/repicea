@@ -169,7 +169,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		Matrix beta = new Matrix(indicesOfParametersToOptimize.size(),1);
 		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
 			int parameterIndex = indicesOfParametersToOptimize.get(i);
-			beta.m_afData[i][0] = function.getParameterValue(parameterIndex);
+			beta.setValueAt(i, 0, function.getParameterValue(parameterIndex));
 		}
 		return beta;
 	}
@@ -177,7 +177,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	private void setParameters(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize, Matrix newBeta) {
 		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
 			int index = indicesOfParametersToOptimize.get(i);
-			function.setParameterValue(index, newBeta.m_afData[i][0]);
+			function.setParameterValue(index, newBeta.getValueAt(i, 0));
 		}
 	}
 	
@@ -190,7 +190,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	 * @return the indicator (a Double instance)
 	 */
 	protected double calculateConvergence(Matrix gradient, Matrix hessian, double llk) {
-		return gradient.transpose().multiply(hessian.getInverseMatrix()).multiply(gradient).scalarMultiply(1d / llk).m_afData[0][0];
+		return gradient.transpose().multiply(hessian.getInverseMatrix()).multiply(gradient).scalarMultiply(1d / llk).getValueAt(0, 0);
 	}
 
 

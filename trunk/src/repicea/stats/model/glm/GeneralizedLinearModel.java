@@ -145,9 +145,9 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 			Matrix linearPred = matrixX.multiply(beta);
 			Matrix omega = getEstimator().getParameterEstimates().getVariance().getSubMatrix(0, matrixX.m_iCols - 1, 0, matrixX.m_iCols - 1);
 			for (int i = 0; i < nbObs; i++) {
-				pred.m_afData[i][0] = linearPred.m_afData[i][0];
+				pred.setValueAt(i, 0, linearPred.getValueAt(i, 0));
 				Matrix x_i = matrixX.getSubMatrix(i, i, 0, matrixX.m_iCols - 1);
-				pred.m_afData[i][1] = x_i.multiply(omega).multiply(x_i.transpose()).m_afData[0][0];
+				pred.setValueAt(i, 1, x_i.multiply(omega).multiply(x_i.transpose()).getValueAt(0, 0));
 			}
 			return pred;
 		} else {

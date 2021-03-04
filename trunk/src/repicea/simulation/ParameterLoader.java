@@ -100,7 +100,7 @@ public class ParameterLoader {
 			while (lineRead != null) {
 				for (int i = 0; i < reader.getFieldCount(); i++) {
 					double parameter = Double.parseDouble(lineRead[i].toString());
-					omega.m_afData[record][i] = parameter;
+					omega.setValueAt(record, i, parameter);
 				}
 				lineRead = reader.nextRecord();
 				record++;

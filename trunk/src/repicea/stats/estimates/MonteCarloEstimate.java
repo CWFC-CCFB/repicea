@@ -127,14 +127,14 @@ public class MonteCarloEstimate extends ResamplingBasedEstimate {
 		for (int i = 0; i < nbRows; i++) {
 			realizationsForThisRow = new ArrayList<Double>();
 			for (int j = 0; j < realizations.size(); j++) {
-				realizationsForThisRow.add(realizations.get(j).m_afData[i][0]);
+				realizationsForThisRow.add(realizations.get(j).getValueAt(i, 0));
 			}
 			Collections.sort(realizationsForThisRow);
 			int index = (int) Math.round(percentile * realizations.size()) - 1;
 			if (index < 0) {
 				index = 0;
 			} 
-			percentileValues.m_afData[i][0] = realizationsForThisRow.get(index);
+			percentileValues.setValueAt(i, 0, realizationsForThisRow.get(index));
 		}
 		return percentileValues;
 	}

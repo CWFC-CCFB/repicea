@@ -60,9 +60,9 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 	public GaussianEstimate(double mean, double variance) {
 		this();
 		Matrix meanMat = new Matrix(1,1);
-		meanMat.m_afData[0][0] = mean;
+		meanMat.setValueAt(0, 0, mean);
 		Matrix varianceMat = new Matrix(1,1);
-		varianceMat.m_afData[0][0] = variance;
+		varianceMat.setValueAt(0, 0, variance);
 		setMean(meanMat);
 		setVariance(varianceMat);
 	}

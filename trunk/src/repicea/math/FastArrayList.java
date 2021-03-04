@@ -88,7 +88,7 @@ public class FastArrayList<T extends Serializable> implements Serializable {
 		if (length > 0 && internalArray[0] instanceof Number) {
 			Matrix outputMatrix = new Matrix(length, 1);
 			for (int i = 0; i < length; i++) {
-				outputMatrix.m_afData[i][0] = ((Number) internalArray[i]).doubleValue();
+				outputMatrix.setValueAt(i, 0, ((Number) internalArray[i]).doubleValue());
 			}
 			return outputMatrix;
 		} else {

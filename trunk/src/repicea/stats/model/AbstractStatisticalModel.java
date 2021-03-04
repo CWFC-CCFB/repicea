@@ -170,9 +170,9 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 			System.out.println("Parameter estimates");
 			String output;
 			for (int i = 0; i < report.m_iRows; i++) {
-				output = "Parameter " + i + "; Estimate : " + formatter.format(report.m_afData[i][0]);
+				output = "Parameter " + i + "; Estimate : " + formatter.format(report.getValueAt(i, 0));
 				if (varianceAvailable) {
-					output = output.concat("; Standard error : " + formatter.format(report.m_afData[i][1]));
+					output = output.concat("; Standard error : " + formatter.format(report.getValueAt(i, 1)));
 				}
 				System.out.println(output);
 			}

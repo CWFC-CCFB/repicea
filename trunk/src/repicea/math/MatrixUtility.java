@@ -28,7 +28,7 @@ import java.security.InvalidParameterException;
 public class MatrixUtility {
 	
 	/**
-	 * This method adds a matrix to a reference matrix. The result is returned in the reference matrix. NOTE:
+	 * Add a matrix to a reference matrix. The result is returned in the reference matrix. NOTE:
 	 * No new matrix instance is created.
 	 * @param a a Matrix instance (the reference)
 	 * @param b a Matrix instance
@@ -37,16 +37,15 @@ public class MatrixUtility {
 		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
 			throw new InvalidParameterException("Matrices a and b are not the same size!");
 		}
-		
 		for (int i = 0 ; i < a.m_iRows; i++) {
 			for (int j = 0; j < a.m_iCols; j++) {
-				a.m_afData[i][j] = a.m_afData[i][j] + b.m_afData[i][j];
+				a.setValueAt(i, j, a.getValueAt(i, j) + b.getValueAt(i, j));
 			}
 		}
 	}
 	
 	/**
-	 * This method subtracts a matrix from a reference matrix. The result is returned in the reference matrix. NOTE:
+	 * Subtract a matrix from a reference matrix. The result is returned in the reference matrix. NOTE:
 	 * No new matrix instance is created.
 	 * @param a a Matrix instance (the reference)
 	 * @param b a Matrix instance
@@ -55,17 +54,16 @@ public class MatrixUtility {
 		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
 			throw new InvalidParameterException("Matrices a and b are not the same size!");
 		}
-		
 		for (int i = 0 ; i < a.m_iRows; i++) {
 			for (int j = 0; j < a.m_iCols; j++) {
-				a.m_afData[i][j] = a.m_afData[i][j] - b.m_afData[i][j];
+				a.setValueAt(i, j, a.getValueAt(i, j) - b.getValueAt(i, j));
 			}
 		}
 		
 	}
 	
 	/**
-	 * This method returns the element wise product of two matrices. The result is returned in the first matrix. NOTE:
+	 * Return the element wise product of two matrices. The result is returned in the first matrix. NOTE:
 	 * No new matrix instance is created.
 	 * @param a a Matrix instance (the reference)
 	 * @param b a Matrix instance
@@ -74,17 +72,16 @@ public class MatrixUtility {
 		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
 			throw new InvalidParameterException("Matrices a and b are not the same size!");
 		}
-		
 		for (int i = 0 ; i < a.m_iRows; i++) {
 			for (int j = 0; j < a.m_iCols; j++) {
-				a.m_afData[i][j] = a.m_afData[i][j] * b.m_afData[i][j];
+				a.setValueAt(i, j, a.getValueAt(i, j) * b.getValueAt(i, j));
 			}
 		}
 		
 	}
 
 	/**
-	 * This method multiplies all the element of a matrix by a double. The result is returned in the same matrix. NOTE:
+	 * Multiply all the element of a matrix by a double. The result is returned in the same matrix. NOTE:
 	 * No new matrix instance is created.
 	 * @param a a Matrix instance 
 	 * @param b a double instance
@@ -92,7 +89,7 @@ public class MatrixUtility {
 	public static void scalarMultiply(Matrix a, double b) {
 		for (int i = 0 ; i < a.m_iRows; i++) {
 			for (int j = 0; j < a.m_iCols; j++) {
-				a.m_afData[i][j] = a.m_afData[i][j] * b;
+				a.setValueAt(i, j, a.getValueAt(i, j) * b);
 			}
 		}
 	}

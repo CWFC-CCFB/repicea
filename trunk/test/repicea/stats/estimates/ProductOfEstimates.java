@@ -34,7 +34,7 @@ public class ProductOfEstimates {
 			if (method == Method.Naive) {
 				newVariance = newVariance.add(alphaVariance.multiply(betaVariance));
 			}
-			if (newVariance.m_afData[0][0] < 0) {
+			if (newVariance.getValueAt(0, 0) < 0d) {
 				throw new UnsupportedOperationException("The product of the estimates yields negative variance");
 			}
 			currentEstimate = new SimpleEstimate(newMean, newVariance);
@@ -48,21 +48,21 @@ public class ProductOfEstimates {
 			double currentProduct = -1;
 			for (int i = 1; i < estimates.size(); i++) {
 				if (i == 1) {
-					currentProduct = estimates.get(i - 1).getRandomDeviate().m_afData[0][0];
+					currentProduct = estimates.get(i - 1).getRandomDeviate().getValueAt(0, 0);
 				}
 
-				currentProduct *= estimates.get(i).getRandomDeviate().m_afData[0][0];
+				currentProduct *= estimates.get(i).getRandomDeviate().getValueAt(0, 0);
 			}
 			Matrix obs = new Matrix(1,1);
-			obs.m_afData[0][0] = currentProduct;
+			obs.setValueAt(0, 0, currentProduct);
 			est.addRealization(obs);
 		}
 		return est;
 	}
 
 	private static Estimate getEstimate(Estimate trueMean, VarianceEstimate trueVariance, boolean isLogNormal) {
-		double mean = trueMean.getRandomDeviate().m_afData[0][0];
-		double variance = trueVariance.getRandomDeviate().m_afData[0][0];
+		double mean = trueMean.getRandomDeviate().getValueAt(0, 0);
+		double variance = trueVariance.getRandomDeviate().getValueAt(0, 0);
 		if (isLogNormal) {
 			return new LogNormalEstimate(mean, variance, false);
 		} else {
@@ -113,9 +113,9 @@ public class ProductOfEstimates {
 		VarianceEstimate trueVarAlpha = ProductOfEstimates.getTrueVariance(df, alpha, lowAlpha);
 		VarianceEstimate trueVarBeta = ProductOfEstimates.getTrueVariance(df, beta, lowBeta);
 		VarianceEstimate trueVarGamma = ProductOfEstimates.getTrueVariance(df, gamma, lowGamma);
-		double varAlpha = trueVarAlpha.getMean().m_afData[0][0];
-		double varBeta = trueVarBeta.getMean().m_afData[0][0];
-		double varGamma = trueVarGamma.getMean().m_afData[0][0];
+		double varAlpha = trueVarAlpha.getMean().getValueAt(0, 0);
+		double varBeta = trueVarBeta.getMean().getValueAt(0, 0);
+		double varGamma = trueVarGamma.getMean().getValueAt(0, 0);
 
 		double biasedAlpha = alpha * (1d + biasAlpha);
 		double biasedBeta = beta * (1d + biasBeta);
@@ -174,23 +174,23 @@ public class ProductOfEstimates {
 			varMonteCarlo.addRealization(productMC.getVariance());
 			ConfidenceInterval ci = productMC.getConfidenceIntervalBounds(.95);
 			Matrix in = new Matrix(1,1);
-			if (ci.getLowerLimit().m_afData[0][0] <= trueMean && trueMean <= ci.getUpperLimit().m_afData[0][0]) {
-				in.m_afData[0][0] = 1d;
+			if (ci.getLowerLimit().getValueAt(0, 0) <= trueMean && trueMean <= ci.getUpperLimit().getValueAt(0, 0)) {
+				in.setValueAt(0, 0, 1d);
 			}
 			coverage.addRealization(in);
 
 
 			MonteCarloEstimate scaledProductMC = new MonteCarloEstimate();
-			double scalingFactor = Math.sqrt(productGoodman.getVariance().m_afData[0][0] / productNaive.getVariance().m_afData[0][0]);
+			double scalingFactor = Math.sqrt(productGoodman.getVariance().getValueAt(0, 0) / productNaive.getVariance().getValueAt(0, 0));
 			if (Double.isNaN(scalingFactor)) {
 				throw new UnsupportedOperationException("Trying to compute a negative square root when rescaling the Monte Carlo variance estimator");
 			}
-			double mean = productMC.getMean().m_afData[0][0];
+			double mean = productMC.getMean().getValueAt(0, 0);
 			Matrix newReal;
 			for (Matrix r : productMC.getRealizations()) {
 				newReal = new Matrix(1,1);
-				double rValue = r.m_afData[0][0];
-				newReal.m_afData[0][0] = scalingFactor * (rValue - mean) + mean;
+				double rValue = r.getValueAt(0, 0);
+				newReal.setValueAt(0, 0, scalingFactor * (rValue - mean) + mean);
 				scaledProductMC.addRealization(newReal);
 			}
 			muRescaledMonteCarlo.addRealization(scaledProductMC.getMean());
@@ -199,8 +199,8 @@ public class ProductOfEstimates {
 
 			ci = scaledProductMC.getConfidenceIntervalBounds(.95);
 			in = new Matrix(1,1);
-			if (ci.getLowerLimit().m_afData[0][0] <= trueMean && trueMean <= ci.getUpperLimit().m_afData[0][0]) {
-				in.m_afData[0][0] = 1d;
+			if (ci.getLowerLimit().getValueAt(0, 0) <= trueMean && trueMean <= ci.getUpperLimit().getValueAt(0, 0)) {
+				in.setValueAt(0, 0, 1d);
 			}
 			rescaledCoverage.addRealization(in);
 
@@ -235,22 +235,22 @@ public class ProductOfEstimates {
 		Object[] record = new Object[15];
 		record[0] = simulationName;
 		record[1] = trueMean;
-		record[2] = muGoodman.getMean().m_afData[0][0];
+		record[2] = muGoodman.getMean().getValueAt(0, 0);
 		double expMeanAB = biasedAlpha * biasedBeta;
 		double trueVarianceAB = biasedAlpha * biasedAlpha * varBeta + varAlpha * biasedBeta * biasedBeta + varAlpha * varBeta; 
 		double trueVariance = expMeanAB * expMeanAB * varGamma + trueVarianceAB * biasedGamma * biasedGamma + trueVarianceAB * varGamma; 
 		record[3] = trueVariance;
-		record[4] = muGoodman.getVariance().m_afData[0][0];
-		record[5] = varGoodman.getMean().m_afData[0][0];
-		record[6] = varNaive.getMean().m_afData[0][0];
-		record[7] = varPropagation.getMean().m_afData[0][0];
-		record[8] = muMonteCarlo.getMean().m_afData[0][0];
-		record[9] = varMonteCarlo.getMean().m_afData[0][0];
-		record[10] = coverage.getMean().m_afData[0][0];
-		record[11] = muRescaledMonteCarlo.getMean().m_afData[0][0];
-		record[12] = varRescaledMonteCarlo.getMean().m_afData[0][0];
-		record[13] = rescaledCoverage.getMean().m_afData[0][0];
-		record[14] = mse.getMean().m_afData[0][0];
+		record[4] = muGoodman.getVariance().getValueAt(0, 0);
+		record[5] = varGoodman.getMean().getValueAt(0, 0);
+		record[6] = varNaive.getMean().getValueAt(0, 0);
+		record[7] = varPropagation.getMean().getValueAt(0, 0);
+		record[8] = muMonteCarlo.getMean().getValueAt(0, 0);
+		record[9] = varMonteCarlo.getMean().getValueAt(0, 0);
+		record[10] = coverage.getMean().getValueAt(0, 0);
+		record[11] = muRescaledMonteCarlo.getMean().getValueAt(0, 0);
+		record[12] = varRescaledMonteCarlo.getMean().getValueAt(0, 0);
+		record[13] = rescaledCoverage.getMean().getValueAt(0, 0);
+		record[14] = mse.getMean().getValueAt(0, 0);
 
 		writer.addRecord(record);
 		writer.close();

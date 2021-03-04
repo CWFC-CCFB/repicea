@@ -28,13 +28,13 @@ public class HorvitzThompsonTauEstimateTest {
 		Matrix obs;
 		for (Double value : sample) {
 			obs = new Matrix(1,1);
-			obs.m_afData[0][0] = value;
+			obs.setValueAt(0, 0, value);
 			estimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(obs, 1d/populationSize));
 		}
 		Matrix total = estimate.getMean();
-		Assert.assertEquals("Testing the estimate of the total", 4111.11111111111, total.m_afData[0][0], 1E-8);
+		Assert.assertEquals("Testing the estimate of the total", 4111.11111111111, total.getValueAt(0, 0), 1E-8);
 		Matrix totalVariance = estimate.getVariance();
-		Assert.assertEquals("Testing the variance of the total", 507734.5679, totalVariance.m_afData[0][0], 1E-4);
+		Assert.assertEquals("Testing the variance of the total", 507734.5679, totalVariance.getValueAt(0, 0), 1E-4);
 	}
 	
 	

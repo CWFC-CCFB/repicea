@@ -321,7 +321,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	protected Matrix getVectorOfThisField(int j) {
 		Matrix output = new Matrix(observations.size(), 1);
 		for (int i = 0; i < observations.size(); i++) {
-			output.m_afData[i][0] = ((Number) getValueAt(i,j)).doubleValue();
+			output.setValueAt(i, 0, ((Number) getValueAt(i,j)).doubleValue());
 		}
 		return output;
 	}
@@ -352,7 +352,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		for (int i = 0; i < getNumberOfObservations(); i++) {
 			int position = possibleValues.indexOf(getValueAt(i, fieldIndex));
 			if (position >= 0 && position < outputMatrix.m_iCols) {
-				outputMatrix.m_afData[i][position] = 1d;
+				outputMatrix.setValueAt(i, position, 1d);
 			}
 		}
 		return outputMatrix;

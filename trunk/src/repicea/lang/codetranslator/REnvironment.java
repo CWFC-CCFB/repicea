@@ -511,7 +511,7 @@ public class REnvironment extends ConcurrentHashMap<Integer, Object> implements 
 					if (score == -1d) {
 						return -1d;
 					} else {
-						scores.m_afData[i][0] = score;
+						scores.setValueAt(i, 0, score);
 					}
 				}
 				return scores.getSumOfElements();

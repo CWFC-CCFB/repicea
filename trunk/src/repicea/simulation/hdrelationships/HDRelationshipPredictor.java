@@ -109,7 +109,7 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 	 */
 	protected double blupImplementation(Stand stand, RegressionElements regElement) {
 		Matrix randomEffects = getRandomEffectsForThisSubject(stand);
-		return regElement.vectorZ.multiply(randomEffects).m_afData[0][0];
+		return regElement.vectorZ.multiply(randomEffects).getValueAt(0, 0);
 	}
 	
 
@@ -136,7 +136,7 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 	protected double residualImplementation(Tree tree, double predictedHeightWithoutResidual) {
 		double residualForThisPrediction = 0d; 
 		if (wasThisTreeInitiallyMeasured(tree) && !doesThisSubjectHaveResidualErrorTerm(tree)) {	// means the height has been observed but its residual has not been calculated yet
-			double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().m_afData[0][0];
+			double variance = getDefaultResidualError(getErrorGroup(tree)).getVariance().getValueAt(0, 0);
 			double diff = observedHeights.get(tree.getSubjectId()) - predictedHeightWithoutResidual;
 			double dNormResidual = diff / Math.pow(variance, 0.5);
 			GaussianErrorTerm errorTerm = new GaussianErrorTermForHeight(tree, dNormResidual, diff);
@@ -145,13 +145,13 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 		if (isResidualVariabilityEnabled) {
 			Matrix residuals = getResidualErrorForThisSubject(tree, getErrorGroup(tree));
 			int index = getGaussianErrorTerms(tree).getDistanceIndex().indexOf(tree.getErrorTermIndex());
-			residualForThisPrediction = residuals.m_afData[index][0]; 
+			residualForThisPrediction = residuals.getValueAt(index, 0); 
 		} else {
 			if (doesThisSubjectHaveResidualErrorTerm(tree)) {		// means that height was initially measured
 				setSpecificResiduals(tree, new GaussianErrorTerm(tree, 0d));
 				GaussianErrorTermList list = getGaussianErrorTerms(tree);
 				Matrix meanResiduals = getDefaultResidualError(getErrorGroup(tree)).getMean(list);
-				residualForThisPrediction = meanResiduals.m_afData[meanResiduals.m_iRows - 1][0];
+				residualForThisPrediction = meanResiduals.getValueAt(meanResiduals.m_iRows - 1, 0);
 			} 
 		}
 		return residualForThisPrediction;
@@ -207,10 +207,10 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 					regElement = fixedEffectsPrediction(stand, t, defaultBeta);
 					matX_i.setSubMatrix(oXVector.getSubMatrix(DefaultZeroIndex, trueParameterIndices), i, 0);
 					matZ_i.setSubMatrix(regElement.vectorZ, i, 0);
-					double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().m_afData[0][0];
-					matR_i.m_afData[i][i] = variance;
+					double variance = getDefaultResidualError(getErrorGroup(t)).getVariance().getValueAt(0, 0);
+					matR_i.setValueAt(i, i, variance);
 					double residual = height - regElement.fixedPred;
-					res_i.m_afData[i][0] = residual;
+					res_i.setValueAt(i, 0, residual);
 				}
 				Matrix matV_i = matZ_i.multiply(matGbck).multiply(matZ_i.transpose()).add(matR_i);
 				Matrix invV_i = matV_i.getInverseMatrix();

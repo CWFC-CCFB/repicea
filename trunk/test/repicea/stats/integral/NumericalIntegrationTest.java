@@ -36,7 +36,7 @@ public class NumericalIntegrationTest {
 		}
 
 		Matrix lowerCholeskyTriangle = new Matrix(1,1);
-		lowerCholeskyTriangle.m_afData[0][0] = 1d;
+		lowerCholeskyTriangle.setValueAt(0, 0, 1d);
 		
 		System.out.println("Simulated mean =  " + mean);
 
@@ -82,10 +82,10 @@ public class NumericalIntegrationTest {
 		logit.setVariableValue(1, 1d);
 
 		Matrix gMatrix = new Matrix(2,2);
-		gMatrix.m_afData[0][0] = 1d;
-		gMatrix.m_afData[1][0] = .5;
-		gMatrix.m_afData[0][1] = .5;
-		gMatrix.m_afData[1][1] = .5;
+		gMatrix.setValueAt(0, 0, 1d);
+		gMatrix.setValueAt(1, 0, .5);
+		gMatrix.setValueAt(0, 1, .5);
+		gMatrix.setValueAt(1, 1, .5);
 		
 		Matrix lowerCholeskyTriangle = gMatrix.getLowerCholTriangle();
 		
@@ -94,8 +94,8 @@ public class NumericalIntegrationTest {
 		double factor = 1d / nbIter;
 		for (int i = 0; i < nbIter; i++) {
 			Matrix u = lowerCholeskyTriangle.multiply(StatisticalUtility.drawRandomVector(lowerCholeskyTriangle.m_iRows, Distribution.Type.GAUSSIAN));
-			logit.setParameterValue(0, xBeta + u.m_afData[0][0]);
-			logit.setParameterValue(1, u.m_afData[1][0]);
+			logit.setParameterValue(0, xBeta + u.getValueAt(0, 0));
+			logit.setParameterValue(1, u.getValueAt(1, 0));
 			mean += logit.getValue() * factor;
 		}
 		
@@ -122,8 +122,8 @@ public class NumericalIntegrationTest {
 		mean = 0;
 		for (int i = 0; i < nbIter; i++) {
 			Matrix u = lowerCholeskyTriangle.multiply(StatisticalUtility.drawRandomVector(lowerCholeskyTriangle.m_iRows, Distribution.Type.GAUSSIAN));
-			logit.setParameterValue(0, xBeta + u.m_afData[0][0]);
-			logit.setParameterValue(1, u.m_afData[1][0]);
+			logit.setParameterValue(0, xBeta + u.getValueAt(0, 0));
+			logit.setParameterValue(1, u.getValueAt(1, 0));
 			mean += logit.getValue() * factor;
 		}
 
@@ -162,7 +162,7 @@ public class NumericalIntegrationTest {
 		}
 
 		Matrix lowerCholeskyTriangle = new Matrix(1,1);
-		lowerCholeskyTriangle.m_afData[0][0] = 1d;
+		lowerCholeskyTriangle.setValueAt(0, 0, 1d);
 		
 		System.out.println("Simulated mean =  " + mean);
 
@@ -204,10 +204,10 @@ public class NumericalIntegrationTest {
 		GaussHermiteQuadrature rghq15 = new GaussHermiteQuadrature(NumberOfPoints.N15);
 
 		Matrix matG = new Matrix(2,2);
-		matG.m_afData[0][0] = 1d;
-		matG.m_afData[1][0] = .2;
-		matG.m_afData[0][1] = .2;
-		matG.m_afData[1][1] = .5d;
+		matG.setValueAt(0, 0, 1d);
+		matG.setValueAt(1, 0, .2);
+		matG.setValueAt(0, 1, .2);
+		matG.setValueAt(1, 1, .5);
 		Matrix chol = matG.getLowerCholTriangle();
 		
 		
@@ -228,8 +228,8 @@ public class NumericalIntegrationTest {
 		double oriVal2 = linkFunction.getParameterValue(2);
 		for (int i = 0; i < nbIter; i++) {
 			Matrix u = chol.multiply(StatisticalUtility.drawRandomVector(chol.m_iRows, Distribution.Type.GAUSSIAN));
-			linkFunction.setParameterValue(1, oriVal1 + u.m_afData[0][0]);
-			linkFunction.setParameterValue(2, oriVal2 + u.m_afData[1][0]);
+			linkFunction.setParameterValue(1, oriVal1 + u.getValueAt(0, 0));
+			linkFunction.setParameterValue(2, oriVal2 + u.getValueAt(1, 0));
 			mean += linkFunction.getValue() * factor;
 		}
 		
@@ -330,10 +330,10 @@ public class NumericalIntegrationTest {
 		GaussHermiteQuadrature ghq15 = new GaussHermiteQuadrature(NumberOfPoints.N15);
 		
 		Matrix matG = new Matrix(2,2);
-		matG.m_afData[0][0] = 1d;
-		matG.m_afData[1][0] = .2;
-		matG.m_afData[0][1] = .2;
-		matG.m_afData[1][1] = .5d;
+		matG.setValueAt(0, 0, 1d);
+		matG.setValueAt(1, 0, .2);
+		matG.setValueAt(0, 1, .2);
+		matG.setValueAt(1, 1, .5);
 		Matrix chol = matG.getLowerCholTriangle();
 		
 		
@@ -355,8 +355,8 @@ public class NumericalIntegrationTest {
 		double oriVal2 = linkFunction.getParameterValue(2);
 		for (int i = 0; i < nbIter; i++) {
 			Matrix u = chol.multiply(StatisticalUtility.drawRandomVector(chol.m_iRows, Distribution.Type.GAUSSIAN));
-			linkFunction.setParameterValue(1, oriVal1 + u.m_afData[0][0]);
-			linkFunction.setParameterValue(2, oriVal2 + u.m_afData[1][0]);
+			linkFunction.setParameterValue(1, oriVal1 + u.getValueAt(0, 0));
+			linkFunction.setParameterValue(2, oriVal2 + u.getValueAt(1, 0));
 			mean += linkFunction.getValue() * factor;
 		}
 		
@@ -418,7 +418,7 @@ public class NumericalIntegrationTest {
 		List<Integer> indices = new ArrayList<Integer>();
 		indices.add(1);
 		Matrix chol = new Matrix(1,1);
-		chol.m_afData[0][0] = stdDev;
+		chol.setValueAt(0, 0, stdDev);
 		
 		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
 		

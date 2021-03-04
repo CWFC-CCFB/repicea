@@ -61,7 +61,7 @@ class InternalLogWrapperFunction extends LogFunctionWrapper {
 	@Override
 	public Double getValue() {
 		Matrix u = getParametersFromNestedFunction().subtract(originalParameterValues);
-		return super.getValue() + mPart - 0.5 * u.transpose().multiply(invG).multiply(u).m_afData[0][0]; 
+		return super.getValue() + mPart - 0.5 * u.transpose().multiply(invG).multiply(u).getValueAt(0, 0); 
 	}
 
 	@Override
@@ -81,7 +81,7 @@ class InternalLogWrapperFunction extends LogFunctionWrapper {
 	private Matrix getParametersFromNestedFunction() {
 		Matrix parameterValues = new Matrix(parameterIndices.size(), 1);
 		for (int i = 0; i < parameterIndices.size(); i++) {
-			parameterValues.m_afData[i][0] = getOriginalFunction().getParameterValue(parameterIndices.get(i));
+			parameterValues.setValueAt(i, 0, getOriginalFunction().getParameterValue(parameterIndices.get(i)));
 		}
 		return parameterValues;
 	}

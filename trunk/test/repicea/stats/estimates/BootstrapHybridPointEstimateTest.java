@@ -23,7 +23,7 @@ public class BootstrapHybridPointEstimateTest {
 		Matrix obs;
 		for (int i = 0; i < 50; i++) {
 			obs = new Matrix(1,1);
-			obs.m_afData[0][0] = RANDOM.nextGaussian() * 2 + 12;
+			obs.setValueAt(0, 0, RANDOM.nextGaussian() * 2 + 12);
 			pe.addObservation(new PopulationUnitWithEqualInclusionProbability(obs));
 		}
 
@@ -32,14 +32,14 @@ public class BootstrapHybridPointEstimateTest {
 			bhpe.addPointEstimate(pe);
 		}
 		
-		double expectedMean = pe.getMean().m_afData[0][0];
-		double actualMean = bhpe.getMean().m_afData[0][0];
+		double expectedMean = pe.getMean().getValueAt(0, 0);
+		double actualMean = bhpe.getMean().getValueAt(0, 0);
 		
 		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 1E-8);
 		
 		
-		double expectedVariance = pe.getVariance().m_afData[0][0];
-		double actualVariance = bhpe.getVariance().m_afData[0][0];
+		double expectedVariance = pe.getVariance().getValueAt(0, 0);
+		double actualVariance = bhpe.getVariance().getValueAt(0, 0);
 		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
 		
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-8);
@@ -56,20 +56,20 @@ public class BootstrapHybridPointEstimateTest {
 			Matrix obs;
 			for (int j = 0; j < 50; j++) {
 				obs = new Matrix(1,1);
-				obs.m_afData[0][0] = deviate;
+				obs.setValueAt(0, 0, deviate);
 				pe.addObservation(new PopulationUnitWithEqualInclusionProbability(obs));
 			}
 			bhpe.addPointEstimate(pe);
 		}
 		
 		double expectedMean = 12d;
-		double actualMean = bhpe.getMean().m_afData[0][0];
+		double actualMean = bhpe.getMean().getValueAt(0, 0);
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
 		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 1E-1);
 		
 		
 		double expectedVariance = 4d;
-		double actualVariance = bhpe.getVariance().m_afData[0][0];
+		double actualVariance = bhpe.getVariance().getValueAt(0, 0);
 		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
 		
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-1);
@@ -86,12 +86,12 @@ public class BootstrapHybridPointEstimateTest {
 		Matrix obs;
 		for (int j = 0; j < sampleSize; j++) {
 			obs = new Matrix(1,1);
-			obs.m_afData[0][0] = meanX + RANDOM.nextGaussian() * stdPopUnit;
+			obs.setValueAt(0, 0, meanX + RANDOM.nextGaussian() * stdPopUnit);
 			pe.addObservation(new PopulationUnitWithEqualInclusionProbability(obs));
 		}
 		
-		double mu_x_hat = pe.getMean().m_afData[0][0];
-		double var_mu_x_hat = pe.getVariance().m_afData[0][0];
+		double mu_x_hat = pe.getMean().getValueAt(0, 0);
+		double var_mu_x_hat = pe.getVariance().getValueAt(0, 0);
 		
 		double meanModel = 0.7;
 		double stdModel = .15;
@@ -103,15 +103,15 @@ public class BootstrapHybridPointEstimateTest {
 			double slope = meanModel + RANDOM.nextGaussian() * stdModel; 
 			for (int j = 0; j < sampleSize; j++) {
 				obsNew = new Matrix(1,1);
-				double x = pe.getObservations().get(j).getData().m_afData[0][0];
-				obsNew.m_afData[0][0] =  x * slope + stdRes * RANDOM.nextGaussian();
+				double x = pe.getObservations().get(j).getData().getValueAt(0, 0);
+				obsNew.setValueAt(0, 0, x * slope + stdRes * RANDOM.nextGaussian());
 				peNew.addObservation(new PopulationUnitWithEqualInclusionProbability(obsNew));
 			}
 			bhpe.addPointEstimate(peNew);
 		}
 		
 		double expectedMean = meanModel * mu_x_hat;
-		double actualMean = bhpe.getMean().m_afData[0][0];
+		double actualMean = bhpe.getMean().getValueAt(0, 0);
 		
 		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 3E-2);
 		
@@ -123,7 +123,7 @@ public class BootstrapHybridPointEstimateTest {
 		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
 		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
 		System.out.println("Total variance = " + varPointEstimate.getTotalVariance());
-		double actualVariance = varPointEstimate.getTotalVariance().m_afData[0][0];
+		double actualVariance = varPointEstimate.getTotalVariance().getValueAt(0, 0);
 
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-1);
 
@@ -131,7 +131,7 @@ public class BootstrapHybridPointEstimateTest {
 		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
 		System.out.println("Theoretical correction = " + theoreticalCorrection);
 		System.out.println("Empirical correction = " + empiricalCorrection);
-		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.m_afData[0][0], 1E-2);
+		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.getValueAt(0, 0), 1E-2);
 	}
 
 	@Test
@@ -139,13 +139,13 @@ public class BootstrapHybridPointEstimateTest {
 		BootstrapHybridPointEstimate bhpe = new BootstrapHybridPointEstimate(); 
 		int sampleSize = 10;
 		Matrix meanX = new Matrix(2,1);
-		meanX.m_afData[0][0] = 20;
-		meanX.m_afData[1][0] = 12;
+		meanX.setValueAt(0, 0, 20d);
+		meanX.setValueAt(1, 0, 12d);
 		Matrix varianceX = new Matrix(2,2);
-		varianceX.m_afData[0][0] = 10d * 10d;
-		varianceX.m_afData[1][1] = 4d * 4d;
-		varianceX.m_afData[1][0] = 4d * 10d * .5;
-		varianceX.m_afData[0][1] = varianceX.m_afData[1][0];
+		varianceX.setValueAt(0, 0, 10d * 10d);
+		varianceX.setValueAt(1, 1, 4d * 4d);
+		varianceX.setValueAt(1, 0, 4d * 10d * .5);
+		varianceX.setValueAt(0, 1, varianceX.getValueAt(1, 0));
 
 		GaussianEstimate popUnitGenerator = new GaussianEstimate(meanX, varianceX);
 		PopulationMeanEstimate pe = new PopulationMeanEstimate();

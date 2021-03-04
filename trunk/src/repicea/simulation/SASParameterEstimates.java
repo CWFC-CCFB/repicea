@@ -32,7 +32,6 @@ import repicea.math.Matrix;
 @SuppressWarnings("serial")
 public class SASParameterEstimates extends ModelParameterEstimates {
 
-//	protected final List<Integer> estimatedParameterIndices;
 
 	/**
 	 * Constructor.
@@ -41,14 +40,13 @@ public class SASParameterEstimates extends ModelParameterEstimates {
 	 */
 	public SASParameterEstimates(Matrix mean, Matrix variance) {
 		super(mean, variance);
-//		estimatedParameterIndices = new ArrayList<Integer>();
 	}
 
 	@Override
 	protected void setEstimatedParameterIndices() {
 		Matrix mean = getMean();
 		for (int i = 0; i < mean.m_iRows; i++) {
-			if (mean.m_afData[i][0] != 0.0 && mean.m_afData[i][0] != 1.0) { 
+			if (mean.getValueAt(i, 0) != 0d && mean.getValueAt(i, 0) != 1d) { 
 				estimatedParameterIndices.add(i);
 			}
 		}

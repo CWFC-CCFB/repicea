@@ -118,7 +118,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		double llk;
 		for (double value = start; value < end + step; value+=step) {
 			Matrix beta = originalParameters.getDeepClone();
-			beta.m_afData[parameterName][0] = value;
+			beta.setValueAt(parameterName, 0, value);
 			setParameters(beta);
 			((FGMCompositeLogLikelihood) getCompleteLogLikelihood()).reset();
 			llk = getCompleteLogLikelihood().getValue();

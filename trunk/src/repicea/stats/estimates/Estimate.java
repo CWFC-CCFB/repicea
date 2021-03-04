@@ -245,7 +245,7 @@ s	 */
 		Matrix collapsedMatrix = new Matrix(desiredIndicesForCollapsing.size(), 1);
 		for (int i = 0; i < collapsedMatrix.m_iRows; i++) {
 			List<String> requestedIndices = desiredIndicesForCollapsing.get(newIndexRow.get(i));
-			collapsedMatrix.m_afData[i][0] = originalMatrix.getSubMatrix(convertIndexIntoInteger(requestedIndices), null).getSumOfElements();
+			collapsedMatrix.setValueAt(i, 0, originalMatrix.getSubMatrix(convertIndexIntoInteger(requestedIndices), null).getSumOfElements());
 		}
 		return collapsedMatrix;
 	}
@@ -261,8 +261,9 @@ s	 */
 				List<String> requestedIndices_i = desiredIndicesForCollapsing.get(newIndexRow.get(i));
 				for (int j = 0; j < collapsedMatrix.m_iRows; j++) {
 					List<String> requestedIndices_j = desiredIndicesForCollapsing.get(newIndexRow.get(j));
-					collapsedMatrix.m_afData[i][j] = originalMatrix.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
-							convertIndexIntoInteger(requestedIndices_j)).getSumOfElements();
+					Matrix tmpMatrix = originalMatrix.getSubMatrix(convertIndexIntoInteger(requestedIndices_i), 
+							convertIndexIntoInteger(requestedIndices_j));
+					collapsedMatrix.setValueAt(i, j, tmpMatrix.getSumOfElements());
 				}
 			}
 			return collapsedMatrix;

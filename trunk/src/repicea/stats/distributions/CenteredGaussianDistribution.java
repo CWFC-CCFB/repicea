@@ -101,13 +101,13 @@ public final class CenteredGaussianDistribution implements Distribution {
 			referenceList.addAll(((List) key));		// make a copy to avoid changes through reference
 			Matrix distances = new Matrix(referenceList);
 			Matrix correlationMatrix = StatisticalUtility.constructRMatrix(distances, 1d, correlationParameter, type);
-			Matrix varianceCovariance = correlationMatrix.scalarMultiply(underlyingDistribution.getVariance().m_afData[0][0]);
+			Matrix varianceCovariance = correlationMatrix.scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
 			structuredVarianceCovarianceMap.put(referenceList, varianceCovariance);
 			Matrix lowerChol = varianceCovariance.getLowerCholTriangle();
 			structuredLowerCholeskyMap.put(referenceList, lowerChol);
 		} else {
 			int size = (Integer) key;
-			Matrix varianceCovariance = Matrix.getIdentityMatrix(size).scalarMultiply(underlyingDistribution.getVariance().m_afData[0][0]);
+			Matrix varianceCovariance = Matrix.getIdentityMatrix(size).scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
 			simpleVarianceCovarianceMap.put(size, varianceCovariance);
 			Matrix lowerChol = varianceCovariance.getLowerCholTriangle();
 			simpleLowerCholeskyMap.put(size, lowerChol);

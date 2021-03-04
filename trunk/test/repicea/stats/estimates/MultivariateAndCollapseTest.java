@@ -38,11 +38,11 @@ public class MultivariateAndCollapseTest {
 		
 		Matrix collapsedMean = collapsedEstimate.getMean();
 		Assert.assertTrue("Testing we have 1 row", collapsedMean.m_iRows == 1);
-		Assert.assertEquals("Testing consistency", basicMean.getSumOfElements(), collapsedMean.m_afData[0][0], 1E-8);
+		Assert.assertEquals("Testing consistency", basicMean.getSumOfElements(), collapsedMean.getValueAt(0, 0), 1E-8);
 		Matrix collapsedVariance = collapsedEstimate.getVariance();
 		Assert.assertTrue("Testing we have 1 row", collapsedVariance.m_iRows == 1);
 		Assert.assertTrue("Testing we have 1 col", collapsedVariance.m_iCols == 1);
-		Assert.assertEquals("Testing consistency", basicVariance.getSumOfElements(), collapsedVariance.m_afData[0][0], 1E-8);
+		Assert.assertEquals("Testing consistency", basicVariance.getSumOfElements(), collapsedVariance.getValueAt(0, 0), 1E-8);
 	}
 
 	@Test

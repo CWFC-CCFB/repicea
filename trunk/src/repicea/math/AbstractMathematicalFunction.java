@@ -139,7 +139,7 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		} else {
 			variableValues.clear();
 			for (int j = 0; j < x.m_iCols; j++) {
-				setVariableValue(j, x.m_afData[0][j]);
+				setVariableValue(j, x.getValueAt(0, j));
 			}
 		}
 	}
@@ -156,7 +156,7 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		} else {
 			this.parameterValues.clear();
 			for (int i = 0; i < beta.m_iRows; i++) {
-				setParameterValue(i, beta.m_afData[i][0]);
+				setParameterValue(i, beta.getValueAt(i, 0));
 			}
 		}
 	}
@@ -168,7 +168,7 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 	public Matrix getBeta() {
 		Matrix m = new Matrix(getNumberOfParameters(), 1);
 		for (int i = 0; i < getNumberOfParameters(); i++) {
-			m.m_afData[i][0] = getParameterValue(i);
+			m.setValueAt(i, 0, getParameterValue(i));
 		}
 		return m;
 	}

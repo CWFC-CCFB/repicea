@@ -56,42 +56,42 @@ public class StatisticalUtility {
 					double corr = 0d;
 					switch(type) {
 					case LINEAR:					// linear case
-						corr = 1 - covarianceParameter * Math.abs(coordinates.m_afData[i][0] - coordinates.m_afData[j][0]);
+						corr = 1 - covarianceParameter * Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0));
 						if (corr >= 0) {
-							matrixR.m_afData[i][j] = varianceParameter * corr;
-							matrixR.m_afData[j][i] = varianceParameter * corr;
+							matrixR.setValueAt(i, j, varianceParameter * corr);
+							matrixR.setValueAt(j, i, varianceParameter * corr);
 						}
 						break;
 					case LINEAR_LOG:				// linear log case
-						if (Math.abs(coordinates.m_afData[i][0] - coordinates.m_afData[j][0]) == 0) {
+						if (Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0)) == 0) {
 							corr = 1d;
 						} else {
-							corr = 1 - covarianceParameter*Math.log(Math.abs(coordinates.m_afData[i][0] - coordinates.m_afData[j][0]));
+							corr = 1 - covarianceParameter*Math.log(Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0)));
 						}
 						if (corr >= 0) {
-							matrixR.m_afData[i][j] = varianceParameter * corr;
-							matrixR.m_afData[j][i] = varianceParameter * corr;
+							matrixR.setValueAt(i, j, varianceParameter * corr);
+							matrixR.setValueAt(j, i, varianceParameter * corr);
 						}
 						break;
 					case COMPOUND_SYMMETRY:
 						if (i == j) {
-							matrixR.m_afData[i][j] = varianceParameter + covarianceParameter;
+							matrixR.setValueAt(i, j, varianceParameter + covarianceParameter);
 						} else {
-							matrixR.m_afData[i][j] = covarianceParameter;
-							matrixR.m_afData[j][i] = covarianceParameter;
+							matrixR.setValueAt(i, j, covarianceParameter);
+							matrixR.setValueAt(j, i, covarianceParameter);
 						}
 						break;
 					case POWER:                  // power case
-                        if (Math.abs(coordinates.m_afData[i][0] - coordinates.m_afData[j][0]) == 0) {
+                        if (Math.abs(coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0)) == 0) {
                               corr = 1d;
                         } else {
-                              corr = Math.pow (covarianceParameter, (Math.abs (coordinates.m_afData[i][0] - coordinates.m_afData[j][0])));
+                              corr = Math.pow (covarianceParameter, (Math.abs (coordinates.getValueAt(i, 0) - coordinates.getValueAt(j, 0))));
                         }
                         if (corr >= 0) {
-                              matrixR.m_afData[i][j] = varianceParameter * corr;
-                              matrixR.m_afData[j][i] = varianceParameter * corr;
+                              matrixR.setValueAt(i, j, varianceParameter * corr);
+                              matrixR.setValueAt(j, i, varianceParameter * corr);
                         }
-       break;   
+                        break;   
 
 					default:
 						throw new UnsupportedOperationException("Matrix.ConstructRMatrix() : This type of correlation structure is not supported in this function");
@@ -124,11 +124,11 @@ public class StatisticalUtility {
 					for (int j = i+1; j < nrow; j++) {							
 						corr =Math.abs(i - j)-1;						
 						double powCol = java.lang.Math.pow(rho, corr);
-						matrixR.m_afData[i][j] = residual * gamma * powCol;
-						matrixR.m_afData[j][i] = matrixR.m_afData[i][j] ;						
+						matrixR.setValueAt(i, j, residual * gamma * powCol);
+						matrixR.setValueAt(j, i, matrixR.getValueAt(i, j));						
 
 					}
-					matrixR.m_afData[i][i]  = residual;
+					matrixR.setValueAt(i, i, residual);
 				}
 				break;
 			default:
@@ -139,7 +139,7 @@ public class StatisticalUtility {
 	}
 	
     /**
-     * This method generates a random vector
+     * Generate a random vector
      * @param nrow the number of elements to be generated
      * @param type the distribution type (a Distribution.Type enum variable)
      * @return a Matrix instance
@@ -150,7 +150,7 @@ public class StatisticalUtility {
 
 	
 	/**
-	 * This method returns a Random generator.
+	 * Return a Random generator.
 	 * @return a Random instance
 	 */
 	public static REpiceaRandom getRandom() {
@@ -186,10 +186,15 @@ public class StatisticalUtility {
 					valid = false;
 					break;
 				}
-				if (valid) matrix.m_afData[i][0] = number;
+				if (valid) {
+					matrix.setValueAt(i, 0, number);
+				}
 			}
-			if (valid) return matrix;
-			else return null;
+			if (valid) {
+				return matrix;
+			} else {
+				return null;
+			}
 		} catch (Exception e) {
 			System.out.println("Matrix.RandomVector() : Error while computing the random vector");
 			return null;		
@@ -197,7 +202,7 @@ public class StatisticalUtility {
 	}
 
 	/**
-	 * This method performs a special addition in which only the elements different from 0 and 1 
+	 * Perform a special addition in which only the elements different from 0 and 1 
 	 * are involved. NOTE: this method is used with SAS output. 
 	 * @param originalMatrix the matrix of parameters
 	 * @param matrixToAdd the matrix of parameter deviates
@@ -209,7 +214,7 @@ public class StatisticalUtility {
 		oVector.clear();
 		
 		for (int i = 0; i < originalMatrix.m_iRows; i++) {
-			if (oMat.m_afData[i][0] != 0.0 && oMat.m_afData[i][0] != 1.0) { 
+			if (oMat.getValueAt(i, 0) != 0d && oMat.getValueAt(i, 0) != 1d) { 
 				oVector.add(i);
 			}
 		}
@@ -218,14 +223,15 @@ public class StatisticalUtility {
 			throw new InvalidParameterException("The number of rows do not match!");
 		} else {
 			for (int j = 0; j < oVector.size(); j++) {
-				oMat.m_afData[oVector.get(j)][0] += matrixToAdd.m_afData[j][0];
+				double newValue = oMat.getValueAt(oVector.get(j), 0) + matrixToAdd.getValueAt(j, 0);
+				oMat.setValueAt(oVector.get(j), 0, newValue);
 			}
 		}
 		return oMat;
 	}
 	
 	/**
-	 * This method combines two row vectors of dummy variables. Useful for regressions.
+	 * Combine two row vectors of dummy variables. Useful for regressions.
 	 * @param mat1 the first row vector
 	 * @param mat2 the second row vector
 	 * @return the resulting matrix
@@ -237,7 +243,7 @@ public class StatisticalUtility {
 			for (int i = 0; i < mat1.m_iRows; i++) {
 				for (int j = 0; j < mat1.m_iCols; j++) {
 					for (int j_prime = 0; j_prime < mat2.m_iCols; j_prime++) {
-						oMat.m_afData[i][j*mat2.m_iCols+j_prime] = mat1.m_afData[i][j] * mat2.m_afData[i][j_prime];
+						oMat.setValueAt(i, j*mat2.m_iCols+j_prime, mat1.getValueAt(i, j) * mat2.getValueAt(i, j_prime));
 					}
 				}
 			}

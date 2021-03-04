@@ -53,7 +53,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	
 	private static final double EPSILON = 1E-12;
 	
-	public final double[][] m_afData;
+	private final double[][] m_afData;
 	public int m_iRows;
 	public int m_iCols;
 	
@@ -64,7 +64,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		this(data.length, data[0].length);
 		for (int i = 0; i < m_iRows; i++)
 			for (int j = 0; j < m_iCols; j++)
-				m_afData[i][j] = data[i][j];
+				setValueAt(i, j, data[i][j]);
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public Matrix(double data[]) {
 		this(data.length, 1);
 		for (int i = 0; i < m_iRows; i++)
-			m_afData[i][0] = data[i];
+			setValueAt(i, 0, data[i]);
 	}
 	
 	/**
@@ -86,7 +86,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Number number;
 		for (int i = 0; i < m_iRows; i++) {
 			number = list.get(i);
-			m_afData[i][0] = number.doubleValue();
+			setValueAt(i, 0, number.doubleValue());
 		}
 	}
 
@@ -117,12 +117,33 @@ public final class Matrix implements Serializable, DeepCloneable {
 		double value = from;
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				m_afData[i][j] = value;
+				setValueAt(i, j, value);
 				value += iIncrement;
 			}
 		}
 	}
 
+	
+	/**
+	 * Set the value at row i and column j.
+	 * @param i
+	 * @param j
+	 * @param value
+	 */
+	public void setValueAt(int i, int j, double value) {
+		m_afData[i][j] = value;
+	}
+	
+	/**
+	 * Return the value at row i and column j.
+	 * @param i
+	 * @param j
+	 * @return a double
+	 */
+	public double getValueAt(int i, int j) {
+		return m_afData[i][j];
+	}
+	
 	/**
 	 * This method add matrix m to the current matrix.
 	 * @param m the matrix to be added
@@ -132,7 +153,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				mat.m_afData[i][j] = m_afData[i][j] + m.m_afData[i][j];
+				mat.setValueAt(i, j, getValueAt(i, j) + m.getValueAt(i, j));
 			}
 		}
 		
@@ -149,7 +170,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		boolean bool = false;
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				if (Math.abs(this.m_afData[i][j] - d) > EPSILON)
+				if (Math.abs(getValueAt(i, j) - d) > EPSILON)
 					bool = true;
 			}
 		}
@@ -165,7 +186,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public boolean anyElementLargerThan(double d) {
 		for (int i = 0; i < this.m_iRows; i++) {
 			for (int j = 0; j < this.m_iCols; j++) {
-				if (this.m_afData[i][j] > d) {
+				if (getValueAt(i, j) > d) {
 					return true;
 				}
 			}
@@ -183,7 +204,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public boolean anyElementSmallerOrEqualTo(double d) {
 		for (int i = 0; i < this.m_iRows; i++) {
 			for (int j = 0; j < this.m_iCols; j++) {
-				if (this.m_afData[i][j] <= d) {
+				if (getValueAt(i, j) <= d) {
 					return true;
 				}
 			}
@@ -204,7 +225,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		} else  {
 			Matrix oMat = new Matrix(m_iRows, 1);
 			for (int i = 0; i < m_iRows; i++) {
-				oMat.m_afData[i][0] = this.m_afData[i][i];
+				oMat.setValueAt(i, 0, getValueAt(i, i));
 			}
 			return oMat;
 		}
@@ -217,7 +238,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	public boolean doesContainAnyNaN() {
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				if (Double.isNaN(m_afData[i][j])) {
+				if (Double.isNaN(getValueAt(i, j))) {
 					return true;
 				}
 			}
@@ -235,7 +256,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 			Matrix oMat = new Matrix(this.m_iRows,this.m_iCols);
 			for (int i = 0; i < this.m_iRows; i++) {
 				for (int j = 0; j < this.m_iCols; j++) {
-					oMat.m_afData[i][j] = this.m_afData[i][j] / m.m_afData[i][j];
+					oMat.setValueAt(i, j, getValueAt(i, j) / m.getValueAt(i, j));
 				}
 			}
 			return oMat;
@@ -254,8 +275,8 @@ public final class Matrix implements Serializable, DeepCloneable {
 			Matrix oMat = new Matrix(this.m_iRows,this.m_iCols);
 			for (int i = 0; i < this.m_iRows; i++) {
 				for (int j = 0; j < this.m_iCols; j++) {
-					if (this.m_afData[i][j] != 0d && m.m_afData[i][j] != 0d) {
-						oMat.m_afData[i][j] = this.m_afData[i][j] * m.m_afData[i][j];
+					if (getValueAt(i, j) != 0d && m.getValueAt(i, j) != 0d) {
+						oMat.setValueAt(i, j, getValueAt(i, j) * m.getValueAt(i, j));
 					}
 				}
 			}
@@ -273,7 +294,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix matrix = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < matrix.m_iRows; i++) {
 			for (int j = 0; j < matrix.m_iCols; j++) {
-				matrix.m_afData[i][j] = Math.exp(m_afData[i][j]);
+				matrix.setValueAt(i, j, Math.exp(getValueAt(i, j)));
 			}
 		}
 		return matrix;
@@ -300,17 +321,17 @@ public final class Matrix implements Serializable, DeepCloneable {
     			if (j == i) {
     				dTmp = 0;
     				for (int k = 0; k <= i - 1; k++) {
-    					dTmp += matrix.m_afData[i][k]*matrix.m_afData[i][k];
+    					dTmp += matrix.getValueAt(i, k) * matrix.getValueAt(i, k);
     				}
-    				matrix.m_afData[i][j] = Math.sqrt(m_afData[i][j] - dTmp);
+    				matrix.setValueAt(i, j, Math.sqrt(getValueAt(i, j) - dTmp));
     			} else {
     				dTmp = 0;
     				for (int k = 0; k <= j - 1; k++) {
-    					dTmp += matrix.m_afData[i][k]*matrix.m_afData[j][k];
+    					dTmp += matrix.getValueAt(i, k) * matrix.getValueAt(j, k);
     				}
-    				matrix.m_afData[i][j] = 1d / matrix.m_afData[j][j] * (m_afData[i][j]-dTmp);
+    				matrix.setValueAt(i, j, 1d / matrix.getValueAt(j, j) * (getValueAt(i, j) - dTmp));
     			}
-    			if (Double.isNaN(matrix.m_afData[i][j])) {
+    			if (Double.isNaN(matrix.getValueAt(i, j))) {
     				throw new UnsupportedOperationException("Matrix.lowerChol(): the lower triangle of the Cholesky decomposition cannot be calculated because NaN have been generated!");
     			}
     		}
@@ -332,7 +353,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix mat = new Matrix(iRows, iCols);
 		for (int i = 0; i < iRows; i++) {
 			for (int j = 0; j < iCols; j++) {
-				mat.m_afData[i][j] = m_afData[startRow + i][startColumn + j];
+				mat.setValueAt(i, j, getValueAt(startRow + i, startColumn + j));
 			}
 		}
 		return mat;		
@@ -367,7 +388,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix outputMatrix = new Matrix(rowIndex.size(), columnIndex.size());
 		for (int i = 0; i < rowIndex.size(); i++) {
 			for (int j = 0; j < columnIndex.size(); j++) {
-				outputMatrix.m_afData[i][j] = m_afData[rowIndex.get(i)][columnIndex.get(j)];
+				outputMatrix.setValueAt(i, j, getValueAt(rowIndex.get(i), columnIndex.get(j)));
 			}
 		}
 	
@@ -390,7 +411,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 			for (int i = 0; i < m_iRows; i++) {
 				for (int j = 0; j < m_iCols; j++) {
 					if (i != j) {
-						if (Math.abs(m_afData[i][j]) != 0d) {
+						if (Math.abs(getValueAt(i, j)) != 0d) {
 							return false;
 						}
 					}
@@ -428,13 +449,13 @@ public final class Matrix implements Serializable, DeepCloneable {
 		outerLoop:
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = i + 1; j < m_iCols; j++) {
-				if (Math.abs(m_afData[j][i]) < 1E-50) {		// equal to 0
-					if (Math.abs(m_afData[i][j]) > 1E-50) {	// not equal to 0
+				if (Math.abs(getValueAt(j, i)) < 1E-50) {		// equal to 0
+					if (Math.abs(getValueAt(i, j)) > 1E-50) {	// not equal to 0
 						valid = false;
 						break outerLoop;
 					}
 				} else {
-					double ratio = m_afData[i][j] / m_afData[j][i];
+					double ratio = getValueAt(i, j) / getValueAt(j, i);
 					if (Math.abs(ratio - 1) > VERY_SMALL) {
 						valid = false;
 						break outerLoop;
@@ -471,11 +492,11 @@ public final class Matrix implements Serializable, DeepCloneable {
     	outerloop:
     		for (int i = 0; i < matrix.m_iRows; i++) {
     			for (int j = 0; j < matrix.m_iCols; j++) {
-    				if (m_afData[i][j] <= 0d) {
+    				if (getValueAt(i, j) <= 0d) {
     					valid = false;
     					break outerloop;
     				}
-    				matrix.m_afData[i][j] = Math.log(m_afData[i][j]);
+    				matrix.setValueAt(i, j, Math.log(getValueAt(i, j)));
     			}
     		}
     	if (valid) {
@@ -486,7 +507,7 @@ public final class Matrix implements Serializable, DeepCloneable {
     }
 
 	/**
-	 * This method creates a new matrix in which the current matrix represents the first diagonal block and matrix m represents the second
+	 * Create a new matrix in which the current matrix represents the first diagonal block and matrix m represents the second
 	 * diagonal block.
 	 * @param m the matrix to be diagonally blocked
 	 * @return the result in a new Matrix instance
@@ -504,7 +525,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 
 	
 	/**
-	 * This method compute a diagonal matrix from a row or a column vector.
+	 * Compute a diagonal matrix from a row or a column vector.
 	 * @return the resulting matrix
 	 * @throws UnsupportedOperationException if this matrix is not a vector
 	 */
@@ -521,9 +542,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 			Matrix matrix = new Matrix(dim, dim); 
 			for (int i = 0; i < dim; i++) {
 				if (isColumnVector()) {
-					matrix.m_afData[i][i] = m_afData[i][0];
+					matrix.setValueAt(i, i, getValueAt(i, 0));
 				} else {
-					matrix.m_afData[i][i] = m_afData[0][i];
+					matrix.setValueAt(i, i, getValueAt(0, i));
 				}
 			}
 			return matrix;
@@ -531,7 +552,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method creates a new matrix that is the stack of this and matrix m. 
+	 * Create a new matrix which is the stack of this and matrix m. 
 	 * @param m the matrix to stack.
 	 * @param stackOver true if the stack is vertically or false if horizontally
 	 * @return the stacked matrix
@@ -559,7 +580,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method compute the matrix multiplication product of this x m
+	 * Compute the matrix product of this x m
 	 * @param m a Matrix type object 
 	 * @return a matrix type object that contains the result of the matrix multiplication
 	 */
@@ -572,8 +593,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 				for (int j_m = 0; j_m < m.m_iCols; j_m++ ) {
 					for (int j_this = 0; j_this < m_iCols; j_this++) {
 						int i_m = j_this;
-						if (m_afData[i_this][j_this] != 0d && m.m_afData[i_m][j_m] != 0d) {
-							mat.m_afData[i_this][j_m] += m_afData[i_this][j_this] * m.m_afData[i_m][j_m];
+						if (getValueAt(i_this, j_this) != 0d && m.getValueAt(i_m, j_m) != 0d) {
+							double newValue = mat.getValueAt(i_this, j_m) + getValueAt(i_this, j_this) * m.getValueAt(i_m, j_m);
+							mat.setValueAt(i_this, j_m, newValue);
 						}
 					}
 				}
@@ -583,18 +605,18 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method reset all the elements of this Matrix instance to 0.
+	 * Reset all the elements of this Matrix instance to 0.
 	 */
 	public void resetMatrix() {
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				m_afData[i][j] = 0.0;
+				setValueAt(i, j, 0d);
 			}
 		}
 	}
 	
 	/**
-	 * This method adds the scalar d to all the elements of the current matrix.
+	 * Add the scalar d to all the elements of the current matrix.
 	 * @param d the scalar to be added
 	 * @return the result in a new Matrix instance
 	 */
@@ -602,14 +624,14 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				mat.m_afData[i][j] = m_afData[i][j]+d;
+				mat.setValueAt(i, j, getValueAt(i, j) + d);
 			}
 		}
 		return mat;
 	}
 	
 	/**
-	 * This method multiplies the elements of the current matrix by the scalar d.
+	 * Multiply the elements of the current matrix by the scalar d.
 	 * @param d the multiplier
 	 * @return the result in a new Matrix instance
 	 */
@@ -617,41 +639,46 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				mat.m_afData[i][j] = m_afData[i][j]*d;
+				mat.setValueAt(i, j, getValueAt(i, j) * d);
 			}
 		}
 		return mat;
 	}
 
-	/**
-	 * This method replaces some elements of the matrix by those that are contained in an array of Double.
-	 * @param array a two-dimension array of Double
-	 * @param i the row index of the first element to be changed
-	 * @param j the column index of the first element to be changed
-	 */
-	public void setSubMatrix(double[][] array, int i, int j) {
-		for (int ii = 0; ii < array.length; ii++) {
-			for (int jj = 0; jj < array[0].length; jj++) {
-				m_afData[i + ii][j + jj] = array[ii][jj];
-			}
-		}
-	}
+//	/**
+//	 * Replace some elements of the matrix by those that are contained in an array of Double.
+//	 * @param array a two-dimension array of Double
+//	 * @param i the row index of the first element to be changed
+//	 * @param j the column index of the first element to be changed
+//	 */
+//	public void setSubMatrix(double[][] array, int i, int j) {
+//		for (int ii = 0; ii < array.length; ii++) {
+//			for (int jj = 0; jj < array[0].length; jj++) {
+//				setValueAt(i + ii, j + jj, array[ii][jj]);
+//			}
+//		}
+//	}
 
 	/**
-	 * This method replaces some elements of the matrix by those that are contained in matrix m.
+	 * Replace some elements of the matrix by those that are contained in matrix m.
 	 * @param m a Matrix instance 
 	 * @param i the row index of the first element to be changed
 	 * @param j the column index of the first element to be changed
 	 */
 	public void setSubMatrix(Matrix m, int i, int j) {
-		setSubMatrix(m.m_afData, i, j);
+		for (int ii = 0; ii < m.m_iRows; ii++) {
+			for (int jj = 0; jj < m.m_iCols; jj++) {
+				setValueAt(i + ii, j + jj, m.getValueAt(ii, jj));
+			}
+		}
 	}
 
 
 	
 	
 	/**
-	 * This method makes a square symmetric matrix from a vector.
+	 * Create a square symmetric matrix from a vector. <br>
+	 * <br>
 	 * Checks are implemented to make sure the vector has the appropriate
 	 * number of elements.
 	 * @return the resulting matrix
@@ -669,8 +696,8 @@ public final class Matrix implements Serializable, DeepCloneable {
 				Matrix matrix = new Matrix(nbRow,nbRow);
 				int pointer = 0;
 				for (int i = 0; i < nbRow; i++) {
-					matrix.setSubMatrix(getSubMatrix(pointer, pointer + i, 0, 0).m_afData, 0, i);
-					matrix.setSubMatrix(getSubMatrix(pointer, pointer + i, 0, 0).transpose().m_afData, i, 0);
+					matrix.setSubMatrix(getSubMatrix(pointer, pointer + i, 0, 0), 0, i);
+					matrix.setSubMatrix(getSubMatrix(pointer, pointer + i, 0, 0).transpose(), i, 0);
 					pointer += i + 1; 
 				}
 				return matrix;
@@ -679,7 +706,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method returns a vector of the values corresponding to a symmetric matrix.
+	 * Create a vector of the values corresponding to a symmetric matrix.
 	 * @return a nx1 Matrix 
 	 */
 	public Matrix symSquare() {
@@ -700,21 +727,22 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method subtracts matrix m from the current matrix.
+	 * Subtract matrix m from this matrix.
 	 * @param m the matrix to be subtracted
 	 * @return the result in a new Matrix instance
 	 */
 	public Matrix subtract(Matrix m) {
 		Matrix mat = new Matrix(m_iRows, m_iCols);
-		for (int i = 0; i < m_iRows; i++)
-			for (int j = 0; j < m_iCols; j++)
-				mat.m_afData[i][j] = m_afData[i][j] - m.m_afData[i][j];
-		
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				mat.setValueAt(i, j, getValueAt(i, j) - m.getValueAt(i, j));
+			}
+		}
 		return mat;
 	}
-	
+
 	/**
-	 * This method computes the trace of the matrix, i.e. the sum of the diagonal elements.
+	 * Compute the trace of the matrix.
 	 * @return a double
 	 */
 	public double getTrace() {
@@ -723,40 +751,27 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 		double sum = 0;
 		for (int i = 0; i < m_iRows; i++) {
-			sum += this.m_afData[i][i];
+			sum += getValueAt(i, i);
 		}
 		return sum;
 	}
 
 	/**
-	 * Creates a transposed matrix.
+	 * Create a transposed matrix.
 	 * @return the transposed matrix in a new Matrix instance
 	 */
 	public Matrix transpose() {
 		Matrix matrix = new Matrix(m_iCols, m_iRows);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				matrix.m_afData[j][i] = m_afData[i][j];
+				matrix.setValueAt(j, i, getValueAt(i, j));
 			}
 		}
 		return matrix;
 	}
 	
-
-	
-	
-	
-	
-	
-	
-
-	
-	
-
-    
-	
 	/**
-	 * This method computes the power of the seed by the elements of the matrix. For example, if the first element of this
+	 * Compute the power of the seed by the elements of the matrix. For example, if the first element of this
 	 * matrix is 2, the first element of the resulting matrix will be seed ^ 2.
 	 * @param seed a double
 	 * @return a Matrix instance
@@ -765,14 +780,14 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix matrix = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < matrix.m_iRows; i++) {
 			for (int j = 0; j < matrix.m_iCols; j++) {
-				matrix.m_afData[i][j] = Math.pow(seed, m_afData[i][j]);
+				matrix.setValueAt(i, j, Math.pow(seed, getValueAt(i, j)));
 			}
 		}
 		return matrix;
 	}
 	
 	/**
-	 * This method computes the elements of the matrix at a given power.
+	 * Compute the elements of the matrix at a given power.
 	 * @param power a double
 	 * @return a Matrix instance
 	 */
@@ -780,7 +795,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix matrix = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < matrix.m_iRows; i++) {
 			for (int j = 0; j < matrix.m_iCols; j++) {
-				matrix.m_afData[i][j] = Math.pow(m_afData[i][j], power);
+				matrix.setValueAt(i, j, Math.pow(getValueAt(i, j), power));
 			}
 		}
 		return matrix;
@@ -788,7 +803,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	
 
 	/**
-	 * This method repeats this matrix a given number of times in each dimension.
+	 * Repeat this matrix a given number of times in each dimension.
 	 * @param nrow the number of times to repeat in row-wise direction
 	 * @param ncol the number of times to repeat in column-wise direction
 	 * @return the resulting matrix
@@ -804,8 +819,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method makes it possible to remove some elements in a 
-	 * particular matrix
+	 * Remove some elements in a particular matrix and create a row vector. 
 	 * @param index is the index of the elements to be removed
 	 * @return a row vector
 	 */
@@ -815,7 +829,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		for (int i=0; i < m_iRows; i++) {
 			for (int j=0; j < m_iCols; j++) {
 				if (!index.contains(i * m_iCols + j)) {
-					oMat.m_afData[0][pointer] = m_afData[i][j];
+					oMat.setValueAt(0, pointer, getValueAt(i, j));
 					pointer++;
 				}
 			}
@@ -824,7 +838,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method returns the elements defined by the List indices in a row vector.
+	 * Return the elements defined by the List indices in a row vector.
 	 * @param indices a List of indices
 	 * @return a row vector
 	 */
@@ -834,7 +848,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
 				if (indices.contains(i * m_iCols + j)) {
-					oMat.m_afData[0][pointer] = m_afData[i][j];
+					oMat.setValueAt(0, pointer, getValueAt(i, j));
 					pointer++;
 				}
 			}
@@ -843,7 +857,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method replaces the elements of the matrix designated through the indices by the values
+	 * Replace the elements of the matrix designated through the indices by the values
 	 * in the row vector m.
 	 * @param indices a List of Integer representing the indices
 	 * @param m a Matrix instance
@@ -855,14 +869,14 @@ public final class Matrix implements Serializable, DeepCloneable {
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
 				if (indices.contains(i * m_iCols + j)) {
-					m_afData[i][j] = m.m_afData[indices.indexOf(i * m_iCols + j)][0];
+					setValueAt(i, j, m.getValueAt(indices.indexOf(i * m_iCols + j), 0));
 				}
 			}
 		}
 	}
 
 	/**
-	 * This method add the elements of the parameter matrix to those designated through the indices.
+	 * Add the elements of the parameter matrix to those designated through the indices.
 	 * @param indices a List of Integer representing the indices
 	 * @param m a Matrix instance
 	 */
@@ -873,15 +887,15 @@ public final class Matrix implements Serializable, DeepCloneable {
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
 				if (indices.contains(i * m_iCols + j)) {
-					m_afData[i][j] += m.m_afData[indices.indexOf(i * m_iCols + j)][0];
+					double newValue = getValueAt(i, j) + m.getValueAt(indices.indexOf(i * m_iCols + j), 0);
+					setValueAt(i, j, newValue);
 				}
 			}
 		}
 	}
 
-
 	/**
-	 * This method returns a List of integers, which represent the index of the elements
+	 * Return a List of integers, which represent the index of the elements
 	 * that are equal to parameter d. The index is calculated as i * m_iCols + j.
 	 * @param d the value that is checked for
 	 * @return a List of integers
@@ -890,8 +904,8 @@ public final class Matrix implements Serializable, DeepCloneable {
 		List<Integer> list = new ArrayList<Integer>();
 		for (int i=0; i < m_iRows; i++) {
 			for (int j=0; j < m_iCols; j++) {
-				if (Math.abs(m_afData[i][j] - d) < VERY_SMALL) {
-					list.add(i * this.m_iCols + j);
+				if (Math.abs(getValueAt(i, j) - d) < VERY_SMALL) {
+					list.add(i * m_iCols + j);
 				}
 			}
 		}
@@ -899,21 +913,21 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method returns the sum of all the elements in the Matrix instance.
+	 * Compute the sum of all the elements in the Matrix instance.
 	 * @return a double
 	 */
 	public double getSumOfElements() {
 		double sum = 0d;
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				sum += this.m_afData[i][j];
+				sum += getValueAt(i, j);
 			}
 		}
 		return sum;
 	}
 
 	/**
-	 * This method returns the sum of the elements of a submatrix. The submatrix bounds are determined
+	 * Compute the sum of the elements of a submatrix. The submatrix bounds are determined
 	 * through the parameters.
 	 * @param startRow the index of the starting row
 	 * @param endRow the index of the ending row 
@@ -932,29 +946,29 @@ public final class Matrix implements Serializable, DeepCloneable {
 		double sum = 0d;
 		for (int i = startRow; i <= endRow; i++) {
 			for (int j = startColumn; j <= endColumn; j++) {
-				sum += this.m_afData[i][j];
+				sum += getValueAt(i, j);
 			}
 		}
 		return sum;
 	}
 	
-	
-	
 	/**
-	 * This method returns a Matrix object that contains the absolute values
+	 * Create a Matrix instance that contains the absolute values
 	 * of the original matrix.
 	 * @return a Matrix instance that contains the absolute values
 	 */
 	public Matrix getAbsoluteValue() {
 		Matrix oMat = new Matrix(m_iRows, m_iCols);
-		for (int i = 0; i < m_iRows; i++) 
-			for (int j = 0; j < m_iCols; j++)
-				oMat.m_afData[i][j] = Math.abs(this.m_afData[i][j]);
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				oMat.setValueAt(i, j, Math.abs(getValueAt(i, j)));
+			}
+		}
 		return oMat;
 	}
 
 	/**
-	 * This method returns the number of elements in a Matrix object.
+	 * Return the number of elements in a Matrix object.
 	 * @return the number of elements (integer)
 	 */
 	public int getNumberOfElements() {
@@ -962,7 +976,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method calculates the Kronecker product of this by the m Matrix object.
+	 * Calculate the Kronecker product of this by the m Matrix object.
 	 * @param m a Matrix instance
 	 * @return the resulting product (a matrix instance)
 	 */
@@ -972,7 +986,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 			for (int j1 = 0; j1 < m_iCols; j1++) {
 				for (int i2 = 0; i2 < m.m_iRows; i2++) {
 					for (int j2 = 0; j2 < m.m_iCols; j2++) {
-						result.m_afData[i1 * m.m_iRows + i2][j1 * m.m_iCols + j2] = m_afData[i1][j1] * m.m_afData[i2][j2];
+						result.setValueAt(i1 * m.m_iRows + i2, j1 * m.m_iCols + j2, getValueAt(i1, j1) * m.getValueAt(i2, j2));
 					}
 				}
 			}
@@ -981,7 +995,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method returns a Matrix that corresponds to the Isserlis theorem given that matrix this is
+	 * Create a Matrix that corresponds to the Isserlis theorem given that matrix this is
 	 * a variance-covariance matrix.
 	 * @return a Matrix instance
 	 */
@@ -997,14 +1011,14 @@ public final class Matrix implements Serializable, DeepCloneable {
 				for (int j = i; j < m_iCols; j++) {
 					for (int iPrime = 0; iPrime < m_iRows; iPrime++) {
 						for (int jPrime = 0; jPrime < m_iCols; jPrime++) {
-							covariance = m_afData[i][j] * m_afData[iPrime][jPrime] 
-									+ m_afData[i][iPrime] * m_afData[j][jPrime]
-									+ m_afData[i][jPrime] * m_afData[j][iPrime];
+							covariance = getValueAt(i, j) * getValueAt(iPrime, jPrime) + 
+									getValueAt(i, iPrime) * getValueAt(j, jPrime) +
+									getValueAt(i, jPrime) * getValueAt(j, iPrime);
 							indexRow = i * m_iRows + iPrime;
 							indexCol = j * m_iCols + jPrime;
-							output.m_afData[indexRow][indexCol] = covariance;
+							output.setValueAt(indexRow, indexCol, covariance);
 							if (indexRow != indexCol) {
-								output.m_afData[indexCol][indexRow] = covariance;
+								output.setValueAt(indexCol, indexRow, covariance);
 							}
 						}
 					}
@@ -1016,7 +1030,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 
 	/**
-	 * This method checks if the matrix is positive definite. The check is based on the Cholesky factorization. If the factorization can
+	 * Check if the matrix is positive definite. The check is based on the Cholesky factorization. If the factorization can
 	 * be computed the method returns true.
 	 * @return true if it is or false otherwise
 	 */
@@ -1034,20 +1048,20 @@ public final class Matrix implements Serializable, DeepCloneable {
 		Matrix oMat = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				oMat.m_afData[i][j] = this.m_afData[i][j];
+				oMat.setValueAt(i, j, getValueAt(i, j));
 			}
 		}
 		return oMat;
 	}
 	
 	/**
-	 * Returns a representation of the m_afData array.
+	 * Returns a representation of the matrix content.
 	 */
 	@Override
 	public String toString() {
 		String outputString = "{";
 		for (int i = 0; i < m_iRows; i ++) {
-			outputString += convertArrayToString(m_afData[i]);
+			outputString += convertArrayToString(i);
 			if (i == m_iRows - 1) {
 				outputString += "}";
 			} else {
@@ -1065,25 +1079,24 @@ public final class Matrix implements Serializable, DeepCloneable {
 		return outputString;
 	}
 
-	private String convertArrayToString(double[] myArray) {
+	private String convertArrayToString(int i) {
 		String outputString = "";
-		for (int i = 0; i < myArray.length; i++) {
-			if (i > 0) {
+		for (int j = 0; j < m_iCols; j++) {
+			if (j > 0) {
 				outputString = outputString.concat(" ");
 			}
-			double absValue = Math.abs(myArray[i]);
+			double absValue = Math.abs(getValueAt(i, j));
 			if (absValue > 0.1 && absValue < 1E3) {
-				outputString = outputString.concat("[" + SimpleDecimalFormatter.format(myArray[i]) + "]");
+				outputString = outputString.concat("[" + SimpleDecimalFormatter.format(getValueAt(i, j)) + "]");
 			} else {
-				outputString = outputString.concat("[" + ScientificFormatter.format(myArray[i]) + "]");
+				outputString = outputString.concat("[" + ScientificFormatter.format(getValueAt(i, j)) + "]");
 			}
-				
 		}
 		return outputString;
 	}
 	
 	/**
-	 * This method returns the LU decomposition of this Matrix instance. The diagonal in the lower triangle is 1.
+	 * Return the LU decomposition of this Matrix instance. The diagonal in the lower triangle is 1.
 	 * @return an array of two matrices, the first and the second being the lower and the upper triangle, respectively
 	 * @throws UnsupportedOperationException if the matrix is not square
 	 */
@@ -1095,24 +1108,23 @@ public final class Matrix implements Serializable, DeepCloneable {
 			Matrix l = new Matrix(m_iRows, m_iCols);
 			Matrix u = new Matrix(m_iRows, m_iCols);
 		    for (int i = 0; i < m_iRows; i++) {
-		        l.m_afData[i][i] = 1d;
+		        l.setValueAt(i, i, 1d);
 		        for (int j = i; j < m_iRows; j++) {
 		            double sum = 0;
 		            for (int s = 0; s <= i - 1; s++) {
-		                sum += l.m_afData[i][s] * u.m_afData[s][j];
+		                sum += l.getValueAt(i, s) * u.getValueAt(s, j);
 		            }
-		            u.m_afData[i][j] = m_afData[i][j] - sum;
+		            u.setValueAt(i, j, getValueAt(i, j) - sum);
 		        }
 		        for (int iii = i + 1; iii < m_iRows; iii++) {
 		            double sum = 0;
 		            for(int s = 0; s <= i - 1; s++) {
-		                sum += l.m_afData[iii][s] * u.m_afData[s][i];
+		                sum += l.getValueAt(iii, s) * u.getValueAt(s, i);
 		            }
-		            if (u.m_afData[i][i] == 0d) {
-//		            	this.getLUDecomposition();
+		            if (u.getValueAt(i, i) == 0d) {
 		            	throw new UnsupportedOperationException("The determinant cannot be calculated because of a division by 0!");
 		            }
-		            l.m_afData[iii][i] = (m_afData[iii][i] - sum) / u.m_afData[i][i];
+		            l.setValueAt(iii, i, (getValueAt(iii, i) - sum) / u.getValueAt(i, i));
 		        }
 		    }
 		    outputMatrices[0] = l;
@@ -1121,7 +1133,6 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 	}
 
-	
 	private void swap(int i, int j, boolean columnWise) {
 		if (columnWise) {
 			if (i >= m_iCols || j >= m_iCols) {
@@ -1129,9 +1140,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 			} else {
 				double d;
 				for (int k = 0; k < m_iRows; k++) {
-					d = m_afData[k][i];
-					m_afData[k][i] = m_afData[k][j];
-					m_afData[k][j] = d;
+					d = getValueAt(k, i);
+					setValueAt(k, i, getValueAt(k, j));
+					setValueAt(k, j, d);
 				}
 			}
 		} else {
@@ -1140,12 +1151,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 			} else {
 				double d;
 				for (int k = 0; k < m_iCols; k++) {
-					d = m_afData[i][k];
-					m_afData[i][k] = m_afData[j][k];
-					m_afData[j][k] = d;
+					d = getValueAt(i, k);
+					setValueAt(i, k, getValueAt(j, k));
+					setValueAt(j, k, d);
 				}
 			}
-			
 		}
 	}
 	
@@ -1163,7 +1173,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	
 
 	/**
-	 * This method returns a list of indices that defines the blocks in the matrix.
+	 * Return a list of indices that define the blocks in the matrix.
 	 * @return a List of List of Integers
 	 */
 	protected List<List<Integer>> getBlockConfiguration() {
@@ -1191,13 +1201,13 @@ public final class Matrix implements Serializable, DeepCloneable {
 					int indexI = potentialBlock.get(i);
 					for (int j = remainingIndex.indexOf(indexI) + 1; j < remainingIndex.size(); j++) {
 						int indexJ = remainingIndex.get(j);
-						if (m_afData[indexI][indexJ] != 0) {
+						if (getValueAt(indexI, indexJ) != 0) {
 							if (!potentialBlock.contains(indexJ)) {
 								potentialBlock.add(indexJ);
 							}
 							for (int k = i + 1; k < j; k++) {
 								int indexK = remainingIndex.get(k);
-								if (m_afData[indexK][indexJ] != 0) {
+								if (getValueAt(indexK, indexJ) != 0) {
 									if (!potentialBlock.contains(indexK)) {
 										potentialBlock.add(indexK);
 									}
@@ -1216,7 +1226,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	
 	
 	/**
-	 * This method returns the minor of this matrix, ie the determinant of the Matrix that 
+	 * Compute the minor of this matrix, i.e. the determinant of the Matrix that 
 	 * contains all the elements of the original matrix except those in row i and column j.
 	 * @param i the index of the row to be omitted
 	 * @param j the index of the column to be omitted
@@ -1237,7 +1247,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 					int index_j = 0;
 					for (int jj = 0; jj < m_iCols; jj++) {
 						if (jj != j) {
-							m.m_afData[index_i][index_j] = m_afData[ii][jj];
+							m.setValueAt(index_i, index_j, getValueAt(ii, jj));
 							index_j++;
 						}
 					}
@@ -1249,7 +1259,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
-	 * This method returns the cofactor of this matrix with respect to the element i,j.
+	 * Compute the cofactor of this matrix with respect to the element i,j.
 	 * @param i the row index of the element
 	 * @param j the column index of the element
 	 * @return the cofactor matrix
@@ -1265,7 +1275,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	
 	
 	/**
-	 * This method returns the determinant of this matrix using Laplace's method for small matrices and LU decomposition
+	 * Compute the determinant of this matrix using Laplace's method for small matrices and LU decomposition
 	 * for larger matrices.
 	 * @return a double
 	 * @throws UnsupportedOperationException if the matrix is not square
@@ -1275,34 +1285,34 @@ public final class Matrix implements Serializable, DeepCloneable {
 		if (!isSquare()) {
 			throw new UnsupportedOperationException("The matrix is not square!");
 		} else if (m_iRows == 1) {
-			return m_afData[0][0];
+			return getValueAt(0, 0);
 		} else if (m_iRows == 2) {
-			return m_afData[0][0] * m_afData[1][1] - m_afData[0][1] * m_afData[1][0];
+			return getValueAt(0, 0) * getValueAt(1, 1) - getValueAt(0, 1) * getValueAt(1, 0);
 		} else if (m_iRows <= SizeBeforeSwitchingToLUDecompositionInDeterminantCalculation) {
 			for (int j = 0; j < m_iRows; j++) {
-				if (m_afData[0][j] != 0) {
-					determinant += m_afData[0][j] * getCofactor(0, j);
+				if (getValueAt(0, j) != 0d) {
+					determinant += getValueAt(0, j) * getCofactor(0, j);
 				}
 			}
 		} else {
 			Matrix triangle = getLUDecomposition()[1];
 			determinant = 1d;
 			for (int i = 0; i < triangle.m_iRows; i++) {
-				determinant *= triangle.m_afData[i][i];
+				determinant *= triangle.getValueAt(i, i);
 			}
 		}
 		return determinant;
 	}
 
 	/**
-	 * This method returns the adjugate matrix of this matrix.
+	 * Compute the adjugate matrix of this matrix.
 	 * @return a Matrix instance
 	 */
 	public Matrix getAdjugateMatrix() {
 		Matrix adjugate = new Matrix(m_iRows, m_iCols);
 		for (int i = 0; i < m_iRows; i++) {
 			for (int j = 0; j < m_iCols; j++) {
-				adjugate.m_afData[j][i] = getCofactor(i, j);		// i and j are inversed for adjugate to ensure the transposition
+				adjugate.setValueAt(j, i, getCofactor(i, j));		// i and j are inversed for adjugate to ensure the transposition
 			}
 		}
 		return adjugate;
@@ -1311,7 +1321,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	protected Matrix getInternalInverseMatrix() {
 		if (m_iRows == 1) {
 			Matrix output = new Matrix(1,1);
-			output.m_afData[0][0] = 1d/m_afData[0][0];
+			output.setValueAt(0, 0, 1d / getValueAt(0, 0));
 			return output;
 		} else if (m_iRows > SizeBeforeSwitchingToLUDecompositionInDeterminantCalculation) {
 			int index = m_iCols / 2;
@@ -1336,21 +1346,20 @@ public final class Matrix implements Serializable, DeepCloneable {
 				return getAdjugateMatrix().scalarMultiply(1d / determinant);
 			}
 		}
-
 	}
 	
 	/**
-	 * This method returns the inverse matrix of this matrix.
+	 * Compute the inverse of this matrix.
 	 * @return the inverse matrix
 	 */
 	public Matrix getInverseMatrix() {
 		if (isDiagonalMatrix()) {		// procedure for diagonal matrices
 			Matrix mat = new Matrix(m_iRows, m_iCols);
 			for (int i = 0; i < m_iRows; i++) {
-				if (m_afData[i][i] == 0d) {
+				if (getValueAt(i, i) == 0d) {
 					throw new UnsupportedOperationException("The matrix is diagonal but some diagonal elements are null! It cannot be inverted!");
 				}
-				mat.m_afData[i][i] = 1 / m_afData[i][i];
+				mat.setValueAt(i, i, 1d / getValueAt(i, i));
 			}
 			return mat;
 		} 
@@ -1363,7 +1372,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 				Matrix invSubMatrix = getSubMatrix(blockIndex, blockIndex).getInternalInverseMatrix();
 				for (int i = 0; i < blockIndex.size(); i++) {
 					for (int j = 0; j < blockIndex.size(); j++) {
-						inverseMatrix.m_afData[blockIndex.get(i)][blockIndex.get(j)] = invSubMatrix.m_afData[i][j];
+						inverseMatrix.setValueAt(blockIndex.get(i), blockIndex.get(j), invSubMatrix.getValueAt(i, j));
 					}
 				}
 			}
@@ -1371,14 +1380,19 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 		
 	}
-	
+
+	/**
+	 * Create an identity matrix of dimension i.
+	 * @param i the dimension of the matrix
+	 * @return a Matrix instance
+	 */
 	public static Matrix getIdentityMatrix(int i) {
 		if (i <= 0) {
 			throw new InvalidParameterException("The parameter i must be larger than 0!");
 		}
 		Matrix mat = new Matrix(i,i);
 		for (int j = 0; j < i; j++) {
-			mat.m_afData[j][j] = 1d;
+			mat.setValueAt(j, j, 1d);
 		}
 		return mat;
 	}

@@ -56,7 +56,7 @@ public final class GaussianErrorTermList extends ArrayList<GaussianErrorTerm> {
 	public Matrix getNormalizedErrors() {
 		Matrix mat = new Matrix(size(),1);
 		for (int i = 0; i < size(); i++) {
-			mat.m_afData[i][0] = get(i).normalizedValue;
+			mat.setValueAt(i, 0, get(i).normalizedValue);
 		}
 		return mat;
 	}
@@ -64,7 +64,7 @@ public final class GaussianErrorTermList extends ArrayList<GaussianErrorTerm> {
 	protected Matrix getRealizedErrors() {
 		Matrix mat = new Matrix(size(),1);
 		for (int i = 0; i < size(); i++) {
-			mat.m_afData[i][0] = get(i).value;
+			mat.setValueAt(i, 0, get(i).value);
 		}
 		return mat;
 	}
@@ -73,7 +73,7 @@ public final class GaussianErrorTermList extends ArrayList<GaussianErrorTerm> {
 		for (int i = 0; i < errorTerms.m_iRows; i++) {
 			GaussianErrorTerm error = get(i);
 			if (error.value == null) {
-				error.value = errorTerms.m_afData[i][0];
+				error.value = errorTerms.getValueAt(i, 0);
 			}
 		}
 		updated = true;

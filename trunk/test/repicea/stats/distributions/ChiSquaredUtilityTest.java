@@ -36,9 +36,9 @@ public class ChiSquaredUtilityTest {
 		}
 		
 		Matrix mean = receiver.getMean();
-		Assert.assertEquals("Testing the mean", dist.getMean().m_afData[0][0], mean.m_afData[0][0], 1E-2);
+		Assert.assertEquals("Testing the mean", dist.getMean().getValueAt(0, 0), mean.getValueAt(0, 0), 1E-2);
 		Matrix variance = receiver.getVariance();
-		Assert.assertEquals("Testing the variance", dist.getVariance().m_afData[0][0], variance.m_afData[0][0], 1E-2);
+		Assert.assertEquals("Testing the variance", dist.getVariance().getValueAt(0, 0), variance.getValueAt(0, 0), 1E-2);
 	}
 	
 	
@@ -46,10 +46,10 @@ public class ChiSquaredUtilityTest {
 	public void randomGenerationTestForMultivariateChiSquared() {
 		int df = 100;
 		Matrix expectedMean = new Matrix(2,2);
-		expectedMean.m_afData[0][0] = 5d;
-		expectedMean.m_afData[1][1] = 5d;
-		expectedMean.m_afData[0][1] = 0d;
-		expectedMean.m_afData[1][0] = 0d;
+		expectedMean.setValueAt(0, 0, 5d);
+		expectedMean.setValueAt(1, 1, 5d);
+		expectedMean.setValueAt(0, 1, 0d);
+		expectedMean.setValueAt(1, 0, 0d);
 		
 		ChiSquaredDistribution dist = new ChiSquaredDistribution(df, expectedMean);
 		EmpiricalDistribution receiver = new EmpiricalDistribution();
@@ -71,10 +71,10 @@ public class ChiSquaredUtilityTest {
 		Assert.assertTrue("Testing the mean", !meanDiff.getAbsoluteValue().anyElementLargerThan(5E-3));	// test if no absolute difference is larger than 5E-3
 
 		Matrix obsVariance = new Matrix(2,2);
-		obsVariance.m_afData[0][0] = receiver00.getVariance().m_afData[0][0];
-		obsVariance.m_afData[0][1] = receiver01.getVariance().m_afData[0][0];
-		obsVariance.m_afData[1][0] = receiver10.getVariance().m_afData[0][0];
-		obsVariance.m_afData[1][1] = receiver11.getVariance().m_afData[0][0];
+		obsVariance.setValueAt(0, 0, receiver00.getVariance().getValueAt(0, 0));
+		obsVariance.setValueAt(0, 1, receiver01.getVariance().getValueAt(0, 0));
+		obsVariance.setValueAt(1, 0, receiver10.getVariance().getValueAt(0, 0));
+		obsVariance.setValueAt(1, 1, receiver11.getVariance().getValueAt(0, 0));
 		Matrix expectedVariance = dist.getVariance();
 		Matrix varianceDiff = expectedVariance.subtract(obsVariance);
 		
