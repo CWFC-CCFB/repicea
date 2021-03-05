@@ -121,7 +121,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 		if (iRows <= 0 || iCols <= 0) {
 			throw new InvalidParameterException("The number of rows or columns must be equal to or greater than 1!");
 		}
-		m_afData = new double[iRows][iCols];
+		if (iCols == 1 && newImplementation) {
+			m_afData = new double[iCols][iRows];		// the array is stored as a row vector for better memory management
+		} else {
+	  		m_afData = new double[iRows][iCols];
+		}
 		m_iRows = iRows;
 		m_iCols = iCols;
 	}
@@ -141,6 +145,10 @@ public final class Matrix implements Serializable, DeepCloneable {
 		return arr;
 	}
 	
+	private boolean isNewImplementationForColumnVector() {
+		return isColumnVector() && !isRowVector() && m_afData.length == 1;	// second condition is to avoid side effect when dealing with a 1x1 matrix
+	}
+	
 	/**
 	 * Set the value at row i and column j.
 	 * @param i
@@ -148,7 +156,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 * @param value
 	 */
 	public void setValueAt(int i, int j, double value) {
-		m_afData[i][j] = value;
+		if (isNewImplementationForColumnVector()) {	// the vector is actually transposed for a better memory management
+			m_afData[j][i] = value;
+		} else {
+			m_afData[i][j] = value;
+		}
 	}
 	
 	/**
@@ -158,7 +170,11 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 * @return a double
 	 */
 	public double getValueAt(int i, int j) {
-		return m_afData[i][j];
+		if (isNewImplementationForColumnVector()) {	// the vector is actually transposed for a better memory management
+			return m_afData[j][i];
+		} else {
+			return m_afData[i][j];
+		}
 	}
 	
 	/**

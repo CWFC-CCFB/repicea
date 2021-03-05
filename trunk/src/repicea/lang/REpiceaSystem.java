@@ -292,7 +292,7 @@ public class REpiceaSystem {
 	 * the free memory as provided by the Runtime class.
 	 * @return the memory load in Megabytes
 	 */
-	public double getCurrentMemoryLoadMb() {
+	public static double getCurrentMemoryLoadMb() {
 		System.gc();
 		long usedMem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
 		return usedMem * ConversionFromBytestoMegabytes;
