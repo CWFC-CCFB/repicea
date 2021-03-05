@@ -125,6 +125,21 @@ public final class Matrix implements Serializable, DeepCloneable {
 
 	
 	/**
+	 * Create an array from the Matrix instance. Note that this array is not the internal array. It is a copy and consequently repeated calls to 
+	 * this method with large matrices might be computationally intensive.
+	 * @return a 2-dimension array
+	 */
+	public double[][] toArray() {
+		double[][] arr = new double[m_iRows][m_iCols];
+		for (int i = 0; i < m_iRows; i++) {
+			for (int j = 0; j < m_iCols; j++) {
+				arr[i][j] = getValueAt(i, j);
+			}
+		}
+		return arr;
+	}
+	
+	/**
 	 * Set the value at row i and column j.
 	 * @param i
 	 * @param j
