@@ -117,6 +117,13 @@ public final class Matrix implements Serializable, DeepCloneable {
 		this(iRows, iCols, true);
 	}
 
+	/**
+	 * Protected constructor which allows for the former implementation. 
+	 * @param iRows number of rows
+	 * @param iCols number of columns
+	 * @param newImplementation if true, the column vector are stored in transposed manner so that they take less memory. 
+	 * By default, it is set to true.
+	 */
 	protected Matrix(int iRows, int iCols, boolean newImplementation) {
 		if (iRows <= 0 || iCols <= 0) {
 			throw new InvalidParameterException("The number of rows or columns must be equal to or greater than 1!");
