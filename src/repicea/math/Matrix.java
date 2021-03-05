@@ -54,8 +54,8 @@ public final class Matrix implements Serializable, DeepCloneable {
 	private static final double EPSILON = 1E-12;
 	
 	private final double[][] m_afData;
-	public int m_iRows;
-	public int m_iCols;
+	public final int m_iRows;
+	public final int m_iCols;
 	
 	/**
 	 * Constructor 1. Creates a matrix from a two-dimension array.
@@ -89,24 +89,9 @@ public final class Matrix implements Serializable, DeepCloneable {
 			setValueAt(i, 0, number.doubleValue());
 		}
 	}
-
 	
 	/**
-	 * Constructor 4. Creates a matrix with all elements set to 0.
-	 * @param iRows number of rows
-	 * @param iCols number of columns
-	 */
-	public Matrix(int iRows, int iCols) {
-		if (iRows <= 0 || iCols <= 0) {
-			throw new InvalidParameterException("The number of rows or columns must be equal to or greater than 1!");
-		}
-		m_afData = new double[iRows][iCols];
-		m_iRows = iRows;
-		m_iCols = iCols;
-	}
-	
-	/**
-	 * Constructor 5. Creates a matrix with the elements starting from a given number with a particular increment.
+	 * Constructor 4. Creates a matrix with the elements starting from a given number with a particular increment.
 	 * @param iRows number of rows
 	 * @param iCols number of columns
 	 * @param from first element of the matrix
@@ -123,6 +108,23 @@ public final class Matrix implements Serializable, DeepCloneable {
 		}
 	}
 
+	/**
+	 * Basic constructor. Creates a matrix with all elements set to 0.
+	 * @param iRows number of rows
+	 * @param iCols number of columns
+	 */
+	public Matrix(int iRows, int iCols) {
+		this(iRows, iCols, true);
+	}
+
+	protected Matrix(int iRows, int iCols, boolean newImplementation) {
+		if (iRows <= 0 || iCols <= 0) {
+			throw new InvalidParameterException("The number of rows or columns must be equal to or greater than 1!");
+		}
+		m_afData = new double[iRows][iCols];
+		m_iRows = iRows;
+		m_iCols = iCols;
+	}
 	
 	/**
 	 * Create an array from the Matrix instance. Note that this array is not the internal array. It is a copy and consequently repeated calls to 

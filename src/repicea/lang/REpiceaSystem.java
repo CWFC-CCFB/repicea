@@ -40,6 +40,7 @@ import repicea.util.REpiceaTranslator.Language;
  */
 public class REpiceaSystem {
 
+	private static final double ConversionFromBytestoMegabytes = 1d / (1024 * 1024);
 	
 	private static String jreVersion;
 	
@@ -283,6 +284,17 @@ public class REpiceaSystem {
 		field.setAccessible(true);
 		return field.get(cl);
 	}
-	
-	
+
+	/**
+	 * Call the garbage collector and compute the current memory load in Megabytes. <br>
+	 * <br>
+	 * This method actually relies on the difference between to total memory and
+	 * the free memory as provided by the Runtime class.
+	 * @return the memory load in Megabytes
+	 */
+	public double getCurrentMemoryLoadMb() {
+		System.gc();
+		long usedMem = (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory());
+		return usedMem * ConversionFromBytestoMegabytes;
+	}
 }
