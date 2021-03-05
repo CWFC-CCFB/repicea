@@ -29,6 +29,7 @@ import org.junit.Test;
 import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
+import repicea.lang.REpiceaSystem;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.util.ObjectUtility;
@@ -147,6 +148,24 @@ public class MatrixTests {
 		Assert.assertEquals(true, equalToIdentity);
 	}
 
+	@Test
+	public void testMemoryManagement() {
+		List<Matrix> myArrayList = new ArrayList<Matrix>();
+		for (int i = 0; i < 10000; i++) {
+			myArrayList.add(new Matrix(700,1, false)); // old implementation
+		}
+		double currentMemoryLoad = REpiceaSystem.getCurrentMemoryLoadMb();
+		System.out.println("Current memory load with old implementation = " + currentMemoryLoad + " Mb");
+		myArrayList.clear();
+		for (int i = 0; i < 10000; i++) {
+			myArrayList.add(new Matrix(700,1)); // new implementation
+		}
+		double newMemoryLoad = REpiceaSystem.getCurrentMemoryLoadMb();
+		System.out.println("Current memory load with new implementation = " + newMemoryLoad + " Mb");
+		Assert.assertTrue("Testing that former implementation takes at least three times the memory space", currentMemoryLoad > newMemoryLoad * 3);
+	}
+	
+	
 	public void speedTestInversionMatrix(int iMax) throws IOException {
 		String filename = ObjectUtility.getPackagePath(getClass()) + "inversionTimes.csv";
 		CSVWriter writer = new CSVWriter(new File(filename), false);
