@@ -29,11 +29,12 @@ import repicea.math.Matrix;
 public class PopulationUnitWithEqualInclusionProbability extends PopulationUnit {
 
 	/**
-	 * Constructor
-	 * @param obs a column vector
+	 * Constructor.
+	 * @param sampleId a string that stands for the sample id
+	 * @param obs a Matrix instance. Must be a column vector
 	 */
-	public PopulationUnitWithEqualInclusionProbability(Matrix obs) {
-		super(obs);
+	public PopulationUnitWithEqualInclusionProbability(String sampleId, Matrix obs) {
+		super(sampleId, obs);
 	}
 
 }

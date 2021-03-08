@@ -19,6 +19,7 @@
 package repicea.stats.estimates;
 
 import java.security.InvalidParameterException;
+import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
@@ -50,7 +51,7 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 	protected Matrix getMeanFromDistribution() {
 		Matrix total = new Matrix(nRows, nCols);
 		int sampleSize = getObservations().size();
-		for (PopulationUnitWithUnequalInclusionProbability observation : getObservations()) {
+		for (PopulationUnitWithUnequalInclusionProbability observation : getObservations().values()) {
 			total = total.add(observation.getData().scalarMultiply(1d/(sampleSize * observation.getInclusionProbability())));
 		}
 		return total;
@@ -71,10 +72,11 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		double pi_ij;
 		Matrix varianceContribution;
 		Matrix variance = null;
+		List<String> sampleIds = getSampleIds();
 		for (int i = 0; i < getObservations().size(); i++) {
 			for (int j = i; j < getObservations().size(); j++) {
-				obs_i = getObservations().get(i);
-				obs_j = getObservations().get(j);
+				obs_i = getObservations().get(sampleIds.get(i));
+				obs_j = getObservations().get(sampleIds.get(j));
 				pi_i = n * obs_i.getInclusionProbability();
 				pi_j = n * obs_j.getInclusionProbability();
 				if (i == j) {
@@ -100,9 +102,9 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		boolean isMergeable = super.isMergeableEstimate(estimate);
 		if (isMergeable) {
 			PopulationTotalEstimate est = (PopulationTotalEstimate) estimate;
-			for (int i = 0; i < getObservations().size(); i++) {
-				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
-				PopulationUnitWithUnequalInclusionProbability thatUnit = est.getObservations().get(i);
+			for (String sampleId : getSampleIds()) {
+				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(sampleId);
+				PopulationUnitWithUnequalInclusionProbability thatUnit = est.getObservations().get(sampleId);
 				if (thisUnit.getInclusionProbability() != thatUnit.getInclusionProbability()) {
 					return false;
 				}
@@ -117,11 +119,13 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate();
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
-			for (int i = 0; i < getObservations().size(); i++) {
-				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
-				PopulationUnitWithUnequalInclusionProbability thatUnit = totalEstimate.getObservations().get(i);
-				newEstimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(thisUnit.getData().add(thatUnit.getData()), 
-						thisUnit.getInclusionProbability()));
+			for (String sampleId : getSampleIds()) {
+				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(sampleId);
+				PopulationUnitWithUnequalInclusionProbability thatUnit = totalEstimate.getObservations().get(sampleId);
+				PopulationUnitWithUnequalInclusionProbability newUnit = new PopulationUnitWithUnequalInclusionProbability(sampleId, 
+						thisUnit.getData().add(thatUnit.getData()), 
+						thisUnit.getInclusionProbability());
+				newEstimate.addObservation(newUnit);
 			}
 			return newEstimate;
 		} else {
@@ -134,11 +138,14 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 		if (isMergeableEstimate(pointEstimate)) {
 			PopulationTotalEstimate newEstimate = new PopulationTotalEstimate();
 			PopulationTotalEstimate totalEstimate = (PopulationTotalEstimate) pointEstimate;
-			for (int i = 0; i < getObservations().size(); i++) {
-				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
-				PopulationUnitWithUnequalInclusionProbability thatUnit = totalEstimate.getObservations().get(i);
-				newEstimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(thisUnit.getData().subtract(thatUnit.getData()), 
-						thisUnit.getInclusionProbability()));
+			for (String sampleId : getSampleIds()) {
+				PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(sampleId);
+				PopulationUnitWithUnequalInclusionProbability thatUnit = totalEstimate.getObservations().get(sampleId);
+				PopulationUnitWithUnequalInclusionProbability newUnit = new PopulationUnitWithUnequalInclusionProbability(sampleId, 
+						thisUnit.getData().subtract(thatUnit.getData()), 
+						thisUnit.getInclusionProbability());
+				newEstimate.addObservation(newUnit);
+						
 			}
 			return newEstimate;
 		} else {
@@ -149,9 +156,12 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 	@Override
 	protected PopulationTotalEstimate multiply(double scalar) {
 		PopulationTotalEstimate newEstimate = new PopulationTotalEstimate();
-		for (int i = 0; i < getObservations().size(); i++) {
-			PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(i);
-			newEstimate.addObservation(new PopulationUnitWithUnequalInclusionProbability(thisUnit.getData().scalarMultiply(scalar), thisUnit.getInclusionProbability()));
+		for (String sampleId : getSampleIds()) {
+			PopulationUnitWithUnequalInclusionProbability thisUnit = getObservations().get(sampleId);
+			PopulationUnitWithUnequalInclusionProbability newUnit =	new PopulationUnitWithUnequalInclusionProbability(sampleId, 
+					thisUnit.getData().scalarMultiply(scalar), 
+					thisUnit.getInclusionProbability());
+			newEstimate.addObservation(newUnit);
 		}
 		return newEstimate;
 	}

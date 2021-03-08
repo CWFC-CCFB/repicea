@@ -31,24 +31,34 @@ import repicea.math.Matrix;
 public abstract class PopulationUnit {
 
 	private final Matrix data;
-
+	private final String sampleId;
+	
 	/**
-	 * Constructor
-	 * @param obs
+	 * Constructor.
+	 * @param sampleId a string that stands for the sample id
+	 * @param obs a Matrix instance. Must be a column vector
 	 */
-	protected PopulationUnit(Matrix obs) {
+	protected PopulationUnit(String sampleId, Matrix obs) {
+		if (sampleId == null) {
+			throw new InvalidParameterException("The sample argument must be non null!");
+		}
 		if (!obs.isColumnVector()) {
 			throw new InvalidParameterException("The obs parameter should be a column vector!");
 		}
+		this.sampleId = sampleId;
 		this.data = obs;
 	}
 
 	/**
-	 * This method returns the response that was observed in 
+	 * Return the response that was observed in 
 	 * this unit of the population. The response can be multivariate.
 	 * @return a Matrix instance
 	 */
 	public Matrix getData() {return data;}
 
-	
+	/**
+	 * Provide the sample id which is a unique string for this sample unit.
+	 * @return a String
+	 */
+	public String getSampleId() {return sampleId;}
 }
