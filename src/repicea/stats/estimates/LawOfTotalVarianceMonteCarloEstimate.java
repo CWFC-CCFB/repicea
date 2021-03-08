@@ -75,7 +75,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	private PopulationMeanEstimate unformatObservation(Matrix formattedObservation) {
 		PopulationMeanEstimate estimate = new PopulationMeanEstimate();
 		for (int j = 0; j < formattedObservation.m_iCols; j++) {
-			estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j)));
+			estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(j + "", formattedObservation.getSubMatrix(0, formattedObservation.m_iRows - 1, j, j)));
 		}
 		return estimate;
 	}

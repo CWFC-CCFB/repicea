@@ -29,7 +29,6 @@ import repicea.math.Matrix;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.distributions.UnknownDistribution;
 import repicea.stats.distributions.utility.GaussianUtility;
-import repicea.stats.sampling.PopulationUnit;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
@@ -45,9 +44,13 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
  * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
  * inference in forest inventories. Forestry 91(3): 354-365. </a>
  */
+@SuppressWarnings("serial")
 public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
 
-	
+	/**
+	 * An inner class that contains the corrected variance of the BootstrapHybridPointEstimate instance.
+	 * @author Mathieu Fortin - May 2018
+	 */
 	public static class VariancePointEstimate extends SimpleEstimate {
 		
 		private final Matrix modelRelatedVariance;
@@ -145,7 +148,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	 * and the resulting BootstrapHybridPointEstimate can then be combined through this method.
 	 * @param estimate a BootstrapHybridPointEstimate instance that relies on the same PointEstimate class in the estimates member
 	 */
-	public void addBootstrapHybridEstimate(BootstrapHybridPointEstimate estimate) {
+	public void appendBootstrapHybridEstimate(BootstrapHybridPointEstimate estimate) {
 		for (PointEstimate<?> pointEstimate : estimate.estimates) {
 			addPointEstimate(pointEstimate);
 		}
@@ -216,7 +219,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				}
 				mean.addRealization(estimate.getMean());
 				variance.addRealization(estimate.getVariance());
-				observationMeans.addRealization(estimate.getObservationVector());
+				observationMeans.addRealization(estimate.getObservationMatrix());
 			}
 			
 			PointEstimate<?> meanEstimate; 
@@ -229,17 +232,17 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 					meanEstimate = estimates.get(0).getClass().newInstance();
 				}
 				
-				PopulationUnit popUnit;
 				Matrix observationMeanMatrix = observationMeans.getMean();
+				List<String> sampleIds = estimates.get(0).getSampleIds();
 				for (int i = 0; i < sampleSize; i++) {
-					Matrix meanForThisI = observationMeanMatrix.getSubMatrix(i * nbElementsPerObs,  (i + 1) * nbElementsPerObs - 1, 0, 0);
+					String sampleId = sampleIds.get(i);
+					Matrix meanForThisI = observationMeanMatrix.getSubMatrix(i, i, 0, nbElementsPerObs - 1).transpose();		// need to transpose because it is a row vector
 					if (meanEstimate instanceof PopulationTotalEstimate) {
-						popUnit = new PopulationUnitWithUnequalInclusionProbability(meanForThisI,
-								((PopulationTotalEstimate) estimates.get(0)).getObservations().get(i).getInclusionProbability());
-						((PopulationTotalEstimate) meanEstimate).addObservation((PopulationUnitWithUnequalInclusionProbability) popUnit);
+						PopulationUnitWithUnequalInclusionProbability popUnit = new PopulationUnitWithUnequalInclusionProbability(sampleId, meanForThisI, ((PopulationTotalEstimate) estimates.get(0)).getObservations().get(sampleId).getInclusionProbability());
+						((PopulationTotalEstimate) meanEstimate).addObservation(popUnit);
 					} else {
-						popUnit = new PopulationUnitWithEqualInclusionProbability(meanForThisI);
-						((PopulationMeanEstimate) meanEstimate).addObservation((PopulationUnitWithEqualInclusionProbability) popUnit);
+						PopulationUnitWithEqualInclusionProbability popUnit = new PopulationUnitWithEqualInclusionProbability(sampleId, meanForThisI);
+						((PopulationMeanEstimate) meanEstimate).addObservation(popUnit);
 					}
 				}
 				

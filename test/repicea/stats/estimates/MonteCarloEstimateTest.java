@@ -42,7 +42,7 @@ public class MonteCarloEstimateTest {
 			for (int j = 0; j < sampleSize; j++) {
 				obs = new Matrix(1,1);
 				obs.setValueAt(0, 0, generator.nextGaussian() * innerStd + meanForThisRealization); 
-				estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(obs));
+				estimate.addObservation(new PopulationUnitWithEqualInclusionProbability(j + "", obs));
 			}
 			output.addRealization(estimate);
 		}
