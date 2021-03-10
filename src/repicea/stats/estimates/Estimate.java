@@ -224,7 +224,7 @@ s	 */
 		} 
 
 		Matrix oldMean = getMean();
-		Matrix newMean = this.collapseRowVector(oldMean, desiredIndicesForCollapsing);
+		Matrix newMean = collapseRowVector(oldMean, desiredIndicesForCollapsing);
 		
 		Matrix oldVariance = getVariance();
 		Matrix newVariance = collapseSquareMatrix(oldVariance, desiredIndicesForCollapsing);

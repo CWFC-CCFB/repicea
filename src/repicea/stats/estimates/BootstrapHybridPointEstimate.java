@@ -53,27 +53,79 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	 */
 	public static class VariancePointEstimate extends SimpleEstimate {
 		
-		private final Matrix modelRelatedVariance;
-		private final Matrix samplingRelatedVariance;
+		public static enum VarianceEstimatorImplementation {Corrected,
+			LessBiased,
+			RegularMultipleImputation,
+			None;
+		}
+		
+		private final VarianceEstimatorImplementation implementation;
+		private final Matrix varMean;
+		private final Matrix meanVar;
+		private final Matrix designVarianceOfMeanRealizedY;
 		private final Matrix varianceBiasCorrection;
 		
-		private VariancePointEstimate(Matrix pointEstimate, Matrix totalVariance, Matrix modelRelatedVariance, Matrix samplingRelatedVariance, List<String> rowIndex) {
-			super(pointEstimate, totalVariance); 
+		/**
+		 * Private constructor for the different variance estimator implementation. <br>
+		 * <br>
+		 * There are three implementations: Corrected, LessBiased, RegularMultipleImputation and None. If the argument
+		 * designVarianceOfMeanRealizedY is non null, the constructor tries to corrected implementation. If this 
+		 * implementation fails, that is if it provides negative variance estimates, then the constructor relies
+		 * on the less biased implementation. If designVarianceOfMeanRealizedY is set to null then the implementation
+		 * is the regular multiple imputation which is the most biased. <br>
+		 * <br>
+		 * If any of the varMean or meanVar argument is null, then the implementation is set to None.
+		 * 
+		 * @param pointEstimate the point estimate 
+		 * @param varMean the variance of the bootstrapped point estimates 
+		 * @param meanVar the mean of the bootstrapped variances
+		 * @param designVarianceOfMeanRealizedY the design variance based on the mean realizations of y. 
+		 * @param rowIndex a list of strings that represent the row indices
+		 */
+		private VariancePointEstimate(Matrix pointEstimate, Matrix varMean, Matrix meanVar, Matrix designVarianceOfMeanRealizedY, List<String> rowIndex) {
+			super(pointEstimate, null); 
 			if (pointEstimate == null) {
-				throw new InvalidParameterException("The pointEstimate argument cannot be null!");
+				throw new InvalidParameterException("The pointEstimate argument must be non null!");
 			}
-			this.modelRelatedVariance = modelRelatedVariance;
-			this.samplingRelatedVariance = samplingRelatedVariance;
-			if (modelRelatedVariance != null && samplingRelatedVariance != null) {
-				Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(samplingRelatedVariance);
-				Matrix numerator = modelRelatedVariance.elementWiseMultiply(samplingRelatedVariance);
-				varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
+			if (varMean == null || meanVar == null) {		// Implementation set to None
+				implementation = VarianceEstimatorImplementation.None;
+				this.varMean = null;
+				this.meanVar = null;
+				this.designVarianceOfMeanRealizedY = null;
+				this.varianceBiasCorrection = null;
 			} else {
-				varianceBiasCorrection = null;
+				this.varMean = varMean.getDeepClone();
+				this.meanVar = meanVar.getDeepClone();
+				
+				if (designVarianceOfMeanRealizedY == null) {	// Implementation set to regular multiple implementation
+					implementation = VarianceEstimatorImplementation.RegularMultipleImputation;
+					setVariance(varMean.add(meanVar));
+					this.designVarianceOfMeanRealizedY = null;
+					this.varianceBiasCorrection = null;
+				} else {	// either less biased or corrected
+					this.designVarianceOfMeanRealizedY = designVarianceOfMeanRealizedY.getDeepClone();
+					
+					Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.add(this.designVarianceOfMeanRealizedY);
+					Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
+					
+					if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d)) { // means that the corrected variance estimator is inconsistent
+						implementation = VarianceEstimatorImplementation.LessBiased;
+						setVariance(varMeanPlusDesignVarianceOfMeanRealizedY);
+						this.varianceBiasCorrection = null;
+					} else {
+						implementation = VarianceEstimatorImplementation.Corrected;
+						setVariance(varMeanPlusDesignVarianceOfMeanRealizedY.add(this.designVarianceOfMeanRealizedY).subtract(meanVar));
+						Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(this.designVarianceOfMeanRealizedY);
+						Matrix numerator = modelRelatedVariance.elementWiseMultiply(this.designVarianceOfMeanRealizedY);
+						varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
+					}
+				}
 			}
 			setRowIndex(rowIndex);  
 		}
 
+
+		
 		protected Matrix getVarianceBiasCorrection() {return varianceBiasCorrection;}
 
 		/**
@@ -85,20 +137,39 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		}
 		
 		/**
-		 * Provide the model-related variance, which includes the variance bias correction. 
+		 * Provide the model-related variance, which includes the variance bias correction if the implementation
+		 * is the corrected one. 
 		 * @return a Matrix instance
 		 */
 		public Matrix getModelRelatedVariance() {
-			return modelRelatedVariance;
+			switch(implementation) {
+			case Corrected:
+				return varMean.add(designVarianceOfMeanRealizedY).subtract(meanVar);
+			case LessBiased:
+				return varMean;
+			case RegularMultipleImputation:
+				return varMean;
+			case None:
+				return null;
+			default:
+				throw new InvalidParameterException("This variance estimator implementation is unknown: " + implementation.name());
+			}
 		}
 
 		
 		/**
-		 * Provide the model-related variance, without the variance bias correction. 
-		 * @return a Matrix instance
+		 * Provide the model-related variance, without the variance bias correction. <br>
+		 * <br>
+		 * This method assumes that the estimator implementation is the corrected one. Otherwise it returns null.
+		 * 
+		 * @return a Matrix instance or null if the estimator implementation is not EstimatorImplementation.Corrected.
 		 */
 		public Matrix getNetModelRelatedVariance() {
-			return getModelRelatedVariance().subtract(getVarianceBiasCorrection());
+			if (implementation == VarianceEstimatorImplementation.Corrected) {
+				return getModelRelatedVariance().subtract(getVarianceBiasCorrection());
+			} else {
+				return null;
+			}
 		}
 		
 		/**
@@ -106,7 +177,18 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @return a Matrix instance
 		 */
 		public Matrix getSamplingRelatedVariance() {
-			return samplingRelatedVariance;
+			switch(implementation) {
+			case Corrected:
+				return designVarianceOfMeanRealizedY;
+			case LessBiased:
+				return designVarianceOfMeanRealizedY;
+			case RegularMultipleImputation:
+				return meanVar;
+			case None:
+				return null;
+			default:
+				throw new InvalidParameterException("This variance estimator implementation is unknown: " + implementation.name());
+			}
 		}
 	}
 	
@@ -190,9 +272,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			variance.addRealization(estimate.getVariance());
 		}
 		return new VariancePointEstimate(mean.getMean(), 
-				mean.getVariance().add(variance.getMean()),
 				mean.getVariance(), 
-				variance.getMean(), 
+				variance.getMean(),
+				null,
 				rowIndex);
 	}
 
@@ -245,29 +327,11 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 						((PopulationMeanEstimate) meanEstimate).addObservation(popUnit);
 					}
 				}
-				
-//				Matrix crudeVariances = observationMeans.getVariance();
-//				double test = crudeVariances.subtract(crudeVariances.diagonalVector().matrixDiagonal()).getSumOfElements() / (sampleSize * (sampleSize - 1));
-//				System.out.println("Marginal model-related variance = " + test);
-				
-				Matrix meanModelContribution = mean.getVariance();
-				Matrix designVarianceOfMeanRealizedY = meanEstimate.getVariance();
-				Matrix averageDesignVariance = variance.getMean();
-				
-				Matrix samplingRelatedComponent = designVarianceOfMeanRealizedY;
-				Matrix grossModelRelatedComponent = meanModelContribution.add(designVarianceOfMeanRealizedY).subtract(averageDesignVariance);
-				Matrix totalVariance = grossModelRelatedComponent.add(samplingRelatedComponent);
-
-//				Matrix pointEstimate = mean.getMean();
-//				Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(samplingRelatedComponent);
-//				Matrix numerator = modelRelatedComponent.multiply(samplingRelatedComponent);
-//				double correction = numerator.m_afData[0][0]/denominator.m_afData[0][0];
-//				System.out.println("Estimated correction = " + correction);
 						
 				VariancePointEstimate varEst = new VariancePointEstimate(getMean(),
-						totalVariance,
-						grossModelRelatedComponent, 
-						samplingRelatedComponent, 
+						mean.getVariance(),
+						variance.getMean(), 
+						meanEstimate.getVariance(), 
 						rowIndex);
 				return varEst;
 			} catch (Exception e) {
@@ -391,17 +455,21 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 
 	@Override
 	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
-		Estimate<?> simpleEstimate = collapseMeanAndVariance(desiredIndicesForCollapsing);
 		VariancePointEstimate vpe = getCorrectedVariance();
-		Matrix collapsedSamplingRelatedVariance = collapseSquareMatrix(vpe.getSamplingRelatedVariance(), desiredIndicesForCollapsing);
-		Matrix collapsedModelRelatedVariance = collapseSquareMatrix(vpe.modelRelatedVariance, desiredIndicesForCollapsing);
+		Matrix collapsedPointEstimate = collapseRowVector(vpe.getMean(), desiredIndicesForCollapsing);
+		Matrix collapsedVarMean = collapseSquareMatrix(vpe.varMean, desiredIndicesForCollapsing);
+		Matrix collapsedMeanVar = collapseSquareMatrix(vpe.meanVar, desiredIndicesForCollapsing);
+		Matrix collapsedDesignVarianceOfMeanRealizedY = collapseSquareMatrix(vpe.designVarianceOfMeanRealizedY, desiredIndicesForCollapsing);
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);
-		VariancePointEstimate outputEstimate = new VariancePointEstimate(simpleEstimate.getMean(),
-				simpleEstimate.getVariance(),
-				collapsedModelRelatedVariance,
-				collapsedSamplingRelatedVariance,
+		VariancePointEstimate outputEstimate = new VariancePointEstimate(collapsedPointEstimate,
+				collapsedVarMean,
+				collapsedMeanVar,
+				collapsedDesignVarianceOfMeanRealizedY,
 				newIndexRow);
+		if (outputEstimate.implementation != vpe.implementation) {
+			throw new InvalidParameterException("The implementation of the variance estimator has changed when collapsing the estimate!");
+		}
 		return outputEstimate;
 	}
 
