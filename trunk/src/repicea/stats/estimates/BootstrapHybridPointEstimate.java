@@ -190,6 +190,13 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				throw new InvalidParameterException("This variance estimator implementation is unknown: " + implementation.name());
 			}
 		}
+		
+		/**
+		 * Provide the implementation of the variance estimator, which can be Corrected, 
+		 * LessBiased,	RegularMultipleImputation or None.
+		 * @return a VarianceEstimatorImplementation enum
+		 */
+		public VarianceEstimatorImplementation getVarianceImplementation() {return implementation;}
 	}
 	
 	
