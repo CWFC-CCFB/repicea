@@ -467,9 +467,11 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				collapsedMeanVar,
 				collapsedDesignVarianceOfMeanRealizedY,
 				newIndexRow);
-		if (outputEstimate.implementation != vpe.implementation) {
-			throw new InvalidParameterException("The implementation of the variance estimator has changed when collapsing the estimate!");
-		}
+//		if (outputEstimate.implementation != vpe.implementation) { // but we allow less biased to move to corrected
+//			if (vpe.implementation != VarianceEstimatorImplementation.LessBiased || outputEstimate.implementation != VarianceEstimatorImplementation.Corrected) {
+//				throw new InvalidParameterException("The implementation of the variance estimator has changed when collapsing the estimate!");
+//			}
+//		}
 		return outputEstimate;
 	}
 
