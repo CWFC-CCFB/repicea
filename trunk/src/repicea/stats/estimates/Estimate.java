@@ -195,7 +195,12 @@ s	 */
 	}
 	
 	/**
-	 * Collapse the estimate following a map that contains the indices for each group.
+	 * Collapse the estimate following a map that contains the indices for each group. <br>
+	 * <br>
+	 * The collapsing ensures the consistency, that is all the row indices must be found in the
+	 * list instances contained in the map argument. If there is a mismatch, the method will throw an 
+	 * exception. IMPORTANT: the new indices, that is the keys of the map argument are sorted in the
+	 * new Estimate instance.
 	 * @param desiredIndicesForCollapsing a LinkedHashMap with the keys being the new indices and 
 	 * the values being lists of indices to be collapsed.
 	 * @return an Estimate instance
