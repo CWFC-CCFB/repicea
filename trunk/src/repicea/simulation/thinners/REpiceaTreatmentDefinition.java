@@ -19,11 +19,11 @@
 package repicea.simulation.thinners;
 
 /**
- * The REpiceaTreatmentDescription interface ensures a particular description of treatment contains 
+ * The REpiceaTreatmentDefinition interface ensures a particular description of treatment contains 
  * a treatment type and a delay before re-entry.
  * @author Mathieu Fortin - March 2021
  */
-public interface REpiceaTreatmentDescription {
+public interface REpiceaTreatmentDefinition {
 
 	/**
 	 * Provide the treatment type associated with this instance of REpiceaTreatmentDescription.
