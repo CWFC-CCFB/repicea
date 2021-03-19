@@ -30,9 +30,9 @@ public abstract class REpiceaThinner<S, T> extends REpiceaBinaryEventPredictor<S
 	/**
 	 * Return some information about the treatment.
 	 * @param stand a S-derived instance
-	 * @return an Object or null if no information can be provided.
+	 * @return an REpiceaTreatmentDefinition or null if no information can be provided.
 	 */
-	public abstract Object getInformationOnThinning(S stand);
+	public abstract REpiceaTreatmentDefinition getTreatmentDefinitionForThisHarvestedStand(S stand);
 	
 	
 }
