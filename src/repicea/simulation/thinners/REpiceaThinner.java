@@ -18,6 +18,8 @@
  */
 package repicea.simulation.thinners;
 
+import java.util.List;
+
 import repicea.simulation.REpiceaBinaryEventPredictor;
 
 @SuppressWarnings("serial")
@@ -34,5 +36,9 @@ public abstract class REpiceaThinner<S, T> extends REpiceaBinaryEventPredictor<S
 	 */
 	public abstract REpiceaTreatmentDefinition getTreatmentDefinitionForThisHarvestedStand(S stand);
 	
-	
+	/**
+	 * Return the list of all possible treatments.
+	 * @return a List of Enum variables
+	 */
+	public abstract List<Enum> getTreatmentList();
 }
