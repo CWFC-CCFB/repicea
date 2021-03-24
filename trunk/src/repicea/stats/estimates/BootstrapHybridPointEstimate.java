@@ -47,6 +47,9 @@ import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 @SuppressWarnings("serial")
 public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribution> implements NumberOfRealizationsProvider {
 
+	private static boolean IsVarianceCorrectionEnabled = true; 	// default value
+	
+	
 	/**
 	 * An inner class that contains the corrected variance of the BootstrapHybridPointEstimate instance.
 	 * @author Mathieu Fortin - May 2018
@@ -108,7 +111,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 					Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.add(this.designVarianceOfMeanRealizedY);
 					Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
 					
-					if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d)) { // means that the corrected variance estimator is inconsistent
+					if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d) || !BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled) { // means that the corrected variance estimator is inconsistent or it has been overriden
 						implementation = VarianceEstimatorImplementation.LessBiased;
 						setVariance(varMeanPlusDesignVarianceOfMeanRealizedY);
 						this.varianceBiasCorrection = null;
@@ -207,6 +210,23 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		estimates = new ArrayList<PointEstimate<?>>();
 	}
 
+	/**
+	 * Allow to enable or disable the variance correction. If the variance correction is disabled,
+	 * then the less biased variance estimator is preferred. By default, the variance correction is enabled.
+	 * @param bool a boolean
+	 */
+	public static void setVarianceCorrectionEnabled(boolean bool) {	
+		BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled = bool;
+	}
+	
+	/**
+	 * Return true if the variance correction is enabled (default) or false otherwise.
+	 * @return a boolean
+	 */
+	public static boolean isVarianceCorrectionEnabled() {	
+		return BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled;
+	}
+	
 	/**
 	 * This method adds a realization of the point estimate. The compatibility of 
 	 * the instance with previously added instances is checked. If the check fails
