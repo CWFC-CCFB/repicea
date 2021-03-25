@@ -283,9 +283,9 @@ public abstract class TreeLogger<Parameter extends TreeLoggerParameters<? extend
 	}
 
 	@Override
-	public boolean hasBeenCancelled() {
+	public boolean isCancelled() {
 		if (loggerTask != null) {
-			return loggerTask.hasBeenCancelled();
+			return loggerTask.isCancelled();
 		} else {
 			return false;
 		}

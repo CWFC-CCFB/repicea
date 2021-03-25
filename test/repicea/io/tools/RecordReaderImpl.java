@@ -26,6 +26,7 @@ import javax.swing.UIManager;
 
 import repicea.io.ImportTest;
 import repicea.io.tools.ImportFieldElement.FieldType;
+import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
@@ -38,6 +39,11 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 @SuppressWarnings("serial")
 public class RecordReaderImpl extends REpiceaRecordReader {
 
+	static {
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.test.tools.TestRecordReader$FieldID", "repicea.io.tools.RecordReaderImpl$FieldID");
+	}
+	
+	
 	private enum Level {
 		stratumLevel,
 		plotLevel, 
@@ -346,10 +352,14 @@ public class RecordReaderImpl extends REpiceaRecordReader {
 		reader.setPopUpWindowEnabled(true);
 		try {
 			reader.initGUIMode(UseMode.GUI_MODE, sourcePath, "TEST6152");
+			reader.readRecordsForThisGroupId(reader.getSelectedGroupId());
 		} catch (CancellationException e) {
+			System.out.println("Import has been cancelled!");
 		} catch (Exception e2) {
 			e2.printStackTrace();
 		}
+		reader.initGUIMode(UseMode.GUI_MODE, sourcePath, "TEST6152");
+		int u = 0;
 		System.exit(0);
 	}
 

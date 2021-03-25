@@ -31,6 +31,7 @@ import repicea.app.AbstractGenericTask;
 import repicea.gui.UIControlManager;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.gui.genericwindows.REpiceaSimpleListDialog;
+import repicea.gui.genericwindows.REpiceaProgressBarDialog.REpiceaProgressBarDialogParameters;
 import repicea.io.FormatReader;
 import repicea.io.tools.ImportFieldElement.FieldType;
 import repicea.simulation.UseModeProvider.UseMode;
@@ -52,10 +53,14 @@ public abstract class REpiceaRecordReader implements Serializable {
 		
 		protected InternalTask(int groupId) {
 			this.groupId = groupId;
+			setName("Internal Record Reader Thread");
 		}
 		
 		@Override
 		protected void doThisJob() throws Exception {
+			if (getName() != null && !getName().isEmpty()) {
+				Thread.currentThread().setName(getName());
+			}
 			int lineCounter = 0;
 
 			List<ImportFieldElement> importFieldElements = importFieldManager.getFields();
@@ -85,6 +90,9 @@ public abstract class REpiceaRecordReader implements Serializable {
 				int numberLinesRead = 0;
 				Object[] rowObjects = null;
 				for (Integer lineNumber : rowIndex) {
+					if (isCancelled()) {
+						throw new CancellationException();
+					}
 					numberOfLinesToSkip = lineNumber - lineCounter;
 					rowObjects = reader.nextRecord(numberOfLinesToSkip);
 					lineCounter = lineNumber + 1;  					// 1 is added to have the real reference line 1 is really line 1
@@ -119,6 +127,8 @@ public abstract class REpiceaRecordReader implements Serializable {
 					}
 				}
 
+			} catch (CancellationException e0) {
+				throw e0;
 			} catch (Exception e) {
 				String message; 
 				if (e instanceof VariableValueException) {
@@ -225,7 +235,6 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
-	@SuppressWarnings("deprecation")
 	public void initGUIMode(Window guiOwner, UseMode useMode, String... fileSpec) throws Exception {
 		if (useMode == null || useMode == UseMode.PURE_SCRIPT_MODE) {
 			throw new InvalidParameterException("The use mode with the initGUIMode should be either UseMode.GUI_MODE or UseMode.ASSISTED_SCRIPT_MODE!");
@@ -248,7 +257,10 @@ public abstract class REpiceaRecordReader implements Serializable {
 		String title = REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Progress);
 		String message = REpiceaTranslator.getString(MessageID.ProgressMessage);
 		
-		new REpiceaProgressBarDialog(guiOwner, title, message, groupingRegistryReader, false);
+		REpiceaProgressBarDialogParameters parm = new REpiceaProgressBarDialogParameters(message, groupingRegistryReader, false);
+		List<REpiceaProgressBarDialogParameters> parms = new ArrayList<REpiceaProgressBarDialogParameters>();
+		parms.add(parm);
+		new REpiceaProgressBarDialog(guiOwner, title, parms);
 		
 		if (!groupingRegistryReader.isCorrectlyTerminated()) {
 			throw groupingRegistryReader.getFailureReason();

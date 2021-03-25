@@ -110,7 +110,7 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 					int obsCounter = 0;
 					
 					for (GExportRecord r : recordSet) {
-						if (isCancelled) {
+						if (isCancelled()) {
 							break;
 						}
 						

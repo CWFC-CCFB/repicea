@@ -49,6 +49,8 @@ class GroupingRegistryReader extends AbstractGenericTask implements Serializable
 	 * Script constructor. General for any model.
 	 */
 	protected GroupingRegistryReader(ImportFieldManager importFieldManager) {
+		super();
+		setName("Stratum Reader Thread");
 		groupList  = new Vector<String>(); 
 		groupMap = new TreeMap<String, List<Integer>>();
 		groupFieldEnabled = false;
@@ -85,7 +87,7 @@ class GroupingRegistryReader extends AbstractGenericTask implements Serializable
 				boolean bStratumChanged = false; 
 
 				int line = 0;
-				while( (rowObjects = formatReader.nextRecord()) != null && !isCancelled) {
+				while( (rowObjects = formatReader.nextRecord()) != null && !isCancelled()) {
 					strStratum = ((Object) rowObjects[iFieldStratum]).toString().trim();
 					bStratumChanged = (strStratum.compareTo(strStratumLast) != 0); 
 
@@ -113,15 +115,28 @@ class GroupingRegistryReader extends AbstractGenericTask implements Serializable
 				}
 				// By now, we have iterated through all of the rows
 				formatReader.close();
-				groupFieldEnabled = true;
+				if (isCancelled()) {
+					throw new InterruptedException();
+				} else {
+					groupFieldEnabled = true;
+				}
+			} catch (InterruptedException e) {
+				cleanUpBeforeThrowingException();
+				throw e;
 			} catch (Exception e) {
-				System.out.println("Error while loading file: " + importFieldManager.getFileSpecifications());
+				System.out.println("Error while loading file: " + importFieldManager.getFileSpecifications()[0]);
 				e.printStackTrace();
+				cleanUpBeforeThrowingException();
 				throw e;
 			} 
 		} 
 	}
-
+	
+	private void cleanUpBeforeThrowingException() {
+		groupMap = null;
+		importFieldManager = null;
+		groupList = null;
+	}
 
 	/*
 	 * Accessors

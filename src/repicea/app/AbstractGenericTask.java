@@ -41,11 +41,6 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 	private final Object lock = new Object();
 	
 	/**
-	 * Member isCancelled should be used in the doThisJob() method to ensure a proper cancellation.
-	 */
-	protected boolean isCancelled;
-
-	/**
 	 * Empty constructor.
 	 */
 	protected AbstractGenericTask() {}
@@ -97,14 +92,10 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 	
 	@Override
 	public void cancel() {
-		if (!isCancelled) {
-			isCancelled = true;
-//			cancel(true);
+		if (!isCancelled()) {
+			cancel(true);
 		}
 	}
-	
-	@Override
-	public final boolean hasBeenCancelled() {return isCancelled;}
 	
 	
 	/**
@@ -115,6 +106,9 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 	@Override
 	protected final Boolean doInBackground() {
 		try {
+			if (getName() != null && !getName().isEmpty()) {
+				Thread.currentThread().setName(getName());
+			}
 			doThisJob();
 			return true;
 		} catch (Exception e) {

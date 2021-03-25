@@ -35,7 +35,7 @@ class REpiceaExportToolImpl extends REpiceaExportTool {
 			GExportFieldDetails age = new GExportFieldDetails("Age", 25);
 			for (int i = 0; i < 200000; i++) {
 				GExportRecord record = new GExportRecord();
-				if (isCancelled) {
+				if (isCancelled()) {
 					break;
 				}
 				record.addField(people);
