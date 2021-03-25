@@ -36,7 +36,6 @@ import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.SwingWorker;
 
-import repicea.app.AbstractGenericTask;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaPanel;
 import repicea.gui.UIControlManager;
@@ -53,20 +52,16 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	public static final String LABEL = "label";
 	
 	
-//	protected JProgressBar progressBar;
 	private String titleString;
 	private List<REpiceaProgressBarDialogParameters> parms;
 	private int currentJobId = 0;
-//	private JLabel label;
-//	@SuppressWarnings("rawtypes")
-//	private SwingWorker jobToRun;
 
 
 	static class ProgressBarPanel extends REpiceaPanel implements PropertyChangeListener {
 
 		final JProgressBar progressBar;
 		final JLabel label;
-		private SwingWorker jobToRun;
+		private SwingWorker<?,?> jobToRun;
 		
 		ProgressBarPanel(REpiceaProgressBarDialogParameters parm) {
 			this.jobToRun = parm.jobToRun;
@@ -124,10 +119,10 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	
 	public static class REpiceaProgressBarDialogParameters {
 		final String labelString;
-		final SwingWorker jobToRun;
+		final SwingWorker<?,?> jobToRun;
 		final boolean isIndeterminate;
 		
-		public REpiceaProgressBarDialogParameters(String labelString, SwingWorker jobToRun, boolean isIndeterminate) {
+		public REpiceaProgressBarDialogParameters(String labelString, SwingWorker<?,?> jobToRun, boolean isIndeterminate) {
 			if (labelString == null) {
 				throw new InvalidParameterException("The labelString parameter cannot be null!");
 			}
@@ -176,7 +171,13 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 		this(null, titleString, labelString, jobToRun, setIndeterminate);
 	}
 	
-
+	/**
+	 * Generic constructor for multiple progress bars. The bar parameters are set through
+	 * REpiceaProgressBarDialogParameters instances.
+	 * @param owner the window (can be null)
+	 * @param titleString the title of the dialog
+	 * @param parms a List of REpiceaProgressBarDialogParameters instances
+	 */
 	public REpiceaProgressBarDialog(Window owner, String titleString, List<REpiceaProgressBarDialogParameters> parms) {
 		super(owner);
 		init(titleString, parms);
@@ -209,11 +210,7 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	@Override
 	public void cancelAction() {
 		for (REpiceaProgressBarDialogParameters parm : parms) {
-			if (parm.jobToRun instanceof AbstractGenericTask) {
-				((AbstractGenericTask) parm.jobToRun).cancel();
-			} else {
-				parm.jobToRun.cancel(true);
-			}
+			parm.jobToRun.cancel(true);
 		}
 	}
 	

@@ -121,7 +121,7 @@ public abstract class AbstractGenericEngine {
 
 					currentTask.run();
 
-					if (!currentTask.isCorrectlyTerminated() || currentTask.hasBeenCancelled()) {
+					if (!currentTask.isCorrectlyTerminated() || currentTask.isCancelled()) {
 						engine.decideWhatToDoInCaseOfFailure(currentTask);
 					} else {
 						engine.tasksDone.add(currentTask.getName());
@@ -181,7 +181,7 @@ public abstract class AbstractGenericEngine {
 	 */
 	protected void decideWhatToDoInCaseOfFailure(GenericTask task) {
 		String message = null;
-		if (task.hasBeenCancelled()) {
+		if (task.isCancelled()) {
 			message = MessageID.CancelMessage.toString();
 		} else {
 			String taskName = task.getName();

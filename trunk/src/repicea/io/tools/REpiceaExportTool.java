@@ -382,11 +382,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 				recordSet.clear();
 				buildRecordSetWorker.terminateSaveThreadIfAny();
 				throw buildRecordSetWorker.getFailureReason();
-			} else if (buildRecordSetWorker.hasBeenCancelled()) {
-				recordSet.clear();
-				buildRecordSetWorker.terminateSaveThreadIfAny();
-				throw new CancellationException();
-			}
+			} 
 
 			if (saveFileEnabled) {
 				buildRecordSetWorker.terminateSaveThreadIfAny();

@@ -43,7 +43,7 @@ class TreeLoggerTask<Tree extends LoggableTree> extends AbstractGenericTask {
 			int i = 0;
 			setProgress(i);
 			for (Tree tree : loggableTrees) {
-				if (isCancelled) {
+				if (isCancelled()) {
 					break;
 				}
 				treeLogger.logThisTree(tree);
