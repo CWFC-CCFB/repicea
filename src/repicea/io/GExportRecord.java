@@ -101,4 +101,10 @@ public class GExportRecord {
 	public void removeField(int i) {
 		fieldList.remove(i);
 	}
+	
+	@Override
+	public String toString() {
+		return getValues().toString();
+	}
+	
 }
