@@ -26,6 +26,10 @@ import java.awt.geom.Path2D;
 @SuppressWarnings("serial")
 public abstract class AbstractProcessorLinkLine extends AbstractPermissionProviderButton {
 
+	private static final int OriginalArrowSize = 15;
+	private static final double ArrowRatio = .5;
+	private static final double ArrowWaisting = .3;
+	
 	protected static enum AnchorPosition {
 		TOP,
 		RIGHT,
@@ -115,19 +119,19 @@ public abstract class AbstractProcessorLinkLine extends AbstractPermissionProvid
 			double y95 = getBezierCoordinate(controlY1, controlY2, sonLocation.y, 0.90);
 			double angle = Math.atan2(sonLocation.y - y95, x95 - sonLocation.x);
 
-            double arrowRatio = 0.5;
-            double arrowLength = 15d;
+//            double arrowRatio = 0.5;
+            double arrowLength = SystemLayout.convertToRelative(OriginalArrowSize);
 
             Path2D.Double arrow = new Path2D.Double();
 
-            double waisting = 0.30 * arrowLength;
+            double waisting = ArrowWaisting * arrowLength;
             
             arrow.moveTo(sonLocation.x, sonLocation.y);
             lineTo(arrow, sonLocation.x - arrowLength, 
-            		sonLocation.y + arrowLength * arrowRatio, 
+            		sonLocation.y + arrowLength * ArrowRatio, 
             		sonLocation.x, sonLocation.y, angle);
             quadTo(arrow, sonLocation.x - arrowLength + waisting, sonLocation.y,
-            		sonLocation.x - arrowLength, sonLocation.y - arrowLength * arrowRatio,
+            		sonLocation.x - arrowLength, sonLocation.y - arrowLength * ArrowRatio,
             		sonLocation.x, sonLocation.y,  angle);
             arrow.lineTo (sonLocation.x, sonLocation.y);
  
