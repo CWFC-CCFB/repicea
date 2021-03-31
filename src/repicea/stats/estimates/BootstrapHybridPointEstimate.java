@@ -67,6 +67,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		private final Matrix meanVar;
 		private final Matrix designVarianceOfMeanRealizedY;
 		private final Matrix varianceBiasCorrection;
+		private final int numberOfRealizations;
 		
 		/**
 		 * Private constructor for the different variance estimator implementation. <br>
@@ -85,8 +86,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @param designVarianceOfMeanRealizedY the design variance based on the mean realizations of y. 
 		 * @param rowIndex a list of strings that represent the row indices
 		 */
-		private VariancePointEstimate(Matrix pointEstimate, Matrix varMean, Matrix meanVar, Matrix designVarianceOfMeanRealizedY, List<String> rowIndex) {
+		private VariancePointEstimate(int numberOfRealizations, Matrix pointEstimate, Matrix varMean, Matrix meanVar, Matrix designVarianceOfMeanRealizedY, List<String> rowIndex) {
 			super(pointEstimate, null); 
+			this.numberOfRealizations = numberOfRealizations;
 			if (pointEstimate == null) {
 				throw new InvalidParameterException("The pointEstimate argument must be non null!");
 			}
@@ -102,13 +104,13 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				
 				if (designVarianceOfMeanRealizedY == null) {	// Implementation set to regular multiple implementation
 					implementation = VarianceEstimatorImplementation.RegularMultipleImputation;
-					setVariance(varMean.add(meanVar));
+					setVariance(this.varMean.scalarMultiply((this.numberOfRealizations + 1d)/ this.numberOfRealizations).add(this.meanVar));	// the (n + 1)/n factor comes from Rubin 1987 p.76 
 					this.designVarianceOfMeanRealizedY = null;
 					this.varianceBiasCorrection = null;
 				} else {	// either less biased or corrected
 					this.designVarianceOfMeanRealizedY = designVarianceOfMeanRealizedY.getDeepClone();
 					
-					Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.add(this.designVarianceOfMeanRealizedY);
+					Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.scalarMultiply((this.numberOfRealizations - 1d) / this.numberOfRealizations).add(this.designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
 					Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
 					
 					if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d) || !BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled) { // means that the corrected variance estimator is inconsistent or it has been overriden
@@ -117,7 +119,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 						this.varianceBiasCorrection = null;
 					} else {
 						implementation = VarianceEstimatorImplementation.Corrected;
-						setVariance(varMeanPlusDesignVarianceOfMeanRealizedY.add(this.designVarianceOfMeanRealizedY).subtract(meanVar));
+						setVariance(modelRelatedVariance.add(this.designVarianceOfMeanRealizedY));
 						Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(this.designVarianceOfMeanRealizedY);
 						Matrix numerator = modelRelatedVariance.elementWiseMultiply(this.designVarianceOfMeanRealizedY);
 						varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
@@ -147,11 +149,11 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		public Matrix getModelRelatedVariance() {
 			switch(implementation) {
 			case Corrected:
-				return varMean.add(designVarianceOfMeanRealizedY).subtract(meanVar);
+				return varMean.scalarMultiply((numberOfRealizations - 1d) / numberOfRealizations).add(designVarianceOfMeanRealizedY).subtract(meanVar);
 			case LessBiased:
-				return varMean;
+				return varMean.scalarMultiply((numberOfRealizations - 1d) / numberOfRealizations);
 			case RegularMultipleImputation:
-				return varMean;
+				return varMean.scalarMultiply((numberOfRealizations + 1d) / numberOfRealizations);
 			case None:
 				return null;
 			default:
@@ -298,7 +300,8 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			mean.addRealization(estimate.getMean());
 			variance.addRealization(estimate.getVariance());
 		}
-		return new VariancePointEstimate(mean.getMean(), 
+		return new VariancePointEstimate(mean.getNumberOfRealizations(),
+				mean.getMean(), 
 				mean.getVariance(), 
 				variance.getMean(),
 				null,
@@ -355,7 +358,8 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 					}
 				}
 						
-				VariancePointEstimate varEst = new VariancePointEstimate(getMean(),
+				VariancePointEstimate varEst = new VariancePointEstimate(getNumberOfRealizations(),
+						getMean(),
 						mean.getVariance(),
 						variance.getMean(), 
 						meanEstimate.getVariance(), 
@@ -366,7 +370,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			}
 		} else {
 			System.out.println("The variance of the hybrid point estimate cannot be calculated because there is not enough realizations!");
-			return new VariancePointEstimate(getMean(), null, null, null, rowIndex);
+			return new VariancePointEstimate(getNumberOfRealizations(), getMean(), null, null, null, rowIndex);
 		}
 	}
 
@@ -489,16 +493,12 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		Matrix collapsedDesignVarianceOfMeanRealizedY = collapseSquareMatrix(vpe.designVarianceOfMeanRealizedY, desiredIndicesForCollapsing);
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);
-		VariancePointEstimate outputEstimate = new VariancePointEstimate(collapsedPointEstimate,
+		VariancePointEstimate outputEstimate = new VariancePointEstimate(vpe.numberOfRealizations,
+				collapsedPointEstimate,
 				collapsedVarMean,
 				collapsedMeanVar,
 				collapsedDesignVarianceOfMeanRealizedY,
 				newIndexRow);
-//		if (outputEstimate.implementation != vpe.implementation) { // but we allow less biased to move to corrected
-//			if (vpe.implementation != VarianceEstimatorImplementation.LessBiased || outputEstimate.implementation != VarianceEstimatorImplementation.Corrected) {
-//				throw new InvalidParameterException("The implementation of the variance estimator has changed when collapsing the estimate!");
-//			}
-//		}
 		return outputEstimate;
 	}
 
