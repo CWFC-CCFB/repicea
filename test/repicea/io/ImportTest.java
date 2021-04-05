@@ -9,8 +9,6 @@ import java.util.List;
 import org.junit.Ignore;
 import org.junit.Test;
 
-import com.sun.prism.impl.Disposer.Record;
-
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
 import repicea.io.javasql.SQLReader;
@@ -227,7 +225,6 @@ public class ImportTest {
 		
 		read1 = reader1.nextRecord();
 		read2 = reader2.nextRecord();
-		int i = 0;
 		while (read1 != null || read2 != null) {
 			CompareTwoRecords(read1, read2, reader1.getFieldCount());
 			read1 = reader1.nextRecord();
