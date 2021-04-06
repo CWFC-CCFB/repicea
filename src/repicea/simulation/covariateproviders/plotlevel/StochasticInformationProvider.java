@@ -20,11 +20,13 @@ package repicea.simulation.covariateproviders.plotlevel;
 
 import java.util.List;
 
+import repicea.simulation.covariateproviders.StochasticImplementation;
+
 /**
  * The StochasticInformationProvider interface provides basic information about the simulation mode.
  * @author Mathieu Fortin - November 2014
  */
-public interface StochasticInformationProvider<Realization> {
+public interface StochasticInformationProvider<Realization> extends StochasticImplementation {
 
 	/**
 	 * This method returns the number of realizations to be made.
@@ -40,11 +42,6 @@ public interface StochasticInformationProvider<Realization> {
 	 */
 	public List<Integer> getRealizationIds();
 	
-	/**
-	 * This method returns true if the instance is running in stochastic mode or false it is in deterministic mode.
-	 * @return a boolean
-	 */
-	public boolean isStochastic();
 	
 	
 	/**
