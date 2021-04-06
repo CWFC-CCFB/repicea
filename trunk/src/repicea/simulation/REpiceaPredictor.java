@@ -120,8 +120,8 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Mode
 
 
 	// set by the constructor
-	protected boolean isRandomEffectsVariabilityEnabled;
-	protected boolean isResidualVariabilityEnabled;
+	protected final boolean isRandomEffectsVariabilityEnabled;
+	protected final boolean isResidualVariabilityEnabled;
 		
 	protected Matrix oXVector;
 
@@ -510,11 +510,12 @@ public abstract class REpiceaPredictor extends SensitivityAnalysisParameter<Mode
 		} else {
 			return false;
 		}
-		
 	}
 
-//	protected boolean areBlupsEstimated() {return areBlupsEstimated;}
-//	protected void setBlupsEstimated(boolean bool) {areBlupsEstimated = bool;};
+	@Override
+	public final boolean isStochastic() {
+		return super.isStochastic() || isRandomEffectsVariabilityEnabled || isResidualVariabilityEnabled;
+	}
 	
 }
 

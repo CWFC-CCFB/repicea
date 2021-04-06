@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.covariateproviders.StochasticImplementation;
 import repicea.stats.estimates.Estimate;
 
 /**
@@ -33,7 +34,7 @@ import repicea.stats.estimates.Estimate;
  * @param <E> an Estimate-derived class
  */
 @SuppressWarnings({ "serial", "rawtypes" })
-public abstract class SensitivityAnalysisParameter<E extends Estimate> implements Serializable {
+public abstract class SensitivityAnalysisParameter<E extends Estimate> implements Serializable, StochasticImplementation {
 
 	final Map<Integer, Matrix> simulatedParameters;		// refers to the realization id only
 	private E parameterEstimates;
@@ -73,5 +74,7 @@ public abstract class SensitivityAnalysisParameter<E extends Estimate> implement
 		}
 	}
 
+	@Override
+	public boolean isStochastic() {return isParametersVariabilityEnabled;}
 
 }
