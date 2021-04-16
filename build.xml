@@ -119,15 +119,17 @@
 	<!-- COMPILE ALL SOURCES AND TESTS -->
     <target name="compile-all" description="Clean and compile src and test" depends="compile,compile-test"/>
 
-	
-	<!-- TEST DEV -->
-	<target name="test" description="Run all JUnit tests" depends="compile-all">
+    <!-- TEST DEV (DEPENDING ON JAVA VERSION WILL CHOOSE THE APPROPRIATE SETUP) -->
+    <target name="test" description="Run all JUnit tests with jar file (development mode)" depends="compile-all,test-java-8,test-after-java-8" />
+
+	<!-- TEST DEV FOR JAVA VERSION 1.8 -->
+	<target name="test-java-8" description="Run all JUnit tests in Java 1.8 (development mode)" if="${is.java.8}">
+        <echo message="Running tests for Java version 1.8" />
 		<mkdir dir="${test.rep.dir}"/>
 		<delete dir="${test.rep.dir}/${project.name}"/>
 		<mkdir dir="${test.rep.dir}/${project.name}"/>
 
-		<junit fork="no" printsummary="yes" showOutput="true" filtertrace="off">
-
+		<junit fork="yes" printsummary="yes" showOutput="true" filtertrace="off">
 			<classpath>
 				<pathelement location="${bin.dir}" />
 				<path refid="junit"/>
@@ -146,6 +148,44 @@
 				</fileset>
 			</batchtest>
 		</junit>
+
+		<junitreport todir="${test.rep.dir}/${project.name}" tofile="TESTS-${project.name}.xml">
+			<fileset dir="${test.rep.dir}/${project.name}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${test.rep.dir}/${project.name}"/>
+		</junitreport>
+	</target>
+	
+	<!-- TEST DEV FOR JAVA VERSIONS GREATER THAN 1.8 -->
+	<target name="test-after-java-8" description="Run all JUnit tests for versions greater than 1.8 (development mode)" if="${is.after.java.8}">
+        <echo message="Running tests for Java version greater than 1.8" />
+		<mkdir dir="${test.rep.dir}"/>
+		<delete dir="${test.rep.dir}/${project.name}"/>
+		<mkdir dir="${test.rep.dir}/${project.name}"/>
+
+		<junit fork="yes" forkmode="once" printsummary="yes" showOutput="true" filtertrace="off">
+            <jvmarg line="--add-opens java.base/jdk.internal.loader=ALL-UNNAMED"/>
+
+			<classpath>
+				<pathelement location="${bin.dir}" />
+				<path refid="junit"/>
+				<path refid="hamcrest"/>
+				<path refid="ucanaccess"/>
+				<path refid="jaxb"/>
+			</classpath>
+			
+			<formatter type="xml"/>
+			
+			<batchtest fork="yes" todir="${test.rep.dir}/${project.name}">
+				<fileset dir="${bin.dir}">
+					<include name="**/*Test.class" />
+					<!-- Do not include inner class -->
+					<exclude name="**/*$*" />
+				</fileset>
+			</batchtest>
+		</junit>
+
 		<junitreport todir="${test.rep.dir}/${project.name}" tofile="TESTS-${project.name}.xml">
 			<fileset dir="${test.rep.dir}/${project.name}">
 				<include name="TEST-*.xml" />
@@ -155,14 +195,16 @@
 	</target>
 
 
-	<!-- TEST PROD -->
-	<target name="test-prod" description="Run all JUnit tests with jar file" depends="jar,compile-prodtest">
+    <!-- TEST PROD (DEPENDING ON JAVA VERSION WILL CHOOSE THE APPROPRIATE SETUP) -->
+ 	<target name="test-prod" description="Run all JUnit tests with jar file (production mode)" depends="jar,compile-prodtest,test-prod-java-8,test-prod-after-java-8" />
+
+	<!-- TEST PROD FOR JAVA VERSION 1.8-->
+	<target name="test-prod-java-8" description="Run all JUnit tests in Java 1.8 (production mode)" if="${is.java.8}">
 		<mkdir dir="${test.prod.dir}"/>
 		<delete dir="${test.prod.dir}/${project.name}"/>
 		<mkdir dir="${test.prod.dir}/${project.name}"/>
 
 		<junit fork="no" printsummary="yes" showOutput="true" filtertrace="off">
-
 			<classpath>
 				<pathelement location="${bin.dir}" />
 				<path refid="myJARFile"/>
@@ -182,11 +224,51 @@
 				</fileset>
 			</batchtest>
 		</junit>
+
 		<junitreport todir="${test.prod.dir}/${project.name}" tofile="TESTS-${project.name}.xml">
 			<fileset dir="${test.prod.dir}/${project.name}">
 				<include name="TEST-*.xml" />
 			</fileset>
 			<report format="frames" todir="${test.prod.dir}/${project.name}"/>
+		</junitreport>
+	</target>
+
+	<!-- TEST PROD FOR JAVA VERSIONs GREATER THAN 1.8-->
+	<target name="test-prod-after-java-8" description="Run all JUnit tests for versions greater than 1.8 (production mode)" if="${is.after.java.8}">
+		<mkdir dir="${test.prod.dir}"/>
+		<delete dir="${test.prod.dir}/${project.name}"/>
+		<mkdir dir="${test.prod.dir}/${project.name}"/>
+
+
+		<junit fork="yes" forkmode="once" printsummary="yes" showOutput="true" filtertrace="off">
+            <jvmarg line="--add-opens java.base/jdk.internal.loader=ALL-UNNAMED"/>
+
+			<classpath>
+				<pathelement location="${bin.dir}" />
+				<path refid="myJARFile"/>
+				<path refid="junit"/>
+				<path refid="hamcrest"/>
+				<path refid="jaxb"/>
+				<path refid="ucanaccess"/>
+			</classpath>
+			
+			<formatter type="xml"/>
+			
+			<batchtest fork="yes" todir="${test.prod.dir}/${project.name}">
+				<fileset dir="${bin.dir}">
+					<include name="**/*Test.class" />
+					<!-- Do not include inner class -->
+					<exclude name="**/*$*" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+		<junitreport todir="${test.prod.dir}/${project.name}" tofile="TESTS-${project.name}.xml">
+			<fileset dir="${test.prod.dir}/${project.name}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${test.prod.dir}/${project.name}"/>
+
 		</junitreport>
 	</target>
 
