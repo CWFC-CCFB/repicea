@@ -15,6 +15,9 @@ import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 public class BootstrapHybridPointEstimateTest {
 
 	private static final Random RANDOM = new Random();
+
+	private static int NbRealizations = 20000;
+	
 	
 //	@Ignore
 	@Test
@@ -50,7 +53,7 @@ public class BootstrapHybridPointEstimateTest {
 	@Test
 	public void simpleTestWithoutSamplingVariability() {
 		BootstrapHybridPointEstimate bhpe = new BootstrapHybridPointEstimate(); 
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < NbRealizations; i++) {
 			PopulationMeanEstimate pe = new PopulationMeanEstimate();
 			double deviate = RANDOM.nextGaussian() * 2 + 12;
 			Matrix obs;
@@ -97,7 +100,7 @@ public class BootstrapHybridPointEstimateTest {
 		double stdModel = .15;
 		double stdRes = 1.1;
 		
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < NbRealizations; i++) {
 			PopulationMeanEstimate peNew = new PopulationMeanEstimate();
 			Matrix obsNew;
 			double slope = meanModel + RANDOM.nextGaussian() * stdModel; 
@@ -161,7 +164,7 @@ public class BootstrapHybridPointEstimateTest {
 		double stdModel = .15;
 		double stdRes = 1.1;
 		
-		for (int i = 0; i < 100000; i++) {
+		for (int i = 0; i < NbRealizations; i++) {
 			PopulationMeanEstimate peNew = new PopulationMeanEstimate();
 			Matrix obsNew;
 			Matrix slope = new Matrix(1,1,meanModel + RANDOM.nextGaussian() * stdModel,0); 
