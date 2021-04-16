@@ -71,7 +71,7 @@ public class BootstrapHybridPointEstimateTest {
 		double actualMean = bhpe.getMean().getValueAt(0, 0);
 		System.out.println("Testing without sampling variability...");
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
-		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 3E-2);
+		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 4E-2);
 		
 		
 		double expectedVariance = 4d;
