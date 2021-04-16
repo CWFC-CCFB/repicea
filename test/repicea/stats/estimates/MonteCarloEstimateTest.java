@@ -10,13 +10,14 @@ import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
 public class MonteCarloEstimateTest {
 
+	private static int NbRealizations = 50000;
 	
 	@Test
 	public void percentilesTest() {
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		Random random = new Random();
 		Matrix m;
-		for (int i = 0; i < 1000000; i++) {
+		for (int i = 0; i < NbRealizations; i++) {
 			m = new Matrix(2,1);
 			m.setValueAt(0, 0, random.nextDouble());
 			m.setValueAt(1, 0, random.nextDouble() * 2);
@@ -24,8 +25,8 @@ public class MonteCarloEstimateTest {
 		}
 		
 		Matrix percentiles = estimate.getQuantileForProbability(0.95);
-		Assert.assertEquals(0.95, percentiles.getValueAt(0, 0), 1E-3);
-		Assert.assertEquals(0.95 * 2, percentiles.getValueAt(1, 0), 2E-3);
+		Assert.assertEquals(0.95, percentiles.getValueAt(0, 0), 1E-2);
+		Assert.assertEquals(0.95 * 2, percentiles.getValueAt(1, 0), 1E-2);
 	}
 	
 	@Test
@@ -35,7 +36,7 @@ public class MonteCarloEstimateTest {
 		int sampleSize = 100;
 		Random generator = new Random();
 		LawOfTotalVarianceMonteCarloEstimate output = new LawOfTotalVarianceMonteCarloEstimate();
-		for (int i = 0; i < 50000; i++) {
+		for (int i = 0; i < 10000; i++) {
 			double meanForThisRealization = generator.nextGaussian() * outerStd;
 			PopulationMeanEstimate estimate = new PopulationMeanEstimate();
 			Matrix obs;
