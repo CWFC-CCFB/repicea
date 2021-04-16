@@ -16,7 +16,7 @@ public class BootstrapHybridPointEstimateTest {
 
 	private static final Random RANDOM = new Random();
 
-	private static int NbRealizations = 20000;
+	private static int NbRealizations = 25000;
 	
 	
 //	@Ignore
@@ -38,6 +38,8 @@ public class BootstrapHybridPointEstimateTest {
 		double expectedMean = pe.getMean().getValueAt(0, 0);
 		double actualMean = bhpe.getMean().getValueAt(0, 0);
 		
+		System.out.println("Testing without model variability...");
+		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
 		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 1E-8);
 		
 		
@@ -67,8 +69,9 @@ public class BootstrapHybridPointEstimateTest {
 		
 		double expectedMean = 12d;
 		double actualMean = bhpe.getMean().getValueAt(0, 0);
+		System.out.println("Testing without sampling variability...");
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
-		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 1E-1);
+		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 3E-2);
 		
 		
 		double expectedVariance = 4d;
@@ -116,6 +119,8 @@ public class BootstrapHybridPointEstimateTest {
 		double expectedMean = meanModel * mu_x_hat;
 		double actualMean = bhpe.getMean().getValueAt(0, 0);
 		
+		System.out.println("Testing with complete variability...");
+		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
 		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 3E-2);
 		
 		
@@ -123,17 +128,18 @@ public class BootstrapHybridPointEstimateTest {
 				meanModel * meanModel * var_mu_x_hat -	
 				stdModel * stdModel * var_mu_x_hat;	// when dealing with the estimate of the mean, the contribution of the residual error tends to 0, i.e. N * V.bar(e_i) / N^2 = V.bar(e_i) / N. MF2020-12-14
 		VariancePointEstimate varPointEstimate = bhpe.getCorrectedVariance();
-		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
-		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
-		System.out.println("Total variance = " + varPointEstimate.getTotalVariance());
+//		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
+//		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
+//		System.out.println("Total variance = " + varPointEstimate.getTotalVariance());
 		double actualVariance = varPointEstimate.getTotalVariance().getValueAt(0, 0);
 
-		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 1E-1);
+		System.out.println("Expected variance= " + expectedVariance + " - actual variance = " + actualVariance);
+		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 2E-1);
 
 		Matrix empiricalCorrection = varPointEstimate.getVarianceBiasCorrection();
 		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
-		System.out.println("Theoretical correction = " + theoreticalCorrection);
-		System.out.println("Empirical correction = " + empiricalCorrection);
+//		System.out.println("Theoretical correction = " + theoreticalCorrection);
+//		System.out.println("Empirical correction = " + empiricalCorrection);
 		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.getValueAt(0, 0), 1E-2);
 	}
 
@@ -179,6 +185,9 @@ public class BootstrapHybridPointEstimateTest {
 		Matrix expectedMean = mu_x_hat.scalarMultiply(meanModel);
 		Matrix actualMean = bhpe.getMean();
 
+
+		System.out.println("Testing multivariate with complete variability...");
+		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
 		Assert.assertTrue("Testing mean estimates", !expectedMean.subtract(actualMean).getAbsoluteValue().anyElementLargerThan(3E-2));
 		
 		
@@ -187,21 +196,22 @@ public class BootstrapHybridPointEstimateTest {
 				.subtract(var_mu_x_hat.scalarMultiply(stdModel * stdModel));	// when dealing with the estimate of the mean, the contribution of the residual error tends to 0, i.e. N * V.bar(e_i) / N^2 = V.bar(e_i) / N. MF2020-12-14
 
 		VariancePointEstimate varPointEstimate = bhpe.getCorrectedVariance();
-		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
-		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
+//		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
+//		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
 		Matrix actualVariance = varPointEstimate.getTotalVariance();
-		System.out.println("Total variance = " + actualVariance);
-		System.out.println("Expected variance = " + expectedVariance);
+//		System.out.println("Total variance = " + actualVariance);
+//		System.out.println("Expected variance = " + expectedVariance);
 
-		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(8E-2));
+		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
+		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(2E-1));
 		
 		Matrix empiricalCorrection = varPointEstimate.getVarianceBiasCorrection();
 		Matrix theoreticalCorrection = var_mu_x_hat.scalarMultiply(-stdModel * stdModel);
-		System.out.println("Theoretical correction = " + theoreticalCorrection);
-		System.out.println("Empirical correction = " + empiricalCorrection);
+//		System.out.println("Theoretical correction = " + theoreticalCorrection);
+//		System.out.println("Empirical correction = " + empiricalCorrection);
 		Matrix relDiff = empiricalCorrection.elementWiseDivide(theoreticalCorrection).scalarAdd(-1d);
 
-		Assert.assertTrue("Testing variance estimates", !relDiff.getAbsoluteValue().anyElementLargerThan(1E-2));
+		Assert.assertTrue("Testing variance estimates", !relDiff.getAbsoluteValue().anyElementLargerThan(2E-1));
 	}
 	
 	

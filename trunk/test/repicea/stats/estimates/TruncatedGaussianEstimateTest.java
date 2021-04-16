@@ -18,7 +18,7 @@ public class TruncatedGaussianEstimateTest {
 			actualMean += estimate.getRandomDeviate().getValueAt(0, 0) * fact;
 		}
 		double expectedMean = Math.sqrt(2) / Math.sqrt(Math.PI);
-		Assert.assertEquals("Comparing mean of half-normal distribution", expectedMean, actualMean, 5E-3);}
+		Assert.assertEquals("Comparing mean of half-normal distribution", expectedMean, actualMean, 1E-2);}
 	
 	@Test
 	public void comparingMeanNegativeHalfDistributionTest() {
@@ -31,7 +31,7 @@ public class TruncatedGaussianEstimateTest {
 			actualMean += estimate.getRandomDeviate().getValueAt(0, 0) * fact;
 		}
 		double expectedMean = - Math.sqrt(2) / Math.sqrt(Math.PI);
-		Assert.assertEquals("Comparing mean of half-normal distribution", expectedMean, actualMean, 5E-3);
+		Assert.assertEquals("Comparing mean of half-normal distribution", expectedMean, actualMean, 1E-2);
 	}
 
 }
