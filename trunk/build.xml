@@ -65,7 +65,7 @@
 
 
 	<!-- COMPILE SOURCES ONLY -->
-    <target name="compile" description="Compile src only" depends="clean">
+    <target name="compile" description="Compile src only" depends="clean,validate-java-version">
         <mkdir dir="${bin.dir}"/>
 		
         <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="on">
@@ -81,7 +81,7 @@
 
 
 	<!-- COMPILE TESTS -->
-    <target name="compile-test" description="Compile tests">
+    <target name="compile-test" description="Compile tests" depends="validate-java-version">
         <mkdir dir="${bin.dir}"/>
 		
         <javac srcdir="${test.dir}" destdir="${bin.dir}">
@@ -98,7 +98,7 @@
 
 
 	<!-- COMPILE PRODUCTION TESTS -->
-    <target name="compile-prodtest" description="Compile production tests">
+    <target name="compile-prodtest" description="Compile production tests" depends="validate-java-version">
         <delete dir="${bin.dir}"/>
         <mkdir dir="${bin.dir}"/>
 		
@@ -221,9 +221,40 @@
         </jar>
     </target>
 
-    <target name="checkJavaVersion">
-         <echo>Java/JVM version: ${ant.java.version}</echo> 
+	<!-- SET A PROPERTY FOR IF JAVA VERSION IS 1.8 -->
+    <target name="is-java-8">
+        <condition property="is.java.8">
+            <equals arg1="${ant.java.version}" arg2="1.8" />
+        </condition>
     </target>
- 
+
+	<!-- SET A PROPERTY IF JAVA VERSION IS GREATER THAN 1.8 -->
+    <target name="is-after-java-8">
+        <condition property="is.after.java.8">
+            <or>
+                <equals arg1="${ant.java.version}" arg2="9" />
+                <equals arg1="${ant.java.version}" arg2="10" />
+                <equals arg1="${ant.java.version}" arg2="11" />
+                <equals arg1="${ant.java.version}" arg2="12" />
+                <equals arg1="${ant.java.version}" arg2="13" />
+                <equals arg1="${ant.java.version}" arg2="14" />
+            </or>
+        </condition>
+    </target>
+
+	<!-- SET A PROPERTY IF JAVA VERSION IS EQUAL TO OR GREATER THAN 1.8 -->
+    <target name="check-java-version" depends="is-java-8,is-after-java-8">
+        <condition property="is.java.version.ok">
+            <or>
+                <equals arg1="${is.java.8}" arg2="true" />
+                <equals arg1="${is.after.java.8}" arg2="true" />
+            </or>
+        </condition>
+    </target>
+
+   	<!-- ENSURE THAT THE JAVA VERSION IS EQUAL TO OR GREATER THAN 1.8 -->
+    <target name="validate-java-version" depends="check-java-version" unless="${is.java.version.ok}">
+        <fail message="Unsupported Java version: ${ant.java.version}. Make sure that the Java version is 1.8 or greater."/>
+    </target>
 
 </project>
