@@ -2,7 +2,7 @@
 
 	<property name="project.name" value="repicea" />
 	<property name="project.description" value="REpicea Utilitaries" />
-	<property name="ext.dir" value="../externalLibraries" />
+	<property name="ext.dir" value="../externallibraries" />
 	<property name="bin.dir" value="bin" />
 	<property name="src.dir" value="src" />
 	<property name="test.dir" value="test" />
@@ -21,21 +21,27 @@
 	
 	<path id="junit">
 		<fileset dir="${ext.dir}">
-			<include name="junit-4.12.jar" />
+			<include name="junit.jar" />
 		</fileset>
 	</path>
 
 	<path id="hamcrest">
 		<fileset dir="${ext.dir}">
-			<include name="hamcrest-core-1.3.jar" />
+			<include name="hamcrest-core.jar" />
 		</fileset>
 	</path>
 
 	<path id="ucanaccess">
-		<fileset dir="${ext.dir}/UCanAccess-4.0.4-bin">
-			<include name="ucanaccess-4.0.4.jar" />
+		<fileset dir="${ext.dir}/UCanAccess">
+			<include name="*.jar" />
 		</fileset>
-		<fileset dir="${ext.dir}/UCanAccess-4.0.4-bin/lib">
+		<fileset dir="${ext.dir}/UCanAccess/lib">
+			<include name="*.jar" />
+		</fileset>
+	</path>
+
+	<path id="jaxb">
+		<fileset dir="${ext.dir}/jaxb-ri/mod">
 			<include name="*.jar" />
 		</fileset>
 	</path>
@@ -62,8 +68,12 @@
     <target name="compile" description="Compile src only" depends="clean">
         <mkdir dir="${bin.dir}"/>
 		
-        <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="on" />
-		
+        <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="on">
+			<classpath>
+				<path refid="jaxb"/>
+			</classpath>
+		</javac>
+
 		<copy todir="${bin.dir}">
 			<fileset dir="${src.dir}" excludes="**/*.java" />
 		</copy>
@@ -76,6 +86,7 @@
 		
         <javac srcdir="${test.dir}" destdir="${bin.dir}">
 			<classpath>
+				<path refid="jaxb"/>
 				<path refid="junit"/>
 			</classpath>
 		</javac>
@@ -94,6 +105,7 @@
         <javac srcdir="${test.dir}" destdir="${bin.dir}">
 			<classpath>
 				<path refid="myJARFile"/>
+				<path refid="jaxb"/>
 				<path refid="junit"/>
 			</classpath>
 		</javac>
@@ -121,6 +133,7 @@
 				<path refid="junit"/>
 				<path refid="hamcrest"/>
 				<path refid="ucanaccess"/>
+				<path refid="jaxb"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -155,6 +168,7 @@
 				<path refid="myJARFile"/>
 				<path refid="junit"/>
 				<path refid="hamcrest"/>
+				<path refid="jaxb"/>
 				<path refid="ucanaccess"/>
 			</classpath>
 			
