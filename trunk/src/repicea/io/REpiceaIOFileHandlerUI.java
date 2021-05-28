@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-iotools library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2014 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2021 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -46,7 +46,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * The IOFileHandlerUI class handles the save, save as and load actions in REpicea windows.
  * @author Mathieu Fortin - May 2014
  */
-public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeListener {
+public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements ActionListener, PropertyChangeListener {
 
 	protected static enum MessageID implements TextableEnum {
 		
@@ -68,23 +68,33 @@ public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeLis
 	}
 
 	
-	private final IOUserInterface component;
+//	private final IOUserInterface component;
 	private final IOUserInterfaceableObject componentOwner;
 	private final AbstractButton saveButton;
 	private final AbstractButton saveAsButton;
 	private final AbstractButton loadButton;
 	
 	private boolean hasChanged;
-	
+
+	/**
+	 * Handle the load, save and save as menu item in a dialog. If the component parameter
+	 * is not a component instance, the constructor will throw a ClassCastException.
+	 * 
+	 * @param component Must be a Component instance implementing the IOUserInterface
+	 * @param componentOwner an IOUserInterfaceableObject instance
+	 * @param saveButton
+	 * @param saveAsButton
+	 * @param loadButton
+	 */
 	public REpiceaIOFileHandlerUI(IOUserInterface component, 
 			IOUserInterfaceableObject componentOwner,
 			AbstractButton saveButton,
 			AbstractButton saveAsButton,
 			AbstractButton loadButton) {
-		this.component = component;
-		((Component) this.component).addPropertyChangeListener(this);
+		super((Component) component, componentOwner.getFileFilter());
+		this.component.addPropertyChangeListener(this);
 		this.componentOwner = componentOwner;
-		this.component.firePropertyChange(REpiceaAWTProperty.DisconnectAutoShutdown, null, this);
+		getIOUserInterface().firePropertyChange(REpiceaAWTProperty.DisconnectAutoShutdown, null, this);
 		this.saveButton = saveButton;
 		this.saveButton.addActionListener(this);
 		
@@ -94,6 +104,11 @@ public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeLis
 		this.loadButton = loadButton;
 		this.loadButton.addActionListener(this);
 	}
+
+	
+	private IOUserInterface getIOUserInterface() {
+		return (IOUserInterface) component;
+	}
 	
 	
 	/**
@@ -101,7 +116,7 @@ public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeLis
 	 */
 	protected void loadAction() {
 		try {
-			SettingMemory settings = component.getWindowSettings();
+			SettingMemory settings = getIOUserInterface().getWindowSettings();
 			String filename;
 			if (settings != null) {
 				filename = settings.getProperty(component.getClass().getSimpleName() + ".last.file.loaded", componentOwner.getFilename());
@@ -119,9 +134,9 @@ public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeLis
 			
 			if (fileChooserOutput.isValid()) {
 				componentOwner.load(fileChooserOutput.getFilename());
-				component.postLoadingAction();
+				getIOUserInterface().postLoadingAction();
 				hasChanged = false;
-				component.firePropertyChange(REpiceaAWTProperty.JustLoaded,	null, component);
+				getIOUserInterface().firePropertyChange(REpiceaAWTProperty.JustLoaded,	null, component);
 				if (settings != null) {
 					settings.setProperty(component.getClass().getSimpleName() + ".last.file.loaded", fileChooserOutput.getFilename());
 				}
@@ -148,48 +163,49 @@ public class REpiceaIOFileHandlerUI implements ActionListener, PropertyChangeLis
 		}
 	}
 
-	private void showSaveActionFailedMessage() {
-		JOptionPane.showMessageDialog((Component) component, 
-				REpiceaTranslator.getString(UIControlManager.InformationMessage.ErrorWhileSavingData),
-				REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Error),
-				JOptionPane.ERROR_MESSAGE);
-	}
 	
-	
-	private void internalSaveAction(String filename) throws Exception {
+	@Override
+	protected void internalSaveAction(String filename) throws Exception {
 		componentOwner.save(filename);
-		component.postSavingAction();
+		getIOUserInterface().postSavingAction();
 		hasChanged = false;
-		component.firePropertyChange(REpiceaAWTProperty.JustSaved, null, component);
+		getIOUserInterface().firePropertyChange(REpiceaAWTProperty.JustSaved, null, component);
+	}
+
+	
+	@Override
+	protected String getFilename() {
+		return componentOwner.getFilename();
 	}
 	
-	protected boolean saveAsAction() {
-		try {
-			String filename = componentOwner.getFilename();
-			List<FileFilter> fileFilters = new ArrayList<FileFilter>();
-			fileFilters.add(componentOwner.getFileFilter());
-			FileChooserOutput fileChooserOutput = CommonGuiUtility.browseAction((Component) component,
-					JFileChooser.FILES_ONLY,
-					filename,
-					fileFilters,
-					JFileChooser.SAVE_DIALOG);
-			if (fileChooserOutput.isValid()) {
-				if (new File(fileChooserOutput.getFilename()).exists()) {
-					if (!CommonGuiUtility.popupWriteOverWarningDialog((Component) component)) {
-						return false;
-					}
-				}
-				internalSaveAction(fileChooserOutput.getFilename());
-				return true;
-			} else {
-				return false;	// file chooser has been cancelled
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			showSaveActionFailedMessage();
-			return false;
-		}
-	}
+	
+//	protected boolean saveAsAction() {
+//		try {
+////			String filename = componentOwner.getFilename();
+////			List<FileFilter> fileFilters = new ArrayList<FileFilter>();
+////			fileFilters.add(componentOwner.getFileFilter());
+//			FileChooserOutput fileChooserOutput = CommonGuiUtility.browseAction((Component) component,
+//					JFileChooser.FILES_ONLY,
+//					filename,
+//					fileFilters,
+//					JFileChooser.SAVE_DIALOG);
+//			if (fileChooserOutput.isValid()) {
+//				if (new File(fileChooserOutput.getFilename()).exists()) {
+//					if (!CommonGuiUtility.popupWriteOverWarningDialog((Component) component)) {
+//						return false;
+//					}
+//				}
+//				internalSaveAction(fileChooserOutput.getFilename());
+//				return true;
+//			} else {
+//				return false;	// file chooser has been cancelled
+//			}
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//			showSaveActionFailedMessage();
+//			return false;
+//		}
+//	}
 
 
 	@Override

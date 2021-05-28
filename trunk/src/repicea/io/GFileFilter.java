@@ -45,6 +45,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 		JAVACLASS("Java class file (*.class)", "Fichier de classe Java (*.class)"),
 		HTML("Hypertext Markup Language (*.html)", "Langage Hypertext Markup (*.html)"),
 		TXT("Text File (*.txt)", "Fichier texte  (*.txt)"),
+		SVG("Scalable Vector Graphics file (*.svg)", "Fichier Scalable Vector Graphics (*.svg)"),
 		UNKNOWN("","");
 
 		private static Map<FileType, GFileFilter> FileFilterMap;
@@ -76,6 +77,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 				FileFilterMap.put(HTML, GFileFilter.HTML);
 				FileFilterMap.put(TXT, GFileFilter.TXT);
 				FileFilterMap.put(MDB,  GFileFilter.MDB);
+				FileFilterMap.put(SVG,  GFileFilter.SVG);
 			}
 			return FileFilterMap;
 		}
@@ -99,6 +101,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 	public final static GFileFilter JAVACLASS = new GFileFilter(".class", FileType.JAVACLASS);
 	public final static GFileFilter HTML = new GFileFilter(".html", FileType.HTML);
 	public final static GFileFilter TXT = new GFileFilter(".txt", FileType.TXT);
+	public final static GFileFilter SVG = new GFileFilter(".svg", FileType.SVG);
 	
 	
 	private String extension;

@@ -31,6 +31,12 @@
 		</fileset>
 	</path>
 
+	<path id="batik">
+		<fileset dir="${ext.dir}/batik">
+			<include name="batik-all.jar" />
+		</fileset>
+	</path>
+
 	<path id="ucanaccess">
 		<fileset dir="${ext.dir}/UCanAccess">
 			<include name="*.jar" />
@@ -71,6 +77,7 @@
         <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="on">
 			<classpath>
 				<path refid="jaxb"/>
+				<path refid="batik"/>
 			</classpath>
 		</javac>
 
@@ -88,6 +95,7 @@
 			<classpath>
 				<path refid="jaxb"/>
 				<path refid="junit"/>
+				<path refid="batik"/>
 			</classpath>
 		</javac>
 		
@@ -106,6 +114,7 @@
 			<classpath>
 				<path refid="myJARFile"/>
 				<path refid="jaxb"/>
+				<path refid="batik"/>
 				<path refid="junit"/>
 			</classpath>
 		</javac>
@@ -136,6 +145,7 @@
 				<path refid="hamcrest"/>
 				<path refid="ucanaccess"/>
 				<path refid="jaxb"/>
+				<path refid="batik"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -173,6 +183,7 @@
 				<path refid="hamcrest"/>
 				<path refid="ucanaccess"/>
 				<path refid="jaxb"/>
+				<path refid="batik"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -212,6 +223,7 @@
 				<path refid="hamcrest"/>
 				<path refid="jaxb"/>
 				<path refid="ucanaccess"/>
+				<path refid="batik"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -250,6 +262,7 @@
 				<path refid="hamcrest"/>
 				<path refid="jaxb"/>
 				<path refid="ucanaccess"/>
+				<path refid="batik"/>
 			</classpath>
 			
 			<formatter type="xml"/>

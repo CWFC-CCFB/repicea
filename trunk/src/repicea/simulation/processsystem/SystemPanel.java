@@ -45,6 +45,7 @@ import repicea.gui.Resettable;
 import repicea.gui.UIControlManager;
 import repicea.gui.dnd.DnDPanel;
 import repicea.gui.dnd.LocatedEvent;
+import repicea.gui.dnd.DnDPanel.InternalPanel;
 import repicea.simulation.processsystem.UISetup.BasicMode;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -233,6 +234,10 @@ public class SystemPanel extends DnDPanel<Processor> implements MouseListener,
 				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
 			}
 		}
+	}
+	
+	protected InternalPanel getInternalPanel() {
+		return internalPanel;
 	}
 	
 	private void deleteAction() {
