@@ -20,10 +20,11 @@ This library uses some icons from the GTK library which are protected
 by a GNU Lesser General Public License. 
 
 This library relies on 
-    - the JavaDBF library (copyright anil@linuxense.com) which is licensed under GNU Lesser General Public License.
-    - the ucanaccess library version 5.0.0 (https://sourceforge.net/projects/ucanaccess/) which is licensed under Apache License, Version 2.0
+    - (integrated in repicea) the JavaDBF library (copyright anil@linuxense.com) which is licensed under GNU Lesser General Public License.
+    - (optionally) the ucanaccess library version 5.0.0 (https://sourceforge.net/projects/ucanaccess/) which is licensed under Apache License, Version 2.0
+	- (optionally) the Batik library (copyright Apache Software Foundation) which is licensed under Apache License, Version 2.0
 
-It also requires the jabx library version 2.3.2 (Copyright (c) 2017 Oracle and/or its affiliates, 
+It may also require the jabx library version 2.3.2 (Copyright (c) 2017 Oracle and/or its affiliates, 
 https://eclipse-ee4j.github.io/jaxb-ri/) if the JVM is running under Java 11 or 13. 
 The jabx library is protected by the Eclipse Distribution License 
 (see https://www.eclipse.org/org/documents/edl-v10.php).

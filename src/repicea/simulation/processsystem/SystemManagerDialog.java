@@ -49,6 +49,7 @@ import repicea.gui.UIControlManager.CommonMenuTitle;
 import repicea.gui.WindowSettings;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
+import repicea.io.REpiceaOSVGFileHandlerUI;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.Memorizable;
 import repicea.serial.REpiceaMemorizerHandler;
@@ -64,7 +65,8 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	
 	protected static enum MessageID implements TextableEnum {
 		SliderTitle("Output flux", "Flux sortant"),
-		Unnamed("Unnamed", "SansNom");
+		Unnamed("Unnamed", "SansNom"),
+		ExportAsSVGLabel("Export as SVG", "Exporter au format SVG");
 
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -90,6 +92,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	protected JMenuItem load;
 	protected JMenuItem save;
 	protected JMenuItem saveAs;
+	protected JMenuItem exportAsSVG;
 	protected JMenuItem close;
 	protected JMenuItem reset;
 	protected JMenuItem help;
@@ -125,8 +128,10 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		load = UIControlManager.createCommonMenuItem(CommonControlID.Open);
 		save = UIControlManager.createCommonMenuItem(CommonControlID.Save);;
 		saveAs = UIControlManager.createCommonMenuItem(CommonControlID.SaveAs);
-		
 		new REpiceaIOFileHandlerUI(this, caller, save, saveAs, load);
+
+		exportAsSVG = new JMenuItem(MessageID.ExportAsSVGLabel.toString());
+		new REpiceaOSVGFileHandlerUI(this, exportAsSVG, systemPanel.getInternalPanel());
 		
 		close = UIControlManager.createCommonMenuItem(CommonControlID.Close);
 		reset = UIControlManager.createCommonMenuItem(CommonControlID.Reset);
@@ -169,6 +174,10 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		file.add(save);
 		file.add(saveAs);
 		file.add(new JSeparator());
+		if (isBatikExtensionAvailable()) {
+			file.add(exportAsSVG);
+			file.add(new JSeparator());
+		}
 		file.add(close);
 		return file;
 	}
@@ -181,7 +190,20 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		edit.add(redo);
 		return edit;
 	}
-	
+
+	/**
+	 * Check if batik extension is available, in case it has not
+	 * packaged in the fat jar. 
+	 * @return a boolean
+	 */
+	private boolean isBatikExtensionAvailable() {
+		try {
+			Class.forName("org.apache.batik.svggen.SVGGraphics2D");
+			return true;
+		} catch (ClassNotFoundException e) {
+			return false;
+		}
+	}
 	
 	protected JMenu createAboutMenu() {
 		JMenu about = UIControlManager.createCommonMenu(CommonMenuTitle.About);
