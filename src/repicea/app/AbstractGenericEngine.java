@@ -165,14 +165,22 @@ public abstract class AbstractGenericEngine {
 	
 	/**
 	 * Protected constructor for derived class.
+	 * @param fullStart a boolean that enables the instantiation and the starting of the internal worker. Some applications might 
+	 * want to do this in two different steps.
 	 */
-	protected AbstractGenericEngine() {
+	protected AbstractGenericEngine(boolean fullStart) {
 		queue = new LinkedBlockingQueue<GenericTask>();
 		tasksDone = new CopyOnWriteArrayList<String>();
+		if (fullStart) {
+			startInternalWorker();
+		}
+	}
+
+	protected void startInternalWorker() {
 		worker = new InternalWorker(this);
 		worker.start();
 	}
-
+	
 	/**
 	 * This method is called whenever an exception is thrown while running a task. If 
 	 * the Engine has a user interface and this interface is visible, an error message

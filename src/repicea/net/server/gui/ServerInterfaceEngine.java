@@ -40,7 +40,7 @@ public class ServerInterfaceEngine extends AbstractGenericEngine implements REpi
 	
 	
 	private ServerInterfaceEngine() {
-		super();
+		super(true); // full start
 	}
 	
 

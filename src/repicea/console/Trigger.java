@@ -37,7 +37,7 @@ public abstract class Trigger extends AbstractGenericEngine implements REpiceaSh
 	protected TriggerSettings settings;
 	
 	public Trigger() {
-		super();
+		super(true); // full start
 	}
 	
 	protected void redirectOutputStream() {

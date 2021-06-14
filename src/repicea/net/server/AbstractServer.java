@@ -188,6 +188,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * @throws Exception
 	 */
 	protected AbstractServer(ServerConfiguration configuration, boolean isCallerAJavaApplication) throws Exception {
+		super(true);  // full start
 		this.configuration = configuration;
 		this.isCallerAJavaApplication = isCallerAJavaApplication;
 		clientThreads = new ArrayList<ClientThread>();
