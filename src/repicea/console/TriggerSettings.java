@@ -18,6 +18,7 @@
  */
 package repicea.console;
 
+import repicea.lang.REpiceaSystem;
 import repicea.serial.Memorizable;
 import repicea.serial.MemorizerPackage;
 import repicea.util.REpiceaTranslator;
@@ -67,9 +68,8 @@ public class TriggerSettings implements Memorizable {
 			language = Language.English;  
 		}
 		
-		String completeJREVersion = System.getProperty("java.version");
-		jreVersion = completeJREVersion.substring(0, completeJREVersion.indexOf("_"));
-		revision = completeJREVersion.substring(completeJREVersion.indexOf("_") + 1);
+		jreVersion = REpiceaSystem.getJVMVersion();
+		revision = REpiceaSystem.getJVMRevision();
 
 		architecture = System.getProperty("os.arch");
 		if (architecture.endsWith("64")) {
