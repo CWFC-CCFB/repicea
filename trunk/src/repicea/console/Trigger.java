@@ -87,10 +87,11 @@ public abstract class Trigger extends AbstractGenericEngine implements REpiceaSh
 
 	@Override
 	protected void firstTasksToDo() {
-		addTask(new TriggerTask(TaskID.RedirectingOutputStream, this));
 		addTask(new TriggerTask(TaskID.FindCurrentLocation, this));
 		addTask(new TriggerTask(TaskID.LoadSettings, this));
 		addTask(new TriggerTask(TaskID.ShowInterface, this));
+		addTask(new TriggerTask(TaskID.RedirectingOutputStream, this));
+		addTask(new TriggerTask(TaskID.FindCurrentLocation, this));  // just to display it in the console
 	}
 
 	@Override
