@@ -160,7 +160,7 @@ public class MainDialog extends REpiceaFrame implements ActionListener, Property
 		super();
 		try {
 			Method callHelp = BrowserCaller.class.getMethod("openUrl", String.class);
-			String url = "http://www.inra.fr/capsis/help_" 
+			String url = "http://capsis.cirad.fr/capsis/doku.php?id=help_"
 					+ caller.getSettings().getLanguage().getCode() 
 					+ "/quebecmrnf/capsisstarter";
 			AutomatedHelper helper = new AutomatedHelper(callHelp, new Object[]{url});
