@@ -233,6 +233,25 @@ public class GaussianUtility {
 	}
 
 	
+	/**
+	 * Compute the probability density for a quantile of a normal distribution with mean mu and
+	 * variance sigma2.
+	 * @param y the quantile
+	 * @param mu the mean
+	 * @param sigma2 the variance of the distribution. Must be greater than 0.
+	 * @return a probability density
+	 */
+	public static double getProbabilityDensity(double y, double mu, double sigma2) {
+		if (sigma2 <= 0) {
+			throw new InvalidParameterException("The sigma2 parameter must be strictly positive (i.e. > 0)!");
+		}
+		double diff =  y - mu;
+		return 1d / Math.sqrt(2 * Math.PI * sigma2) * 
+				Math.exp(- 0.5 * diff * diff / sigma2); 
+	}
+	
+	
+	
 	private static double increasePrecision(double x, double cdfValue) {
 		return x;
 //		double e = 0.5 * (1 - erf(-x/Math.sqrt(2d))) - cdfValue;
