@@ -2,8 +2,12 @@ package repicea.stats.distributions;
 
 import static org.junit.Assert.assertEquals;
 
+import java.security.InvalidParameterException;
+
+import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.math.Matrix;
 import repicea.stats.distributions.utility.GaussianUtility;
 
 public class GaussianTest {
@@ -34,6 +38,25 @@ public class GaussianTest {
 			double cdfValue = GaussianUtility.getCumulativeProbability(quantile);
 			assertEquals(expectedCDFValue, cdfValue, 1E-9);
 		}
+	}
+	
+	@Test
+	public void probabilityDensityTest() {
+		double prob = GaussianUtility.getProbabilityDensity(10, 5, 9);
+		assertEquals("Comparing probability density", 0.03315905, prob, 1E-8);
+		prob = GaussianUtility.getProbabilityDensity(-6, -1, 100);
+		assertEquals("Comparing probability density", 0.03520653, prob, 1E-8);
+		try {
+			prob = GaussianUtility.getProbabilityDensity(-6, -1, -100);
+			Assert.fail();	// if get to this line, means that the exception was not throw.
+		} catch(InvalidParameterException e) {}
+		StandardGaussianDistribution sgd = new StandardGaussianDistribution();
+		Matrix mat = new Matrix(1,1);
+		mat.setValueAt(0, 0, 1d);
+		sgd.getProbabilityDensity(mat);
+		
+		
+		
 	}
 
 }

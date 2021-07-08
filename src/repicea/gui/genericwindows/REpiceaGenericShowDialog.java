@@ -77,6 +77,7 @@ public abstract class REpiceaGenericShowDialog extends REpiceaDialog {
 			
 			editorPane.setEditorKit(kit);					// The kit is set into the Editor Pane
 			editorPane.setPage(urlAddress);					// The page of the Editor is set to the address of the HTML file
+															// Line 79 instantiates a SwingWorker instance and there is not much to be done to get rid of it once it is terminated MF2021-07-08.
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
