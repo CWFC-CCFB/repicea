@@ -61,7 +61,8 @@ public abstract class REpiceaGenericShowDialog extends REpiceaDialog {
 			if (new File(filePath).exists()) {
 				urlAddress = new File(filePath).toURI().toURL();
 			} else {
-				urlAddress = ClassLoader.getSystemResource(filePath);
+//				urlAddress = ClassLoader.getSystemResource(filePath);
+				urlAddress = getClass().getResource("/" + filePath);		// Changed to account for possible delegated class loader MF2021-07-08
 			}
 			editorPane.setEditable(false);		
 			StyledEditorKit kit;
