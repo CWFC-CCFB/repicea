@@ -234,10 +234,10 @@ public class GaussianUtility {
 
 	
 	/**
-	 * Compute the probability density for a quantile of a normal distribution with mean mu and
+	 * Compute the probability density for a value of a normal distribution with mean mu and
 	 * variance sigma2.
-	 * @param y the quantile
-	 * @param mu the mean
+	 * @param y the value
+	 * @param mu the mean of the distribution
 	 * @param sigma2 the variance of the distribution. Must be greater than 0.
 	 * @return a probability density
 	 */
@@ -249,8 +249,15 @@ public class GaussianUtility {
 		return 1d / Math.sqrt(2 * Math.PI * sigma2) * 
 				Math.exp(- 0.5 * diff * diff / sigma2); 
 	}
-	
-	
+
+	/**
+	 * Compute the probability density for a quantile of the standard normal distribution. 
+	 * @param y 
+	 * @return a probability density
+	 */
+	public static double getProbabilityDensity(double y) {
+		return getProbabilityDensity(y, 0, 1);
+	}
 	
 	private static double increasePrecision(double x, double cdfValue) {
 		return x;

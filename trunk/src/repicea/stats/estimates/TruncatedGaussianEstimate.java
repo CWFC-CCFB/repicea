@@ -23,8 +23,10 @@ import repicea.stats.distributions.BoundedDistribution;
 import repicea.stats.distributions.TruncatedGaussianDistribution;
 
 /**
- * The TruncatedGaussianEstimate class allows to generate random deviates from a truncated Gaussian distribution. The bound of the 
- * distribution can set through the setLowerBound and setUpperBound methods. 
+ * The TruncatedGaussianEstimate class allows to generate random deviates from a 
+ * truncated Gaussian distribution. The bound of the distribution can set through 
+ * the setLowerBound and setUpperBound methods. In its current form, the class is only
+ * available for univariate distributions.
  * @author Mathieu Fortin - August 2015
  */
 public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistribution> implements BoundedDistribution {
@@ -40,10 +42,10 @@ public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistrib
 
 	/**
 	 * Constructor 2 with user specified mu and sigma2.
-	 * @param mu a Matrix instance
-	 * @param sigma2 a Matrix instance
+	 * @param mu a double
+	 * @param sigma2 a double
 	 */
-	public TruncatedGaussianEstimate(Matrix mu, Matrix sigma2) {
+	public TruncatedGaussianEstimate(double mu, double sigma2) {
 		super(new TruncatedGaussianDistribution(mu, sigma2));
 	}
 	
@@ -63,13 +65,6 @@ public class TruncatedGaussianEstimate extends Estimate<TruncatedGaussianDistrib
 	}
 	
 
-//	public static void main(String[] args) {
-//		TruncatedGaussianEstimate estimate = new TruncatedGaussianEstimate();
-//		BasicSerialCloner cloner = new BasicSerialCloner();
-//		MemorizerPackage mp = new MemorizerPackage();
-//		mp.add(estimate);
-//		MemorizerPackage mpCloned = cloner.cloneThisObject(mp);
-//	}
 	
 	
 }
