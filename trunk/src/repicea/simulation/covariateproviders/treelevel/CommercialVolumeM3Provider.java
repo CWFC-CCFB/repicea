@@ -20,8 +20,7 @@ package repicea.simulation.covariateproviders.treelevel;
 
 /**
  * This interface ensures the tree instance can provide its commercial volume. 
- * This volume can be either under or over bark. By default, it is assumed to
- * be under bark.
+ * This volume can be either under or over bark. 
  * @author Mathieu Fortin - August 2020
  *
  */
@@ -30,13 +29,12 @@ public interface CommercialVolumeM3Provider {
 	/**
 	 * This method calculates the commercial volume, that is the volume from
 	 * the stump up to a small-end diameter that defines the commercial limit.
+	 * The volume is calculated WITHOUT any expansion factor, that is the volume of
+	 * a single tree, regardless of the expansion factor.
 	 * @return a double -- the volume (m3)
 	 */
 	public double getCommercialVolumeM3();
 
 	public boolean isCommercialVolumeOverbark();
-//	public default boolean isCommercialVolumeOverbark() {
-//		return false;
-//	}
 
 }
