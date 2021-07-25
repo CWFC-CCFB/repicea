@@ -18,6 +18,7 @@
  */
 package repicea.gui.components;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -51,9 +52,16 @@ public class REpiceaSliderGroup implements ChangeListener, SynchronizedListening
 	 * @param repiceaSlider a REpiceaSlider instance 
 	 */
 	public void add(REpiceaSlider repiceaSlider) {
-		if (!sliders.contains(repiceaSlider.slider)) {
-			sliders.add(repiceaSlider.slider);
-			repiceaSlider.slider.addChangeListener(this);
+		if (sliders.size() < 2) {
+			if (!sliders.contains(repiceaSlider.slider)) {
+				sliders.add(repiceaSlider.slider);
+				if (sliders.size() == 2) {
+					stateChanged(new ChangeEvent(repiceaSlider.slider));
+				}
+				repiceaSlider.slider.addChangeListener(this);
+			}
+		} else {
+			throw new InvalidParameterException("An REpiceaSliderGroup instance can only handle two REpiceaSlider instances at a time!");
 		}
 	}
 	
