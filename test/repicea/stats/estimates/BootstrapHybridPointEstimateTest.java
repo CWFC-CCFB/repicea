@@ -121,7 +121,7 @@ public class BootstrapHybridPointEstimateTest {
 		
 		System.out.println("Testing with complete variability...");
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
-		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 3E-2);
+		Assert.assertEquals("Testing mean estimates", expectedMean, actualMean, 5E-2);
 		
 		
 		double expectedVariance = mu_x_hat * mu_x_hat * stdModel * stdModel + 
@@ -134,7 +134,7 @@ public class BootstrapHybridPointEstimateTest {
 		double actualVariance = varPointEstimate.getTotalVariance().getValueAt(0, 0);
 
 		System.out.println("Expected variance= " + expectedVariance + " - actual variance = " + actualVariance);
-		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 2E-1);
+		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 3E-1);
 
 		Matrix empiricalCorrection = varPointEstimate.getVarianceBiasCorrection();
 		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
@@ -188,7 +188,7 @@ public class BootstrapHybridPointEstimateTest {
 
 		System.out.println("Testing multivariate with complete variability...");
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
-		Assert.assertTrue("Testing mean estimates", !expectedMean.subtract(actualMean).getAbsoluteValue().anyElementLargerThan(3E-2));
+		Assert.assertTrue("Testing mean estimates", !expectedMean.subtract(actualMean).getAbsoluteValue().anyElementLargerThan(5E-2));
 		
 		
 		Matrix expectedVariance = mu_x_hat.multiply(mu_x_hat.transpose()).scalarMultiply(stdModel * stdModel)
