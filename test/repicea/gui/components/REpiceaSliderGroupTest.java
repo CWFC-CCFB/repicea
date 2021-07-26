@@ -24,14 +24,12 @@ import java.security.InvalidParameterException;
 import javax.swing.JFrame;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 public class REpiceaSliderGroupTest {
 
-	private final static int WAIT_TIME = 1000;
+	private final static int WAIT_TIME = 500;
 
-	@Ignore
 	@Test
 	public void testTotal() throws InterruptedException {
 		REpiceaSliderGroup sliderGroup = new REpiceaSliderGroup(100);

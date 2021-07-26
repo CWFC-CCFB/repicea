@@ -22,14 +22,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.StatusClass;
 
 public class REpiceaMatchSelectorTest {
 
-	private final static int WAIT_TIME = 2000;
+	private final static int WAIT_TIME = 500;
 	
 	static class MyComplexObjectClass implements REpiceaMatchComplexObject<MyComplexObjectClass> {
 
@@ -72,7 +71,6 @@ public class REpiceaMatchSelectorTest {
 		
 	}
 	
-	@Ignore
 	@Test
 	public void cancelOkTest() throws InterruptedException {
 		REpiceaMatchSelector<StatusClass> selector = new REpiceaMatchSelector<StatusClass>(new String[]{"a","b","c","d","e","f"},
@@ -88,15 +86,16 @@ public class REpiceaMatchSelectorTest {
 		};
 		Thread t = new Thread(toRun);
 		t.start();
-		while (!dlg.isVisible()) {}
 		Thread.sleep(WAIT_TIME);
-		dlg.controlPanel.doClickCancelButton();
-		while (dlg.isVisible()) {}
+		while (dlg.isVisible()) {
+			dlg.controlPanel.doClickCancelButton();
+		}
 		dlg.dispose();
-		Thread.sleep(WAIT_TIME);
+		t.join();
 		
 		Assert.assertEquals("Testing if the dialog has been properly cancelled", true, dlg.hasBeenCancelled());
 		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
+
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (StatusClass sc : StatusClass.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
@@ -114,17 +113,18 @@ public class REpiceaMatchSelectorTest {
 		};
 		t = new Thread(toRun);
 		t.start();
-		while (!dlg.isVisible()) {}
+//		while (!dlg.isVisible()) {}
 		Thread.sleep(WAIT_TIME);
-		dlg.controlPanel.doClickOkButton();
-		while (dlg.isVisible()) {}
+		while (dlg.isVisible()) {
+			dlg.controlPanel.doClickOkButton();
+		}
 		dlg.dispose();
-		Thread.sleep(WAIT_TIME);
+		t.join();
 		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
 		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
+		System.out.println("Test cancelOkTest successfully carried out!");
 	}
 
-	@Ignore
 	@Test
 	public void changeValueTest() throws InterruptedException {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
@@ -144,7 +144,6 @@ public class REpiceaMatchSelectorTest {
 		};
 		Thread t = new Thread(toRun);
 		t.start();
-		while (!dlg.isVisible()) {}
 		Thread.sleep(WAIT_TIME);
 		REpiceaTableModel model = (REpiceaTableModel) dlg.getTable().getModel();
 		model.setValueAt(complexObjects.get(0), 1, 1);
@@ -153,13 +152,14 @@ public class REpiceaMatchSelectorTest {
 		Assert.assertEquals("Testing the match", StatusClass.alive.name(), match.name);
 		Assert.assertEquals("Testing the match index", StatusClass.alive.ordinal(), match.index);
 		
-		dlg.controlPanel.doClickOkButton();
-		while (dlg.isVisible()) {}
+		while (dlg.isVisible()) {
+			dlg.controlPanel.doClickOkButton();
+		}
 		dlg.dispose();
-		Thread.sleep(WAIT_TIME);
+		t.join();
 		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
 		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
-
+		System.out.println("Test changeValue successfully carried out!");
 	}
 
 }
