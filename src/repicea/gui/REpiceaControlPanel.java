@@ -76,5 +76,18 @@ public class REpiceaControlPanel extends REpiceaPanel implements ActionListener 
 		}
 	}
 	
+	/**
+	 * Press the cancel button. Essentially for JUnit testing.
+	 */
+	public void doClickCancelButton() {
+		cancelButton.doClick();
+	}
 	
+	/**
+	 * Press the ok button. Essentially for JUnit testing.
+	 */
+	public void doClickOkButton() {
+		okButton.doClick();
+	}
+
 }

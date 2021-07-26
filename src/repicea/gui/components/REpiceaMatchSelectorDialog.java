@@ -61,6 +61,7 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	private final JMenuItem saveAs;
 	private final WindowSettings windowSettings;
 	private boolean isCancelled;
+	protected final REpiceaControlPanel controlPanel;
 	
 	protected REpiceaMatchSelectorDialog(REpiceaMatchSelector<E> caller, Window parent, Object[] columnNames) {
 		super(parent);
@@ -82,6 +83,8 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 		table.setDefaultEditor(Object.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
 		table.setRowSelectionAllowed(false);
 
+		controlPanel = new REpiceaControlPanel(this);
+		
 		init();
 		
 		refreshInterface();
@@ -100,6 +103,7 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 //		pane.add(cancelButton);
 //		return pane;
 //	}
+
 	
 	
 	@Override
@@ -164,7 +168,7 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(getMainPanel(), BorderLayout.CENTER);		
 		
-		getContentPane().add(new REpiceaControlPanel(this), BorderLayout.SOUTH);
+		getContentPane().add(controlPanel, BorderLayout.SOUTH);
 	}
 
 	protected REpiceaTable getTable() {return table;}
