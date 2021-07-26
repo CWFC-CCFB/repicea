@@ -97,15 +97,6 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	
 	protected REpiceaMatchSelector<?> getCaller() {return caller;}
 	
-//	protected JPanel getControlPanel() {
-//		JPanel pane = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-//		pane.add(okButton);
-//		pane.add(cancelButton);
-//		return pane;
-//	}
-
-	
-	
 	@Override
 	public void cancelAction() {
 		super.cancelAction();
@@ -146,8 +137,6 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	@Override
 	public void listenTo() {
 		tableModel.addTableModelListener(caller);
-//		okButton.addActionListener(this);
-//		cancelButton.addActionListener(this);
 	}
 
 	@Override

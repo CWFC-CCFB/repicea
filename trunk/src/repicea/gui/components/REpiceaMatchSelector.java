@@ -187,7 +187,8 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 				if (e.getColumn() == 1) {	// the event occurred in the match object
 					String s = (String) model.getValueAt(e.getLastRow(), 0);
 					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					E trueMatch = getMatchesForThisKey(s).get(m);
+					Map<E,E> potentialMatchesForThisKey = getMatchesForThisKey(s);
+					E trueMatch = potentialMatchesForThisKey.get(m);
 					matchMap.put(s, trueMatch);
 					getUI(null).doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
 					model.setValueAt(trueMatch, e.getLastRow(), 1);

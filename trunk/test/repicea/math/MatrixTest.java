@@ -38,7 +38,7 @@ import repicea.util.ObjectUtility;
  * This test class performs some tests on matrix calculation.
  * @author Mathieu Fortin - September 2013
  */
-public class MatrixTests {
+public class MatrixTest {
 
 	/**
 	 * This test is performed on the calculation of the inverse of a blocked matrix.
@@ -199,10 +199,10 @@ public class MatrixTests {
 		System.out.println("Elapsed time = " + ((System.currentTimeMillis() - startingTime) * .001));
 	}
 	
-	public static void main(String[] args) throws IOException {
-		MatrixTests test = new MatrixTests();
-//		test.speedTestInversionMatrix(100);
-		test.speedTestMatrixMultiplication();
-	}
+//	public static void main(String[] args) throws IOException {
+//		MatrixTests test = new MatrixTests();
+////		test.speedTestInversionMatrix(100);
+//		test.speedTestMatrixMultiplication();
+//	}
 	
 }
