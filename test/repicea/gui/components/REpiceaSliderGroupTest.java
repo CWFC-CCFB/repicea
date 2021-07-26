@@ -54,20 +54,21 @@ public class REpiceaSliderGroupTest {
 		w.getContentPane().add(slider2, BorderLayout.SOUTH);
 		w.pack();
 		w.setVisible(true);
-		Thread.sleep(100);
+		Thread.sleep(100);  // leave some time for the DispatchThread to process the event
 		Assert.assertEquals("Testing the value of slider no 1", 40, slider1.getValue());
 		Assert.assertEquals("Testing label of slider no 1", "40 %", slider1.getLabelString());
 		Assert.assertEquals("Testing the value of slider no 2", 60, slider2.getValue());
 		Assert.assertEquals("Testing label of slider no 2", "60 %", slider2.getLabelString());
 		
 		slider1.setValue(45);
-		Thread.sleep(100);
+		Thread.sleep(100); // leave some time for the DispatchThread to process the event
 		Assert.assertEquals("Testing the value of slider no 1", 45, slider1.getValue());
 		Assert.assertEquals("Testing label of slider no 1", "45 %", slider1.getLabelString());
 		Assert.assertEquals("Testing the value of slider no 2", 55, slider2.getValue());
 		Assert.assertEquals("Testing label of slider no 2", "55 %", slider2.getLabelString());
+		
 		slider2.setValue(40);
-		Thread.sleep(100);
+		Thread.sleep(100); // leave some time for the DispatchThread to process the event
 		Assert.assertEquals("Testing the value of slider no 1", 60, slider1.getValue());
 		Assert.assertEquals("Testing label of slider no 1", "60 %", slider1.getLabelString());
 		Assert.assertEquals("Testing the value of slider no 2", 40, slider2.getValue());
