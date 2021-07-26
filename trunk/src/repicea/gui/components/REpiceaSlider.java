@@ -191,6 +191,10 @@ public class REpiceaSlider extends REpiceaPanel implements ChangeListener {
 		int sliderValue = slider.getValue();
 		sliderLabel.setText(((Integer) sliderValue).toString() + " " + token);		
 	}
+	
+	protected String getLabelString() {
+		return sliderLabel.getText();
+	}
 
 	@Override
 	public void listenTo() {

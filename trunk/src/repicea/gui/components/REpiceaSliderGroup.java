@@ -55,10 +55,10 @@ public class REpiceaSliderGroup implements ChangeListener, SynchronizedListening
 		if (sliders.size() < 2) {
 			if (!sliders.contains(repiceaSlider.slider)) {
 				sliders.add(repiceaSlider.slider);
+				repiceaSlider.slider.addChangeListener(this);
 				if (sliders.size() == 2) {
 					stateChanged(new ChangeEvent(repiceaSlider.slider));
 				}
-				repiceaSlider.slider.addChangeListener(this);
 			}
 		} else {
 			throw new InvalidParameterException("An REpiceaSliderGroup instance can only handle two REpiceaSlider instances at a time!");
