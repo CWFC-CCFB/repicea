@@ -3,7 +3,7 @@ package repicea.lang.codetranslator;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class REnvironmentTests {
+public class REnvironmentTest {
 
 	
 	@Test
