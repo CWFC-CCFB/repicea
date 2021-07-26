@@ -140,7 +140,7 @@ public class BootstrapHybridPointEstimateTest {
 		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
 //		System.out.println("Theoretical correction = " + theoreticalCorrection);
 //		System.out.println("Empirical correction = " + empiricalCorrection);
-		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.getValueAt(0, 0), 1E-2);
+		Assert.assertEquals("Comparing variance bias correction", theoreticalCorrection, empiricalCorrection.getValueAt(0, 0), 2E-2);
 	}
 
 	@Test
@@ -203,7 +203,7 @@ public class BootstrapHybridPointEstimateTest {
 //		System.out.println("Expected variance = " + expectedVariance);
 
 		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
-		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(2E-1));
+		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(3E-1));
 		
 		Matrix empiricalCorrection = varPointEstimate.getVarianceBiasCorrection();
 		Matrix theoreticalCorrection = var_mu_x_hat.scalarMultiply(-stdModel * stdModel);
