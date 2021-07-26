@@ -21,6 +21,8 @@ package repicea.gui.components;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.Assert;
+
 import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.StatusClass;
 
 public class REpiceaMatchSelectorTestUI {
@@ -66,15 +68,26 @@ public class REpiceaMatchSelectorTestUI {
 		
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws InterruptedException {
 		REpiceaMatchSelector<StatusClass> selector = new REpiceaMatchSelector<StatusClass>(new String[]{"a","b","c","d","e","f"},
 				StatusClass.values(), 
 				-1, 
 				new String[]{"string", "status"});
-		selector.showUI(null);
-		boolean cancelled = selector.getUI(null).hasBeenCancelled();
-		System.out.println("The dialog has been cancelled : " + cancelled);
-
+		REpiceaMatchSelectorDialog dlg = selector.getUI(null);
+		Runnable toRun = new Runnable() {
+			@Override
+			public void run() {
+				selector.showUI(null);
+			}
+		};
+		Thread t = new Thread(toRun);
+		t.start();
+		while (!dlg.isVisible()) {}
+		dlg.controlPanel.doClickCancelButton();
+		while (dlg.isVisible()) {}
+		
+		Assert.assertEquals("Testing if the dialog has been properly cancelled", true, dlg.hasBeenCancelled());
+		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (StatusClass sc : StatusClass.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
@@ -83,13 +96,21 @@ public class REpiceaMatchSelectorTestUI {
 		REpiceaMatchSelector<MyComplexObjectClass> selector2 = new REpiceaMatchSelector<MyComplexObjectClass>(new String[]{"a","b","c","d","e","f"},
 				complexObjects.toArray(new MyComplexObjectClass[]{}), 
 				new String[]{"string", "status", "index"});
-		selector2.showUI(null);
-		cancelled = selector2.getUI(null).hasBeenCancelled();
-		System.out.println("The dialog has been cancelled : " + cancelled);
-
+		dlg = selector2.getUI(null);
+		toRun = new Runnable() {
+			@Override
+			public void run() {
+				selector2.showUI(null);
+			}
+		};
+		t = new Thread(toRun);
+		t.start();
+		while (!dlg.isVisible()) {}
+		dlg.controlPanel.doClickOkButton();
+		while (dlg.isVisible()) {}
+		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
+		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
 		
-		
-		System.exit(0);
 	}
 
 }

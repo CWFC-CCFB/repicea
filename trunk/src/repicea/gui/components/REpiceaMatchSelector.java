@@ -200,7 +200,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 					}
 					getUI(null).listenTo(); // finally re-enable the listeners
 				} else { // it comes from the additional columns
-					String s = (String) model.getValueAt(e.getLastRow(), 0);
+//					String s = (String) model.getValueAt(e.getLastRow(), 0);
 					E m = (E) model.getValueAt(e.getLastRow(), 1);
 					((REpiceaMatchComplexObject) m).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
 							guiInterface.getTable().getValueAt(e.getLastRow(), e.getColumn()));
