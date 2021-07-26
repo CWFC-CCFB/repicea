@@ -22,6 +22,8 @@ import java.awt.FlowLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
 import java.util.Map;
 
 import javax.swing.Box;
@@ -37,11 +39,12 @@ import repicea.gui.UIControlManager;
 import repicea.simulation.processsystem.SystemManagerDialog.MessageID;
 
 @SuppressWarnings("serial")
-public class ProcessorLinkLineSlider extends REpiceaDialog implements ChangeListener, ActionListener {
+public class ProcessorLinkLineSlider extends REpiceaDialog implements ChangeListener, ActionListener, WindowListener {
 
 	private final ProcessorLinkLine linkLine;
-	private final JSlider slider;
-	private final JButton setToAppropriateValue;
+	protected final JSlider slider;
+	protected final JButton setToAppropriateValue;
+	private transient int startingValue;
 	
 	protected ProcessorLinkLineSlider(Window window, ProcessorLinkLine linkLine) {
 		super(window);
@@ -75,12 +78,14 @@ public class ProcessorLinkLineSlider extends REpiceaDialog implements ChangeList
 	public void listenTo() {
 		slider.addChangeListener(this);
 		setToAppropriateValue.addActionListener(this);
+		addWindowListener(this);
 	}
 
 	@Override
 	public void doNotListenToAnymore() {
 		slider.removeChangeListener(this);
 		setToAppropriateValue.removeActionListener(this);
+		removeWindowListener(this);
 	}
 
 	@Override
@@ -101,10 +106,10 @@ public class ProcessorLinkLineSlider extends REpiceaDialog implements ChangeList
 			Processor sonProcessor = linkLine.getSonAnchor().getOwner();
 			fatherProcessor.getSubProcessorIntakes().put(sonProcessor, value);
 			linkLine.setLabel();
-			SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
-			if (dlg != null) {
-				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
-			}
+//			SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+//			if (dlg != null) {
+//				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, null, dlg);
+//			}
 		}
 	}
 
@@ -127,18 +132,58 @@ public class ProcessorLinkLineSlider extends REpiceaDialog implements ChangeList
 		if (arg0.getSource().equals(setToAppropriateValue)) {
 			Processor fatherProcessor = linkLine.getFatherAnchor().getOwner();
 			Processor sonProcessor = linkLine.getSonAnchor().getOwner();
-			int originalValue = fatherProcessor.getSubProcessorIntakes().get(sonProcessor);
+//			int originalValue = fatherProcessor.getSubProcessorIntakes().get(sonProcessor);
 			int newValue = 100 - getSumOfCurrentFlux();
 			fatherProcessor.getSubProcessorIntakes().put(sonProcessor, newValue);
 			linkLine.setLabel();
 			refreshInterface();
-			SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
-			if (dlg != null) {
-				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, originalValue, newValue);
-			}
+//			SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+//			if (dlg != null) {
+//				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, originalValue, newValue);
+//			}
 		}
-		
 	}
 
+	@Override
+	public void windowOpened(WindowEvent e) {
+		startingValue = getCurrentValue();
+	}
+	
+	
+	private int getCurrentValue() {
+		Processor fatherProcessor = linkLine.getFatherAnchor().getOwner();
+		Processor sonProcessor = linkLine.getSonAnchor().getOwner();
+		return fatherProcessor.getSubProcessorIntakes().get(sonProcessor);
+	}
 
+	@Override
+	public void windowClosing(WindowEvent e) {
+		int currentValue = getCurrentValue();
+		if (currentValue != startingValue) {
+			SystemManagerDialog dlg = (SystemManagerDialog) CommonGuiUtility.getParentComponent(this, SystemManagerDialog.class);
+			if (dlg != null) {
+				dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, startingValue, currentValue);
+			}
+		}
+	}
+
+	@Override
+	public void windowClosed(WindowEvent e) {}
+
+	@Override
+	public void windowIconified(WindowEvent e) {}
+
+	@Override
+	public void windowDeiconified(WindowEvent e) {}
+
+	@Override
+	public void windowActivated(WindowEvent e) {}
+
+	@Override
+	public void windowDeactivated(WindowEvent e) {}
+
+
+	
+	
+	
 }
