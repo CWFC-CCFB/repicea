@@ -52,6 +52,7 @@ public class UIToolKit implements AWTEventListener {
    /**
      * Invoked when an event is dispatched in the AWT.
      */
+	@Override
     public void eventDispatched(AWTEvent event) {
     	if (event instanceof WindowEvent) {
     		WindowEvent we = (WindowEvent) event;
