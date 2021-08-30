@@ -87,7 +87,7 @@ public class ProcessSystemTest {
 	
 
 	@Test
-	public void creatingProcessorsLinksAndchangingValuesOfSliderAsASingleAction() throws InterruptedException {
+	public void creatingProcessorsLinksAndChangingValuesOfSliderAsASingleAction() throws InterruptedException {
 		SystemManager man = new SystemManager();
 		SystemManagerDialog dlg = man.getUI(null);
 		Runnable toRun = new Runnable() {
@@ -103,21 +103,26 @@ public class ProcessSystemTest {
 		Point loc = sysPane.getLocation();
 		LocatedEvent evt = new LocatedEvent(sysPane, new Point(loc.x + 50, loc.y + 50));
 			sysPane.acceptThisObject(new Processor("1"), evt);
+			Thread.sleep(WAIT_TIME);
 		Assert.assertEquals("Testing if the processor has been recorded in the manager", 1, man.getList().size());
 		
 		evt = new LocatedEvent(sysPane, new Point(loc.x + 125, loc.y + 50));
 		sysPane.acceptThisObject(new Processor("2"), evt);
+		Thread.sleep(WAIT_TIME);
 		Assert.assertEquals("Testing if the processor has been recorded in the manager", 2, man.getList().size());
 		
 		sysPane.addLinkLine(new ProcessorLinkLine(sysPane, man.getList().get(0), man.getList().get(1)));
+		Thread.sleep(WAIT_TIME);
 		Assert.assertEquals("Testing if the link has been recorded in the manager", 1, sysPane.linkLines.size());
 		Assert.assertEquals("Testing if the link has been recorded in father processor", 1, man.getList().get(0).getSubProcessors().size());
 
 		dlg.undo.doClick();
+		Thread.sleep(WAIT_TIME);
 		Assert.assertEquals("Testing if the link has been undone in the manager", 0, sysPane.linkLines.size());
 		Assert.assertEquals("Testing if the link has been undone in father processor", 0, man.getList().get(0).getSubProcessors().size());
 		
 		dlg.redo.doClick();
+		Thread.sleep(WAIT_TIME);
 		Assert.assertEquals("Testing if the link has been redone in the manager", 1, sysPane.linkLines.size());
 		Assert.assertEquals("Testing if the link has been redone in father processor", 1, man.getList().get(0).getSubProcessors().size());
 
