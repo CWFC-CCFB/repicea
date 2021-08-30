@@ -68,6 +68,7 @@ public class CSVReader extends FormatReader<CSVHeader> {
 		bufferedReader = openReader();		// reopen the stream because the header has read the whole file
 		bufferedReader.readLine();			// skip the first line which is the header
 		linePointer = 0;
+		isClosed = false;
 	}
 	
 	

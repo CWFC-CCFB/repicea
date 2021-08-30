@@ -103,6 +103,7 @@ public class DBFReader extends FormatReader<DBFHeader> {
 			dataInputStream.skip( t_dataStartIndex);
 		}
 		linePointer = 0;
+		isClosed = false;
 	}
 
 	/* 

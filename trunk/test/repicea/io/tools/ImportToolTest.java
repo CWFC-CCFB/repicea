@@ -5,7 +5,10 @@ import static org.junit.Assert.assertEquals;
 import java.io.IOException;
 import java.util.List;
 
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
+
 import repicea.io.FileUtility;
 import repicea.io.ImportTest;
 import repicea.lang.REpiceaSystem;
@@ -18,7 +21,7 @@ public class ImportToolTest {
 	static {
 		XmlSerializerChangeMonitor.registerClassNameChange("repicea.test.tools.TestRecordReader$FieldID", "repicea.io.tools.RecordReaderImpl$FieldID");
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Test
 	public void testStrataFileReading() throws Exception {
@@ -46,6 +49,42 @@ public class ImportToolTest {
 					refStrataList.get(i),
 					strataList.get(i));
 		}
-
 	}
+
+	
+	/*
+	 * Rerun the same test than above but using the csv file instance + it tests 
+	 * the resetting of the CSVReader within the ImportFieldManager instance
+	 */
+	@SuppressWarnings("unchecked")
+	@Test
+	public void testResettingFormatReader() throws Exception {
+		String sourcePath = ObjectUtility.getPackagePath(ImportTest.class) + "TEST6152.csv";
+		
+		String testIfe = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "test.ife";
+		String results = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "result1.xml";
+				
+		RecordReaderImpl recordReader = new RecordReaderImpl();
+		ImportFieldManager ifm = ImportFieldManager.createImportFieldManager(testIfe, sourcePath);
+		recordReader.initInScriptMode(ifm);
+		List<String> strataList = recordReader.getGroupList();
+//		XmlSerializer serializer = new XmlSerializer(results);
+//		serializer.writeObject(strataList);
+		XmlDeserializer deserializer = new XmlDeserializer(results);
+		List<String>  refStrataList = (List<String>) deserializer.readObject();
+		assertEquals("Testing for number of elements", refStrataList.size(), strataList.size());
+		for (int i = 0; i < strataList.size(); i++) {
+			assertEquals("Testing for group name at index " + ((Integer) i).toString(), 
+					refStrataList.get(i),
+					strataList.get(i));
+		}
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing nb records read", 3647, recordReader.nbRecordsRead);
+		recordReader.getImportFieldManager().getFormatReader().reset();
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing nb records read", 3647 * 2, recordReader.nbRecordsRead);
+	}
+
+	
+	
 }

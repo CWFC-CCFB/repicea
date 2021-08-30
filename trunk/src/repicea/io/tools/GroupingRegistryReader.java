@@ -149,9 +149,13 @@ class GroupingRegistryReader extends AbstractGenericTask implements Serializable
 
 	protected List<Integer> getObservationIndicesForThisGroup(int groupPositionID) {
 		if (groupFieldEnabled) {
-			return groupMap.get(getGroupName(groupPositionID));
+			if (groupPositionID == -1) {
+				return null;		// will then process all the strata (this will not happen in the GUI but in may happen in script mode
+			} else {
+				return groupMap.get(getGroupName(groupPositionID));
+			}
 		} else {
-			return null;
+			return null;	// will process all the strata since there is not stratum grouping
 		}
 	}
 

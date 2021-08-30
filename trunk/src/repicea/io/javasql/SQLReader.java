@@ -66,6 +66,7 @@ public class SQLReader extends FormatReader<SQLHeader> {
 	public void reset() throws IOException {
 		resultSet = null;		// the resultSet is set to null so that the next call to nextRecord(int) will re-instantiate this member 
 		linePointer = 0;
+		isClosed = false;
 	}
 	
 	@Override
