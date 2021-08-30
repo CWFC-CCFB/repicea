@@ -43,7 +43,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	private H header;
 	private final boolean isSystemResource;
 	protected int linePointer;
-	private boolean isClosed;
+	protected boolean isClosed;
 	
 	/**
 	 * General constructor for files.

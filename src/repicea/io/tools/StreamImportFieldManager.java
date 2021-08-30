@@ -90,11 +90,26 @@ public class StreamImportFieldManager extends ImportFieldManager {
 		 */
 		public void addRecord(Object[] record) {recordQueue.add(record);}
 
+		/**
+		 * Clear the records of the QueueReader
+		 */
+		public void clearRecords() {
+			recordQueue.clear();
+			try {
+				reset();		// will not throw any exception. 
+			} catch (IOException e) {}
+		}
+		
 		@Override
-		public void reset() throws IOException {linePointer = 0;}
+		public void reset() throws IOException {
+			linePointer = 0;
+			isClosed = false;
+		}
 
 		@Override
-		protected void closeInternalStream() {recordQueue.clear();}
+		protected void closeInternalStream() {
+//			recordQueue.clear();		// should not do that otherwise the reader cannot be reset MF20210830
+		}
 	}
 	
 //	private final QueueReader streamReader;

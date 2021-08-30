@@ -120,4 +120,38 @@ public class StreamImportFieldManagerTest {
 		Assert.assertEquals("Testing plot 2", recordReader.resultMap.get("plot2"), "SAB");
 	}
 
+	@Test
+	public void testingResettingAndThenClear() throws Exception {
+		RecordReaderImpl2 recordReader = new RecordReaderImpl2();
+		StreamImportFieldManager ifm = new StreamImportFieldManager(recordReader);
+		ifm.setFieldMatches(new int[] {1,0});
+		recordReader.initInScriptMode(ifm);
+		List<ImportFieldElementIDCard> fieldDescriptions = ifm.getFieldDescriptions();
+		System.out.println(fieldDescriptions);
+		
+		Object[] record = new Object[2];
+		record[1] = "plot1";
+		record[0] = "EPX";
+		ifm.getFormatReader().addRecord(record);
+		record = new Object[2];
+		record[1] = "plot2";
+		record[0] = "SAB";
+		ifm.getFormatReader().addRecord(record);
+		
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing plot 1", recordReader.resultMap.get("plot1"), "EPX");
+		Assert.assertEquals("Testing plot 2", recordReader.resultMap.get("plot2"), "SAB");
+		recordReader.resultMap.clear();
+		ifm.getFormatReader().reset();
+		
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing plot 1", recordReader.resultMap.get("plot1"), "EPX");
+		Assert.assertEquals("Testing plot 2", recordReader.resultMap.get("plot2"), "SAB");
+		recordReader.resultMap.clear();
+		ifm.getFormatReader().clearRecords();
+		
+		recordReader.readAllRecords();
+		Assert.assertEquals("Testing that the result map is empty", 0, recordReader.resultMap.size());
+	}
+
 }

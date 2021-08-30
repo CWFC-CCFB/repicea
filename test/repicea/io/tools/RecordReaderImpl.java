@@ -196,6 +196,9 @@ public class RecordReaderImpl extends REpiceaRecordReader {
 		
 	}
 
+	int nbRecordsRead = 0;
+	
+	
 	private static List<ImportFieldElement> defineFields() throws Exception {
 		List<ImportFieldElement> importFields = new ArrayList<ImportFieldElement>();
 		importFields.add(new ImportFieldElement(FieldID.STRATUM,
@@ -310,7 +313,9 @@ public class RecordReaderImpl extends REpiceaRecordReader {
 	}
 
 	@Override
-	protected void readLineRecord(Object[] oArray, int lineCounter) throws VariableValueException, Exception {}
+	protected void readLineRecord(Object[] oArray, int lineCounter) throws VariableValueException, Exception {
+		nbRecordsRead++;
+	}
 
 	@Override
 	protected List<ImportFieldElement> defineFieldsToImport() throws Exception {
