@@ -241,7 +241,13 @@ public class ProcessorButton extends SelectableJButton implements AnchorProvider
 	}
 
 	@Override
-	public String toString() {return getOwner().getName();}
+	public String toString() {
+		if (getOwner() != null) {
+			return getOwner().getName();
+		} else {
+			return "";
+		}
+	}
 
 
 	@Override
