@@ -47,6 +47,36 @@ public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvid
 		@Override
 		public String toString() {return REpiceaTranslator.getString(this);}
 	}
+	
+	/**
+	 * This enum serves to set the climate change options in the initial parameters
+	 * @author Mathieu Fortin - December 2010
+	 */
+	@Deprecated	
+	public static enum ClimateChangeOption implements TextableEnum {
+		NoChange("No change", 
+				"Aucun changement"), 
+		Plus2Degrees("2-degree increase over the XXI century", 
+				"Augmentation de 2 degr\u00E9s au cours du 21e si\u00E8cle"), 
+		Plus4Degrees("4-degree increase over the XXI century", 
+				"Augmentation de 4 degr\u00E9s au cours du 21e si\u00E8cle"), 
+		Plus6Degrees("6-degree increase over the XXI century", 
+				"Augmentation de 6 degr\u00E9s au cours du 21e si\u00E8cle");
+
+		ClimateChangeOption(String englishText, String frenchText) {
+			setText(englishText, frenchText);
+		}
+		
+		@Override
+		public void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
+		
+		@Override
+		public String toString() {
+			return REpiceaTranslator.getString(this);
+		}		
+	}
 
 	/**
 	 * Returns a map of climate variables depending on the geographical coordinates of the plot.
