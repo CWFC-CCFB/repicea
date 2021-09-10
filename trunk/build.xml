@@ -6,6 +6,7 @@
 	<property name="bin.dir" value="bin" />
 	<property name="src.dir" value="src" />
 	<property name="test.dir" value="test" />
+	<property name="dep.dir" value="ext" />
 	<property name="test.rep.dir" value="../testdev" />
 	<property name="java.doc.dir" value="../javadoc" />
 	<property name="test.prod.dir" value="../testprod" />
@@ -19,6 +20,7 @@
 	</path>
 
 	
+	<!--
 	<path id="junit">
 		<fileset dir="${ext.dir}/junit4">
 			<include name="*.jar" />
@@ -51,7 +53,13 @@
 			<include name="*.jar" />
 		</fileset>
 	</path>
-
+	-->
+	
+	<path id="extensions">
+		<fileset dir="${dep.dir}">
+			<include name="*.jar" />
+		</fileset>
+	</path>
 
 	<!-- REVISION : retrieve the head revision and stores its number in a file -->
 	<target name="revision" description="Retrieve the head revision">
@@ -76,9 +84,7 @@
 		
         <javac srcdir="${src.dir}" destdir="${bin.dir}" debug="on">
 			<classpath>
-				<path refid="jaxb"/>
-				<path refid="json-io"/>
-				<path refid="batik"/>
+				<path refid="extensions"/>
 			</classpath>
 		</javac>
 
@@ -94,10 +100,7 @@
 		
         <javac srcdir="${test.dir}" destdir="${bin.dir}">
 			<classpath>
-				<path refid="jaxb"/>
-				<path refid="json-io"/>
-				<path refid="batik"/>
-				<path refid="junit"/>
+				<path refid="extensions"/>
 			</classpath>
 		</javac>
 		
@@ -115,10 +118,7 @@
         <javac srcdir="${test.dir}" destdir="${bin.dir}">
 			<classpath>
 				<path refid="myJARFile"/>
-				<path refid="jaxb"/>
-				<path refid="batik"/>
-				<path refid="json-io"/>
-				<path refid="junit"/>
+				<path refid="extensions"/>
 			</classpath>
 		</javac>
 		
@@ -144,11 +144,7 @@
 		<junit fork="yes" printsummary="yes" showOutput="true" filtertrace="off">
 			<classpath>
 				<pathelement location="${bin.dir}" />
-				<path refid="ucanaccess"/>
-				<path refid="jaxb"/>
-				<path refid="batik"/>
-				<path refid="json-io"/>
-				<path refid="junit"/>
+				<path refid="extensions"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -182,11 +178,7 @@
 
 			<classpath>
 				<pathelement location="${bin.dir}" />
-				<path refid="ucanaccess"/>
-				<path refid="jaxb"/>
-				<path refid="batik"/>
-				<path refid="json-io"/>
-				<path refid="junit"/>
+				<path refid="extensions"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -222,11 +214,6 @@
 			<classpath>
 				<pathelement location="${bin.dir}" />
 				<path refid="myJARFile"/>
-				<path refid="jaxb"/>
-				<path refid="ucanaccess"/>
-				<path refid="batik"/>
-				<path refid="json-io"/>
-				<path refid="junit"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -261,11 +248,6 @@
 			<classpath>
 				<pathelement location="${bin.dir}" />
 				<path refid="myJARFile"/>
-				<path refid="jaxb"/>
-				<path refid="ucanaccess"/>
-				<path refid="batik"/>
-				<path refid="json-io"/>
-				<path refid="junit"/>
 			</classpath>
 			
 			<formatter type="xml"/>
@@ -305,6 +287,10 @@
         <delete dir="${ext.dir}/${project.name}"/>
         <mkdir dir="${ext.dir}/${project.name}"/>
     	
+		<copy todir="${ext.dir}/${project.name}">
+			<fileset dir="${dep.dir}"/>
+		</copy>
+
         <jar destfile="${ext.dir}/${project.name}/${project.name}.jar">
 			<fileset dir="${bin.dir}"/>
 			<fileset dir="${src.dir}" includes="**/*.java"/>
