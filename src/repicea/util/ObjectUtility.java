@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,6 +53,8 @@ public final class ObjectUtility {
 		Map returnMap;
 		if (oMap instanceof TreeMap)
 			returnMap = new TreeMap();
+		else if (oMap instanceof LinkedHashMap)
+			returnMap = new LinkedHashMap();
 		else returnMap = new HashMap();
 		for (Iterator iter = oMap.keySet().iterator(); iter.hasNext();) {
 			Object key = iter.next();

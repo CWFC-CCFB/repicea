@@ -1,4 +1,4 @@
-Copyright (C) 2009-2020 Mathieu Fortin for Rouge Epicea.
+Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
 
 Email: mathieu.fortin.re@gmail.com
 
@@ -21,6 +21,7 @@ by a GNU Lesser General Public License.
 
 This library relies on 
     - (integrated in repicea) the JavaDBF library (copyright anil@linuxense.com) which is licensed under GNU Lesser General Public License.
+    - (used by repicea) the json-io library (Copyright (c) 2007 Cedar Software LLC.m) (https://github.com/jdereg/json-io) which is licensed under Apache License version 2.0
     - (optionally) the ucanaccess library version 5.0.0 (https://sourceforge.net/projects/ucanaccess/) which is licensed under Apache License, Version 2.0
 	- (optionally) the Batik library (copyright Apache Software Foundation) which is licensed under Apache License, Version 2.0
 

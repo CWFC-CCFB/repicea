@@ -17,37 +17,17 @@
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
 
-package repicea.simulation.metamodel;
+package repicea.app;
 
-import java.util.concurrent.LinkedBlockingQueue;
-
-class MetaModelManagerWorker extends Thread implements Runnable {
-
-	static final Object FinishToken = new Object();
-	
-	final LinkedBlockingQueue queue;
-	
-	MetaModelManagerWorker(int i, LinkedBlockingQueue queue) {
-		super("ExtMetaModelManagerWorker " + i);
-		this.queue = queue;
-		setDaemon(true);
-		start();
-	}
-	
-	
-	@Override
-	public void run() {
-		Object o;
-		try {
-			while(!(o = queue.take()).equals(FinishToken)) {
-				MetaModel metaModel = (MetaModel) o;
-				metaModel.fitModel();
-			}
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	
-	
+/**
+ * The REpiceaJSONConfiguration class defines a specific JSON configuration file by defining 
+ * its key locations into static constant Strings.  The application should use those strings instead
+ * of hardcoding a path
+ * 
+ * @author Jean-François Lavoie - September 2021
+ * @see JSONConfigurationGlobal
+ */
+public class REpiceaJSONConfiguration {
+	public static final String processingMaxThreads = "processing/maxThreads";
+	public static final String processingMaxMemoryLimitMB = "processing/maxMemoryLimitMB";
 }

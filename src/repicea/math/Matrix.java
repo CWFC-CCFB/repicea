@@ -1389,6 +1389,48 @@ public final class Matrix implements Serializable, DeepCloneable {
 	}
 	
 	/**
+	 * Ensures that no elements in the matrix are lower than value by setting them to value if needed
+	 * Note : changes the matrix in place 
+	 */
+	public void clampIfLowerThan(double value) {
+		if (isNewImplementationForColumnVector()) {
+			for (int i = 0; i < m_iRows; i++) {
+				for (int j = 0; j < m_iCols; j++) {
+					this.m_afData[j][i] = this.m_afData[j][i] < value ? value : this.m_afData[j][i];   
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < m_iRows; i++) {
+				for (int j = 0; j < m_iCols; j++) {
+					this.m_afData[i][j] = this.m_afData[i][j] < value ? value : this.m_afData[i][j];   
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Ensures that no elements in the matrix are higher than value by setting them to value if needed
+	 * Note : changes the matrix in place 
+	 */
+	public void clampIfHigherThan(double value) {
+		if (isNewImplementationForColumnVector()) {
+			for (int i = 0; i < m_iRows; i++) {
+				for (int j = 0; j < m_iCols; j++) {
+					this.m_afData[j][i] = this.m_afData[j][i] > value ? value : this.m_afData[j][i];   
+				}
+			}
+		}
+		else {
+			for (int i = 0; i < m_iRows; i++) {
+				for (int j = 0; j < m_iCols; j++) {
+					this.m_afData[i][j] = this.m_afData[i][j] > value ? value : this.m_afData[i][j];   
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Compute the inverse of this matrix.
 	 * @return the inverse matrix
 	 */
