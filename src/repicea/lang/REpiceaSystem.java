@@ -19,11 +19,6 @@
 package repicea.lang;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,9 +28,7 @@ import repicea.util.REpiceaTranslator.Language;
 
 /**
  * The REpiceaSystem offers some additional features to the System class.
- * Among others, it allows for dynamic classpath. The methods deliberately
- * call the system class loader and add the path to the class path at this 
- * level.
+ * 
  * @author Mathieu Fortin - November 2014
  */
 public class REpiceaSystem {
@@ -226,64 +219,7 @@ public class REpiceaSystem {
 		return System.getProperty("sun.arch.data.model");
 	}
 	
-	/**
-	 * Provides the different URLs in the class path.
-	 * @return a List of String
-	 * @throws Exception
-	 */
-	public static List<String> getClassPathURLs() throws Exception {
-		URL[] urls;
-		if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.8.0")) {
-			Object urlClassPath = getURLClassPathWithJava9andLaterVersions();
-			Method met = urlClassPath.getClass().getMethod("getURLs");
-			urls = (URL[]) met.invoke(urlClassPath);
-		} else {
-			URLClassLoader cl = (URLClassLoader) ClassLoader.getSystemClassLoader();
-			urls = cl.getURLs();
-		}
-		ArrayList<String> urlStrings = new ArrayList<String>();
-		for (URL url : urls) {
-			urlStrings.add(url.toString());
-		}
-		return urlStrings;
-	}
-	
-	/**
-	 * Dynamically adds a directory or a JAR file to the class path. The JVM must implement
-	 * the following option: --add-opens java.base/jdk.internal.loader=ALL-UNNAMED
-	 * @param filename a String that stands for the filename.
-	 * @throws Exception
-	 */
-	public static void addToClassPath(String filename) throws Exception {
-		File f = new File(filename);
-		if (f.exists()) {
-			URL thisURL = f.toURI().toURL();
-			Object target;
-			Class<?> targetClass;
-			if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.8.0")) {
-				target = getURLClassPathWithJava9andLaterVersions();
-				targetClass = target.getClass();
-			} else {
-				target = ClassLoader.getSystemClassLoader();
-				targetClass = target.getClass().getSuperclass();
-			}
-			Method met = targetClass.getDeclaredMethod("addURL", URL.class);
-			met.setAccessible(true);
-			met.invoke(target, thisURL);
 
-		} else {
-			throw new IOException("The file or directory " + filename + " does not exist!");
-		}
-	}
-	
-	
-	
-	private final static Object getURLClassPathWithJava9andLaterVersions() throws Exception {
-		ClassLoader cl = ClassLoader.getSystemClassLoader();
-		Field field = cl.getClass().getDeclaredField("ucp");
-		field.setAccessible(true);
-		return field.get(cl);
-	}
 
 	/**
 	 * Call the garbage collector and compute the current memory load in Megabytes. <br>
