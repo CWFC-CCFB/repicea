@@ -19,10 +19,10 @@
 
 package repicea.simulation.metamodel;
 
-import java.io.File;
 import java.util.List;
 
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -40,13 +40,12 @@ public class MetaModelTests {
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.metamodel.ExtMetaModel$InnerModel", "repicea.simulation.metamodel.MetaModel$InnerModel");		
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.ExtScriptResult", "repicea.simulation.metamodel.ScriptResult");				
 	}
-				
+		
+	@Ignore
 	@Test
 	public void testingOutputTypes() throws Exception {
 		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";
-		String test = MetaModelManager.class.getResource("MetaModelManager.class").toString();
-		System.out.println("MetaModelTests.testingOutputTypes MetamodelManager class = " + test);
+		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";				
 		manager.load(fittedModelsFilename);				
 		List<String> outputTypes = manager.getPossibleOutputTypes("RE2_NoChange");
 		Assert.assertEquals("Testing list size", 2, outputTypes.size());
@@ -54,6 +53,7 @@ public class MetaModelTests {
 		Assert.assertEquals("Testing second value", "Coniferous", outputTypes.get(1));
 	}
 
+	@Ignore
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
 		MetaModelManager manager = new MetaModelManager();
@@ -63,6 +63,7 @@ public class MetaModelTests {
 		Assert.assertEquals("Testing prediction at 90 yrs of age", 105.8510350604584, pred, 1E-8);
 	}
 
+	@Ignore
 	@Test
 	public void testingDeserializationFittedMetaModelManager() throws Exception {
 		MetaModelManager manager = new MetaModelManager();

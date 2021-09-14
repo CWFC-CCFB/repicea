@@ -2,13 +2,37 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 
+import org.tmatesoft.svn.core.wc.*
+
 repositories {
     mavenCentral()
     mavenLocal()
 }
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.8.11'
+    }
+}
+
+def getSvnRevision(){
+    ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
+    SVNClientManager clientManager = SVNClientManager.newInstance(options);
+    SVNStatusClient statusClient = clientManager.getStatusClient();
+    SVNStatus status = statusClient.doStatus(projectDir, false);
+    SVNRevision revision = status.getRevision();
+    return revision.getNumber();
+}
+
 //sourceCompatibility = 1.8
 //targetCompatibility = 1.8
+
+project.version=repiceaVersion+'r'+getSvnRevision()
+
+println "Building REpicea " + project.version
 
 println "Using java version " + JavaVersion.current()
 
@@ -59,13 +83,18 @@ test {
     testLogging.showStandardStreams = true
 
     // set heap size for the test JVM(s)
-    maxHeapSize = "8192m"
+    maxHeapSize = "2048m"
+    
+    exclude '**/IntegrationSpecificTest.class'
 }
 
 task integrationTest(type: Test) {
 	description = 'Runs the integration tests.'
     group = 'verification'
 	dependsOn jar
+	
+	include '**/*.class'
+	
 	testLogging.showStandardStreams = true
     testClassesDirs = sourceSets.test.output.classesDirs
         
@@ -73,7 +102,7 @@ task integrationTest(type: Test) {
     classpath = project.sourceSets.test.output + configurations.testRuntimeClasspath + files(jar.archiveFile) 
     outputs.upToDateWhen { false }
     mustRunAfter test
-    maxHeapSize = "8192m"
+    maxHeapSize = "2048m"
 }
 
 check.dependsOn integrationTest
@@ -82,7 +111,7 @@ jar {
 	 manifest {
         attributes("Built-By": "Mathieu Fortin",
         		   "Specification-Title": "REpicea Utilitaries",
-        		   "Specification-Version": "1.0.0",                   
+        		   "Specification-Version": archiveVersion,                   
                    "Specification-Vendor": "REpicea",
                    "Implementation-Title": "repicea",
                    "Implementation-Version": archiveVersion,
