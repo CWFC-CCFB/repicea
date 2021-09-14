@@ -1,0 +1,103 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+sourceSets {
+    main {    	
+        java {
+            srcDirs 'src'            
+        }
+        
+        resources {
+			srcDirs= ['src']
+			exclude '**/*.java'
+		}
+		
+		output.resourcesDir = "$buildDir/classes/java/$name"
+    }
+
+    test {
+        java {
+            srcDirs 'test'
+        }
+                
+        resources {
+			srcDirs= ['test']
+			exclude '**/*.java'
+		}
+		
+		output.resourcesDir = "$buildDir/classes/java/$name"
+    }               
+}
+
+dependencies {
+    implementation 'com.cedarsoftware:json-io:4.12.0'
+	implementation 'org.apache.xmlgraphics:batik-all:1.14'
+    implementation 'net.sf.ucanaccess:ucanaccess:4.0.4'
+    
+    if(JavaVersion.current() == JavaVersion.VERSION_1_8){
+ 		implementation 'javax.xml.bind:jaxb-api:2.4.0-b180830.0359'   
+	}
+      
+	compile group: 'org.jboss', name: 'jdk-misc', version: '3.Final'     
+    
+    testImplementation "junit:junit:4.12"    
+}
+
+test {
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    // set heap size for the test JVM(s)
+    maxHeapSize = "8192m"
+}
+
+task integrationTest(type: Test) {
+	description = 'Runs the integration tests.'
+    group = 'verification'
+	dependsOn jar
+	testLogging.showStandardStreams = true
+    testClassesDirs = sourceSets.test.output.classesDirs
+    print "project.sourceSets.test.output:"
+    print project.sourceSets.test.output    
+    println "configurations.testRuntimeClasspath = ${configurations.testRuntimeClasspath.asPath}";
+    print "files(jar.archiveFile):"
+    println "configurations.testRuntimeClasspath = ${configurations.testRuntimeClasspath.asPath}";
+        
+    // set classpath to test classes + test dependencies + JAR
+    classpath = project.sourceSets.test.output + configurations.testRuntimeClasspath + files(jar.archiveFile) 
+    outputs.upToDateWhen { false }
+    mustRunAfter test
+    maxHeapSize = "8192m"
+}
+
+check.dependsOn integrationTest
+
+jar {
+	 manifest {
+        attributes("Built-By": "Mathieu Fortin",
+        		   "Specification-Title": "REpicea Utilitaries",
+        		   "Specification-Version": "1.0.0",                   
+                   "Specification-Vendor": "REpicea",
+                   "Implementation-Title": "repicea",
+                   "Implementation-Version": archiveVersion,
+                   "Implementation-Vendor": "REpicea",
+                   )
+    }
+    
+	into ('/') {
+		from files(['./README.txt', './COPYING.LESSER.txt'])			
+	}
+	
+	// include all java files from main sourceset into the jar file (resources are already included)
+	from sourceSets.main.allJava
+		
+}
