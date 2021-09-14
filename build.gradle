@@ -7,8 +7,10 @@ repositories {
     mavenLocal()
 }
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+//sourceCompatibility = 1.8
+//targetCompatibility = 1.8
+
+println "Using java version " + JavaVersion.current()
 
 sourceSets {
     main {    	
@@ -66,11 +68,6 @@ task integrationTest(type: Test) {
 	dependsOn jar
 	testLogging.showStandardStreams = true
     testClassesDirs = sourceSets.test.output.classesDirs
-    print "project.sourceSets.test.output:"
-    print project.sourceSets.test.output    
-    println "configurations.testRuntimeClasspath = ${configurations.testRuntimeClasspath.asPath}";
-    print "files(jar.archiveFile):"
-    println "configurations.testRuntimeClasspath = ${configurations.testRuntimeClasspath.asPath}";
         
     // set classpath to test classes + test dependencies + JAR
     classpath = project.sourceSets.test.output + configurations.testRuntimeClasspath + files(jar.archiveFile) 
