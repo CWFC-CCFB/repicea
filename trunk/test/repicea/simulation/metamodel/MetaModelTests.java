@@ -44,7 +44,9 @@ public class MetaModelTests {
 	@Test
 	public void testingOutputTypes() throws Exception {
 		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()).replace("class", "test" + File.separator + "src") + "fittedMetaModel.zml";
+		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";
+		String test = MetaModelManager.class.getResource("MetaModelManager.class").toString();
+		System.out.println("MetaModelTests.testingOutputTypes MetamodelManager class = " + test);
 		manager.load(fittedModelsFilename);				
 		List<String> outputTypes = manager.getPossibleOutputTypes("RE2_NoChange");
 		Assert.assertEquals("Testing list size", 2, outputTypes.size());
@@ -55,7 +57,7 @@ public class MetaModelTests {
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
 		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()).replace("class", "test" + File.separator + "src") + "fittedMetaModel.zml";
+		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";
 		manager.load(fittedModelsFilename);		
 		double pred = manager.getPrediction("RE2_NoChange", 90, 0, "Coniferous");
 		Assert.assertEquals("Testing prediction at 90 yrs of age", 105.8510350604584, pred, 1E-8);
@@ -64,7 +66,7 @@ public class MetaModelTests {
 	@Test
 	public void testingDeserializationFittedMetaModelManager() throws Exception {
 		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()).replace("class", "test" + File.separator + "src") + "fittedMetaModel.zml";
+		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";
 		manager.load(fittedModelsFilename);		
 		DataSet finalDataSet = manager.getMetaModelResult("RE2_NoChange");
 		Assert.assertEquals("Testing dataset size", 108, finalDataSet.getNumberOfObservations());

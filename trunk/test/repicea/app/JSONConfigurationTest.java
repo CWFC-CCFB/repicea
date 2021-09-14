@@ -12,7 +12,7 @@ public class JSONConfigurationTest {
 	
 	@Test
 	public void configConstructorTest() {
-		String JSONfilename = ObjectUtility.getPackagePath(getClass()).replace("class", "test" + File.separator + "src") + "processConfig.json";		
+		String JSONfilename = ObjectUtility.getPackagePath(getClass()) + "processConfig.json";		
 		
 		JSONConfiguration local; 
 		
@@ -34,7 +34,7 @@ public class JSONConfigurationTest {
 	
 	@Test
 	public void configDelayedLoadTest() {
-		String JSONfilename = ObjectUtility.getPackagePath(getClass()).replace("class", "test" + File.separator + "src") + "processConfig.json";		
+		String JSONfilename = ObjectUtility.getPackagePath(getClass()) + "processConfig.json";		
 		
 		JSONConfiguration local; 
 		
@@ -56,7 +56,7 @@ public class JSONConfigurationTest {
 	
 	@Test
 	public void globalConfigDeepCopyTest() {
-		String JSONfilename = ObjectUtility.getPackagePath(getClass()).replace("class", "test" + File.separator + "src") + "processConfig.json";		
+		String JSONfilename = ObjectUtility.getPackagePath(getClass()) + "processConfig.json";		
 		
 		JSONConfiguration local;
 		
