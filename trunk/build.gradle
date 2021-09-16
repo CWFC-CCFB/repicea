@@ -26,6 +26,7 @@ def getSvnRevision(){
     ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
     SVNClientManager clientManager = SVNClientManager.newInstance(options);
     // here we force updating to the HEAD SVN version so that the local working copy is up to date with the repo
+    // (the local SVN revision is behind the HEAD even if the current user himself just commited to the HEAD)
     // the "install" and "publish" targets depend on the "integrationTest" target to make sure we publish a tested version
     // i.e. user A commits, then user B commits something else, then A publishes -> user B updates and retests before publishing
     SVNUpdateClient updateClient = clientManager.getUpdateClient();
