@@ -25,8 +25,8 @@ buildscript {
 def getSvnRevision(){
     ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
     SVNClientManager clientManager = SVNClientManager.newInstance(options);
-    SVNUpdateClient updateClient = clientManager.getUpdateClient();
-    updateClient.doUpdate(projectDir, SVNRevision.HEAD, false);
+    //SVNUpdateClient updateClient = clientManager.getUpdateClient();
+    //updateClient.doUpdate(projectDir, SVNRevision.HEAD, false);
     SVNStatusClient statusClient = clientManager.getStatusClient();
     SVNStatus status = statusClient.doStatus(projectDir, false);
     SVNRevision revision = status.getRevision();
