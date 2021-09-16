@@ -1,6 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
+apply plugin: 'maven-publish'
+
+group = 'org'
+version = project.version
 
 import org.tmatesoft.svn.core.wc.*
 
@@ -32,7 +36,7 @@ def getSvnRevision(){
 
 project.version=repiceaVersion+'.'+getSvnRevision()
 
-println "Building REpicea " + project.version
+println "Building " + rootProject.name + " v" + project.version
 
 println "Using java version " + JavaVersion.current()
 
@@ -139,4 +143,19 @@ task install(type: Copy) {
 	from configurations.default
 	from jar
 	into "${installDir}"
+}
+
+publishing {
+    publications {
+        repicea(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'myRepo'
+            url = "file://${buildDir}/repo"
+        }
+    }
 }
