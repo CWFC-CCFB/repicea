@@ -25,18 +25,18 @@ buildscript {
 def getSvnRevision(){
     ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
     SVNClientManager clientManager = SVNClientManager.newInstance(options);
-    //SVNUpdateClient updateClient = clientManager.getUpdateClient();
-    ////updateClient.doUpdate(projectDir, SVNRevision.HEAD, false);
+    // here we force updating to the HEAD SVN version so that the local working copy is up to date with the repo
+    // the "install" and "publish" targets depend on the "integrationTest" target to make sure we publish a tested version
+    // i.e. user A commits, then user B commits something else, then A publishes -> user B updates and retests before publishing
+    SVNUpdateClient updateClient = clientManager.getUpdateClient();
+    updateClient.doUpdate(projectDir, SVNRevision.HEAD, false);
     SVNStatusClient statusClient = clientManager.getStatusClient();
     SVNStatus status = statusClient.doStatus(projectDir, false);
     SVNRevision revision = status.getRevision();
     return revision.getNumber();
 }
 
-//sourceCompatibility = 1.8
-//targetCompatibility = 1.8
-
-project.version=repiceaVersion+'.'+getSvnRevision()
+project.version=repiceaVersion + '.' + getSvnRevision()
 
 println "Building " + rootProject.name + " v" + project.version
 
@@ -141,7 +141,7 @@ task deleteInstallFolder(type: Delete) {
 task install(type: Copy) {
 	description = 'Copies the output jar to installation folder.'
 	group = 'build'
-	dependsOn jar,deleteInstallFolder
+	dependsOn jar,deleteInstallFolder,integrationTest
 	from configurations.default
 	from jar
 	into "${installDir}"
@@ -160,4 +160,8 @@ publishing {
             url = "file://${buildDir}/repo"
         }
     }
+}
+
+publish {
+	dependsOn integrationTest
 }
