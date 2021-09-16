@@ -90,7 +90,7 @@ test {
     // set heap size for the test JVM(s)
     maxHeapSize = "2048m"
     
-    exclude '**/IntegrationSpecificTest.class'
+    exclude '**/ProductionEnvironmentTest.class'
 }
 
 task integrationTest(type: Test) {
