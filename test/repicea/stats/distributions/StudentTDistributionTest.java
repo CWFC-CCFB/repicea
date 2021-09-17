@@ -27,7 +27,7 @@ public class StudentTDistributionTest {
 		double expectedMean = dist.getMean().getValueAt(0, 0);
 		double expectedVariance = dist.getVariance().getValueAt(0, 0);
 		Assert.assertEquals("Testing the mean", expectedMean, mean, 2E-3);
-		Assert.assertEquals("Testing the variance", expectedVariance, variance, 1E-1);
+		Assert.assertEquals("Testing the variance", expectedVariance, variance, 0.2);
 		Assert.assertEquals("Testing quantile 0.025", quantile025, -3.182446, 5E-2);
 		Assert.assertEquals("Testing quantile 0.975", quantile975, 3.182446, 5E-2);
 	}
