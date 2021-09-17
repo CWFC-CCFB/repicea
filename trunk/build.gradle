@@ -157,12 +157,18 @@ publishing {
 
     repositories {
         maven {
-            name = 'myRepo'
+            name = 'LocalFile'
             url = "file://${buildDir}/repo"
         }
     }
 }
 
-publish {
+publishRepiceaPublicationToMavenLocal {
 	dependsOn integrationTest
 }
+
+publishRepiceaPublicationToLocalFileRepository {
+	dependsOn integrationTest
+}
+
+ 

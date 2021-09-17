@@ -188,7 +188,7 @@ public class BootstrapHybridPointEstimateTest {
 
 		System.out.println("Testing multivariate with complete variability...");
 		System.out.println("Expected mean = " + expectedMean + " - actual mean = " + actualMean);
-		Assert.assertTrue("Testing mean estimates", !expectedMean.subtract(actualMean).getAbsoluteValue().anyElementLargerThan(5E-2));
+		Assert.assertTrue("Testing mean estimates", !expectedMean.subtract(actualMean).getAbsoluteValue().anyElementLargerThan(0.1));
 		
 		
 		Matrix expectedVariance = mu_x_hat.multiply(mu_x_hat.transpose()).scalarMultiply(stdModel * stdModel)
