@@ -36,6 +36,7 @@ public class ScriptResult {
 	final Matrix modelVariance;
 	final Matrix samplingVariance;
 	final int nbRealizations;
+	final int nbPlots;
 	
 	/**
 	 * Constructor.
@@ -46,8 +47,15 @@ public class ScriptResult {
 	 * @param modelVariance
 	 * @param samplingVariance
 	 */
-	public ScriptResult(int nbRealizations, DataSet dataset, List<String> outputTypes, Matrix y, Matrix modelVariance, Matrix samplingVariance) {
+	public ScriptResult(int nbRealizations, 
+			int nbPlots,
+			DataSet dataset, 
+			List<String> outputTypes, 
+			Matrix y, 
+			Matrix modelVariance, 
+			Matrix samplingVariance) {
 		this.nbRealizations = nbRealizations;
+		this.nbPlots = nbPlots;
 		this.dataset = dataset;
 		this.outputTypes = outputTypes;
 		this.y = y;
