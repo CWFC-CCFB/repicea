@@ -32,7 +32,7 @@ import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.stats.data.DataSet;
 import repicea.util.ObjectUtility;
 
-public class MetaModelTests {
+public class MetaModelTest {
 
 	static {		
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.metamodel.ExtMetaModelManager", "repicea.simulation.metamodel.MetaModelManager");
@@ -49,7 +49,7 @@ public class MetaModelTests {
 		
 	@BeforeClass
 	public static void deserializingMetaModel() throws IOException {
-		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTests.class) + "QC_FMU02664_RE2_NoChange.zml";
+		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange.zml";
 		MetaModelInstance = MetaModel.Load(metaModelFilename);
 	}
 	
@@ -81,7 +81,7 @@ public class MetaModelTests {
 
 	public static void main(String[] args) throws IOException {
 		MetaModelManager manager = new MetaModelManager();
-		String path = ObjectUtility.getPackagePath(MetaModelTests.class);
+		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String filename = path + "fittedMetaModel.zml";
 		manager.load(filename);
 		for (MetaModel m : manager.values()) {
