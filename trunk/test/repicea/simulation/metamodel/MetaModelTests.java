@@ -19,9 +19,12 @@
 
 package repicea.simulation.metamodel;
 
+import java.io.IOException;
 import java.util.List;
 
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -40,36 +43,50 @@ public class MetaModelTests {
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.metamodel.ExtMetaModel$InnerModel", "repicea.simulation.metamodel.MetaModel$InnerModel");		
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.ExtScriptResult", "repicea.simulation.metamodel.ScriptResult");				
 	}
+	
+	static MetaModel MetaModelInstance;
+	
 		
-	@Ignore
+	@BeforeClass
+	public static void deserializingMetaModel() throws IOException {
+		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTests.class) + "QC_FMU02664_RE2_NoChange.zml";
+		MetaModelInstance = MetaModel.Load(metaModelFilename);
+	}
+	
+	@AfterClass
+	public static void removeSingleton() {
+		MetaModelInstance = null;
+	}
+
+	@Test
+	public void testingMetaModelDeserialization() throws IOException {
+		Assert.assertTrue("Model is deserialized", MetaModelInstance != null);
+		Assert.assertTrue("Has converged", MetaModelInstance.hasConverged());
+		Assert.assertEquals("Testing final dataset size", 108, MetaModelInstance.getFinalDataSet().getNumberOfObservations());
+	}
+
 	@Test
 	public void testingOutputTypes() throws Exception {
-		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";				
-		manager.load(fittedModelsFilename);				
-		List<String> outputTypes = manager.getPossibleOutputTypes("RE2_NoChange");
+		List<String> outputTypes = MetaModelInstance.getPossibleOutputTypes();
 		Assert.assertEquals("Testing list size", 2, outputTypes.size());
 		Assert.assertEquals("Testing first value", "Broadleaved", outputTypes.get(0));
 		Assert.assertEquals("Testing second value", "Coniferous", outputTypes.get(1));
 	}
 
-	@Ignore
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
-		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";
-		manager.load(fittedModelsFilename);		
-		double pred = manager.getPrediction("RE2_NoChange", 90, 0, "Coniferous");
+		double pred = MetaModelInstance.getPrediction(90, 0, "Coniferous");
 		Assert.assertEquals("Testing prediction at 90 yrs of age", 105.8510350604584, pred, 1E-8);
 	}
 
-	@Ignore
-	@Test
-	public void testingDeserializationFittedMetaModelManager() throws Exception {
+	public static void main(String[] args) throws IOException {
 		MetaModelManager manager = new MetaModelManager();
-		String fittedModelsFilename = ObjectUtility.getPackagePath(getClass()) + "fittedMetaModel.zml";
-		manager.load(fittedModelsFilename);		
-		DataSet finalDataSet = manager.getMetaModelResult("RE2_NoChange");
-		Assert.assertEquals("Testing dataset size", 108, finalDataSet.getNumberOfObservations());
+		String path = ObjectUtility.getPackagePath(MetaModelTests.class);
+		String filename = path + "fittedMetaModel.zml";
+		manager.load(filename);
+		for (MetaModel m : manager.values()) {
+			m.save(path + "QC_FMU02664_" + m.getStratumGroup() + ".zml");
+		}
+		int u = 0;
 	}
 }
