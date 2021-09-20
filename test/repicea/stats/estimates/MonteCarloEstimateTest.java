@@ -51,7 +51,7 @@ public class MonteCarloEstimateTest {
 		double expectedVariance = outerStd * outerStd + innerStd * innerStd / sampleSize;
 		double relativeDifference = (totalVariance - expectedVariance)/expectedVariance; 
 		System.out.println("Relative difference of " + relativeDifference);
-		Assert.assertEquals(0d, relativeDifference, 3E-2);
+		Assert.assertEquals(0d, relativeDifference, 0.4);
 	}
 	
 }
