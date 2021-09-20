@@ -32,9 +32,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.io.FormatField;
+import repicea.io.Loadable;
+import repicea.io.Saveable;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
+import repicea.serial.xml.XmlDeserializer;
+import repicea.serial.xml.XmlSerializer;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
@@ -50,7 +54,7 @@ import repicea.stats.estimates.MonteCarloEstimate;
  * Runnable for an eventual multi-threaded implementation.
  * @author Mathieu Fortin - December 2020
  */
-public class MetaModel {
+public class MetaModel implements Saveable {
 
 	private class Bound {
 		final double lower;
@@ -173,29 +177,67 @@ public class MetaModel {
 		
 	}
 	
-	double coefVar;
-	final Map<Integer, ScriptResult> scriptResults;
-	boolean converged;
-	List<Bound> bounds;
-	InnerModel model;
-	Matrix finalParmEstimates;
-	Matrix finalVarCov;
-	String stratumGroup;
-	List<MetaModelGibbsSample> finalGibbsSample;
-	DataSet dataSet;
-//	HierarchicalStatisticalDataStructure datssaStructure;
-	
+	private int nbBurnIn = 5000;
+	private int nbRealizations = 500000 + nbBurnIn;
+	private int nbInternalIter = 100000;
+	private int oneEach = 50;
+	private int nbInitialGrid = 10000;	
 
+	private double coefVar;
+	private boolean converged;
+	
+	private final Map<Integer, ScriptResult> scriptResults;
+	private List<Bound> bounds;
+	private InnerModel model;
+	private Matrix finalParmEstimates;
+	private Matrix finalVarCov;
+	private String stratumGroup;
+	private List<MetaModelGibbsSample> finalGibbsSample;
+	private DataSet dataSet;
+
+	/**
+	 * Constructor. 
+	 * @param stratumGroup a String representing the stratum group
+	 */
 	public MetaModel(String stratumGroup) {
-		setStratumGroup(stratumGroup);
+		this.stratumGroup = stratumGroup;
 		scriptResults = new ConcurrentHashMap<Integer, ScriptResult>();
 	}
 
-	void setStratumGroup(String stratumGroup) {
-		this.stratumGroup = stratumGroup;
+//	MF20210920 required if the load method is not static
+//	private void importMetaModel(MetaModel thatModel) {
+//		this.nbBurnIn = thatModel.nbBurnIn;
+//		this.nbRealizations = thatModel.nbRealizations;
+//		this.nbInternalIter = thatModel.nbInternalIter;
+//		this.oneEach = thatModel.oneEach;
+//		this.nbInitialGrid = thatModel.nbInitialGrid;	
+//
+//		this.coefVar = thatModel.coefVar;
+//		scriptResults.clear();
+//		scriptResults.putAll(thatModel.scriptResults);
+//		this.converged = thatModel.converged;
+//		this.bounds = thatModel.bounds;
+//		this.model = thatModel.model;
+//		this.finalParmEstimates= thatModel.finalParmEstimates;
+//		this.finalVarCov = thatModel.finalParmEstimates;
+//		this.stratumGroup = thatModel.stratumGroup;
+//		this.finalGibbsSample = thatModel.finalGibbsSample;
+//		this.dataSet = thatModel.dataSet;
+//	}
+	
+	/**
+	 * Provide the stratum group for this mate-model.
+	 * @return a String
+	 */
+	public String getStratumGroup() {
+		return stratumGroup;
 	}
 	
-	public boolean isConverged() {
+	/**
+	 * Return the state of the model. The model can be used if it has converged.
+	 * @return
+	 */
+	public boolean hasConverged() {
 		return converged;
 	}
 	
@@ -293,56 +335,6 @@ public class MetaModel {
 		return startingParms;
 	}
 
-//	@SuppressWarnings("unused")
-//	private boolean generateMetropolisWithinGibbsSample(List<ExtMetaModelGibbsSample> gibbsSample, Matrix stdErr) {
-//		long startTime = System.currentTimeMillis();
-//		List<ExtMetaModelGibbsSample> innerSample = new ArrayList<ExtMetaModelGibbsSample>();
-//		Matrix newParms = null;
-//		double llk = Double.NEGATIVE_INFINITY;
-//		boolean completed = true;
-//		outerloop:
-//		for (int i = 0; i < ExtMetaModelManager.NbRealizations; i++) { // Metropolis-Hasting
-//			if (i%100000 == 0) {
-//				displayMessage("Processing realization " + i);
-//			}
-//			int j = 0;
-//			innerSample.clear();
-//			innerSample.add(gibbsSample.get(gibbsSample.size() - 1)); // we add the latest set of parameters
-//			for (j = 0; j < gibbsSample.get(gibbsSample.size() - 1).parms.m_iRows; j++) { // Gibbs sampling
-//				boolean accepted = false;
-//				int innerIter = 0;
-//				ExtMetaModelGibbsSample lastSampleUnit;
-//				lastSampleUnit = innerSample.get(innerSample.size() - 1);
-//				newParms = lastSampleUnit.parms.getDeepClone();
-//				double originalValue = newParms.m_afData[j][0]; 
-//				while (!accepted && innerIter < ExtMetaModelManager.NbInternalIter) {
-//					newParms.m_afData[j][0] = originalValue + StatisticalUtility.getRandom().nextGaussian() * stdErr.m_afData[j][0];
-////					checkBounds(newParms);
-//					llk = model.getPartialLogLikelihood(newParms);
-//					double ratio = Math.exp(llk - lastSampleUnit.llk);
-//					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
-//					if (!accepted) {
-//						newParms.m_afData[j][0] = originalValue;	// reset to original value
-//					}
-//					innerIter++;
-//				}
-//				if (innerIter >= ExtMetaModelManager.NbInternalIter && !accepted) {
-//					displayMessage("Stopping after " + i + " realization");
-//					displayMessage("Failed to improve parameter " + j);
-//					completed = false;
-//					break outerloop;
-//				} else {
-//					innerSample.add(new ExtMetaModelGibbsSample(newParms, llk));  // new set of parameters is recorded
-//				}
-//			}
-//			gibbsSample.add(innerSample.get(innerSample.size() - 1));
-//		}
-//			
-//		displayMessage("Time to obtain " + gibbsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-//		displayMessage("Last set of parameters = " + gibbsSample.get(gibbsSample.size() - 1).parms);
-//		return completed;
-//	}
-
 
 //	MF2020-12-21 A pure metropolis-hastings algorithm. 
 	private boolean generateMetropolisSample(List<MetaModelGibbsSample> gibbsSample, GaussianDistribution gaussDist) {
@@ -353,9 +345,9 @@ public class MetaModel {
 		int trials = 0;
 		int successes = 0;
 		double acceptanceRatio; 
-		for (int i = 0; i < MetaModelManager.NbRealizations; i++) { // Metropolis-Hasting
+		for (int i = 0; i < nbRealizations; i++) { // Metropolis-Hasting
 			gaussDist.setMean(gibbsSample.get(gibbsSample.size() - 1).parms);
-			if (i > 0 && i < MetaModelManager.NbBurnIn && i%500 == 0) {
+			if (i > 0 && i < nbBurnIn && i%500 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
 				if (MetaModelManager.Verbose) {
 					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
@@ -376,7 +368,7 @@ public class MetaModel {
 			boolean accepted = false;
 			int innerIter = 0;
 			
-			while (!accepted && innerIter < MetaModelManager.NbInternalIter) {
+			while (!accepted && innerIter < nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
 				if (checkBounds(newParms)) {
 					llk = model.getLogLikelihood(newParms);
@@ -389,7 +381,7 @@ public class MetaModel {
 				}
 				innerIter++;
 			}
-			if (innerIter >= MetaModelManager.NbInternalIter && !accepted) {
+			if (innerIter >= nbInternalIter && !accepted) {
 				displayMessage("Stopping after " + i + " realization");
 				completed = false;
 				break;
@@ -410,60 +402,12 @@ public class MetaModel {
 		return completed;
 	}
 
-//	MF2020-12-21  Here is a Gibbs sampler where all samples in the inner loop are accepted and then the acceptance ratio is computed. 
-//	MF2020-12-21  It just takes too much time
-//	private boolean generateGibbsSample(List<ExtMetaModelGibbsSample> gibbsSample, Matrix stdErr) {
-//		long startTime = System.currentTimeMillis();
-//		List<ExtMetaModelGibbsSample> innerSample = new ArrayList<ExtMetaModelGibbsSample>();
-//		Matrix newParms = null;
-//		double lk = 0;
-//		boolean completed = true;
-//		outerloop:
-//			while (gibbsSample.size() < 100000) { // Metropolis-Hasting
-//				if (gibbsSample.size()%1000 == 0) {
-//					displayMessage("Processing realization " + gibbsSample.size());
-//				}
-//				int j = 0;
-//				innerSample.clear();
-//				innerSample.add(gibbsSample.get(gibbsSample.size() - 1)); // we add the latest set of parameters
-//				for (j = 0; j < gibbsSample.get(gibbsSample.size() - 1).parms.m_iRows; j++) { // Gibbs sampling
-//					boolean acceptedInner = false;
-//					int innerIter = 0;
-//					ExtMetaModelGibbsSample lastSampleUnit;
-//					while (!acceptedInner && innerIter < nbInternalIter) {
-//						lastSampleUnit = innerSample.get(innerSample.size() - 1);
-//						newParms = lastSampleUnit.parms.getDeepClone();
-//						newParms.m_afData[j][0] = lastSampleUnit.parms.m_afData[j][0] + StatisticalUtility.getRandom().nextGaussian() * stdErr.m_afData[j][0];
-//						checkBounds(newParms);
-//						lk = model.getLikelihood(newParms);
-//						if (lk > 0) {
-//							acceptedInner = true;
-//						}
-//						innerIter++;
-//					}
-//					if (innerIter >= nbInternalIter && !acceptedInner) {
-//						displayMessage("Stopping after " + gibbsSample.size() + " realization");
-//						displayMessage("Failed to improve parameter " + j);
-//						completed = false;
-//						break outerloop;
-//					} else {
-//						innerSample.add(new ExtMetaModelGibbsSample(newParms, lk));  // new set of parameters is recorded
-//					}
-//				}
-//				
-//				double ratio = innerSample.get(innerSample.size() - 1).lk / gibbsSample.get(gibbsSample.size() - 1).lk;
-//				if (StatisticalUtility.getRandom().nextDouble() < ratio) {
-//					gibbsSample.add(innerSample.get(innerSample.size() - 1));
-//				}
-//			}
-//
-//		displayMessage("Time to obtain " + gibbsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-//		displayMessage("Last set of parameters = " + gibbsSample.get(gibbsSample.size() - 1).parms);
-//		return completed;
-//	}
 
-	
-	boolean fitModel() {
+	/**
+	 * Fit the meta-model.
+	 * @return a boolean true if the model has converged or false otherwise
+	 */
+	public boolean fitModel() {
 		coefVar = 0.01;
 		boolean converged = false;
 		dataSet = null;
@@ -472,7 +416,7 @@ public class MetaModel {
 			model = getInnerModel(dataStructure);
 			GaussianDistribution gaussDist = getStartingParmEst();
 			List<MetaModelGibbsSample> gibbsSample = new ArrayList<MetaModelGibbsSample>();
-			MetaModelGibbsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, MetaModelManager.NbInitialGrid);
+			MetaModelGibbsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
 			gibbsSample.add(firstSet); // first valid sample
 			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
 			if (completed) {
@@ -511,7 +455,7 @@ public class MetaModel {
 	
 	private List<MetaModelGibbsSample> retrieveFinalSample(List<MetaModelGibbsSample> gibbsSample) {
 		List<MetaModelGibbsSample> finalGibbsSample = new ArrayList<MetaModelGibbsSample>();
-		for (int i = MetaModelManager.NbBurnIn; i < gibbsSample.size(); i+= MetaModelManager.OneEach) {
+		for (int i = nbBurnIn; i < gibbsSample.size(); i+= oneEach) {
 			finalGibbsSample.add(gibbsSample.get(i));
 		}
 		return finalGibbsSample;
@@ -579,17 +523,50 @@ public class MetaModel {
 		}
 	}
 	
+	/**
+	 * Export the initial data set (before fitting the meta-model).
+	 * @param filename
+	 * @throws Exception
+	 */
 	public void exportInitialDataSet(String filename) throws Exception {
 		getDataStructureReady().getDataSet().save(filename);
 	}
 	
+	/**
+	 * Export a final dataset, that is the initial data set plus the meta-model 
+	 * predictions. This works only if the model has converged.
+	 * @param filename
+	 * @throws IOException
+	 */
 	public void exportFinalDataSet(String filename) throws IOException {
 		if (converged) {
 			dataSet.save(filename);
 		}
 	}
 
-	public void exportGibbsSample(String filename) throws IOException {
+	/**
+	 * Provide the list of possible output type for this meta-model.
+	 * @return a List of String
+	 */
+	public List<String> getPossibleOutputTypes() {
+		List<String> outputTypes = new ArrayList<String>();
+		for (Object obj : model.dummyOriginalValues) {
+			outputTypes.add(obj.toString());
+		}
+		return outputTypes;
+	}
+
+	
+	
+	/**
+	 * Save a CSV file containing the final sequence produced by the Metropolis-Hastings algorithm, 
+	 * that is without the burn-in period and with only every nth observation. The number of 
+	 * burn-in samples to be dropped is set by the nbBurnIn member while every nth observation is 
+	 * set by the oneEach member.
+	 * @param filename
+	 * @throws IOException
+	 */
+	public void exportMetropolisHastingsSample(String filename) throws IOException {
 		if (converged) {
 			CSVWriter writer = null;
 			for (MetaModelGibbsSample sample : this.finalGibbsSample) {
@@ -613,4 +590,26 @@ public class MetaModel {
 		}
 	}
 
+	protected DataSet getFinalDataSet() {
+		return dataSet;
+	}
+
+	@Override
+	public void save(String filename) throws IOException {
+		XmlSerializer serializer = new XmlSerializer(filename);
+		serializer.writeObject(this);
+	}
+
+	/**
+	 * Load a meta-model instance from file
+	 * @param filename
+	 * @return a MetaModel instance
+	 * @throws IOException
+	 */
+	public static MetaModel Load(String filename) throws IOException {
+		XmlDeserializer deserializer = new XmlDeserializer(filename);
+		MetaModel metaModel = (MetaModel) deserializer.readObject();
+		return metaModel;
+	}
+	
 }

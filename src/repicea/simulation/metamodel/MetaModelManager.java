@@ -53,14 +53,6 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.metamodel.ExtMetaModelGibbsSample", "repicea.simulation.metamodel.MetaModelGibbsSample");
 	}
 	
-//	static int NbRealizations = 10000;
-	static int NbRealizations = 500000;
-//	static int NbRealizations = 1000000;
-	static int NbInternalIter = 100000;
-	static int NbBurnIn = 5000;
-	static int OneEach = 50;
-//	static int NbInitialGrid = 100;
-	static int NbInitialGrid = 10000;	
 	
 	static boolean Verbose = false;
 	
@@ -113,7 +105,6 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 			
 			for (String stratumGroup : stratumGroups) {
 				MetaModel metaModel = get(stratumGroup);
-				metaModel.setStratumGroup(stratumGroup);
 				queue.add(metaModel);
 			}
 			
@@ -147,7 +138,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 			throw new MetaModelException("The meta model for this stratum group does not exist: " + stratumGroup);
 		} else {
 			MetaModel model = get(stratumGroup);
-			if (!model.converged) {
+			if (!model.hasConverged()) {
 				throw new MetaModelException("The meta model for this stratum group has not been fitted or has not converged: " + stratumGroup);
 			}
 			return model;
@@ -174,11 +165,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 */
 	public List<String> getPossibleOutputTypes(String stratumGroup) throws MetaModelException {
 		MetaModel metaModel = getFittedMetaModel(stratumGroup);
-		List<String> outputTypes = new ArrayList<String>();
-		for (Object obj : metaModel.model.dummyOriginalValues) {
-			outputTypes.add(obj.toString());
-		}
-		return outputTypes;
+		return metaModel.getPossibleOutputTypes();
 	}
 
 	@Override
@@ -204,8 +191,8 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	public DataSet getMetaModelResult(String stratumGroup) throws MetaModelException {
 		if (containsKey(stratumGroup)) {
 			MetaModel model = get(stratumGroup);
-			if (model.converged) {
-				return model.dataSet;
+			if (model.hasConverged()) {
+				return model.getFinalDataSet();
 			} else {
 				throw new MetaModelException("The model of this group : " + stratumGroup + " has not been fitted or has not converged yet!");
 			}

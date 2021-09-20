@@ -1486,7 +1486,19 @@ public final class Matrix implements Serializable, DeepCloneable {
 			if (mat.m_iCols != m_iCols || mat.m_iRows != m_iRows) {
 				return false;
 			} else {
-				return !subtract(mat).getAbsoluteValue().anyElementLargerThan(1E-20);
+				double jLength = -1;
+				for (int i = 0; i < m_afData.length; i++) {
+					if (jLength == -1) {
+						jLength = m_afData[i].length;
+					}
+					for (int j = 0; j < jLength; j++) {
+						if (m_afData[i][j] != mat.m_afData[i][j]) {
+							return false;
+						}
+					}
+				}
+				return true;
+//				return !subtract(mat).getAbsoluteValue().anyElementLargerThan(1E-20);
 			}
 		} else {
 			return false;
