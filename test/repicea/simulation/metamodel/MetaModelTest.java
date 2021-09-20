@@ -80,13 +80,16 @@ public class MetaModelTest {
 	}
 
 	public static void main(String[] args) throws IOException {
-		MetaModelManager manager = new MetaModelManager();
-		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
-		String filename = path + "fittedMetaModel.zml";
-		manager.load(filename);
-		for (MetaModel m : manager.values()) {
-			m.save(path + "QC_FMU02664_" + m.getStratumGroup() + ".zml");
-		}
+		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange.zml";
+		MetaModel m = MetaModel.Load(metaModelFilename);
 		int u = 0;
+//		MetaModelManager manager = new MetaModelManager();
+//		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
+//		String filename = path + "fittedMetaModel.zml";
+//		manager.load(filename);
+//		for (MetaModel m : manager.values()) {
+//			m.save(path + "QC_FMU02664_" + m.getStratumGroup() + ".zml");
+//		}
+//		int u = 0;
 	}
 }
