@@ -65,6 +65,8 @@ public class ScriptResult {
 
 	public int getNbRealizations() {return nbRealizations;}
 	
+	public int getNbPlots() {return nbPlots;} 
+	
 	public DataSet getDataSet() {return dataset;}
 	
 	public List<String> getOutputTypes() {return this.outputTypes;}
