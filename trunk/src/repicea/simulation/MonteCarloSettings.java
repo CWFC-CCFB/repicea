@@ -24,13 +24,12 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class MonteCarloSettings {
 	
 	public static enum MonteCarloVarSource implements TextableEnum {
-//		Parameters("Module parameters", "Param\u00E9trage des modules"),
 		Mortality("Mortality module", "Module de mortalit\u00E9"),
 		DiameterGrowth("Diameter increment module", "Module de croissance diam\u00E9trale"),
 		Recruitment("Recruitment module", "Module de recrutement"),
-//		RecruitsDBH("Recruit DBH module", "Module de diam\u00E8tre des recrues"),
 		HDRelationship("Height module", "Module de hauteur"),
 		Volume("Volume module", "Module de volume"),
+		Biomass("Biomass module", "Module de biomasse"),
 		Harvesting("Harvesting module", "Module de r\u00E9colte"),
 		Climate("Climate module", "Module de climat"),
 		TreeBucking("Bucking module", "Module de billonnage"),
