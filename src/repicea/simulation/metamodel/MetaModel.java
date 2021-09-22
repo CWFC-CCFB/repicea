@@ -56,6 +56,8 @@ import repicea.stats.estimates.MonteCarloEstimate;
  */
 public class MetaModel implements Saveable {
 
+	protected static boolean Verbose = false; 
+	
 	private class Bound {
 		final double lower;
 		final double upper;
@@ -202,28 +204,17 @@ public class MetaModel implements Saveable {
 	public MetaModel(String stratumGroup) {
 		this.stratumGroup = stratumGroup;
 		scriptResults = new ConcurrentHashMap<Integer, ScriptResult>();
+		setDefaultSettings();
 	}
 
-//	MF20210920 required if the load method is not static
-//	private void importMetaModel(MetaModel thatModel) {
-//		this.nbBurnIn = thatModel.nbBurnIn;
-//		this.nbRealizations = thatModel.nbRealizations;
-//		this.nbInternalIter = thatModel.nbInternalIter;
-//		this.oneEach = thatModel.oneEach;
-//		this.nbInitialGrid = thatModel.nbInitialGrid;	
-//
-//		this.coefVar = thatModel.coefVar;
-//		scriptResults.clear();
-//		scriptResults.putAll(thatModel.scriptResults);
-//		this.converged = thatModel.converged;
-//		this.bounds = thatModel.bounds;
-//		this.model = thatModel.model;
-//		this.finalParmEstimates= thatModel.finalParmEstimates;
-//		this.finalVarCov = thatModel.finalParmEstimates;
-//		this.stratumGroup = thatModel.stratumGroup;
-//		this.finalGibbsSample = thatModel.finalGibbsSample;
-//		this.dataSet = thatModel.dataSet;
-//	}
+	private void setDefaultSettings() {
+		nbBurnIn = 5000;
+		nbRealizations = 500000 + nbBurnIn;
+		nbInternalIter = 100000;
+		oneEach = 50;
+		nbInitialGrid = 10000;	
+	}
+	
 	
 	/**
 	 * Provide the stratum group for this mate-model.
@@ -319,17 +310,17 @@ public class MetaModel implements Saveable {
 			if (Math.exp(llk) > 0d) {
 				myFirstList.add(new MetaModelGibbsSample(parms.getDeepClone(), llk));
 				int nbSamples = myFirstList.size();
-				if (MetaModelManager.Verbose) {
+//				if (MetaModel.Verbose) {
 					if (nbSamples%1000 == 0) {
 						displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
 					}
-				}
+//				}
 			}
 		}
 		Collections.sort(myFirstList);
 		MetaModelGibbsSample startingParms = myFirstList.get(myFirstList.size() - 1);
 		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
-		if (MetaModelManager.Verbose) {
+		if (MetaModel.Verbose) {
 			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
 		}
 		return startingParms;
@@ -345,11 +336,11 @@ public class MetaModel implements Saveable {
 		int trials = 0;
 		int successes = 0;
 		double acceptanceRatio; 
-		for (int i = 0; i < nbRealizations; i++) { // Metropolis-Hasting
+		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
 			gaussDist.setMean(gibbsSample.get(gibbsSample.size() - 1).parms);
 			if (i > 0 && i < nbBurnIn && i%500 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
-				if (MetaModelManager.Verbose) {
+				if (MetaModel.Verbose) {
 					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
 				}
 				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
@@ -360,11 +351,11 @@ public class MetaModel implements Saveable {
 				successes = 0;
 				trials = 0;
 			}
-			if (MetaModelManager.Verbose) {
+//			if (MetaModel.Verbose) {
 				if (i%10000 == 0) {
-					displayMessage("Processing realization " + i);
+					displayMessage("Processing realization " + i + " / " + nbRealizations);
 				}
-			}
+//			}
 			boolean accepted = false;
 			int innerIter = 0;
 			
@@ -387,7 +378,7 @@ public class MetaModel implements Saveable {
 				break;
 			} else {
 				gibbsSample.add(new MetaModelGibbsSample(newParms, llk));  // new set of parameters is recorded
-				if (MetaModelManager.Verbose) {
+				if (MetaModel.Verbose) {
 					if (gibbsSample.size()%100 == 0) {
 						displayMessage(gibbsSample.get(gibbsSample.size() - 1));
 					}
@@ -455,9 +446,11 @@ public class MetaModel implements Saveable {
 	
 	private List<MetaModelGibbsSample> retrieveFinalSample(List<MetaModelGibbsSample> gibbsSample) {
 		List<MetaModelGibbsSample> finalGibbsSample = new ArrayList<MetaModelGibbsSample>();
+		displayMessage("Discarding " + this.nbBurnIn + " samples as burn in.");
 		for (int i = nbBurnIn; i < gibbsSample.size(); i+= oneEach) {
 			finalGibbsSample.add(gibbsSample.get(i));
 		}
+		displayMessage("Selecting one every " + this.oneEach + " samples as final selection.");
 		return finalGibbsSample;
 	}
 
@@ -523,6 +516,10 @@ public class MetaModel implements Saveable {
 		}
 	}
 	
+	protected Matrix getFinalParameterEstimates() {
+		return finalParmEstimates;
+	}
+  	
 	/**
 	 * Export the initial data set (before fitting the meta-model).
 	 * @param filename
@@ -609,6 +606,9 @@ public class MetaModel implements Saveable {
 	public static MetaModel Load(String filename) throws IOException {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
 		MetaModel metaModel = (MetaModel) deserializer.readObject();
+		if (metaModel.nbBurnIn == 0) { //saved under a former implementation where this variable was static
+			metaModel.setDefaultSettings();
+		}
 		return metaModel;
 	}
 	

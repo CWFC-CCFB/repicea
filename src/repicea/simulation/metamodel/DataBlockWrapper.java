@@ -53,25 +53,7 @@ class DataBlockWrapper extends AbstractMathematicalFunction {
 		Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
 		Matrix matX = structure.getMatrixX().getSubMatrix(indices, null);
 		this.vecY = structure.getVectorY().getSubMatrix(indices, null);
-		boolean useCompleteMatrix;
-//		try {
-//			double determinant = varCovTmp.getDeterminant();
-//			if (determinant > 0) {
-////			if (!Double.isNaN(determinant)) {
-//				useCompleteMatrix = true;
-//			} else {
-//				useCompleteMatrix = false;
-//			}
-//		} catch (Exception e) {
-//			useCompleteMatrix = false;
-//		}
-//		if (useCompleteMatrix) {
-//			this.varCov = varCovTmp;
-//		} else {
-			this.varCov = correctVarCov(varCovTmp).diagonalVector().matrixDiagonal();
-//			System.out.println("Ill-conditioned variance-covariance matrix for block : " + this.blockId);
-//			System.out.println("The covariances will be set to null!");
-//		}
+		this.varCov = correctVarCov(varCovTmp);
 		this.invVarCov = this.varCov.getInverseMatrix();
 
 		this.timeSinceBeginning = matX.getSubMatrix(0, matX.m_iRows - 1, 1, 1);
@@ -89,6 +71,11 @@ class DataBlockWrapper extends AbstractMathematicalFunction {
 		ghqIndices.add(0);
 	}
 	
+	/**
+	 * Ensure null variances are set to 0.0001
+	 * @param deepClone 
+	 * @return a Matrix
+	 */
 	private Matrix correctVarCov(Matrix deepClone) {
 		for (int i = 0; i < deepClone.m_iRows; i++) {
 			if (deepClone.getValueAt(i, i) <= 0) {

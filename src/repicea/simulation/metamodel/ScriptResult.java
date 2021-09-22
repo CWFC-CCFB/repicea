@@ -19,6 +19,7 @@
 
 package repicea.simulation.metamodel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
@@ -29,12 +30,19 @@ import repicea.stats.data.DataSet;
  * @author Mathieu Fortin - January 2021
  */
 public class ScriptResult {
+
+	public static final String DateYrFieldName = "DateYr";
+	public static final String NbRealizationsFieldName = "NbRealizations";
+	public static final String TimeSinceInitialDateYrFieldName = "timeSinceInitialDateYr";
+	public static final String OutputTypeFieldName = "OutputType";
+	public static final String EstimateFieldName = "Estimate";
+	public static final String TotalVarianceFieldName = "TotalVariance";
 	
 	final DataSet dataset;
 	final List<String> outputTypes;
-	final Matrix y;
-	final Matrix modelVariance;
-	final Matrix samplingVariance;
+//	Matrix y;
+//	Matrix modelVariance;
+//	Matrix samplingVariance;
 	final int nbRealizations;
 	final int nbPlots;
 	
@@ -43,26 +51,37 @@ public class ScriptResult {
 	 * @param nbRealizations
 	 * @param dataset
 	 * @param outputTypes
-	 * @param y
-	 * @param modelVariance
-	 * @param samplingVariance
 	 */
 	public ScriptResult(int nbRealizations, 
 			int nbPlots,
 			DataSet dataset, 
-			List<String> outputTypes, 
-			Matrix y, 
-			Matrix modelVariance, 
-			Matrix samplingVariance) {
+			List<String> outputTypes) {
 		this.nbRealizations = nbRealizations;
 		this.nbPlots = nbPlots;
 		this.dataset = dataset;
 		this.outputTypes = outputTypes;
-		this.y = y;
-		this.modelVariance = modelVariance;
-		this.samplingVariance = samplingVariance;
+		List<Integer> sortingIndex = new ArrayList<Integer>();
+		sortingIndex.add(getDataSet().getFieldNames().indexOf(OutputTypeFieldName));
+		sortingIndex.add(getDataSet().getFieldNames().indexOf(DateYrFieldName));
+		getDataSet().sortObservations(sortingIndex);	// the dataset is sorted according to the output type and then the date yr
 	}
 
+	/**
+	 * Return an empty data set already formatted with the appropriate field names.
+	 * @return a DataSet instance
+	 */
+	public static DataSet createEmptyDataSet() {
+		List<String> fieldNames = new ArrayList<String>();
+		fieldNames.add(DateYrFieldName);
+		fieldNames.add(NbRealizationsFieldName);
+		fieldNames.add(TimeSinceInitialDateYrFieldName);
+		fieldNames.add(OutputTypeFieldName);
+		fieldNames.add(EstimateFieldName);
+		fieldNames.add(TotalVarianceFieldName);
+		DataSet outputDataSet = new DataSet(fieldNames);
+		return outputDataSet;
+	}
+	
 	public int getNbRealizations() {return nbRealizations;}
 	
 	public int getNbPlots() {return nbPlots;} 
@@ -71,31 +90,23 @@ public class ScriptResult {
 	
 	public List<String> getOutputTypes() {return this.outputTypes;}
 
-	public Matrix getMeanPredictedValues() {return y;}
-	
-	public Matrix getModelVariance() {return modelVariance;}
-	
-	public Matrix getSamplingVariance() {return samplingVariance;}
-	
-	public Matrix getTotalVariance() {return getModelVariance().add(getSamplingVariance());}
-	
-	public Matrix getTotalVarianceWithoutGroupCovariance() {
-		Matrix totalVariance = getTotalVariance();
-		
-		int outputTypeIndex = getDataSet().getFieldNames().indexOf("OutputType");
-		for (int i = 0; i < totalVariance.m_iRows; i++) {
-			for (int j = 0; j < totalVariance.m_iRows; j++) {
-				if (i != j) {
-					Object valueI = getDataSet().getObservations().get(i).toArray()[outputTypeIndex];
-					Object valueJ = getDataSet().getObservations().get(j).toArray()[outputTypeIndex];
-					if (!valueI.equals(valueJ)) {
-						totalVariance.setValueAt(i, j, 0d);
-					}
-				}
-			}
+
+	/**
+	 * Sort the dataset and retrieve the variances from it.
+	 * @return a Matrix
+	 */
+	protected Matrix getTotalVariance() {
+		// TODO the outputType must be set somewhere before calling this method here MF20210922.
+//		Matrix formerTotalVariance = this.samplingVariance.add(modelVariance);
+		int varianceIndex = getDataSet().getFieldNames().indexOf(TotalVarianceFieldName);
+		int nbObs = getDataSet().getNumberOfObservations();
+		Matrix mat = new Matrix(nbObs, nbObs);
+		for (int i = 0; i < nbObs; i++) {
+			mat.setValueAt(i, i, (Double) getDataSet().getObservations().get(i).toArray()[varianceIndex]);
 		}
-		return totalVariance;
+		return mat;
 	}
+	
 
 	public boolean isCompatible(ScriptResult result) {
 		if (dataset.getFieldNames().equals(result.dataset.getFieldNames())) {
