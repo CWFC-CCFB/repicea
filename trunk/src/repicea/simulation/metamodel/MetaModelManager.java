@@ -54,7 +54,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	}
 	
 	
-	static boolean Verbose = false;
+//	private static boolean Verbose = false;
 	
 	/**
 	 * Constructor.

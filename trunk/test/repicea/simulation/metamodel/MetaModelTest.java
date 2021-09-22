@@ -81,7 +81,10 @@ public class MetaModelTest {
 
 	public static void main(String[] args) throws IOException {
 		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange.zml";
+//		MetaModel.Verbose = true;
 		MetaModel m = MetaModel.Load(metaModelFilename);
+		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
+		m.fitModel();
 		int u = 0;
 //		MetaModelManager manager = new MetaModelManager();
 //		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
