@@ -101,7 +101,7 @@ test {
 }
 
 task integrationTest(type: Test) {
-	description = 'Runs the integration tests.'
+	description = 'Runs the integration tests (unit tests run using the produced JAR file)'
     group = 'verification'
 	dependsOn jar
 	

@@ -83,7 +83,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 		this.fitMetaModels(keySet());
 		for (String stratumGroup : keySet()) {
 			MetaModel metaModel = get(stratumGroup);
-			if (!metaModel.fitModel()) {
+			if (!metaModel.hasConverged()) {
 				throw new MetaModelException("The meta-model for this stratum group has not converged: " + stratumGroup);
 			}
 		}
