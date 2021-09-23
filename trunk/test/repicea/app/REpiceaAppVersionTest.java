@@ -23,18 +23,19 @@ import org.junit.Test;
 
 import repicea.util.ObjectUtility;
 
-public class REpiceaJARSVNAppVersionTest {
+public class REpiceaAppVersionTest {
 	
 	@Test
 	public void compileAndRetrieveRevision() {
-		if (!ObjectUtility.isEmbeddedInJar(REpiceaJARSVNAppVersionCompiler.class)) {
-			REpiceaJARSVNAppVersionCompiler.main(null);
-		}
-		String build = REpiceaJARSVNAppVersion.getInstance().getBuild();
-		try {
-			Integer.parseInt(build);
-		} catch (NumberFormatException e) {
-			Assert.fail("The revision cannot be parsed to an integer!");
+		String build = REpiceaAppVersion.getInstance().getBuild();
+		if (ObjectUtility.isEmbeddedInJar(REpiceaAppVersion.class)) {
+			try {
+				Integer.parseInt(build);
+			} catch (NumberFormatException e) {
+				Assert.fail("The revision cannot be parsed to an integer!");
+			}
+		} else {
+			Assert.assertEquals("Unknown", build);
 		}
 	}
 }
