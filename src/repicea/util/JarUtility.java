@@ -71,12 +71,5 @@ public class JarUtility {
 		file.close();
 		return m;
 	}
-	
-	public static void main(String[] args) throws IOException {
-		String jarFile = "C:\\Users\\matforti\\Documents\\7_Developpement\\JavaProjects\\repicea\\build\\libs\\repicea-1.0.814.jar";
-		Manifest m = JarUtility.getManifestFromThisJarFile(jarFile);
-		Object o = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION);
-		Attributes att = m.getAttributes("Implementation-Version");
-	}
 
 }
