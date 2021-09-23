@@ -36,7 +36,7 @@ public class REpiceaAppVersion {
 	private final String version;
 	private final String revision;
 	
-	private REpiceaAppVersion() {
+	protected REpiceaAppVersion() {
 		String filePath = JarUtility.getJarFileImInIfAny(getClass());
 		if (filePath != null) {
 			try {
