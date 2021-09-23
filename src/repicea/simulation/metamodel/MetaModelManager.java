@@ -79,8 +79,8 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 * Fit all the meta-models.
 	 * @throws an ExtMetaModelException if one of the models has not converged.
 	 */
-	public void fitMetaModels() throws MetaModelException {
-		this.fitMetaModels(keySet());
+	public void fitMetaModels(String outputType) throws MetaModelException {
+		this.fitMetaModels(keySet(), outputType);
 		for (String stratumGroup : keySet()) {
 			MetaModel metaModel = get(stratumGroup);
 			if (!metaModel.hasConverged()) {
@@ -89,7 +89,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 		}
 	}
 
-	public void fitMetaModels(Collection<String> stratumGroups) throws MetaModelException {
+	public void fitMetaModels(Collection<String> stratumGroups, String outputType) throws MetaModelException {
 		
 		int NbWorkers = (int)((long) JSONConfigurationGlobal.getInstance().get(REpiceaJSONConfiguration.processingMaxThreads, 2L));
 		
@@ -100,7 +100,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 			LinkedBlockingQueue queue = new LinkedBlockingQueue();
 			List<MetaModelManagerWorker> workers = new ArrayList<MetaModelManagerWorker>();
 			for (int i = 0; i < NbWorkers; i++) {
-				workers.add(new MetaModelManagerWorker(i, queue));
+				workers.add(new MetaModelManagerWorker(i, queue, outputType));
 			}
 			
 			for (String stratumGroup : stratumGroups) {
@@ -128,9 +128,9 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 * @return a double
 	 * @throws MetaModelException if the model has not been fitted or if the stratum group is not found in the Map.
 	 */
-	public double getPrediction(String stratumGroup, int ageYr, int timeSinceInitialDateYr, String outputType) throws MetaModelException {
+	public double getPrediction(String stratumGroup, int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		MetaModel metaModel = getFittedMetaModel(stratumGroup);
-		return metaModel.getPrediction(ageYr, timeSinceInitialDateYr, outputType);
+		return metaModel.getPrediction(ageYr, timeSinceInitialDateYr);
 	}
 	
 	private MetaModel getFittedMetaModel(String stratumGroup) throws MetaModelException {
@@ -158,6 +158,17 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	}
 
 	/**
+	 * Provide the selected output type (e.g. "Coniferous", "Broadleaved") for a particular stratum group.
+	 * @param stratumGroup a String that stands for the stratum group.
+	 * @return a String
+	 * @throws MetaModelException if the model has not been fitted or if the stratum group is not found in the Map.
+	 */
+	public String getSelectedOutputType(String stratumGroup) throws MetaModelException {
+		MetaModel metaModel = getFittedMetaModel(stratumGroup);
+		return metaModel.getSelectedOutputType();
+	}
+	
+	/**
 	 * Provide the possible output types (e.g. "Coniferous", "Broadleaved") for a particular stratum group.
 	 * @param stratumGroup a String that stands for the stratum group.
 	 * @return a List of String
@@ -167,6 +178,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 		MetaModel metaModel = getFittedMetaModel(stratumGroup);
 		return metaModel.getPossibleOutputTypes();
 	}
+
 
 	@Override
 	public void save(String filename) throws IOException {

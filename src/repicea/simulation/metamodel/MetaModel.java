@@ -32,7 +32,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import repicea.io.FormatField;
-import repicea.io.Loadable;
 import repicea.io.Saveable;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
@@ -86,22 +85,23 @@ public class MetaModel implements Saveable {
 		
 		private Matrix parameters;
 		final List<DataBlockWrapper> dataBlockWrappers;
-		final Map<Object, Matrix> dummyMap;
-		final List dummyOriginalValues;
+//		final Map<Object, Matrix> dummyMap;
+//		final List dummyOriginalValues;
 
 		InnerModel(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-			dummyOriginalValues = structure.getPossibleValueForDummyVariable("OutputType", null);
-			dummyMap = new HashMap<Object, Matrix>();
-			for (Object obj : dummyOriginalValues) {
-				Matrix oMat = new Matrix(1, dummyOriginalValues.size());
-				oMat.setValueAt(0, dummyOriginalValues.indexOf(obj), 1d);
-				dummyMap.put(obj, oMat);
-			}
+//			dummyOriginalValues = structure.getPossibleValueForDummyVariable("OutputType", null);
+//			dummyMap = new HashMap<Object, Matrix>();
+//			for (Object obj : dummyOriginalValues) {
+//				Matrix oMat = new Matrix(1, dummyOriginalValues.size());
+//				oMat.setValueAt(0, dummyOriginalValues.indexOf(obj), 1d);
+//				dummyMap.put(obj, oMat);
+//			}
 
 			Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
 			Map<String, DataBlock> ageMap = structure.getHierarchicalStructure(); 
 			for (String ageKey : ageMap.keySet()) {
 				DataBlock db = ageMap.get(ageKey);
+				Object o = db.keySet();
 				for (String speciesGroupKey : db.keySet()) {
 					DataBlock innerDb = db.get(speciesGroupKey);
 					formattedMap.put(ageKey + "_" + speciesGroupKey, innerDb);
@@ -116,28 +116,19 @@ public class MetaModel implements Saveable {
 			}
 		}
 
-		
-		private static Matrix getGeneralParm(Matrix dummy, Matrix parameters, int i) {
-			Matrix genParm = dummy.multiply(parameters.getSubMatrix(i, i+1, 0, 0));
-			return genParm;
-		}
-		
 		Matrix generatePredictions(DataBlockWrapper dbw, double randomEffect) {
-			Matrix b1 = getGeneralParm(dbw.dummy, parameters, 0);
-			Matrix b2 = getGeneralParm(dbw.dummy, parameters, 2);
-			Matrix b3 = getGeneralParm(dbw.dummy, parameters, 4);
+			double b1 = parameters.getValueAt(0, 0);
+			double b2 = parameters.getValueAt(1, 0);
+			double b3 = parameters.getValueAt(2, 0);
 			Matrix mu = new Matrix(dbw.vecY.m_iRows, 1);
 			for (int i = 0; i < mu.m_iRows; i++) {
-				mu.setValueAt(i, 0, getPrediction(b1.getValueAt(i, 0), 
-						b2.getValueAt(i, 0),
-						b3.getValueAt(i, 0),
-						dbw.ageYr.getValueAt(i, 0), randomEffect));
+				mu.setValueAt(i, 0, getPrediction(b1, b2, b3, dbw.ageYr.getValueAt(i, 0), randomEffect));
 			}
 			return mu;
 		}
 		
 		Matrix getVarianceRandomEffect(DataBlockWrapper dbw) {
-			return getGeneralParm(dbw.dummy.getSubMatrix(0, 0, 0, dbw.dummy.m_iCols - 1), parameters, 6);
+			return parameters.getSubMatrix(3, 3, 0, 0);
 		}
 		
 		static double getPrediction(double b1, double b2, double b3, double ageYr, double r1) {
@@ -193,8 +184,9 @@ public class MetaModel implements Saveable {
 	private InnerModel model;
 	private Matrix finalParmEstimates;
 	private Matrix finalVarCov;
-	private String stratumGroup;
-	private List<MetaModelGibbsSample> finalGibbsSample;
+	private final String stratumGroup;
+	private String selectedOutputType;
+	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private DataSet dataSet;
 
 	/**
@@ -252,6 +244,11 @@ public class MetaModel implements Saveable {
 		}
 	}
 
+	/**
+	 * Get the observation of a particular output type ready for the meta-model fitting. 
+	 * @return a HierarchicalStatisticalDataStructure instance
+	 * @throws StatisticalDataException
+	 */
 	protected HierarchicalStatisticalDataStructure getDataStructureReady() throws StatisticalDataException {
 		DataSet overallDataset = null;
 		for (int initAgeYr : scriptResults.keySet()) {
@@ -263,17 +260,21 @@ public class MetaModel implements Saveable {
 				fieldNames.add("initialAgeYr");
 				overallDataset = new DataSet(fieldNames);
 			}
+			int outputTypeFieldNameIndex = overallDataset.getFieldNames().indexOf(ScriptResult.OutputTypeFieldName);
 			for (Observation obs : dataSet.getObservations()) {
 				List<Object> newObs = new ArrayList<Object>();
-				newObs.addAll(Arrays.asList(obs.toArray()));
-				newObs.add(initAgeYr);	// adding the initial age to the data set
-				overallDataset.addObservation(newObs.toArray());
+				Object[] obsArray = obs.toArray();
+				if (obsArray[outputTypeFieldNameIndex].equals(selectedOutputType)) {
+					newObs.addAll(Arrays.asList(obsArray));
+					newObs.add(initAgeYr);	// adding the initial age to the data set
+					overallDataset.addObservation(newObs.toArray());
+				}
 			}
 		}
 		overallDataset.indexFieldType();
 		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
 		dataStruct.setInterceptModel(false); // no intercept
-		dataStruct.constructMatrices("Estimate ~ initialAgeYr + timeSinceInitialDateYr + OutputType + (1 | initialAgeYr/OutputType)");
+		dataStruct.constructMatrices("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
 		return dataStruct;
 	}
 	
@@ -281,7 +282,7 @@ public class MetaModel implements Saveable {
 		Matrix varCov = null;
 		for (int initAgeYr : scriptResults.keySet()) {
 			ScriptResult r = scriptResults.get(initAgeYr);
-			Matrix varCovI = r.getTotalVariance();
+			Matrix varCovI = r.getTotalVariance(selectedOutputType);
 			if (varCov == null) {
 				varCov = varCovI;
 			} else {
@@ -297,28 +298,26 @@ public class MetaModel implements Saveable {
 		return model;
 	}
 	
-	private MetaModelGibbsSample findFirstSetOfParameters(int nrow, int desiredSize) {
+	private MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
 		long startTime = System.currentTimeMillis();
 		Matrix parms = new Matrix(nrow, 1);
 		double llk = Double.NEGATIVE_INFINITY;
-		List<MetaModelGibbsSample> myFirstList = new ArrayList<MetaModelGibbsSample>();
+		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
 		while (myFirstList.size() < desiredSize) {
 			for (int i = 0; i < parms.m_iRows; i++) {
 				parms.setValueAt(i, 0, bounds.get(i).getRandomValue());
 			}
 			llk = model.getLogLikelihood(parms);
 			if (Math.exp(llk) > 0d) {
-				myFirstList.add(new MetaModelGibbsSample(parms.getDeepClone(), llk));
+				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
 				int nbSamples = myFirstList.size();
-//				if (MetaModel.Verbose) {
-					if (nbSamples%1000 == 0) {
-						displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
-					}
-//				}
+				if (nbSamples%1000 == 0) {
+					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
+				}
 			}
 		}
 		Collections.sort(myFirstList);
-		MetaModelGibbsSample startingParms = myFirstList.get(myFirstList.size() - 1);
+		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
 		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
 		if (MetaModel.Verbose) {
 			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
@@ -326,9 +325,13 @@ public class MetaModel implements Saveable {
 		return startingParms;
 	}
 
-
-//	MF2020-12-21 A pure metropolis-hastings algorithm. 
-	private boolean generateMetropolisSample(List<MetaModelGibbsSample> gibbsSample, GaussianDistribution gaussDist) {
+	/**
+	 * Implement a pure Metropolis-Hastings algorithm.
+	 * @param metropolisHastingsSample
+	 * @param gaussDist
+	 * @return
+	 */
+	private boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
 		long startTime = System.currentTimeMillis();
 		Matrix newParms = null;
 		double llk = 0d;
@@ -337,7 +340,7 @@ public class MetaModel implements Saveable {
 		int successes = 0;
 		double acceptanceRatio; 
 		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
-			gaussDist.setMean(gibbsSample.get(gibbsSample.size() - 1).parms);
+			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
 			if (i > 0 && i < nbBurnIn && i%500 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
 				if (MetaModel.Verbose) {
@@ -363,7 +366,7 @@ public class MetaModel implements Saveable {
 				newParms = gaussDist.getRandomRealization();
 				if (checkBounds(newParms)) {
 					llk = model.getLogLikelihood(newParms);
-					double ratio = Math.exp(llk - gibbsSample.get(gibbsSample.size() - 1).llk);
+					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
 					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
 					trials++;
 					if (accepted) {
@@ -377,10 +380,10 @@ public class MetaModel implements Saveable {
 				completed = false;
 				break;
 			} else {
-				gibbsSample.add(new MetaModelGibbsSample(newParms, llk));  // new set of parameters is recorded
+				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
 				if (MetaModel.Verbose) {
-					if (gibbsSample.size()%100 == 0) {
-						displayMessage(gibbsSample.get(gibbsSample.size() - 1));
+					if (metropolisHastingsSample.size()%100 == 0) {
+						displayMessage(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
 					}
 				}
 			}
@@ -388,17 +391,33 @@ public class MetaModel implements Saveable {
 		
 		acceptanceRatio = ((double) successes) / trials;
 		
-		displayMessage("Time to obtain " + gibbsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
+		displayMessage("Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
 		displayMessage("Acceptance ratio = " + acceptanceRatio);
 		return completed;
 	}
 
-
+	/**
+	 * Return the possible output types given what they are in the ScriptResult
+	 * instances.
+	 * @return a List of String
+	 * @throws MetaModelException
+	 */
+	public List<String> getPossibleOutputTypes() {
+		List<String> possibleOutputTypes = new ArrayList<String>();
+		if (!scriptResults.isEmpty()) {
+			ScriptResult scriptRes = scriptResults.values().iterator().next();
+			possibleOutputTypes.addAll(scriptRes.getOutputTypes());
+		}
+		return possibleOutputTypes;
+	}
+	
 	/**
 	 * Fit the meta-model.
+	 * @param outputType the output type the model will be fitted to (e.g. volumeAlive_Coniferous)
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
-	public boolean fitModel() {
+	public boolean fitModel(String outputType) {
+		selectedOutputType = outputType;
 		coefVar = 0.01;
 		boolean converged = false;
 		dataSet = null;
@@ -406,35 +425,39 @@ public class MetaModel implements Saveable {
 			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
 			model = getInnerModel(dataStructure);
 			GaussianDistribution gaussDist = getStartingParmEst();
-			List<MetaModelGibbsSample> gibbsSample = new ArrayList<MetaModelGibbsSample>();
-			MetaModelGibbsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
+			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
 			gibbsSample.add(firstSet); // first valid sample
 			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
 			if (completed) {
-				finalGibbsSample = retrieveFinalSample(gibbsSample);
+				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
-				for (MetaModelGibbsSample sample : finalGibbsSample) {
+				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 					mcmcEstimate.addRealization(sample.parms);
 				}
+				
 				finalParmEstimates = mcmcEstimate.getMean();
 				model.setParameters(finalParmEstimates);
 				finalVarCov = mcmcEstimate.getVariance();
+				
 				Matrix finalPred = model.getVectorOfPopulationAveragedPredictions();
 				Object[] finalPredArray = new Object[finalPred.m_iRows];
 				for (int i = 0; i < finalPred.m_iRows; i++) {
 					finalPredArray[i] = finalPred.getValueAt(i, 0);
 				}
+				
 				dataSet = dataStructure.getDataSet();
 				dataSet.addField("pred", finalPredArray);
-				displayMessage("Final sample had " + finalGibbsSample.size() + " sets of parameters.");
+				
+				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 				displayMessage("Final parameters = " + finalParmEstimates.toString());
-//				displayMessage(finalVarCov);
+				displayMessage("Final variance-covariance = " + finalVarCov);
 				converged = true;
 			}
- 		} catch (StatisticalDataException e1) {
+ 		} catch (Exception e1) {
  			e1.printStackTrace();
-		} catch (Exception e2) {
-			e2.printStackTrace();
+ 			converged = false;
+ 			selectedOutputType = null;
 		} 
 		this.converged = converged;
 		return this.converged;
@@ -444,8 +467,8 @@ public class MetaModel implements Saveable {
 		System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
 	}
 	
-	private List<MetaModelGibbsSample> retrieveFinalSample(List<MetaModelGibbsSample> gibbsSample) {
-		List<MetaModelGibbsSample> finalGibbsSample = new ArrayList<MetaModelGibbsSample>();
+	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> gibbsSample) {
+		List<MetaModelMetropolisHastingsSample> finalGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
 		displayMessage("Discarding " + this.nbBurnIn + " samples as burn in.");
 		for (int i = nbBurnIn; i < gibbsSample.size(); i+= oneEach) {
 			finalGibbsSample.add(gibbsSample.get(i));
@@ -455,15 +478,11 @@ public class MetaModel implements Saveable {
 	}
 
 	private GaussianDistribution getStartingParmEst() {
-		Matrix parmEst = new Matrix(8,1);
+		Matrix parmEst = new Matrix(4,1);
 		parmEst.setValueAt(0, 0, 100d);
-		parmEst.setValueAt(1, 0, 100d);
-		parmEst.setValueAt(2, 0, 0.02);
-		parmEst.setValueAt(3, 0, 0.02);
-		parmEst.setValueAt(4, 0, 2d);
-		parmEst.setValueAt(5, 0, 2d);
-		parmEst.setValueAt(6, 0, 200d);
-		parmEst.setValueAt(7, 0, 200d);
+		parmEst.setValueAt(1, 0, 0.02);
+		parmEst.setValueAt(2, 0, 2d);
+		parmEst.setValueAt(3, 0, 200d);
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -474,12 +493,8 @@ public class MetaModel implements Saveable {
 		
 		bounds = new ArrayList<Bound>();
 		bounds.add(new Bound(0,400));
-		bounds.add(new Bound(0,400));
-		bounds.add(new Bound(0.0001, 0.1));
 		bounds.add(new Bound(0.0001, 0.1));
 		bounds.add(new Bound(1,6));
-		bounds.add(new Bound(1,6));
-		bounds.add(new Bound(0,350));
 		bounds.add(new Bound(0,350));
 
 		return gd;
@@ -495,21 +510,12 @@ public class MetaModel implements Saveable {
 		return true;
 	}
 
-	public double getPrediction(int ageYr, int timeSinceInitialDateYr, String outputType) throws MetaModelException {
+	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (converged) {
-			if (!model.dummyOriginalValues.contains(outputType)) {
-				throw new InvalidParameterException("This output type " + outputType + " is not recognized!");
-			}
-			Matrix dummy = model.dummyMap.get(outputType);
-			// TODO optimize this
-			Matrix b1 = InnerModel.getGeneralParm(dummy, finalParmEstimates, 0);
-			Matrix b2 = InnerModel.getGeneralParm(dummy, finalParmEstimates, 2);
-			Matrix b3 = InnerModel.getGeneralParm(dummy, finalParmEstimates, 4);
-			double pred = InnerModel.getPrediction(b1.getValueAt(0, 0), 
-					b2.getValueAt(0, 0), 
-					b3.getValueAt(0, 0), 
-					ageYr, 
-					0d);
+			double b1 = finalParmEstimates.getValueAt(0, 0);
+			double b2 = finalParmEstimates.getValueAt(1, 0);
+			double b3 = finalParmEstimates.getValueAt(2, 0);
+			double pred = InnerModel.getPrediction(b1, b2, b3, ageYr, 0d);
 			return pred;
 		} else {
 			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
@@ -542,16 +548,11 @@ public class MetaModel implements Saveable {
 	}
 
 	/**
-	 * Provide the list of possible output type for this meta-model.
-	 * @return a List of String
+	 * Provide the selected output type that was set in the call to method
+	 * fitModel.
+	 * @return a String
 	 */
-	public List<String> getPossibleOutputTypes() {
-		List<String> outputTypes = new ArrayList<String>();
-		for (Object obj : model.dummyOriginalValues) {
-			outputTypes.add(obj.toString());
-		}
-		return outputTypes;
-	}
+	public String getSelectedOutputType() {return selectedOutputType;}
 
 	
 	
@@ -566,7 +567,7 @@ public class MetaModel implements Saveable {
 	public void exportMetropolisHastingsSample(String filename) throws IOException {
 		if (converged) {
 			CSVWriter writer = null;
-			for (MetaModelGibbsSample sample : this.finalGibbsSample) {
+			for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 				if (writer == null) {
 					writer = new CSVWriter(new File(filename), false);
 					List<FormatField> fieldNames = new ArrayList<FormatField>();

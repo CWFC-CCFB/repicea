@@ -21,18 +21,18 @@ package repicea.simulation.metamodel;
 
 import repicea.math.Matrix;
 
-class MetaModelGibbsSample implements Comparable<MetaModelGibbsSample> {
+class MetaModelMetropolisHastingsSample implements Comparable<MetaModelMetropolisHastingsSample> {
 
 	final Matrix parms;
 	final double llk;
 	
-	MetaModelGibbsSample(Matrix parms, double lk) {
+	MetaModelMetropolisHastingsSample(Matrix parms, double lk) {
 		this.parms = parms;
 		this.llk = lk;
 	}
 
 	@Override
-	public int compareTo(MetaModelGibbsSample arg0) {
+	public int compareTo(MetaModelMetropolisHastingsSample arg0) {
 		if (llk > arg0.llk) {
 			return 1;
 		} else if (llk < arg0.llk) {
