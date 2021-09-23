@@ -21,17 +21,17 @@ package repicea.util;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ObjectUtilityTest {
+public class JarUtilityTest {
 
 	@Test
 	public void testingIfAssertClassInJar() {
-		boolean isInJar = ObjectUtility.isEmbeddedInJar(Assert.class);
+		boolean isInJar = JarUtility.isEmbeddedInJar(Assert.class);
 		Assert.assertTrue("Testing if the Assert class is in a jar.", isInJar);
 	}
 	
 	@Test
 	public void testingIfThisClassInJar() {
-		boolean isInJar = ObjectUtility.isEmbeddedInJar(ObjectUtilityTest.class);
+		boolean isInJar = JarUtility.isEmbeddedInJar(JarUtilityTest.class);
 		Assert.assertTrue("Testing that this class is not in a jar.", !isInJar);
 	}
 

@@ -21,7 +21,6 @@ package repicea.util;
 import java.io.File;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -414,18 +413,5 @@ public final class ObjectUtility {
 		return strings;
 	}
 
-	/**
-	 * Returns a boolean that indicates whether the class is embedded in a Jar file or not.
-	 * @param clazz the class
-	 * @return a boolean true means the class is in a jar file or false otherwise
-	 */
-	public static boolean isEmbeddedInJar(Class<?> clazz) {
-		String className = clazz.getSimpleName();
-		URL resourceURL = clazz.getResource(className + ".class");
-		String resourcePath = resourceURL.toString();
-		return resourcePath.startsWith("jar:");
-	}
-	
-	
 	
 }
