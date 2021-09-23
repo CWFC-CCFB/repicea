@@ -26,10 +26,12 @@ class MetaModelManagerWorker extends Thread implements Runnable {
 	static final Object FinishToken = new Object();
 	
 	final LinkedBlockingQueue queue;
+	final String outputType;
 	
-	MetaModelManagerWorker(int i, LinkedBlockingQueue queue) {
+	MetaModelManagerWorker(int i, LinkedBlockingQueue queue, String outputType) {
 		super("ExtMetaModelManagerWorker " + i);
 		this.queue = queue;
+		this.outputType = outputType;
 		setDaemon(true);
 		start();
 	}
@@ -41,7 +43,7 @@ class MetaModelManagerWorker extends Thread implements Runnable {
 		try {
 			while(!(o = queue.take()).equals(FinishToken)) {
 				MetaModel metaModel = (MetaModel) o;
-				metaModel.fitModel();
+				metaModel.fitModel(outputType);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();

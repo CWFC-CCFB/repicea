@@ -49,7 +49,7 @@ public class MetaModelTest {
 		
 	@BeforeClass
 	public static void deserializingMetaModel() throws IOException {
-		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange.zml";
+		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange_Coniferous.zml";
 		MetaModelInstance = MetaModel.Load(metaModelFilename);
 	}
 	
@@ -62,7 +62,7 @@ public class MetaModelTest {
 	public void testingMetaModelDeserialization() throws IOException {
 		Assert.assertTrue("Model is deserialized", MetaModelInstance != null);
 		Assert.assertTrue("Has converged", MetaModelInstance.hasConverged());
-		Assert.assertEquals("Testing final dataset size", 108, MetaModelInstance.getFinalDataSet().getNumberOfObservations());
+		Assert.assertEquals("Testing final dataset size", 54, MetaModelInstance.getFinalDataSet().getNumberOfObservations());
 	}
 
 	@Test
@@ -75,24 +75,25 @@ public class MetaModelTest {
 
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
-		double pred = MetaModelInstance.getPrediction(90, 0, "Coniferous");
-		Assert.assertEquals("Testing prediction at 90 yrs of age", 105.8510350604584, pred, 1E-8);
+		double pred = MetaModelInstance.getPrediction(90, 0);
+		Assert.assertEquals("Testing prediction at 90 yrs of age", 105.714445041154, pred, 1E-8);
 	}
 
-	public static void main(String[] args) throws IOException {
-		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange.zml";
-//		MetaModel.Verbose = true;
-		MetaModel m = MetaModel.Load(metaModelFilename);
-		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
-		m.fitModel();
-		int u = 0;
-//		MetaModelManager manager = new MetaModelManager();
+//	public static void main(String[] args) throws IOException {
 //		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
-//		String filename = path + "fittedMetaModel.zml";
-//		manager.load(filename);
-//		for (MetaModel m : manager.values()) {
-//			m.save(path + "QC_FMU02664_" + m.getStratumGroup() + ".zml");
-//		}
+//		String metaModelFilename = path + "QC_FMU02664_RE2_NoChange.zml";
+//		MetaModel m = MetaModel.Load(metaModelFilename);
+//		List<String> possibleOutput = m.getPossibleOutputTypes();
+//		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
+//		m.fitModel("Coniferous");
+//		m.save(path + "QC_FMU02664_" + m.getStratumGroup() + "_Coniferous" + ".zml");
 //		int u = 0;
-	}
+////		MetaModelManager manager = new MetaModelManager();
+////		String filename = path + "fittedMetaModel.zml";
+////		manager.load(filename);
+////		for (MetaModel m : manager.values()) {
+////			m.save(path + "QC_FMU02664_" + m.getStratumGroup() + ".zml");
+////		}
+////		int u = 0;
+//	}
 }

@@ -20,10 +20,12 @@
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
+import repicea.stats.data.Observation;
 
 /**
  * Handle the result of a simulation performed through the ExtScript class
@@ -40,9 +42,6 @@ public class ScriptResult {
 	
 	final DataSet dataset;
 	final List<String> outputTypes;
-//	Matrix y;
-//	Matrix modelVariance;
-//	Matrix samplingVariance;
 	final int nbRealizations;
 	final int nbPlots;
 	
@@ -54,16 +53,25 @@ public class ScriptResult {
 	 */
 	public ScriptResult(int nbRealizations, 
 			int nbPlots,
-			DataSet dataset, 
-			List<String> outputTypes) {
+			DataSet dataset) {
 		this.nbRealizations = nbRealizations;
 		this.nbPlots = nbPlots;
 		this.dataset = dataset;
-		this.outputTypes = outputTypes;
+		
 		List<Integer> sortingIndex = new ArrayList<Integer>();
-		sortingIndex.add(getDataSet().getFieldNames().indexOf(OutputTypeFieldName));
+		int outputTypeFieldNameIndex = getDataSet().getFieldNames().indexOf(OutputTypeFieldName);
+		sortingIndex.add(outputTypeFieldNameIndex);
 		sortingIndex.add(getDataSet().getFieldNames().indexOf(DateYrFieldName));
 		getDataSet().sortObservations(sortingIndex);	// the dataset is sorted according to the output type and then the date yr
+		
+		outputTypes = new ArrayList<String>();
+		for (Observation o : getDataSet().getObservations()) {
+			String outputType =  o.toArray()[outputTypeFieldNameIndex].toString();
+			if (!outputTypes.contains(outputType)) {
+				outputTypes.add(outputType);
+			}
+		}
+		Collections.sort(outputTypes);
 	}
 
 	/**
@@ -88,29 +96,43 @@ public class ScriptResult {
 	
 	public DataSet getDataSet() {return dataset;}
 	
-	public List<String> getOutputTypes() {return this.outputTypes;}
+	public List<String> getOutputTypes() {return outputTypes;}
 
 
 	/**
 	 * Sort the dataset and retrieve the variances from it.
 	 * @return a Matrix
 	 */
-	protected Matrix getTotalVariance() {
-		// TODO the outputType must be set somewhere before calling this method here MF20210922.
-//		Matrix formerTotalVariance = this.samplingVariance.add(modelVariance);
+	protected Matrix getTotalVariance(String outputType) {
 		int varianceIndex = getDataSet().getFieldNames().indexOf(TotalVarianceFieldName);
-		int nbObs = getDataSet().getNumberOfObservations();
+		int outputFieldTypeIndex = getDataSet().getFieldNames().indexOf(OutputTypeFieldName);
+		
+		List<Observation> selectedObservations = new ArrayList<Observation>();
+		for (Observation o : getDataSet().getObservations()) {
+			if (o.toArray()[outputFieldTypeIndex].equals(outputType)) {
+				selectedObservations.add(o);
+			}
+		}
+		
+		int nbObs = selectedObservations.size();
 		Matrix mat = new Matrix(nbObs, nbObs);
 		for (int i = 0; i < nbObs; i++) {
-			mat.setValueAt(i, i, (Double) getDataSet().getObservations().get(i).toArray()[varianceIndex]);
+			mat.setValueAt(i, i, (Double) selectedObservations.get(i).toArray()[varianceIndex]);
 		}
 		return mat;
 	}
 	
-
-	public boolean isCompatible(ScriptResult result) {
+	/**
+	 * Check the compatibility between two ScriptResult instances. To be compatible,
+	 * the DataSet instances nested in the ScriptResult instances must share the 
+	 * same field names and the same field types. Moreover the ScriptResult instances 
+	 * must have the same output types. 
+	 * @param result a ScriptResult instance
+	 * @return a boolean
+	 */
+	protected boolean isCompatible(ScriptResult result) {
 		if (dataset.getFieldNames().equals(result.dataset.getFieldNames())) {
-			if (dataset.getFieldTypes().equals(this.dataset.getFieldTypes())) {
+			if (dataset.getFieldTypes().equals(result.dataset.getFieldTypes())) {
 				if (outputTypes.equals(result.outputTypes)) {
 					return true;
 				}

@@ -28,7 +28,7 @@ import repicea.simulation.metamodel.MetaModel.InnerModel;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.integral.GaussHermiteQuadrature;
 
-class DataBlockWrapper extends AbstractMathematicalFunction {
+public class DataBlockWrapper extends AbstractMathematicalFunction {
 	
 	final Matrix vecY;
 	final Matrix varCov;
@@ -36,7 +36,6 @@ class DataBlockWrapper extends AbstractMathematicalFunction {
 	final Matrix timeSinceBeginning;
 	final Matrix timeToOrigin;
 	final Matrix ageYr;
-	final Matrix dummy;
 	final double constant;
 	final double lnConstant;
 	Matrix parameters;
@@ -60,7 +59,6 @@ class DataBlockWrapper extends AbstractMathematicalFunction {
 		this.timeToOrigin = matX.getSubMatrix(0, matX.m_iRows - 1, 0, 0).scalarMultiply(-1);
 		this.ageYr = matX.getSubMatrix(0, matX.m_iRows - 1, 0, 0).add(timeSinceBeginning);
 		
-		dummy = matX.getSubMatrix(0, matX.m_iRows - 1, 2, 3);
 		int k = this.vecY.m_iRows;
 		double determinant = this.varCov.getDeterminant();
 		this.constant = 1d / (Math.pow(2 * Math.PI, 0.5 * k) * Math.sqrt(determinant));
