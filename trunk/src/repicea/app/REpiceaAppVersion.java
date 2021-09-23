@@ -18,7 +18,12 @@
  */
 package repicea.app;
 
-import repicea.util.ObjectUtility;
+import java.io.IOException;
+import java.security.InvalidParameterException;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
+import repicea.util.JarUtility;
 
 /**
  * This class retrieves information on the version and other features of the repicea.jar application. 
@@ -32,9 +37,20 @@ public class REpiceaAppVersion {
 	private final String revision;
 	
 	private REpiceaAppVersion() {
-		if (ObjectUtility.isEmbeddedInJar(getClass())) {
-			version = getClass().getPackage().getImplementationVersion().trim();
-			revision = version.split(".")[2].trim();
+		String filePath = JarUtility.getJarFileImInIfAny(getClass());
+		if (filePath != null) {
+			try {
+				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
+				version = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION).toString();
+				String[] versionSplit = version.split("\\.");
+				if (versionSplit.length == 3) {
+					revision = versionSplit[2].trim();
+				} else {
+					throw new InvalidParameterException("Can extract version but not revision from manifest!");
+				}
+			} catch (IOException e) {
+				throw new InvalidParameterException("Cannot retrieve manifest from jar file: " + filePath);
+			}
 		} else {
 			version = "Unknown";
 			revision = "Unknown";

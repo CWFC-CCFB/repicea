@@ -21,14 +21,15 @@ package repicea.app;
 import org.junit.Assert;
 import org.junit.Test;
 
-import repicea.util.ObjectUtility;
+import repicea.util.JarUtility;
 
 public class REpiceaAppVersionTest {
 	
 	@Test
 	public void compileAndRetrieveRevision() {
 		String build = REpiceaAppVersion.getInstance().getBuild();
-		if (ObjectUtility.isEmbeddedInJar(REpiceaAppVersion.class)) {
+		System.out.println("Build is: " + build);
+		if (JarUtility.isEmbeddedInJar(REpiceaAppVersion.class)) {
 			try {
 				Integer.parseInt(build);
 			} catch (NumberFormatException e) {

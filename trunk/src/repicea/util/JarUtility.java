@@ -1,0 +1,78 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
+package repicea.util;
+
+import java.io.IOException;
+import java.net.URL;
+import java.util.jar.Attributes;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
+
+public class JarUtility {
+
+	/**
+	 * Return a boolean that indicates whether the class is embedded in a Jar file or not.
+	 * @param clazz the class
+	 * @return a boolean true means the class is in a jar file or false otherwise
+	 */
+	public static boolean isEmbeddedInJar(Class<?> clazz) {
+		String className = clazz.getSimpleName();
+		URL resourceURL = clazz.getResource(className + ".class");
+		String resourcePath = resourceURL.toString();
+		return resourcePath.startsWith("jar:");
+	}
+
+	/**
+	 * Return the jar file the class is located in if it is packaged. Otherwise,
+	 * it returns null. 
+	 * @param clazz
+	 * @return 
+	 */
+	public static String getJarFileImInIfAny(Class<?> clazz) {
+		String className = clazz.getSimpleName();
+		URL resourceURL = clazz.getResource(className + ".class");
+		String resourcePath = resourceURL.toString();
+		if (resourcePath.startsWith("jar:")) {
+			return resourcePath;
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Return the manifest of a jar file.
+	 * @param jarFilePath
+	 * @return
+	 * @throws IOException
+	 */
+	public static Manifest getManifestFromThisJarFile(String jarFilePath) throws IOException {
+		JarFile file = new JarFile(jarFilePath);
+		Manifest m = file.getManifest();
+		file.close();
+		return m;
+	}
+	
+	public static void main(String[] args) throws IOException {
+		String jarFile = "C:\\Users\\matforti\\Documents\\7_Developpement\\JavaProjects\\repicea\\build\\libs\\repicea-1.0.814.jar";
+		Manifest m = JarUtility.getManifestFromThisJarFile(jarFile);
+		Object o = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION);
+		Attributes att = m.getAttributes("Implementation-Version");
+	}
+
+}
