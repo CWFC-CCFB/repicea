@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2015 Mathieu Fortin for Rouge Epicea.
  *
@@ -18,34 +18,36 @@
  */
 package repicea.app;
 
-import repicea.io.javacsv.CSVReader;
+import repicea.util.ObjectUtility;
 
 /**
- * This class retrieves the revision that defines the version of the application.
- * This revision number can be return using the getRevision() method.
+ * This class retrieves information on the version and other features of the repicea.jar application. 
  * @author Mathieu Fortin - August 2015
  */
-public abstract class AbstractAppVersion {
+public class REpiceaAppVersion {
 
-	private String revision; 
-	private final String appName;
+	private static REpiceaAppVersion SINGLETON;
+
+	private final String version;
+	private final String revision;
 	
-	protected AbstractAppVersion(String appName, String csvRevisionFilename) {
-		this.appName = appName;
-		CSVReader reader = null;
-		try {
-			reader = new CSVReader(csvRevisionFilename);
-			Object[] record = reader.nextRecord();
-			revision = record[reader.getHeader().getIndexOfThisField(AbstractAppVersionCompiler.REVISION_STRING)].toString();
-		} catch (Exception e) {
+	private REpiceaAppVersion() {
+		if (ObjectUtility.isEmbeddedInJar(getClass())) {
+			version = getClass().getPackage().getImplementationVersion().trim();
+			revision = version.split(".")[2].trim();
+		} else {
+			version = "Unknown";
 			revision = "Unknown";
-		} finally {
-			if (reader != null) {
-				reader.close();
-			}
 		}
 	}
 
+	public static REpiceaAppVersion getInstance() {
+		if (SINGLETON == null) {
+			SINGLETON = new REpiceaAppVersion();
+		}
+		return SINGLETON;
+	}
+	
 	/**
 	 * This method returns the revision number, i.e. the label "revision" + the build number.
 	 * @return a String
@@ -57,14 +59,12 @@ public abstract class AbstractAppVersion {
 	 * @return the build number as a string.
 	 */
 	public final String getBuild() {return revision.trim();}
-	
-	
-	
-	
+
 	/**
-	 * This method returns the application name.
-	 * @return a String
+	 * Return the version number. Typically, 1.1.819. The last number represents the revision.
+	 * @return
 	 */
-	public final String getName() {return appName;}
+	public final String getVersion() {return version;};
 	
+
 }

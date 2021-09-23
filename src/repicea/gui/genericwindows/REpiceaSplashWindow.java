@@ -39,7 +39,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
-import repicea.app.REpiceaJARSVNAppVersion;
+import repicea.app.REpiceaAppVersion;
 
 
 /**
@@ -172,20 +172,6 @@ public class REpiceaSplashWindow extends JDialog {
 		setModal(true);			// modal window to avoid any interaction with other windows
 	}
 	
-	public static void main(String[] args) {
-		String file = File.separator + "home" + File.separator + 
-				"fortin" + File.separator + 
-				"Documents" + File.separator + 
-				"7_Developpement" + File.separator + 
-				"JavaProjects" + File.separator + 
-				"lerfob-foresttools" + File.separator + 
-				"src" + File.separator + 
-				"lerfob" + File.separator + 
-				"carbonbalancetool" + File.separator + 
-				"SplashImage.jpg";
-		
-		new REpiceaSplashWindow(file, 2, null, "REpicea Build " + REpiceaJARSVNAppVersion.getInstance().getBuild());
-	}
 	
 	
 }
