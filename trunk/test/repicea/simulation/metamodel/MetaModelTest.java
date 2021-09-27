@@ -79,21 +79,14 @@ public class MetaModelTest {
 		Assert.assertEquals("Testing prediction at 90 yrs of age", 105.714445041154, pred, 1E-8);
 	}
 
-//	public static void main(String[] args) throws IOException {
-//		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
-//		String metaModelFilename = path + "QC_FMU02664_RE2_NoChange.zml";
-//		MetaModel m = MetaModel.Load(metaModelFilename);
-//		List<String> possibleOutput = m.getPossibleOutputTypes();
-//		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
-//		m.fitModel("Coniferous");
+	public static void main(String[] args) throws IOException {
+		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
+		String metaModelFilename = path + "QC_FMU02664_RE2_NoChange_Coniferous.zml";
+		MetaModel m = MetaModel.Load(metaModelFilename);
+		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
+		m.fitModel("Coniferous");
+		m.exportMetropolisHastingsSample(path + "mhSample.csv");
 //		m.save(path + "QC_FMU02664_" + m.getStratumGroup() + "_Coniferous" + ".zml");
-//		int u = 0;
-////		MetaModelManager manager = new MetaModelManager();
-////		String filename = path + "fittedMetaModel.zml";
-////		manager.load(filename);
-////		for (MetaModel m : manager.values()) {
-////			m.save(path + "QC_FMU02664_" + m.getStratumGroup() + ".zml");
-////		}
-////		int u = 0;
-//	}
+		int u = 0;
+	}
 }

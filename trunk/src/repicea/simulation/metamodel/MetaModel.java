@@ -85,18 +85,14 @@ public class MetaModel implements Saveable {
 		
 		private Matrix parameters;
 		final List<DataBlockWrapper> dataBlockWrappers;
-//		final Map<Object, Matrix> dummyMap;
-//		final List dummyOriginalValues;
 
+		/**
+		 * Internal constructor
+		 * @param structure
+		 * @param varCov
+		 */
 		InnerModel(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-//			dummyOriginalValues = structure.getPossibleValueForDummyVariable("OutputType", null);
-//			dummyMap = new HashMap<Object, Matrix>();
-//			for (Object obj : dummyOriginalValues) {
-//				Matrix oMat = new Matrix(1, dummyOriginalValues.size());
-//				oMat.setValueAt(0, dummyOriginalValues.indexOf(obj), 1d);
-//				dummyMap.put(obj, oMat);
-//			}
-
+			
 			Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
 			Map<String, DataBlock> ageMap = structure.getHierarchicalStructure(); 
 			for (String ageKey : ageMap.keySet()) {
@@ -354,11 +350,9 @@ public class MetaModel implements Saveable {
 				successes = 0;
 				trials = 0;
 			}
-//			if (MetaModel.Verbose) {
-				if (i%10000 == 0) {
-					displayMessage("Processing realization " + i + " / " + nbRealizations);
-				}
-//			}
+			if (i%10000 == 0) {
+				displayMessage("Processing realization " + i + " / " + nbRealizations);
+			}
 			boolean accepted = false;
 			int innerIter = 0;
 			
@@ -417,6 +411,9 @@ public class MetaModel implements Saveable {
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
 	public boolean fitModel(String outputType) {
+		if (!getPossibleOutputTypes().contains(outputType)) {
+			throw new InvalidParameterException("This output type is not recognized: " + outputType);
+		}
 		selectedOutputType = outputType;
 		coefVar = 0.01;
 		boolean converged = false;

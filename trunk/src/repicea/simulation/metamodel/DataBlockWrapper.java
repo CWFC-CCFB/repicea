@@ -45,7 +45,11 @@ public class DataBlockWrapper extends AbstractMathematicalFunction {
 	final List<Integer> ghqIndices;
 	final List<Integer> indices;
 	
-	DataBlockWrapper(InnerModel innerModel, String blockId, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix overallVarCov) {
+	DataBlockWrapper(InnerModel innerModel, 
+			String blockId, 
+			List<Integer> indices, 
+			HierarchicalStatisticalDataStructure structure, 
+			Matrix overallVarCov) {
 		this.blockId = blockId;
 		this.indices = indices;
 		this.innerModel = innerModel;
