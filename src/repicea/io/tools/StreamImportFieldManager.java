@@ -181,7 +181,8 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	}
 
 	/**
-	 * Set the field matches manually if needed.
+	 * Set the field matches manually if needed. Mandatory fields are listed first, then come the 
+	 * optional fields.
 	 * @param indices a list of integer
 	 * @return true if the field matches have been changed or false otherwise
 	 */
