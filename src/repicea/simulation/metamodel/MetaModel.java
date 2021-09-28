@@ -104,7 +104,7 @@ public class MetaModel implements Saveable {
 		oneEach = 50;
 		nbInitialGrid = 10000;	
 		if (modelImplEnum == null) {
-			modelImplEnum = ModelImplEnum.RichardsChapman;
+			modelImplEnum = ModelImplEnum.RichardsChapmanWithRandomEffect;
 		}
 	}
 	
@@ -323,9 +323,15 @@ public class MetaModel implements Saveable {
 	/**
 	 * Fit the meta-model.
 	 * @param outputType the output type the model will be fitted to (e.g. volumeAlive_Coniferous)
+	 * @param e a ModelImplEnum enum 
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
-	public boolean fitModel(String outputType) {
+	public boolean fitModel(String outputType, ModelImplEnum e) {
+		if (e == null) {
+			throw new InvalidParameterException("Argument e cannot be null!");
+		} 
+		this.modelImplEnum = e;
+
 		if (!getPossibleOutputTypes().contains(outputType)) {
 			throw new InvalidParameterException("This output type is not recognized: " + outputType);
 		}
@@ -467,18 +473,6 @@ public class MetaModel implements Saveable {
 		}
 	}
 
-	/**
-	 * Set the meta-model implementation, namely the type of model and its features (with or without random effects).
-	 * @param e a ModelImplEnum enum 
-	 * @see the ModelImplEnum enum 
-	 */
-	public void setModelImplementation(ModelImplEnum e) {
-		if (e == null) {
-			throw new InvalidParameterException("Argument e cannot be null!");
-		} else {
-			this.modelImplEnum = e;
-		}
-	}
 	
 	protected DataSet getFinalDataSet() {
 		return dataSet;
@@ -499,7 +493,7 @@ public class MetaModel implements Saveable {
 	public static MetaModel Load(String filename) throws IOException {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
 		MetaModel metaModel = (MetaModel) deserializer.readObject();
-		if (metaModel.nbBurnIn == 0) { //saved under a former implementation where this variable was static
+		if (metaModel.nbBurnIn == 0 || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
 			metaModel.setDefaultSettings();
 		}
 		return metaModel;

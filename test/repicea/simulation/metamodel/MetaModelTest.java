@@ -82,14 +82,13 @@ public class MetaModelTest {
 
 	public static void main(String[] args) throws IOException {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
-		String metaModelFilename = path + "QC_FMU02664_RE2_Plus4Degrees.zml";
+		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange.zml";
 		MetaModel m = MetaModel.Load(metaModelFilename);
 		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
+		m.fitModel("Coniferous", ModelImplEnum.RichardsChapman);
+		m.fitModel("Coniferous", ModelImplEnum.RichardsChapmanWithRandomEffect);
+//		m.setModelImplementation(ModelImplEnum.RichardsChapmanWithTimeAndRandomEffects);
 //		m.fitModel("Coniferous");
-//		m.setModelImplementation(ModelImplEnum.RichardsChapmanWithRandomEffect);
-//		m.fitModel("Coniferous");
-		m.setModelImplementation(ModelImplEnum.RichardsChapmanWithTimeAndRandomEffects);
-		m.fitModel("Coniferous");
 		
 //		m.exportMetropolisHastingsSample(path + "mhSample.csv");
 //		m.exportFinalDataSet(path + "QC_FMU02664_Art2009_Plus4Degrees_" + m.getStratumGroup() + "_Coniferous.csv");
