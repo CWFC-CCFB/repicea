@@ -41,13 +41,8 @@ public class REpiceaAppVersion {
 		if (filePath != null) {
 			try {
 				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
-				version = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION).toString();
-				String[] versionSplit = version.split("\\.");
-				if (versionSplit.length == 3) {
-					revision = versionSplit[2].trim();
-				} else {
-					throw new InvalidParameterException("Can extract version but not revision from manifest!");
-				}
+				version = m.getMainAttributes().get(Attributes.Name.SPECIFICATION_VERSION).toString();
+				revision = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION).toString();
 			} catch (IOException e) {
 				throw new InvalidParameterException("Cannot retrieve manifest from jar file: " + filePath);
 			}
