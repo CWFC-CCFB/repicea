@@ -21,17 +21,21 @@ package repicea.simulation.metamodel;
 
 import java.util.concurrent.LinkedBlockingQueue;
 
+import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
+
 class MetaModelManagerWorker extends Thread implements Runnable {
 
 	static final Object FinishToken = new Object();
 	
 	final LinkedBlockingQueue queue;
 	final String outputType;
+	final ModelImplEnum modelImplEnum;
 	
-	MetaModelManagerWorker(int i, LinkedBlockingQueue queue, String outputType) {
+	MetaModelManagerWorker(int i, LinkedBlockingQueue queue, String outputType, ModelImplEnum e) {
 		super("ExtMetaModelManagerWorker " + i);
 		this.queue = queue;
 		this.outputType = outputType;
+		this.modelImplEnum = e;
 		setDaemon(true);
 		start();
 	}
@@ -43,7 +47,7 @@ class MetaModelManagerWorker extends Thread implements Runnable {
 		try {
 			while(!(o = queue.take()).equals(FinishToken)) {
 				MetaModel metaModel = (MetaModel) o;
-				metaModel.fitModel(outputType);
+				metaModel.fitModel(outputType, modelImplEnum);
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();

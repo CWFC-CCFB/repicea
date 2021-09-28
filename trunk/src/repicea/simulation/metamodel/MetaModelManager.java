@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import repicea.app.JSONConfiguration;
 import repicea.app.JSONConfigurationGlobal;
 import repicea.app.REpiceaJSONConfiguration;
 import repicea.io.Loadable;
@@ -35,6 +34,7 @@ import repicea.io.Saveable;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
+import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.stats.data.DataSet;
 
 /**
@@ -77,10 +77,12 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	
 	/**
 	 * Fit all the meta-models.
+	 * @param outputType the output type to which the model is to be fitted
+	 * @param modImpl an implementation for the meta-model.
 	 * @throws an ExtMetaModelException if one of the models has not converged.
 	 */
-	public void fitMetaModels(String outputType) throws MetaModelException {
-		this.fitMetaModels(keySet(), outputType);
+	public void fitMetaModels(String outputType, ModelImplEnum modImpl) throws MetaModelException {
+		this.fitMetaModels(keySet(), outputType, modImpl);
 		for (String stratumGroup : keySet()) {
 			MetaModel metaModel = get(stratumGroup);
 			if (!metaModel.hasConverged()) {
@@ -89,7 +91,35 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 		}
 	}
 
+	/**
+	 * Fit all the meta-models using the default implementation 
+	 * "Richards-Chapman including random effects".
+	 * @param outputType the output type to which the model is to be fitted
+	 * @throws an ExtMetaModelException if one of the models has not converged.
+	 */
+	public void fitMetaModels(String outputType) throws MetaModelException {
+		fitMetaModels(outputType, ModelImplEnum.RichardsChapmanWithRandomEffect);
+	}
+
+	/**
+	 * Fit the meta-models identified in the stratumGroups argument using the default model
+	 * implementation "Richards-Chapman including random effects".
+	 * @param stratumGroups a Collection of stratum group ids
+	 * @param outputType the output type to which the model is to be fitted
+	 * @throws an ExtMetaModelException if one of the models has not converged.
+	 */
 	public void fitMetaModels(Collection<String> stratumGroups, String outputType) throws MetaModelException {
+		fitMetaModels(stratumGroups, outputType, ModelImplEnum.RichardsChapmanWithRandomEffect);
+	}
+	
+	/**
+	 * Fit the meta-models identified in the stratumGroups argument.
+	 * @param stratumGroups a Collection of stratum group ids
+	 * @param outputType the output type to which the model is to be fitted
+	 * @param modImpl an implementation for the meta-model.
+	 * @throws an ExtMetaModelException if one of the models has not converged.
+	 */
+	public void fitMetaModels(Collection<String> stratumGroups, String outputType, ModelImplEnum modImpl) throws MetaModelException {
 		
 		int NbWorkers = (int)((long) JSONConfigurationGlobal.getInstance().get(REpiceaJSONConfiguration.processingMaxThreads, 2L));
 		
@@ -100,7 +130,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 			LinkedBlockingQueue queue = new LinkedBlockingQueue();
 			List<MetaModelManagerWorker> workers = new ArrayList<MetaModelManagerWorker>();
 			for (int i = 0; i < NbWorkers; i++) {
-				workers.add(new MetaModelManagerWorker(i, queue, outputType));
+				workers.add(new MetaModelManagerWorker(i, queue, outputType, modImpl));
 			}
 			
 			for (String stratumGroup : stratumGroups) {
