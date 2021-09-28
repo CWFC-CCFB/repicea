@@ -86,7 +86,9 @@ dependencies {
 }
 
 compileJava {
-	project.version=repiceaVersion + '.' + getSvnRevision()
+//	project.version=repiceaVersion + '.' + getSvnRevision()
+	project.version=repiceaVersion
+	project.ext.build = getSvnRevision()
 	println "Building " + rootProject.name + " v" + project.version
 }
 
@@ -126,7 +128,7 @@ jar {
         		   "Specification-Version": archiveVersion,                   
                    "Specification-Vendor": "REpicea",
                    "Implementation-Title": "repicea",
-                   "Implementation-Version": archiveVersion,
+                   "Implementation-Version": project.ext.build,
                    "Implementation-Vendor": "REpicea",
                    )
     }
