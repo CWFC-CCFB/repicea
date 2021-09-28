@@ -25,8 +25,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -39,7 +37,6 @@ import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -55,115 +52,19 @@ import repicea.stats.estimates.MonteCarloEstimate;
  */
 public class MetaModel implements Saveable {
 
+	static {
+		repicea.serial.xml.XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.MetaModel$InnerModel", 
+				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation");
+		repicea.serial.xml.XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.DataBlockWrapper", 
+				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper");
+	}
+	
 	protected static boolean Verbose = false; 
 	
-	private class Bound {
-		final double lower;
-		final double upper;
-		final double extent;
-		
-		Bound(double lower, double upper) {
-			this.lower = lower;
-			this.upper = upper;
-			this.extent = this.upper - lower;
-		}
-
-		boolean checkValue(double value) {
-			if (value < lower || value > upper) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-		
-		double getRandomValue() {
-			return lower + extent * StatisticalUtility.getRandom().nextDouble(); 
-		}
-	}
-
-	static class InnerModel {
-		
-		private Matrix parameters;
-		final List<DataBlockWrapper> dataBlockWrappers;
-
-		/**
-		 * Internal constructor
-		 * @param structure
-		 * @param varCov
-		 */
-		InnerModel(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-			
-			Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
-			Map<String, DataBlock> ageMap = structure.getHierarchicalStructure(); 
-			for (String ageKey : ageMap.keySet()) {
-				DataBlock db = ageMap.get(ageKey);
-				Object o = db.keySet();
-				for (String speciesGroupKey : db.keySet()) {
-					DataBlock innerDb = db.get(speciesGroupKey);
-					formattedMap.put(ageKey + "_" + speciesGroupKey, innerDb);
-				}
-			}
-
-			dataBlockWrappers = new ArrayList<DataBlockWrapper>();
-			for (String k : formattedMap.keySet()) {
-				DataBlock db = formattedMap.get(k);
-				List<Integer> indices = db.getIndices();
-				dataBlockWrappers.add(new DataBlockWrapper(this, k, indices, structure, varCov));
-			}
-		}
-
-		Matrix generatePredictions(DataBlockWrapper dbw, double randomEffect) {
-			double b1 = parameters.getValueAt(0, 0);
-			double b2 = parameters.getValueAt(1, 0);
-			double b3 = parameters.getValueAt(2, 0);
-			Matrix mu = new Matrix(dbw.vecY.m_iRows, 1);
-			for (int i = 0; i < mu.m_iRows; i++) {
-				mu.setValueAt(i, 0, getPrediction(b1, b2, b3, dbw.ageYr.getValueAt(i, 0), randomEffect));
-			}
-			return mu;
-		}
-		
-		Matrix getVarianceRandomEffect(DataBlockWrapper dbw) {
-			return parameters.getSubMatrix(3, 3, 0, 0);
-		}
-		
-		static double getPrediction(double b1, double b2, double b3, double ageYr, double r1) {
-			double pred = (b1 + r1) * Math.pow(1 - Math.exp(-b2 * ageYr), b3);
-			return pred;
-		}
-		
-		
-		double getLogLikelihood(Matrix parameters) {
-			setParameters(parameters);
-			double logLikelihood = 0d;
-			for (DataBlockWrapper dbw : dataBlockWrappers) {
-				double marginalLogLikelihoodForThisBlock = dbw.getMarginalLogLikelihood();
-				logLikelihood += marginalLogLikelihoodForThisBlock;
-			}
-			return logLikelihood;
-		}
-		
-		void setParameters(Matrix parameters) {
-			this.parameters = parameters;
-		}
-		
-		
-		Matrix getVectorOfPopulationAveragedPredictions() {
-			int size = 0;
-			for (DataBlockWrapper dbw : dataBlockWrappers) {
-				size += dbw.indices.size();
-			}
-			Matrix predictions = new Matrix(size,1);
-			for (DataBlockWrapper dbw : dataBlockWrappers) {
-				Matrix y_i = generatePredictions(dbw, 0d);
-				for (int i = 0; i < dbw.indices.size(); i++) {
-					int index = dbw.indices.get(i);
-					predictions.setValueAt(index, 0, y_i.getValueAt(i, 0));
-				}
-			}
-			return predictions;
-		}
-		
+	public static enum ModelImplEnum {
+		RichardsChapman,
+		RichardsChapmanWithRandomEffect,
+		RichardsChapmanWithTimeAndRandomEffects;
 	}
 	
 	private int nbBurnIn = 5000;
@@ -176,14 +77,15 @@ public class MetaModel implements Saveable {
 	private boolean converged;
 	
 	private final Map<Integer, ScriptResult> scriptResults;
-	private List<Bound> bounds;
-	private InnerModel model;
+	private AbstractModelImplementation model;
 	private Matrix finalParmEstimates;
 	private Matrix finalVarCov;
+	private double finalLLK;
 	private final String stratumGroup;
 	private String selectedOutputType;
 	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private DataSet dataSet;
+	private ModelImplEnum modelImplEnum; 
 
 	/**
 	 * Constructor. 
@@ -201,6 +103,9 @@ public class MetaModel implements Saveable {
 		nbInternalIter = 100000;
 		oneEach = 50;
 		nbInitialGrid = 10000;	
+		if (modelImplEnum == null) {
+			modelImplEnum = ModelImplEnum.RichardsChapman;
+		}
 	}
 	
 	
@@ -288,21 +193,31 @@ public class MetaModel implements Saveable {
 		return varCov;
 	}
 
-	private InnerModel getInnerModel(HierarchicalStatisticalDataStructure structure) {
+	private AbstractModelImplementation getInnerModel(HierarchicalStatisticalDataStructure structure) {
 		Matrix varCov = getVarCovReady();
-		InnerModel model = new InnerModel(structure, varCov);
+		AbstractModelImplementation model;
+		switch(modelImplEnum) {
+		case RichardsChapman:
+			model = new RichardsChapmanModelImplementation(structure, varCov);
+			break;
+		case RichardsChapmanWithRandomEffect:
+			model = new RichardsChapmanModelWithRandomEffectImplementation(structure, varCov);
+			break;
+		case RichardsChapmanWithTimeAndRandomEffects:
+			model = new RichardsChapmanModelWithTimeAndRandomEffectsImplementation(structure, varCov);
+			break;
+		default:
+			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
+		}
 		return model;
 	}
 	
 	private MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
 		long startTime = System.currentTimeMillis();
-		Matrix parms = new Matrix(nrow, 1);
 		double llk = Double.NEGATIVE_INFINITY;
 		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
 		while (myFirstList.size() < desiredSize) {
-			for (int i = 0; i < parms.m_iRows; i++) {
-				parms.setValueAt(i, 0, bounds.get(i).getRandomValue());
-			}
+			Matrix parms = model.getRandomValueBetweenBounds();
 			llk = model.getLogLikelihood(parms);
 			if (Math.exp(llk) > 0d) {
 				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
@@ -358,7 +273,7 @@ public class MetaModel implements Saveable {
 			
 			while (!accepted && innerIter < nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
-				if (checkBounds(newParms)) {
+				if (model.checkBounds(newParms)) {
 					llk = model.getLogLikelihood(newParms);
 					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
 					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
@@ -421,7 +336,7 @@ public class MetaModel implements Saveable {
 		try {
 			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
 			model = getInnerModel(dataStructure);
-			GaussianDistribution gaussDist = getStartingParmEst();
+			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
 			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
 			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
 			gibbsSample.add(firstSet); // first valid sample
@@ -434,6 +349,7 @@ public class MetaModel implements Saveable {
 				}
 				
 				finalParmEstimates = mcmcEstimate.getMean();
+				finalLLK = model.getLogLikelihood(finalParmEstimates);
 				model.setParameters(finalParmEstimates);
 				finalVarCov = mcmcEstimate.getVariance();
 				
@@ -445,10 +361,9 @@ public class MetaModel implements Saveable {
 				
 				dataSet = dataStructure.getDataSet();
 				dataSet.addField("pred", finalPredArray);
-				
+
 				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
-				displayMessage("Final parameters = " + finalParmEstimates.toString());
-				displayMessage("Final variance-covariance = " + finalVarCov);
+				printSummary();
 				converged = true;
 			}
  		} catch (Exception e1) {
@@ -474,45 +389,12 @@ public class MetaModel implements Saveable {
 		return finalGibbsSample;
 	}
 
-	private GaussianDistribution getStartingParmEst() {
-		Matrix parmEst = new Matrix(4,1);
-		parmEst.setValueAt(0, 0, 100d);
-		parmEst.setValueAt(1, 0, 0.02);
-		parmEst.setValueAt(2, 0, 2d);
-		parmEst.setValueAt(3, 0, 200d);
-		
-		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
-		for (int i = 0; i < varianceDiag.m_iRows; i++) {
-			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
-		}
-		
-		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
-		
-		bounds = new ArrayList<Bound>();
-		bounds.add(new Bound(0,400));
-		bounds.add(new Bound(0.0001, 0.1));
-		bounds.add(new Bound(1,6));
-		bounds.add(new Bound(0,350));
-
-		return gd;
-	}
 	
 	
-	private boolean checkBounds(Matrix parms) {
-		for (int i = 0; i < parms.m_iRows; i++) {
-			if (!bounds.get(i).checkValue(parms.getValueAt(i, 0))) {
-				return false;
-			} 
-		}
-		return true;
-	}
 
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (converged) {
-			double b1 = finalParmEstimates.getValueAt(0, 0);
-			double b2 = finalParmEstimates.getValueAt(1, 0);
-			double b3 = finalParmEstimates.getValueAt(2, 0);
-			double pred = InnerModel.getPrediction(b1, b2, b3, ageYr, 0d);
+			double pred = model.getPrediction(ageYr, timeSinceInitialDateYr, 0d);
 			return pred;
 		} else {
 			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
@@ -585,6 +467,19 @@ public class MetaModel implements Saveable {
 		}
 	}
 
+	/**
+	 * Set the meta-model implementation, namely the type of model and its features (with or without random effects).
+	 * @param e a ModelImplEnum enum 
+	 * @see the ModelImplEnum enum 
+	 */
+	public void setModelImplementation(ModelImplEnum e) {
+		if (e == null) {
+			throw new InvalidParameterException("Argument e cannot be null!");
+		} else {
+			this.modelImplEnum = e;
+		}
+	}
+	
 	protected DataSet getFinalDataSet() {
 		return dataSet;
 	}
@@ -608,6 +503,22 @@ public class MetaModel implements Saveable {
 			metaModel.setDefaultSettings();
 		}
 		return metaModel;
+	}
+
+	public void printSummary() {
+		if (converged) {
+			System.out.println("Final log-likelihood = " + finalLLK);
+			System.out.println("Final parameters = ");
+			System.out.println(finalParmEstimates.toString());
+			System.out.println("Final standardError = ");
+			Matrix diagStd = finalVarCov.diagonalVector().elementWisePower(0.5);
+			System.out.println(diagStd.toString());
+			System.out.println("Correlation matrix = ");
+			Matrix corrMat = finalVarCov.elementWiseDivide(diagStd.multiply(diagStd.transpose()));
+			System.out.println(corrMat);
+		} else {
+			System.out.println("The model has not converged!");
+		}
 	}
 	
 }
