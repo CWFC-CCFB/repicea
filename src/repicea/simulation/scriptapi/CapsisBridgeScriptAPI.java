@@ -39,6 +39,5 @@ public interface CapsisBridgeScriptAPI extends ExtScriptAPI {
 			int nbRealizations, 
 			ApplicationScale scale,
 			String climateChangeOption);	// this is passed as a string so that the implementing script will cast it correctly for use.
-	
-	public List<String> getClimateChangeOptions();
+		
 }
