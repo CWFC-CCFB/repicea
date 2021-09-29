@@ -29,7 +29,13 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  */
 public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvider> {
 
-	public static enum RepresentativeConcentrationPathway implements TextableEnum {
+	/**
+	 * An empty interface used to identify climate change options.
+	 * @author Mathieu Fortin - September 2021
+	 */
+	public interface ClimateChangeScenario extends TextableEnum {}
+	
+	public static enum RepresentativeConcentrationPathway implements ClimateChangeScenario {
 		RCP2_6("RCP 2.6", "RCP 2.6"),
 		RCP4_5("RCP 4.5", "RCP 4.5"),
 		RCP6_0("RCP 6.0", "RCP 6.0"),
@@ -53,7 +59,7 @@ public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvid
 	 * @author Mathieu Fortin - December 2010
 	 */
 	@Deprecated	
-	public static enum ClimateChangeOption implements TextableEnum {
+	public static enum ClimateChangeOption implements ClimateChangeScenario {
 		NoChange("No change", 
 				"Aucun changement"), 
 		Plus2Degrees("2-degree increase over the XXI century", 

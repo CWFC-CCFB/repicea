@@ -21,7 +21,6 @@ package repicea.simulation.scriptapi;
 import java.util.List;
 
 import repicea.simulation.ApplicationScaleProvider.ApplicationScale;
-import repicea.simulation.climate.REpiceaClimateGenerator.ClimateChangeOption;
 
 /**
  * The script API that a Capsis model script should implement to be compatible with CapsisBridge
