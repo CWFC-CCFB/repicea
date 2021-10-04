@@ -18,12 +18,16 @@
  */
 package repicea.app;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.security.InvalidParameterException;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import repicea.util.JarUtility;
+import repicea.util.ObjectUtility;
 
 /**
  * This class retrieves information on the version and other features of the repicea.jar application. 
@@ -42,7 +46,10 @@ public class REpiceaAppVersion {
 			try {
 				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
 				version = m.getMainAttributes().get(Attributes.Name.SPECIFICATION_VERSION).toString();
-				revision = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION).toString();
+				String filename = ObjectUtility.getRelativePackagePath(REpiceaAppVersion.class) + "revision";
+				InputStream in = REpiceaAppVersion.class.getResourceAsStream("/" + filename);
+				BufferedReader br = new BufferedReader(new InputStreamReader(in));
+				revision = br.readLine().split("=")[1];
 			} catch (IOException e) {
 				throw new InvalidParameterException("Cannot retrieve manifest from jar file: " + filePath);
 			}
@@ -77,5 +84,4 @@ public class REpiceaAppVersion {
 	 */
 	public final String getVersion() {return version;};
 	
-
 }
