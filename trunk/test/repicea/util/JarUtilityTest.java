@@ -18,6 +18,10 @@
  */
 package repicea.util;
 
+import java.io.IOException;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -28,7 +32,16 @@ public class JarUtilityTest {
 		boolean isInJar = JarUtility.isEmbeddedInJar(Assert.class);
 		Assert.assertTrue("Testing if the Assert class is in a jar.", isInJar);
 	}
+
 	
+	@Test
+	public void testingIfManifestCanBeAccessed() throws IOException {
+		String jarFilename = JarUtility.getJarFileImInIfAny(Assert.class);
+		Manifest m = JarUtility.getManifestFromThisJarFile(jarFilename);
+		String revision = m.getMainAttributes().get(Attributes.Name.IMPLEMENTATION_VERSION).toString();
+		Assert.assertTrue("Testing if revision can be retrieved from manifest", revision != null && !revision.isEmpty());
+	}
+
 	@Test
 	public void testingIfThisClassInJar() {
 		boolean isInJar = JarUtility.isEmbeddedInJar(JarUtilityTest.class);

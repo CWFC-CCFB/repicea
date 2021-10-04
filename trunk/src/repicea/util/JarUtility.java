@@ -26,7 +26,7 @@ import java.util.jar.Manifest;
 
 public class JarUtility {
 	
-	private static final String JAR_FILE_PREFIX = "jar:file:/";
+	private static final String JAR_FILE_PREFIX = "jar:file:";
 
 	/**
 	 * Return a boolean that indicates whether the class is embedded in a Jar file or not.
