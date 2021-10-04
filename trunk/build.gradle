@@ -85,10 +85,15 @@ dependencies {
     testImplementation "junit:junit:4.12"    
 }
 
-compileJava {
-//	project.version=repiceaVersion + '.' + getSvnRevision()
-	project.version=repiceaVersion
+task updateRevision(type: WriteProperties) {
 	project.ext.build = getSvnRevision()
+	outputFile = file("$buildDir/classes/java/main/repicea/app/revision")	
+	property "Revision", project.ext.build
+}
+ 
+compileJava {
+	dependsOn updateRevision
+	project.version=repiceaVersion
 	println "Building " + rootProject.name + " v" + project.version
 }
 
@@ -128,7 +133,7 @@ jar {
         		   "Specification-Version": archiveVersion,                   
                    "Specification-Vendor": "REpicea",
                    "Implementation-Title": "repicea",
-                   "Implementation-Version": project.ext.build,
+//                   "Implementation-Version": project.ext.build,		// the revision is now written to file in repicea.app package
                    "Implementation-Vendor": "REpicea",
                    )
     }
