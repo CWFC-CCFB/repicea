@@ -92,7 +92,6 @@ task updateRevision(type: WriteProperties) {
 }
  
 compileJava {
-	dependsOn updateRevision
 	project.version=repiceaVersion
 	println "Building " + rootProject.name + " v" + project.version
 }
@@ -127,6 +126,7 @@ task integrationTest(type: Test) {
 check.dependsOn integrationTest
 
 jar {
+	dependsOn updateRevision
 	 manifest {
         attributes("Built-By": "Mathieu Fortin",
         		   "Specification-Title": "REpicea Utilitaries",
