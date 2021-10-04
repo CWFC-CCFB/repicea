@@ -44,12 +44,13 @@ public class REpiceaAppVersion {
 		String filePath = JarUtility.getJarFileImInIfAny(getClass());
 		if (filePath != null) {
 			try {
-				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
-				version = m.getMainAttributes().get(Attributes.Name.SPECIFICATION_VERSION).toString();
+//				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
+//				version = m.getMainAttributes().get(Attributes.Name.SPECIFICATION_VERSION).toString();
 				String filename = ObjectUtility.getRelativePackagePath(getClass()) + "revision";
 				InputStream in = getClass().getResourceAsStream("/" + filename);
 				BufferedReader br = new BufferedReader(new InputStreamReader(in));
 				revision = br.readLine().split("=")[1];
+				version = br.readLine().split("=")[1];
 			} catch (IOException e) {
 				throw new InvalidParameterException("Cannot retrieve manifest from jar file: " + filePath);
 			}
@@ -82,6 +83,6 @@ public class REpiceaAppVersion {
 	 * Return the version number. Typically, 1.1.819. The last number represents the revision.
 	 * @return
 	 */
-	public final String getVersion() {return version;};
+	public final String getVersion() {return version;}
 	
 }

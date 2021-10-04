@@ -89,6 +89,7 @@ task updateRevision(type: WriteProperties) {
 	project.ext.build = getSvnRevision()
 	outputFile = file("$buildDir/classes/java/main/repicea/app/revision")	
 	property "Revision", project.ext.build
+	property "Version", repiceaVersion
 }
  
 compileJava {
@@ -130,7 +131,7 @@ jar {
 	 manifest {
         attributes("Built-By": "Mathieu Fortin",
         		   "Specification-Title": "REpicea Utilitaries",
-        		   "Specification-Version": archiveVersion,                   
+	       		   "Specification-Version": archiveVersion,                   
                    "Specification-Vendor": "REpicea",
                    "Implementation-Title": "repicea",
 //                   "Implementation-Version": project.ext.build,		// the revision is now written to file in repicea.app package
