@@ -369,8 +369,8 @@ public class MetaModel implements Saveable {
 				dataSet.addField("pred", finalPredArray);
 
 				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
-				printSummary();
 				converged = true;
+				printSummary();				
 			}
  		} catch (Exception e1) {
  			e1.printStackTrace();
@@ -514,5 +514,9 @@ public class MetaModel implements Saveable {
 			System.out.println("The model has not converged!");
 		}
 	}
-	
+
+	MetaModelMetaData getMetaData() {
+		//MetaModelMetaData.Growth growth = new MetaModelMetaData.Growth(); 
+		return null;
+	}
 }
