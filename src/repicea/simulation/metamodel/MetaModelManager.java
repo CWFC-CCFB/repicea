@@ -20,6 +20,7 @@
 package repicea.simulation.metamodel;
 
 import java.io.IOException;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -223,6 +224,38 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 		clear(); // we clear only after loading the new manager
 		putAll(manager);
 	}
+
+	/**
+	 * Save a particular instance of meta model to file.
+	 * @param stratumGroup
+	 * @param filename
+	 * @throws IOException
+	 */
+	public void saveMetaModel(String stratumGroup, String filename) throws IOException {
+		if (containsKey(stratumGroup)) {
+			MetaModel metaModel = get(stratumGroup);
+			metaModel.save(filename);
+		} else {
+			throw new InvalidParameterException("This stratum group is not recognized: " + stratumGroup);
+		}
+	}
+	
+	/**
+	 * Load an instance of meta model from file and add it to the meta model manager.
+	 * @param stratumGroup
+	 * @param filename
+	 * @throws IOException
+	 */
+	public void loadMetaModel(String stratumGroup, String filename) throws IOException {
+		if (stratumGroup == null) {
+			throw new InvalidParameterException("The stratum group cannot be null!");
+		}
+		MetaModel metaModel = MetaModel.Load(filename);
+		put(stratumGroup, metaModel);
+	}
+	
+	
+	
 	
 	/**
 	 * Provide a final data set including the prediction of the meta model. 
