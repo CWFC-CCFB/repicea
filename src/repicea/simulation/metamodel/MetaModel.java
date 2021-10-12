@@ -492,7 +492,8 @@ public class MetaModel implements Saveable {
 	 */
 	public static MetaModel Load(String filename) throws IOException {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
-		MetaModel metaModel = (MetaModel) deserializer.readObject();
+		Object obj = deserializer.readObject();
+		MetaModel metaModel = (MetaModel) obj;
 		if (metaModel.nbBurnIn == 0 || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
 			metaModel.setDefaultSettings();
 		}
