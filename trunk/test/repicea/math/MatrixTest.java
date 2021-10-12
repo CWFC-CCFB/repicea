@@ -162,7 +162,7 @@ public class MatrixTest {
 		}
 		double newMemoryLoad = REpiceaSystem.getCurrentMemoryLoadMb();
 		System.out.println("Current memory load with new implementation = " + newMemoryLoad + " Mb");
-		Assert.assertTrue("Testing that former implementation takes at least 2.5 times the memory space", currentMemoryLoad > newMemoryLoad * 2.5);
+		Assert.assertTrue("Testing that former implementation takes at least twice the memory space", currentMemoryLoad > newMemoryLoad * 2);
 	}
 	
 	
