@@ -35,7 +35,11 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 			double rhoParm = getCorrelationParameter();	
 			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
 			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
-			invVarCov = varCov.getInverseMatrix();
+			
+			Matrix invCorr = StatisticalUtility.getInverseCorrelationAR1Matrix(distances.m_iRows, rhoParm);
+			Matrix invFull = varCovFullCorr.elementWisePower(-1d);
+//			invVarCov = varCov.getInverseMatrix();
+			invVarCov = invFull.elementWiseMultiply(invCorr);
 			double determinant = varCov.getDeterminant();
 			int k = this.vecY.m_iRows;
 			this.lnConstant = -.5 * k * Math.log(2 * Math.PI) - Math.log(determinant) * .5;

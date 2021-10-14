@@ -90,16 +90,14 @@ public class MetaModelTest {
 		MetaModel m = MetaModel.Load(metaModelFilename);
 		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
 		m.printSummary();
-//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapman);
-//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
-//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanWithRandomEffect);
-//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
-//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivative);
-//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
+		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapman);
+		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
+		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanWithRandomEffect);
+		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
+		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivative);
+		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivativeWithRandomEffect);
 		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivativeWithRandomEffect.csv");
-//		m.setModelImplementation(ModelImplEnum.RichardsChapmanWithTimeAndRandomEffects);
-//		m.fitModel("Coniferous");
 		
 //		m.exportMetropolisHastingsSample(path + "mhSample.csv");
 //		m.exportFinalDataSet(path + "QC_FMU02664_Art2009_Plus4Degrees_" + m.getStratumGroup() + "_Coniferous.csv");
