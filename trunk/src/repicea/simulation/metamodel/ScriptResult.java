@@ -39,6 +39,7 @@ public class ScriptResult {
 	public static final String OutputTypeFieldName = "OutputType";
 	public static final String EstimateFieldName = "Estimate";
 	public static final String TotalVarianceFieldName = "TotalVariance";
+	public static final String VarianceEstimatorType = "VarianceEstimatorType";
 	
 	final DataSet dataset;
 	final List<String> outputTypes;
@@ -86,6 +87,7 @@ public class ScriptResult {
 		fieldNames.add(OutputTypeFieldName);
 		fieldNames.add(EstimateFieldName);
 		fieldNames.add(TotalVarianceFieldName);
+		fieldNames.add(VarianceEstimatorType);
 		DataSet outputDataSet = new DataSet(fieldNames);
 		return outputDataSet;
 	}
