@@ -36,6 +36,37 @@ public class StatisticalUtility {
 	
 	public static enum TypeMatrixR {LINEAR, LINEAR_LOG, COMPOUND_SYMMETRY, POWER, ARMA}
 	
+	/**
+	 * This method is a shortcut for inverting an AR1 correlation matrix.
+	 * @param size the size of the matrix
+	 * @param rho the correlation between two successive observations
+	 * @return a Matrix
+	 */
+	public static Matrix getInverseCorrelationAR1Matrix(int size, double rho) {
+		if (size < 1) {
+			throw new InvalidParameterException("The size parameter must be equal to or greater than 1!");
+		}
+		if (rho <= 0 || rho >= 1) {
+			throw new InvalidParameterException("The rho parameter must be greater than 0 and smaller than 1!");
+		}
+		double rho2 = rho * rho;
+		Matrix mat = new Matrix(size, size); 
+		for (int i = 0; i < mat.m_iRows; i++) {
+			for (int j = i; j < mat.m_iCols; j++) {
+				if (j == i) {
+					if (i == 0 || i == mat.m_iRows - 1) {
+						mat.setValueAt(i, j, 1d / (1d - rho2));
+					} else {
+						mat.setValueAt(i, j, (1d + rho2) / (1d - rho2));
+					}
+				} else if (j == i + 1) {
+					mat.setValueAt(i, j, -rho/(1d - rho2));
+					mat.setValueAt(j, i, -rho/(1d - rho2));
+				}
+			}
+		}
+		return mat;
+	}
 	
 	/**
 	 * Construct a within-subject correlation matrix using a variance parameter, a correlation parameter and a column vector of coordinates.

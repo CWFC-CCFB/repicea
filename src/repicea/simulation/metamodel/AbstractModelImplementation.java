@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation.DataBlockWrapper;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -105,6 +106,10 @@ abstract class AbstractModelImplementation {
 
 	void setParameters(Matrix parameters) {
 		this.parameters = parameters;
+		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
+			dbw.updateCovMat(this.parameters);
+		}
+
 	}
 
 	Matrix getVectorOfPopulationAveragedPredictions() {

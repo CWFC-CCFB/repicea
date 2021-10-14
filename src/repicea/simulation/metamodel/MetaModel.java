@@ -64,7 +64,9 @@ public class MetaModel implements Saveable {
 	public static enum ModelImplEnum {
 		RichardsChapman,
 		RichardsChapmanWithRandomEffect,
-		RichardsChapmanWithTimeAndRandomEffects;
+		RichardsChapmanWithTimeAndRandomEffects,
+		RichardsChapmanDerivative,
+		RichardsChapmanDerivativeWithRandomEffect;
 	}
 	
 	private int nbBurnIn = 5000;
@@ -205,6 +207,12 @@ public class MetaModel implements Saveable {
 			break;
 		case RichardsChapmanWithTimeAndRandomEffects:
 			model = new RichardsChapmanModelWithTimeAndRandomEffectsImplementation(structure, varCov);
+			break;
+		case RichardsChapmanDerivative:
+			model = new RichardsChapmanDerivativeModelImplementation(structure, varCov);
+			break;
+		case RichardsChapmanDerivativeWithRandomEffect:
+			model = new RichardsChapmanDerivativeModelWithRandomEffectImplementation(structure, varCov);
 			break;
 		default:
 			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");

@@ -19,6 +19,7 @@
 
 package repicea.simulation.metamodel;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
@@ -84,11 +85,19 @@ public class MetaModelTest {
 
 	public static void main(String[] args) throws IOException {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
-		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange.zml";
+		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
+		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange_AliveVolume_ConiferousSpecies.zml";
 		MetaModel m = MetaModel.Load(metaModelFilename);
 		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
-		m.fitModel("Coniferous", ModelImplEnum.RichardsChapman);
-		m.fitModel("Coniferous", ModelImplEnum.RichardsChapmanWithRandomEffect);
+		m.printSummary();
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapman);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanWithRandomEffect);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivative);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
+		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivativeWithRandomEffect);
+		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivativeWithRandomEffect.csv");
 //		m.setModelImplementation(ModelImplEnum.RichardsChapmanWithTimeAndRandomEffects);
 //		m.fitModel("Coniferous");
 		

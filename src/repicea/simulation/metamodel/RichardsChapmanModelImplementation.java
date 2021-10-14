@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.stats.StatisticalUtility;
+import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.distributions.GaussianDistribution;
 
@@ -12,21 +14,33 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 	@SuppressWarnings("serial")
 	class DataBlockWrapper extends AbstractDataBlockWrapper {
 		
-		final Matrix invVarCov;
-		final double lnConstant;
+		final Matrix varCovFullCorr;
+		final Matrix distances;
+		Matrix invVarCov;
+		double lnConstant;
 		
 		DataBlockWrapper(String blockId, 
 				List<Integer> indices, 
 				HierarchicalStatisticalDataStructure structure, 
 				Matrix overallVarCov) {
 			super(blockId, indices, structure, overallVarCov);
-			Matrix varCov = correctVarCov(overallVarCov.getSubMatrix(indices, indices));
+			Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
+			Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
+			this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
+			distances = new Matrix(varCovFullCorr.m_iRows, 1, 1, 1);
+		}
+		
+		@Override
+		void updateCovMat(Matrix parameters) {
+			double rhoParm = getCorrelationParameter();	
+			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
+			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
 			invVarCov = varCov.getInverseMatrix();
 			double determinant = varCov.getDeterminant();
 			int k = this.vecY.m_iRows;
 			this.lnConstant = -.5 * k * Math.log(2 * Math.PI) - Math.log(determinant) * .5;
 		}
-		
+
 		@Override
 		double getLogLikelihood() {
 			Matrix pred = generatePredictions(this, getParameterValue(0));
@@ -48,12 +62,14 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 		
 	}
 
+	int indexCorrelationParameter;
+
 	public RichardsChapmanModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
 		super(structure, varCov);
 	}
 	
 	@Override
-	final Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
+	Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
 		Matrix mu = new Matrix(dbw.vecY.m_iRows, 1);
 		for (int i = 0; i < mu.m_iRows; i++) {
 			mu.setValueAt(i, 0, getPrediction(dbw.ageYr.getValueAt(i, 0), dbw.timeSinceBeginning.getValueAt(i, 0), randomEffect));
@@ -61,6 +77,10 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 		return mu;
 	}
 	
+	protected double getCorrelationParameter() {
+		return parameters.getValueAt(indexCorrelationParameter, 0);
+	}
+
 	@Override
 	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
 		double b1 = parameters.getValueAt(0, 0);
@@ -73,7 +93,7 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 
 	@Override
 	AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		return new RichardsChapmanModelImplementation.DataBlockWrapper(k, indices, structure, varCov);
+		return new DataBlockWrapper(k, indices, structure, varCov);
 	}
 	
 	@Override
@@ -96,6 +116,8 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 		parmEst.setValueAt(2, 0, 2d);
 		parmEst.setValueAt(3, 0, .92);
 		
+		this.indexCorrelationParameter = 3;
+
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
