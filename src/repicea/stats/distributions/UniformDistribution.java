@@ -44,7 +44,7 @@ public class UniformDistribution implements Distribution, BoundedDistribution {
 		if (!lowerBound.isColumnVector() || !upperBound.isColumnVector()) {
 			throw new InvalidParameterException("The lowerBound and upperBound matrices must be column vectors!");
 		} 
-		if (lowerBound.m_iCols != upperBound.m_iCols) {
+		if (lowerBound.m_iRows != upperBound.m_iRows) {
 			throw new InvalidParameterException("The lowerBound and upperBound matrices must be column vectors of the same dimension!");
 		}
 		if (upperBound.subtract(lowerBound).anyElementSmallerOrEqualTo(0d)) {	// means the upper bound is equal or smaller than the lower bound
@@ -91,15 +91,22 @@ public class UniformDistribution implements Distribution, BoundedDistribution {
 	 * @return the composite probability density
 	 */
 	public double getProbabilityDensity(Matrix values) {
-		if (values == null) {
-			throw new InvalidParameterException("The values parameter must be non null!");
+		if (values == null || !values.isColumnVector()) {
+			throw new InvalidParameterException("The values parameter must be a column vector!");
 		}
-		if (values.m_iCols != upperBound.getBoundValue().m_iCols) {
+		if (values.m_iRows != upperBound.getBoundValue().m_iRows) {
 			throw new InvalidParameterException("The number of elements in the values parameter is inconsistent with the bounds!");
+		}
+		for (int i = 0; i < values.m_iRows; i++) {	// check if any element in values lay beyond the bounds. If this happens, it returns 0.
+			double currentValue = values.getValueAt(i, 0);
+			if (currentValue > upperBound.getBoundValue().getValueAt(i, 0) ||
+					currentValue < lowerBound.getBoundValue().getValueAt(i, 0)) {
+				return 0d;
+			}
 		}
 		Matrix densities = upperBound.getBoundValue().subtract(lowerBound.getBoundValue()).elementWisePower(-1d);
 		double product = 1d;
-		for (int i = 0; i < densities.m_iCols; i++) {
+		for (int i = 0; i < densities.m_iRows; i++) {
 			product *= densities.getValueAt(i, 0);
 		}
 		return product;

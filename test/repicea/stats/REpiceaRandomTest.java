@@ -60,7 +60,7 @@ public class REpiceaRandomTest {
 		@SuppressWarnings("unused")
 		double mean = estimate.getMean().getValueAt(0, 0);
 		System.out.println ("Simulated variance = " + actual + "; Expected variance = " + variance);
-		Assert.assertEquals("Testing mean for gamma random values", variance, actual, 6E-2);
+		Assert.assertEquals("Testing mean for gamma random values", variance, actual, 0.07);
 	}
 
 	@Test
