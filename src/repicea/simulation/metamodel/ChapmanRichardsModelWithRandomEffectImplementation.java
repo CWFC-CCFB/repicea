@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
@@ -7,14 +25,14 @@ import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.distributions.GaussianDistribution;
 
-public class RichardsChapmanDerivativeModelWithRandomEffectImplementation extends RichardsChapmanDerivativeModelImplementation {
+public class ChapmanRichardsModelWithRandomEffectImplementation extends ChapmanRichardsModelImplementation {
 
 	/**
 	 * The likelihood implementation for this model implementation.
 	 * @author Mathieu Fortin - September 2021
 	 */
 	@SuppressWarnings("serial")
-	class DataBlockWrapper extends RichardsChapmanDerivativeModelImplementation.DataBlockWrapper {
+	class DataBlockWrapper extends ChapmanRichardsModelImplementation.DataBlockWrapper {
 		
 		DataBlockWrapper(String blockId, 
 				List<Integer> indices, 
@@ -26,17 +44,16 @@ public class RichardsChapmanDerivativeModelWithRandomEffectImplementation extend
 		
 		@Override
 		double getMarginalLogLikelihood() {
-			Matrix lowerCholeskyTriangle = RichardsChapmanDerivativeModelWithRandomEffectImplementation.this.getVarianceRandomEffect().getLowerCholTriangle();
+			Matrix lowerCholeskyTriangle = ChapmanRichardsModelWithRandomEffectImplementation.this.getVarianceRandomEffect().getLowerCholTriangle();
 			double integratedLikelihood = ghq.getIntegralApproximation(this, ghqIndices, lowerCholeskyTriangle);
 			return Math.log(integratedLikelihood);
 		}
 		
-
 	}
 
 	int indexRandomEffectVariance;
 	
-	public RichardsChapmanDerivativeModelWithRandomEffectImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
+	public ChapmanRichardsModelWithRandomEffectImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
 		super(structure, varCov);
 	}
 
@@ -45,6 +62,9 @@ public class RichardsChapmanDerivativeModelWithRandomEffectImplementation extend
 		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
 	}
 
+	protected double getCorrelationParameter() {
+		return getParameters().getValueAt(indexCorrelationParameter, 0);
+	}
 
 	@Override
 	AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
@@ -67,10 +87,10 @@ public class RichardsChapmanDerivativeModelWithRandomEffectImplementation extend
 	@Override
 	GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(5,1);
-		parmEst.setValueAt(0, 0, 1000d);
+		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
 		parmEst.setValueAt(2, 0, 2d);
-		parmEst.setValueAt(3, 0, 1000d);
+		parmEst.setValueAt(3, 0, 200d);
 		parmEst.setValueAt(4, 0, .92);
 		
 		fixedEffectsParameterIndices = new ArrayList<Integer>();
@@ -78,8 +98,8 @@ public class RichardsChapmanDerivativeModelWithRandomEffectImplementation extend
 		fixedEffectsParameterIndices.add(1);
 		fixedEffectsParameterIndices.add(2);
 		
-		this.indexRandomEffectVariance = 3;
-		this.indexCorrelationParameter = 4;
+		indexRandomEffectVariance = 3;
+		indexCorrelationParameter = 4;
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -89,11 +109,11 @@ public class RichardsChapmanDerivativeModelWithRandomEffectImplementation extend
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
 		bounds = new ArrayList<Bound>();
-		bounds.add(new Bound(0,2000));
-		bounds.add(new Bound(0.00001, 0.05));
+		bounds.add(new Bound(0,400));
+		bounds.add(new Bound(0.0001, 0.1));
 		bounds.add(new Bound(1,6));
-		bounds.add(new Bound(0,2000));
-		bounds.add(new Bound(.90,.99));
+		bounds.add(new Bound(0,350));
+		bounds.add(new Bound(.9,.99));
 
 		return gd;
 	}

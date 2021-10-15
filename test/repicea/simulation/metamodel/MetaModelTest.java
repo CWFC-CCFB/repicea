@@ -42,6 +42,10 @@ public class MetaModelTest {
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.metamodel.ExtMetaModel$Bound", "repicea.simulation.metamodel.MetaModel$Bound");
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.metamodel.ExtMetaModel$InnerModel", "repicea.simulation.metamodel.MetaModel$InnerModel");		
 		XmlSerializerChangeMonitor.registerClassNameChange("capsis.util.extendeddefaulttype.ExtScriptResult", "repicea.simulation.metamodel.ScriptResult");				
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation", "repicea.simulation.metamodel.ChapmanRichardsModelWithRandomEffectImplementation");				
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper", 
+				"repicea.simulation.metamodel.ChapmanRichardsModelWithRandomEffectImplementation$DataBlockWrapper");				
+		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.simulation.metamodel.MetaModel$ModelImplEnum", "RichardsChapmanWithRandomEffect", "ChapmanRichardsWithRandomEffect");
 	}
 	
 	static MetaModel MetaModelInstance;
@@ -88,14 +92,14 @@ public class MetaModelTest {
 		MetaModel m = MetaModel.Load(metaModelFilename);
 		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
 //		m.printSummary();
-//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapman);
-//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
-//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanWithRandomEffect);
+		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichards);
+		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsWithRandomEffect);
 //		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
-		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivative);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
-		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivativeWithRandomEffect);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivativeWithRandomEffect.csv");
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsDerivative);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivativeWithRandomEffect.csv");
 		
 //		m.exportMetropolisHastingsSample(path + "mhSample.csv");
 //		m.exportFinalDataSet(path + "QC_FMU02664_Art2009_Plus4Degrees_" + m.getStratumGroup() + "_Coniferous.csv");

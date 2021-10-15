@@ -42,7 +42,9 @@ public class XmlSerializerChangeMonitor {
 
 
 	/**
-	 * This method register an enum name change.
+	 * This method register an enum name change. 
+	 * @param enumClass a string representing the enum class name. A dollar sign should appear between the enum class name
+	 * and the class it is nested in (e.g. repicea.simulation.metamodel.MetaModel$ModelImplEnum).
 	 * @param oldName the former name of this enum
 	 * @param newName the new name of this enum
 	 */

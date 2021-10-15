@@ -99,7 +99,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 * @throws an ExtMetaModelException if one of the models has not converged.
 	 */
 	public void fitMetaModels(String outputType) throws MetaModelException {
-		fitMetaModels(outputType, ModelImplEnum.RichardsChapmanWithRandomEffect);
+		fitMetaModels(outputType, ModelImplEnum.ChapmanRichardsWithRandomEffect);
 	}
 
 	/**
@@ -110,7 +110,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 * @throws an ExtMetaModelException if one of the models has not converged.
 	 */
 	public void fitMetaModels(Collection<String> stratumGroups, String outputType) throws MetaModelException {
-		fitMetaModels(stratumGroups, outputType, ModelImplEnum.RichardsChapmanWithRandomEffect);
+		fitMetaModels(stratumGroups, outputType, ModelImplEnum.ChapmanRichardsWithRandomEffect);
 	}
 	
 	/**
