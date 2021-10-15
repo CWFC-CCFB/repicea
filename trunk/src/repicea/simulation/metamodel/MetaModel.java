@@ -62,11 +62,10 @@ public class MetaModel implements Saveable {
 	protected static boolean Verbose = false; 
 	
 	public static enum ModelImplEnum {
-		RichardsChapman,
-		RichardsChapmanWithRandomEffect,
-		RichardsChapmanWithTimeAndRandomEffects,
-		RichardsChapmanDerivative,
-		RichardsChapmanDerivativeWithRandomEffect;
+		ChapmanRichards,
+		ChapmanRichardsWithRandomEffect,
+		ChapmanRichardsDerivative,
+		ChapmanRichardsDerivativeWithRandomEffect;
 	}
 	
 	private int nbBurnIn = 5000;
@@ -106,7 +105,7 @@ public class MetaModel implements Saveable {
 		oneEach = 50;
 		nbInitialGrid = 10000;	
 		if (modelImplEnum == null) {
-			modelImplEnum = ModelImplEnum.RichardsChapmanWithRandomEffect;
+			modelImplEnum = ModelImplEnum.ChapmanRichardsWithRandomEffect;
 		}
 	}
 	
@@ -199,20 +198,17 @@ public class MetaModel implements Saveable {
 		Matrix varCov = getVarCovReady();
 		AbstractModelImplementation model;
 		switch(modelImplEnum) {
-		case RichardsChapman:
-			model = new RichardsChapmanModelImplementation(structure, varCov);
+		case ChapmanRichards:
+			model = new ChapmanRichardsModelImplementation(structure, varCov);
 			break;
-		case RichardsChapmanWithRandomEffect:
-			model = new RichardsChapmanModelWithRandomEffectImplementation(structure, varCov);
+		case ChapmanRichardsWithRandomEffect:
+			model = new ChapmanRichardsModelWithRandomEffectImplementation(structure, varCov);
 			break;
-		case RichardsChapmanWithTimeAndRandomEffects:
-			model = new RichardsChapmanModelWithTimeAndRandomEffectsImplementation(structure, varCov);
+		case ChapmanRichardsDerivative:
+			model = new ChapmanRichardsDerivativeModelImplementation(structure, varCov);
 			break;
-		case RichardsChapmanDerivative:
-			model = new RichardsChapmanDerivativeModelImplementation(structure, varCov);
-			break;
-		case RichardsChapmanDerivativeWithRandomEffect:
-			model = new RichardsChapmanDerivativeModelWithRandomEffectImplementation(structure, varCov);
+		case ChapmanRichardsDerivativeWithRandomEffect:
+			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(structure, varCov);
 			break;
 		default:
 			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");

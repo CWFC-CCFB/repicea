@@ -16,7 +16,6 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;

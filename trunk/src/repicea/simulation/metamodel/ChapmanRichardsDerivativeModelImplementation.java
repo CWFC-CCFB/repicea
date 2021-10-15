@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
@@ -7,10 +25,10 @@ import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.distributions.GaussianDistribution;
 
-public class RichardsChapmanDerivativeModelImplementation extends RichardsChapmanModelImplementation {
+public class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelImplementation {
 
 	@SuppressWarnings("serial")
-	class DataBlockWrapper extends RichardsChapmanModelImplementation.DataBlockWrapper {
+	class DataBlockWrapper extends ChapmanRichardsModelImplementation.DataBlockWrapper {
 		
 		DataBlockWrapper(String blockId, 
 				List<Integer> indices, 
@@ -20,7 +38,7 @@ public class RichardsChapmanDerivativeModelImplementation extends RichardsChapma
 		}
 	}
 
-	public RichardsChapmanDerivativeModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
+	public ChapmanRichardsDerivativeModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
 		super(structure, varCov);
 	}
 	
