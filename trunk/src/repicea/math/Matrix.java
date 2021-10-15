@@ -177,11 +177,12 @@ public final class Matrix implements Serializable, DeepCloneable {
 	 * @return a double
 	 */
 	public double getValueAt(int i, int j) {
-		if (isNewImplementationForColumnVector()) {	// the vector is actually transposed for a better memory management
-			return m_afData[j][i];
-		} else {
-			return m_afData[i][j];
-		}
+		return isNewImplementationForColumnVector() ? m_afData[j][i] : m_afData[i][j];
+//		if (isNewImplementationForColumnVector()) {	// the vector is actually transposed for a better memory management
+//			return m_afData[j][i];
+//		} else {
+//			return m_afData[i][j];
+//		}
 	}
 	
 	/**

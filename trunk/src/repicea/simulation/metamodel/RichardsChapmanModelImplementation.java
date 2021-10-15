@@ -73,28 +73,38 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 	}
 	
 	@Override
-	Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
-		Matrix mu = new Matrix(dbw.vecY.m_iRows, 1);
+	Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
+		boolean canCalculateVariance = includePredVariance && getParmsVarCov() != null;
+		Matrix mu;
+		if (canCalculateVariance) {
+			mu = new Matrix(dbw.vecY.m_iRows, 2);
+		} else {
+			mu = new Matrix(dbw.vecY.m_iRows, 1);
+		}
+		
 		for (int i = 0; i < mu.m_iRows; i++) {
 			mu.setValueAt(i, 0, getPrediction(dbw.ageYr.getValueAt(i, 0), dbw.timeSinceBeginning.getValueAt(i, 0), randomEffect));
+			if (canCalculateVariance) {
+				double predVar = getPredictionVariance(dbw.ageYr.getValueAt(i, 0), dbw.timeSinceBeginning.getValueAt(i, 0), randomEffect);
+				mu.setValueAt(i, 1, predVar);
+			}
 		}
 		return mu;
 	}
 	
 	protected double getCorrelationParameter() {
-		return parameters.getValueAt(indexCorrelationParameter, 0);
+		return getParameters().getValueAt(indexCorrelationParameter, 0);
 	}
 
 	@Override
 	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
-		double b1 = parameters.getValueAt(0, 0);
-		double b2 = parameters.getValueAt(1, 0);
-		double b3 = parameters.getValueAt(2, 0);
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
 		double pred = (b1 + r1) * Math.pow(1 - Math.exp(-b2 * ageYr), b3);
 		return pred;
 	}
-
-
+	
 	@Override
 	AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
 		return new DataBlockWrapper(k, indices, structure, varCov);
@@ -120,7 +130,12 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 		parmEst.setValueAt(2, 0, 2d);
 		parmEst.setValueAt(3, 0, .92);
 		
-		this.indexCorrelationParameter = 3;
+		fixedEffectsParameterIndices = new ArrayList<Integer>();
+		fixedEffectsParameterIndices.add(0);
+		fixedEffectsParameterIndices.add(1);
+		fixedEffectsParameterIndices.add(2);
+		
+		indexCorrelationParameter = 3;
 
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -137,6 +152,24 @@ public class RichardsChapmanModelImplementation extends AbstractModelImplementat
 
 		return gd;
 	}
+
+	@Override
+	Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1) {
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
+		
+		double exp = Math.exp(-b2 * ageYr);
+		double root = 1 - exp;
+		
+		Matrix derivatives = new Matrix(3,1);
+		derivatives.setValueAt(0, 0, Math.pow(root, b3));
+		derivatives.setValueAt(1, 0, b1 * b3 * Math.pow(root, b3 - 1) * exp * ageYr);
+		derivatives.setValueAt(2, 0, b1 * Math.pow(root, b3) * Math.log(root));
+		return derivatives;
+	}
+
+
 
 	
 }

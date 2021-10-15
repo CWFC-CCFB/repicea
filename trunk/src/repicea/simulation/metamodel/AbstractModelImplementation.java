@@ -18,13 +18,13 @@
  */
 package repicea.simulation.metamodel;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation.DataBlockWrapper;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -62,8 +62,10 @@ abstract class AbstractModelImplementation {
 
 	
 	protected List<Bound> bounds;
-	protected Matrix parameters;
+	private Matrix parameters;
+	private Matrix parmsVarCov;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
+	protected List<Integer> fixedEffectsParameterIndices;
 
 	/**
 	 * Internal constructor
@@ -92,10 +94,25 @@ abstract class AbstractModelImplementation {
 
 	abstract AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov);
 
-	abstract Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect);
+	abstract Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance);
 
+	final Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
+		return generatePredictions(dbw, randomEffect, false);
+	}
+	
 	abstract double getPrediction(double ageYr, double timeSinceBeginning, double r1);
+	
+	abstract Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1);
 
+	final double getPredictionVariance(double ageYr, double timeSinceBeginning, double r1) {
+		if (parmsVarCov == null) {
+			throw new InvalidParameterException("The variance-covariance matrix of the parameter estimates has not been set!");
+		}
+		Matrix firstDerivatives = getFirstDerivative(ageYr, timeSinceBeginning, r1);
+		Matrix variance = firstDerivatives.transpose().multiply(parmsVarCov.getSubMatrix(fixedEffectsParameterIndices, fixedEffectsParameterIndices)).multiply(firstDerivatives);
+		return variance.getValueAt(0, 0);
+	}
+	
 	/**
 	 * Return the loglikelihood for the model implementation. This likelihood is used in 
 	 * the Metropolis-Hastings algorithm.
@@ -111,18 +128,31 @@ abstract class AbstractModelImplementation {
 		}
 
 	}
+	
+	Matrix getParameters() {
+		return parameters;
+	}
+	
+	Matrix getParmsVarCov() {
+		return parmsVarCov;
+	}
+	
+	void setParmsVarCov(Matrix m) {
+		parmsVarCov = m;
+	}
 
-	Matrix getVectorOfPopulationAveragedPredictions() {
+	Matrix getVectorOfPopulationAveragedPredictionsAndVariances() {
 		int size = 0;
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
 			size += dbw.indices.size();
 		}
-		Matrix predictions = new Matrix(size,1);
+		Matrix predictions = new Matrix(size,2);
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
-			Matrix y_i = generatePredictions(dbw, 0d);
+			Matrix y_i = generatePredictions(dbw, 0d, true);
 			for (int i = 0; i < dbw.indices.size(); i++) {
 				int index = dbw.indices.get(i);
 				predictions.setValueAt(index, 0, y_i.getValueAt(i, 0));
+				predictions.setValueAt(index, 1, y_i.getValueAt(i, 1));
 			}
 		}
 		return predictions;

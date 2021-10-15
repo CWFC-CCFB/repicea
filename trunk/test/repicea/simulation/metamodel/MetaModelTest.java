@@ -26,12 +26,10 @@ import java.util.List;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
-import repicea.stats.data.DataSet;
 import repicea.util.ObjectUtility;
 
 public class MetaModelTest {
@@ -89,11 +87,11 @@ public class MetaModelTest {
 		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange_AliveVolume_ConiferousSpecies.zml";
 		MetaModel m = MetaModel.Load(metaModelFilename);
 		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
-		m.printSummary();
-		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapman);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
-		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanWithRandomEffect);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
+//		m.printSummary();
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapman);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
+//		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanWithRandomEffect);
+//		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivative);
 		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.RichardsChapmanDerivativeWithRandomEffect);
