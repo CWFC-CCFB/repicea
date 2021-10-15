@@ -277,8 +277,9 @@ public class MetaModel implements Saveable {
 			
 			while (!accepted && innerIter < nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
-				if (model.checkBounds(newParms)) {
-					llk = model.getLogLikelihood(newParms);
+				double parmsDensity = model.getParmsDensity(newParms);
+				if (parmsDensity > 0d) {
+					llk = model.getLogLikelihood(newParms) + Math.log(parmsDensity);
 					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
 					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
 					trials++;
