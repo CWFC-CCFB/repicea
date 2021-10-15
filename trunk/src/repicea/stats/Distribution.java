@@ -27,7 +27,10 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 
 
 /**
- * The Distribution interface provides the basic function for a probability density (or mass) function.
+ * The Distribution interface provides the basic function for the GaussianDistribution, StudentTDistribution and other 
+ * classes of the repicea.stat.distribution package. The interface provides the getRandomRealization() method which
+ * returns a random deviate of the distribution. For the implementation of probability density (or mass) functions, see
+ * the repicea.stat.distribution.utility package.
  * @author Mathieu Fortin - August 2012
  */
 public interface Distribution extends CentralMomentsGettable, Serializable {
