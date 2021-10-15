@@ -43,11 +43,11 @@ public class RichardsChapmanModelWithRandomEffectImplementation extends Richards
 
 	
 	Matrix getVarianceRandomEffect() {
-		return parameters.getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
+		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
 	}
 
 	protected double getCorrelationParameter() {
-		return parameters.getValueAt(indexCorrelationParameter, 0);
+		return getParameters().getValueAt(indexCorrelationParameter, 0);
 	}
 
 	@Override
@@ -77,8 +77,13 @@ public class RichardsChapmanModelWithRandomEffectImplementation extends Richards
 		parmEst.setValueAt(3, 0, 200d);
 		parmEst.setValueAt(4, 0, .92);
 		
-		this.indexRandomEffectVariance = 3;
-		this.indexCorrelationParameter = 4;
+		fixedEffectsParameterIndices = new ArrayList<Integer>();
+		fixedEffectsParameterIndices.add(0);
+		fixedEffectsParameterIndices.add(1);
+		fixedEffectsParameterIndices.add(2);
+		
+		indexRandomEffectVariance = 3;
+		indexCorrelationParameter = 4;
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {

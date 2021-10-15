@@ -80,8 +80,8 @@ public class MetaModel implements Saveable {
 	
 	private final Map<Integer, ScriptResult> scriptResults;
 	private AbstractModelImplementation model;
-	private Matrix finalParmEstimates;
-	private Matrix finalVarCov;
+//	private Matrix finalParmEstimates;
+//	private Matrix finalVarCov;
 	private double finalLLK;
 	private final String stratumGroup;
 	private String selectedOutputType;
@@ -362,19 +362,28 @@ public class MetaModel implements Saveable {
 					mcmcEstimate.addRealization(sample.parms);
 				}
 				
-				finalParmEstimates = mcmcEstimate.getMean();
+//				finalParmEstimates = mcmcEstimate.getMean();
+//				finalLLK = model.getLogLikelihood(finalParmEstimates);
+//				model.setParameters(finalParmEstimates);
+//				finalVarCov = mcmcEstimate.getVariance();
+
+				Matrix finalParmEstimates = mcmcEstimate.getMean();
+				Matrix finalVarCov = mcmcEstimate.getVariance();
 				finalLLK = model.getLogLikelihood(finalParmEstimates);
 				model.setParameters(finalParmEstimates);
-				finalVarCov = mcmcEstimate.getVariance();
+				model.setParmsVarCov(finalVarCov);
 				
-				Matrix finalPred = model.getVectorOfPopulationAveragedPredictions();
+				Matrix finalPred = model.getVectorOfPopulationAveragedPredictionsAndVariances();
 				Object[] finalPredArray = new Object[finalPred.m_iRows];
+				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
 				for (int i = 0; i < finalPred.m_iRows; i++) {
 					finalPredArray[i] = finalPred.getValueAt(i, 0);
+					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
 				}
 				
 				dataSet = dataStructure.getDataSet();
 				dataSet.addField("pred", finalPredArray);
+				dataSet.addField("predVar", finalPredVarArray);
 
 				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 				converged = true;
@@ -416,7 +425,7 @@ public class MetaModel implements Saveable {
 	}
 	
 	protected Matrix getFinalParameterEstimates() {
-		return finalParmEstimates;
+		return model.getParameters();
 	}
   	
 	/**
@@ -512,12 +521,12 @@ public class MetaModel implements Saveable {
 		if (converged) {
 			System.out.println("Final log-likelihood = " + finalLLK);
 			System.out.println("Final parameters = ");
-			System.out.println(finalParmEstimates.toString());
+			System.out.println(getFinalParameterEstimates().toString());
 			System.out.println("Final standardError = ");
-			Matrix diagStd = finalVarCov.diagonalVector().elementWisePower(0.5);
+			Matrix diagStd = model.getParmsVarCov().diagonalVector().elementWisePower(0.5);
 			System.out.println(diagStd.toString());
 			System.out.println("Correlation matrix = ");
-			Matrix corrMat = finalVarCov.elementWiseDivide(diagStd.multiply(diagStd.transpose()));
+			Matrix corrMat = model.getParmsVarCov().elementWiseDivide(diagStd.multiply(diagStd.transpose()));
 			System.out.println(corrMat);
 		} else {
 			System.out.println("The model has not converged!");

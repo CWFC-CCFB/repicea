@@ -27,9 +27,9 @@ public class RichardsChapmanDerivativeModelImplementation extends RichardsChapma
 	
 	@Override
 	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
-		double b1 = parameters.getValueAt(0, 0);
-		double b2 = parameters.getValueAt(1, 0);
-		double b3 = parameters.getValueAt(2, 0);
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
 		double pred = (b1 + r1) * Math.exp(-b2 * ageYr) * Math.pow(1 - Math.exp(-b2 * ageYr), b3);
 		return pred;
 	}
@@ -50,6 +50,11 @@ public class RichardsChapmanDerivativeModelImplementation extends RichardsChapma
 		parmEst.setValueAt(2, 0, 2d);
 		parmEst.setValueAt(3, 0, .92);
 		
+		fixedEffectsParameterIndices = new ArrayList<Integer>();
+		fixedEffectsParameterIndices.add(0);
+		fixedEffectsParameterIndices.add(1);
+		fixedEffectsParameterIndices.add(2);
+
 		this.indexCorrelationParameter = 3;
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
@@ -67,6 +72,24 @@ public class RichardsChapmanDerivativeModelImplementation extends RichardsChapma
 
 		return gd;
 	}
+
+	@Override
+	Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1) {
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
+		
+		double exp = Math.exp(-b2 * ageYr);
+		double root = 1 - exp;
+		
+		Matrix derivatives = new Matrix(3,1);
+		derivatives.setValueAt(0, 0, exp * Math.pow(root, b3));
+		derivatives.setValueAt(1, 0, - ageYr * b1 * exp * Math.pow(root, b3) + 
+				b1 * exp * b3 * Math.pow(root, b3 - 1) * exp * ageYr);
+		derivatives.setValueAt(2, 0, b1 * exp * Math.pow(root, b3) * Math.log(root));
+		return derivatives;
+	}
+
 
 	
 }

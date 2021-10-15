@@ -15,10 +15,10 @@ public class RichardsChapmanModelWithTimeAndRandomEffectsImplementation extends 
 	
 	@Override
 	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
-		double b1 = parameters.getValueAt(0, 0);
-		double b2 = parameters.getValueAt(1, 0);
-		double b3 = parameters.getValueAt(2, 0);
-		double b4 = parameters.getValueAt(3, 0);
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
+		double b4 = getParameters().getValueAt(3, 0);
 		double pred = (b1 + b4 * timeSinceBeginning + r1) * Math.pow(1 - Math.exp(-b2 * ageYr), b3);
 		return pred;
 	}
