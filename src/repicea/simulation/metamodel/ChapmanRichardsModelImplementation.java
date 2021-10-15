@@ -26,6 +26,7 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.distributions.UniformDistribution;
 
 public class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 
@@ -162,11 +163,20 @@ public class ChapmanRichardsModelImplementation extends AbstractModelImplementat
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		bounds = new ArrayList<Bound>();
-		bounds.add(new Bound(0,400));
-		bounds.add(new Bound(0.0001, 0.1));
-		bounds.add(new Bound(1,6));
-		bounds.add(new Bound(.90,.99));
+		Matrix lowerBound = new Matrix(4,1);
+		Matrix upperBound = new Matrix(4,1);
+		lowerBound.setValueAt(0, 0, 0);
+		upperBound.setValueAt(0, 0, 400);
+		
+		lowerBound.setValueAt(1, 0, 0.0001);
+		upperBound.setValueAt(1, 0, 0.1);
+		
+		lowerBound.setValueAt(2, 0, 1);
+		upperBound.setValueAt(2, 0, 6);
+		
+		lowerBound.setValueAt(3, 0, .90);
+		upperBound.setValueAt(3, 0, .99);
+		priors = new UniformDistribution(lowerBound, upperBound);
 
 		return gd;
 	}

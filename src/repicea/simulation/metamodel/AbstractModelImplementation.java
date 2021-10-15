@@ -25,10 +25,10 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.distributions.UniformDistribution;
 
 /**
  * A package class to handle the different type of meta-models (e.g. Richards-Chapman and others).
@@ -36,32 +36,32 @@ import repicea.stats.distributions.GaussianDistribution;
  */
 abstract class AbstractModelImplementation {
 
-	static class Bound {
-		final double lower;
-		final double upper;
-		final double extent;
-		
-		Bound(double lower, double upper) {
-			this.lower = lower;
-			this.upper = upper;
-			this.extent = this.upper - lower;
-		}
-
-		boolean checkValue(double value) {
-			if (value < lower || value > upper) {
-				return false;
-			} else {
-				return true;
-			}
-		}
-		
-		double getRandomValue() {
-			return lower + extent * StatisticalUtility.getRandom().nextDouble(); 
-		}
-	}
+//	static class Bound {
+//		final double lower;
+//		final double upper;
+//		final double extent;
+//		
+//		Bound(double lower, double upper) {
+//			this.lower = lower;
+//			this.upper = upper;
+//			this.extent = this.upper - lower;
+//		}
+//
+//		boolean checkValue(double value) {
+//			if (value < lower || value > upper) {
+//				return false;
+//			} else {
+//				return true;
+//			}
+//		}
+//		
+//		double getRandomValue() {
+//			return lower + extent * StatisticalUtility.getRandom().nextDouble(); 
+//		}
+//	}
 
 	
-	protected List<Bound> bounds;
+	protected UniformDistribution priors;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
@@ -160,21 +160,12 @@ abstract class AbstractModelImplementation {
 
 	abstract GaussianDistribution getStartingParmEst(double coefVar);
 
-	boolean checkBounds(Matrix parms) {
-		for (int i = 0; i < parms.m_iRows; i++) {
-			if (!bounds.get(i).checkValue(parms.getValueAt(i, 0))) {
-				return false;
-			} 
-		}
-		return true;
+	double getParmsDensity(Matrix parms) {
+		return priors.getProbabilityDensity(parms);
 	}
 	
 	Matrix getRandomValueBetweenBounds() {
-		Matrix parms = new Matrix(bounds.size(), 1);
-		for (int i = 0; i < bounds.size(); i++) {
-			parms.setValueAt(i, 0, bounds.get(i).getRandomValue());
-		}
-		return parms;
+		return priors.getRandomRealization();
 	}
 
 }
