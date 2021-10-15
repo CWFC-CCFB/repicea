@@ -109,8 +109,8 @@ public class ChapmanRichardsModelWithRandomEffectImplementation extends ChapmanR
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		Matrix lowerBound = new Matrix(4,1);
-		Matrix upperBound = new Matrix(4,1);
+		Matrix lowerBound = new Matrix(5,1);
+		Matrix upperBound = new Matrix(5,1);
 		lowerBound.setValueAt(0, 0, 0);
 		upperBound.setValueAt(0, 0, 400);
 		
