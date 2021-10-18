@@ -88,17 +88,18 @@ public class MetaModelTest {
 	public static void main(String[] args) throws IOException {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
-		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange_root.zml";
+		String vegPot = "RE2";
+		String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
 		MetaModel m = MetaModel.Load(metaModelFilename);
 //		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichards);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
+		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichards.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsWithRandomEffect);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanWithRandomEffect.csv");
+		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichardsWithRandomEffect.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsDerivative);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivative.csv");
+		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichardsDerivative.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
-		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapmanDerivativeWithRandomEffect.csv");
+		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichardsDerivativeWithRandomEffect.csv");
 		
 //		m.exportMetropolisHastingsSample(path + "mhSample.csv");
 //		m.exportFinalDataSet(path + "QC_FMU02664_Art2009_Plus4Degrees_" + m.getStratumGroup() + "_Coniferous.csv");
