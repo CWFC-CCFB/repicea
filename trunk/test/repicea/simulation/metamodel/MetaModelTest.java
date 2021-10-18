@@ -88,9 +88,9 @@ public class MetaModelTest {
 	public static void main(String[] args) throws IOException {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
-		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange_AliveVolume_ConiferousSpecies.zml";
+		String metaModelFilename = path + "QC_FMU02664_RS2_NoChange_root.zml";
 		MetaModel m = MetaModel.Load(metaModelFilename);
-		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
+//		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichards);
 		m.exportFinalDataSet(outputPath + File.separator + "RS2_RichardsChapman.csv");
 		m.fitModel("AliveVolume_ConiferousSpecies", ModelImplEnum.ChapmanRichardsWithRandomEffect);
