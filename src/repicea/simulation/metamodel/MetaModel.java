@@ -79,12 +79,12 @@ public class MetaModel implements Saveable {
 	
 	private final Map<Integer, ScriptResult> scriptResults;
 	private AbstractModelImplementation model;
-	private double finalLLK;
-	private double marginalLikelihood;
+//	private double finalLLK;
+//	private double marginalLikelihood;
 	private final String stratumGroup;
 	private String selectedOutputType;
 	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
-	private DataSet dataSet;
+//	private DataSet dataSet;
 	private ModelImplEnum modelImplEnum; 
 
 	/**
@@ -230,7 +230,6 @@ public class MetaModel implements Saveable {
 				}
 			}
 		}
-		
  		Collections.sort(myFirstList);
 		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
 		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
@@ -277,9 +276,9 @@ public class MetaModel implements Saveable {
 			
 			while (!accepted && innerIter < nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
-				double parmsDensity = model.getParmsDensity(newParms);
-				if (parmsDensity > 0d) {
-					llk = model.getLogLikelihood(newParms) + Math.log(parmsDensity);
+				double parmsPriorDensity = model.getParmsPriorDensity(newParms);
+				if (parmsPriorDensity > 0d) {
+					llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
 					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
 					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
 					trials++;
@@ -309,7 +308,53 @@ public class MetaModel implements Saveable {
 		displayMessage("Acceptance ratio = " + acceptanceRatio);
 		return completed;
 	}
+	
+	
 
+	private double getLnProbY(Matrix point, 
+			List<MetaModelMetropolisHastingsSample> posteriorSamples, 
+			GaussianDistribution samplingDist) {
+		double parmsPriorDensity = model.getParmsPriorDensity(point);
+		double llkOfThisPoint = model.getLogLikelihood(point) + Math.log(parmsPriorDensity);
+		double sumIntegrand = 0;
+		double densityFromSamplingDist = 0;
+		for (MetaModelMetropolisHastingsSample s : posteriorSamples) {
+			samplingDist.setMean(s.parms);
+			double ratio = Math.exp(llkOfThisPoint - s.llk);
+			if (ratio > 1d) {
+				ratio = 1;
+			}
+			densityFromSamplingDist = samplingDist.getProbabilityDensity(point); 
+			sumIntegrand += ratio * densityFromSamplingDist;
+		}
+		sumIntegrand /= posteriorSamples.size();
+		
+		samplingDist.setMean(point);
+		double sumRatio = 0d;
+		int nbRealizations = posteriorSamples.size();
+		for (int j = 0; j < nbRealizations; j++) {
+			Matrix newParms = samplingDist.getRandomRealization();
+			parmsPriorDensity = model.getParmsPriorDensity(newParms);
+			double ratio;
+			if (parmsPriorDensity > 0d) {
+				double llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
+				ratio = Math.exp(llk - llkOfThisPoint);
+				if (ratio > 1d) {
+					ratio = 1d;
+				}
+			} else {
+				ratio = 0d;
+			}
+			sumRatio += ratio;
+		}
+		sumRatio /= nbRealizations;
+		double pi_theta_y = sumIntegrand / sumRatio;
+		double log_m_hat = llkOfThisPoint - Math.log(pi_theta_y);
+		return log_m_hat;
+	}
+	
+	
+	
 	/**
 	 * Return the possible output types given what they are in the ScriptResult
 	 * instances.
@@ -342,7 +387,6 @@ public class MetaModel implements Saveable {
 		}
 		selectedOutputType = outputType;
 		coefVar = 0.01;
-		dataSet = null;
 		try {
 			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
 			model = getInnerModel(dataStructure);
@@ -352,29 +396,20 @@ public class MetaModel implements Saveable {
 			gibbsSample.add(firstSet); // first valid sample
 			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
 			if (completed) {
-				dataSet = dataStructure.getDataSet();
-				int n = dataSet.getNumberOfObservations();
 
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
-				marginalLikelihood = 0d;
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
 				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 					mcmcEstimate.addRealization(sample.parms);
-					marginalLikelihood += Math.exp(sample.llk + n);
 				}
-				marginalLikelihood /= this.finalMetropolisHastingsSampleSelection.size();
-				marginalLikelihood /= Math.exp(n);
-				marginalLikelihood = Math.log(marginalLikelihood);
 				
-//				finalParmEstimates = mcmcEstimate.getMean();
-//				finalLLK = model.getLogLikelihood(finalParmEstimates);
-//				model.setParameters(finalParmEstimates);
-//				finalVarCov = mcmcEstimate.getVariance();
-
 				Matrix finalParmEstimates = mcmcEstimate.getMean();
 				Matrix finalVarCov = mcmcEstimate.getVariance();
-				finalLLK = model.getLogLikelihood(finalParmEstimates);
-				
+				double lnProbY = getLnProbY(finalParmEstimates, 
+						finalMetropolisHastingsSampleSelection, 
+						gaussDist);
+				model.lnProbY = lnProbY;
+//				finalLLK = model.getLogLikelihood(finalParmEstimates);
 				model.setParameters(finalParmEstimates);
 				model.setParmsVarCov(finalVarCov);
 				
@@ -386,8 +421,8 @@ public class MetaModel implements Saveable {
 					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
 				}
 				
-				dataSet.addField("pred", finalPredArray);
-				dataSet.addField("predVar", finalPredVarArray);
+				model.structure.getDataSet().addField("pred", finalPredArray);
+				model.structure.getDataSet().addField("predVar", finalPredVarArray);
 
 				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 				converged = true;
@@ -448,7 +483,7 @@ public class MetaModel implements Saveable {
 	 */
 	public void exportFinalDataSet(String filename) throws IOException {
 		if (converged) {
-			dataSet.save(filename);
+			model.structure.getDataSet().save(filename);
 		}
 	}
 
@@ -495,7 +530,7 @@ public class MetaModel implements Saveable {
 
 	
 	protected DataSet getFinalDataSet() {
-		return dataSet;
+		return model.structure.getDataSet();
 	}
 
 	@Override
@@ -522,8 +557,8 @@ public class MetaModel implements Saveable {
 
 	public void printSummary() {
 		if (converged) {
-			System.out.println("Final log-likelihood = " + finalLLK);
-			System.out.println("Final marginal log-likelihood = " + marginalLikelihood);
+			System.out.println("Final log-likelihood = " + model.getLogLikelihood(getFinalParameterEstimates()));
+			System.out.println("Final marginal log-likelihood = " + model.lnProbY);
 			System.out.println("Final parameters = ");
 			System.out.println(getFinalParameterEstimates().toString());
 			System.out.println("Final standardError = ");

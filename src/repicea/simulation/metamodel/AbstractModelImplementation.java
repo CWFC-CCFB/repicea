@@ -37,11 +37,12 @@ import repicea.stats.distributions.GaussianDistribution;
 abstract class AbstractModelImplementation {
 
 	protected ContinuousDistribution priors;
-	final HierarchicalStatisticalDataStructure structure;
+	protected final HierarchicalStatisticalDataStructure structure;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
 	protected List<Integer> fixedEffectsParameterIndices;
+	protected double lnProbY;
 
 	/**
 	 * Internal constructor
@@ -136,9 +137,8 @@ abstract class AbstractModelImplementation {
 
 	abstract GaussianDistribution getStartingParmEst(double coefVar);
 
-	double getParmsDensity(Matrix parms) {
+	double getParmsPriorDensity(Matrix parms) {
 		return priors.getProbabilityDensity(parms);
 	}
-	
 
 }
