@@ -79,9 +79,8 @@ public class MetaModel implements Saveable {
 	
 	private final Map<Integer, ScriptResult> scriptResults;
 	private AbstractModelImplementation model;
-//	private Matrix finalParmEstimates;
-//	private Matrix finalVarCov;
 	private double finalLLK;
+	private double marginalLikelihood;
 	private final String stratumGroup;
 	private String selectedOutputType;
 	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
@@ -221,8 +220,8 @@ public class MetaModel implements Saveable {
 		double llk = Double.NEGATIVE_INFINITY;
 		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
 		while (myFirstList.size() < desiredSize) {
-			Matrix parms = model.getRandomValueBetweenBounds();
-			llk = model.getLogLikelihood(parms);
+			Matrix parms = model.priors.getRandomRealization();
+			llk = model.getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
 			if (Math.exp(llk) > 0d) {
 				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
 				int nbSamples = myFirstList.size();
@@ -231,7 +230,8 @@ public class MetaModel implements Saveable {
 				}
 			}
 		}
-		Collections.sort(myFirstList);
+		
+ 		Collections.sort(myFirstList);
 		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
 		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
 		if (MetaModel.Verbose) {
@@ -342,7 +342,6 @@ public class MetaModel implements Saveable {
 		}
 		selectedOutputType = outputType;
 		coefVar = 0.01;
-		boolean converged = false;
 		dataSet = null;
 		try {
 			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
@@ -353,11 +352,19 @@ public class MetaModel implements Saveable {
 			gibbsSample.add(firstSet); // first valid sample
 			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
 			if (completed) {
+				dataSet = dataStructure.getDataSet();
+				int n = dataSet.getNumberOfObservations();
+
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
+				marginalLikelihood = 0d;
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
 				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 					mcmcEstimate.addRealization(sample.parms);
+					marginalLikelihood += Math.exp(sample.llk + n);
 				}
+				marginalLikelihood /= this.finalMetropolisHastingsSampleSelection.size();
+				marginalLikelihood /= Math.exp(n);
+				marginalLikelihood = Math.log(marginalLikelihood);
 				
 //				finalParmEstimates = mcmcEstimate.getMean();
 //				finalLLK = model.getLogLikelihood(finalParmEstimates);
@@ -367,6 +374,7 @@ public class MetaModel implements Saveable {
 				Matrix finalParmEstimates = mcmcEstimate.getMean();
 				Matrix finalVarCov = mcmcEstimate.getVariance();
 				finalLLK = model.getLogLikelihood(finalParmEstimates);
+				
 				model.setParameters(finalParmEstimates);
 				model.setParmsVarCov(finalVarCov);
 				
@@ -378,7 +386,6 @@ public class MetaModel implements Saveable {
 					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
 				}
 				
-				dataSet = dataStructure.getDataSet();
 				dataSet.addField("pred", finalPredArray);
 				dataSet.addField("predVar", finalPredVarArray);
 
@@ -391,8 +398,7 @@ public class MetaModel implements Saveable {
  			converged = false;
  			selectedOutputType = null;
 		} 
-		this.converged = converged;
-		return this.converged;
+		return converged;
 	}
 
 	private void displayMessage(Object obj) {
@@ -517,6 +523,7 @@ public class MetaModel implements Saveable {
 	public void printSummary() {
 		if (converged) {
 			System.out.println("Final log-likelihood = " + finalLLK);
+			System.out.println("Final marginal log-likelihood = " + marginalLikelihood);
 			System.out.println("Final parameters = ");
 			System.out.println(getFinalParameterEstimates().toString());
 			System.out.println("Final standardError = ");

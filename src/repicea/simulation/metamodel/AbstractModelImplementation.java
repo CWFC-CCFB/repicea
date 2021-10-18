@@ -27,8 +27,8 @@ import java.util.Map;
 import repicea.math.Matrix;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.distributions.UniformDistribution;
 
 /**
  * A package class to handle the different type of meta-models (e.g. Richards-Chapman and others).
@@ -36,32 +36,8 @@ import repicea.stats.distributions.UniformDistribution;
  */
 abstract class AbstractModelImplementation {
 
-//	static class Bound {
-//		final double lower;
-//		final double upper;
-//		final double extent;
-//		
-//		Bound(double lower, double upper) {
-//			this.lower = lower;
-//			this.upper = upper;
-//			this.extent = this.upper - lower;
-//		}
-//
-//		boolean checkValue(double value) {
-//			if (value < lower || value > upper) {
-//				return false;
-//			} else {
-//				return true;
-//			}
-//		}
-//		
-//		double getRandomValue() {
-//			return lower + extent * StatisticalUtility.getRandom().nextDouble(); 
-//		}
-//	}
-
-	
-	protected UniformDistribution priors;
+	protected ContinuousDistribution priors;
+	final HierarchicalStatisticalDataStructure structure;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
@@ -73,11 +49,11 @@ abstract class AbstractModelImplementation {
 	 * @param varCov
 	 */
 	AbstractModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
+		this.structure = structure;
 		Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
 		Map<String, DataBlock> ageMap = structure.getHierarchicalStructure(); 
 		for (String ageKey : ageMap.keySet()) {
 			DataBlock db = ageMap.get(ageKey);
-			Object o = db.keySet();
 			for (String speciesGroupKey : db.keySet()) {
 				DataBlock innerDb = db.get(speciesGroupKey);
 				formattedMap.put(ageKey + "_" + speciesGroupKey, innerDb);
@@ -164,8 +140,5 @@ abstract class AbstractModelImplementation {
 		return priors.getProbabilityDensity(parms);
 	}
 	
-	Matrix getRandomValueBetweenBounds() {
-		return priors.getRandomRealization();
-	}
 
 }

@@ -21,11 +21,10 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
-import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 
 @SuppressWarnings("serial")
-public class UniformDistribution implements Distribution, BoundedDistribution {
+public class UniformDistribution implements ContinuousDistribution, BoundedDistribution {
 
 	private final BasicBound upperBound;
 	private final BasicBound lowerBound;
@@ -90,6 +89,7 @@ public class UniformDistribution implements Distribution, BoundedDistribution {
 	 * @param values a Matrix instance that stands for a column vector.
 	 * @return the composite probability density
 	 */
+	@Override
 	public double getProbabilityDensity(Matrix values) {
 		if (values == null || !values.isColumnVector()) {
 			throw new InvalidParameterException("The values parameter must be a column vector!");

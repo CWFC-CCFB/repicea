@@ -93,6 +93,6 @@ public interface Distribution extends CentralMomentsGettable, Serializable {
 	 * @return the observation in a Matrix instance
 	 */
 	public Matrix getRandomRealization();
-	
-	
+
+
 }

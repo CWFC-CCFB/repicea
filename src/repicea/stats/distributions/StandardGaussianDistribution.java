@@ -26,7 +26,7 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.utility.GaussianUtility;
 
 @SuppressWarnings("serial")
-public class StandardGaussianDistribution implements Distribution {
+public class StandardGaussianDistribution implements ContinuousDistribution {
 
 	private static StandardGaussianDistribution Singleton;
 	
@@ -116,6 +116,7 @@ public class StandardGaussianDistribution implements Distribution {
 	 * @param yValues a single double value or a Matrix instance
 	 * @return a double
 	 */
+	@Override
 	public double getProbabilityDensity(Matrix yValues) {
 		if (yValues == null || !yValues.isTheSameDimension(getMu())) {
 			throw new UnsupportedOperationException("Vector y is either null or its dimensions are different from those of mu!");
@@ -125,10 +126,6 @@ public class StandardGaussianDistribution implements Distribution {
 				double mu = getMu().getValueAt(0, 0);
 				double variance = getSigma2().getValueAt(0, 0);
 				return GaussianUtility.getProbabilityDensity(y, mu, variance);
-//				double diff =  yValues.getValueAt(0, 0) - getMu().getValueAt(0, 0);
-//				double secondValue = 1d / Math.sqrt(2 * Math.PI * sigma2.getValueAt(0, 0)) * 
-//						Math.exp(- 0.5 * diff * diff / getSigma2().getValueAt(0, 0)); 
-//				return secondValue;
 			} else {
 				int k = yValues.m_iRows;
 				Matrix residuals = yValues.subtract(getMu());
