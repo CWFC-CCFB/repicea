@@ -23,8 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,11 +34,7 @@ import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
-import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
-import repicea.stats.data.HierarchicalStatisticalDataStructure;
-import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.estimates.MonteCarloEstimate;
@@ -68,11 +62,28 @@ public class MetaModel implements Saveable {
 		ChapmanRichardsDerivativeWithRandomEffect;
 	}
 	
-	private int nbBurnIn = 5000;
-	private int nbRealizations = 500000 + nbBurnIn;
-	private int nbInternalIter = 100000;
-	private int oneEach = 50;
-	private int nbInitialGrid = 10000;	
+	static class SimulationParameters implements Cloneable {
+		protected int nbBurnIn = 5000;
+		protected int nbRealizations = 500000 + nbBurnIn;
+		protected int nbInternalIter = 100000;
+		protected int oneEach = 50;
+		protected int nbInitialGrid = 10000;	
+		
+		SimulationParameters() {}
+		
+		@Override
+		public SimulationParameters clone() {
+			try {
+				return (SimulationParameters) super.clone();
+			} catch (CloneNotSupportedException e) {
+				e.printStackTrace();
+				return null;
+			}
+		}
+	}
+	
+	
+	protected SimulationParameters simParms;
 
 	private double coefVar;
 	private boolean converged;
@@ -95,11 +106,12 @@ public class MetaModel implements Saveable {
 	}
 
 	private void setDefaultSettings() {
-		nbBurnIn = 5000;
-		nbRealizations = 500000 + nbBurnIn;
-		nbInternalIter = 100000;
-		oneEach = 50;
-		nbInitialGrid = 10000;	
+		simParms = new SimulationParameters();
+//		nbBurnIn = 5000;
+//		nbRealizations = 500000 + nbBurnIn;
+//		nbInternalIter = 100000;
+//		oneEach = 50;
+//		nbInitialGrid = 10000;	
 		if (modelImplEnum == null) {
 			modelImplEnum = ModelImplEnum.ChapmanRichardsWithRandomEffect;
 		}
@@ -147,16 +159,16 @@ public class MetaModel implements Saveable {
 		AbstractModelImplementation model;
 		switch(modelImplEnum) {
 		case ChapmanRichards:
-			model = new ChapmanRichardsModelImplementation(stratumGroup, outputType, scriptResults);
+			model = new ChapmanRichardsModelImplementation(outputType, this);
 			break;
 		case ChapmanRichardsWithRandomEffect:
-			model = new ChapmanRichardsModelWithRandomEffectImplementation(stratumGroup, outputType, scriptResults);
+			model = new ChapmanRichardsModelWithRandomEffectImplementation(outputType, this);
 			break;
 		case ChapmanRichardsDerivative:
-			model = new ChapmanRichardsDerivativeModelImplementation(stratumGroup, outputType, scriptResults);
+			model = new ChapmanRichardsDerivativeModelImplementation(outputType, this);
 			break;
 		case ChapmanRichardsDerivativeWithRandomEffect:
-			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(stratumGroup, outputType, scriptResults);
+			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(outputType, this);
 			break;
 		default:
 			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
@@ -351,13 +363,9 @@ public class MetaModel implements Saveable {
 			model = getInnerModel(outputType);
 			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
 			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-			MetaModelMetropolisHastingsSample firstSet = model.findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
+			MetaModelMetropolisHastingsSample firstSet = model.findFirstSetOfParameters(gaussDist.getMean().m_iRows, simParms.nbInitialGrid);
 			gibbsSample.add(firstSet); // first valid sample
-			boolean completed = model.generateMetropolisSample(nbRealizations, 
-					nbBurnIn, 
-					nbInternalIter,
-					gibbsSample, 
-					gaussDist);
+			boolean completed = model.generateMetropolisSample(gibbsSample, gaussDist);
 			if (completed) {
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
@@ -404,11 +412,11 @@ public class MetaModel implements Saveable {
 	
 	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> gibbsSample) {
 		List<MetaModelMetropolisHastingsSample> finalGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-		displayMessage("Discarding " + this.nbBurnIn + " samples as burn in.");
-		for (int i = nbBurnIn; i < gibbsSample.size(); i+= oneEach) {
+		displayMessage("Discarding " + simParms.nbBurnIn + " samples as burn in.");
+		for (int i = simParms.nbBurnIn; i < gibbsSample.size(); i+= simParms.oneEach) {
 			finalGibbsSample.add(gibbsSample.get(i));
 		}
-		displayMessage("Selecting one every " + this.oneEach + " samples as final selection.");
+		displayMessage("Selecting one every " + simParms.oneEach + " samples as final selection.");
 		return finalGibbsSample;
 	}
 
@@ -517,7 +525,7 @@ public class MetaModel implements Saveable {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
 		Object obj = deserializer.readObject();
 		MetaModel metaModel = (MetaModel) obj;
-		if (metaModel.nbBurnIn == 0 || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
+		if (metaModel.simParms == null || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
 			metaModel.setDefaultSettings();
 		}
 		return metaModel;
