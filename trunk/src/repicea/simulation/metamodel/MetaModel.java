@@ -36,8 +36,6 @@ import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.estimates.MonteCarloEstimate;
 
 /**
  * A package class that handles the data set and fits the meta model. It implements
@@ -85,13 +83,11 @@ public class MetaModel implements Saveable {
 	
 	protected SimulationParameters simParms;
 
-	private double coefVar;
-	private boolean converged;
+//	private boolean converged;
 	
 	protected final Map<Integer, ScriptResult> scriptResults;
 	private AbstractModelImplementation model;
 	private final String stratumGroup;
-	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private ModelImplEnum modelImplEnum; 
 
 	
@@ -107,11 +103,6 @@ public class MetaModel implements Saveable {
 
 	private void setDefaultSettings() {
 		simParms = new SimulationParameters();
-//		nbBurnIn = 5000;
-//		nbRealizations = 500000 + nbBurnIn;
-//		nbInternalIter = 100000;
-//		oneEach = 50;
-//		nbInitialGrid = 10000;	
 		if (modelImplEnum == null) {
 			modelImplEnum = ModelImplEnum.ChapmanRichardsWithRandomEffect;
 		}
@@ -131,7 +122,7 @@ public class MetaModel implements Saveable {
 	 * @return
 	 */
 	public boolean hasConverged() {
-		return converged;
+		return model != null ? model.hasConverged() : false;
 	}
 	
 	void add(int initialAge, ScriptResult result) {
@@ -148,7 +139,8 @@ public class MetaModel implements Saveable {
 		}
 		if (canBeAdded) {
 			scriptResults.put(initialAge, result);
-			converged = false;  // reset convergence to false since new results have been added
+			model = null;	// so that converge is set to false by default
+//			converged = false;  // reset convergence to false since new results have been added
 		} else {
 			throw new InvalidParameterException("The result parameter is not compatible with previous results in the map!");
 		}
@@ -272,47 +264,6 @@ public class MetaModel implements Saveable {
 	
 	
 
-	private double getLnProbY(Matrix point, 
-			List<MetaModelMetropolisHastingsSample> posteriorSamples, 
-			GaussianDistribution samplingDist) {
-		double parmsPriorDensity = model.getParmsPriorDensity(point);
-		double llkOfThisPoint = model.getLogLikelihood(point) + Math.log(parmsPriorDensity);
-		double sumIntegrand = 0;
-		double densityFromSamplingDist = 0;
-		for (MetaModelMetropolisHastingsSample s : posteriorSamples) {
-			samplingDist.setMean(s.parms);
-			double ratio = Math.exp(llkOfThisPoint - s.llk);
-			if (ratio > 1d) {
-				ratio = 1;
-			}
-			densityFromSamplingDist = samplingDist.getProbabilityDensity(point); 
-			sumIntegrand += ratio * densityFromSamplingDist;
-		}
-		sumIntegrand /= posteriorSamples.size();
-		
-		samplingDist.setMean(point);
-		double sumRatio = 0d;
-		int nbRealizations = posteriorSamples.size();
-		for (int j = 0; j < nbRealizations; j++) {
-			Matrix newParms = samplingDist.getRandomRealization();
-			parmsPriorDensity = model.getParmsPriorDensity(newParms);
-			double ratio;
-			if (parmsPriorDensity > 0d) {
-				double llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
-				ratio = Math.exp(llk - llkOfThisPoint);
-				if (ratio > 1d) {
-					ratio = 1d;
-				}
-			} else {
-				ratio = 0d;
-			}
-			sumRatio += ratio;
-		}
-		sumRatio /= nbRealizations;
-		double pi_theta_y = sumIntegrand / sumRatio;
-		double log_m_hat = llkOfThisPoint - Math.log(pi_theta_y);
-		return log_m_hat;
-	}
 	
 	
 	
@@ -358,73 +309,64 @@ public class MetaModel implements Saveable {
 		}
 		
 		this.modelImplEnum = e;
-		coefVar = 0.01;
+//		coefVar = 0.01;
 		try {
 			model = getInnerModel(outputType);
-			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
-			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-			MetaModelMetropolisHastingsSample firstSet = model.findFirstSetOfParameters(gaussDist.getMean().m_iRows, simParms.nbInitialGrid);
-			gibbsSample.add(firstSet); // first valid sample
-			boolean completed = model.generateMetropolisSample(gibbsSample, gaussDist);
-			if (completed) {
-				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
-				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
-				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
-					mcmcEstimate.addRealization(sample.parms);
-				}
-				
-				Matrix finalParmEstimates = mcmcEstimate.getMean();
-				Matrix finalVarCov = mcmcEstimate.getVariance();
-				double lnProbY = getLnProbY(finalParmEstimates, 
-						finalMetropolisHastingsSampleSelection, 
-						gaussDist);
-				model.lnProbY = lnProbY;
-//				finalLLK = model.getLogLikelihood(finalParmEstimates);
-				model.setParameters(finalParmEstimates);
-				model.setParmsVarCov(finalVarCov);
-				
-				Matrix finalPred = model.getVectorOfPopulationAveragedPredictionsAndVariances();
-				Object[] finalPredArray = new Object[finalPred.m_iRows];
-				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
-				for (int i = 0; i < finalPred.m_iRows; i++) {
-					finalPredArray[i] = finalPred.getValueAt(i, 0);
-					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
-				}
-				
-				model.structure.getDataSet().addField("pred", finalPredArray);
-				model.structure.getDataSet().addField("predVar", finalPredVarArray);
-
-				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
-				converged = true;
-				printSummary();				
-			}
+//			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
+//			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+//			MetaModelMetropolisHastingsSample firstSet = model.findFirstSetOfParameters(gaussDist.getMean().m_iRows, simParms.nbInitialGrid);
+//			gibbsSample.add(firstSet); // first valid sample
+//			boolean completed = model.generateMetropolisSample(gibbsSample, gaussDist);
+			model.fitModel();
+			printSummary();				
+			return hasConverged();
+//			if (completed) {
+//				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
+//				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
+//				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+//					mcmcEstimate.addRealization(sample.parms);
+//				}
+//				
+//				Matrix finalParmEstimates = mcmcEstimate.getMean();
+//				Matrix finalVarCov = mcmcEstimate.getVariance();
+//				double lnProbY = getLnProbY(finalParmEstimates, 
+//						finalMetropolisHastingsSampleSelection, 
+//						gaussDist);
+//				model.lnProbY = lnProbY;
+////				finalLLK = model.getLogLikelihood(finalParmEstimates);
+//				model.setParameters(finalParmEstimates);
+//				model.setParmsVarCov(finalVarCov);
+//				
+//				Matrix finalPred = model.getVectorOfPopulationAveragedPredictionsAndVariances();
+//				Object[] finalPredArray = new Object[finalPred.m_iRows];
+//				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
+//				for (int i = 0; i < finalPred.m_iRows; i++) {
+//					finalPredArray[i] = finalPred.getValueAt(i, 0);
+//					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
+//				}
+//				
+//				model.structure.getDataSet().addField("pred", finalPredArray);
+//				model.structure.getDataSet().addField("predVar", finalPredVarArray);
+//
+//				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
+//				converged = true;
+//				printSummary();				
+//			}
  		} catch (Exception e1) {
  			e1.printStackTrace();
- 			converged = false;
+ 			return false;
+// 			converged = false;
 // 			selectedOutputType = null;
 		} 
-		return converged;
+//		return converged;
 	}
 
-	private void displayMessage(Object obj) {
-		System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
-	}
-	
-	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> gibbsSample) {
-		List<MetaModelMetropolisHastingsSample> finalGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-		displayMessage("Discarding " + simParms.nbBurnIn + " samples as burn in.");
-		for (int i = simParms.nbBurnIn; i < gibbsSample.size(); i+= simParms.oneEach) {
-			finalGibbsSample.add(gibbsSample.get(i));
-		}
-		displayMessage("Selecting one every " + simParms.oneEach + " samples as final selection.");
-		return finalGibbsSample;
-	}
-
-	
-	
+//	private void displayMessage(Object obj) {
+//		System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
+//	}
 
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
-		if (converged) {
+		if (hasConverged()) {
 			double pred = model.getPrediction(ageYr, timeSinceInitialDateYr, 0d);
 			return pred;
 		} else {
@@ -452,7 +394,7 @@ public class MetaModel implements Saveable {
 	 * @throws IOException
 	 */
 	public void exportFinalDataSet(String filename) throws IOException {
-		if (converged) {
+		if (hasConverged()) {
 			model.structure.getDataSet().save(filename);
 		}
 	}
@@ -480,10 +422,10 @@ public class MetaModel implements Saveable {
 	 * @param filename
 	 * @throws IOException
 	 */
-	public void exportMetropolisHastingsSample(String filename) throws IOException {
-		if (converged) {
+	void exportMetropolisHastingsSample(String filename) throws IOException {
+		if (hasConverged() && model.finalMetropolisHastingsSampleSelection != null) {
 			CSVWriter writer = null;
-			for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+			for (MetaModelMetropolisHastingsSample sample : model.finalMetropolisHastingsSampleSelection) {
 				if (writer == null) {
 					writer = new CSVWriter(new File(filename), false);
 					List<FormatField> fieldNames = new ArrayList<FormatField>();
@@ -532,7 +474,7 @@ public class MetaModel implements Saveable {
 	}
 
 	public void printSummary() {
-		if (converged) {
+		if (hasConverged()) {
 			System.out.println("Final log-likelihood = " + model.getLogLikelihood(getFinalParameterEstimates()));
 			System.out.println("Final marginal log-likelihood = " + model.lnProbY);
 			System.out.println("Final parameters = ");
