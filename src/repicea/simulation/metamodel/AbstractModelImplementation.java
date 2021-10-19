@@ -37,6 +37,7 @@ import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.estimates.MonteCarloEstimate;
 
 /**
  * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
@@ -55,6 +56,8 @@ abstract class AbstractModelImplementation {
 	protected double lnProbY;
 	protected final String outputType;
 	protected final String stratumGroup;
+	protected transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
+	private boolean converged;
 
 	/**
 	 * Internal constructor.
@@ -343,5 +346,93 @@ abstract class AbstractModelImplementation {
 		displayMessage("Selecting one every " + simParms.oneEach + " samples as final selection.");
 		return finalMetropolisHastingsGibbsSample;
 	}
+	
+	void fitModel() {
+		double coefVar = 0.01;
+		try {
+			GaussianDistribution gaussDist = getStartingParmEst(coefVar);
+			List<MetaModelMetropolisHastingsSample> mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, simParms.nbInitialGrid);
+			mhSample.add(firstSet); // first valid sample
+			boolean completed = generateMetropolisSample(mhSample, gaussDist);
+			if (completed) {
+				finalMetropolisHastingsSampleSelection = retrieveFinalSample(mhSample);
+				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
+				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+					mcmcEstimate.addRealization(sample.parms);
+				}
 
+				Matrix finalParmEstimates = mcmcEstimate.getMean();
+				Matrix finalVarCov = mcmcEstimate.getVariance();
+				lnProbY = getLnProbY(finalParmEstimates, finalMetropolisHastingsSampleSelection, gaussDist);
+
+				//			finalLLK = model.getLogLikelihood(finalParmEstimates);
+				setParameters(finalParmEstimates);
+				setParmsVarCov(finalVarCov);
+
+				Matrix finalPred = getVectorOfPopulationAveragedPredictionsAndVariances();
+				Object[] finalPredArray = new Object[finalPred.m_iRows];
+				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
+				for (int i = 0; i < finalPred.m_iRows; i++) {
+					finalPredArray[i] = finalPred.getValueAt(i, 0);
+					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
+				}
+
+				structure.getDataSet().addField("pred", finalPredArray);
+				structure.getDataSet().addField("predVar", finalPredVarArray);
+
+				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
+				converged = true;
+			}
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			converged = false;
+		} 
+	}
+	
+
+	private double getLnProbY(Matrix point, 
+			List<MetaModelMetropolisHastingsSample> posteriorSamples, 
+			GaussianDistribution samplingDist) {
+		double parmsPriorDensity = getParmsPriorDensity(point);
+		double llkOfThisPoint = getLogLikelihood(point) + Math.log(parmsPriorDensity);
+		double sumIntegrand = 0;
+		double densityFromSamplingDist = 0;
+		for (MetaModelMetropolisHastingsSample s : posteriorSamples) {
+			samplingDist.setMean(s.parms);
+			double ratio = Math.exp(llkOfThisPoint - s.llk);
+			if (ratio > 1d) {
+				ratio = 1;
+			}
+			densityFromSamplingDist = samplingDist.getProbabilityDensity(point); 
+			sumIntegrand += ratio * densityFromSamplingDist;
+		}
+		sumIntegrand /= posteriorSamples.size();
+		
+		samplingDist.setMean(point);
+		double sumRatio = 0d;
+		int nbRealizations = posteriorSamples.size();
+		for (int j = 0; j < nbRealizations; j++) {
+			Matrix newParms = samplingDist.getRandomRealization();
+			parmsPriorDensity = getParmsPriorDensity(newParms);
+			double ratio;
+			if (parmsPriorDensity > 0d) {
+				double llk = getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
+				ratio = Math.exp(llk - llkOfThisPoint);
+				if (ratio > 1d) {
+					ratio = 1d;
+				}
+			} else {
+				ratio = 0d;
+			}
+			sumRatio += ratio;
+		}
+		sumRatio /= nbRealizations;
+		double pi_theta_y = sumIntegrand / sumRatio;
+		double log_m_hat = llkOfThisPoint - Math.log(pi_theta_y);
+		return log_m_hat;
+	}
+
+	boolean hasConverged() {return converged;}
+	
 }
