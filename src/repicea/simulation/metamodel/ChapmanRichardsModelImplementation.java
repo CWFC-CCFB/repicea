@@ -93,10 +93,8 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 
 	int indexCorrelationParameter;
 
-	ChapmanRichardsModelImplementation(String stratumGroup, 
-			String outputType, 
-			Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
-		super(stratumGroup, outputType, scriptResults);
+	ChapmanRichardsModelImplementation(String outputType, MetaModel model) throws StatisticalDataException {
+		super(outputType, model);
 	}
 	
 	@Override

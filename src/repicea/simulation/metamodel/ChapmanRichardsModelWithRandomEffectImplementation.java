@@ -60,10 +60,8 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends ChapmanRichards
 
 	int indexRandomEffectVariance;
 	
-	ChapmanRichardsModelWithRandomEffectImplementation(String stratumGroup,
-			String outputType, 
-			Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
-		super(stratumGroup, outputType, scriptResults);
+	ChapmanRichardsModelWithRandomEffectImplementation(String outputType, MetaModel model) throws StatisticalDataException {
+		super(outputType, model);
 	}
 
 	

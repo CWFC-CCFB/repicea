@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.metamodel.MetaModel.SimulationParameters;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
@@ -43,6 +44,8 @@ import repicea.stats.distributions.GaussianDistribution;
  */
 abstract class AbstractModelImplementation {
 
+	protected final SimulationParameters simParms;
+
 	protected ContinuousDistribution priors;
 	protected final HierarchicalStatisticalDataStructure structure;
 	private Matrix parameters;
@@ -58,9 +61,10 @@ abstract class AbstractModelImplementation {
 	 * @param outputType the desired outputType to be modelled
 	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 */
-	AbstractModelImplementation(String stratumGroup, String outputType, MetaModel metaModel) throws StatisticalDataException {
-		
+	AbstractModelImplementation(String outputType, MetaModel metaModel) throws StatisticalDataException {
+		simParms = metaModel.simParms.clone();
 		Map<Integer, ScriptResult> scriptResults = metaModel.scriptResults;
+		String stratumGroup = metaModel.getStratumGroup();
 		if (stratumGroup == null) {
 			throw new InvalidParameterException("The argument stratumGroup must be non null!");
 		}
@@ -265,10 +269,7 @@ abstract class AbstractModelImplementation {
 	 * @param gaussDist the sampling distribution
 	 * @return a boolean
 	 */
-	boolean generateMetropolisSample(int nbRealizations,
-			int nbBurnIn,
-			int nbInternalIter,
-			List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, 
+	boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, 
 			GaussianDistribution gaussDist) {
 		long startTime = System.currentTimeMillis();
 		Matrix newParms = null;
@@ -277,9 +278,9 @@ abstract class AbstractModelImplementation {
 		int trials = 0;
 		int successes = 0;
 		double acceptanceRatio; 
-		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
+		for (int i = 0; i < simParms.nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
 			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
-			if (i > 0 && i < nbBurnIn && i%500 == 0) {
+			if (i > 0 && i < simParms.nbBurnIn && i%500 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
 				if (MetaModel.Verbose) {
 					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
@@ -293,12 +294,12 @@ abstract class AbstractModelImplementation {
 				trials = 0;
 			}
 			if (i%10000 == 0) {
-				displayMessage("Processing realization " + i + " / " + nbRealizations);
+				displayMessage("Processing realization " + i + " / " + simParms.nbRealizations);
 			}
 			boolean accepted = false;
 			int innerIter = 0;
 			
-			while (!accepted && innerIter < nbInternalIter) {
+			while (!accepted && innerIter < simParms.nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
 				double parmsPriorDensity = getParmsPriorDensity(newParms);
 				if (parmsPriorDensity > 0d) {
@@ -312,7 +313,7 @@ abstract class AbstractModelImplementation {
 				}
 				innerIter++;
 			}
-			if (innerIter >= nbInternalIter && !accepted) {
+			if (innerIter >= simParms.nbInternalIter && !accepted) {
 				displayMessage("Stopping after " + i + " realization");
 				completed = false;
 				break;
@@ -333,14 +334,14 @@ abstract class AbstractModelImplementation {
 		return completed;
 	}
 
-	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> gibbsSample) {
-		List<MetaModelMetropolisHastingsSample> finalGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-		displayMessage("Discarding " + this.nbBurnIn + " samples as burn in.");
-		for (int i = nbBurnIn; i < gibbsSample.size(); i+= oneEach) {
-			finalGibbsSample.add(gibbsSample.get(i));
+	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample) {
+		List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+		displayMessage("Discarding " + simParms.nbBurnIn + " samples as burn in.");
+		for (int i = simParms.nbBurnIn; i < metropolisHastingsSample.size(); i+= simParms.oneEach) {
+			finalMetropolisHastingsGibbsSample.add(metropolisHastingsSample.get(i));
 		}
-		displayMessage("Selecting one every " + this.oneEach + " samples as final selection.");
-		return finalGibbsSample;
+		displayMessage("Selecting one every " + simParms.oneEach + " samples as final selection.");
+		return finalMetropolisHastingsGibbsSample;
 	}
 
 }
