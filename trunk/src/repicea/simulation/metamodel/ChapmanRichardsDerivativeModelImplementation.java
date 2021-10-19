@@ -45,8 +45,10 @@ class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelI
 		}
 	}
 
-	ChapmanRichardsDerivativeModelImplementation(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
-		super(outputType, scriptResults);
+	ChapmanRichardsDerivativeModelImplementation(String stratumGroup, 
+			String outputType, 
+			Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+		super(stratumGroup, outputType, scriptResults);
 	}
 	
 	

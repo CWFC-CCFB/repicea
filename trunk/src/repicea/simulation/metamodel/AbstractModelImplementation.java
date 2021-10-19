@@ -21,12 +21,13 @@ package repicea.simulation.metamodel;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
-import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
+import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
@@ -35,10 +36,9 @@ import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.estimates.MonteCarloEstimate;
 
 /**
- * A package class to handle the different type of meta-models (e.g. Richards-Chapman and others).
+ * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
  * @author Mathieu Fortin - September 2021
  */
 abstract class AbstractModelImplementation {
@@ -51,13 +51,26 @@ abstract class AbstractModelImplementation {
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected double lnProbY;
 	protected final String outputType;
+	protected final String stratumGroup;
 
 	/**
 	 * Internal constructor.
 	 * @param outputType the desired outputType to be modelled
 	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 */
-	AbstractModelImplementation(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+	AbstractModelImplementation(String stratumGroup, String outputType, MetaModel metaModel) throws StatisticalDataException {
+		
+		Map<Integer, ScriptResult> scriptResults = metaModel.scriptResults;
+		if (stratumGroup == null) {
+			throw new InvalidParameterException("The argument stratumGroup must be non null!");
+		}
+		if (outputType == null) {
+			throw new InvalidParameterException("The argument outputType must be non null!");
+		}
+		if (!MetaModel.getPossibleOutputTypes(scriptResults).contains(outputType)) {
+			throw new InvalidParameterException("The outputType " + outputType + " is not part of the dataset!");
+		}
+		this.stratumGroup = stratumGroup;
 		this.structure = getDataStructureReady(outputType, scriptResults);
 		Matrix varCov = getVarCovReady(outputType, scriptResults);
 
@@ -87,13 +100,7 @@ abstract class AbstractModelImplementation {
 	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 * @throws StatisticalDataException
 	 */
-	protected HierarchicalStatisticalDataStructure getDataStructureReady(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
-		if (outputType == null) {
-			throw new InvalidParameterException("The argument outputType must be non null!");
-		}
-		if (!MetaModel.getPossibleOutputTypes(scriptResults).contains(outputType)) {
-			throw new InvalidParameterException("The outputType " + outputType + " is not part of the dataset!");
-		}
+	private HierarchicalStatisticalDataStructure getDataStructureReady(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
 		DataSet overallDataset = null;
 		for (int initAgeYr : scriptResults.keySet()) {
 			ScriptResult r = scriptResults.get(initAgeYr);
@@ -108,7 +115,6 @@ abstract class AbstractModelImplementation {
 			for (Observation obs : dataSet.getObservations()) {
 				List<Object> newObs = new ArrayList<Object>();
 				Object[] obsArray = obs.toArray();
-//				if (obsArray[outputTypeFieldNameIndex].equals(selectedOutputType)) {
 				if (obsArray[outputTypeFieldNameIndex].equals(outputType)) {
 					newObs.addAll(Arrays.asList(obsArray));
 					newObs.add(initAgeYr);	// adding the initial age to the data set
@@ -220,67 +226,121 @@ abstract class AbstractModelImplementation {
 		return outputType;
 	}
 	
-	
-	
-//	/**
-//	 * Fit the meta-model.
-//	 * @param outputType the output type the model will be fitted to (e.g. volumeAlive_Coniferous)
-//	 * @return a boolean true if the model has converged or false otherwise
-//	 */
-//	boolean fitModel(String outputType) {
-//		if (outputType == null) {
-//			throw new InvalidParameterException("The arguments outputType and e must be non null!");
-//		} 
-////		selectedOutputType = outputType;
-//
-//		double coefVar = 0.01;
-//		try {
-////			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
-////			model = getInnerModel(dataStructure);
-//			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
-//			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-//			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
-//			gibbsSample.add(firstSet); // first valid sample
-//			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
-//			if (completed) {
-//				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
-//				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
-//				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
-//					mcmcEstimate.addRealization(sample.parms);
-//				}
-//				
-//				Matrix finalParmEstimates = mcmcEstimate.getMean();
-//				Matrix finalVarCov = mcmcEstimate.getVariance();
-//				double lnProbY = getLnProbY(finalParmEstimates, 
-//						finalMetropolisHastingsSampleSelection, 
-//						gaussDist);
-//				model.lnProbY = lnProbY;
-////				finalLLK = model.getLogLikelihood(finalParmEstimates);
-//				model.setParameters(finalParmEstimates);
-//				model.setParmsVarCov(finalVarCov);
-//				
-//				Matrix finalPred = model.getVectorOfPopulationAveragedPredictionsAndVariances();
-//				Object[] finalPredArray = new Object[finalPred.m_iRows];
-//				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
-//				for (int i = 0; i < finalPred.m_iRows; i++) {
-//					finalPredArray[i] = finalPred.getValueAt(i, 0);
-//					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
-//				}
-//				
-//				model.structure.getDataSet().addField("pred", finalPredArray);
-//				model.structure.getDataSet().addField("predVar", finalPredVarArray);
-//
-//				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
-//				converged = true;
-//				printSummary();				
-//			}
-// 		} catch (Exception e1) {
-// 			e1.printStackTrace();
-// 			converged = false;
-// 			selectedOutputType = null;
-//		} 
-//		return converged;
-//	}
+	MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
+		long startTime = System.currentTimeMillis();
+		double llk = Double.NEGATIVE_INFINITY;
+		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
+		while (myFirstList.size() < desiredSize) {
+			Matrix parms = priors.getRandomRealization();
+			llk = getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
+			if (Math.exp(llk) > 0d) {
+				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
+				int nbSamples = myFirstList.size();
+				if (nbSamples%1000 == 0) {
+					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
+				}
+			}
+		}
+ 		Collections.sort(myFirstList);
+		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
+		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
+		if (MetaModel.Verbose) {
+			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
+		}
+		return startingParms;
+	}
 
 	
+	private void displayMessage(Object obj) {
+		System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
+	}
+
+
+	/**
+	 * Implement the Metropolis-Hastings algorithm.
+	 * @param nbRealizations number of samples in the chain before removing burn in and selected one sample every x samples
+	 * @param nbBurnIn number of samples to discard at the beginning of the chain
+	 * @param nbInternalIter maximum number of realizations to find the next acceptable sample of the chain
+	 * @param metropolisHastingsSample A list of MetaModelMetropolisHastingsSample instance that represents the chain
+	 * @param gaussDist the sampling distribution
+	 * @return a boolean
+	 */
+	boolean generateMetropolisSample(int nbRealizations,
+			int nbBurnIn,
+			int nbInternalIter,
+			List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, 
+			GaussianDistribution gaussDist) {
+		long startTime = System.currentTimeMillis();
+		Matrix newParms = null;
+		double llk = 0d;
+		boolean completed = true;
+		int trials = 0;
+		int successes = 0;
+		double acceptanceRatio; 
+		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
+			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
+			if (i > 0 && i < nbBurnIn && i%500 == 0) {
+				acceptanceRatio = ((double) successes) / trials;
+				if (MetaModel.Verbose) {
+					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
+				}
+				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
+					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
+				} else if (acceptanceRatio < 0.2) {
+					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(0.8*0.8));
+				}
+				successes = 0;
+				trials = 0;
+			}
+			if (i%10000 == 0) {
+				displayMessage("Processing realization " + i + " / " + nbRealizations);
+			}
+			boolean accepted = false;
+			int innerIter = 0;
+			
+			while (!accepted && innerIter < nbInternalIter) {
+				newParms = gaussDist.getRandomRealization();
+				double parmsPriorDensity = getParmsPriorDensity(newParms);
+				if (parmsPriorDensity > 0d) {
+					llk = getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
+					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
+					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
+					trials++;
+					if (accepted) {
+						successes++;
+					}
+				}
+				innerIter++;
+			}
+			if (innerIter >= nbInternalIter && !accepted) {
+				displayMessage("Stopping after " + i + " realization");
+				completed = false;
+				break;
+			} else {
+				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
+				if (MetaModel.Verbose) {
+					if (metropolisHastingsSample.size()%100 == 0) {
+						displayMessage(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
+					}
+				}
+			}
+		}
+		
+		acceptanceRatio = ((double) successes) / trials;
+		
+		displayMessage("Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
+		displayMessage("Acceptance ratio = " + acceptanceRatio);
+		return completed;
+	}
+
+	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> gibbsSample) {
+		List<MetaModelMetropolisHastingsSample> finalGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+		displayMessage("Discarding " + this.nbBurnIn + " samples as burn in.");
+		for (int i = nbBurnIn; i < gibbsSample.size(); i+= oneEach) {
+			finalGibbsSample.add(gibbsSample.get(i));
+		}
+		displayMessage("Selecting one every " + this.oneEach + " samples as final selection.");
+		return finalGibbsSample;
+	}
+
 }

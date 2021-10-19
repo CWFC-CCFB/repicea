@@ -77,10 +77,9 @@ public class MetaModel implements Saveable {
 	private double coefVar;
 	private boolean converged;
 	
-	private final Map<Integer, ScriptResult> scriptResults;
+	protected final Map<Integer, ScriptResult> scriptResults;
 	private AbstractModelImplementation model;
 	private final String stratumGroup;
-//	private String selectedOutputType;
 	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private ModelImplEnum modelImplEnum; 
 
@@ -145,21 +144,19 @@ public class MetaModel implements Saveable {
 
 
 	private AbstractModelImplementation getInnerModel(String outputType) throws StatisticalDataException {
-//		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType);
-//		Matrix varCov = getVarCovReady(outputType);
 		AbstractModelImplementation model;
 		switch(modelImplEnum) {
 		case ChapmanRichards:
-			model = new ChapmanRichardsModelImplementation(outputType, scriptResults);
+			model = new ChapmanRichardsModelImplementation(stratumGroup, outputType, scriptResults);
 			break;
 		case ChapmanRichardsWithRandomEffect:
-			model = new ChapmanRichardsModelWithRandomEffectImplementation(outputType, scriptResults);
+			model = new ChapmanRichardsModelWithRandomEffectImplementation(stratumGroup, outputType, scriptResults);
 			break;
 		case ChapmanRichardsDerivative:
-			model = new ChapmanRichardsDerivativeModelImplementation(outputType, scriptResults);
+			model = new ChapmanRichardsDerivativeModelImplementation(stratumGroup, outputType, scriptResults);
 			break;
 		case ChapmanRichardsDerivativeWithRandomEffect:
-			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(outputType, scriptResults);
+			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(stratumGroup, outputType, scriptResults);
 			break;
 		default:
 			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
@@ -167,99 +164,99 @@ public class MetaModel implements Saveable {
 		return model;
 	}
 	
-	private MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
-		long startTime = System.currentTimeMillis();
-		double llk = Double.NEGATIVE_INFINITY;
-		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
-		while (myFirstList.size() < desiredSize) {
-			Matrix parms = model.priors.getRandomRealization();
-			llk = model.getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
-			if (Math.exp(llk) > 0d) {
-				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
-				int nbSamples = myFirstList.size();
-				if (nbSamples%1000 == 0) {
-					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
-				}
-			}
-		}
- 		Collections.sort(myFirstList);
-		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
-		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
-		if (MetaModel.Verbose) {
-			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
-		}
-		return startingParms;
-	}
+//	private MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
+//		long startTime = System.currentTimeMillis();
+//		double llk = Double.NEGATIVE_INFINITY;
+//		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
+//		while (myFirstList.size() < desiredSize) {
+//			Matrix parms = model.priors.getRandomRealization();
+//			llk = model.getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
+//			if (Math.exp(llk) > 0d) {
+//				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
+//				int nbSamples = myFirstList.size();
+//				if (nbSamples%1000 == 0) {
+//					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
+//				}
+//			}
+//		}
+// 		Collections.sort(myFirstList);
+//		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
+//		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
+//		if (MetaModel.Verbose) {
+//			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
+//		}
+//		return startingParms;
+//	}
 
-	/**
-	 * Implement a pure Metropolis-Hastings algorithm.
-	 * @param metropolisHastingsSample
-	 * @param gaussDist
-	 * @return
-	 */
-	private boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
-		long startTime = System.currentTimeMillis();
-		Matrix newParms = null;
-		double llk = 0d;
-		boolean completed = true;
-		int trials = 0;
-		int successes = 0;
-		double acceptanceRatio; 
-		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
-			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
-			if (i > 0 && i < nbBurnIn && i%500 == 0) {
-				acceptanceRatio = ((double) successes) / trials;
-				if (MetaModel.Verbose) {
-					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
-				}
-				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
-					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
-				} else if (acceptanceRatio < 0.2) {
-					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(0.8*0.8));
-				}
-				successes = 0;
-				trials = 0;
-			}
-			if (i%10000 == 0) {
-				displayMessage("Processing realization " + i + " / " + nbRealizations);
-			}
-			boolean accepted = false;
-			int innerIter = 0;
-			
-			while (!accepted && innerIter < nbInternalIter) {
-				newParms = gaussDist.getRandomRealization();
-				double parmsPriorDensity = model.getParmsPriorDensity(newParms);
-				if (parmsPriorDensity > 0d) {
-					llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
-					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
-					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
-					trials++;
-					if (accepted) {
-						successes++;
-					}
-				}
-				innerIter++;
-			}
-			if (innerIter >= nbInternalIter && !accepted) {
-				displayMessage("Stopping after " + i + " realization");
-				completed = false;
-				break;
-			} else {
-				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
-				if (MetaModel.Verbose) {
-					if (metropolisHastingsSample.size()%100 == 0) {
-						displayMessage(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
-					}
-				}
-			}
-		}
-		
-		acceptanceRatio = ((double) successes) / trials;
-		
-		displayMessage("Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-		displayMessage("Acceptance ratio = " + acceptanceRatio);
-		return completed;
-	}
+//	/**
+//	 * Implement a pure Metropolis-Hastings algorithm.
+//	 * @param metropolisHastingsSample
+//	 * @param gaussDist
+//	 * @return
+//	 */
+//	private boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
+//		long startTime = System.currentTimeMillis();
+//		Matrix newParms = null;
+//		double llk = 0d;
+//		boolean completed = true;
+//		int trials = 0;
+//		int successes = 0;
+//		double acceptanceRatio; 
+//		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
+//			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
+//			if (i > 0 && i < nbBurnIn && i%500 == 0) {
+//				acceptanceRatio = ((double) successes) / trials;
+//				if (MetaModel.Verbose) {
+//					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
+//				}
+//				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
+//					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
+//				} else if (acceptanceRatio < 0.2) {
+//					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(0.8*0.8));
+//				}
+//				successes = 0;
+//				trials = 0;
+//			}
+//			if (i%10000 == 0) {
+//				displayMessage("Processing realization " + i + " / " + nbRealizations);
+//			}
+//			boolean accepted = false;
+//			int innerIter = 0;
+//			
+//			while (!accepted && innerIter < nbInternalIter) {
+//				newParms = gaussDist.getRandomRealization();
+//				double parmsPriorDensity = model.getParmsPriorDensity(newParms);
+//				if (parmsPriorDensity > 0d) {
+//					llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
+//					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
+//					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
+//					trials++;
+//					if (accepted) {
+//						successes++;
+//					}
+//				}
+//				innerIter++;
+//			}
+//			if (innerIter >= nbInternalIter && !accepted) {
+//				displayMessage("Stopping after " + i + " realization");
+//				completed = false;
+//				break;
+//			} else {
+//				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
+//				if (MetaModel.Verbose) {
+//					if (metropolisHastingsSample.size()%100 == 0) {
+//						displayMessage(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
+//					}
+//				}
+//			}
+//		}
+//		
+//		acceptanceRatio = ((double) successes) / trials;
+//		
+//		displayMessage("Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
+//		displayMessage("Acceptance ratio = " + acceptanceRatio);
+//		return completed;
+//	}
 	
 	
 
@@ -347,8 +344,6 @@ public class MetaModel implements Saveable {
 		if (!getPossibleOutputTypes().contains(outputType)) {
 			throw new InvalidParameterException("This output type is not recognized: " + outputType);
 		}
-//		selectedOutputType = outputType;
-
 		
 		this.modelImplEnum = e;
 		coefVar = 0.01;
@@ -356,9 +351,13 @@ public class MetaModel implements Saveable {
 			model = getInnerModel(outputType);
 			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
 			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
+			MetaModelMetropolisHastingsSample firstSet = model.findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
 			gibbsSample.add(firstSet); // first valid sample
-			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
+			boolean completed = model.generateMetropolisSample(nbRealizations, 
+					nbBurnIn, 
+					nbInternalIter,
+					gibbsSample, 
+					gaussDist);
 			if (completed) {
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
