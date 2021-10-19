@@ -20,13 +20,19 @@ package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
-public class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends ChapmanRichardsDerivativeModelImplementation {
+/**
+ * An implementation of the derivative form of the Chapman-Richards model including random effects.
+ * @author Mathieu Fortin - October 2021
+ */
+class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends ChapmanRichardsDerivativeModelImplementation {
 
 	/**
 	 * The likelihood implementation for this model implementation.
@@ -55,8 +61,8 @@ public class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extend
 
 	int indexRandomEffectVariance;
 	
-	public ChapmanRichardsDerivativeModelWithRandomEffectImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		super(structure, varCov);
+	ChapmanRichardsDerivativeModelWithRandomEffectImplementation(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+		super(outputType, scriptResults);
 	}
 
 	

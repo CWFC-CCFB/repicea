@@ -79,14 +79,12 @@ public class MetaModel implements Saveable {
 	
 	private final Map<Integer, ScriptResult> scriptResults;
 	private AbstractModelImplementation model;
-//	private double finalLLK;
-//	private double marginalLikelihood;
 	private final String stratumGroup;
-	private String selectedOutputType;
+//	private String selectedOutputType;
 	private transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
-//	private DataSet dataSet;
 	private ModelImplEnum modelImplEnum; 
 
+	
 	/**
 	 * Constructor. 
 	 * @param stratumGroup a String representing the stratum group
@@ -145,69 +143,23 @@ public class MetaModel implements Saveable {
 		}
 	}
 
-	/**
-	 * Get the observation of a particular output type ready for the meta-model fitting. 
-	 * @return a HierarchicalStatisticalDataStructure instance
-	 * @throws StatisticalDataException
-	 */
-	protected HierarchicalStatisticalDataStructure getDataStructureReady() throws StatisticalDataException {
-		DataSet overallDataset = null;
-		for (int initAgeYr : scriptResults.keySet()) {
-			ScriptResult r = scriptResults.get(initAgeYr);
-			DataSet dataSet = r.getDataSet();
-			if (overallDataset == null) {
-				List<String> fieldNames = new ArrayList<String>();
-				fieldNames.addAll(dataSet.getFieldNames());
-				fieldNames.add("initialAgeYr");
-				overallDataset = new DataSet(fieldNames);
-			}
-			int outputTypeFieldNameIndex = overallDataset.getFieldNames().indexOf(ScriptResult.OutputTypeFieldName);
-			for (Observation obs : dataSet.getObservations()) {
-				List<Object> newObs = new ArrayList<Object>();
-				Object[] obsArray = obs.toArray();
-				if (obsArray[outputTypeFieldNameIndex].equals(selectedOutputType)) {
-					newObs.addAll(Arrays.asList(obsArray));
-					newObs.add(initAgeYr);	// adding the initial age to the data set
-					overallDataset.addObservation(newObs.toArray());
-				}
-			}
-		}
-		overallDataset.indexFieldType();
-		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
-		dataStruct.setInterceptModel(false); // no intercept
-		dataStruct.constructMatrices("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
-		return dataStruct;
-	}
-	
-	private Matrix getVarCovReady() {
-		Matrix varCov = null;
-		for (int initAgeYr : scriptResults.keySet()) {
-			ScriptResult r = scriptResults.get(initAgeYr);
-			Matrix varCovI = r.getTotalVariance(selectedOutputType);
-			if (varCov == null) {
-				varCov = varCovI;
-			} else {
-				varCov = varCov.matrixDiagBlock(varCovI);
-			}
-		}
-		return varCov;
-	}
 
-	private AbstractModelImplementation getInnerModel(HierarchicalStatisticalDataStructure structure) {
-		Matrix varCov = getVarCovReady();
+	private AbstractModelImplementation getInnerModel(String outputType) throws StatisticalDataException {
+//		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType);
+//		Matrix varCov = getVarCovReady(outputType);
 		AbstractModelImplementation model;
 		switch(modelImplEnum) {
 		case ChapmanRichards:
-			model = new ChapmanRichardsModelImplementation(structure, varCov);
+			model = new ChapmanRichardsModelImplementation(outputType, scriptResults);
 			break;
 		case ChapmanRichardsWithRandomEffect:
-			model = new ChapmanRichardsModelWithRandomEffectImplementation(structure, varCov);
+			model = new ChapmanRichardsModelWithRandomEffectImplementation(outputType, scriptResults);
 			break;
 		case ChapmanRichardsDerivative:
-			model = new ChapmanRichardsDerivativeModelImplementation(structure, varCov);
+			model = new ChapmanRichardsDerivativeModelImplementation(outputType, scriptResults);
 			break;
 		case ChapmanRichardsDerivativeWithRandomEffect:
-			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(structure, varCov);
+			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(outputType, scriptResults);
 			break;
 		default:
 			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
@@ -362,6 +314,16 @@ public class MetaModel implements Saveable {
 	 * @throws MetaModelException
 	 */
 	public List<String> getPossibleOutputTypes() {
+		return getPossibleOutputTypes(scriptResults);
+//		List<String> possibleOutputTypes = new ArrayList<String>();
+//		if (!scriptResults.isEmpty()) {
+//			ScriptResult scriptRes = scriptResults.values().iterator().next();
+//			possibleOutputTypes.addAll(scriptRes.getOutputTypes());
+//		}
+//		return possibleOutputTypes;
+	}
+	
+	protected static List<String> getPossibleOutputTypes(Map<Integer, ScriptResult> scriptResults) {
 		List<String> possibleOutputTypes = new ArrayList<String>();
 		if (!scriptResults.isEmpty()) {
 			ScriptResult scriptRes = scriptResults.values().iterator().next();
@@ -370,6 +332,8 @@ public class MetaModel implements Saveable {
 		return possibleOutputTypes;
 	}
 	
+	
+	
 	/**
 	 * Fit the meta-model.
 	 * @param outputType the output type the model will be fitted to (e.g. volumeAlive_Coniferous)
@@ -377,26 +341,25 @@ public class MetaModel implements Saveable {
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
 	public boolean fitModel(String outputType, ModelImplEnum e) {
-		if (e == null) {
-			throw new InvalidParameterException("Argument e cannot be null!");
+		if (e == null || outputType == null) {
+			throw new InvalidParameterException("The arguments outputType and e must be non null!");
 		} 
-		this.modelImplEnum = e;
-
 		if (!getPossibleOutputTypes().contains(outputType)) {
 			throw new InvalidParameterException("This output type is not recognized: " + outputType);
 		}
-		selectedOutputType = outputType;
+//		selectedOutputType = outputType;
+
+		
+		this.modelImplEnum = e;
 		coefVar = 0.01;
 		try {
-			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
-			model = getInnerModel(dataStructure);
+			model = getInnerModel(outputType);
 			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
 			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
 			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
 			gibbsSample.add(firstSet); // first valid sample
 			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
 			if (completed) {
-
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
 				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
@@ -431,7 +394,7 @@ public class MetaModel implements Saveable {
  		} catch (Exception e1) {
  			e1.printStackTrace();
  			converged = false;
- 			selectedOutputType = null;
+// 			selectedOutputType = null;
 		} 
 		return converged;
 	}
@@ -466,14 +429,14 @@ public class MetaModel implements Saveable {
 		return model.getParameters();
 	}
   	
-	/**
-	 * Export the initial data set (before fitting the meta-model).
-	 * @param filename
-	 * @throws Exception
-	 */
-	public void exportInitialDataSet(String filename) throws Exception {
-		getDataStructureReady().getDataSet().save(filename);
-	}
+//	/**
+//	 * Export the initial data set (before fitting the meta-model).
+//	 * @param filename
+//	 * @throws Exception
+//	 */
+//	public void exportInitialDataSet(String filename) throws Exception {
+//		getDataStructureReady().getDataSet().save(filename);
+//	}
 	
 	/**
 	 * Export a final dataset, that is the initial data set plus the meta-model 
@@ -492,7 +455,13 @@ public class MetaModel implements Saveable {
 	 * fitModel.
 	 * @return a String
 	 */
-	public String getSelectedOutputType() {return selectedOutputType;}
+	public String getSelectedOutputType() {
+		if (model != null) {
+			return model.getSelectedOutputType();
+		} else {
+			return "";
+		}
+	}
 
 	
 	

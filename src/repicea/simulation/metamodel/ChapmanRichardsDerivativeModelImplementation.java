@@ -20,13 +20,19 @@ package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
-public class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelImplementation {
+/**
+ * An implementation of the derivative form of the Chapman-Richards model.
+ * @author Mathieu Fortin - October 2021
+ */
+class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelImplementation {
 
 	@SuppressWarnings("serial")
 	class DataBlockWrapper extends ChapmanRichardsModelImplementation.DataBlockWrapper {
@@ -39,8 +45,8 @@ public class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichard
 		}
 	}
 
-	public ChapmanRichardsDerivativeModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		super(structure, varCov);
+	ChapmanRichardsDerivativeModelImplementation(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+		super(outputType, scriptResults);
 	}
 	
 	
