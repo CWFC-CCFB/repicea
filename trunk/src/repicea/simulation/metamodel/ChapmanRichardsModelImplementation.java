@@ -20,15 +20,21 @@ package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
-public class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
+/**
+ * An implementation of the Chapman-Richards model.
+ * @author Mathieu Fortin - October 2021
+ */
+class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 
 	@SuppressWarnings("serial")
 	class DataBlockWrapper extends AbstractDataBlockWrapper {
@@ -87,8 +93,8 @@ public class ChapmanRichardsModelImplementation extends AbstractModelImplementat
 
 	int indexCorrelationParameter;
 
-	public ChapmanRichardsModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		super(structure, varCov);
+	ChapmanRichardsModelImplementation(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+		super(outputType, scriptResults);
 	}
 	
 	@Override

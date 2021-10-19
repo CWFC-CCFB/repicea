@@ -20,15 +20,22 @@ package repicea.simulation.metamodel;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.stats.data.DataBlock;
+import repicea.stats.data.DataSet;
+import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.data.Observation;
+import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.estimates.MonteCarloEstimate;
 
 /**
  * A package class to handle the different type of meta-models (e.g. Richards-Chapman and others).
@@ -43,14 +50,18 @@ abstract class AbstractModelImplementation {
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected double lnProbY;
+	protected final String outputType;
 
 	/**
-	 * Internal constructor
-	 * @param structure
-	 * @param varCov
+	 * Internal constructor.
+	 * @param outputType the desired outputType to be modelled
+	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 */
-	AbstractModelImplementation(HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		this.structure = structure;
+	AbstractModelImplementation(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+		this.structure = getDataStructureReady(outputType, scriptResults);
+		Matrix varCov = getVarCovReady(outputType, scriptResults);
+
+		this.outputType = outputType;
 		Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
 		Map<String, DataBlock> ageMap = structure.getHierarchicalStructure(); 
 		for (String ageKey : ageMap.keySet()) {
@@ -69,6 +80,70 @@ abstract class AbstractModelImplementation {
 		}
 	}
 
+	/**
+	 * Get the observations of a particular output type ready for the meta-model fitting. 
+	 * @return a HierarchicalStatisticalDataStructure instance
+	 * @param outputType the desired outputType to be modelled
+	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
+	 * @throws StatisticalDataException
+	 */
+	protected HierarchicalStatisticalDataStructure getDataStructureReady(String outputType, Map<Integer, ScriptResult> scriptResults) throws StatisticalDataException {
+		if (outputType == null) {
+			throw new InvalidParameterException("The argument outputType must be non null!");
+		}
+		if (!MetaModel.getPossibleOutputTypes(scriptResults).contains(outputType)) {
+			throw new InvalidParameterException("The outputType " + outputType + " is not part of the dataset!");
+		}
+		DataSet overallDataset = null;
+		for (int initAgeYr : scriptResults.keySet()) {
+			ScriptResult r = scriptResults.get(initAgeYr);
+			DataSet dataSet = r.getDataSet();
+			if (overallDataset == null) {
+				List<String> fieldNames = new ArrayList<String>();
+				fieldNames.addAll(dataSet.getFieldNames());
+				fieldNames.add("initialAgeYr");
+				overallDataset = new DataSet(fieldNames);
+			}
+			int outputTypeFieldNameIndex = overallDataset.getFieldNames().indexOf(ScriptResult.OutputTypeFieldName);
+			for (Observation obs : dataSet.getObservations()) {
+				List<Object> newObs = new ArrayList<Object>();
+				Object[] obsArray = obs.toArray();
+//				if (obsArray[outputTypeFieldNameIndex].equals(selectedOutputType)) {
+				if (obsArray[outputTypeFieldNameIndex].equals(outputType)) {
+					newObs.addAll(Arrays.asList(obsArray));
+					newObs.add(initAgeYr);	// adding the initial age to the data set
+					overallDataset.addObservation(newObs.toArray());
+				}
+			}
+		}
+		overallDataset.indexFieldType();
+		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
+		dataStruct.setInterceptModel(false); // no intercept
+		dataStruct.constructMatrices("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
+		return dataStruct;
+	}
+	
+	/**
+	 * Format the variance-covariance matrix of the residual error term. 
+	 * @param outputType the desired outputType to be modelled
+	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
+	 * @return
+	 */
+	private Matrix getVarCovReady(String outputType, Map<Integer, ScriptResult> scriptResults) {
+		Matrix varCov = null;
+		for (int initAgeYr : scriptResults.keySet()) {
+			ScriptResult r = scriptResults.get(initAgeYr);
+			Matrix varCovI = r.getTotalVariance(outputType);
+			if (varCov == null) {
+				varCov = varCovI;
+			} else {
+				varCov = varCov.matrixDiagBlock(varCovI);
+			}
+		}
+		return varCov;
+	}
+
+	
 	abstract AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov);
 
 	abstract Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance);
@@ -141,4 +216,71 @@ abstract class AbstractModelImplementation {
 		return priors.getProbabilityDensity(parms);
 	}
 
+	String getSelectedOutputType() {
+		return outputType;
+	}
+	
+	
+	
+//	/**
+//	 * Fit the meta-model.
+//	 * @param outputType the output type the model will be fitted to (e.g. volumeAlive_Coniferous)
+//	 * @return a boolean true if the model has converged or false otherwise
+//	 */
+//	boolean fitModel(String outputType) {
+//		if (outputType == null) {
+//			throw new InvalidParameterException("The arguments outputType and e must be non null!");
+//		} 
+////		selectedOutputType = outputType;
+//
+//		double coefVar = 0.01;
+//		try {
+////			HierarchicalStatisticalDataStructure dataStructure = getDataStructureReady();
+////			model = getInnerModel(dataStructure);
+//			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
+//			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+//			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, nbInitialGrid);
+//			gibbsSample.add(firstSet); // first valid sample
+//			boolean completed = generateMetropolisSample(gibbsSample, gaussDist);
+//			if (completed) {
+//				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
+//				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
+//				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+//					mcmcEstimate.addRealization(sample.parms);
+//				}
+//				
+//				Matrix finalParmEstimates = mcmcEstimate.getMean();
+//				Matrix finalVarCov = mcmcEstimate.getVariance();
+//				double lnProbY = getLnProbY(finalParmEstimates, 
+//						finalMetropolisHastingsSampleSelection, 
+//						gaussDist);
+//				model.lnProbY = lnProbY;
+////				finalLLK = model.getLogLikelihood(finalParmEstimates);
+//				model.setParameters(finalParmEstimates);
+//				model.setParmsVarCov(finalVarCov);
+//				
+//				Matrix finalPred = model.getVectorOfPopulationAveragedPredictionsAndVariances();
+//				Object[] finalPredArray = new Object[finalPred.m_iRows];
+//				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
+//				for (int i = 0; i < finalPred.m_iRows; i++) {
+//					finalPredArray[i] = finalPred.getValueAt(i, 0);
+//					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
+//				}
+//				
+//				model.structure.getDataSet().addField("pred", finalPredArray);
+//				model.structure.getDataSet().addField("predVar", finalPredVarArray);
+//
+//				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
+//				converged = true;
+//				printSummary();				
+//			}
+// 		} catch (Exception e1) {
+// 			e1.printStackTrace();
+// 			converged = false;
+// 			selectedOutputType = null;
+//		} 
+//		return converged;
+//	}
+
+	
 }
