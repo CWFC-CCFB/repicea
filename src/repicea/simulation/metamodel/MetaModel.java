@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -51,7 +52,21 @@ public class MetaModel implements Saveable {
 				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper");
 	}
 	
-	protected static boolean Verbose = false; 
+	protected static VerboseLevel Verbose = VerboseLevel.Minimum; 
+	
+	public static enum VerboseLevel {None,
+		Minimum,
+		Medium,
+		High;
+		
+		public boolean shouldVerboseAtThisLevel(VerboseLevel level) {
+			if (ordinal() >= level.ordinal()) {
+				return true;
+			} else {
+				return false;
+			}
+		}
+	}
 	
 	public static enum ModelImplEnum {
 		ChapmanRichards,
@@ -63,7 +78,7 @@ public class MetaModel implements Saveable {
 	static class SimulationParameters implements Cloneable {
 		protected int nbBurnIn = 5000;
 		protected int nbRealizations = 500000 + nbBurnIn;
-		protected int nbInternalIter = 100000;
+		protected int nbInternalIter = 200000;
 		protected int oneEach = 50;
 		protected int nbInitialGrid = 10000;	
 		
@@ -82,13 +97,10 @@ public class MetaModel implements Saveable {
 	
 	
 	protected SimulationParameters simParms;
-
-//	private boolean converged;
-	
 	protected final Map<Integer, ScriptResult> scriptResults;
-	private AbstractModelImplementation model;
+	protected AbstractModelImplementation model;
 	private final String stratumGroup;
-	private ModelImplEnum modelImplEnum; 
+//	private ModelImplEnum modelImplEnum; 
 
 	
 	/**
@@ -103,9 +115,9 @@ public class MetaModel implements Saveable {
 
 	private void setDefaultSettings() {
 		simParms = new SimulationParameters();
-		if (modelImplEnum == null) {
-			modelImplEnum = ModelImplEnum.ChapmanRichardsWithRandomEffect;
-		}
+//		if (modelImplEnum == null) {
+//			modelImplEnum = ModelImplEnum.ChapmanRichardsWithRandomEffect;
+//		}
 	}
 	
 	
@@ -147,7 +159,7 @@ public class MetaModel implements Saveable {
 	}
 
 
-	private AbstractModelImplementation getInnerModel(String outputType) throws StatisticalDataException {
+	private AbstractModelImplementation getInnerModel(String outputType, ModelImplEnum modelImplEnum) throws StatisticalDataException {
 		AbstractModelImplementation model;
 		switch(modelImplEnum) {
 		case ChapmanRichards:
@@ -168,105 +180,7 @@ public class MetaModel implements Saveable {
 		return model;
 	}
 	
-//	private MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
-//		long startTime = System.currentTimeMillis();
-//		double llk = Double.NEGATIVE_INFINITY;
-//		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
-//		while (myFirstList.size() < desiredSize) {
-//			Matrix parms = model.priors.getRandomRealization();
-//			llk = model.getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
-//			if (Math.exp(llk) > 0d) {
-//				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
-//				int nbSamples = myFirstList.size();
-//				if (nbSamples%1000 == 0) {
-//					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
-//				}
-//			}
-//		}
-// 		Collections.sort(myFirstList);
-//		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
-//		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
-//		if (MetaModel.Verbose) {
-//			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
-//		}
-//		return startingParms;
-//	}
 
-//	/**
-//	 * Implement a pure Metropolis-Hastings algorithm.
-//	 * @param metropolisHastingsSample
-//	 * @param gaussDist
-//	 * @return
-//	 */
-//	private boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
-//		long startTime = System.currentTimeMillis();
-//		Matrix newParms = null;
-//		double llk = 0d;
-//		boolean completed = true;
-//		int trials = 0;
-//		int successes = 0;
-//		double acceptanceRatio; 
-//		for (int i = 0; i < nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
-//			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
-//			if (i > 0 && i < nbBurnIn && i%500 == 0) {
-//				acceptanceRatio = ((double) successes) / trials;
-//				if (MetaModel.Verbose) {
-//					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
-//				}
-//				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
-//					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
-//				} else if (acceptanceRatio < 0.2) {
-//					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(0.8*0.8));
-//				}
-//				successes = 0;
-//				trials = 0;
-//			}
-//			if (i%10000 == 0) {
-//				displayMessage("Processing realization " + i + " / " + nbRealizations);
-//			}
-//			boolean accepted = false;
-//			int innerIter = 0;
-//			
-//			while (!accepted && innerIter < nbInternalIter) {
-//				newParms = gaussDist.getRandomRealization();
-//				double parmsPriorDensity = model.getParmsPriorDensity(newParms);
-//				if (parmsPriorDensity > 0d) {
-//					llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
-//					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
-//					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
-//					trials++;
-//					if (accepted) {
-//						successes++;
-//					}
-//				}
-//				innerIter++;
-//			}
-//			if (innerIter >= nbInternalIter && !accepted) {
-//				displayMessage("Stopping after " + i + " realization");
-//				completed = false;
-//				break;
-//			} else {
-//				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
-//				if (MetaModel.Verbose) {
-//					if (metropolisHastingsSample.size()%100 == 0) {
-//						displayMessage(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
-//					}
-//				}
-//			}
-//		}
-//		
-//		acceptanceRatio = ((double) successes) / trials;
-//		
-//		displayMessage("Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-//		displayMessage("Acceptance ratio = " + acceptanceRatio);
-//		return completed;
-//	}
-	
-	
-
-	
-	
-	
 	/**
 	 * Return the possible output types given what they are in the ScriptResult
 	 * instances.
@@ -275,12 +189,6 @@ public class MetaModel implements Saveable {
 	 */
 	public List<String> getPossibleOutputTypes() {
 		return getPossibleOutputTypes(scriptResults);
-//		List<String> possibleOutputTypes = new ArrayList<String>();
-//		if (!scriptResults.isEmpty()) {
-//			ScriptResult scriptRes = scriptResults.values().iterator().next();
-//			possibleOutputTypes.addAll(scriptRes.getOutputTypes());
-//		}
-//		return possibleOutputTypes;
 	}
 	
 	protected static List<String> getPossibleOutputTypes(Map<Integer, ScriptResult> scriptResults) {
@@ -292,7 +200,45 @@ public class MetaModel implements Saveable {
 		return possibleOutputTypes;
 	}
 	
+	static class InnerWorker extends Thread implements Comparable<InnerWorker> {
+		
+		final AbstractModelImplementation ami;
+		double prob;
+
+		InnerWorker(AbstractModelImplementation ami) {
+			super(ami);
+			this.ami = ami;
+			setName(ami.getModelImplementation().name());
+		}
+		
+		@Override
+		public int compareTo(InnerWorker o) {
+			if (prob > o.prob) {
+				return -1;
+			} else if (prob == o.prob) {
+				return 0;
+			} else {
+				return 1;
+			}
+		}
+	}
 	
+	private InnerWorker performModelSelection(List<InnerWorker> innerWorkers) {
+		double sumProb = 0;
+		List<InnerWorker> newList = new ArrayList<InnerWorker>();
+		for (InnerWorker w : innerWorkers) {
+			if (w.ami.hasConverged()) {
+				newList.add(w);
+				sumProb += Math.exp(w.ami.lnProbY);
+			}
+		}
+		for (InnerWorker w : newList) {
+			w.prob = Math.exp(w.ami.lnProbY) / sumProb;
+			System.out.println("Implementation " + w.ami.getModelImplementation().name() + ": " + w.prob);
+		}
+		Collections.sort(newList);
+		return newList.get(0);
+	}
 	
 	/**
 	 * Fit the meta-model.
@@ -300,70 +246,30 @@ public class MetaModel implements Saveable {
 	 * @param e a ModelImplEnum enum 
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
-	public boolean fitModel(String outputType, ModelImplEnum e) {
-		if (e == null || outputType == null) {
-			throw new InvalidParameterException("The arguments outputType and e must be non null!");
-		} 
-		if (!getPossibleOutputTypes().contains(outputType)) {
-			throw new InvalidParameterException("This output type is not recognized: " + outputType);
-		}
-		
-		this.modelImplEnum = e;
-//		coefVar = 0.01;
+	public boolean fitModel(String outputType) {
+		System.out.println("----------- Modeling output type: " + stratumGroup + "-" + outputType + " ----------------");
 		try {
-			model = getInnerModel(outputType);
-//			GaussianDistribution gaussDist = model.getStartingParmEst(coefVar);
-//			List<MetaModelMetropolisHastingsSample> gibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-//			MetaModelMetropolisHastingsSample firstSet = model.findFirstSetOfParameters(gaussDist.getMean().m_iRows, simParms.nbInitialGrid);
-//			gibbsSample.add(firstSet); // first valid sample
-//			boolean completed = model.generateMetropolisSample(gibbsSample, gaussDist);
-			model.fitModel();
-			printSummary();				
-			return hasConverged();
-//			if (completed) {
-//				finalMetropolisHastingsSampleSelection = retrieveFinalSample(gibbsSample);
-//				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
-//				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
-//					mcmcEstimate.addRealization(sample.parms);
-//				}
-//				
-//				Matrix finalParmEstimates = mcmcEstimate.getMean();
-//				Matrix finalVarCov = mcmcEstimate.getVariance();
-//				double lnProbY = getLnProbY(finalParmEstimates, 
-//						finalMetropolisHastingsSampleSelection, 
-//						gaussDist);
-//				model.lnProbY = lnProbY;
-////				finalLLK = model.getLogLikelihood(finalParmEstimates);
-//				model.setParameters(finalParmEstimates);
-//				model.setParmsVarCov(finalVarCov);
-//				
-//				Matrix finalPred = model.getVectorOfPopulationAveragedPredictionsAndVariances();
-//				Object[] finalPredArray = new Object[finalPred.m_iRows];
-//				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
-//				for (int i = 0; i < finalPred.m_iRows; i++) {
-//					finalPredArray[i] = finalPred.getValueAt(i, 0);
-//					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
-//				}
-//				
-//				model.structure.getDataSet().addField("pred", finalPredArray);
-//				model.structure.getDataSet().addField("predVar", finalPredVarArray);
-//
-//				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
-//				converged = true;
-//				printSummary();				
-//			}
+			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
+			for (ModelImplEnum e : ModelImplEnum.values()) {
+				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
+				w.start();
+				modelList.add(w);
+			}
+			for (InnerWorker w : modelList) {
+				w.join();
+			}
+			
+			InnerWorker selectedWorker = performModelSelection(modelList);
+			model = selectedWorker.ami;
+			System.out.println("Selected model is " + model.getModelImplementation().name());
+			model.printSummary();
+			return true; 
  		} catch (Exception e1) {
  			e1.printStackTrace();
  			return false;
-// 			converged = false;
-// 			selectedOutputType = null;
 		} 
-//		return converged;
 	}
 
-//	private void displayMessage(Object obj) {
-//		System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
-//	}
 
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (hasConverged()) {
@@ -412,7 +318,11 @@ public class MetaModel implements Saveable {
 		}
 	}
 
-	
+	private void displayMessage(VerboseLevel level, Object obj) {
+		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level))
+			System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
+	}
+
 	
 	/**
 	 * Save a CSV file containing the final sequence produced by the Metropolis-Hastings algorithm, 
@@ -467,7 +377,8 @@ public class MetaModel implements Saveable {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
 		Object obj = deserializer.readObject();
 		MetaModel metaModel = (MetaModel) obj;
-		if (metaModel.simParms == null || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
+//		if (metaModel.simParms == null || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
+		if (metaModel.simParms == null) { //saved under a former implementation where this variable was static
 			metaModel.setDefaultSettings();
 		}
 		return metaModel;
@@ -475,18 +386,9 @@ public class MetaModel implements Saveable {
 
 	public void printSummary() {
 		if (hasConverged()) {
-			System.out.println("Final log-likelihood = " + model.getLogLikelihood(getFinalParameterEstimates()));
-			System.out.println("Final marginal log-likelihood = " + model.lnProbY);
-			System.out.println("Final parameters = ");
-			System.out.println(getFinalParameterEstimates().toString());
-			System.out.println("Final standardError = ");
-			Matrix diagStd = model.getParmsVarCov().diagonalVector().elementWisePower(0.5);
-			System.out.println(diagStd.toString());
-			System.out.println("Correlation matrix = ");
-			Matrix corrMat = model.getParmsVarCov().elementWiseDivide(diagStd.multiply(diagStd.transpose()));
-			System.out.println(corrMat);
+			model.printSummary();
 		} else {
-			System.out.println("The model has not converged!");
+			System.out.println("The model has not been fitted yet!");
 		}
 	}
 

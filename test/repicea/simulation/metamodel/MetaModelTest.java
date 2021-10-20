@@ -21,6 +21,7 @@ package repicea.simulation.metamodel;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.AfterClass;
@@ -29,7 +30,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
-import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.util.ObjectUtility;
 
 public class MetaModelTest {
@@ -88,23 +88,23 @@ public class MetaModelTest {
 	public static void main(String[] args) throws IOException {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
-		String vegPot = "RS2";
-		String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
-		String outputType = "AliveVolume_ConiferousSpecies";
-		MetaModel m = MetaModel.Load(metaModelFilename);
-//		System.out.println("Parameter estimates = " + m.getFinalParameterEstimates());
-		m.fitModel(outputType, ModelImplEnum.ChapmanRichards);
-		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichards.csv");
-		m.fitModel(outputType, ModelImplEnum.ChapmanRichardsWithRandomEffect);
-		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichardsWithRandomEffect.csv");
-		m.fitModel(outputType, ModelImplEnum.ChapmanRichardsDerivative);
-		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichardsDerivative.csv");
-		m.fitModel(outputType, ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
-		m.exportFinalDataSet(outputPath + File.separator + vegPot + "_ChapmanRichardsDerivativeWithRandomEffect.csv");
+		List<String> vegPotList = new ArrayList<String>();
+		vegPotList.add("MS2");
+		vegPotList.add("RE2");
+		vegPotList.add("RE3");
+		vegPotList.add("RS2");
 		
-//		m.exportMetropolisHastingsSample(path + "mhSample.csv");
-//		m.exportFinalDataSet(path + "QC_FMU02664_Art2009_Plus4Degrees_" + m.getStratumGroup() + "_Coniferous.csv");
-//		m.save(path + "QC_FMU02664_Art2009_Plus4Degrees_" + m.getStratumGroup() + "_Coniferous.zml");
-//		int u = 0;
+		List<String> outputTypes = new ArrayList<String>();
+		outputTypes.add("AliveVolume_ConiferousSpecies");
+		outputTypes.add("AliveVolume_BroadleavedSpecies");
+		
+		for (String vegPot : vegPotList) {
+			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
+			for (String outputType : outputTypes) {
+				MetaModel m = MetaModel.Load(metaModelFilename);
+				m.fitModel(outputType);
+				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + "_" + m.model.getModelImplementation() + ".csv");
+			}
+		}
 	}
 }
