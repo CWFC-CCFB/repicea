@@ -22,12 +22,15 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.simulation.metamodel.MetaModel.SimulationParameters;
+import repicea.simulation.metamodel.MetaModel.VerboseLevel;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
@@ -43,8 +46,16 @@ import repicea.stats.estimates.MonteCarloEstimate;
  * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
  * @author Mathieu Fortin - September 2021
  */
-abstract class AbstractModelImplementation {
+abstract class AbstractModelImplementation implements Runnable {
 
+	private static final Map<Class<? extends AbstractModelImplementation>, ModelImplEnum> EnumMap = new HashMap<Class<? extends AbstractModelImplementation>, ModelImplEnum>();
+	static {
+		EnumMap.put(ChapmanRichardsModelImplementation.class, ModelImplEnum.ChapmanRichards);
+		EnumMap.put(ChapmanRichardsModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsWithRandomEffect);
+		EnumMap.put(ChapmanRichardsDerivativeModelImplementation.class, ModelImplEnum.ChapmanRichardsDerivative);
+		EnumMap.put(ChapmanRichardsDerivativeModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
+	}
+	
 	protected final SimulationParameters simParms;
 
 	protected ContinuousDistribution priors;
@@ -100,6 +111,11 @@ abstract class AbstractModelImplementation {
 		}
 	}
 
+	final ModelImplEnum getModelImplementation() {
+		return EnumMap.get(getClass());
+	}
+	
+	
 	/**
 	 * Get the observations of a particular output type ready for the meta-model fitting. 
 	 * @return a HierarchicalStatisticalDataStructure instance
@@ -242,24 +258,23 @@ abstract class AbstractModelImplementation {
 			llk = getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
 			if (Math.exp(llk) > 0d) {
 				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
-				int nbSamples = myFirstList.size();
-				if (nbSamples%1000 == 0) {
-					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
-				}
+//				int nbSamples = myFirstList.size();
+//				if (nbSamples%1000 == 0) {
+//					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
+//				}
 			}
 		}
  		Collections.sort(myFirstList);
 		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
-		displayMessage("Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
-		if (MetaModel.Verbose) {
-			displayMessage("LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
-		}
+		displayMessage(VerboseLevel.Medium, "Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
+		displayMessage(VerboseLevel.High, "LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
 		return startingParms;
 	}
 
 	
-	private void displayMessage(Object obj) {
-		System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
+	private void displayMessage(VerboseLevel level, Object obj) {
+		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level))
+			System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
 	}
 
 
@@ -285,9 +300,7 @@ abstract class AbstractModelImplementation {
 			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
 			if (i > 0 && i < simParms.nbBurnIn && i%500 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
-				if (MetaModel.Verbose) {
-					displayMessage("After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
-				}
+				displayMessage(VerboseLevel.Medium, "After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
 				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
 				} else if (acceptanceRatio < 0.2) {
@@ -296,9 +309,7 @@ abstract class AbstractModelImplementation {
 				successes = 0;
 				trials = 0;
 			}
-			if (i%10000 == 0) {
-				displayMessage("Processing realization " + i + " / " + simParms.nbRealizations);
-			}
+			displayMessage(VerboseLevel.Medium, "Processing realization " + i + " / " + simParms.nbRealizations);
 			boolean accepted = false;
 			int innerIter = 0;
 			
@@ -317,33 +328,31 @@ abstract class AbstractModelImplementation {
 				innerIter++;
 			}
 			if (innerIter >= simParms.nbInternalIter && !accepted) {
-				displayMessage("Stopping after " + i + " realization");
+				displayMessage(VerboseLevel.Minimum, "Stopping after " + i + " realization");
 				completed = false;
 				break;
 			} else {
 				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
-				if (MetaModel.Verbose) {
-					if (metropolisHastingsSample.size()%100 == 0) {
-						displayMessage(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
-					}
+				if (metropolisHastingsSample.size()%100 == 0) {
+					displayMessage(VerboseLevel.High, metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
 				}
 			}
 		}
 		
 		acceptanceRatio = ((double) successes) / trials;
 		
-		displayMessage("Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-		displayMessage("Acceptance ratio = " + acceptanceRatio);
+		displayMessage(VerboseLevel.Medium, "Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
+		displayMessage(VerboseLevel.Minimum, "Acceptance ratio = " + acceptanceRatio);
 		return completed;
 	}
 
 	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample) {
 		List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-		displayMessage("Discarding " + simParms.nbBurnIn + " samples as burn in.");
+		displayMessage(VerboseLevel.Medium, "Discarding " + simParms.nbBurnIn + " samples as burn in.");
 		for (int i = simParms.nbBurnIn; i < metropolisHastingsSample.size(); i+= simParms.oneEach) {
 			finalMetropolisHastingsGibbsSample.add(metropolisHastingsSample.get(i));
 		}
-		displayMessage("Selecting one every " + simParms.oneEach + " samples as final selection.");
+		displayMessage(VerboseLevel.Medium, "Selecting one every " + simParms.oneEach + " samples as final selection.");
 		return finalMetropolisHastingsGibbsSample;
 	}
 	
@@ -381,7 +390,7 @@ abstract class AbstractModelImplementation {
 				structure.getDataSet().addField("pred", finalPredArray);
 				structure.getDataSet().addField("predVar", finalPredVarArray);
 
-				displayMessage("Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
+				displayMessage(VerboseLevel.Medium, "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 				converged = true;
 			}
 		} catch (Exception e1) {
@@ -435,4 +444,26 @@ abstract class AbstractModelImplementation {
 
 	boolean hasConverged() {return converged;}
 	
+	@Override
+	public final void run() {
+		fitModel();
+	}
+	
+	void printSummary() {
+		if (hasConverged()) {
+			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
+			System.out.println("Final marginal log-likelihood = " + lnProbY);
+			System.out.println("Final parameters = ");
+			System.out.println(getParameters().toString());
+			System.out.println("Final standardError = ");
+			Matrix diagStd = getParmsVarCov().diagonalVector().elementWisePower(0.5);
+			System.out.println(diagStd.toString());
+			System.out.println("Correlation matrix = ");
+			Matrix corrMat = getParmsVarCov().elementWiseDivide(diagStd.multiply(diagStd.transpose()));
+			System.out.println(corrMat);
+		} else {
+			System.out.println("The model has not converged!");
+		}
+	}
+
 }

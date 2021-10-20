@@ -20,7 +20,6 @@ package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
@@ -45,11 +44,10 @@ class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelI
 		}
 	}
 
-	ChapmanRichardsDerivativeModelImplementation(String outputType, MetaModel model) throws StatisticalDataException {
+	protected ChapmanRichardsDerivativeModelImplementation(String outputType, MetaModel model) throws StatisticalDataException {
 		super(outputType, model);
 	}
-	
-	
+
 	@Override
 	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
 		double b1 = getParameters().getValueAt(0, 0);

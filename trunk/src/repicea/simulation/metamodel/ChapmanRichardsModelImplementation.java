@@ -20,7 +20,6 @@ package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
@@ -96,7 +95,7 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 	ChapmanRichardsModelImplementation(String outputType, MetaModel model) throws StatisticalDataException {
 		super(outputType, model);
 	}
-	
+
 	@Override
 	Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
 		boolean canCalculateVariance = includePredVariance && getParmsVarCov() != null;

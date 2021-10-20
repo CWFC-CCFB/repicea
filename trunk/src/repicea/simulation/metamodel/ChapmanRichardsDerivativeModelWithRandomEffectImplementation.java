@@ -20,7 +20,6 @@ package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
