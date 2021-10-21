@@ -241,27 +241,22 @@ abstract class AbstractModelImplementation implements Runnable {
 
 	abstract GaussianDistribution getStartingParmEst(double coefVar);
 
-	double getParmsPriorDensity(Matrix parms) {
-		return priors.getProbabilityDensity(parms);
-	}
-
 	String getSelectedOutputType() {
 		return outputType;
 	}
 	
-	MetaModelMetropolisHastingsSample findFirstSetOfParameters(int nrow, int desiredSize) {
+	private MetaModelMetropolisHastingsSample findFirstSetOfParameters(int desiredSize, boolean isForIntegral) {
 		long startTime = System.currentTimeMillis();
 		double llk = Double.NEGATIVE_INFINITY;
 		List<MetaModelMetropolisHastingsSample> myFirstList = new ArrayList<MetaModelMetropolisHastingsSample>();
 		while (myFirstList.size() < desiredSize) {
 			Matrix parms = priors.getRandomRealization();
-			llk = getLogLikelihood(parms); // no need for the density of the parameters since the random realizations account for the distribution of the prior 
+			llk = isForIntegral ? getLogLikelihood(parms) : getLogLikelihood(parms) + Math.log(priors.getProbabilityDensity(parms)); // if isForIntegral then there is no need for the density of the parameters since the random realizations account for the distribution of the prior 
 			if (Math.exp(llk) > 0d) {
 				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
-//				int nbSamples = myFirstList.size();
-//				if (nbSamples%1000 == 0) {
-//					displayMessage("Initial sample list has " + myFirstList.size() + " sets.");
-//				}
+				if (myFirstList.size()%1000 == 0) {
+					displayMessage(VerboseLevel.Medium, "Initial sample list has " + myFirstList.size() + " sets.");
+				}
 			}
 		}
  		Collections.sort(myFirstList);
@@ -273,8 +268,9 @@ abstract class AbstractModelImplementation implements Runnable {
 
 	
 	private void displayMessage(VerboseLevel level, Object obj) {
-		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level))
-			System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
+		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level)) {
+			System.out.println("Meta-model " + stratumGroup + "; Implementation " + getModelImplementation().name() + ": " + obj.toString());
+		}
 	}
 
 
@@ -287,8 +283,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	 * @param gaussDist the sampling distribution
 	 * @return a boolean
 	 */
-	boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, 
-			GaussianDistribution gaussDist) {
+	private boolean generateMetropolisSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
 		long startTime = System.currentTimeMillis();
 		Matrix newParms = null;
 		double llk = 0d;
@@ -315,7 +310,7 @@ abstract class AbstractModelImplementation implements Runnable {
 			
 			while (!accepted && innerIter < simParms.nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
-				double parmsPriorDensity = getParmsPriorDensity(newParms);
+				double parmsPriorDensity = priors.getProbabilityDensity(newParms);
 				if (parmsPriorDensity > 0d) {
 					llk = getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
 					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
@@ -339,10 +334,11 @@ abstract class AbstractModelImplementation implements Runnable {
 			}
 		}
 		
-		acceptanceRatio = ((double) successes) / trials;
-		
-		displayMessage(VerboseLevel.Medium, "Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-		displayMessage(VerboseLevel.Minimum, "Acceptance ratio = " + acceptanceRatio);
+		if (completed) {
+			acceptanceRatio = ((double) successes) / trials;
+			displayMessage(VerboseLevel.Medium, "Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
+			displayMessage(VerboseLevel.Minimum, "Acceptance ratio = " + acceptanceRatio);
+		} 
 		return completed;
 	}
 
@@ -358,12 +354,23 @@ abstract class AbstractModelImplementation implements Runnable {
 	
 	void fitModel() {
 		double coefVar = 0.01;
+		int nbMaxTry = 2;
+		boolean completed = false;
 		try {
-			GaussianDistribution gaussDist = getStartingParmEst(coefVar);
-			List<MetaModelMetropolisHastingsSample> mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(gaussDist.getMean().m_iRows, simParms.nbInitialGrid);
-			mhSample.add(firstSet); // first valid sample
-			boolean completed = generateMetropolisSample(mhSample, gaussDist);
+			int nbTry = 0;
+			GaussianDistribution gaussDist = null;
+			List<MetaModelMetropolisHastingsSample> mhSample = null;
+			while (!completed && nbTry < nbMaxTry) {
+				if (nbTry > 0) {
+					displayMessage(VerboseLevel.Minimum, "Trying again to fit the meta-model!");
+				}
+				gaussDist = getStartingParmEst(coefVar);
+				mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+				MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
+				mhSample.add(firstSet); // first valid sample
+				completed = generateMetropolisSample(mhSample, gaussDist);
+				nbTry++;
+			}
 			if (completed) {
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(mhSample);
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
@@ -403,7 +410,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	private double getLnProbY(Matrix point, 
 			List<MetaModelMetropolisHastingsSample> posteriorSamples, 
 			GaussianDistribution samplingDist) {
-		double parmsPriorDensity = getParmsPriorDensity(point);
+		double parmsPriorDensity = priors.getProbabilityDensity(point);
 		double llkOfThisPoint = getLogLikelihood(point) + Math.log(parmsPriorDensity);
 		double sumIntegrand = 0;
 		double densityFromSamplingDist = 0;
@@ -423,7 +430,7 @@ abstract class AbstractModelImplementation implements Runnable {
 		int nbRealizations = posteriorSamples.size();
 		for (int j = 0; j < nbRealizations; j++) {
 			Matrix newParms = samplingDist.getRandomRealization();
-			parmsPriorDensity = getParmsPriorDensity(newParms);
+			parmsPriorDensity = priors.getProbabilityDensity(newParms);
 			double ratio;
 			if (parmsPriorDensity > 0d) {
 				double llk = getLogLikelihood(newParms) + Math.log(parmsPriorDensity);

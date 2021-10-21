@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -69,10 +70,40 @@ public class MetaModel implements Saveable {
 	}
 	
 	public static enum ModelImplEnum {
-		ChapmanRichards,
-		ChapmanRichardsWithRandomEffect,
-		ChapmanRichardsDerivative,
-		ChapmanRichardsDerivativeWithRandomEffect;
+		ChapmanRichards(true),
+		ChapmanRichardsWithRandomEffect(false),
+		ChapmanRichardsDerivative(true),
+		ChapmanRichardsDerivativeWithRandomEffect(false);
+		
+		private static List<ModelImplEnum> ModelsWithoutRandomEffects;
+		private static Map<ModelImplEnum, ModelImplEnum> MatchingModelsWithRandomEffects;
+		
+		ModelImplEnum(boolean modelWithoutRandomEffect) {
+			
+		}
+		
+		public static List<ModelImplEnum> getModelsWithoutRandomEffects() {
+			if (ModelsWithoutRandomEffects == null) {
+				ModelsWithoutRandomEffects = new ArrayList<ModelImplEnum>();
+				ModelsWithoutRandomEffects.add(ChapmanRichards);
+				ModelsWithoutRandomEffects.add(ChapmanRichardsDerivative);
+			}
+			return ModelsWithoutRandomEffects;
+		}
+		
+		private static Map<ModelImplEnum, ModelImplEnum> getMatchingModelsWithRandomEffects() {
+			if (MatchingModelsWithRandomEffects == null) {
+				MatchingModelsWithRandomEffects = new HashMap<ModelImplEnum, ModelImplEnum>();
+				MatchingModelsWithRandomEffects.put(ChapmanRichards, ChapmanRichardsWithRandomEffect);
+				MatchingModelsWithRandomEffects.put(ChapmanRichardsDerivative, ChapmanRichardsDerivativeWithRandomEffect);
+			}
+			return MatchingModelsWithRandomEffects;
+		}
+		
+		public static ModelImplEnum getMatchingModelWithRandomEffects(ModelImplEnum modelImplEnum) {
+			return getMatchingModelsWithRandomEffects().get(modelImplEnum);
+		}
+		
 	}
 	
 	static class SimulationParameters implements Cloneable {
@@ -80,7 +111,7 @@ public class MetaModel implements Saveable {
 		protected int nbRealizations = 500000 + nbBurnIn;
 		protected int nbInternalIter = 200000;
 		protected int oneEach = 50;
-		protected int nbInitialGrid = 10000;	
+		protected int nbInitialGrid = 1000;	
 		
 		SimulationParameters() {}
 		
@@ -100,7 +131,6 @@ public class MetaModel implements Saveable {
 	protected final Map<Integer, ScriptResult> scriptResults;
 	protected AbstractModelImplementation model;
 	private final String stratumGroup;
-//	private ModelImplEnum modelImplEnum; 
 
 	
 	/**
@@ -115,12 +145,8 @@ public class MetaModel implements Saveable {
 
 	private void setDefaultSettings() {
 		simParms = new SimulationParameters();
-//		if (modelImplEnum == null) {
-//			modelImplEnum = ModelImplEnum.ChapmanRichardsWithRandomEffect;
-//		}
 	}
-	
-	
+		
 	/**
 	 * Provide the stratum group for this mate-model.
 	 * @return a String
@@ -152,7 +178,6 @@ public class MetaModel implements Saveable {
 		if (canBeAdded) {
 			scriptResults.put(initialAge, result);
 			model = null;	// so that converge is set to false by default
-//			converged = false;  // reset convergence to false since new results have been added
 		} else {
 			throw new InvalidParameterException("The result parameter is not compatible with previous results in the map!");
 		}
@@ -247,10 +272,11 @@ public class MetaModel implements Saveable {
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
 	public boolean fitModel(String outputType) {
-		System.out.println("----------- Modeling output type: " + stratumGroup + "-" + outputType + " ----------------");
+		model = null;	// reset the convergence to false 
+		displayMessage(VerboseLevel.None, "----------- Modeling output type: " + outputType + " ----------------");
 		try {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
-			for (ModelImplEnum e : ModelImplEnum.values()) {
+			for (ModelImplEnum e : ModelImplEnum.getModelsWithoutRandomEffects()) {	// use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
 				w.start();
 				modelList.add(w);
@@ -258,10 +284,18 @@ public class MetaModel implements Saveable {
 			for (InnerWorker w : modelList) {
 				w.join();
 			}
-			
 			InnerWorker selectedWorker = performModelSelection(modelList);
+			displayMessage(VerboseLevel.None, "Preliminary model is " + selectedWorker.ami.getModelImplementation().name());
+			modelList.clear();
+			modelList.add(selectedWorker);
+			ModelImplEnum e = ModelImplEnum.getMatchingModelWithRandomEffects(selectedWorker.ami.getModelImplementation());
+			InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
+			w.start();
+			modelList.add(w);
+			w.join();
+			selectedWorker = performModelSelection(modelList);
 			model = selectedWorker.ami;
-			System.out.println("Selected model is " + model.getModelImplementation().name());
+			displayMessage(VerboseLevel.None, "Final model is " + model.getModelImplementation().name());
 			model.printSummary();
 			return true; 
  		} catch (Exception e1) {
@@ -377,8 +411,7 @@ public class MetaModel implements Saveable {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
 		Object obj = deserializer.readObject();
 		MetaModel metaModel = (MetaModel) obj;
-//		if (metaModel.simParms == null || metaModel.modelImplEnum == null) { //saved under a former implementation where this variable was static
-		if (metaModel.simParms == null) { //saved under a former implementation where this variable was static
+		if (metaModel.simParms == null) { // saved under a former implementation where this variable was static
 			metaModel.setDefaultSettings();
 		}
 		return metaModel;
