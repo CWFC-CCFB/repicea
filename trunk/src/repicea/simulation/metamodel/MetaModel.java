@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
  *
@@ -70,6 +70,8 @@ public class MetaModel implements Saveable {
 	}
 	
 	public static enum ModelImplEnum {
+		SimpleSlope(true),
+		SimplifiedChapmanRichards(true),
 		ChapmanRichards(true),
 		ChapmanRichardsWithRandomEffect(false),
 		ChapmanRichardsDerivative(true),
@@ -78,15 +80,19 @@ public class MetaModel implements Saveable {
 		private static List<ModelImplEnum> ModelsWithoutRandomEffects;
 		private static Map<ModelImplEnum, ModelImplEnum> MatchingModelsWithRandomEffects;
 		
+		final boolean modelWithoutRandomEffect;
 		ModelImplEnum(boolean modelWithoutRandomEffect) {
-			
+			this.modelWithoutRandomEffect = modelWithoutRandomEffect;
 		}
 		
 		public static List<ModelImplEnum> getModelsWithoutRandomEffects() {
 			if (ModelsWithoutRandomEffects == null) {
 				ModelsWithoutRandomEffects = new ArrayList<ModelImplEnum>();
-				ModelsWithoutRandomEffects.add(ChapmanRichards);
-				ModelsWithoutRandomEffects.add(ChapmanRichardsDerivative);
+				for (ModelImplEnum e : ModelImplEnum.values()) {
+					if (e.modelWithoutRandomEffect) {
+						ModelsWithoutRandomEffects.add(e);
+					}
+				}
 			}
 			return ModelsWithoutRandomEffects;
 		}
@@ -109,9 +115,9 @@ public class MetaModel implements Saveable {
 	static class SimulationParameters implements Cloneable {
 		protected int nbBurnIn = 5000;
 		protected int nbRealizations = 500000 + nbBurnIn;
-		protected int nbInternalIter = 200000;
+		protected int nbInternalIter = 10000;
 		protected int oneEach = 50;
-		protected int nbInitialGrid = 1000;	
+		protected int nbInitialGrid = 10000;	
 		
 		SimulationParameters() {}
 		
@@ -187,6 +193,12 @@ public class MetaModel implements Saveable {
 	private AbstractModelImplementation getInnerModel(String outputType, ModelImplEnum modelImplEnum) throws StatisticalDataException {
 		AbstractModelImplementation model;
 		switch(modelImplEnum) {
+		case SimpleSlope:
+			model = new SimpleSlopeModelImplementation(outputType, this);
+			break;
+		case SimplifiedChapmanRichards:
+			model = new SimplifiedChapmanRichardsModelImplementation(outputType, this);
+			break;
 		case ChapmanRichards:
 			model = new ChapmanRichardsModelImplementation(outputType, this);
 			break;
@@ -255,6 +267,8 @@ public class MetaModel implements Saveable {
 			if (w.ami.hasConverged()) {
 				newList.add(w);
 				sumProb += Math.exp(w.ami.lnProbY);
+				w.ami.displayMessage(VerboseLevel.Minimum, "Result for this implementation!");
+				w.ami.printSummary();
 			}
 		}
 		for (InnerWorker w : newList) {
@@ -276,7 +290,16 @@ public class MetaModel implements Saveable {
 		displayMessage(VerboseLevel.None, "----------- Modeling output type: " + outputType + " ----------------");
 		try {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
-			for (ModelImplEnum e : ModelImplEnum.getModelsWithoutRandomEffects()) {	// use the basic models first, i.e. those without random effects
+			/***************** TODO to be deleted */ 
+			List<ModelImplEnum> myImplementations = new ArrayList<ModelImplEnum>();
+			myImplementations.add(ModelImplEnum.ChapmanRichards);
+			myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
+			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
+			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
+			
+			
+//			for (ModelImplEnum e : ModelImplEnum.getModelsWithoutRandomEffects()) {	// use the basic models first, i.e. those without random effects
+			for (ModelImplEnum e : myImplementations) {	// use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
 				w.start();
 				modelList.add(w);
@@ -286,16 +309,16 @@ public class MetaModel implements Saveable {
 			}
 			InnerWorker selectedWorker = performModelSelection(modelList);
 			displayMessage(VerboseLevel.None, "Preliminary model is " + selectedWorker.ami.getModelImplementation().name());
-			modelList.clear();
-			modelList.add(selectedWorker);
-			ModelImplEnum e = ModelImplEnum.getMatchingModelWithRandomEffects(selectedWorker.ami.getModelImplementation());
-			InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
-			w.start();
-			modelList.add(w);
-			w.join();
-			selectedWorker = performModelSelection(modelList);
+//			modelList.clear();
+//			modelList.add(selectedWorker);
+//			ModelImplEnum e = ModelImplEnum.getMatchingModelWithRandomEffects(selectedWorker.ami.getModelImplementation());
+//			InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
+//			w.start();
+//			modelList.add(w);
+//			w.join();
+//			selectedWorker = performModelSelection(modelList);
+//			displayMessage(VerboseLevel.None, "Final model is " + model.getModelImplementation().name());
 			model = selectedWorker.ami;
-			displayMessage(VerboseLevel.None, "Final model is " + model.getModelImplementation().name());
 			model.printSummary();
 			return true; 
  		} catch (Exception e1) {

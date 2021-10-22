@@ -89,14 +89,14 @@ public class MetaModelTest {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
-		vegPotList.add("MS2");
-		vegPotList.add("RE2");
-		vegPotList.add("RE3");
+//		vegPotList.add("MS2");
+//		vegPotList.add("RE2");
+//		vegPotList.add("RE3");
 		vegPotList.add("RS2");
 		
 		List<String> outputTypes = new ArrayList<String>();
 		outputTypes.add("AliveVolume_ConiferousSpecies");
-		outputTypes.add("AliveVolume_BroadleavedSpecies");
+//		outputTypes.add("AliveVolume_BroadleavedSpecies");
 		
 		for (String vegPot : vegPotList) {
 			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";

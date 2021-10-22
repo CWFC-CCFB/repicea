@@ -32,6 +32,7 @@ import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.simulation.metamodel.MetaModel.SimulationParameters;
 import repicea.simulation.metamodel.MetaModel.VerboseLevel;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
@@ -48,8 +49,65 @@ import repicea.stats.estimates.MonteCarloEstimate;
  */
 abstract class AbstractModelImplementation implements Runnable {
 
+	@SuppressWarnings("serial")
+	class DataBlockWrapper extends AbstractDataBlockWrapper {
+
+		final Matrix varCovFullCorr;
+		final Matrix distances;
+		Matrix invVarCov;
+		double lnConstant;
+
+		DataBlockWrapper(String blockId, 
+				List<Integer> indices, 
+				HierarchicalStatisticalDataStructure structure, 
+				Matrix overallVarCov) {
+			super(blockId, indices, structure, overallVarCov);
+			Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
+			Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
+			this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
+			distances = new Matrix(varCovFullCorr.m_iRows, 1, 1, 1);
+		}
+
+		@Override
+		void updateCovMat(Matrix parameters) {
+			double rhoParm = getCorrelationParameter();	
+			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
+			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
+
+			Matrix invCorr = StatisticalUtility.getInverseCorrelationAR1Matrix(distances.m_iRows, rhoParm);
+			Matrix invFull = varCovFullCorr.elementWisePower(-1d);
+			invVarCov = invFull.elementWiseMultiply(invCorr);
+			double determinant = varCov.getDeterminant();
+			int k = this.vecY.m_iRows;
+			this.lnConstant = -.5 * k * Math.log(2 * Math.PI) - Math.log(determinant) * .5;
+		}
+
+		@Override
+		double getLogLikelihood() {
+			Matrix pred = generatePredictions(this, getParameterValue(0));
+			Matrix residuals = vecY.subtract(pred);
+			Matrix rVr = residuals.transpose().multiply(invVarCov).multiply(residuals);
+			double rVrValue = rVr.getSumOfElements();
+			if (rVrValue < 0) {
+				throw new UnsupportedOperationException("The sum of squared errors is negative!");
+			} else {
+				double llk = - 0.5 * rVrValue + lnConstant; 
+				return llk;
+			}
+		}
+
+		@Override
+		double getMarginalLogLikelihood() {
+			throw new UnsupportedOperationException("This model implementation " + getClass().getSimpleName() + " does not implement random effects!");
+		}
+
+	}
+
+
 	private static final Map<Class<? extends AbstractModelImplementation>, ModelImplEnum> EnumMap = new HashMap<Class<? extends AbstractModelImplementation>, ModelImplEnum>();
 	static {
+		EnumMap.put(SimpleSlopeModelImplementation.class, ModelImplEnum.SimpleSlope);
+		EnumMap.put(SimplifiedChapmanRichardsModelImplementation.class, ModelImplEnum.SimplifiedChapmanRichards);
 		EnumMap.put(ChapmanRichardsModelImplementation.class, ModelImplEnum.ChapmanRichards);
 		EnumMap.put(ChapmanRichardsModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsWithRandomEffect);
 		EnumMap.put(ChapmanRichardsDerivativeModelImplementation.class, ModelImplEnum.ChapmanRichardsDerivative);
@@ -57,18 +115,19 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 	
 	protected final SimulationParameters simParms;
-
-	protected ContinuousDistribution priors;
 	protected final HierarchicalStatisticalDataStructure structure;
-	private Matrix parameters;
-	private Matrix parmsVarCov;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
-	protected List<Integer> fixedEffectsParameterIndices;
-	protected double lnProbY;
 	protected final String outputType;
 	protected final String stratumGroup;
+	
+	protected ContinuousDistribution priors;
+	private Matrix parameters;
+	private Matrix parmsVarCov;
+	protected List<Integer> fixedEffectsParameterIndices;
+	protected double lnProbY;
 	protected transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
+	int indexCorrelationParameter;
 
 	/**
 	 * Internal constructor.
@@ -107,14 +166,50 @@ abstract class AbstractModelImplementation implements Runnable {
 		for (String k : formattedMap.keySet()) {
 			DataBlock db = formattedMap.get(k);
 			List<Integer> indices = db.getIndices();
-			dataBlockWrappers.add(createDataBlockWrapper(k, indices, structure, varCov));
+			dataBlockWrappers.add(createWrapper(k, indices, structure, varCov));
 		}
+	}
+
+	AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
+		return new DataBlockWrapper(k, indices, structure, varCov);
+	}
+	
+	final Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
+		boolean canCalculateVariance = includePredVariance && getParmsVarCov() != null;
+		Matrix mu;
+		if (canCalculateVariance) {
+			mu = new Matrix(dbw.vecY.m_iRows, 2);
+		} else {
+			mu = new Matrix(dbw.vecY.m_iRows, 1);
+		}
+		
+		for (int i = 0; i < mu.m_iRows; i++) {
+			mu.setValueAt(i, 0, getPrediction(dbw.ageYr.getValueAt(i, 0), dbw.timeSinceBeginning.getValueAt(i, 0), randomEffect));
+			if (canCalculateVariance) {
+				double predVar = getPredictionVariance(dbw.ageYr.getValueAt(i, 0), dbw.timeSinceBeginning.getValueAt(i, 0), randomEffect);
+				mu.setValueAt(i, 1, predVar);
+			}
+		}
+		return mu;
+	}
+
+	final double getCorrelationParameter() {
+		return getParameters().getValueAt(indexCorrelationParameter, 0);
 	}
 
 	final ModelImplEnum getModelImplementation() {
 		return EnumMap.get(getClass());
 	}
 	
+	double getLogLikelihood(Matrix parameters) {
+		setParameters(parameters);
+		double logLikelihood = 0d;
+		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
+			double logLikelihoodForThisBlock = dbw.getLogLikelihood();
+			logLikelihood += logLikelihoodForThisBlock;
+		}
+		return logLikelihood;
+	}
 	
 	/**
 	 * Get the observations of a particular output type ready for the meta-model fitting. 
@@ -172,10 +267,6 @@ abstract class AbstractModelImplementation implements Runnable {
 		return varCov;
 	}
 
-	
-	abstract AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov);
-
-	abstract Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance);
 
 	final Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
 		return generatePredictions(dbw, randomEffect, false);
@@ -194,13 +285,6 @@ abstract class AbstractModelImplementation implements Runnable {
 		return variance.getValueAt(0, 0);
 	}
 	
-	/**
-	 * Return the loglikelihood for the model implementation. This likelihood is used in 
-	 * the Metropolis-Hastings algorithm.
-	 * @param parameters
-	 * @return
-	 */
-	abstract double getLogLikelihood(Matrix parameters);
 
 	void setParameters(Matrix parameters) {
 		this.parameters = parameters;
@@ -267,7 +351,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 
 	
-	private void displayMessage(VerboseLevel level, Object obj) {
+	void displayMessage(VerboseLevel level, Object obj) {
 		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level)) {
 			System.out.println("Meta-model " + stratumGroup + "; Implementation " + getModelImplementation().name() + ": " + obj.toString());
 		}
@@ -304,7 +388,9 @@ abstract class AbstractModelImplementation implements Runnable {
 				successes = 0;
 				trials = 0;
 			}
-			displayMessage(VerboseLevel.Medium, "Processing realization " + i + " / " + simParms.nbRealizations);
+			if (i%100000 == 0) {
+				displayMessage(VerboseLevel.Minimum, "Processing realization " + i + " / " + simParms.nbRealizations);
+			}
 			boolean accepted = false;
 			int innerIter = 0;
 			

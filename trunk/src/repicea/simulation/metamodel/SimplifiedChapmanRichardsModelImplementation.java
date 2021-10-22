@@ -25,33 +25,33 @@ import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
-/**
- * An implementation of the Chapman-Richards model including random effects.
- * @author Mathieu Fortin - October 2021
- */
-class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedModelImplementation {
+class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelImplementation {
 
-
-	ChapmanRichardsModelWithRandomEffectImplementation(String outputType, MetaModel model) throws StatisticalDataException {
+	SimplifiedChapmanRichardsModelImplementation(String outputType, MetaModel model) throws StatisticalDataException {
 		super(outputType, model);
 	}
 
 	@Override
+	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double pred = (b1 + r1) * (1 - Math.exp(-b2 * ageYr));
+		return pred;
+	}
+
+
+	@Override
 	GaussianDistribution getStartingParmEst(double coefVar) {
-		Matrix parmEst = new Matrix(5,1);
+		Matrix parmEst = new Matrix(3,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
-		parmEst.setValueAt(2, 0, 2d);
-		parmEst.setValueAt(3, 0, 200d);
-		parmEst.setValueAt(4, 0, .92);
+		parmEst.setValueAt(2, 0, .92);
 		
 		fixedEffectsParameterIndices = new ArrayList<Integer>();
 		fixedEffectsParameterIndices.add(0);
 		fixedEffectsParameterIndices.add(1);
-		fixedEffectsParameterIndices.add(2);
-		
-		indexRandomEffectVariance = 3;
-		indexCorrelationParameter = 4;
+
+		this.indexCorrelationParameter = 2;
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -60,22 +60,16 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		Matrix lowerBound = new Matrix(5,1);
-		Matrix upperBound = new Matrix(5,1);
+		Matrix lowerBound = new Matrix(3,1);
+		Matrix upperBound = new Matrix(3,1);
 		lowerBound.setValueAt(0, 0, 0);
 		upperBound.setValueAt(0, 0, 400);
 		
 		lowerBound.setValueAt(1, 0, 0.0001);
 		upperBound.setValueAt(1, 0, 0.1);
 		
-		lowerBound.setValueAt(2, 0, 1);
-		upperBound.setValueAt(2, 0, 6);
-
-		lowerBound.setValueAt(3, 0, 0);
-		upperBound.setValueAt(3, 0, 350);
-
-		lowerBound.setValueAt(4, 0, .90);
-		upperBound.setValueAt(4, 0, .99);
+		lowerBound.setValueAt(2, 0, .90);
+		upperBound.setValueAt(2, 0, .99);
 		
 		priors = new UniformDistribution(lowerBound, upperBound);
 
@@ -83,27 +77,16 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 	}
 
 	@Override
-	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
-		double b1 = getParameters().getValueAt(0, 0);
-		double b2 = getParameters().getValueAt(1, 0);
-		double b3 = getParameters().getValueAt(2, 0);
-		double pred = (b1 + r1) * Math.pow(1 - Math.exp(-b2 * ageYr), b3);
-		return pred;
-	}
-
-	@Override
 	Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1) {
 		double b1 = getParameters().getValueAt(0, 0);
 		double b2 = getParameters().getValueAt(1, 0);
-		double b3 = getParameters().getValueAt(2, 0);
 		
 		double exp = Math.exp(-b2 * ageYr);
 		double root = 1 - exp;
 		
-		Matrix derivatives = new Matrix(3,1);
-		derivatives.setValueAt(0, 0, Math.pow(root, b3));
-		derivatives.setValueAt(1, 0, b1 * b3 * Math.pow(root, b3 - 1) * exp * ageYr);
-		derivatives.setValueAt(2, 0, b1 * Math.pow(root, b3) * Math.log(root));
+		Matrix derivatives = new Matrix(2,1);
+		derivatives.setValueAt(0, 0, root);
+		derivatives.setValueAt(1, 0, ageYr * b1 * exp);
 		return derivatives;
 	}
 
