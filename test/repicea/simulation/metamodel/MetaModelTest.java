@@ -23,10 +23,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogManager;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -62,6 +65,7 @@ public class MetaModelTest {
 		MetaModelInstance = null;
 	}
 
+	@Ignore
 	@Test
 	public void testingMetaModelDeserialization() throws IOException {
 		Assert.assertTrue("Model is deserialized", MetaModelInstance != null);
@@ -71,6 +75,7 @@ public class MetaModelTest {
 		Assert.assertEquals("Testing final dataset size", 60, MetaModelInstance.getFinalDataSet().getNumberOfObservations());
 	}
 
+	@Ignore
 	@Test
 	public void testingOutputTypes() throws Exception {
 		List<String> outputTypes = MetaModelInstance.getPossibleOutputTypes();
@@ -79,6 +84,7 @@ public class MetaModelTest {
 		Assert.assertEquals("Testing second value", "AliveVolume_ConiferousSpecies", outputTypes.get(1));
 	}
 
+	@Ignore
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
 		double pred = MetaModelInstance.getPrediction(90, 0);
@@ -86,6 +92,8 @@ public class MetaModelTest {
 	}
 
 	public static void main(String[] args) throws IOException {
+        System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
+		MetaModelManager.getLogger().setLevel(Level.INFO);
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
@@ -95,7 +103,8 @@ public class MetaModelTest {
 		vegPotList.add("RS2");
 		
 		List<String> outputTypes = new ArrayList<String>();
-		outputTypes.add("AliveVolume_ConiferousSpecies");
+		outputTypes.add("AliveVolume_All-species");
+//		outputTypes.add("AliveVolume_ConiferousSpecies");
 //		outputTypes.add("AliveVolume_BroadleavedSpecies");
 		
 		for (String vegPot : vegPotList) {

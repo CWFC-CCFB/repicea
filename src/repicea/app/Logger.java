@@ -36,6 +36,7 @@ import repicea.gui.REpiceaUIObject;
  * a JScrollPane that contains the JTextArea.
  * @author Mathieu Fortin - October 2012
  */
+@Deprecated
 public class Logger extends OutputStream implements Runnable, REpiceaUIObject {
 
 	private JScrollPane guiInterface;

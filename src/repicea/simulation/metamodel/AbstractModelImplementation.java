@@ -26,11 +26,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 import repicea.math.Matrix;
 import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.simulation.metamodel.MetaModel.SimulationParameters;
-import repicea.simulation.metamodel.MetaModel.VerboseLevel;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.data.DataBlock;
@@ -339,22 +339,19 @@ abstract class AbstractModelImplementation implements Runnable {
 			if (Math.exp(llk) > 0d) {
 				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
 				if (myFirstList.size()%1000 == 0) {
-					displayMessage(VerboseLevel.Medium, "Initial sample list has " + myFirstList.size() + " sets.");
+					MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Initial sample list has " + myFirstList.size() + " sets.");
 				}
 			}
 		}
  		Collections.sort(myFirstList);
 		MetaModelMetropolisHastingsSample startingParms = myFirstList.get(myFirstList.size() - 1);
-		displayMessage(VerboseLevel.Medium, "Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
-		displayMessage(VerboseLevel.High, "LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
+		MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Time to find a first set of plausible parameters = " + (System.currentTimeMillis() - startTime) + " ms");
+		MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "LLK = " + startingParms.llk + " - Parameters = " + startingParms.parms);
 		return startingParms;
 	}
 
-	
-	void displayMessage(VerboseLevel level, Object obj) {
-		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level)) {
-			System.out.println("Meta-model " + stratumGroup + "; Implementation " + getModelImplementation().name() + ": " + obj.toString());
-		}
+	private String getLogMessagePrefix() {
+		return stratumGroup + " Implementation " + getModelImplementation().name();
 	}
 
 
@@ -379,7 +376,7 @@ abstract class AbstractModelImplementation implements Runnable {
 			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
 			if (i > 0 && i < simParms.nbBurnIn && i%500 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
-				displayMessage(VerboseLevel.Medium, "After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
 				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
 				} else if (acceptanceRatio < 0.2) {
@@ -389,7 +386,7 @@ abstract class AbstractModelImplementation implements Runnable {
 				trials = 0;
 			}
 			if (i%100000 == 0) {
-				displayMessage(VerboseLevel.Minimum, "Processing realization " + i + " / " + simParms.nbRealizations);
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Processing realization " + i + " / " + simParms.nbRealizations);
 			}
 			boolean accepted = false;
 			int innerIter = 0;
@@ -409,54 +406,59 @@ abstract class AbstractModelImplementation implements Runnable {
 				innerIter++;
 			}
 			if (innerIter >= simParms.nbInternalIter && !accepted) {
-				displayMessage(VerboseLevel.Minimum, "Stopping after " + i + " realization");
+				MetaModelManager.logMessage(Level.SEVERE,  getLogMessagePrefix(), "Stopping after " + i + " realization");
 				completed = false;
 				break;
 			} else {
 				metropolisHastingsSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
 				if (metropolisHastingsSample.size()%100 == 0) {
-					displayMessage(VerboseLevel.High, metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
+					MetaModelManager.logMessage(Level.FINEST, getLogMessagePrefix(), metropolisHastingsSample.get(metropolisHastingsSample.size() - 1));
 				}
 			}
 		}
 		
 		if (completed) {
 			acceptanceRatio = ((double) successes) / trials;
-			displayMessage(VerboseLevel.Medium, "Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
-			displayMessage(VerboseLevel.Minimum, "Acceptance ratio = " + acceptanceRatio);
+			MetaModelManager.logMessage(Level.INFO, getLogMessagePrefix(), "Time to obtain " + metropolisHastingsSample.size() + " samples = " + (System.currentTimeMillis() - startTime) + " ms");
+			MetaModelManager.logMessage(Level.INFO, getLogMessagePrefix(), "Acceptance ratio = " + acceptanceRatio);
 		} 
 		return completed;
 	}
 
 	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample) {
 		List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-		displayMessage(VerboseLevel.Medium, "Discarding " + simParms.nbBurnIn + " samples as burn in.");
+		MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Discarding " + simParms.nbBurnIn + " samples as burn in.");
 		for (int i = simParms.nbBurnIn; i < metropolisHastingsSample.size(); i+= simParms.oneEach) {
 			finalMetropolisHastingsGibbsSample.add(metropolisHastingsSample.get(i));
 		}
-		displayMessage(VerboseLevel.Medium, "Selecting one every " + simParms.oneEach + " samples as final selection.");
+		MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Selecting one every " + simParms.oneEach + " samples as final selection.");
 		return finalMetropolisHastingsGibbsSample;
 	}
 	
 	void fitModel() {
 		double coefVar = 0.01;
-		int nbMaxTry = 2;
-		boolean completed = false;
+//		int nbMaxTry = 2;
+//		boolean completed = false;
 		try {
-			int nbTry = 0;
-			GaussianDistribution gaussDist = null;
-			List<MetaModelMetropolisHastingsSample> mhSample = null;
-			while (!completed && nbTry < nbMaxTry) {
-				if (nbTry > 0) {
-					displayMessage(VerboseLevel.Minimum, "Trying again to fit the meta-model!");
-				}
-				gaussDist = getStartingParmEst(coefVar);
-				mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-				MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
-				mhSample.add(firstSet); // first valid sample
-				completed = generateMetropolisSample(mhSample, gaussDist);
-				nbTry++;
-			}
+//			int nbTry = 0;
+//			GaussianDistribution gaussDist = null;
+//			List<MetaModelMetropolisHastingsSample> mhSample = null;
+//			while (!completed && nbTry < nbMaxTry) {
+//				if (nbTry > 0) {
+//					displayMessage(VerboseLevel.Minimum, "Trying again to fit the meta-model!");
+//				}
+//				gaussDist = getStartingParmEst(coefVar);
+//				mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+//				MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
+//				mhSample.add(firstSet); // first valid sample
+//				completed = generateMetropolisSample(mhSample, gaussDist);
+//				nbTry++;
+//			}
+			GaussianDistribution gaussDist = getStartingParmEst(coefVar);
+			List<MetaModelMetropolisHastingsSample> mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
+			mhSample.add(firstSet); // first valid sample
+			boolean completed = generateMetropolisSample(mhSample, gaussDist);
 			if (completed) {
 				finalMetropolisHastingsSampleSelection = retrieveFinalSample(mhSample);
 				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
@@ -483,7 +485,7 @@ abstract class AbstractModelImplementation implements Runnable {
 				structure.getDataSet().addField("pred", finalPredArray);
 				structure.getDataSet().addField("predVar", finalPredVarArray);
 
-				displayMessage(VerboseLevel.Medium, "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 				converged = true;
 			}
 		} catch (Exception e1) {
