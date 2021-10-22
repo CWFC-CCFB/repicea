@@ -19,10 +19,8 @@
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
@@ -31,18 +29,7 @@ import repicea.stats.distributions.UniformDistribution;
  * An implementation of the derivative form of the Chapman-Richards model.
  * @author Mathieu Fortin - October 2021
  */
-class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelImplementation {
-
-	@SuppressWarnings("serial")
-	class DataBlockWrapper extends ChapmanRichardsModelImplementation.DataBlockWrapper {
-		
-		DataBlockWrapper(String blockId, 
-				List<Integer> indices, 
-				HierarchicalStatisticalDataStructure structure, 
-				Matrix overallVarCov) {
-			super(blockId, indices, structure, overallVarCov);
-		}
-	}
+class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplementation {
 
 	protected ChapmanRichardsDerivativeModelImplementation(String outputType, MetaModel model) throws StatisticalDataException {
 		super(outputType, model);
@@ -57,14 +44,6 @@ class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelI
 		return pred;
 	}
 
-
-	@Override
-	AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, structure, varCov);
-	}
-	
-
-	
 	@Override
 	GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(4,1);
@@ -123,6 +102,4 @@ class ChapmanRichardsDerivativeModelImplementation extends ChapmanRichardsModelI
 		return derivatives;
 	}
 
-
-	
 }

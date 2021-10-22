@@ -19,10 +19,8 @@
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
@@ -31,60 +29,10 @@ import repicea.stats.distributions.UniformDistribution;
  * An implementation of the derivative form of the Chapman-Richards model including random effects.
  * @author Mathieu Fortin - October 2021
  */
-class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends ChapmanRichardsDerivativeModelImplementation {
-
-	/**
-	 * The likelihood implementation for this model implementation.
-	 * @author Mathieu Fortin - September 2021
-	 */
-	@SuppressWarnings("serial")
-	class DataBlockWrapper extends ChapmanRichardsDerivativeModelImplementation.DataBlockWrapper {
-		
-		DataBlockWrapper(String blockId, 
-				List<Integer> indices, 
-				HierarchicalStatisticalDataStructure structure, 
-				Matrix overallVarCov) {
-			super(blockId, indices, structure, overallVarCov);
-		}
-		
-		
-		@Override
-		double getMarginalLogLikelihood() {
-			Matrix lowerCholeskyTriangle = ChapmanRichardsDerivativeModelWithRandomEffectImplementation.this.getVarianceRandomEffect().getLowerCholTriangle();
-			double integratedLikelihood = ghq.getIntegralApproximation(this, ghqIndices, lowerCholeskyTriangle);
-			return Math.log(integratedLikelihood);
-		}
-		
-
-	}
-
-	int indexRandomEffectVariance;
+class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends AbstractMixedModelImplementation {
 	
 	ChapmanRichardsDerivativeModelWithRandomEffectImplementation(String outputType, MetaModel model) throws StatisticalDataException {
 		super(outputType, model);
-	}
-
-	
-	Matrix getVarianceRandomEffect() {
-		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
-	}
-
-
-	@Override
-	AbstractDataBlockWrapper createDataBlockWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, structure, varCov);
-	}
-
-
-	@Override
-	double getLogLikelihood(Matrix parameters) {
-		setParameters(parameters);
-		double logLikelihood = 0d;
-		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
-			double marginalLogLikelihoodForThisBlock = dbw.getMarginalLogLikelihood();
-			logLikelihood += marginalLogLikelihoodForThisBlock;
-		}
-		return logLikelihood;
 	}
 
 	
@@ -133,6 +81,34 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Chapm
 		priors = new UniformDistribution(lowerBound, upperBound);
 
 		return gd;
+	}
+
+
+	@Override
+	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
+		double pred = (b1 + r1) * Math.exp(-b2 * ageYr) * Math.pow(1 - Math.exp(-b2 * ageYr), b3);
+		return pred;
+	}
+
+
+	@Override
+	Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1) {
+		double b1 = getParameters().getValueAt(0, 0);
+		double b2 = getParameters().getValueAt(1, 0);
+		double b3 = getParameters().getValueAt(2, 0);
+		
+		double exp = Math.exp(-b2 * ageYr);
+		double root = 1 - exp;
+		
+		Matrix derivatives = new Matrix(3,1);
+		derivatives.setValueAt(0, 0, exp * Math.pow(root, b3));
+		derivatives.setValueAt(1, 0, - ageYr * b1 * exp * Math.pow(root, b3) + 
+				b1 * exp * b3 * Math.pow(root, b3 - 1) * exp * ageYr);
+		derivatives.setValueAt(2, 0, b1 * exp * Math.pow(root, b3) * Math.log(root));
+		return derivatives;
 	}
 
 	
