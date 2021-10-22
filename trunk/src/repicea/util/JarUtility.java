@@ -20,7 +20,6 @@ package repicea.util;
 
 import java.io.IOException;
 import java.net.URL;
-import java.util.jar.Attributes;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 

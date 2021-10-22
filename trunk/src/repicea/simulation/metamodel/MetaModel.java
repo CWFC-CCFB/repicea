@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 
 import repicea.io.FormatField;
 import repicea.io.Saveable;
@@ -53,21 +54,21 @@ public class MetaModel implements Saveable {
 				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper");
 	}
 	
-	protected static VerboseLevel Verbose = VerboseLevel.Minimum; 
+//	protected static VerboseLevel Verbose = VerboseLevel.Minimum; 
 	
-	public static enum VerboseLevel {None,
-		Minimum,
-		Medium,
-		High;
-		
-		public boolean shouldVerboseAtThisLevel(VerboseLevel level) {
-			if (ordinal() >= level.ordinal()) {
-				return true;
-			} else {
-				return false;
-			}
-		}
-	}
+//	public static enum VerboseLevel {None,
+//		Minimum,
+//		Medium,
+//		High;
+//		
+//		public boolean shouldVerboseAtThisLevel(VerboseLevel level) {
+//			if (ordinal() >= level.ordinal()) {
+//				return true;
+//			} else {
+//				return false;
+//			}
+//		}
+//	}
 	
 	public static enum ModelImplEnum {
 		SimpleSlope(true),
@@ -267,7 +268,7 @@ public class MetaModel implements Saveable {
 			if (w.ami.hasConverged()) {
 				newList.add(w);
 				sumProb += Math.exp(w.ami.lnProbY);
-				w.ami.displayMessage(VerboseLevel.Minimum, "Result for this implementation!");
+				MetaModelManager.logMessage(Level.INFO, stratumGroup, "Result for the implementation " + w.ami.getModelImplementation().name());
 				w.ami.printSummary();
 			}
 		}
@@ -287,7 +288,7 @@ public class MetaModel implements Saveable {
 	 */
 	public boolean fitModel(String outputType) {
 		model = null;	// reset the convergence to false 
-		displayMessage(VerboseLevel.None, "----------- Modeling output type: " + outputType + " ----------------");
+		MetaModelManager.logMessage(Level.INFO, stratumGroup, "----------- Modeling output type: " + outputType + " ----------------");
 		try {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
 			/***************** TODO to be deleted */ 
@@ -308,7 +309,7 @@ public class MetaModel implements Saveable {
 				w.join();
 			}
 			InnerWorker selectedWorker = performModelSelection(modelList);
-			displayMessage(VerboseLevel.None, "Preliminary model is " + selectedWorker.ami.getModelImplementation().name());
+			MetaModelManager.logMessage(Level.INFO, stratumGroup, "Preliminary model is " + selectedWorker.ami.getModelImplementation().name());
 //			modelList.clear();
 //			modelList.add(selectedWorker);
 //			ModelImplEnum e = ModelImplEnum.getMatchingModelWithRandomEffects(selectedWorker.ami.getModelImplementation());
@@ -373,11 +374,6 @@ public class MetaModel implements Saveable {
 		} else {
 			return "";
 		}
-	}
-
-	private void displayMessage(VerboseLevel level, Object obj) {
-		if (MetaModel.Verbose.shouldVerboseAtThisLevel(level))
-			System.out.println("Meta-model " + stratumGroup + ": " + obj.toString());
 	}
 
 	
