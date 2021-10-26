@@ -477,11 +477,14 @@ abstract class AbstractModelImplementation implements Runnable {
 				Matrix finalPred = getVectorOfPopulationAveragedPredictionsAndVariances();
 				Object[] finalPredArray = new Object[finalPred.m_iRows];
 				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
+				Object[] implementationArray = new Object[finalPred.m_iRows];
 				for (int i = 0; i < finalPred.m_iRows; i++) {
 					finalPredArray[i] = finalPred.getValueAt(i, 0);
 					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
+					implementationArray[i] = getModelImplementation().name();
 				}
 
+				structure.getDataSet().addField("modelImplementation", implementationArray);
 				structure.getDataSet().addField("pred", finalPredArray);
 				structure.getDataSet().addField("predVar", finalPredVarArray);
 
@@ -546,6 +549,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	
 	void printSummary() {
 		if (hasConverged()) {
+			System.out.println("Model implementation: " + getModelImplementation().name());
 			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
 			System.out.println("Final marginal log-likelihood = " + lnProbY);
 			System.out.println("Final parameters = ");

@@ -291,15 +291,13 @@ public class MetaModel implements Saveable {
 		MetaModelManager.logMessage(Level.INFO, stratumGroup, "----------- Modeling output type: " + outputType + " ----------------");
 		try {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
-			/***************** TODO to be deleted */ 
+
 			List<ModelImplEnum> myImplementations = new ArrayList<ModelImplEnum>();
 			myImplementations.add(ModelImplEnum.ChapmanRichards);
 			myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
 			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
 			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
 			
-			
-//			for (ModelImplEnum e : ModelImplEnum.getModelsWithoutRandomEffects()) {	// use the basic models first, i.e. those without random effects
 			for (ModelImplEnum e : myImplementations) {	// use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
 				w.start();

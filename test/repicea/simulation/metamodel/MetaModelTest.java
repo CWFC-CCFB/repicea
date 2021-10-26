@@ -97,13 +97,14 @@ public class MetaModelTest {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
-//		vegPotList.add("MS2");
-//		vegPotList.add("RE2");
-//		vegPotList.add("RE3");
+		vegPotList.add("MS2");
+		vegPotList.add("RE2");
+		vegPotList.add("RE3");
 		vegPotList.add("RS2");
+		vegPotList.add("RS3");
 		
 		List<String> outputTypes = new ArrayList<String>();
-		outputTypes.add("AliveVolume_All-species");
+		outputTypes.add("AliveVolume_AllSpecies");
 //		outputTypes.add("AliveVolume_ConiferousSpecies");
 //		outputTypes.add("AliveVolume_BroadleavedSpecies");
 		
@@ -112,7 +113,7 @@ public class MetaModelTest {
 			for (String outputType : outputTypes) {
 				MetaModel m = MetaModel.Load(metaModelFilename);
 				m.fitModel(outputType);
-				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + "_" + m.model.getModelImplementation() + ".csv");
+				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + ".csv");
 			}
 		}
 	}

@@ -21,8 +21,6 @@ package repicea.stats.estimates;
 import java.lang.reflect.Constructor;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import repicea.math.Matrix;
@@ -49,25 +47,33 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 
 	private static boolean IsVarianceCorrectionEnabled = true; 	// default value
 	
-	
+	public static enum VarianceEstimatorImplementation {
+		/**
+		 * The unbiased estimator in Fortin et al. (2017).
+		 */
+		Corrected,
+		/**
+		 * A less biased estimator than the multiple imputation. 
+		 */
+		LessBiased,
+		/**
+		 * The estimator in Rubin (1987).
+		 */
+		RegularMultipleImputation,
+		None;
+	}
+
 	/**
 	 * An inner class that contains the corrected variance of the BootstrapHybridPointEstimate instance.
 	 * @author Mathieu Fortin - May 2018
 	 */
-	public static class VariancePointEstimate extends SimpleEstimate {
+	class VarianceEstimate extends SimpleEstimate {
 		
-		public static enum VarianceEstimatorImplementation {Corrected,
-			LessBiased,
-			RegularMultipleImputation,
-			None;
-		}
-		
-		private final VarianceEstimatorImplementation implementation;
-		private final Matrix varMean;
-		private final Matrix meanVar;
-		private final Matrix designVarianceOfMeanRealizedY;
-		private final Matrix varianceBiasCorrection;
-		private final int numberOfRealizations;
+		final int numberOfRealizations;
+		final Matrix varMean;
+		final Matrix meanVar;
+		final Matrix designVarianceOfMeanRealizedY;
+		final Matrix varianceBiasCorrection;
 		
 		/**
 		 * Private constructor for the different variance estimator implementation. <br>
@@ -86,68 +92,105 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @param designVarianceOfMeanRealizedY the design variance based on the mean realizations of y. 
 		 * @param rowIndex a list of strings that represent the row indices
 		 */
-		private VariancePointEstimate(int numberOfRealizations, Matrix pointEstimate, Matrix varMean, Matrix meanVar, Matrix designVarianceOfMeanRealizedY, List<String> rowIndex) {
+		VarianceEstimate(int numberOfRealizations,
+				Matrix pointEstimate, 
+				Matrix varMean, 
+				Matrix meanVar, 
+				Matrix designVarianceOfMeanRealizedY, 
+				List<String> rowIndex) {
 			super(pointEstimate, null); 
-			this.numberOfRealizations = numberOfRealizations;
 			if (pointEstimate == null) {
 				throw new InvalidParameterException("The pointEstimate argument must be non null!");
 			}
-			if (varMean == null || meanVar == null) {		// Implementation set to None
-				implementation = VarianceEstimatorImplementation.None;
-				this.varMean = null;
-				this.meanVar = null;
-				this.designVarianceOfMeanRealizedY = null;
-				this.varianceBiasCorrection = null;
-			} else {
-				this.varMean = varMean.getDeepClone();
-				this.meanVar = meanVar.getDeepClone();
+			this.numberOfRealizations = numberOfRealizations;
+			this.varMean = varMean != null ? varMean.getDeepClone() : null;
+			this.meanVar = varMean != null ? meanVar.getDeepClone() : null;
+			this.designVarianceOfMeanRealizedY = designVarianceOfMeanRealizedY != null ? designVarianceOfMeanRealizedY.getDeepClone() : null;
+			if (this.varMean != null && this.meanVar != null && this.designVarianceOfMeanRealizedY != null) {
+				Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.scalarMultiply((this.numberOfRealizations - 1d) / this.numberOfRealizations).add(this.designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
+				Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
 				
-				if (designVarianceOfMeanRealizedY == null) {	// Implementation set to regular multiple implementation
-					implementation = VarianceEstimatorImplementation.RegularMultipleImputation;
-					setVariance(this.varMean.scalarMultiply((this.numberOfRealizations + 1d)/ this.numberOfRealizations).add(this.meanVar));	// the (n + 1)/n factor comes from Rubin 1987 p.76 
-					this.designVarianceOfMeanRealizedY = null;
+				if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d) || !BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled) { // means that the corrected variance estimator is inconsistent or it has been overriden
 					this.varianceBiasCorrection = null;
-				} else {	// either less biased or corrected
-					this.designVarianceOfMeanRealizedY = designVarianceOfMeanRealizedY.getDeepClone();
-					
-					Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.scalarMultiply((this.numberOfRealizations - 1d) / this.numberOfRealizations).add(this.designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
-					Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
-					
-					if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d) || !BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled) { // means that the corrected variance estimator is inconsistent or it has been overriden
-						implementation = VarianceEstimatorImplementation.LessBiased;
-						setVariance(varMeanPlusDesignVarianceOfMeanRealizedY);
-						this.varianceBiasCorrection = null;
-					} else {
-						implementation = VarianceEstimatorImplementation.Corrected;
-						setVariance(modelRelatedVariance.add(this.designVarianceOfMeanRealizedY));
-						Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(this.designVarianceOfMeanRealizedY);
-						Matrix numerator = modelRelatedVariance.elementWiseMultiply(this.designVarianceOfMeanRealizedY);
-						varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
-					}
+				} else {
+					Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(this.designVarianceOfMeanRealizedY);
+					Matrix numerator = modelRelatedVariance.elementWiseMultiply(this.designVarianceOfMeanRealizedY);
+					varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
 				}
+			} else {
+				this.varianceBiasCorrection = null;
 			}
+			
+//			if (varMean == null || meanVar == null) {		// Implementation set to None
+//				implementation = VarianceEstimatorImplementation.None;
+//				this.varMean = null;
+//				this.meanVar = null;
+//				this.designVarianceOfMeanRealizedY = null;
+//				this.varianceBiasCorrection = null;
+//			} else {
+//				this.varMean = varMean.getDeepClone();
+//				this.meanVar = meanVar.getDeepClone();
+//				this.designVarianceOfMeanRealizedY = designVarianceOfMeanRealizedY.getDeepClone();
+//				
+//				
+//				if (designVarianceOfMeanRealizedY == null) {	// Implementation set to regular multiple implementation
+//					implementation = VarianceEstimatorImplementation.RegularMultipleImputation;
+//					setVariance(this.varMean.scalarMultiply((this.numberOfRealizations + 1d)/ this.numberOfRealizations).add(this.meanVar));	// the (n + 1)/n factor comes from Rubin 1987 p.76 
+//					this.designVarianceOfMeanRealizedY = null;
+//					this.varianceBiasCorrection = null;
+//				} else {	// either less biased or corrected
+//					this.designVarianceOfMeanRealizedY = designVarianceOfMeanRealizedY.getDeepClone();
+//					
+//					Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.scalarMultiply((this.numberOfRealizations - 1d) / this.numberOfRealizations).add(this.designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
+//					Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
+//					
+//					if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d) || !BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled) { // means that the corrected variance estimator is inconsistent or it has been overriden
+//						implementation = VarianceEstimatorImplementation.LessBiased;
+//						setVariance(varMeanPlusDesignVarianceOfMeanRealizedY);
+//						this.varianceBiasCorrection = null;
+//					} else {
+//						implementation = VarianceEstimatorImplementation.Corrected;
+//						setVariance(modelRelatedVariance.add(this.designVarianceOfMeanRealizedY));
+//						Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(this.designVarianceOfMeanRealizedY);
+//						Matrix numerator = modelRelatedVariance.elementWiseMultiply(this.designVarianceOfMeanRealizedY);
+//						varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
+//					}
+//				}
+//			}
 			setRowIndex(rowIndex);  
 		}
 
+		@Override
+		protected Matrix getVarianceFromDistribution() {
+			Matrix varMeanPlusDesignVarianceOfMeanRealizedY = varMean.
+					scalarMultiply((numberOfRealizations - 1d) / numberOfRealizations).
+					add(designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
+			Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(meanVar);
+			switch(BootstrapHybridPointEstimate.this.vei) {
+			case Corrected:
+				return modelRelatedVariance.add(designVarianceOfMeanRealizedY);
+			case LessBiased:
+				return varMeanPlusDesignVarianceOfMeanRealizedY;
+			case RegularMultipleImputation:
+				return varMean.scalarMultiply((numberOfRealizations + 1d) / numberOfRealizations).add(meanVar);	// the (n + 1)/n factor comes from Rubin 1987 p.76;
+			case None:
+				return null;
+			default:
+				throw new InvalidParameterException("This variance estimator implementation is unknown: " + BootstrapHybridPointEstimate.this.vei.name());
+			}
+		}
 
 		
 		protected Matrix getVarianceBiasCorrection() {return varianceBiasCorrection;}
 
-		/**
-		 * This method returns the estimate of the total variance.
-		 * @return a Matrix instance
-		 */
-		public Matrix getTotalVariance() {
-			return getVariance();
-		}
 		
 		/**
 		 * Provide the model-related variance, which includes the variance bias correction if the implementation
 		 * is the corrected one. 
 		 * @return a Matrix instance
 		 */
-		public Matrix getModelRelatedVariance() {
-			switch(implementation) {
+		Matrix getModelRelatedVariance() {
+			switch(BootstrapHybridPointEstimate.this.vei) {
 			case Corrected:
 				return varMean.scalarMultiply((numberOfRealizations - 1d) / numberOfRealizations).add(designVarianceOfMeanRealizedY).subtract(meanVar);
 			case LessBiased:
@@ -157,7 +200,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			case None:
 				return null;
 			default:
-				throw new InvalidParameterException("This variance estimator implementation is unknown: " + implementation.name());
+				throw new InvalidParameterException("This variance estimator implementation is unknown: " + BootstrapHybridPointEstimate.this.vei.name());
 			}
 		}
 
@@ -170,7 +213,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * @return a Matrix instance or null if the estimator implementation is not EstimatorImplementation.Corrected.
 		 */
 		public Matrix getNetModelRelatedVariance() {
-			if (implementation == VarianceEstimatorImplementation.Corrected) {
+			if (getVarianceBiasCorrection() != null) {
 				return getModelRelatedVariance().subtract(getVarianceBiasCorrection());
 			} else {
 				return null;
@@ -181,8 +224,8 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 * This method returns the estimate of the sampling-related variance.
 		 * @return a Matrix instance
 		 */
-		public Matrix getSamplingRelatedVariance() {
-			switch(implementation) {
+		Matrix getSamplingRelatedVariance() {
+			switch(BootstrapHybridPointEstimate.this.vei) {
 			case Corrected:
 				return designVarianceOfMeanRealizedY;
 			case LessBiased:
@@ -192,24 +235,24 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			case None:
 				return null;
 			default:
-				throw new InvalidParameterException("This variance estimator implementation is unknown: " + implementation.name());
+				throw new InvalidParameterException("This variance estimator implementation is unknown: " + BootstrapHybridPointEstimate.this.vei.name());
 			}
 		}
 		
-		/**
-		 * Provide the implementation of the variance estimator, which can be Corrected, 
-		 * LessBiased,	RegularMultipleImputation or None.
-		 * @return a VarianceEstimatorImplementation enum
-		 */
-		public VarianceEstimatorImplementation getVarianceImplementation() {return implementation;}
 	}
 	
 	
 	private final List<PointEstimate<?>> estimates;
-	
+	private VarianceEstimate varianceEstimate;
+	private VarianceEstimatorImplementation vei;
+
+	/**
+	 * Constructor.
+	 */
 	public BootstrapHybridPointEstimate() {
 		super(new UnknownDistribution());
 		estimates = new ArrayList<PointEstimate<?>>();
+		vei = VarianceEstimatorImplementation.Corrected; // default value
 	}
 
 	/**
@@ -220,6 +263,17 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	public static void setVarianceCorrectionEnabled(boolean bool) {	
 		BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled = bool;
 	}
+
+	/**
+	 * Set the variance estimator implementation. Can be corrected, less biased or regular multiple imputation (or eventually none). 
+	 * @param vei a VarianceEstimatorImplementation enum
+	 */
+	public void setVarianceEstimatorImplementation(VarianceEstimatorImplementation vei) {
+		if (vei != null) {
+			this.vei = vei;
+		}
+	}
+	
 	
 	/**
 	 * Return true if the variance correction is enabled (default) or false otherwise.
@@ -238,10 +292,19 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	public void addPointEstimate(PointEstimate<?> estimate) {
 		if (estimates.isEmpty() || estimates.get(0).isMergeableEstimate(estimate)) {
 			estimates.add(estimate);
+			varianceEstimate = null;	// make sure to reset the variance estimate
 		} else {
 			throw new InvalidParameterException("The point estimate is not compatible with the previous estimates!");
 		}
 	}
+	
+	/*
+	 * For test only.
+	 */
+	protected Matrix getVarianceBiasCorrection() {
+		return getVarianceEstimate().getVarianceBiasCorrection();
+	}
+	
 	
 	@Override
 	protected boolean isMergeableEstimate(Estimate<?> estimate) {
@@ -282,43 +345,43 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	
 	
 
-	/**
-	 * This method returns the uncorrected variance of the total estimate. 
-	 * This estimator is based on the law of total variance. It tends to overestimate 
-	 * the true variance. This method is deprecated and the getCorrectedVariance method
-	 * should be used in place.
-	 * @return a Matrix
-	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
-	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
-	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
-	 */
-	@Deprecated
-	public final VariancePointEstimate getUncorrectedVariance() {
-		MonteCarloEstimate variance = new MonteCarloEstimate();
-		MonteCarloEstimate mean = new MonteCarloEstimate();
-		for (PointEstimate<?> estimate : estimates) {
-			mean.addRealization(estimate.getMean());
-			variance.addRealization(estimate.getVariance());
-		}
-		return new VariancePointEstimate(mean.getNumberOfRealizations(),
-				mean.getMean(), 
-				mean.getVariance(), 
-				variance.getMean(),
-				null,
-				rowIndex);
-	}
+//	/**
+//	 * This method returns the uncorrected variance of the total estimate. 
+//	 * This estimator is based on the law of total variance. It tends to overestimate 
+//	 * the true variance. This method is deprecated and the getCorrectedVariance method
+//	 * should be used in place.
+//	 * @return a Matrix
+//	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
+//	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
+//	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
+//	 */
+//	@Deprecated
+//	public final VarianceEstimate getUncorrectedVariance() {
+//		MonteCarloEstimate variance = new MonteCarloEstimate();
+//		MonteCarloEstimate mean = new MonteCarloEstimate();
+//		for (PointEstimate<?> estimate : estimates) {
+//			mean.addRealization(estimate.getMean());
+//			variance.addRealization(estimate.getVariance());
+//		}
+//		return new VariancePointEstimate(mean.getNumberOfRealizations(),
+//				mean.getMean(), 
+//				mean.getVariance(), 
+//				variance.getMean(),
+//				null,
+//				rowIndex);
+//	}
 
 	
 	/**
-	 * This method returns the corrected variance of the total estimate. 
-	 * This estimator is unbiased. 
+	 * This method calculates the corrected variance of the total estimate. 
+	 * This estimator is theoretically unbiased. 
 	 * @return a VariancePointEstimate
 	 * 
 	 * @see <a href=https://academic.oup.com/forestry/article/91/3/354/4647707>
 	 * Fortin, M., Manso, R., and Schneider, R. 2018. Parametric bootstrap estimators for hybrid 
 	 * inference in forest inventories. Forestry 91(3): 354-365. </a>
 	 */
-	public final VariancePointEstimate getCorrectedVariance() {
+	private VarianceEstimate calculateVarianceEstimate() {
 		if (getNumberOfRealizations() > 1) {
 			MonteCarloEstimate variance = new MonteCarloEstimate();
 			MonteCarloEstimate mean = new MonteCarloEstimate();
@@ -358,7 +421,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 					}
 				}
 						
-				VariancePointEstimate varEst = new VariancePointEstimate(getNumberOfRealizations(),
+				VarianceEstimate varEst = new VarianceEstimate(getNumberOfRealizations(),
 						getMean(),
 						mean.getVariance(),
 						variance.getMean(), 
@@ -370,13 +433,21 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			}
 		} else {
 			System.out.println("The variance of the hybrid point estimate cannot be calculated because there is not enough realizations!");
-			return new VariancePointEstimate(getNumberOfRealizations(), getMean(), null, null, null, rowIndex);
+			return new VarianceEstimate(getNumberOfRealizations(), getMean(), null, null, null, rowIndex);
 		}
 	}
+	
+	private VarianceEstimate getVarianceEstimate() {
+		if (varianceEstimate == null) {
+			varianceEstimate = calculateVarianceEstimate();
+		}
+		return varianceEstimate;
+	}
+	
 
 	@Override
 	protected Matrix getVarianceFromDistribution() {
-		return getCorrectedVariance().getVariance();
+		return getVarianceEstimate().getVariance();
 	}
 
 	@Override
@@ -484,23 +555,23 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		return multiply(scalar);
 	}
 
-	@Override
-	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
-		VariancePointEstimate vpe = getCorrectedVariance();
-		Matrix collapsedPointEstimate = collapseRowVector(vpe.getMean(), desiredIndicesForCollapsing);
-		Matrix collapsedVarMean = collapseSquareMatrix(vpe.varMean, desiredIndicesForCollapsing);
-		Matrix collapsedMeanVar = collapseSquareMatrix(vpe.meanVar, desiredIndicesForCollapsing);
-		Matrix collapsedDesignVarianceOfMeanRealizedY = collapseSquareMatrix(vpe.designVarianceOfMeanRealizedY, desiredIndicesForCollapsing);
-		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
-		Collections.sort(newIndexRow);
-		VariancePointEstimate outputEstimate = new VariancePointEstimate(vpe.numberOfRealizations,
-				collapsedPointEstimate,
-				collapsedVarMean,
-				collapsedMeanVar,
-				collapsedDesignVarianceOfMeanRealizedY,
-				newIndexRow);
-		return outputEstimate;
-	}
+//	@Override
+//	public Estimate<?> collapseEstimate(LinkedHashMap<String, List<String>> desiredIndicesForCollapsing) {
+//		VarianceEstimate vpe = getVarianceEstimate();
+//		Matrix collapsedPointEstimate = collapseRowVector(vpe.getMean(), desiredIndicesForCollapsing);
+//		Matrix collapsedVarMean = collapseSquareMatrix(vpe.varMean, desiredIndicesForCollapsing);
+//		Matrix collapsedMeanVar = collapseSquareMatrix(vpe.meanVar, desiredIndicesForCollapsing);
+//		Matrix collapsedDesignVarianceOfMeanRealizedY = collapseSquareMatrix(vpe.designVarianceOfMeanRealizedY, desiredIndicesForCollapsing);
+//		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
+//		Collections.sort(newIndexRow);
+//		VarianceEstimate outputEstimate = new VarianceEstimate(vpe.numberOfRealizations,
+//				collapsedPointEstimate,
+//				collapsedVarMean,
+//				collapsedMeanVar,
+//				collapsedDesignVarianceOfMeanRealizedY,
+//				newIndexRow);
+//		return outputEstimate;
+//	}
 
 	
 }
