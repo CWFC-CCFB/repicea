@@ -308,6 +308,23 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		}
 	}
 	
+	/**
+	 * Provide the model-related variance, which includes the variance bias correction if the implementation
+	 * is the corrected one. 
+	 * @return a Matrix instance
+	 */
+	public Matrix getModelRelatedVariance() {
+		return getVarianceEstimate().getModelRelatedVariance();
+	}
+	
+	/**
+	 * This method returns the estimate of the sampling-related variance.
+	 * @return a Matrix instance
+	 */
+	public Matrix getSamplingRelatedVariance() {
+		return getVarianceEstimate().getSamplingRelatedVariance();
+	}
+	
 	/*
 	 * For test only.
 	 */
