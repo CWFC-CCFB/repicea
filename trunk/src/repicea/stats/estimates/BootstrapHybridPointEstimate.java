@@ -278,7 +278,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	 * Return the current variance implementation. 
 	 * @return a VarianceEstimatorImplementation enum
 	 */
-	public VarianceEstimatorImplementation setVarianceEstimatorImplementation() {
+	public VarianceEstimatorImplementation getVarianceEstimatorImplementation() {
 		return vei;
 	}
 
