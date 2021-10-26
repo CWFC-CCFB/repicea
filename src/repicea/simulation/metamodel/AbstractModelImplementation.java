@@ -437,23 +437,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	
 	void fitModel() {
 		double coefVar = 0.01;
-//		int nbMaxTry = 2;
-//		boolean completed = false;
 		try {
-//			int nbTry = 0;
-//			GaussianDistribution gaussDist = null;
-//			List<MetaModelMetropolisHastingsSample> mhSample = null;
-//			while (!completed && nbTry < nbMaxTry) {
-//				if (nbTry > 0) {
-//					displayMessage(VerboseLevel.Minimum, "Trying again to fit the meta-model!");
-//				}
-//				gaussDist = getStartingParmEst(coefVar);
-//				mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
-//				MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
-//				mhSample.add(firstSet); // first valid sample
-//				completed = generateMetropolisSample(mhSample, gaussDist);
-//				nbTry++;
-//			}
 			GaussianDistribution gaussDist = getStartingParmEst(coefVar);
 			List<MetaModelMetropolisHastingsSample> mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
 			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
@@ -469,8 +453,6 @@ abstract class AbstractModelImplementation implements Runnable {
 				Matrix finalParmEstimates = mcmcEstimate.getMean();
 				Matrix finalVarCov = mcmcEstimate.getVariance();
 				lnProbY = getLnProbY(finalParmEstimates, finalMetropolisHastingsSampleSelection, gaussDist);
-
-				//			finalLLK = model.getLogLikelihood(finalParmEstimates);
 				setParameters(finalParmEstimates);
 				setParmsVarCov(finalVarCov);
 
@@ -550,7 +532,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	void printSummary() {
 		if (hasConverged()) {
 			System.out.println("Model implementation: " + getModelImplementation().name());
-			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
+//			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
 			System.out.println("Final marginal log-likelihood = " + lnProbY);
 			System.out.println("Final parameters = ");
 			System.out.println(getParameters().toString());
