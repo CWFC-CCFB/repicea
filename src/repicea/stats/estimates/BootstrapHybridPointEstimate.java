@@ -255,14 +255,14 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		vei = VarianceEstimatorImplementation.Corrected; // default value
 	}
 
-	/**
-	 * Allow to enable or disable the variance correction. If the variance correction is disabled,
-	 * then the less biased variance estimator is preferred. By default, the variance correction is enabled.
-	 * @param bool a boolean
-	 */
-	public static void setVarianceCorrectionEnabled(boolean bool) {	
-		BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled = bool;
-	}
+//	/**
+//	 * Allow to enable or disable the variance correction. If the variance correction is disabled,
+//	 * then the less biased variance estimator is preferred. By default, the variance correction is enabled.
+//	 * @param bool a boolean
+//	 */
+//	public static void setVarianceCorrectionEnabled(boolean bool) {	
+//		BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled = bool;
+//	}
 
 	/**
 	 * Set the variance estimator implementation. Can be corrected, less biased or regular multiple imputation (or eventually none). 
@@ -273,6 +273,16 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 			this.vei = vei;
 		}
 	}
+
+	/**
+	 * Return the current variance implementation. 
+	 * @return a VarianceEstimatorImplementation enum
+	 */
+	public VarianceEstimatorImplementation setVarianceEstimatorImplementation() {
+		return vei;
+	}
+
+	
 	
 	
 	/**
