@@ -98,6 +98,7 @@ public class MetaModelTest {
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
 		vegPotList.add("MS2");
+		vegPotList.add("RE1");
 		vegPotList.add("RE2");
 		vegPotList.add("RE3");
 		vegPotList.add("RS2");
@@ -112,7 +113,8 @@ public class MetaModelTest {
 			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
 			for (String outputType : outputTypes) {
 				MetaModel m = MetaModel.Load(metaModelFilename);
-				m.fitModel(outputType);
+				boolean enabledMixedModelImplementation = vegPot.equals("RE1") ? false : true;
+				m.fitModel(outputType, enabledMixedModelImplementation);
 				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + ".csv");
 			}
 		}

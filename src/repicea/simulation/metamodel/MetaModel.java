@@ -286,7 +286,7 @@ public class MetaModel implements Saveable {
 	 * @param e a ModelImplEnum enum 
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
-	public boolean fitModel(String outputType) {
+	public boolean fitModel(String outputType, boolean enableMixedModelImplementations) {
 		model = null;	// reset the convergence to false 
 		MetaModelManager.logMessage(Level.INFO, stratumGroup, "----------- Modeling output type: " + outputType + " ----------------");
 		try {
@@ -294,10 +294,13 @@ public class MetaModel implements Saveable {
 
 			List<ModelImplEnum> myImplementations = new ArrayList<ModelImplEnum>();
 			myImplementations.add(ModelImplEnum.ChapmanRichards);
-			myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
+			if (enableMixedModelImplementations) {
+				myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
+			}
 			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
-			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
-			
+			if (enableMixedModelImplementations) {
+				myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
+			}			
 			for (ModelImplEnum e : myImplementations) {	// use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
 				w.start();
@@ -307,16 +310,7 @@ public class MetaModel implements Saveable {
 				w.join();
 			}
 			InnerWorker selectedWorker = performModelSelection(modelList);
-			MetaModelManager.logMessage(Level.INFO, stratumGroup, "Preliminary model is " + selectedWorker.ami.getModelImplementation().name());
-//			modelList.clear();
-//			modelList.add(selectedWorker);
-//			ModelImplEnum e = ModelImplEnum.getMatchingModelWithRandomEffects(selectedWorker.ami.getModelImplementation());
-//			InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
-//			w.start();
-//			modelList.add(w);
-//			w.join();
-//			selectedWorker = performModelSelection(modelList);
-//			displayMessage(VerboseLevel.None, "Final model is " + model.getModelImplementation().name());
+			MetaModelManager.logMessage(Level.INFO, stratumGroup, "Selected model is " + selectedWorker.ami.getModelImplementation().name());
 			model = selectedWorker.ami;
 			model.printSummary();
 			return true; 

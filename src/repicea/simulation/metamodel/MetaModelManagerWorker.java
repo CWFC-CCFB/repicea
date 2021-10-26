@@ -47,7 +47,7 @@ class MetaModelManagerWorker extends Thread implements Runnable {
 		try {
 			while(!(o = queue.take()).equals(FinishToken)) {
 				MetaModel metaModel = (MetaModel) o;
-				metaModel.fitModel(outputType);
+				metaModel.fitModel(outputType, true);  // true : enabled mixed model implementation
 			}
 		} catch (InterruptedException e) {
 			e.printStackTrace();
