@@ -9,7 +9,6 @@ import org.junit.Test;
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.estimates.BootstrapHybridPointEstimate.VariancePointEstimate;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
 public class BootstrapHybridPointEstimateTest {
@@ -127,16 +126,16 @@ public class BootstrapHybridPointEstimateTest {
 		double expectedVariance = mu_x_hat * mu_x_hat * stdModel * stdModel + 
 				meanModel * meanModel * var_mu_x_hat -	
 				stdModel * stdModel * var_mu_x_hat;	// when dealing with the estimate of the mean, the contribution of the residual error tends to 0, i.e. N * V.bar(e_i) / N^2 = V.bar(e_i) / N. MF2020-12-14
-		VariancePointEstimate varPointEstimate = bhpe.getCorrectedVariance();
+		Matrix varianceMatrix = bhpe.getVariance();
 //		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
 //		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
 //		System.out.println("Total variance = " + varPointEstimate.getTotalVariance());
-		double actualVariance = varPointEstimate.getTotalVariance().getValueAt(0, 0);
+		double actualVariance = varianceMatrix.getValueAt(0, 0);
 
 		System.out.println("Expected variance= " + expectedVariance + " - actual variance = " + actualVariance);
 		Assert.assertEquals("Testing variance estimates", expectedVariance, actualVariance, 3E-1);
 
-		Matrix empiricalCorrection = varPointEstimate.getVarianceBiasCorrection();
+		Matrix empiricalCorrection = bhpe.getVarianceBiasCorrection();
 		double theoreticalCorrection = -stdModel * stdModel * var_mu_x_hat;
 //		System.out.println("Theoretical correction = " + theoreticalCorrection);
 //		System.out.println("Empirical correction = " + empiricalCorrection);
@@ -195,17 +194,16 @@ public class BootstrapHybridPointEstimateTest {
 				.add(var_mu_x_hat.scalarMultiply(meanModel * meanModel))
 				.subtract(var_mu_x_hat.scalarMultiply(stdModel * stdModel));	// when dealing with the estimate of the mean, the contribution of the residual error tends to 0, i.e. N * V.bar(e_i) / N^2 = V.bar(e_i) / N. MF2020-12-14
 
-		VariancePointEstimate varPointEstimate = bhpe.getCorrectedVariance();
 //		System.out.println("Model-related variance = " + varPointEstimate.getModelRelatedVariance());
 //		System.out.println("Sampling-related variance = " + varPointEstimate.getSamplingRelatedVariance());
-		Matrix actualVariance = varPointEstimate.getTotalVariance();
+		Matrix actualVariance = bhpe.getVariance();
 //		System.out.println("Total variance = " + actualVariance);
 //		System.out.println("Expected variance = " + expectedVariance);
 
 		System.out.println("Expected variance = " + expectedVariance + " - actual variance = " + actualVariance);
 		Assert.assertTrue("Testing variance estimates", !expectedVariance.subtract(actualVariance).getAbsoluteValue().anyElementLargerThan(3E-1));
 		
-		Matrix empiricalCorrection = varPointEstimate.getVarianceBiasCorrection();
+		Matrix empiricalCorrection = bhpe.getVarianceBiasCorrection();
 		Matrix theoreticalCorrection = var_mu_x_hat.scalarMultiply(-stdModel * stdModel);
 //		System.out.println("Theoretical correction = " + theoreticalCorrection);
 //		System.out.println("Empirical correction = " + empiricalCorrection);
