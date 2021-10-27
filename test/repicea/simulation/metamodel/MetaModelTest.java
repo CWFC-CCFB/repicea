@@ -24,12 +24,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.LogManager;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
@@ -56,7 +54,7 @@ public class MetaModelTest {
 		
 	@BeforeClass
 	public static void deserializingMetaModel() throws IOException {
-		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange_AliveVolume_ConiferousSpecies.zml";
+		String metaModelFilename = ObjectUtility.getPackagePath(MetaModelTest.class) + "QC_FMU02664_RE2_NoChange_AliveVolume_AllSpecies.zml";
 		MetaModelInstance = MetaModel.Load(metaModelFilename);
 	}
 	
@@ -65,30 +63,29 @@ public class MetaModelTest {
 		MetaModelInstance = null;
 	}
 
-	@Ignore
 	@Test
 	public void testingMetaModelDeserialization() throws IOException {
 		Assert.assertTrue("Model is deserialized", MetaModelInstance != null);
 		Assert.assertTrue("Has converged", MetaModelInstance.hasConverged());
 		String filename = ObjectUtility.getPackagePath(getClass()) + "finalDataSet.csv";
 		MetaModelInstance.exportFinalDataSet(filename);
-		Assert.assertEquals("Testing final dataset size", 60, MetaModelInstance.getFinalDataSet().getNumberOfObservations());
+		int actualNbOfRecords = MetaModelInstance.getFinalDataSet().getNumberOfObservations();
+		Assert.assertEquals("Testing final dataset size", 60, actualNbOfRecords);
 	}
 
-	@Ignore
 	@Test
 	public void testingOutputTypes() throws Exception {
 		List<String> outputTypes = MetaModelInstance.getPossibleOutputTypes();
-		Assert.assertEquals("Testing list size", 2, outputTypes.size());
-		Assert.assertEquals("Testing first value", "AliveVolume_BroadleavedSpecies", outputTypes.get(0));
-		Assert.assertEquals("Testing second value", "AliveVolume_ConiferousSpecies", outputTypes.get(1));
+		Assert.assertEquals("Testing list size", 3, outputTypes.size());
+		Assert.assertEquals("Testing first value", "AliveVolume_AllSpecies", outputTypes.get(0));
+		Assert.assertEquals("Testing second value", "AliveVolume_BroadleavedSpecies", outputTypes.get(1));
+		Assert.assertEquals("Testing third value", "AliveVolume_ConiferousSpecies", outputTypes.get(2));
 	}
 
-	@Ignore
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
 		double pred = MetaModelInstance.getPrediction(90, 0);
-		Assert.assertEquals("Testing prediction at 90 yrs of age", 102.049670163, pred, 1E-8);
+		Assert.assertEquals("Testing prediction at 90 yrs of age", 103.70002176054153, pred, 1E-8);
 	}
 
 	public static void main(String[] args) throws IOException {
@@ -106,8 +103,6 @@ public class MetaModelTest {
 		
 		List<String> outputTypes = new ArrayList<String>();
 		outputTypes.add("AliveVolume_AllSpecies");
-//		outputTypes.add("AliveVolume_ConiferousSpecies");
-//		outputTypes.add("AliveVolume_BroadleavedSpecies");
 		
 		for (String vegPot : vegPotList) {
 			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
@@ -115,6 +110,7 @@ public class MetaModelTest {
 				MetaModel m = MetaModel.Load(metaModelFilename);
 				boolean enabledMixedModelImplementation = vegPot.equals("RE1") ? false : true;
 				m.fitModel(outputType, enabledMixedModelImplementation);
+				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
 				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + ".csv");
 			}
 		}

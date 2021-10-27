@@ -37,7 +37,7 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 
 	
 	@Override
-	GaussianDistribution getStartingParmEst(double coefVar) {
+	protected GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(5,1);
 		parmEst.setValueAt(0, 0, 1000d);
 		parmEst.setValueAt(1, 0, 0.02);

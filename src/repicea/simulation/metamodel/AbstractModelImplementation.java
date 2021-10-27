@@ -115,7 +115,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 	
 	protected final SimulationParameters simParms;
-	protected final HierarchicalStatisticalDataStructure structure;
+//	protected final HierarchicalStatisticalDataStructure structure;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
 	protected final String outputType;
 	protected final String stratumGroup;
@@ -127,7 +127,8 @@ abstract class AbstractModelImplementation implements Runnable {
 	protected double lnProbY;
 	protected transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
-	int indexCorrelationParameter;
+	protected int indexCorrelationParameter;
+	private DataSet finalDataSet;
 
 	/**
 	 * Internal constructor.
@@ -148,7 +149,7 @@ abstract class AbstractModelImplementation implements Runnable {
 			throw new InvalidParameterException("The outputType " + outputType + " is not part of the dataset!");
 		}
 		this.stratumGroup = stratumGroup;
-		this.structure = getDataStructureReady(outputType, scriptResults);
+		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType, scriptResults);
 		Matrix varCov = getVarCovReady(outputType, scriptResults);
 
 		this.outputType = outputType;
@@ -168,13 +169,15 @@ abstract class AbstractModelImplementation implements Runnable {
 			List<Integer> indices = db.getIndices();
 			dataBlockWrappers.add(createWrapper(k, indices, structure, varCov));
 		}
+		
+		finalDataSet = structure.getDataSet();
 	}
 
-	AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
+	protected AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
 		return new DataBlockWrapper(k, indices, structure, varCov);
 	}
 	
-	final Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
+	private Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
 		boolean canCalculateVariance = includePredVariance && getParmsVarCov() != null;
 		Matrix mu;
 		if (canCalculateVariance) {
@@ -193,15 +196,15 @@ abstract class AbstractModelImplementation implements Runnable {
 		return mu;
 	}
 
-	final double getCorrelationParameter() {
+	private double getCorrelationParameter() {
 		return getParameters().getValueAt(indexCorrelationParameter, 0);
 	}
 
-	final ModelImplEnum getModelImplementation() {
+	protected final ModelImplEnum getModelImplementation() {
 		return EnumMap.get(getClass());
 	}
 	
-	double getLogLikelihood(Matrix parameters) {
+	protected double getLogLikelihood(Matrix parameters) {
 		setParameters(parameters);
 		double logLikelihood = 0d;
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
@@ -268,7 +271,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 
 
-	final Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
+	private Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect) {
 		return generatePredictions(dbw, randomEffect, false);
 	}
 	
@@ -286,7 +289,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 	
 
-	void setParameters(Matrix parameters) {
+	protected void setParameters(Matrix parameters) {
 		this.parameters = parameters;
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
 			dbw.updateCovMat(this.parameters);
@@ -302,11 +305,11 @@ abstract class AbstractModelImplementation implements Runnable {
 		return parmsVarCov;
 	}
 	
-	void setParmsVarCov(Matrix m) {
+	private void setParmsVarCov(Matrix m) {
 		parmsVarCov = m;
 	}
 
-	Matrix getVectorOfPopulationAveragedPredictionsAndVariances() {
+	private Matrix getVectorOfPopulationAveragedPredictionsAndVariances() {
 		int size = 0;
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
 			size += dbw.indices.size();
@@ -323,7 +326,7 @@ abstract class AbstractModelImplementation implements Runnable {
 		return predictions;
 	}
 
-	abstract GaussianDistribution getStartingParmEst(double coefVar);
+	protected abstract GaussianDistribution getStartingParmEst(double coefVar);
 
 	String getSelectedOutputType() {
 		return outputType;
@@ -466,9 +469,9 @@ abstract class AbstractModelImplementation implements Runnable {
 					implementationArray[i] = getModelImplementation().name();
 				}
 
-				structure.getDataSet().addField("modelImplementation", implementationArray);
-				structure.getDataSet().addField("pred", finalPredArray);
-				structure.getDataSet().addField("predVar", finalPredVarArray);
+				finalDataSet.addField("modelImplementation", implementationArray);
+				finalDataSet.addField("pred", finalPredArray);
+				finalDataSet.addField("predVar", finalPredVarArray);
 
 				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 				converged = true;
@@ -545,6 +548,10 @@ abstract class AbstractModelImplementation implements Runnable {
 		} else {
 			System.out.println("The model has not converged!");
 		}
+	}
+	
+	DataSet getFinalDataSet() {
+		return finalDataSet;
 	}
 
 }
