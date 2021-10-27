@@ -351,7 +351,7 @@ public class MetaModel implements Saveable {
 	 */
 	public void exportFinalDataSet(String filename) throws IOException {
 		if (hasConverged()) {
-			model.structure.getDataSet().save(filename);
+			getFinalDataSet().save(filename);
 		}
 	}
 
@@ -403,7 +403,7 @@ public class MetaModel implements Saveable {
 
 	
 	protected DataSet getFinalDataSet() {
-		return model.structure.getDataSet();
+		return model.getFinalDataSet();
 	}
 
 	@Override

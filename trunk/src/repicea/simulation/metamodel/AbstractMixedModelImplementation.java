@@ -56,16 +56,16 @@ abstract class AbstractMixedModelImplementation extends AbstractModelImplementat
 	}
 
 	@Override
-	final AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
+	protected final AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
 		return new DataBlockWrapper(k, indices, structure, varCov);
 	}
 
-	final Matrix getVarianceRandomEffect() {
+	private Matrix getVarianceRandomEffect() {
 		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
 	}
 
 	@Override
-	final double getLogLikelihood(Matrix parameters) {
+	protected final double getLogLikelihood(Matrix parameters) {
 		setParameters(parameters);
 		double logLikelihood = 0d;
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {

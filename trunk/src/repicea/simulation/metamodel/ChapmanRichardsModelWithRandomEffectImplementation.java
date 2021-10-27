@@ -37,7 +37,7 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 	}
 
 	@Override
-	GaussianDistribution getStartingParmEst(double coefVar) {
+	protected GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(5,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
