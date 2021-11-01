@@ -57,16 +57,9 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		Matrix lowerBound = new Matrix(2,1);
-		Matrix upperBound = new Matrix(2,1);
-		lowerBound.setValueAt(0, 0, 0.00001);
-		upperBound.setValueAt(0, 0, 4);
+		priors.put(new UniformDistribution(0.00001, 4), 0);
+		priors.put(new UniformDistribution(0.90, 0.99), 1);
 		
-		lowerBound.setValueAt(1, 0, .90);
-		upperBound.setValueAt(1, 0, .99);
-		
-		priors = new UniformDistribution(lowerBound, upperBound);
-
 		return gd;
 	}
 

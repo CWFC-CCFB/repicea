@@ -59,19 +59,10 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 		}
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
-		
-		Matrix lowerBound = new Matrix(3,1);
-		Matrix upperBound = new Matrix(3,1);
-		lowerBound.setValueAt(0, 0, 0);
-		upperBound.setValueAt(0, 0, 400);
-		
-		lowerBound.setValueAt(1, 0, 0.0001);
-		upperBound.setValueAt(1, 0, 0.1);
-		
-		lowerBound.setValueAt(2, 0, .90);
-		upperBound.setValueAt(2, 0, .99);
-		
-		priors = new UniformDistribution(lowerBound, upperBound);
+
+		priors.put(new UniformDistribution(0, 400), 0);
+		priors.put(new UniformDistribution(0.0001, 0.10), 1);
+		priors.put(new UniformDistribution(0.90, 0.99), 2);
 
 		return gd;
 	}

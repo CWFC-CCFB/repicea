@@ -104,6 +104,45 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 
 
+	/** 
+	 * A nested class to handle the prior distributions.
+	 * @author Mathieu Fortin - November 2021
+	 */
+	class PriorHandler {
+		final Map<ContinuousDistribution, List<Integer>> distributions;
+		
+		PriorHandler() {
+			distributions = new LinkedHashMap<ContinuousDistribution, List<Integer>>();
+		}
+		
+		Matrix getRandomRealization() {
+			Matrix realization = null;
+			for (ContinuousDistribution d : distributions.keySet()) {
+				Matrix thisR = d.getRandomRealization();
+				if (realization == null) {
+					realization = thisR;
+				} else {
+					realization = realization.matrixStack(thisR, true);
+				}
+			}
+			return realization;
+		}
+		
+		double getProbabilityDensity(Matrix m) {
+			double logProb = 0;
+			for (ContinuousDistribution d : distributions.keySet()) {
+				List<Integer> indices = distributions.get(d);
+				logProb += Math.log(d.getProbabilityDensity(m.getSubMatrix(indices, null)));
+			}
+			return Math.exp(logProb);
+		}
+		
+		
+		void put(ContinuousDistribution dist, Integer... indices) {
+			distributions.put(dist, Arrays.asList(indices));
+		}
+	}
+
 	private static final Map<Class<? extends AbstractModelImplementation>, ModelImplEnum> EnumMap = new HashMap<Class<? extends AbstractModelImplementation>, ModelImplEnum>();
 	static {
 		EnumMap.put(SimpleSlopeModelImplementation.class, ModelImplEnum.SimpleSlope);
@@ -120,7 +159,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	protected final String outputType;
 	protected final String stratumGroup;
 	
-	protected ContinuousDistribution priors;
+	protected final PriorHandler priors;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected List<Integer> fixedEffectsParameterIndices;
@@ -136,6 +175,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 */
 	AbstractModelImplementation(String outputType, MetaModel metaModel) throws StatisticalDataException {
+		priors = new PriorHandler();
 		simParms = metaModel.simParms.clone();
 		Map<Integer, ScriptResult> scriptResults = metaModel.scriptResults;
 		String stratumGroup = metaModel.getStratumGroup();

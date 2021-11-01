@@ -59,27 +59,13 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 		}
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
-		
-		
-		Matrix lowerBound = new Matrix(5,1);
-		Matrix upperBound = new Matrix(5,1);
-		lowerBound.setValueAt(0, 0, 0);
-		upperBound.setValueAt(0, 0, 2000);
-		
-		lowerBound.setValueAt(1, 0, 0.00001);
-		upperBound.setValueAt(1, 0, 0.05);
-		
-		lowerBound.setValueAt(2, 0, 1);
-		upperBound.setValueAt(2, 0, 6);
 
-		lowerBound.setValueAt(3, 0, 0);
-		upperBound.setValueAt(3, 0, 2000);
-
-		lowerBound.setValueAt(4, 0, .90);
-		upperBound.setValueAt(4, 0, .99);
-
-		priors = new UniformDistribution(lowerBound, upperBound);
-
+		priors.put(new UniformDistribution(0, 2000), 0);
+		priors.put(new UniformDistribution(0.00001, 0.05), 1);
+		priors.put(new UniformDistribution(1, 6), 2);
+		priors.put(new UniformDistribution(0, 2000), 3);
+		priors.put(new UniformDistribution(0.90, 0.99), 4);
+		
 		return gd;
 	}
 
