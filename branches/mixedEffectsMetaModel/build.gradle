@@ -1,0 +1,186 @@
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+apply plugin: 'maven-publish'
+
+group = 'org'
+version = project.version
+
+import org.tmatesoft.svn.core.wc.*
+
+sourceCompatibility = 1.8
+//targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'org.tmatesoft.svnkit', name: 'svnkit', version: '1.10.3'
+    }
+}
+
+def getSvnRevision(){
+    ISVNOptions options = SVNWCUtil.createDefaultOptions(true);
+    SVNClientManager clientManager = SVNClientManager.newInstance(options);
+    // here we force updating to the HEAD SVN version so that the local working copy is up to date with the repo
+    // the "install" and "publish" targets depend on the "integrationTest" target to make sure we publish a tested version
+    // i.e. user A commits, then user B commits something else, then A publishes -> user B updates and retests before publishing t
+    SVNUpdateClient updateClient = clientManager.getUpdateClient();
+    updateClient.doUpdate(projectDir, SVNRevision.HEAD, false);
+    SVNStatusClient statusClient = clientManager.getStatusClient();
+    SVNStatus status = statusClient.doStatus(projectDir, false);
+    SVNRevision revision = status.getRevision();
+    return revision.getNumber();
+}
+
+println "Using java version " + JavaVersion.current()
+
+sourceSets {
+    main {    	
+        java {
+            srcDirs 'src'            
+        }
+        
+        resources {
+			srcDirs= ['src']
+			exclude '**/*.java'
+		}
+		
+		output.resourcesDir = "$buildDir/classes/java/$name"
+    }
+
+    test {
+        java {
+            srcDirs 'test'
+        }
+                
+        resources {
+			srcDirs= ['test']
+			exclude '**/*.java'
+		}
+		
+		output.resourcesDir = "$buildDir/classes/java/$name"
+    }               
+}
+
+// make sure to set the compliance to Java 1.8 in the project properties if the Java version is later than 1.8
+// make sure to set Java Compiler > Errors Warnings > Deprecated and Restricted API > Forbidden reference to WARNING instead of ERROR
+dependencies {
+    implementation 'com.cedarsoftware:json-io:4.12.0'
+    implementation 'org.apache.xmlgraphics:batik-dom:1.14'	
+	implementation 'org.apache.xmlgraphics:batik-svggen:1.14'
+    implementation 'net.sf.ucanaccess:ucanaccess:4.0.4'
+    
+    if(JavaVersion.current() != JavaVersion.VERSION_1_8){
+ 		implementation 'com.sun.xml.bind:jaxb-ri:2.3.5'   
+	}
+    
+    testImplementation "junit:junit:4.12"    
+}
+
+task updateRevision(type: WriteProperties) {
+	project.ext.build = getSvnRevision()
+	outputFile = file("$buildDir/classes/java/main/repicea/app/revision")	
+	property "Revision", project.ext.build
+	property "Version", repiceaVersion
+}
+ 
+compileJava {
+	project.version=repiceaVersion
+	println "Building " + rootProject.name + " v" + project.version
+}
+
+test {
+    // show standard out and standard error of the test JVM(s) on the console
+    testLogging.showStandardStreams = true
+
+    // set heap size for the test JVM(s)
+    maxHeapSize = "2048m"
+    
+    exclude '**/ProductionEnvironmentTest.class'
+}
+
+task integrationTest(type: Test) {
+	description = 'Runs the integration tests (unit tests run using the produced JAR file)'
+    group = 'verification'
+	dependsOn jar
+	
+	include '**/*.class'
+	
+	testLogging.showStandardStreams = true
+    testClassesDirs = sourceSets.test.output.classesDirs
+        
+    // set classpath to test classes + test dependencies + JAR
+    classpath = project.sourceSets.test.output + configurations.testRuntimeClasspath + files(jar.archiveFile) 
+    outputs.upToDateWhen { false }
+    mustRunAfter test
+    maxHeapSize = "2048m"
+}
+
+check.dependsOn integrationTest
+
+jar {
+	dependsOn updateRevision
+	 manifest {
+        attributes("Built-By": "Mathieu Fortin",
+        		   "Specification-Title": "REpicea Utilitaries",
+	       		   "Specification-Version": archiveVersion,                   
+                   "Specification-Vendor": "REpicea",
+                   "Implementation-Title": "repicea",
+//                   "Implementation-Version": project.ext.build,		// the revision is now written to file in repicea.app package
+                   "Implementation-Vendor": "REpicea",
+                   )
+    }
+    
+	into ('/') {
+		from files(['./README.txt', './COPYING.LESSER.txt'])			
+	}
+	
+	// include all java files from main sourceset into the jar file (resources are already included)
+	from sourceSets.main.allJava		
+}
+
+task deleteInstallFolder(type: Delete) {
+  delete "${installDir}"  
+}
+
+task install(type: Copy) {
+	description = 'Copies the output jar to installation folder.'
+	group = 'build'
+	dependsOn jar,deleteInstallFolder,integrationTest
+	from configurations.default
+	from jar
+	into "${installDir}"
+}
+
+publishing {
+    publications {
+        repicea(MavenPublication) {
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'LocalFile'
+            url = "file://${buildDir}/repo"
+        }
+    }
+}
+
+publishRepiceaPublicationToMavenLocal {
+	dependsOn integrationTest
+}
+
+publishRepiceaPublicationToLocalFileRepository {
+	dependsOn integrationTest
+}
+
+ 
