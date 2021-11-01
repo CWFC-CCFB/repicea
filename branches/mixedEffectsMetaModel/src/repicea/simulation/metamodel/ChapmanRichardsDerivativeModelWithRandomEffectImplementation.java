@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
@@ -29,7 +30,7 @@ import repicea.stats.distributions.UniformDistribution;
  * An implementation of the derivative form of the Chapman-Richards model including random effects.
  * @author Mathieu Fortin - October 2021
  */
-class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends AbstractMixedModelImplementation {
+class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends AbstractMixedModelFullImplementation {
 	
 	ChapmanRichardsDerivativeModelWithRandomEffectImplementation(String outputType, MetaModel model) throws StatisticalDataException {
 		super(outputType, model);
@@ -38,20 +39,34 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 	
 	@Override
 	protected GaussianDistribution getStartingParmEst(double coefVar) {
-		Matrix parmEst = new Matrix(5,1);
+		indexRandomEffectVariance = 3;
+		indexCorrelationParameter = 4;
+		indexFirstRandomEffect = 5;
+		
+		Matrix parmEst = new Matrix(5 + dataBlockWrappers.size(),1);
 		parmEst.setValueAt(0, 0, 1000d);
 		parmEst.setValueAt(1, 0, 0.02);
 		parmEst.setValueAt(2, 0, 2d);
 		parmEst.setValueAt(3, 0, 1000d);
 		parmEst.setValueAt(4, 0, .92);
+		for (int i = 0; i < dataBlockWrappers.size(); i++) {
+			parmEst.setValueAt(5 + i, 0, Math.sqrt(parmEst.getValueAt(indexRandomEffectVariance, 0)));
+		}
 		
 		fixedEffectsParameterIndices = new ArrayList<Integer>();
 		fixedEffectsParameterIndices.add(0);
 		fixedEffectsParameterIndices.add(1);
 		fixedEffectsParameterIndices.add(2);
-		
-		this.indexRandomEffectVariance = 3;
-		this.indexCorrelationParameter = 4;
+
+		priors.addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
+		priors.addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		ContinuousDistribution variancePrior = new UniformDistribution(0, 2000);
+		priors.addFixedEffectDistribution(variancePrior, 3);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 4);
+		for (int i = 0; i < dataBlockWrappers.size(); i++) {
+			priors.addRandomEffectVariance(new GaussianDistribution(0, 1), variancePrior, 5 + i);
+		}
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -59,12 +74,6 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 		}
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
-
-		priors.put(new UniformDistribution(0, 2000), 0);
-		priors.put(new UniformDistribution(0.00001, 0.05), 1);
-		priors.put(new UniformDistribution(1, 6), 2);
-		priors.put(new UniformDistribution(0, 2000), 3);
-		priors.put(new UniformDistribution(0.90, 0.99), 4);
 		
 		return gd;
 	}

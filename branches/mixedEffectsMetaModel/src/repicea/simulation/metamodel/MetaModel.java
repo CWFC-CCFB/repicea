@@ -293,13 +293,13 @@ public class MetaModel implements Saveable {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
 
 			List<ModelImplEnum> myImplementations = new ArrayList<ModelImplEnum>();
-			myImplementations.add(ModelImplEnum.ChapmanRichards);
+//			myImplementations.add(ModelImplEnum.ChapmanRichards);
 //			if (enableMixedModelImplementations) {
 //				myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
 //			}
 //			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
 //			if (enableMixedModelImplementations) {
-//				myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
+				myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
 //			}			
 			for (ModelImplEnum e : myImplementations) {	// use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));

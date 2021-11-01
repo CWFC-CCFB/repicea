@@ -60,9 +60,9 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 
-		priors.put(new UniformDistribution(0, 400), 0);
-		priors.put(new UniformDistribution(0.0001, 0.10), 1);
-		priors.put(new UniformDistribution(0.90, 0.99), 2);
+		priors.addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.0001, 0.10), 1);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 2);
 
 		return gd;
 	}

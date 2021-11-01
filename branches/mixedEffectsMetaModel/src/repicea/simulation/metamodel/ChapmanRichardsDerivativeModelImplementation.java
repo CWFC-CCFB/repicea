@@ -66,10 +66,10 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 
-		priors.put(new UniformDistribution(0, 2000), 0);
-		priors.put(new UniformDistribution(0.00001, 0.05), 1);
-		priors.put(new UniformDistribution(1, 6), 2);
-		priors.put(new UniformDistribution(0.90, 0.99), 3);
+		priors.addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
+		priors.addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 3);
 
 		return gd;
 	}

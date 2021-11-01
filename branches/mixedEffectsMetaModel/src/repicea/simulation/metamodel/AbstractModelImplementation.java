@@ -108,16 +108,20 @@ abstract class AbstractModelImplementation implements Runnable {
 	 * A nested class to handle the prior distributions.
 	 * @author Mathieu Fortin - November 2021
 	 */
-	class PriorHandler {
+	static class PriorHandler {
 		final Map<ContinuousDistribution, List<Integer>> distributions;
+		final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
 		
+				
 		PriorHandler() {
 			distributions = new LinkedHashMap<ContinuousDistribution, List<Integer>>();
+			randomEffectDistributions = new HashMap<GaussianDistribution, ContinuousDistribution>();
 		}
 		
 		Matrix getRandomRealization() {
 			Matrix realization = null;
 			for (ContinuousDistribution d : distributions.keySet()) {
+				updateRandomEffectVarianceIfNeedsBe(d, realization);
 				Matrix thisR = d.getRandomRealization();
 				if (realization == null) {
 					realization = thisR;
@@ -128,18 +132,37 @@ abstract class AbstractModelImplementation implements Runnable {
 			return realization;
 		}
 		
+		private void updateRandomEffectVarianceIfNeedsBe(ContinuousDistribution d, Matrix realization) {
+			if (randomEffectDistributions.containsKey(d)) {	// it is a random effect. So we must update its variance
+				ContinuousDistribution varianceDist = randomEffectDistributions.get(d);
+				int index = distributions.get(varianceDist).get(0);	// TODO FP MF2021-11-01 here we assume that there is only one index 
+				Matrix realizedRandomEffectVariance = realization.getSubMatrix(index, index, 0, 0);
+				((GaussianDistribution) d).setVariance(realizedRandomEffectVariance);
+			}
+		}
+		
 		double getProbabilityDensity(Matrix m) {
 			double logProb = 0;
 			for (ContinuousDistribution d : distributions.keySet()) {
+				updateRandomEffectVarianceIfNeedsBe(d, m);
 				List<Integer> indices = distributions.get(d);
-				logProb += Math.log(d.getProbabilityDensity(m.getSubMatrix(indices, null)));
+				double thisProb = d.getProbabilityDensity(m.getSubMatrix(indices, null));
+				if (thisProb == 0d) {
+					return 0d;
+				}
+				logProb += Math.log(thisProb);
 			}
 			return Math.exp(logProb);
 		}
 		
 		
-		void put(ContinuousDistribution dist, Integer... indices) {
+		void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
 			distributions.put(dist, Arrays.asList(indices));
+		}
+
+		void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, Integer... indices) {
+			distributions.put(dist, Arrays.asList(indices));
+			randomEffectDistributions.put(dist, variancePrior);
 		}
 	}
 
@@ -164,7 +187,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	private Matrix parmsVarCov;
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected double lnProbY;
-	protected transient List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
+	protected List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
 	protected int indexCorrelationParameter;
 	private DataSet finalDataSet;
@@ -379,8 +402,10 @@ abstract class AbstractModelImplementation implements Runnable {
 		while (myFirstList.size() < desiredSize) {
 			Matrix parms = priors.getRandomRealization();
 			llk = isForIntegral ? getLogLikelihood(parms) : getLogLikelihood(parms) + Math.log(priors.getProbabilityDensity(parms)); // if isForIntegral then there is no need for the density of the parameters since the random realizations account for the distribution of the prior 
-			if (Math.exp(llk) > 0d) {
-				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
+//			if (Math.exp(llk) > 0d) {
+			if (llk > Double.NEGATIVE_INFINITY) {
+//				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
+				myFirstList.add(new MetaModelMetropolisHastingsSample(parms, llk));
 				if (myFirstList.size()%1000 == 0) {
 					MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Initial sample list has " + myFirstList.size() + " sets.");
 				}
@@ -417,19 +442,21 @@ abstract class AbstractModelImplementation implements Runnable {
 		double acceptanceRatio; 
 		for (int i = 0; i < simParms.nbRealizations - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
 			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
-			if (i > 0 && i < simParms.nbBurnIn && i%500 == 0) {
+			if (i > 0 && i < simParms.nbBurnIn && i%1000 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
-				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
-				if (acceptanceRatio > 0.4) {	// then we must increase the CoefVar
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rate is " + successes + " / " + trials + "; " + acceptanceRatio);
+				if (acceptanceRatio > 0.35) {	// then we must increase the CoefVar
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
-				} else if (acceptanceRatio < 0.2) {
+				} else if (acceptanceRatio < 0.25) {
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(0.8*0.8));
 				}
 				successes = 0;
 				trials = 0;
 			}
-			if (i%100000 == 0) {
+			if (i%10000 == 0 && i > simParms.nbBurnIn) {
 				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Processing realization " + i + " / " + simParms.nbRealizations);
+				acceptanceRatio = ((double) successes) / trials;
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Acceptance rate = " + successes + " / " + trials + "; " + acceptanceRatio);
 			}
 			boolean accepted = false;
 			int innerIter = 0;

@@ -23,6 +23,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Handler;
 import java.util.logging.Level;
 
 import org.junit.AfterClass;
@@ -90,7 +92,11 @@ public class MetaModelTest {
 
 	public static void main(String[] args) throws IOException {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
-		MetaModelManager.getLogger().setLevel(Level.INFO);
+		MetaModelManager.getLogger().setLevel(Level.FINE);
+		ConsoleHandler sh = new ConsoleHandler();
+		sh.setLevel(Level.FINE);
+		MetaModelManager.getLogger().addHandler(sh);
+		
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
@@ -108,6 +114,8 @@ public class MetaModelTest {
 			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
 			for (String outputType : outputTypes) {
 				MetaModel m = MetaModel.Load(metaModelFilename);
+				m.simParms.nbBurnIn = 50000;
+				m.simParms.nbRealizations = 500000 + m.simParms.nbBurnIn;
 				boolean enabledMixedModelImplementation = vegPot.equals("RE1") ? false : true;
 				m.fitModel(outputType, enabledMixedModelImplementation);
 				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
