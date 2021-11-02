@@ -60,10 +60,10 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 
 		priors.addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
 		priors.addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
-		priors.addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
-		ContinuousDistribution variancePrior = new UniformDistribution(0, 2000);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.8, 6), 2);
+		ContinuousDistribution variancePrior = new UniformDistribution(0, 15000);
 		priors.addFixedEffectDistribution(variancePrior, 3);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 4);
+		priors.addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 4);
 		for (int i = 0; i < dataBlockWrappers.size(); i++) {
 			priors.addRandomEffectVariance(new GaussianDistribution(0, 1), variancePrior, 5 + i);
 		}

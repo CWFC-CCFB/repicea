@@ -190,6 +190,7 @@ abstract class AbstractModelImplementation implements Runnable {
 	private Matrix parmsVarCov;
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected double lnProbY;
+	protected double lnProbY2;
 	protected List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
 	protected int indexCorrelationParameter;
@@ -405,9 +406,7 @@ abstract class AbstractModelImplementation implements Runnable {
 		while (myFirstList.size() < desiredSize) {
 			Matrix parms = priors.getRandomRealization();
 			llk = isForIntegral ? getLogLikelihood(parms) : getLogLikelihood(parms) + Math.log(priors.getProbabilityDensity(parms)); // if isForIntegral then there is no need for the density of the parameters since the random realizations account for the distribution of the prior 
-//			if (Math.exp(llk) > 0d) {
 			if (llk > Double.NEGATIVE_INFINITY) {
-//				myFirstList.add(new MetaModelMetropolisHastingsSample(parms.getDeepClone(), llk));
 				myFirstList.add(new MetaModelMetropolisHastingsSample(parms, llk));
 				if (myFirstList.size()%1000 == 0) {
 					MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Initial sample list has " + myFirstList.size() + " sets.");
@@ -448,9 +447,9 @@ abstract class AbstractModelImplementation implements Runnable {
 			if (i > 0 && i < simParms.nbBurnIn && i%1000 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
 				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
-				if (acceptanceRatio > 0.35) {	// then we must increase the CoefVar
+				if (acceptanceRatio > 0.35) {	// we aim at having an acceptance rate slightly larger than 0.3 because it will decrease as the chain reaches its steady state
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
-				} else if (acceptanceRatio < 0.25) {
+				} else if (acceptanceRatio < 0.28) {
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(0.8*0.8));
 				}
 				successes = 0;
@@ -637,7 +636,11 @@ abstract class AbstractModelImplementation implements Runnable {
 
 					Matrix finalParmEstimates = mcmcEstimate.getMean();
 					Matrix finalVarCov = mcmcEstimate.getVariance();
-					lnProbY = getLnProbY(finalParmEstimates, finalMetropolisHastingsSampleSelection, samplingDist);
+					List<MetaModelMetropolisHastingsSample> tempSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+					tempSample.addAll(finalMetropolisHastingsSampleSelection);
+					Collections.sort(tempSample);
+					lnProbY = getLnProbY(tempSample.get(tempSample.size() - 1).parms, finalMetropolisHastingsSampleSelection, samplingDist);
+					lnProbY2 = getLnProbY(tempSample.get(tempSample.size() - 200).parms, finalMetropolisHastingsSampleSelection, samplingDist);
 					setParameters(finalParmEstimates);
 					setParmsVarCov(finalVarCov);
 
@@ -683,9 +686,7 @@ abstract class AbstractModelImplementation implements Runnable {
 			densityFromSamplingDist = samplingDist.getProbabilityDensity(point); 
 			sumIntegrand += ratio * densityFromSamplingDist;
 		}
-		double allo = 0;
 		sumIntegrand /= posteriorSamples.size();
-		allo += sumIntegrand;
 		
 		samplingDist.setMean(point);
 		double sumRatio = 0d;
@@ -723,6 +724,7 @@ abstract class AbstractModelImplementation implements Runnable {
 			System.out.println("Model implementation: " + getModelImplementation().name());
 //			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
 			System.out.println("Final marginal log-likelihood = " + lnProbY);
+			System.out.println("Final marginal log-likelihood 2 = " + lnProbY2);
 			System.out.println("Final parameters = ");
 			System.out.println(getParameters().toString());
 			System.out.println("Final standardError = ");
