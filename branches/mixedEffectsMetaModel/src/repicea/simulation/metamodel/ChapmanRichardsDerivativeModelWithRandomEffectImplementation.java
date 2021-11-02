@@ -50,7 +50,7 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 		parmEst.setValueAt(3, 0, 1000d);
 		parmEst.setValueAt(4, 0, .92);
 		for (int i = 0; i < dataBlockWrappers.size(); i++) {
-			parmEst.setValueAt(5 + i, 0, Math.sqrt(parmEst.getValueAt(indexRandomEffectVariance, 0)));
+			parmEst.setValueAt(5 + i, 0, 2 * Math.sqrt(parmEst.getValueAt(indexRandomEffectVariance, 0))); // 2 stands for the 97.5th percentile
 		}
 		
 		fixedEffectsParameterIndices = new ArrayList<Integer>();

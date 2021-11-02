@@ -49,6 +49,10 @@ import repicea.stats.estimates.MonteCarloEstimate;
  */
 abstract class AbstractModelImplementation implements Runnable {
 
+	/**
+	 * A nested class to handle blocks of repeated measurements.
+	 * @author Mathieu Fortin - November 2021
+	 */
 	@SuppressWarnings("serial")
 	class DataBlockWrapper extends AbstractDataBlockWrapper {
 
@@ -105,13 +109,13 @@ abstract class AbstractModelImplementation implements Runnable {
 
 
 	/** 
-	 * A nested class to handle the prior distributions.
+	 * A nested class to handle prior distributions.
 	 * @author Mathieu Fortin - November 2021
 	 */
 	static class PriorHandler {
 		final Map<ContinuousDistribution, List<Integer>> distributions;
 		final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
-		
+		int nbElements;
 				
 		PriorHandler() {
 			distributions = new LinkedHashMap<ContinuousDistribution, List<Integer>>();
@@ -119,15 +123,12 @@ abstract class AbstractModelImplementation implements Runnable {
 		}
 		
 		Matrix getRandomRealization() {
-			Matrix realization = null;
+			Matrix realization = new Matrix(nbElements, 1);
 			for (ContinuousDistribution d : distributions.keySet()) {
 				updateRandomEffectVarianceIfNeedsBe(d, realization);
 				Matrix thisR = d.getRandomRealization();
-				if (realization == null) {
-					realization = thisR;
-				} else {
-					realization = realization.matrixStack(thisR, true);
-				}
+				List<Integer> indices = distributions.get(d);
+				realization.setElements(indices, thisR);
 			}
 			return realization;
 		}
@@ -157,15 +158,18 @@ abstract class AbstractModelImplementation implements Runnable {
 		
 		
 		void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
-			distributions.put(dist, Arrays.asList(indices));
+			List<Integer> ind = Arrays.asList(indices);
+			distributions.put(dist, ind);
+			nbElements += ind.size();
 		}
 
 		void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, Integer... indices) {
-			distributions.put(dist, Arrays.asList(indices));
+			addFixedEffectDistribution(dist, indices);
 			randomEffectDistributions.put(dist, variancePrior);
 		}
 	}
 
+	
 	private static final Map<Class<? extends AbstractModelImplementation>, ModelImplEnum> EnumMap = new HashMap<Class<? extends AbstractModelImplementation>, ModelImplEnum>();
 	static {
 		EnumMap.put(SimpleSlopeModelImplementation.class, ModelImplEnum.SimpleSlope);
@@ -177,7 +181,6 @@ abstract class AbstractModelImplementation implements Runnable {
 	}
 	
 	protected final SimulationParameters simParms;
-//	protected final HierarchicalStatisticalDataStructure structure;
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
 	protected final String outputType;
 	protected final String stratumGroup;
@@ -444,7 +447,7 @@ abstract class AbstractModelImplementation implements Runnable {
 			gaussDist.setMean(metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).parms);
 			if (i > 0 && i < simParms.nbBurnIn && i%1000 == 0) {
 				acceptanceRatio = ((double) successes) / trials;
-				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rate is " + successes + " / " + trials + "; " + acceptanceRatio);
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rate is " + acceptanceRatio);
 				if (acceptanceRatio > 0.35) {	// then we must increase the CoefVar
 					gaussDist.setVariance(gaussDist.getVariance().scalarMultiply(1.2*1.2));
 				} else if (acceptanceRatio < 0.25) {
@@ -454,9 +457,8 @@ abstract class AbstractModelImplementation implements Runnable {
 				trials = 0;
 			}
 			if (i%10000 == 0 && i > simParms.nbBurnIn) {
-				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Processing realization " + i + " / " + simParms.nbRealizations);
 				acceptanceRatio = ((double) successes) / trials;
-				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Acceptance rate = " + successes + " / " + trials + "; " + acceptanceRatio);
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Processing realization " + i + " / " + simParms.nbRealizations + "; " + acceptanceRatio);
 			}
 			boolean accepted = false;
 			int innerIter = 0;
@@ -495,6 +497,117 @@ abstract class AbstractModelImplementation implements Runnable {
 		return completed;
 	}
 
+	private void resetSuccessAndTrialMaps(GaussianDistribution dist, 
+			Map<Integer, Integer> trials, 
+			Map<Integer, Integer> successes) {
+		trials.clear();
+		successes.clear();
+		for (int i = 0; i < dist.getMean().m_iRows; i++) {
+			trials.put(i, 0);
+			successes.put(i, 0);
+		}
+	}
+	
+	private Matrix computeSuccessRates(Map<Integer, Integer> trials, Map<Integer, Integer> successes) {
+		Matrix ratios = new Matrix(trials.size(), 1);
+		for (int i = 0; i < trials.size(); i++) {
+			double ratio = ((double) successes.get(i)) / trials.get(i);
+			ratios.setValueAt(i, 0, ratio);
+		}
+		return ratios;
+	}
+	
+	/**
+	 * Implement Gibbs sampling in a preliminary stage to balance the variance of the sampler.
+	 * @param firstSample the MetaModelMetropolisHastingsSample instance that was found through random sampling
+	 * @param sampler the sampling distribution
+	 * @return a boolean
+	 */
+	private boolean balanceVariance(MetaModelMetropolisHastingsSample firstSample, GaussianDistribution sampler) {
+		long startTime = System.currentTimeMillis();
+		List<MetaModelMetropolisHastingsSample> initSample = new ArrayList<MetaModelMetropolisHastingsSample>();
+		initSample.add(firstSample);
+		Matrix newParms = null;
+		double llk = 0d;
+		boolean completed = true;
+		Matrix acceptanceRatios; 
+		Map<Integer, Integer> trialMap = new HashMap<Integer, Integer>();
+		Map<Integer, Integer> successMap = new HashMap<Integer, Integer>();
+		resetSuccessAndTrialMaps(sampler, trialMap, successMap);
+		double targetAcceptance = 0.5; // MF2021-11-01 This number does not matter much in absolute value. It just makes sure that the acceptance rate is balanced across the parameters.
+		for (int i = 0; i < simParms.nbBurnIn - 1; i++) { // Metropolis-Hasting  -1 : the starting parameters are considered as the first realization
+			Matrix originalParms = initSample.get(initSample.size() - 1).parms.getDeepClone();
+			sampler.setMean(originalParms);
+			if (i > 0 && i < simParms.nbBurnIn && i%1000 == 0) {
+				acceptanceRatios = this.computeSuccessRates(trialMap, successMap);
+				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "After " + i + " realizations, the acceptance rates are " + acceptanceRatios);
+				for (int j = 0; j < acceptanceRatios.m_iRows; j++) {
+					double currentRatio = acceptanceRatios.getValueAt(j, 0);
+					if (currentRatio > targetAcceptance + .05) {	// then we must increase the CoefVar
+						Matrix variance = sampler.getVariance();
+						variance.setValueAt(j, j, variance.getValueAt(j, j) * 1.2 * 1.2);
+					} else if (currentRatio < targetAcceptance - .05) {
+						Matrix variance = sampler.getVariance();
+						variance.setValueAt(j, j, variance.getValueAt(j, j) * 0.8 * 0.8);
+					}
+				}
+				resetSuccessAndTrialMaps(sampler, trialMap, successMap);
+			}
+			boolean accepted = false;
+			int innerIter = 0;
+
+			int j = 0;
+			while (j < originalParms.m_iRows && innerIter < simParms.nbInternalIter) {
+				double originalValue = originalParms.getValueAt(j, 0);
+				double newValue = getNewParms(sampler, j);
+				originalParms.setValueAt(j, 0, newValue);
+				double parmsPriorDensity = priors.getProbabilityDensity(originalParms);
+				if (parmsPriorDensity > 0d) {
+					llk = getLogLikelihood(originalParms) + Math.log(parmsPriorDensity);
+					double ratio = Math.exp(llk - initSample.get(initSample.size() - 1).llk);
+					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
+					trialMap.put(j, trialMap.get(j) + 1);
+					if (accepted) {
+						successMap.put(j, successMap.get(j) + 1);
+						j++;
+						accepted = false;
+						innerIter = 0;
+					} else {
+						originalParms.setValueAt(j, 0, originalValue);	// we put the old value back into the vector of parameters
+					}
+				} else {
+					originalParms.setValueAt(j, 0, originalValue);	// we put the old value back into the vector of parameters
+				}
+				innerIter++;
+			}
+			newParms = originalParms;
+			if (innerIter >= simParms.nbInternalIter && !accepted) {
+				MetaModelManager.logMessage(Level.SEVERE,  getLogMessagePrefix(), "Stopping after " + i + " realization");
+				completed = false;
+				break;
+			} else {
+				initSample.add(new MetaModelMetropolisHastingsSample(newParms, llk));  // new set of parameters is recorded
+				if (initSample.size()%100 == 0) {
+					MetaModelManager.logMessage(Level.FINEST, getLogMessagePrefix(), initSample.get(initSample.size() - 1));
+				}
+			}
+		}
+		
+		if (completed) {
+			acceptanceRatios = computeSuccessRates(trialMap, successMap);
+			MetaModelManager.logMessage(Level.INFO, getLogMessagePrefix(), "Time to balance the variance of the sample: " + (System.currentTimeMillis() - startTime) + " ms");
+			MetaModelManager.logMessage(Level.INFO, getLogMessagePrefix(), "Acceptance ratio = " + acceptanceRatios);
+		} 
+		return completed;
+	}
+
+	private double getNewParms(GaussianDistribution dist, int i) {
+		double variance = dist.getVariance().getValueAt(i, i);
+		double mean = dist.getMean().getValueAt(i, 0);
+		double newValue = mean + StatisticalUtility.getRandom().nextGaussian() * Math.sqrt(variance);
+		return newValue;
+	}
+	
 	private List<MetaModelMetropolisHastingsSample> retrieveFinalSample(List<MetaModelMetropolisHastingsSample> metropolisHastingsSample) {
 		List<MetaModelMetropolisHastingsSample> finalMetropolisHastingsGibbsSample = new ArrayList<MetaModelMetropolisHastingsSample>();
 		MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Discarding " + simParms.nbBurnIn + " samples as burn in.");
@@ -508,40 +621,44 @@ abstract class AbstractModelImplementation implements Runnable {
 	void fitModel() {
 		double coefVar = 0.01;
 		try {
-			GaussianDistribution gaussDist = getStartingParmEst(coefVar);
+			GaussianDistribution samplingDist = getStartingParmEst(coefVar);
 			List<MetaModelMetropolisHastingsSample> mhSample = new ArrayList<MetaModelMetropolisHastingsSample>();
 			MetaModelMetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
 			mhSample.add(firstSet); // first valid sample
-			boolean completed = generateMetropolisSample(mhSample, gaussDist);
+			boolean completed = balanceVariance(firstSet, samplingDist);
 			if (completed) {
-				finalMetropolisHastingsSampleSelection = retrieveFinalSample(mhSample);
-				MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
-				for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
-					mcmcEstimate.addRealization(sample.parms);
+				completed = generateMetropolisSample(mhSample, samplingDist);
+				if (completed) {
+					finalMetropolisHastingsSampleSelection = retrieveFinalSample(mhSample);
+					MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
+					for (MetaModelMetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+						mcmcEstimate.addRealization(sample.parms);
+					}
+
+					Matrix finalParmEstimates = mcmcEstimate.getMean();
+					Matrix finalVarCov = mcmcEstimate.getVariance();
+					lnProbY = getLnProbY(finalParmEstimates, finalMetropolisHastingsSampleSelection, samplingDist);
+					setParameters(finalParmEstimates);
+					setParmsVarCov(finalVarCov);
+
+					Matrix finalPred = getVectorOfPopulationAveragedPredictionsAndVariances();
+					Object[] finalPredArray = new Object[finalPred.m_iRows];
+					Object[] finalPredVarArray = new Object[finalPred.m_iRows];
+					Object[] implementationArray = new Object[finalPred.m_iRows];
+					for (int i = 0; i < finalPred.m_iRows; i++) {
+						finalPredArray[i] = finalPred.getValueAt(i, 0);
+						finalPredVarArray[i] = finalPred.getValueAt(i, 1);
+						implementationArray[i] = getModelImplementation().name();
+					}
+
+					finalDataSet.addField("modelImplementation", implementationArray);
+					finalDataSet.addField("pred", finalPredArray);
+					finalDataSet.addField("predVar", finalPredVarArray);
+
+					MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
+					converged = true;
 				}
-
-				Matrix finalParmEstimates = mcmcEstimate.getMean();
-				Matrix finalVarCov = mcmcEstimate.getVariance();
-				lnProbY = getLnProbY(finalParmEstimates, finalMetropolisHastingsSampleSelection, gaussDist);
-				setParameters(finalParmEstimates);
-				setParmsVarCov(finalVarCov);
-
-				Matrix finalPred = getVectorOfPopulationAveragedPredictionsAndVariances();
-				Object[] finalPredArray = new Object[finalPred.m_iRows];
-				Object[] finalPredVarArray = new Object[finalPred.m_iRows];
-				Object[] implementationArray = new Object[finalPred.m_iRows];
-				for (int i = 0; i < finalPred.m_iRows; i++) {
-					finalPredArray[i] = finalPred.getValueAt(i, 0);
-					finalPredVarArray[i] = finalPred.getValueAt(i, 1);
-					implementationArray[i] = getModelImplementation().name();
-				}
-
-				finalDataSet.addField("modelImplementation", implementationArray);
-				finalDataSet.addField("pred", finalPredArray);
-				finalDataSet.addField("predVar", finalPredVarArray);
-
-				MetaModelManager.logMessage(Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
-				converged = true;
+				
 			}
 		} catch (Exception e1) {
 			e1.printStackTrace();
@@ -566,7 +683,9 @@ abstract class AbstractModelImplementation implements Runnable {
 			densityFromSamplingDist = samplingDist.getProbabilityDensity(point); 
 			sumIntegrand += ratio * densityFromSamplingDist;
 		}
+		double allo = 0;
 		sumIntegrand /= posteriorSamples.size();
+		allo += sumIntegrand;
 		
 		samplingDist.setMean(point);
 		double sumRatio = 0d;
