@@ -44,7 +44,7 @@ public class REpiceaLogManager {
 		if (loggerName == null || loggerName.isEmpty()) 
 			throw new InvalidParameterException("Argument loggerName cannot be null");
 		if (!LoggerMap.containsKey(loggerName)) {
-			LoggerMap.put(loggerName, LogManager.getLogManager().getLogger(loggerName));	// ensure the logger is not just a weak reference in the LogManager singleton
+			LoggerMap.put(loggerName, Logger.getLogger(loggerName));	// ensure the logger is not just a weak reference in the LogManager singleton
 		}
 		return LoggerMap.get(loggerName);
 	}

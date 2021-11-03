@@ -19,12 +19,13 @@
 package repicea.stats.mcmc;
 
 import repicea.math.Matrix;
-import repicea.stats.distributions.GaussianDistribution;
 
 public interface MetropolisHastingsCompatibleModel {
 
 	public double getLogLikelihood(Matrix parms);
 	
-	public GaussianDistribution getStartingParmEst(double coefVar);
+	public double getMarginalLogLikelihood(Matrix parms);
+	
+	public MetropolisHastingsSampler getStartingParmEst(double coefVar);
 	
 }

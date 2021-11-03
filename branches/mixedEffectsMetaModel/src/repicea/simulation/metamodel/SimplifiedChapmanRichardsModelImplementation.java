@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
+import repicea.stats.mcmc.MetropolisHastingsSampler;
 
 class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelImplementation {
 
@@ -41,7 +41,7 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 
 
 	@Override
-	public GaussianDistribution getStartingParmEst(double coefVar) {
+	public MetropolisHastingsSampler getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(3,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
@@ -52,17 +52,18 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 		fixedEffectsParameterIndices.add(1);
 
 		this.indexCorrelationParameter = 2;
-		
+
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.10), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 2);
+
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
 		}
 		
-		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
+		MetropolisHastingsSampler gd = new MetropolisHastingsSampler(parmEst, varianceDiag.matrixDiagonal(), null); // there is no random effect in this model
 
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.10), 1);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 2);
 
 		return gd;
 	}

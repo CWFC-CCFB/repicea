@@ -32,7 +32,6 @@ import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.util.REpiceaLogManager;
 
@@ -52,6 +51,7 @@ public class MetropolisHastingsAlgorithm {
 	private Matrix parmsVarCov;
 	
 	protected double lnProbY;
+	protected double lnProbY2;
 	protected List<MetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
 	protected int indexCorrelationParameter;
@@ -106,7 +106,7 @@ public class MetropolisHastingsAlgorithm {
 		List<MetropolisHastingsSample> myFirstList = new ArrayList<MetropolisHastingsSample>();
 		while (myFirstList.size() < desiredSize) {
 			Matrix parms = priors.getRandomRealization();
-			llk = isForIntegral ? model.getLogLikelihood(parms) : model.getLogLikelihood(parms) + Math.log(priors.getProbabilityDensity(parms)); // if isForIntegral then there is no need for the density of the parameters since the random realizations account for the distribution of the prior 
+			llk = isForIntegral ? model.getLogLikelihood(parms) : model.getLogLikelihood(parms) + priors.getLogProbabilityDensityOfRandomEffects(parms) + priors.getLogProbabilityDensity(parms); // if isForIntegral then there is no need for the density of the parameters since the random realizations account for the distribution of the prior 
 			if (llk > Double.NEGATIVE_INFINITY) {
 				myFirstList.add(new MetropolisHastingsSample(parms, llk));
 				if (myFirstList.size()%1000 == 0) {
@@ -132,7 +132,11 @@ public class MetropolisHastingsAlgorithm {
 	public double getMarginalLogLikelihood() {
 		return lnProbY;
 	}
-	
+
+	public double getMarginalLogLikelihood2() {
+		return lnProbY2;
+	}
+
 	public Matrix getFinalParameterEstimates() {
 		return parameters;
 	}
@@ -158,7 +162,7 @@ public class MetropolisHastingsAlgorithm {
 	 * @param gaussDist the sampling distribution
 	 * @return a boolean
 	 */
-	private boolean generateMetropolisSample(List<MetropolisHastingsSample> metropolisHastingsSample, GaussianDistribution gaussDist) {
+	private boolean generateMetropolisSample(List<MetropolisHastingsSample> metropolisHastingsSample, MetropolisHastingsSampler gaussDist) {
 		long startTime = System.currentTimeMillis();
 		Matrix newParms = null;
 		double llk = 0d;
@@ -188,9 +192,11 @@ public class MetropolisHastingsAlgorithm {
 			
 			while (!accepted && innerIter < simParms.nbInternalIter) {
 				newParms = gaussDist.getRandomRealization();
-				double parmsPriorDensity = priors.getProbabilityDensity(newParms);
-				if (parmsPriorDensity > 0d) {
-					llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
+				double parmsPriorLogDensity = priors.getLogProbabilityDensity(newParms);
+				if (parmsPriorLogDensity > Double.NEGATIVE_INFINITY) {
+					llk = model.getLogLikelihood(newParms) + 
+							priors.getLogProbabilityDensityOfRandomEffects(newParms) + 
+							parmsPriorLogDensity;
 					double ratio = Math.exp(llk - metropolisHastingsSample.get(metropolisHastingsSample.size() - 1).llk);
 					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
 					trials++;
@@ -220,7 +226,7 @@ public class MetropolisHastingsAlgorithm {
 		return completed;
 	}
 
-	private void resetSuccessAndTrialMaps(GaussianDistribution dist, 
+	private void resetSuccessAndTrialMaps(MetropolisHastingsSampler dist, 
 			Map<Integer, Integer> trials, 
 			Map<Integer, Integer> successes) {
 		trials.clear();
@@ -246,7 +252,7 @@ public class MetropolisHastingsAlgorithm {
 	 * @param sampler the sampling distribution
 	 * @return a boolean
 	 */
-	private boolean balanceVariance(MetropolisHastingsSample firstSample, GaussianDistribution sampler) {
+	private boolean balanceVariance(MetropolisHastingsSample firstSample, MetropolisHastingsSampler sampler) {
 		long startTime = System.currentTimeMillis();
 		List<MetropolisHastingsSample> initSample = new ArrayList<MetropolisHastingsSample>();
 		initSample.add(firstSample);
@@ -284,9 +290,11 @@ public class MetropolisHastingsAlgorithm {
 				double originalValue = originalParms.getValueAt(j, 0);
 				double newValue = getNewParms(sampler, j);
 				originalParms.setValueAt(j, 0, newValue);
-				double parmsPriorDensity = priors.getProbabilityDensity(originalParms);
-				if (parmsPriorDensity > 0d) {
-					llk = model.getLogLikelihood(originalParms) + Math.log(parmsPriorDensity);
+				double parmsPriorLogDensity = priors.getLogProbabilityDensity(originalParms);
+				if (parmsPriorLogDensity > Double.NEGATIVE_INFINITY) {
+					llk = model.getLogLikelihood(originalParms) + 
+							priors.getLogProbabilityDensityOfRandomEffects(originalParms) +
+							parmsPriorLogDensity;
 					double ratio = Math.exp(llk - initSample.get(initSample.size() - 1).llk);
 					accepted = StatisticalUtility.getRandom().nextDouble() < ratio;
 					trialMap.put(j, trialMap.get(j) + 1);
@@ -318,13 +326,13 @@ public class MetropolisHastingsAlgorithm {
 		
 		if (completed) {
 			acceptanceRatios = computeSuccessRates(trialMap, successMap);
-			REpiceaLogManager.logMessage(getLoggerName(), Level.INFO, getLogMessagePrefix(), "Time to balance the variance of the sample: " + (System.currentTimeMillis() - startTime) + " ms");
-			REpiceaLogManager.logMessage(getLoggerName(), Level.INFO, getLogMessagePrefix(), "Acceptance ratio = " + acceptanceRatios);
+			REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Time to balance the variance of the sample: " + (System.currentTimeMillis() - startTime) + " ms");
+			REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Acceptance ratio = " + acceptanceRatios);
 		} 
 		return completed;
 	}
 
-	private double getNewParms(GaussianDistribution dist, int i) {
+	private double getNewParms(MetropolisHastingsSampler dist, int i) {
 		double variance = dist.getVariance().getValueAt(i, i);
 		double mean = dist.getMean().getValueAt(i, 0);
 		double newValue = mean + StatisticalUtility.getRandom().nextGaussian() * Math.sqrt(variance);
@@ -353,7 +361,7 @@ public class MetropolisHastingsAlgorithm {
 		reset();
 		double coefVar = 0.01;
 		try {
-			GaussianDistribution samplingDist = model.getStartingParmEst(coefVar);
+			MetropolisHastingsSampler samplingDist = model.getStartingParmEst(coefVar);
 			List<MetropolisHastingsSample> mhSample = new ArrayList<MetropolisHastingsSample>();
 			MetropolisHastingsSample firstSet = findFirstSetOfParameters(simParms.nbInitialGrid, false);	// false: not for integration
 			mhSample.add(firstSet); // first valid sample
@@ -373,6 +381,7 @@ public class MetropolisHastingsAlgorithm {
 					tempSample.addAll(finalMetropolisHastingsSampleSelection);
 					Collections.sort(tempSample);
 					lnProbY = getLnProbY(tempSample.get(tempSample.size() - 1).parms, finalMetropolisHastingsSampleSelection, samplingDist);
+					lnProbY2 = getLnProbY(tempSample.get(tempSample.size() - 100).parms, finalMetropolisHastingsSampleSelection, samplingDist);
 					REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 					converged = true;
 				}
@@ -386,18 +395,21 @@ public class MetropolisHastingsAlgorithm {
 
 	private double getLnProbY(Matrix point, 
 			List<MetropolisHastingsSample> posteriorSamples, 
-			GaussianDistribution samplingDist) {
-		double parmsPriorDensity = priors.getProbabilityDensity(point);
-		double llkOfThisPoint = model.getLogLikelihood(point) + Math.log(parmsPriorDensity);
+			MetropolisHastingsSampler samplingDist) {
+		double parmsPriorLogDensity = priors.getLogProbabilityDensity(point);
+		double marginalLlkOfThisPoint = model.getMarginalLogLikelihood(point) + 
+//				priors.getLogProbabilityDensityOfRandomEffects(point) +
+				parmsPriorLogDensity;
 		double sumIntegrand = 0;
 		double densityFromSamplingDist = 0;
 		for (MetropolisHastingsSample s : posteriorSamples) {
 			samplingDist.setMean(s.parms);
-			double ratio = Math.exp(llkOfThisPoint - s.llk);
+			double marginalLlkOfThisSample = model.getMarginalLogLikelihood(s.parms);
+			double ratio = Math.exp(marginalLlkOfThisPoint - marginalLlkOfThisSample);
 			if (ratio > 1d) {
 				ratio = 1;
 			}
-			densityFromSamplingDist = samplingDist.getProbabilityDensity(point); 
+			densityFromSamplingDist = samplingDist.getMarginalProbabilityDensity(point); 
 			sumIntegrand += ratio * densityFromSamplingDist;
 		}
 		sumIntegrand /= posteriorSamples.size();
@@ -407,11 +419,13 @@ public class MetropolisHastingsAlgorithm {
 		int nbRealizations = posteriorSamples.size();
 		for (int j = 0; j < nbRealizations; j++) {
 			Matrix newParms = samplingDist.getRandomRealization();
-			parmsPriorDensity = priors.getProbabilityDensity(newParms);
+			parmsPriorLogDensity = priors.getLogProbabilityDensity(newParms);
 			double ratio;
-			if (parmsPriorDensity > 0d) {
-				double llk = model.getLogLikelihood(newParms) + Math.log(parmsPriorDensity);
-				ratio = Math.exp(llk - llkOfThisPoint);
+			if (parmsPriorLogDensity > Double.NEGATIVE_INFINITY) {
+				double llk = model.getMarginalLogLikelihood(newParms) + 
+//						priors.getLogProbabilityDensityOfRandomEffects(newParms) +
+						parmsPriorLogDensity;
+				ratio = Math.exp(llk - marginalLlkOfThisPoint);
 				if (ratio > 1d) {
 					ratio = 1d;
 				}
@@ -422,7 +436,7 @@ public class MetropolisHastingsAlgorithm {
 		}
 		sumRatio /= nbRealizations;
 		double pi_theta_y = sumIntegrand / sumRatio;
-		double log_m_hat = llkOfThisPoint - Math.log(pi_theta_y);
+		double log_m_hat = marginalLlkOfThisPoint - Math.log(pi_theta_y);
 		return log_m_hat;
 	}
 

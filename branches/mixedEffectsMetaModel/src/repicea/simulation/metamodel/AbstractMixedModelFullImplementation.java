@@ -32,6 +32,24 @@ import repicea.stats.distributions.GaussianDistribution;
  */
 abstract class AbstractMixedModelFullImplementation extends AbstractModelImplementation {
 
+	@SuppressWarnings("serial")
+	class DataBlockWrapper extends AbstractModelImplementation.DataBlockWrapper {
+		DataBlockWrapper(String blockId, 
+				List<Integer> indices, 
+				HierarchicalStatisticalDataStructure structure, 
+				Matrix overallVarCov) {
+			super(blockId, indices, structure, overallVarCov);
+		}
+		
+		
+		@Override
+		double getMarginalLogLikelihood() {
+			Matrix lowerCholeskyTriangle = getVarianceRandomEffect().getLowerCholTriangle();
+			double integratedLikelihood = ghq.getIntegralApproximation(this, ghqIndices, lowerCholeskyTriangle);
+			return Math.log(integratedLikelihood);
+		}
+	}
+
 	int indexRandomEffectVariance;
 	int indexFirstRandomEffect;
 	
@@ -39,6 +57,10 @@ abstract class AbstractMixedModelFullImplementation extends AbstractModelImpleme
 	
 	AbstractMixedModelFullImplementation(String outputType, MetaModel metaModel) throws StatisticalDataException {
 		super(outputType, metaModel);
+	}
+
+	private Matrix getVarianceRandomEffect() {
+		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
 	}
 
 	@Override
@@ -59,5 +81,15 @@ abstract class AbstractMixedModelFullImplementation extends AbstractModelImpleme
 		return logLikelihood;
 	}
 
+	@Override
+	public final double getMarginalLogLikelihood(Matrix parameters) {
+		setParameters(parameters);
+		double logLikelihood = 0d;
+		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
+			double marginalLogLikelihoodForThisBlock = dbw.getMarginalLogLikelihood();
+			logLikelihood += marginalLogLikelihoodForThisBlock;
+		}
+		return logLikelihood;
+	}
 
 }

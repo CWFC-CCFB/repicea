@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.Handler;
 import java.util.logging.Level;
 
 import org.junit.AfterClass;
@@ -34,6 +33,7 @@ import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.util.ObjectUtility;
+import repicea.util.REpiceaLogManager;
 
 public class MetaModelTest {
 
@@ -92,19 +92,19 @@ public class MetaModelTest {
 
 	public static void main(String[] args) throws IOException {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
-		MetaModelManager.getLogger().setLevel(Level.FINE);
-		ConsoleHandler sh = new ConsoleHandler();
-		sh.setLevel(Level.FINE);
-		MetaModelManager.getLogger().addHandler(sh);
+		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).setLevel(Level.INFO);
+//		ConsoleHandler sh = new ConsoleHandler();
+//		sh.setLevel(Level.FINE);
+//		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
 		
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
-		vegPotList.add("MS2");
+//		vegPotList.add("MS2");
 //		vegPotList.add("RE1");
 //		vegPotList.add("RE2");
 //		vegPotList.add("RE3");
-//		vegPotList.add("RS2");
+		vegPotList.add("RS2");
 //		vegPotList.add("RS3");
 		
 		List<String> outputTypes = new ArrayList<String>();

@@ -36,9 +36,9 @@ import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.mcmc.MetropolisHastingsAlgorithm;
 import repicea.stats.mcmc.MetropolisHastingsCompatibleModel;
+import repicea.stats.mcmc.MetropolisHastingsSampler;
 
 /**
  * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
@@ -318,7 +318,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 
 	@Override
-	public abstract GaussianDistribution getStartingParmEst(double coefVar);
+	public abstract MetropolisHastingsSampler getStartingParmEst(double coefVar);
 
 	String getSelectedOutputType() {
 		return outputType;
@@ -363,7 +363,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		if (hasConverged()) {
 			System.out.println("Model implementation: " + getModelImplementation().name());
 //			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
-			System.out.println("Final marginal log-likelihood = " + mh.getMarginalLogLikelihood());
+			System.out.println("Final marginal log-likelihood = " + mh.getMarginalLogLikelihood() + " -- " + mh.getMarginalLogLikelihood2());
 			System.out.println("Final parameters = ");
 			System.out.println(parameters.toString());
 			System.out.println("Final standardError = ");
@@ -379,6 +379,11 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	
 	DataSet getFinalDataSet() {
 		return finalDataSet;
+	}
+
+	@Override
+	public double getMarginalLogLikelihood(Matrix parms) {
+		return getLogLikelihood(parms);		// there is no random effect, so the marginal likelihood reduces to the likelihood
 	}
 
 }

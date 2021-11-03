@@ -267,7 +267,7 @@ public class MetaModel implements Saveable {
 				sumProb += Math.exp(w.ami.mh.getMarginalLogLikelihood());
 				REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
 						Level.INFO, 
-						"Meta-model " + stratumGroup + ": ", 
+						"Meta-model " + stratumGroup, 
 						"Result for the implementation " + w.ami.getModelImplementation().name());
 				w.ami.printSummary();
 			}
@@ -290,20 +290,20 @@ public class MetaModel implements Saveable {
 		model = null;	// reset the convergence to false 
 		REpiceaLogManager.logMessage(MetaModelManager.LoggerName,
 				Level.INFO, 
-				"Meta-model " + stratumGroup + ": ", 
+				"Meta-model " + stratumGroup, 
 				"----------- Modeling output type: " + outputType + " ----------------");
 		try {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
 
 			List<ModelImplEnum> myImplementations = new ArrayList<ModelImplEnum>();
-//			myImplementations.add(ModelImplEnum.ChapmanRichards);
-//			if (enableMixedModelImplementations) {
-//				myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
-//			}
-//			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
-//			if (enableMixedModelImplementations) {
+			myImplementations.add(ModelImplEnum.ChapmanRichards);
+			if (enableMixedModelImplementations) {
+				myImplementations.add(ModelImplEnum.ChapmanRichardsWithRandomEffect);
+			}
+			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
+			if (enableMixedModelImplementations) {
 				myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
-//			}			
+			}			
 			for (ModelImplEnum e : myImplementations) {	// use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
 				w.start();
@@ -315,7 +315,7 @@ public class MetaModel implements Saveable {
 			InnerWorker selectedWorker = performModelSelection(modelList);
 			REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
 					Level.INFO, 
-					"Meta-model " + stratumGroup + ": ", 
+					"Meta-model " + stratumGroup,  
 					"Selected model is " + selectedWorker.ami.getModelImplementation().name());
 			model = selectedWorker.ami;
 			model.printSummary();

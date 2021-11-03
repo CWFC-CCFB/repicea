@@ -43,40 +43,85 @@ public class MetropolisHastingsPriorHandler {
 		randomEffectDistributions = new HashMap<GaussianDistribution, ContinuousDistribution>();
 	}
 
+	/**
+	 * Provide a realization of the parameters (fixed and random).
+	 * @return a Matrix instance
+	 */
 	Matrix getRandomRealization() {
-		Matrix realization = new Matrix(nbElements, 1);
+		Matrix realizedParameters = new Matrix(nbElements, 1);
 		for (ContinuousDistribution d : distributions.keySet()) {
-			updateRandomEffectVarianceIfNeedsBe(d, realization);
+			updateRandomEffectVariance(d, realizedParameters);
 			Matrix thisR = d.getRandomRealization();
 			List<Integer> indices = distributions.get(d);
-			realization.setElements(indices, thisR);
+			realizedParameters.setElements(indices, thisR);
 		}
-		return realization;
+		return realizedParameters;
 	}
 
-	private void updateRandomEffectVarianceIfNeedsBe(ContinuousDistribution d, Matrix realization) {
+	/**
+	 * Update the variance of the random effects on the fly.
+	 * @param d the distribution
+	 * @param realizedParameters the realized parameters
+	 */
+	private void updateRandomEffectVariance(ContinuousDistribution d, Matrix realizedParameters) {
 		if (randomEffectDistributions.containsKey(d)) {	// it is a random effect. So we must update its variance
 			ContinuousDistribution varianceDist = randomEffectDistributions.get(d);
 			int index = distributions.get(varianceDist).get(0);	// TODO FP MF2021-11-01 here we assume that there is only one index 
-			Matrix realizedRandomEffectVariance = realization.getSubMatrix(index, index, 0, 0);
+			Matrix realizedRandomEffectVariance = realizedParameters.getSubMatrix(index, index, 0, 0);
 			((GaussianDistribution) d).setVariance(realizedRandomEffectVariance);
 		}
 	}
 
-	double getProbabilityDensity(Matrix m) {
+	/**
+	 * Return the log probability density of the parameters (only fixed) with respect to the priors.
+	 * @param realizedParameters 
+	 * @return a double
+	 */
+	double getLogProbabilityDensity(Matrix realizedParameters) {
 		double logProb = 0;
 		for (ContinuousDistribution d : distributions.keySet()) {
-			updateRandomEffectVarianceIfNeedsBe(d, m);
-			List<Integer> indices = distributions.get(d);
-			double thisProb = d.getProbabilityDensity(m.getSubMatrix(indices, null));
-			if (thisProb == 0d) {
-				return 0d;
+			if (!randomEffectDistributions.containsKey(d)) {	// we do not consider the random effects in the probability density of the prior
+				List<Integer> indices = distributions.get(d);
+				double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
+				if (thisProb == 0d) {
+					return Double.NEGATIVE_INFINITY;
+				}
+				logProb += Math.log(thisProb);
 			}
-			logProb += Math.log(thisProb);
+//			updateRandomEffectVarianceIfNeedsBe(d, m);
+//			List<Integer> indices = distributions.get(d);
+//			double thisProb = d.getProbabilityDensity(m.getSubMatrix(indices, null));
+//			if (thisProb == 0d) {
+//				return 0d;
+//			}
+//			logProb += Math.log(thisProb);
 		}
-		return Math.exp(logProb);
+		return logProb;
 	}
 
+	double getLogProbabilityDensityOfRandomEffects(Matrix realizedParameters) {
+		double logProb = 0;
+		for (ContinuousDistribution d : distributions.keySet()) {
+			if (randomEffectDistributions.containsKey(d)) {	// we do not consider the random effects in the probability density of the prior
+				updateRandomEffectVariance(d, realizedParameters);
+				List<Integer> indices = distributions.get(d);
+				double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
+				if (thisProb == 0d) {
+					return Double.NEGATIVE_INFINITY;
+				}
+				logProb += Math.log(thisProb);
+			}
+//			updateRandomEffectVarianceIfNeedsBe(d, m);
+//			List<Integer> indices = distributions.get(d);
+//			double thisProb = d.getProbabilityDensity(m.getSubMatrix(indices, null));
+//			if (thisProb == 0d) {
+//				return 0d;
+//			}
+//			logProb += Math.log(thisProb);
+		}
+		return logProb;
+	}
+	
 
 	public void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
 		List<Integer> ind = Arrays.asList(indices);

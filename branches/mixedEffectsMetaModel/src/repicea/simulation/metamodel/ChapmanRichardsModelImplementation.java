@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
+import repicea.stats.mcmc.MetropolisHastingsSampler;
 
 /**
  * An implementation of the Chapman-Richards model.
@@ -48,7 +48,7 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 	
 	
 	@Override
-	public GaussianDistribution getStartingParmEst(double coefVar) {
+	public MetropolisHastingsSampler getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(4,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
@@ -62,24 +62,20 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 		
 		indexCorrelationParameter = 3;
 
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.1), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 3);
+
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
 		}
-		
-		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
-
-		
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.1), 1);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 3);
+		MetropolisHastingsSampler gd = new MetropolisHastingsSampler(parmEst, varianceDiag.matrixDiagonal(), null); // null: there is no random effect in this model
 
 		return gd;
 	}
 	
-	
-
 	@Override
 	Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1) {
 		double b1 = getParameters().getValueAt(0, 0);
@@ -97,6 +93,4 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 	}
 
 
-
-	
 }
