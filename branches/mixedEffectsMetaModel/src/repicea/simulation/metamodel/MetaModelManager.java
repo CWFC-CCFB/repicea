@@ -26,8 +26,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import repicea.app.JSONConfigurationGlobal;
 import repicea.app.REpiceaJSONConfiguration;
@@ -56,25 +54,7 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	}
 	
 	
-//	private static boolean Verbose = false;
-	public static String LoggerName = MetaModelManager.class.getName();
-	private static Logger InternalLogger;
-	
-	/**
-	 * Return the logger for this metamodel package. The logger can be re-addressed to an
-	 * existing logger by changing the LoggerName static variable.
-	 * @return a Logger instance
-	 */
-	public static Logger getLogger() {
-		if (InternalLogger == null || !InternalLogger.getName().equals(LoggerName)) {
-			InternalLogger = Logger.getLogger(LoggerName);
-		}
-		return InternalLogger;
-	}
-	
-	public static void logMessage(Level level, String prefix, Object obj) {
-		MetaModelManager.getLogger().log(level, "Meta-model " + prefix + ": " + obj.toString());
-	}
+	protected static String LoggerName = MetaModelManager.class.getName();
 
 	/**
 	 * Constructor.

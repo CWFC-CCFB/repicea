@@ -19,7 +19,6 @@
 
 package repicea.simulation.metamodel;
 
-import java.io.File;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -30,15 +29,13 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import repicea.io.FormatField;
 import repicea.io.Saveable;
-import repicea.io.javacsv.CSVField;
-import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
+import repicea.util.REpiceaLogManager;
 
 /**
  * A package class that handles the data set and fits the meta model. It implements
@@ -268,7 +265,10 @@ public class MetaModel implements Saveable {
 			if (w.ami.hasConverged()) {
 				newList.add(w);
 				sumProb += Math.exp(w.ami.mh.getMarginalLogLikelihood());
-				MetaModelManager.logMessage(Level.INFO, stratumGroup, "Result for the implementation " + w.ami.getModelImplementation().name());
+				REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
+						Level.INFO, 
+						"Meta-model " + stratumGroup + ": ", 
+						"Result for the implementation " + w.ami.getModelImplementation().name());
 				w.ami.printSummary();
 			}
 		}
@@ -288,7 +288,10 @@ public class MetaModel implements Saveable {
 	 */
 	public boolean fitModel(String outputType, boolean enableMixedModelImplementations) {
 		model = null;	// reset the convergence to false 
-		MetaModelManager.logMessage(Level.INFO, stratumGroup, "----------- Modeling output type: " + outputType + " ----------------");
+		REpiceaLogManager.logMessage(MetaModelManager.LoggerName,
+				Level.INFO, 
+				"Meta-model " + stratumGroup + ": ", 
+				"----------- Modeling output type: " + outputType + " ----------------");
 		try {
 			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
 
@@ -310,7 +313,10 @@ public class MetaModel implements Saveable {
 				w.join();
 			}
 			InnerWorker selectedWorker = performModelSelection(modelList);
-			MetaModelManager.logMessage(Level.INFO, stratumGroup, "Selected model is " + selectedWorker.ami.getModelImplementation().name());
+			REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
+					Level.INFO, 
+					"Meta-model " + stratumGroup + ": ", 
+					"Selected model is " + selectedWorker.ami.getModelImplementation().name());
 			model = selectedWorker.ami;
 			model.printSummary();
 			return true; 

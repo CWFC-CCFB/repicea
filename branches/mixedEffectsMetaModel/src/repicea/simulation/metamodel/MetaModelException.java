@@ -19,6 +19,7 @@
 
 package repicea.simulation.metamodel;
 
+@SuppressWarnings("serial")
 public final class MetaModelException extends Exception {
 
 	protected MetaModelException(String msg) {
