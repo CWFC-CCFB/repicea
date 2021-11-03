@@ -45,7 +45,7 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 	}
 
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(4,1);
 		parmEst.setValueAt(0, 0, 1000d);
 		parmEst.setValueAt(1, 0, 0.02);
@@ -66,10 +66,10 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 
-		priors.addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
-		priors.addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 3);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 3);
 
 		return gd;
 	}

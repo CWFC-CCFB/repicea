@@ -18,6 +18,8 @@
  */
 package repicea.stats.mcmc;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +27,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 
+import repicea.io.FormatField;
+import repicea.io.javacsv.CSVField;
+import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.GaussianDistribution;
@@ -35,7 +40,7 @@ import repicea.util.REpiceaLogManager;
  * An implementation of the MCMC Metropolis-Hastings algorithm.
  * @author Mathieu Fortin - September 2021
  */
-public class MetropolisHastingsAlgorithm implements Runnable {
+public class MetropolisHastingsAlgorithm {
 		
 	private String loggerName;
 	private String loggerPrefix;
@@ -51,6 +56,37 @@ public class MetropolisHastingsAlgorithm implements Runnable {
 	private boolean converged;
 	protected int indexCorrelationParameter;
 
+	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model, String loggerName, String loggerPrefix) {
+		this(model);
+		this.loggerName = loggerName;
+		this.loggerPrefix = loggerPrefix;
+	}
+	
+	public void exportMetropolisHastingsSample(String filename) throws IOException {
+		if (hasConverged() && finalMetropolisHastingsSampleSelection != null) {
+			CSVWriter writer = null;
+			for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
+				if (writer == null) {
+					writer = new CSVWriter(new File(filename), false);
+					List<FormatField> fieldNames = new ArrayList<FormatField>();
+					fieldNames.add(new CSVField("LLK"));
+					for (int j = 1; j <= sample.parms.m_iRows; j++) {
+						fieldNames.add(new CSVField("p" + j));
+					}
+					writer.setFields(fieldNames);
+				}
+				Object[] record = new Object[sample.parms.m_iRows + 1];
+				record[0] = sample.llk;
+				for (int j = 1; j <= sample.parms.m_iRows; j++) {
+					record[j] = sample.parms.getValueAt(j - 1, 0);
+				}
+				writer.addRecord(record);
+			}
+			writer.close();
+		}
+	}
+
+	
 	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model) {
 		simParms = new MetropolisHastingsParameters();
 		priors = new MetropolisHastingsPriorHandler();
@@ -86,13 +122,17 @@ public class MetropolisHastingsAlgorithm implements Runnable {
 	}
 
 	private String getLogMessagePrefix() {
-		return loggerPrefix;
+		return loggerPrefix == null ? "" : loggerPrefix;
 	}
 
 	public MetropolisHastingsParameters getSimulationParameters() {
 		return simParms;
 	}
 
+	public double getMarginalLogLikelihood() {
+		return lnProbY;
+	}
+	
 	public Matrix getFinalParameterEstimates() {
 		return parameters;
 	}
@@ -105,6 +145,9 @@ public class MetropolisHastingsAlgorithm implements Runnable {
 		return converged;
 	}
 	
+	public MetropolisHastingsPriorHandler getPriorHandler() {
+		return priors;
+	}
 	
 	/**
 	 * Implement the Metropolis-Hastings algorithm.
@@ -297,8 +340,17 @@ public class MetropolisHastingsAlgorithm implements Runnable {
 		REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Selecting one every " + simParms.oneEach + " samples as final selection.");
 		return finalMetropolisHastingsGibbsSample;
 	}
+
+	private void reset() {
+		parameters = null;
+		parmsVarCov = null;
+		lnProbY = 0;
+		finalMetropolisHastingsSampleSelection = null;
+		converged = false;
+	}
 	
 	public void fitModel() {
+		reset();
 		double coefVar = 0.01;
 		try {
 			GaussianDistribution samplingDist = model.getStartingParmEst(coefVar);
@@ -374,10 +426,6 @@ public class MetropolisHastingsAlgorithm implements Runnable {
 		return log_m_hat;
 	}
 
-	@Override
-	public void run() {
-		fitModel();
-	}
 
 	
 

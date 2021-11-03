@@ -32,10 +32,11 @@ import repicea.stats.distributions.GaussianDistribution;
  * A class to handle prior distributions.
  * @author Mathieu Fortin - November 2021
  */
-class MetropolisHastingsPriorHandler {
-	final Map<ContinuousDistribution, List<Integer>> distributions;
-	final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
-	int nbElements;
+public class MetropolisHastingsPriorHandler {
+	
+	private final Map<ContinuousDistribution, List<Integer>> distributions;
+	private final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
+	private int nbElements;
 
 	MetropolisHastingsPriorHandler() {
 		distributions = new LinkedHashMap<ContinuousDistribution, List<Integer>>();
@@ -77,13 +78,13 @@ class MetropolisHastingsPriorHandler {
 	}
 
 
-	void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
+	public void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
 		List<Integer> ind = Arrays.asList(indices);
 		distributions.put(dist, ind);
 		nbElements += ind.size();
 	}
 
-	void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, Integer... indices) {
+	public void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, Integer... indices) {
 		addFixedEffectDistribution(dist, indices);
 		randomEffectDistributions.put(dist, variancePrior);
 	}

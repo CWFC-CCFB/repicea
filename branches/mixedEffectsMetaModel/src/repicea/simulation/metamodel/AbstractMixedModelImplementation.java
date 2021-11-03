@@ -65,7 +65,7 @@ abstract class AbstractMixedModelImplementation extends AbstractModelImplementat
 	}
 
 	@Override
-	protected final double getLogLikelihood(Matrix parameters) {
+	public final double getLogLikelihood(Matrix parameters) {
 		setParameters(parameters);
 		double logLikelihood = 0d;
 		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {

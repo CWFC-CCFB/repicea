@@ -267,13 +267,13 @@ public class MetaModel implements Saveable {
 		for (InnerWorker w : innerWorkers) {
 			if (w.ami.hasConverged()) {
 				newList.add(w);
-				sumProb += Math.exp(w.ami.lnProbY);
+				sumProb += Math.exp(w.ami.mh.getMarginalLogLikelihood());
 				MetaModelManager.logMessage(Level.INFO, stratumGroup, "Result for the implementation " + w.ami.getModelImplementation().name());
 				w.ami.printSummary();
 			}
 		}
 		for (InnerWorker w : newList) {
-			w.prob = Math.exp(w.ami.lnProbY) / sumProb;
+			w.prob = Math.exp(w.ami.mh.getMarginalLogLikelihood()) / sumProb;
 			System.out.println("Implementation " + w.ami.getModelImplementation().name() + ": " + w.prob);
 		}
 		Collections.sort(newList);
@@ -378,27 +378,7 @@ public class MetaModel implements Saveable {
 	 * @throws IOException
 	 */
 	void exportMetropolisHastingsSample(String filename) throws IOException {
-		if (hasConverged() && model.finalMetropolisHastingsSampleSelection != null) {
-			CSVWriter writer = null;
-			for (MetaModelMetropolisHastingsSample sample : model.finalMetropolisHastingsSampleSelection) {
-				if (writer == null) {
-					writer = new CSVWriter(new File(filename), false);
-					List<FormatField> fieldNames = new ArrayList<FormatField>();
-					fieldNames.add(new CSVField("LLK"));
-					for (int j = 1; j <= sample.parms.m_iRows; j++) {
-						fieldNames.add(new CSVField("p" + j));
-					}
-					writer.setFields(fieldNames);
-				}
-				Object[] record = new Object[sample.parms.m_iRows + 1];
-				record[0] = sample.llk;
-				for (int j = 1; j <= sample.parms.m_iRows; j++) {
-					record[j] = sample.parms.getValueAt(j - 1, 0);
-				}
-				writer.addRecord(record);
-			}
-			writer.close();
-		}
+		model.mh.exportMetropolisHastingsSample(filename);
 	}
 
 	

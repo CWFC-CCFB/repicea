@@ -41,7 +41,7 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 
 
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(3,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
@@ -60,9 +60,9 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 
-		priors.addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.0001, 0.10), 1);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 2);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.10), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 2);
 
 		return gd;
 	}

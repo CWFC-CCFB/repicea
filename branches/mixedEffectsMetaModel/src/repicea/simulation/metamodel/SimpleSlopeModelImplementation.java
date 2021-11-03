@@ -40,7 +40,7 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 
 
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(2,1);
 		parmEst.setValueAt(0, 0, 0.1);
 		parmEst.setValueAt(1, 0, .92);
@@ -57,8 +57,8 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		priors.addFixedEffectDistribution(new UniformDistribution(0.00001, 4), 0);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.90, 0.99), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.00001, 4), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 1);
 		
 		return gd;
 	}

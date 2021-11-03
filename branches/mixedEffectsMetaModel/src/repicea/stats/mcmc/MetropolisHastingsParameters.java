@@ -20,9 +20,9 @@ package repicea.stats.mcmc;
 
 public class MetropolisHastingsParameters {
 
-	protected int nbBurnIn = 5000;
+	protected int nbBurnIn = 10000;
 	protected int nbRealizations = 500000 + nbBurnIn;
-	protected int nbInternalIter = 10000;
+	protected int nbInternalIter = 100000;
 	protected int oneEach = 50;
 	protected int nbInitialGrid = 10000;	
 

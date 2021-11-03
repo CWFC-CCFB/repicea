@@ -38,7 +38,7 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 
 	
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		indexRandomEffectVariance = 3;
 		indexCorrelationParameter = 4;
 		indexFirstRandomEffect = 5;
@@ -58,14 +58,14 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 		fixedEffectsParameterIndices.add(1);
 		fixedEffectsParameterIndices.add(2);
 
-		priors.addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.8, 6), 2);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.8, 6), 2);
 		ContinuousDistribution variancePrior = new UniformDistribution(0, 15000);
-		priors.addFixedEffectDistribution(variancePrior, 3);
-		priors.addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 4);
+		mh.getPriorHandler().addFixedEffectDistribution(variancePrior, 3);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 4);
 		for (int i = 0; i < dataBlockWrappers.size(); i++) {
-			priors.addRandomEffectVariance(new GaussianDistribution(0, 1), variancePrior, 5 + i);
+			mh.getPriorHandler().addRandomEffectVariance(new GaussianDistribution(0, 1), variancePrior, 5 + i);
 		}
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);

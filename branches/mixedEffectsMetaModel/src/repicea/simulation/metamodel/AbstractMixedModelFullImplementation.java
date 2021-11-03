@@ -32,24 +32,6 @@ import repicea.stats.distributions.GaussianDistribution;
  */
 abstract class AbstractMixedModelFullImplementation extends AbstractModelImplementation {
 
-	@SuppressWarnings("serial")
-	class DataBlockWrapper extends AbstractModelImplementation.DataBlockWrapper {
-		DataBlockWrapper(String blockId, 
-				List<Integer> indices, 
-				HierarchicalStatisticalDataStructure structure, 
-				Matrix overallVarCov) {
-			super(blockId, indices, structure, overallVarCov);
-		}
-		
-		
-//		@Override
-//		double getMarginalLogLikelihood() {
-//			Matrix lowerCholeskyTriangle = getVarianceRandomEffect().getLowerCholTriangle();
-//			double integratedLikelihood = ghq.getIntegralApproximation(this, ghqIndices, lowerCholeskyTriangle);
-//			return Math.log(integratedLikelihood);
-//		}
-	}
-	
 	int indexRandomEffectVariance;
 	int indexFirstRandomEffect;
 	
@@ -64,28 +46,9 @@ abstract class AbstractMixedModelFullImplementation extends AbstractModelImpleme
 		return new DataBlockWrapper(k, indices, structure, varCov);
 	}
 
-//	private Matrix getVarianceRandomEffect() {
-//		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
-//	}
-	
-	private double getVarianceRandomEffect() {
-		return getParameters().getValueAt(indexRandomEffectVariance, 0);
-	}
-
-	private GaussianDistribution getRandomEffectDistribution() {
-		if (randomEffectDistribution == null) {
-			Matrix mu = new Matrix(dataBlockWrappers.size(), 1);
-			Matrix variance = Matrix.getIdentityMatrix(dataBlockWrappers.size());
-			randomEffectDistribution = new GaussianDistribution(mu, variance);
-		}
-		return randomEffectDistribution;
-	}
-	
 	@Override
-	protected final double getLogLikelihood(Matrix parameters) {
+	public final double getLogLikelihood(Matrix parameters) {
 		setParameters(parameters);
-//		getRandomEffectDistribution().setVariance(Matrix.getIdentityMatrix(dataBlockWrappers.size()).scalarMultiply(getVarianceRandomEffect()));
-//		Matrix randomEffects = getRandomEffectDistribution().getRandomRealization();
 		double logLikelihood = 0d;
 		for (int i = 0; i < dataBlockWrappers.size(); i++) {
 			AbstractDataBlockWrapper dbw = dataBlockWrappers.get(i);

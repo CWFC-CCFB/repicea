@@ -100,11 +100,11 @@ public class MetaModelTest {
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		List<String> vegPotList = new ArrayList<String>();
-//		vegPotList.add("MS2");
+		vegPotList.add("MS2");
 //		vegPotList.add("RE1");
 //		vegPotList.add("RE2");
 //		vegPotList.add("RE3");
-		vegPotList.add("RS2");
+//		vegPotList.add("RS2");
 //		vegPotList.add("RS3");
 		
 		List<String> outputTypes = new ArrayList<String>();
@@ -114,9 +114,6 @@ public class MetaModelTest {
 			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
 			for (String outputType : outputTypes) {
 				MetaModel m = MetaModel.Load(metaModelFilename);
-				m.simParms.nbBurnIn = 10000;
-				m.simParms.nbInternalIter = 100000;
-				m.simParms.nbRealizations = 500000 + m.simParms.nbBurnIn;
 				boolean enabledMixedModelImplementation = vegPot.equals("RE1") ? false : true;
 				m.fitModel(outputType, enabledMixedModelImplementation);
 				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
