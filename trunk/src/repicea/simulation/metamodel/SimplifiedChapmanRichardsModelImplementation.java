@@ -41,7 +41,7 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 
 
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(3,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
@@ -52,26 +52,17 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 		fixedEffectsParameterIndices.add(1);
 
 		this.indexCorrelationParameter = 2;
-		
+
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.10), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 2);
+
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
 		}
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
-		
-		Matrix lowerBound = new Matrix(3,1);
-		Matrix upperBound = new Matrix(3,1);
-		lowerBound.setValueAt(0, 0, 0);
-		upperBound.setValueAt(0, 0, 400);
-		
-		lowerBound.setValueAt(1, 0, 0.0001);
-		upperBound.setValueAt(1, 0, 0.1);
-		
-		lowerBound.setValueAt(2, 0, .90);
-		upperBound.setValueAt(2, 0, .99);
-		
-		priors = new UniformDistribution(lowerBound, upperBound);
 
 		return gd;
 	}

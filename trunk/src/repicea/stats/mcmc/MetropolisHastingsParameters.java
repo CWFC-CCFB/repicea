@@ -16,14 +16,26 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
+package repicea.stats.mcmc;
 
-package repicea.simulation.metamodel;
+public class MetropolisHastingsParameters {
 
-@SuppressWarnings("serial")
-public final class MetaModelException extends Exception {
+	protected int nbBurnIn = 10000;
+	protected int nbRealizations = 500000 + nbBurnIn;
+	protected int nbInternalIter = 100000;
+	protected int oneEach = 50;
+	protected int nbInitialGrid = 10000;	
 
-	protected MetaModelException(String msg) {
-		super(msg);
+	MetropolisHastingsParameters() {}
+
+	@Override
+	public MetropolisHastingsParameters clone() {
+		try {
+			return (MetropolisHastingsParameters) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
-	
+
 }

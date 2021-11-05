@@ -29,8 +29,11 @@ import repicea.stats.CentralMomentsSettable;
 public class GaussianDistribution extends StandardGaussianDistribution implements CentralMomentsSettable {
 		
 	/**
-	 * This constructor creates a Gaussian function with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 
+	 * Constructor. <br>
+	 * <br>
+	 * Creates a Gaussian distribution with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 
 	 * positive definite.
+	 * 
 	 * @param mu the mean of the function
 	 * @param sigma2 the variance of the function
 	 * @throws UnsupportedOperationException if the matrix sigma2 is not positive definite
@@ -38,6 +41,15 @@ public class GaussianDistribution extends StandardGaussianDistribution implement
 	public GaussianDistribution(Matrix mu, Matrix sigma2) {
 		setMean(mu);
 		setVariance(sigma2);
+	}
+	
+	/**
+	 * Constructor for univariate Gaussian distribution.
+	 * @param mean
+	 * @param variance
+	 */
+	public GaussianDistribution(double mean, double variance) {
+		this(new Matrix(1,1,mean,0d), new Matrix(1,1,variance,0d));
 	}
 
 	@Override

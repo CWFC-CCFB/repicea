@@ -23,7 +23,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.FileHandler;
 import java.util.logging.Level;
+import java.util.logging.SimpleFormatter;
 
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -32,6 +34,7 @@ import org.junit.Test;
 
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.util.ObjectUtility;
+import repicea.util.REpiceaLogManager;
 
 public class MetaModelTest {
 
@@ -85,14 +88,22 @@ public class MetaModelTest {
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
 		double pred = MetaModelInstance.getPrediction(90, 0);
-		Assert.assertEquals("Testing prediction at 90 yrs of age", 103.70002176054153, pred, 1E-8);
+		Assert.assertEquals("Testing prediction at 90 yrs of age", 101.58121386411835, pred, 1E-8);
 	}
 
 	public static void main(String[] args) throws IOException {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
-		MetaModelManager.getLogger().setLevel(Level.INFO);
-		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
+		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).setLevel(Level.INFO);
+//		ConsoleHandler sh = new ConsoleHandler();
+//		sh.setLevel(Level.FINE);
+//		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
+		FileHandler sh = new FileHandler(outputPath + File.separator + "metamodel.log");
+		sh.setLevel(Level.INFO);
+		sh.setFormatter(new SimpleFormatter());
+		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
+		
+		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		List<String> vegPotList = new ArrayList<String>();
 		vegPotList.add("MS2");
 		vegPotList.add("RE1");
@@ -111,7 +122,10 @@ public class MetaModelTest {
 				boolean enabledMixedModelImplementation = vegPot.equals("RE1") ? false : true;
 				m.fitModel(outputType, enabledMixedModelImplementation);
 				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
+				m.exportMetropolisHastingsSample(outputPath + File.separator + vegPot + "_" + outputType + "MHSample.csv");
 				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + ".csv");
+				m.getSummary().save(outputPath + File.separator + vegPot + "_" + outputType + "Summary.csv");
+				m.getModelComparison().save(outputPath + File.separator + vegPot + "_" + outputType + "ModelComparison.csv");
 			}
 		}
 	}

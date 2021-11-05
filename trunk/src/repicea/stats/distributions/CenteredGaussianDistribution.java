@@ -31,7 +31,8 @@ import repicea.stats.StatisticalUtility.TypeMatrixR;
 
 /**
  * The CenteredGaussianDistribution class is designed for dealing with univariate or multivariate 
- * error terms in linear and non linear model. It assumes a constant variance that is represented by the variance parameter in the constructor.
+ * error terms in linear and non linear model. It assumes a constant variance that is represented 
+ * by the variance parameter in the constructor.
  * @author Mathieu Fortin - August 2014
  */
 @SuppressWarnings("serial")

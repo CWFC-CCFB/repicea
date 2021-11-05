@@ -23,35 +23,21 @@ import java.util.List;
 import repicea.math.Matrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.distributions.GaussianDistribution;
 
 /**
  * The AbstractMixedModelImplementation class relies on a marginal log-likelihood instead of a pure 
  * log-likelihood.
  * @author Mathieu Fortin - October 2021
  */
-abstract class AbstractMixedModelImplementation extends AbstractModelImplementation {
+abstract class AbstractMixedModelFullImplementation extends AbstractModelImplementation {
 
-	@SuppressWarnings("serial")
-	class DataBlockWrapper extends AbstractModelImplementation.DataBlockWrapper {
-		DataBlockWrapper(String blockId, 
-				List<Integer> indices, 
-				HierarchicalStatisticalDataStructure structure, 
-				Matrix overallVarCov) {
-			super(blockId, indices, structure, overallVarCov);
-		}
-		
-		
-		@Override
-		double getMarginalLogLikelihood() {
-			Matrix lowerCholeskyTriangle = getVarianceRandomEffect().getLowerCholTriangle();
-			double integratedLikelihood = ghq.getIntegralApproximation(this, ghqIndices, lowerCholeskyTriangle);
-			return Math.log(integratedLikelihood);
-		}
-	}
-	
 	int indexRandomEffectVariance;
+	int indexFirstRandomEffect;
 	
-	AbstractMixedModelImplementation(String outputType, MetaModel metaModel) throws StatisticalDataException {
+	GaussianDistribution randomEffectDistribution;
+	
+	AbstractMixedModelFullImplementation(String outputType, MetaModel metaModel) throws StatisticalDataException {
 		super(outputType, metaModel);
 	}
 
@@ -60,20 +46,10 @@ abstract class AbstractMixedModelImplementation extends AbstractModelImplementat
 		return new DataBlockWrapper(k, indices, structure, varCov);
 	}
 
-	private Matrix getVarianceRandomEffect() {
-		return getParameters().getSubMatrix(indexRandomEffectVariance, indexRandomEffectVariance, 0, 0);
-	}
-
 	@Override
-	protected final double getLogLikelihood(Matrix parameters) {
-		setParameters(parameters);
-		double logLikelihood = 0d;
-		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
-			double marginalLogLikelihoodForThisBlock = dbw.getMarginalLogLikelihood();
-			logLikelihood += marginalLogLikelihoodForThisBlock;
-		}
-		return logLikelihood;
-	}
-
-
+	protected double getLogLikelihoodForThisBlock(Matrix parameters, int i) {
+		AbstractDataBlockWrapper dbw = dataBlockWrappers.get(i);
+		dbw.setParameterValue(0, parameters.getValueAt(indexFirstRandomEffect + i, 0));
+		return dbw.getLogLikelihood();
+	}	
 }
