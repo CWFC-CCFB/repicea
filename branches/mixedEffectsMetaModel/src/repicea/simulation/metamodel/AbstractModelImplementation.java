@@ -36,9 +36,9 @@ import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.mcmc.MetropolisHastingsAlgorithm;
 import repicea.stats.mcmc.MetropolisHastingsCompatibleModel;
-import repicea.stats.mcmc.MetropolisHastingsSampler;
 
 /**
  * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
@@ -95,11 +95,6 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 				double llk = - 0.5 * rVrValue + lnConstant; 
 				return llk;
 			}
-		}
-
-		@Override
-		double getMarginalLogLikelihood() {
-			throw new UnsupportedOperationException("This model implementation " + getClass().getSimpleName() + " does not implement random effects!");
 		}
 
 	}
@@ -195,14 +190,20 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 
 	@Override
-	public double getLogLikelihood(Matrix parameters) {
+	public final double getLogLikelihood(Matrix parameters) {
 		setParameters(parameters);
 		double logLikelihood = 0d;
-		for (AbstractDataBlockWrapper dbw : dataBlockWrappers) {
-			double logLikelihoodForThisBlock = dbw.getLogLikelihood();
+		for (int i = 0; i < dataBlockWrappers.size(); i++) {
+			double logLikelihoodForThisBlock = getLogLikelihoodForThisBlock(parameters, i);
 			logLikelihood += logLikelihoodForThisBlock;
 		}
 		return logLikelihood;
+	}
+	
+	
+	protected double getLogLikelihoodForThisBlock(Matrix parameters, int i) {
+		AbstractDataBlockWrapper dbw = dataBlockWrappers.get(i);
+		return dbw.getLogLikelihood();
 	}
 	
 	/**
@@ -318,7 +319,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 
 	@Override
-	public abstract MetropolisHastingsSampler getStartingParmEst(double coefVar);
+	public abstract GaussianDistribution getStartingParmEst(double coefVar);
 
 	String getSelectedOutputType() {
 		return outputType;
@@ -359,31 +360,35 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		fitModel();
 	}
 	
-	void printSummary() {
+	DataSet getSummary() {
 		if (hasConverged()) {
-			System.out.println("Model implementation: " + getModelImplementation().name());
-//			System.out.println("Final log-likelihood = " + getLogLikelihood(getParameters()));
-			System.out.println("Final marginal log-likelihood = " + mh.getMarginalLogLikelihood() + " -- " + mh.getMarginalLogLikelihood2());
-			System.out.println("Final parameters = ");
-			System.out.println(parameters.toString());
-			System.out.println("Final standardError = ");
-			Matrix diagStd = parmsVarCov.diagonalVector().elementWisePower(0.5);
-			System.out.println(diagStd.toString());
-			System.out.println("Correlation matrix = ");
-			Matrix corrMat = parmsVarCov.elementWiseDivide(diagStd.multiply(diagStd.transpose()));
-			System.out.println(corrMat);
+			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
+			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
+			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
+			for (int i = 0; i < parameters.m_iRows; i++) {
+				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
+			}
+			return d;
 		} else {
 			System.out.println("The model has not converged!");
+			return null;
 		}
 	}
 	
 	DataSet getFinalDataSet() {
 		return finalDataSet;
 	}
-
+	
 	@Override
-	public double getMarginalLogLikelihood(Matrix parms) {
-		return getLogLikelihood(parms);		// there is no random effect, so the marginal likelihood reduces to the likelihood
+	public final int getNbSubjects() {
+		return dataBlockWrappers.size();
 	}
-
+	
+	@Override
+	public final double getLikelihoodOfThisSubject(Matrix m, int i) {
+		setParameters(m);
+		return Math.exp(getLogLikelihoodForThisBlock(m, i));
+	}
+	
+	
 }

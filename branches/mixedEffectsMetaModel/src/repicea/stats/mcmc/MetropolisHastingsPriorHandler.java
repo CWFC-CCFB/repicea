@@ -18,6 +18,7 @@
  */
 package repicea.stats.mcmc;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -36,11 +37,13 @@ public class MetropolisHastingsPriorHandler {
 	
 	private final Map<ContinuousDistribution, List<Integer>> distributions;
 	private final Map<GaussianDistribution, ContinuousDistribution> randomEffectDistributions;
+	private final List<GaussianDistribution> randomEffectList;
 	private int nbElements;
 
 	MetropolisHastingsPriorHandler() {
 		distributions = new LinkedHashMap<ContinuousDistribution, List<Integer>>();
 		randomEffectDistributions = new HashMap<GaussianDistribution, ContinuousDistribution>();
+		randomEffectList = new ArrayList<GaussianDistribution>();
 	}
 
 	/**
@@ -101,26 +104,38 @@ public class MetropolisHastingsPriorHandler {
 
 	double getLogProbabilityDensityOfRandomEffects(Matrix realizedParameters) {
 		double logProb = 0;
-		for (ContinuousDistribution d : distributions.keySet()) {
-			if (randomEffectDistributions.containsKey(d)) {	// we do not consider the random effects in the probability density of the prior
-				updateRandomEffectVariance(d, realizedParameters);
-				List<Integer> indices = distributions.get(d);
-				double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
-				if (thisProb == 0d) {
-					return Double.NEGATIVE_INFINITY;
-				}
+		for (int i = 0; i < randomEffectList.size(); i++) {
+			double thisProb = getProbabilityDensityOfThisRandomEffect(realizedParameters, i);
+			if (thisProb == 0d) {
+				return Double.NEGATIVE_INFINITY;
+			} else {
 				logProb += Math.log(thisProb);
 			}
-//			updateRandomEffectVarianceIfNeedsBe(d, m);
+		}
+//		for (GaussianDistribution d : randomEffectList) {
+//			updateRandomEffectVariance(d, realizedParameters);
 //			List<Integer> indices = distributions.get(d);
-//			double thisProb = d.getProbabilityDensity(m.getSubMatrix(indices, null));
+//			double thisProb = d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
 //			if (thisProb == 0d) {
-//				return 0d;
+//				return Double.NEGATIVE_INFINITY;
 //			}
 //			logProb += Math.log(thisProb);
-		}
+//		}
 		return logProb;
 	}
+	
+	private double getProbabilityDensityOfThisRandomEffect(Matrix realizedParameters, int i) {
+		if (randomEffectList.isEmpty()) {
+			return 1d;		// no random effect then prob = 1
+		} else {
+			GaussianDistribution d = randomEffectList.get(i);
+			updateRandomEffectVariance(d, realizedParameters);
+			List<Integer> indices = distributions.get(d);
+			return d.getProbabilityDensity(realizedParameters.getSubMatrix(indices, null));
+		}
+		
+	}
+	
 	
 
 	public void addFixedEffectDistribution(ContinuousDistribution dist, Integer... indices) {
@@ -132,6 +147,7 @@ public class MetropolisHastingsPriorHandler {
 	public void addRandomEffectVariance(GaussianDistribution dist, ContinuousDistribution variancePrior, Integer... indices) {
 		addFixedEffectDistribution(dist, indices);
 		randomEffectDistributions.put(dist, variancePrior);
+		randomEffectList.add(dist);
 	}
 
 }

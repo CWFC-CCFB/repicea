@@ -22,6 +22,7 @@ package repicea.simulation.metamodel;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,7 @@ import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.data.DataSet;
+import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.util.REpiceaLogManager;
 
@@ -135,6 +137,7 @@ public class MetaModel implements Saveable {
 	protected final Map<Integer, ScriptResult> scriptResults;
 	protected AbstractModelImplementation model;
 	private final String stratumGroup;
+	private DataSet modelComparison;
 
 	
 	/**
@@ -264,18 +267,20 @@ public class MetaModel implements Saveable {
 		for (InnerWorker w : innerWorkers) {
 			if (w.ami.hasConverged()) {
 				newList.add(w);
-				sumProb += Math.exp(w.ami.mh.getMarginalLogLikelihood());
+				sumProb += Math.exp(w.ami.mh.getLogPseudomarginalLikelihood());
 				REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
 						Level.INFO, 
 						"Meta-model " + stratumGroup, 
 						"Result for the implementation " + w.ami.getModelImplementation().name());
-				w.ami.printSummary();
 			}
 		}
+		DataSet d = new DataSet(Arrays.asList(new String[] {"ModelImplementation", "LPML", "Prob"}));
 		for (InnerWorker w : newList) {
-			w.prob = Math.exp(w.ami.mh.getMarginalLogLikelihood()) / sumProb;
-			System.out.println("Implementation " + w.ami.getModelImplementation().name() + ": " + w.prob);
+			w.prob = Math.exp(w.ami.mh.getLogPseudomarginalLikelihood()) / sumProb;
+			d.addObservation(new Object[] {w.ami.getModelImplementation().name(), w.ami.mh.getLogPseudomarginalLikelihood(), w.prob});
+//			System.out.println("Implementation " + w.ami.getModelImplementation().name() + ": " + w.prob);
 		}
+		modelComparison = d;
 		Collections.sort(newList);
 		return newList.get(0);
 	}
@@ -318,7 +323,7 @@ public class MetaModel implements Saveable {
 					"Meta-model " + stratumGroup,  
 					"Selected model is " + selectedWorker.ami.getModelImplementation().name());
 			model = selectedWorker.ami;
-			model.printSummary();
+//			System.out.println(model.getSummary());
 			return true; 
  		} catch (Exception e1) {
  			e1.printStackTrace();
@@ -415,13 +420,31 @@ public class MetaModel implements Saveable {
 	}
 
 	public void printSummary() {
+		DataSet d = getSummary();
+		if (d != null) {
+			System.out.println(model.getSummary());
+		}
+	}
+	
+	public DataSet getSummary() {
 		if (hasConverged()) {
-			model.printSummary();
+			return model.getSummary();
 		} else {
 			System.out.println("The model has not been fitted yet!");
+			return null;
 		}
 	}
 
+	public DataSet getModelComparison() {
+		if (hasConverged()) {
+			return modelComparison;
+		} else {
+			System.out.println("The model has not been fitted yet!");
+			return null;
+		}
+	}
+	
+	
 	MetaModelMetaData getMetaData() {
 		//MetaModelMetaData.Growth growth = new MetaModelMetaData.Growth(); 
 		return null;

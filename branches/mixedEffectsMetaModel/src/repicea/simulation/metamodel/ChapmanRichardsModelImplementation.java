@@ -22,8 +22,8 @@ import java.util.ArrayList;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
-import repicea.stats.mcmc.MetropolisHastingsSampler;
 
 /**
  * An implementation of the Chapman-Richards model.
@@ -48,7 +48,7 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 	
 	
 	@Override
-	public MetropolisHastingsSampler getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		Matrix parmEst = new Matrix(4,1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
@@ -71,7 +71,7 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
 		}
-		MetropolisHastingsSampler gd = new MetropolisHastingsSampler(parmEst, varianceDiag.matrixDiagonal(), null); // null: there is no random effect in this model
+		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 
 		return gd;
 	}

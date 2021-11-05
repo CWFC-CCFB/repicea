@@ -6,7 +6,9 @@ import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -755,7 +757,7 @@ public class XmlSerializationTest {
 	
 	@Test
 	public void deserializationOfAMatrix() throws FileNotFoundException, XmlMarshallException {
-		String pathname = ObjectUtility.getPackagePath(getClass()).replace("bin", "test") + "serializedMatrix.xml";
+		String pathname = ObjectUtility.getPackagePath(getClass()) + "serializedMatrix.xml";
 //		Matrix myMatrix = new Matrix(2,4);
 //		XmlSerializer serializer = new XmlSerializer(pathname);
 //		serializer.writeObject(myMatrix);
@@ -784,4 +786,31 @@ public class XmlSerializationTest {
 		Assert.assertTrue("Testing compression ratio", ratio > 75);
 	}
 	
+	@Test
+	public void serializationLinkedHashMap() throws XmlMarshallException {
+		Map<String, Double> linkedHashMap = new LinkedHashMap<String, Double>();
+		linkedHashMap.put("entry1", 2d);
+		linkedHashMap.put("entry2", 4d);
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedHashMap.zml";
+		XmlSerializer ser1 = new XmlSerializer(filename1);
+		ser1.writeObject(linkedHashMap);
+		XmlDeserializer deserializer = new XmlDeserializer(filename1);
+		Map<String,Double> desLinkedHashMap = (LinkedHashMap) deserializer.readObject();
+		Assert.assertEquals("Testing entry1", linkedHashMap.get("entry1"),  desLinkedHashMap.get("entry1"), 1E-8);
+		Assert.assertEquals("Testing entry2", linkedHashMap.get("entry2"),  desLinkedHashMap.get("entry2"), 1E-8);
+	}
+
+	@Test
+	public void serializationArraysArrayList() throws XmlMarshallException {
+		List<String> myList = Arrays.asList(new String[] {"patate", "chou", "carotte"});
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedArraysArrayList.zml";
+		XmlSerializer ser1 = new XmlSerializer(filename1);
+		ser1.writeObject(myList);
+		XmlDeserializer deserializer = new XmlDeserializer(filename1);
+		List<String> desList = (List) deserializer.readObject();
+		for (int i = 0; i < myList.size(); i++) {
+			Assert.assertEquals("Testing entry " + i, myList.get(i),  desList.get(i));
+		}
+	}
+
 }

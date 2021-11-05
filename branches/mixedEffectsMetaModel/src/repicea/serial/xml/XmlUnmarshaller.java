@@ -117,6 +117,9 @@ public final class XmlUnmarshaller {
 				registerObject(clazz, xmlList.refHashCode, newInstance);
 				return newInstance;
 			} else {													// any other case
+				if (clazz.getName().equals("java.util.Arrays$ArrayList")) {
+					int u = 0;
+				}
 				Constructor<?> emptyCstor = XmlMarshallingUtilities.getEmptyConstructor(clazz);
 				Constructor<?> cstor = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(clazz, emptyCstor);
 				cstor.setAccessible(true);
@@ -146,14 +149,18 @@ public final class XmlUnmarshaller {
 						((Map) newInstance).clear();
 						putEntriesIntoMap(clazz, newInstance, mapEntries);
 					} else if (Collection.class.isAssignableFrom(clazz)) {
-						try {
-							Field sizeField = findSizeField(clazz);
-							sizeField.setAccessible(true);
-							sizeField.set(newInstance, (Integer) 0);	// force the size to be 0 otherwise the clear method may exceed the array length
-						} catch (Exception e) {
-							throw new XmlMarshallException("The XmlDeserializer did not manage to set the size in the Collection-derived " + clazz);
+						if (!clazz.getName().equals("java.util.Arrays$ArrayList")) {	 // this class is immutable
+							try {
+								Field sizeField = findSizeField(clazz);
+								if (sizeField != null) {
+									sizeField.setAccessible(true);
+									sizeField.set(newInstance, (Integer) 0);	// force the size to be 0 otherwise the clear method may exceed the array length
+								}
+							} catch (Exception e) {
+								throw new XmlMarshallException("The XmlDeserializer did not manage to set the size in the Collection-derived " + clazz);
+							}
+							addEntriesToCollection(clazz, newInstance, mapEntries);
 						}
-						addEntriesToCollection(clazz, newInstance, mapEntries);
 					}
 				}
 				if (newInstance instanceof PostXmlUnmarshalling) {

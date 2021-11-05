@@ -19,14 +19,12 @@
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
-import repicea.stats.mcmc.MetropolisHastingsSampler;
 
 /**
  * An implementation of the derivative form of the Chapman-Richards model including random effects.
@@ -40,7 +38,7 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 
 	
 	@Override
-	public MetropolisHastingsSampler getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
 		indexRandomEffectVariance = 3;
 		indexCorrelationParameter = 4;
 		indexFirstRandomEffect = 5;
@@ -75,12 +73,7 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
 		}
 		
-		List<Integer> truePriorParmsIndices = new ArrayList<Integer>();
-		truePriorParmsIndices.addAll(fixedEffectsParameterIndices);
-		truePriorParmsIndices.add(indexRandomEffectVariance);
-		truePriorParmsIndices.add(indexCorrelationParameter);
-		
-		MetropolisHastingsSampler gd = new MetropolisHastingsSampler(parmEst, varianceDiag.matrixDiagonal(), truePriorParmsIndices);
+		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
 		return gd;
 	}
