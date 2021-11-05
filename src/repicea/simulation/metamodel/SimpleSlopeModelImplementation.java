@@ -40,7 +40,9 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 
 
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
+	public GaussianDistribution getStartingParmEst(double coefVar) {
+		this.indexCorrelationParameter = 1;
+		
 		Matrix parmEst = new Matrix(2,1);
 		parmEst.setValueAt(0, 0, 0.1);
 		parmEst.setValueAt(1, 0, .92);
@@ -48,8 +50,9 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 		fixedEffectsParameterIndices = new ArrayList<Integer>();
 		fixedEffectsParameterIndices.add(0);
 
-		this.indexCorrelationParameter = 1;
-		
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.00001, 4), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 1);
+
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
 			varianceDiag.setValueAt(i, 0, Math.pow(parmEst.getValueAt(i, 0) * coefVar, 2d));
@@ -57,16 +60,6 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		Matrix lowerBound = new Matrix(2,1);
-		Matrix upperBound = new Matrix(2,1);
-		lowerBound.setValueAt(0, 0, 0.00001);
-		upperBound.setValueAt(0, 0, 4);
-		
-		lowerBound.setValueAt(1, 0, .90);
-		upperBound.setValueAt(1, 0, .99);
-		
-		priors = new UniformDistribution(lowerBound, upperBound);
-
 		return gd;
 	}
 
@@ -77,5 +70,5 @@ class SimpleSlopeModelImplementation extends AbstractModelImplementation {
 		return derivatives;
 	}
 
-	
+
 }

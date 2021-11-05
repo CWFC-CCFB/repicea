@@ -90,8 +90,6 @@ abstract class AbstractDataBlockWrapper extends AbstractMathematicalFunction {
 	 */
 	abstract double getLogLikelihood();
 
-	abstract double getMarginalLogLikelihood();
-	
 	abstract void updateCovMat(Matrix parameters);
 
 	@Override

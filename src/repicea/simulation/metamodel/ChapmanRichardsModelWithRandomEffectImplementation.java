@@ -22,6 +22,7 @@ import java.util.ArrayList;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
@@ -29,7 +30,7 @@ import repicea.stats.distributions.UniformDistribution;
  * An implementation of the Chapman-Richards model including random effects.
  * @author Mathieu Fortin - October 2021
  */
-class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedModelImplementation {
+class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedModelFullImplementation {
 
 
 	ChapmanRichardsModelWithRandomEffectImplementation(String outputType, MetaModel model) throws StatisticalDataException {
@@ -37,21 +38,35 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 	}
 
 	@Override
-	protected GaussianDistribution getStartingParmEst(double coefVar) {
-		Matrix parmEst = new Matrix(5,1);
+	public GaussianDistribution getStartingParmEst(double coefVar) {
+		indexRandomEffectVariance = 3;
+		indexCorrelationParameter = 4;
+		indexFirstRandomEffect = 5;
+		
+		Matrix parmEst = new Matrix(5 + dataBlockWrappers.size(),1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
 		parmEst.setValueAt(2, 0, 2d);
 		parmEst.setValueAt(3, 0, 200d);
 		parmEst.setValueAt(4, 0, .92);
+		for (int i = 0; i < dataBlockWrappers.size(); i++) {
+			parmEst.setValueAt(5 + i, 0, 2 * Math.sqrt(parmEst.getValueAt(indexRandomEffectVariance, 0))); // 2 stands for the 97.5th percentile
+		}
 		
 		fixedEffectsParameterIndices = new ArrayList<Integer>();
 		fixedEffectsParameterIndices.add(0);
 		fixedEffectsParameterIndices.add(1);
 		fixedEffectsParameterIndices.add(2);
-		
-		indexRandomEffectVariance = 3;
-		indexCorrelationParameter = 4;
+
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.1), 1);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		ContinuousDistribution variancePrior = new UniformDistribution(0, 10000);
+		mh.getPriorHandler().addFixedEffectDistribution(variancePrior, 3);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 4);
+		for (int i = 0; i < dataBlockWrappers.size(); i++) {
+			mh.getPriorHandler().addRandomEffectVariance(new GaussianDistribution(0, 1), variancePrior, 5 + i);
+		}
 		
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -60,25 +75,6 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 		
 		GaussianDistribution gd = new GaussianDistribution(parmEst, varianceDiag.matrixDiagonal());
 		
-		Matrix lowerBound = new Matrix(5,1);
-		Matrix upperBound = new Matrix(5,1);
-		lowerBound.setValueAt(0, 0, 0);
-		upperBound.setValueAt(0, 0, 400);
-		
-		lowerBound.setValueAt(1, 0, 0.0001);
-		upperBound.setValueAt(1, 0, 0.1);
-		
-		lowerBound.setValueAt(2, 0, 1);
-		upperBound.setValueAt(2, 0, 6);
-
-		lowerBound.setValueAt(3, 0, 0);
-		upperBound.setValueAt(3, 0, 350);
-
-		lowerBound.setValueAt(4, 0, .90);
-		upperBound.setValueAt(4, 0, .99);
-		
-		priors = new UniformDistribution(lowerBound, upperBound);
-
 		return gd;
 	}
 

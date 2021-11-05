@@ -16,23 +16,22 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-
-package repicea.simulation.metamodel;
+package repicea.stats.mcmc;
 
 import repicea.math.Matrix;
 
-class MetaModelMetropolisHastingsSample implements Comparable<MetaModelMetropolisHastingsSample> {
+class MetropolisHastingsSample implements Comparable<MetropolisHastingsSample> {
 
 	final Matrix parms;
 	final double llk;
 	
-	MetaModelMetropolisHastingsSample(Matrix parms, double lk) {
+	MetropolisHastingsSample(Matrix parms, double lk) {
 		this.parms = parms;
 		this.llk = lk;
 	}
 
 	@Override
-	public int compareTo(MetaModelMetropolisHastingsSample arg0) {
+	public int compareTo(MetropolisHastingsSample arg0) {
 		if (llk > arg0.llk) {
 			return 1;
 		} else if (llk < arg0.llk) {

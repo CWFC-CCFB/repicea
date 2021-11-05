@@ -21,6 +21,7 @@ package repicea.stats.data;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -522,35 +523,25 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 		}
 	}
 	
-//	private static class FakeDialog extends REpiceaDialog {
-//
-//		REpiceaTable table;
-//		FakeDialog(REpiceaTable table) {
-//			this.table = table;
-//			initUI();
-//			pack();
-//			setVisible(true);
-//		}
-//		
-//		@Override
-//		public void listenTo() {}
-//
-//		@Override
-//		public void doNotListenToAnymore() {}
-//
-//		@Override
-//		protected void initUI() {
-//			getContentPane().setLayout(new BorderLayout());
-//			JScrollPane scrollPane = new JScrollPane(table);
-//			getContentPane().add(scrollPane, BorderLayout.CENTER);
-//		}
-//	}
-	
-	
-	
-	
-	
-
-	
+	@Override
+	public String toString() {
+		String output = "";
+		output += Arrays.toString(fieldNames.toArray());
+		boolean exceeds = false;
+		int maxLength;
+		if (getNumberOfObservations() <= 100) {
+			maxLength = getNumberOfObservations();
+		} else {
+			exceeds = true;
+			maxLength = 100;
+		}
+		for (int i = 0; i < maxLength; i++) {
+			output += "\n" + Arrays.toString(getObservations().get(i).values.toArray());
+		}
+		if (exceeds) {
+			output += "\n" + "Only " + maxLength + " out of " + getNumberOfObservations() + " observations printed!";
+		}
+		return output;
+	}
 	
 }

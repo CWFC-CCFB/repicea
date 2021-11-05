@@ -35,8 +35,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 	private Matrix lowerCholTriangle;
 		
 	/**
-	 * This constructor creates a Gaussian function with mean mu and variance sigma2. NOTE: Matrix sigma2 must be 
-	 * positive definite.
+	 * This constructor creates a Gaussian distribution with mean mu 0 and variance 1.
 	 */
 	protected StandardGaussianDistribution() {
 		Matrix mu = new Matrix(1,1);
@@ -48,7 +47,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 	
 	/**
 	 * This method returns the single instance of the StandardGaussianDistribution class.
-	 * @returnÂ a StandardGaussianDistribution instance
+	 * @return a StandardGaussianDistribution instance
 	 */
 	public static StandardGaussianDistribution getInstance() {
 		if (Singleton == null) {

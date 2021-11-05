@@ -16,14 +16,19 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
+package repicea.stats.mcmc;
 
-package repicea.simulation.metamodel;
+import repicea.math.Matrix;
+import repicea.stats.distributions.GaussianDistribution;
 
-@SuppressWarnings("serial")
-public final class MetaModelException extends Exception {
+public interface MetropolisHastingsCompatibleModel {
 
-	protected MetaModelException(String msg) {
-		super(msg);
-	}
+	public double getLogLikelihood(Matrix parms);
+
+	public int getNbSubjects();
+	
+	public double getLikelihoodOfThisSubject(Matrix parms, int subjectId);
+	
+	public GaussianDistribution getStartingParmEst(double coefVar);
 	
 }

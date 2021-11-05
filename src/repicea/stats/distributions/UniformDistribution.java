@@ -55,7 +55,15 @@ public class UniformDistribution implements ContinuousDistribution, BoundedDistr
 		this.lowerBound.setBoundValue(lowerBound);
 	}
 	
-	
+	/**
+	 * Constructor for univariate uniform distribution. <br>
+	 * <br>
+	 * @param lowerBound the lower bound of the distribution
+	 * @param upperBound the upper bound of the distribution
+	 */
+	public UniformDistribution(double lowerBound, double upperBound) {
+		this(new Matrix(1,1,lowerBound, 0d), new Matrix(1,1,upperBound, 0d));
+	}
 	
 	@Override
 	public Matrix getMean() {
