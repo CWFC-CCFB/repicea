@@ -45,15 +45,13 @@ public class MetropolisHastingsAlgorithm {
 	private String loggerName;
 	private String loggerPrefix;
 	
-	protected final MetropolisHastingsParameters simParms;
+	protected MetropolisHastingsParameters simParms;
 	protected final MetropolisHastingsPriorHandler priors;
 	protected final MetropolisHastingsCompatibleModel model;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected double lpml;
 	
-//	protected double lnProbY;
-//	protected double lnProbY2;
 	protected List<MetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
 	protected int indexCorrelationParameter;
@@ -64,6 +62,12 @@ public class MetropolisHastingsAlgorithm {
 		this.loggerPrefix = loggerPrefix;
 	}
 	
+	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model) {
+		simParms = new MetropolisHastingsParameters();
+		priors = new MetropolisHastingsPriorHandler();
+		this.model = model; 
+	}
+
 	public void exportMetropolisHastingsSample(String filename) throws IOException {
 		if (hasConverged() && finalMetropolisHastingsSampleSelection != null) {
 			CSVWriter writer = null;
@@ -87,12 +91,11 @@ public class MetropolisHastingsAlgorithm {
 			writer.close();
 		}
 	}
-
 	
-	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model) {
-		simParms = new MetropolisHastingsParameters();
-		priors = new MetropolisHastingsPriorHandler();
-		this.model = model; 
+	public void setSimulationParameters(MetropolisHastingsParameters simParms) {
+		if (simParms != null) {
+			this.simParms = simParms;
+		}
 	}
 
 	private String getLoggerName() {

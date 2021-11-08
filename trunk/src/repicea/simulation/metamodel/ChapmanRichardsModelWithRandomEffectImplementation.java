@@ -39,16 +39,16 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 
 	@Override
 	public GaussianDistribution getStartingParmEst(double coefVar) {
-		indexRandomEffectVariance = 3;
-		indexCorrelationParameter = 4;
+		indexCorrelationParameter = 3;
+		indexRandomEffectVariance = 4;
 		indexFirstRandomEffect = 5;
 		
 		Matrix parmEst = new Matrix(5 + dataBlockWrappers.size(),1);
 		parmEst.setValueAt(0, 0, 100d);
 		parmEst.setValueAt(1, 0, 0.02);
 		parmEst.setValueAt(2, 0, 2d);
-		parmEst.setValueAt(3, 0, 200d);
-		parmEst.setValueAt(4, 0, .92);
+		parmEst.setValueAt(3, 0, .92);
+		parmEst.setValueAt(4, 0, 200d);
 		for (int i = 0; i < dataBlockWrappers.size(); i++) {
 			parmEst.setValueAt(5 + i, 0, 2 * Math.sqrt(parmEst.getValueAt(indexRandomEffectVariance, 0))); // 2 stands for the 97.5th percentile
 		}
@@ -61,9 +61,9 @@ class ChapmanRichardsModelWithRandomEffectImplementation extends AbstractMixedMo
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 400), 0);
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.0001, 0.1), 1);
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 3);
 		ContinuousDistribution variancePrior = new UniformDistribution(0, 10000);
-		mh.getPriorHandler().addFixedEffectDistribution(variancePrior, 3);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 4);
+		mh.getPriorHandler().addFixedEffectDistribution(variancePrior, 4);
 		for (int i = 0; i < dataBlockWrappers.size(); i++) {
 			mh.getPriorHandler().addRandomEffectVariance(new GaussianDistribution(0, 1), variancePrior, 5 + i);
 		}

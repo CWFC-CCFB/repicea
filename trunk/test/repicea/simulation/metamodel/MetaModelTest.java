@@ -88,18 +88,18 @@ public class MetaModelTest {
 	@Test
 	public void testingMetaModelPrediction() throws Exception {
 		double pred = MetaModelInstance.getPrediction(90, 0);
-		Assert.assertEquals("Testing prediction at 90 yrs of age", 101.58121386411835, pred, 1E-8);
+		Assert.assertEquals("Testing prediction at 90 yrs of age", 104.26481827545614, pred, 1E-8);
 	}
 
 	public static void main(String[] args) throws IOException {
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
-		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).setLevel(Level.INFO);
+		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).setLevel(Level.FINE);
 //		ConsoleHandler sh = new ConsoleHandler();
 //		sh.setLevel(Level.FINE);
 //		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
 		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
 		FileHandler sh = new FileHandler(outputPath + File.separator + "metamodel.log");
-		sh.setLevel(Level.INFO);
+		sh.setLevel(Level.FINE);
 		sh.setFormatter(new SimpleFormatter());
 		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
 		
@@ -119,9 +119,13 @@ public class MetaModelTest {
 			String metaModelFilename = path + "QC_FMU02664_" + vegPot + "_NoChange_root.zml";
 			for (String outputType : outputTypes) {
 				MetaModel m = MetaModel.Load(metaModelFilename);
+				m.mhSimParms.nbInitialGrid = 50000;
+				m.mhSimParms.nbBurnIn = 20000;
+				m.mhSimParms.nbRealizations = 1000000 + m.mhSimParms.nbBurnIn;
 				boolean enabledMixedModelImplementation = vegPot.equals("RE1") ? false : true;
 				m.fitModel(outputType, enabledMixedModelImplementation);
-				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
+//				UNCOMMENT THIS LINE TO UPDATE THE META MODELS
+//				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
 				m.exportMetropolisHastingsSample(outputPath + File.separator + vegPot + "_" + outputType + "MHSample.csv");
 				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + ".csv");
 				m.getSummary().save(outputPath + File.separator + vegPot + "_" + outputType + "Summary.csv");

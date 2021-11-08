@@ -61,7 +61,7 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(1, 6), 2);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.8, 6), 2);
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 3);
 
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
