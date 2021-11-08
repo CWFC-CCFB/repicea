@@ -35,8 +35,8 @@ import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.mcmc.MetropolisHastingsParameters;
 import repicea.util.REpiceaLogManager;
 
 /**
@@ -112,28 +112,28 @@ public class MetaModel implements Saveable {
 		
 	}
 	
-	static class SimulationParameters implements Cloneable {
-		protected int nbBurnIn = 5000;
-		protected int nbRealizations = 500000 + nbBurnIn;
-		protected int nbInternalIter = 10000;
-		protected int oneEach = 50;
-		protected int nbInitialGrid = 10000;	
-		
-		SimulationParameters() {}
-		
-		@Override
-		public SimulationParameters clone() {
-			try {
-				return (SimulationParameters) super.clone();
-			} catch (CloneNotSupportedException e) {
-				e.printStackTrace();
-				return null;
-			}
-		}
-	}
+//	static class SimulationParameters implements Cloneable {
+//		protected int nbBurnIn = 5000;
+//		protected int nbRealizations = 500000 + nbBurnIn;
+//		protected int nbInternalIter = 10000;
+//		protected int oneEach = 50;
+//		protected int nbInitialGrid = 10000;	
+//		
+//		SimulationParameters() {}
+//		
+//		@Override
+//		public SimulationParameters clone() {
+//			try {
+//				return (SimulationParameters) super.clone();
+//			} catch (CloneNotSupportedException e) {
+//				e.printStackTrace();
+//				return null;
+//			}
+//		}
+//	}
 	
 	
-	protected SimulationParameters simParms;
+	protected MetropolisHastingsParameters mhSimParms;
 	protected final Map<Integer, ScriptResult> scriptResults;
 	protected AbstractModelImplementation model;
 	private final String stratumGroup;
@@ -151,7 +151,7 @@ public class MetaModel implements Saveable {
 	}
 
 	private void setDefaultSettings() {
-		simParms = new SimulationParameters();
+		mhSimParms = new MetropolisHastingsParameters();
 	}
 		
 	/**
@@ -413,7 +413,7 @@ public class MetaModel implements Saveable {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
 		Object obj = deserializer.readObject();
 		MetaModel metaModel = (MetaModel) obj;
-		if (metaModel.simParms == null) { // saved under a former implementation where this variable was static
+		if (metaModel.mhSimParms == null) { // saved under a former implementation where this variable was static
 			metaModel.setDefaultSettings();
 		}
 		return metaModel;

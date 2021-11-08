@@ -21,10 +21,32 @@ package repicea.stats.mcmc;
 import repicea.math.Matrix;
 import repicea.stats.distributions.GaussianDistribution;
 
+/**
+ * Ensure the compatibility with the Metropolis-Hastings algorithm.
+ * @author Mathieu Fortin - November 2021
+ */
 public interface MetropolisHastingsCompatibleModel {
 
+	/**
+	 * Return the log-likelihood of the parameters. <br>
+	 * <br>
+	 * The model implementation is handled by the class implementing this interface. In the
+	 * context of mixed-effects model, the vector of parameters (the argument parms) must 
+	 * also include the random effects.
+	 * 
+	 * @param parms the model parameters (a Matrix instance)
+	 * @return the log-likelihood of the parameters.
+	 */
 	public double getLogLikelihood(Matrix parms);
 
+	/**
+	 * Return the number of subjects. <br>
+	 * <br>
+	 * If the model is a mixed-effects model, the number of subjects must match the number of random effects.
+	 * Otherwise, it should be the number of observations. 
+	 * 
+	 * @return an integer
+	 */
 	public int getNbSubjects();
 	
 	public double getLikelihoodOfThisSubject(Matrix parms, int subjectId);

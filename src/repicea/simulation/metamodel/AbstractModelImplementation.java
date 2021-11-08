@@ -160,6 +160,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		
 		finalDataSet = structure.getDataSet();
 		mh = new MetropolisHastingsAlgorithm(this, MetaModelManager.LoggerName, getLogMessagePrefix());
+		mh.setSimulationParameters(metaModel.mhSimParms);
 	}
 
 	protected AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
