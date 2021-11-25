@@ -22,6 +22,7 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
+import java.io.IOException;
 
 import javax.swing.AbstractButton;
 
@@ -58,6 +59,25 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 
 	@Override
 	protected void internalSaveAction(String filename) throws Exception {
+		saveAsSVN(componentToExport, filename);
+//	    // Get a DOMImplementation.
+//	    DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
+//	    // Create an instance of org.w3c.dom.Document.
+//	    String svgNS = "http://www.w3.org/2000/svg";
+//	    Document document = domImpl.createDocument(svgNS, "svg", null);
+//	    // Create an instance of the SVG Generator.
+//	    SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
+//	    componentToExport.paint(svgGenerator);
+//	    // Finally, stream out SVG to the standard output using
+//	    // UTF-8 encoding.
+//	    boolean useCSS = true; // we want to use CSS style attributes
+//	    FileWriter writer = new FileWriter(filename);
+//	    svgGenerator.stream(writer, useCSS);
+//	    writer.close();
+	}
+	
+	
+	protected static void saveAsSVN(Component component, String filename) throws IOException {
 	    // Get a DOMImplementation.
 	    DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
 	    // Create an instance of org.w3c.dom.Document.
@@ -65,7 +85,7 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	    Document document = domImpl.createDocument(svgNS, "svg", null);
 	    // Create an instance of the SVG Generator.
 	    SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-	    componentToExport.paint(svgGenerator);
+	    component.paint(svgGenerator);
 	    // Finally, stream out SVG to the standard output using
 	    // UTF-8 encoding.
 	    boolean useCSS = true; // we want to use CSS style attributes
@@ -73,7 +93,8 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	    svgGenerator.stream(writer, useCSS);
 	    writer.close();
 	}
-
+	
+	
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (evt.getSource().equals(saveAsButton)) {

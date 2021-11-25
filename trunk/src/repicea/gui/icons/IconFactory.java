@@ -50,18 +50,6 @@ public class IconFactory {
 				return null;
 			} else {
 				return CommonGuiUtility.retrieveIcon(IconFactory.class, iconID.getIconFilename());
-//				ImageIcon iconImage = null;
-//				try {
-//					String path = ObjectUtility.getRelativePackagePath(IconFactory.class);
-//					String iconFilename = path + iconID.getIconFilename();
-//					InputStream in = ClassLoader.getSystemResourceAsStream(iconFilename);
-//					Image image = ImageIO.read(in);
-//					iconImage = new ImageIcon(image);
-//					iconMap.put(iconID, iconImage);
-//				} catch (IOException e) {
-//					e.printStackTrace();
-//				}
-//				return iconImage;
 			}
 		}
 	}
