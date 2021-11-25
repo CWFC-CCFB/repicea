@@ -361,30 +361,38 @@ public class UIControlManager {
 	 */
 	public static JMenuItem createCommonMenuItem(CommonControlID menuItemID) {
 		JMenuItem menuItem = new JMenuItem();
+		formatMenuItem(menuItem, menuItemID, true);
+		return menuItem;
+	}
+
+	private static void formatMenuItem(JMenuItem menuItem, CommonControlID menuItemID, boolean addAccelerator) {
 		String text = REpiceaTranslator.getString(menuItemID);
 		if (text == null) {
 			text = "Unnamed";
 		}
 		menuItem.setText(text);
+		menuItem.setName(menuItemID.name());
 		Icon icon = menuItemID.getIcon();
 		if (icon != null) {
 			menuItem.setIcon(menuItemID.getIcon());
 		}
-		if (menuItemID == CommonControlID.Export) {
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, Event.CTRL_MASK));
-		} else if (menuItemID == CommonControlID.Save) {
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
-		} else if (menuItemID == CommonControlID.Undo) {
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK));
-		} else if (menuItemID == CommonControlID.Redo) {
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Event.CTRL_MASK));
-		} else if (menuItemID == CommonControlID.Close || menuItemID == CommonControlID.Quit) {
-			menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Event.CTRL_MASK));
+		if (addAccelerator) {
+			if (menuItemID == CommonControlID.Export) {
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_T, Event.CTRL_MASK));
+			} else if (menuItemID == CommonControlID.Save) {
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S, Event.CTRL_MASK));
+			} else if (menuItemID == CommonControlID.Undo) {
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Z, Event.CTRL_MASK));
+			} else if (menuItemID == CommonControlID.Redo) {
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Y, Event.CTRL_MASK));
+			} else if (menuItemID == CommonControlID.Close || menuItemID == CommonControlID.Quit) {
+				menuItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_Q, Event.CTRL_MASK));
+			}
 		}
 		setFontOfThisComponent(menuItem, FontType.MenuItemFont);
-		return menuItem;
 	}
-
+	
+	
 	
 	/**
 	 * This method creates a menu item corresponding to the menuItemID parameter.
@@ -394,16 +402,17 @@ public class UIControlManager {
 	 */
 	public static REpiceaMenuItem createCommonMenuItem(CommonControlID menuItemID, GenericTaskFactory taskMaker) {
 		REpiceaMenuItem menuItem = new REpiceaMenuItem(taskMaker);
-		String text = REpiceaTranslator.getString(menuItemID);
-		if (text == null) {
-			text = "Unnamed";
-		}
-		menuItem.setText(text);
-		Icon icon = menuItemID.getIcon();
-		if (icon != null) {
-			menuItem.setIcon(menuItemID.getIcon());
-		}
-		setFontOfThisComponent(menuItem, FontType.MenuItemFont);
+		formatMenuItem(menuItem, menuItemID, false);
+//		String text = REpiceaTranslator.getString(menuItemID);
+//		if (text == null) {
+//			text = "Unnamed";
+//		}
+//		menuItem.setText(text);
+//		Icon icon = menuItemID.getIcon();
+//		if (icon != null) {
+//			menuItem.setIcon(menuItemID.getIcon());
+//		}
+//		setFontOfThisComponent(menuItem, FontType.MenuItemFont);
 		return menuItem;
 	}
 
@@ -420,6 +429,7 @@ public class UIControlManager {
 			text = "Unnamed";
 		}
 		menu.setText(text);
+		menu.setName(menuTitle.name());
 		setFontOfThisComponent(menu, FontType.MenuFont);
 		return menu;
 	}
