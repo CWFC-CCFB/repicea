@@ -41,9 +41,6 @@ import repicea.io.GFileFilter.FileType;
  */
 public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements ActionListener {
 
-	protected static boolean TestMode = false;
-	protected static String Filename = "";
-	
 	private final AbstractButton saveAsButton;
 	private final Component componentToExport;
 
@@ -61,7 +58,7 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	}
 
 	@Override
-	protected void internalSaveAction(String filename) throws Exception {
+	public void internalSaveAction(String filename) throws Exception {		// this method has been set to public to make it accessible for test purpose MF2021-11-25
 		saveAsSVN(componentToExport, filename);
 //	    // Get a DOMImplementation.
 //	    DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
@@ -101,13 +98,7 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (evt.getSource().equals(saveAsButton)) {
-			if (TestMode)
-				try {
-					internalSaveAction(Filename);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			else saveAsAction();
+			saveAsAction();
 		}
 	}
 
