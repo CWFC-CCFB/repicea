@@ -41,6 +41,9 @@ import repicea.io.GFileFilter.FileType;
  */
 public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements ActionListener {
 
+	protected static boolean TestMode = false;
+	protected static String Filename = "";
+	
 	private final AbstractButton saveAsButton;
 	private final Component componentToExport;
 
@@ -98,7 +101,13 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (evt.getSource().equals(saveAsButton)) {
-			saveAsAction();
+			if (TestMode)
+				try {
+					internalSaveAction(Filename);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			else saveAsAction();
 		}
 	}
 
