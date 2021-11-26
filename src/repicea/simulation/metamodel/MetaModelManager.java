@@ -206,7 +206,10 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 * @throws MetaModelException if the model has not been fitted or if the stratum group is not found in the Map.
 	 */
 	public List<String> getPossibleOutputTypes(String stratumGroup) throws MetaModelException {
-		MetaModel metaModel = getFittedMetaModel(stratumGroup);
+		if (!containsKey(stratumGroup)) {
+			throw new MetaModelException("The meta model for this stratum group does not exist: " + stratumGroup);
+		}
+		MetaModel metaModel = get(stratumGroup);
 		return metaModel.getPossibleOutputTypes();
 	}
 
