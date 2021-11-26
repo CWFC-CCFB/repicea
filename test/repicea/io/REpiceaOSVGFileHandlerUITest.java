@@ -55,6 +55,29 @@ public class REpiceaOSVGFileHandlerUITest {
 			dialog.setVisible(false);
 		}
 	}
-	
+
+	@Test
+	public void testSVGExportWithTextAndEncoding() throws Exception {
+		String filename = System.getProperty("java.io.tmpdir") + "testButton2.svg";
+		File f = new File(filename);
+		if (f.exists()) f.delete();
+		JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		JButton button = new JButton("\u00E9 \u00EA");
+		button.setIcon(IconFactory.getIcon(CommonControlID.Open));
+		panel.add(button);
+		JDialog dialog = new JDialog();
+		dialog.getContentPane().add(panel);
+		dialog.pack();
+		dialog.setVisible(true);
+		try {
+			REpiceaOSVGFileHandlerUI.saveAsSVN(dialog.getContentPane(), filename);
+			Assert.assertTrue("Testing if the file has been created", f.exists());
+		} catch (Exception e) {
+			throw e;
+		} finally {
+			dialog.setVisible(false);
+		}
+	}
+
 	
 }

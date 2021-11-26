@@ -21,8 +21,10 @@ package repicea.io;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.FileWriter;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
 
 import javax.swing.AbstractButton;
 
@@ -60,20 +62,6 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	@Override
 	public void internalSaveAction(String filename) throws Exception {		// this method has been set to public to make it accessible for test purpose MF2021-11-25
 		saveAsSVN(componentToExport, filename);
-//	    // Get a DOMImplementation.
-//	    DOMImplementation domImpl = GenericDOMImplementation.getDOMImplementation();
-//	    // Create an instance of org.w3c.dom.Document.
-//	    String svgNS = "http://www.w3.org/2000/svg";
-//	    Document document = domImpl.createDocument(svgNS, "svg", null);
-//	    // Create an instance of the SVG Generator.
-//	    SVGGraphics2D svgGenerator = new SVGGraphics2D(document);
-//	    componentToExport.paint(svgGenerator);
-//	    // Finally, stream out SVG to the standard output using
-//	    // UTF-8 encoding.
-//	    boolean useCSS = true; // we want to use CSS style attributes
-//	    FileWriter writer = new FileWriter(filename);
-//	    svgGenerator.stream(writer, useCSS);
-//	    writer.close();
 	}
 	
 	
@@ -89,9 +77,12 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	    // Finally, stream out SVG to the standard output using
 	    // UTF-8 encoding.
 	    boolean useCSS = true; // we want to use CSS style attributes
-	    FileWriter writer = new FileWriter(filename);
+	    FileOutputStream fos = new FileOutputStream(new File(filename), false); // do not append the file
+	    OutputStreamWriter writer = new OutputStreamWriter(fos, "UTF-8");	// we make sure to write using encoding UTF-8
 	    svgGenerator.stream(writer, useCSS);
 	    writer.close();
+	    fos.close();
+
 	}
 	
 	
