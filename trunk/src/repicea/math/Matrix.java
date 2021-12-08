@@ -49,7 +49,7 @@ public final class Matrix implements Serializable, DeepCloneable {
 	/*
 	 * Members of this class
 	 */
-	private static final double VERY_SMALL = 1E-06;
+	private static final double VERY_SMALL = 1.5E-06;
 	
 	private static final double EPSILON = 1E-12;
 	

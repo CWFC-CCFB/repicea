@@ -19,7 +19,9 @@
 package repicea.stats.model.glm.copula;
 
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
@@ -131,12 +133,24 @@ public class CopulaLibrary {
 		protected String distanceFieldsEnumeration;
 		protected HierarchicalSpatialDataStructure data;
 				
-		public DistanceLinkFunctionCopulaExpression(Type linkFunctionType,	String hierarchicalLevelSpecifications, 
-				String distanceFieldsEnumeration, double parameter) throws StatisticalDataException {
+		/**
+		 * Constructor for a distance-dependent copula. <br>
+		 * <br>
+		 * The copula general parameter is calculated as exp(distance * beta) 
+		 * @param linkFunctionType the link function of the copula
+		 * @param hierarchicalLevelSpecifications the field that sets the hierarchical (e.g. plotID)
+		 * @param distanceFieldsEnumeration the fields that contains the x and y coordinates
+		 * @param parameterStartingValue the starting value of the beta parameter
+		 * @throws StatisticalDataException
+		 */
+		public DistanceLinkFunctionCopulaExpression(Type linkFunctionType,	
+				String hierarchicalLevelSpecifications, 
+				String distanceFieldsEnumeration, 
+				double parameterStartingValue) throws StatisticalDataException {
 			super(hierarchicalLevelSpecifications);
 			this.distanceFieldsEnumeration = distanceFieldsEnumeration;
 			
-			Matrix beta = new Matrix(1,1,parameter,0);
+			Matrix beta = new Matrix(1,1,parameterStartingValue,0);
 			setBeta(beta);
 		
 			linkFunction = new LinkFunction(linkFunctionType, getOriginalFunction());
@@ -158,8 +172,18 @@ public class CopulaLibrary {
 		
 		@Override
 		protected void setX(int indexFirstObservation, int indexSecondObservation) {
-			double distance = data.getDistancesBetweenObservations().get(indexFirstObservation).get(indexSecondObservation);
-			getOriginalFunction().setVariableValue(0, distance);
+//			double distance = data.getDistancesBetweenObservations().get(indexFirstObservation).get(indexSecondObservation);
+			for (int dType = 0; dType < data.getDistancesBetweenObservations().size(); dType++) {
+				Map<Integer, Double> oMap = data.getDistancesBetweenObservations().get(dType).get(indexFirstObservation);
+				if (oMap != null) {
+					Double distance = oMap.get(indexSecondObservation);
+					if (distance != null) {
+						getOriginalFunction().setVariableValue(0, distance);
+						return;
+					}
+				}
+				getOriginalFunction().setVariableValue(dType, Double.POSITIVE_INFINITY);
+			}
 		}
 		
 		@Override
@@ -173,12 +197,16 @@ public class CopulaLibrary {
 		@Override
 		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
-			List<String> distanceFieldNames = ObjectUtility.decomposeUsingToken(distanceFieldsEnumeration, "+");
+			List<List<String>> distanceParameterization = new ArrayList<List<String>>();
+			List<String> distanceDimensions = ObjectUtility.decomposeUsingToken(distanceFieldsEnumeration, ",");
+			for (String dim : distanceDimensions) {
+				distanceParameterization.add(ObjectUtility.decomposeUsingToken(dim, "+"));
+			}
 			if (!(data instanceof HierarchicalSpatialDataStructure)) {
 				throw new StatisticalDataException("The data are not spatialized.");
 			} else {
 				this.data = (HierarchicalSpatialDataStructure) data;
-				this.data.setDistanceFields(distanceFieldNames);
+				this.data.setDistanceFields(distanceParameterization);
 				this.data.getDistancesBetweenObservations();
 			}
 		}
@@ -187,7 +215,7 @@ public class CopulaLibrary {
 
 	
 //	/**
-//	 * A copula based on a constant and a function depending on the euclidian distance and the angle between the two observations.
+//	 * A copula based on a constant and a function depending on the Euclidian distance and the angle between the two observations.
 //	 * @author Mathieu Fortin - June 2011
 //	 */
 //	public static class DistanceAndAngleFunctionCopulaExpression extends CopulaExpression implements DistanceCopula {
