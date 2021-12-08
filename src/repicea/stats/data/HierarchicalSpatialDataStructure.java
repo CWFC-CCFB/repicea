@@ -27,23 +27,30 @@ import repicea.math.Matrix;
 public interface HierarchicalSpatialDataStructure extends HierarchicalStatisticalDataStructure {
 	
 	/**
-	 * This method returns the distance map between the observations. The keys represent the observation index, whereas the double 
-	 * is the distance.
+	 * Return the distance map between the observations. <br>
+	 * <br>
+	 * The elements of the list correspond to distance types. The first key represents 
+	 * the observation index. The second key represent the distant observation index, 
+	 * whereas the value is the the distance to this distant observation.
 	 * @return a Map instance
 	 */
-	public Map<Integer, Map<Integer, Double>> getDistancesBetweenObservations();
+	public List<Map<Integer, Map<Integer, Double>>> getDistancesBetweenObservations();
+	
+//	/**
+//	 * This method returns the angle map between the observations. The keys represent the observation index, whereas the double 
+//	 * is the angle in radians. 
+//	 * @return a Map instance
+//	 */
+//	public Map<Integer, Map<Integer, Matrix>> getAngleBetweenObservations();
 	
 	/**
-	 * This method returns the angle map between the observations. The keys represent the observation index, whereas the double 
-	 * is the angle in radians. 
-	 * @return a Map instance
+	 * This method sets the distance field names. <br>
+	 * <br> 
+	 * The number of elements in the first list sets the different types of distance. For instance, we might want to
+	 * account for two types of distances (e.g. spatial distance and temporal distance). The inner list contains the fields to 
+	 * compute the distance.
+	 * @param fields a List of List that contains the names of the fields that serve to compute the Euclidian distance.
 	 */
-	public Map<Integer, Map<Integer, Matrix>> getAngleBetweenObservations();
-	
-	/**
-	 * This method sets the distance field names.
-	 * @param fields a List that contains the names of the fields that serve to compute the Euclidian distance
-	 */
-	public void setDistanceFields(List<String> fields);
+	public void setDistanceFields(List<List<String>> fields);
 	
 }

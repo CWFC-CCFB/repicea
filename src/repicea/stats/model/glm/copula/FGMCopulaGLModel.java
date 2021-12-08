@@ -162,15 +162,15 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		if (getEstimator().isConvergenceAchieved()) {
 			NumberFormat formatter = NumberFormat.getInstance();
 			formatter.setMaximumFractionDigits(4);
-			SpearmanCorrelationCoefficient scc = new SpearmanCorrelationCoefficient();
-			CorrelationEstimate[] spearmanCorr = scc.getSpearmanCorrelationCoefficient(this);
-			System.out.println("Spearman's correlation coefficients");
-			for (int i = 0; i < spearmanCorr.length; i++) {
-				CorrelationEstimate estimate = spearmanCorr[i];
-				System.out.println(i + " : " + "Estimate : " + formatter.format(estimate.getMean()) +
-						"; n : " + estimate.getSampleSize() + 
-						"; t-value : " + formatter.format(estimate.getStudentT()));
-			}
+//			SpearmanCorrelationCoefficient scc = new SpearmanCorrelationCoefficient();
+//			CorrelationEstimate[] spearmanCorr = scc.getSpearmanCorrelationCoefficient(this);
+//			System.out.println("Spearman's correlation coefficients");
+//			for (int i = 0; i < spearmanCorr.length; i++) {
+//				CorrelationEstimate estimate = spearmanCorr[i];
+//				System.out.println(i + " : " + "Estimate : " + formatter.format(estimate.getMean()) +
+//						"; n : " + estimate.getSampleSize() + 
+//						"; t-value : " + formatter.format(estimate.getStudentT()));
+//			}
 		}
 	}
 	
