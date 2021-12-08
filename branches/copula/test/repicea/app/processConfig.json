@@ -1,0 +1,9 @@
+{
+	"processing" : {
+		"maxThreads" : 24,
+		"maxMemoryLimitMB" : 32768,
+		"deepcopytest" : {
+			"deepcopytestvalue" : 0
+			}
+		}
+}
