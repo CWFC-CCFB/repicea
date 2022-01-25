@@ -43,7 +43,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * The DataSet class contains many observations and implements the method to read a dataset with a FormatReader instance.
  * @author Mathieu Fortin - November 2012
  */
-public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIObject {
+public class DataSet implements Saveable, REpiceaUIObject {
 
 	protected static enum ActionType {Replace,
 		Add;
@@ -89,10 +89,10 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	 * @param autoLoad true if the file is to be read now. Typically, this boolean is set to false when the swingworker is
 	 * launched from a window that retrieves some events.
 	 */
-	public DataSet(String filename, boolean autoLoad) {
+	public DataSet(String filename, boolean autoLoad) throws Exception {
 		this(filename);
 		if (autoLoad) {
-			run();
+			load();
 		}
 	}
 	
@@ -418,8 +418,7 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 	}
 
 	
-	@Override
-	protected void doThisJob() throws Exception {
+	private void load() throws Exception {
 		fieldNames.clear();
 		observations.clear();
 
@@ -434,14 +433,14 @@ public class DataSet extends AbstractGenericTask implements Saveable, REpiceaUIO
 			int nbRecords = reader.getRecordCount();
 			int recordsRead = 0;
 			
-			firePropertyChange(REpiceaProgressBarDialog.LABEL, 0d, MessageID.ReadingFileMessage.toString());
+//			firePropertyChange(REpiceaProgressBarDialog.LABEL, 0d, MessageID.ReadingFileMessage.toString());
 			
 			Object[] lineRead = reader.nextRecord();
 			while (lineRead != null) {
 				addObservation(lineRead);
 				recordsRead++;
 				int progress = (int) ((recordsRead * 100d) / nbRecords);
-				firePropertyChange(REpiceaProgressBarDialog.PROGRESS, recordsRead, progress);
+//				firePropertyChange(REpiceaProgressBarDialog.PROGRESS, recordsRead, progress);
 				lineRead = reader.nextRecord();
 			}
 			
