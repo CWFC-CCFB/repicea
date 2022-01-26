@@ -25,11 +25,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import repicea.app.AbstractGenericTask;
 import repicea.gui.REpiceaUIObject;
 import repicea.gui.components.REpiceaTable;
 import repicea.gui.components.REpiceaTableModel;
-import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.io.FormatField;
 import repicea.io.FormatReader;
 import repicea.io.FormatWriter;
