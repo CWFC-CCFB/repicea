@@ -44,8 +44,6 @@ public class REpiceaAppVersion {
 		String filePath = JarUtility.getJarFileImInIfAny(getClass());
 		if (filePath != null) {
 			try {
-//				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
-//				version = m.getMainAttributes().get(Attributes.Name.SPECIFICATION_VERSION).toString();
 				String filename = ObjectUtility.getRelativePackagePath(getClass()) + "revision";
 				InputStream in = getClass().getResourceAsStream("/" + filename);
 				BufferedReader br = new BufferedReader(new InputStreamReader(in));

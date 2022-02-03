@@ -362,10 +362,12 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		observations.add(new Observation(observationFrame));
 	}
 	
-	private void addFieldName(String name) {
+	private void addFieldName(String originalName) {
 		int index = 0;
+		String name = originalName;
 		while (fieldNames.contains(name)) {
-			name = name.concat(((Integer) index).toString());
+			name = originalName + index;
+			index++;
 		}
 		fieldNames.add(name);
 	}
