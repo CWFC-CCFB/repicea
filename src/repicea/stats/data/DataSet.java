@@ -116,7 +116,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		return observations.get(i).values.get(j);
 	}
 
-	protected Object getValueAt(int i, String fieldName) {
+	public Object getValueAt(int i, String fieldName) {
 		int j = getIndexOfThisField(fieldName);
 		if (j != -1) {
 			return getValueAt(i,j);
@@ -249,7 +249,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	 * @param fieldName the name of the field
 	 * @return an integer
 	 */
-	protected int getIndexOfThisField(String fieldName) {return fieldNames.indexOf(fieldName);}
+	public int getIndexOfThisField(String fieldName) {return fieldNames.indexOf(fieldName);}
 
 	/**
 	 * This method sorts the data according to the fields represented by the indices in fieldIndices parameter.
