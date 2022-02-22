@@ -23,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.simulation.climate.REpiceaClimateGenerator.ClimateChangeScenario;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.Observation;
 
@@ -30,20 +31,22 @@ import repicea.stats.data.Observation;
  * Handle the result of a simulation performed through the ExtScript class
  * @author Mathieu Fortin - January 2021
  */
-public class ScriptResult {
-
-	public static final String DateYrFieldName = "DateYr";
+public class ScriptResult {	
+	
+	public static final String DateYrFieldName = "DateYr";	
 	public static final String NbRealizationsFieldName = "NbRealizations";
 	public static final String TimeSinceInitialDateYrFieldName = "timeSinceInitialDateYr";
 	public static final String OutputTypeFieldName = "OutputType";
 	public static final String EstimateFieldName = "Estimate";
 	public static final String TotalVarianceFieldName = "TotalVariance";
-	public static final String VarianceEstimatorType = "VarianceEstimatorType";
+	public static final String VarianceEstimatorType = "VarianceEstimatorType";	
 	
 	final DataSet dataset;
 	final List<String> outputTypes;
 	final int nbRealizations;
 	final int nbPlots;
+	final ClimateChangeScenario climateChangeScenario;
+	final String growthModel;
 	
 	/**
 	 * Constructor.
@@ -53,10 +56,14 @@ public class ScriptResult {
 	 */
 	public ScriptResult(int nbRealizations, 
 			int nbPlots,
+			ClimateChangeScenario climateChangeScenario,
+			String growthModel,
 			DataSet dataset) {
 		this.nbRealizations = nbRealizations;
 		this.nbPlots = nbPlots;
 		this.dataset = dataset;
+		this.climateChangeScenario = climateChangeScenario;
+		this.growthModel = growthModel;
 		
 		List<Integer> sortingIndex = new ArrayList<Integer>();
 		int outputTypeFieldNameIndex = getDataSet().getFieldNames().indexOf(OutputTypeFieldName);
@@ -86,7 +93,8 @@ public class ScriptResult {
 		fieldNames.add(OutputTypeFieldName);
 		fieldNames.add(EstimateFieldName);
 		fieldNames.add(TotalVarianceFieldName);
-		fieldNames.add(VarianceEstimatorType);
+		fieldNames.add(VarianceEstimatorType);		
+		
 		DataSet outputDataSet = new DataSet(fieldNames);
 		return outputDataSet;
 	}
@@ -94,6 +102,10 @@ public class ScriptResult {
 	public int getNbRealizations() {return nbRealizations;}
 	
 	public int getNbPlots() {return nbPlots;} 
+	
+	public ClimateChangeScenario getClimateChangeScenario() {return climateChangeScenario;}
+	
+	public String getGrowthModel() {return growthModel;}
 	
 	public DataSet getDataSet() {return dataset;}
 	
@@ -132,14 +144,11 @@ public class ScriptResult {
 	 * @return a boolean
 	 */
 	protected boolean isCompatible(ScriptResult result) {
-		if (dataset.getFieldNames().equals(result.dataset.getFieldNames())) {
-			if (dataset.getFieldTypes().equals(result.dataset.getFieldTypes())) {
-				if (outputTypes.equals(result.outputTypes)) {
-					return true;
-				}
-			}
-		}
-		return false;
+		return (dataset.getFieldNames().equals(result.dataset.getFieldNames()) && 
+				dataset.getFieldTypes().equals(result.dataset.getFieldTypes()) &&
+				outputTypes.equals(result.outputTypes) && 
+				this.nbRealizations == result.nbRealizations &&
+				this.climateChangeScenario.equals(result.climateChangeScenario) &&
+				this.growthModel.equals(result.growthModel));
 	}
-
 }

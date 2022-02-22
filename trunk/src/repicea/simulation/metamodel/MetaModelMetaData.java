@@ -21,6 +21,9 @@ package repicea.simulation.metamodel;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.TreeMap;
 
 import repicea.io.Loadable;
 import repicea.io.Saveable;
@@ -34,72 +37,39 @@ import com.cedarsoftware.util.io.JsonWriter;
  * Stores and manipulates metadata associated with the metamodel.   
  * @author Jean-Francois Lavoie and Mathieu Fortin - September 2021
  */
-public class MetaModelMetaData implements Loadable, Saveable {
-	
-	public class Common {
-		// common
-		String geoDomain;
-		
-		public Common(String geoDomain) {
-			this.geoDomain = geoDomain;
-		}
-	}	
-	
+public class MetaModelMetaData {
+			
 	public class Growth {
-		String dataSource;	// which inventory was used ?
-		String dataSourceYears; // year or year span used
-		int nbRealizations;
-		String climateChangeOption;
-		String growthModel;
-		String upscaling;	// enum
+		public String geoDomain;	// ex : QC_FMU02664
+		public String dataSource;	// which inventory was used ? "4th Campaign of the province forest inventory"
+		public TreeMap<Integer, List<Integer>> dataSourceYears; 
+		public int nbRealizations; 
+		public String climateChangeOption;	
+		public String growthModel;	
+		public TreeMap<Integer, String> upscaling;	
+		public LinkedHashMap<Integer, Integer> nbPlots;	 
 		
-		public Growth(String dataSource, String dataSourceYears, int nbRealizations, String climateChangeOption, String growthModel, String upscaling) {
-			this.dataSource = dataSource;
-			this.dataSourceYears = dataSourceYears;
-			this.nbRealizations = nbRealizations;
-			this.climateChangeOption = climateChangeOption;
-			this.growthModel = growthModel;
-			this.upscaling = upscaling;
+		public Growth() {
+			nbPlots = new LinkedHashMap<Integer, Integer>();
+			dataSourceYears = new TreeMap<Integer, List<Integer>>();
+			upscaling = new TreeMap<Integer, String>();
 		}
 	}
 	
 	public class Fit {
-		String outputType;	
-		String fitModel; 	
-		String stratumGroup;
-		double logLikelihood;
+		public String outputType;	
+		public String fitModel; 	
+		public String stratumGroup;		
 		
-		public Fit(String outputType, String fitModel, String stratumGroup, double logLikelihood) {
-			this.outputType = outputType;
-			this.fitModel = fitModel;
-			this.stratumGroup = stratumGroup;
-			this.logLikelihood = logLikelihood;
+		public Fit() {			
 		}
-	}
+	}		
 	
-	Common common;	
-	Growth growth;
-	Fit fit;
+	public Growth growth;
+	public Fit fit;
 	
-	public MetaModelMetaData (Common common, Growth growth, Fit fit) {
-		this.common = common;
-		this.growth = growth;
-		this.fit = fit;
-	}
-	
-	public String toJSON() {
-		return JsonWriter.objectToJson(this);
-	}
-
-	@Override
-	public void save(String filename) throws IOException {
-		XmlSerializer serializer = new XmlSerializer(filename);
-		serializer.writeObject(this);
-	}
-
-	@Override
-	public void load(String filename) throws IOException {
-		// TODO Auto-generated method stub
-		
-	}
+	public MetaModelMetaData () {	
+		this.growth = new MetaModelMetaData.Growth();
+		this.fit = new MetaModelMetaData.Fit();
+	}	
 }

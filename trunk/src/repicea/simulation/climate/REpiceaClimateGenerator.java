@@ -18,6 +18,11 @@
  */
 package repicea.simulation.climate;
 
+import java.security.InvalidParameterException;
+
+import repicea.simulation.climate.REpiceaClimateGenerator.ClimateChangeOption;
+import repicea.simulation.climate.REpiceaClimateGenerator.ClimateChangeScenario;
+import repicea.simulation.climate.REpiceaClimateGenerator.RepresentativeConcentrationPathway;
 import repicea.simulation.covariateproviders.plotlevel.GeographicalCoordinatesProvider;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -35,6 +40,11 @@ public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvid
 	 */
 	public interface ClimateChangeScenario extends TextableEnum {}
 	
+	public interface ClimateChangeScenarioProvider {
+		ClimateChangeScenario getClimageChangeScenario();
+	}
+	
+	
 	public static enum RepresentativeConcentrationPathway implements ClimateChangeScenario {
 		RCP2_6("RCP 2.6", "RCP 2.6"),
 		RCP4_5("RCP 4.5", "RCP 4.5"),
@@ -51,7 +61,7 @@ public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvid
 		}
 		
 		@Override
-		public String toString() {return REpiceaTranslator.getString(this);}
+		public String toString() {return REpiceaTranslator.getString(this);}	
 	}
 	
 	/**
@@ -90,4 +100,19 @@ public interface REpiceaClimateGenerator<P extends GeographicalCoordinatesProvid
 	 * @return a REpiceaClimateVariableMap-derived instance
 	 */
 	public REpiceaClimateVariableMap getClimateVariables(P plot);
+	
+	public static class ClimateChangeScenarioHelper {
+		@SuppressWarnings("deprecation")
+		static public ClimateChangeScenario getClimateChangeScenarioFromString(String climateChangeScenarioStr) {
+			try {
+				return RepresentativeConcentrationPathway.valueOf(climateChangeScenarioStr);
+			} catch(Exception e) {
+				try {
+					return ClimateChangeOption.valueOf(climateChangeScenarioStr);
+				} catch (Exception e2) {
+					throw new InvalidParameterException("The climate change scenario " + climateChangeScenarioStr + " is not recognized!");
+				}
+			}
+		}
+	}
 }

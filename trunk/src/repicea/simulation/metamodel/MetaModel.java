@@ -19,6 +19,7 @@
 
 package repicea.simulation.metamodel;
 
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -27,34 +28,98 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
+
+import org.apache.commons.io.FilenameUtils;
+
+import com.cedarsoftware.util.io.JsonWriter;
 
 import repicea.io.Saveable;
 import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.data.DataSet;
+import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.mcmc.MetropolisHastingsParameters;
 import repicea.util.REpiceaLogManager;
 
+
 /**
- * A package class that handles the data set and fits the meta model. It implements
- * Runnable for an eventual multi-threaded implementation.
+ * A package class that handles the data set and fits the meta model. It
+ * implements Runnable for an eventual multi-threaded implementation.
+ * 
  * @author Mathieu Fortin - December 2020
  */
 public class MetaModel implements Saveable {
-
+	
+		public class MetaDataHelper {
+						
+			public MetaDataHelper() {
+			}
+			
+			public MetaModelMetaData generate() {
+				
+				MetaModelMetaData data = new MetaModelMetaData();
+				
+				data.growth.geoDomain = MetaModel.this.geoDomain;
+				data.growth.dataSource = MetaModel.this.dataSource;
+				
+				if (!MetaModel.this.scriptResults.isEmpty()) {						
+				
+					List<Integer> srKeys = new ArrayList<Integer>(MetaModel.this.scriptResults.keySet());
+					
+					Collections.sort(srKeys);
+					
+					boolean firstElement = true;
+					for (Integer key : srKeys) {
+						ScriptResult result = MetaModel.this.scriptResults.get(key);
+						if (firstElement) {
+							// fill in data that is constant 	
+							data.growth.nbRealizations = result.getNbRealizations();
+							data.growth.climateChangeOption = ((Enum)result.climateChangeScenario).name();
+							data.growth.growthModel = result.growthModel;							
+						}
+						
+						// DateYrFieldName && upscaling
+						List<Integer> temp = new ArrayList<Integer>();					 
+						for (int i = 0; i < result.getDataSet().getNumberOfObservations(); i++) {
+							if (i == 0)
+								data.growth.upscaling.put(key, (String)result.getDataSet().getValueAt(i, ScriptResult.VarianceEstimatorType));
+								
+							Integer value = (Integer)result.getDataSet().getValueAt(i, ScriptResult.DateYrFieldName); 
+							if (!temp.contains(value))
+								temp.add(value);							
+						}
+						data.growth.dataSourceYears.put(key, temp);
+						
+						// nbPlots
+						data.growth.nbPlots.put(key, result.nbPlots);													
+					}
+				}
+				
+				data.fit.outputType = MetaModel.this.model.getSelectedOutputType();
+				data.fit.fitModel = MetaModel.this.model.getModelImplementation().toString();
+				data.fit.stratumGroup = MetaModel.this.stratumGroup;			
+				
+				return data;
+			}
+		}	
+		
+	
 	static {
-		repicea.serial.xml.XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.MetaModel$InnerModel", 
+		repicea.serial.xml.XmlSerializerChangeMonitor.registerClassNameChange(
+				"repicea.simulation.metamodel.MetaModel$InnerModel",
 				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation");
-		repicea.serial.xml.XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.DataBlockWrapper", 
+		repicea.serial.xml.XmlSerializerChangeMonitor.registerClassNameChange(
+				"repicea.simulation.metamodel.DataBlockWrapper",
 				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper");
 	}
-	
+
 //	protected static VerboseLevel Verbose = VerboseLevel.Minimum; 
-	
+
 //	public static enum VerboseLevel {None,
 //		Minimum,
 //		Medium,
@@ -68,23 +133,21 @@ public class MetaModel implements Saveable {
 //			}
 //		}
 //	}
-	
+
 	public static enum ModelImplEnum {
-		SimpleSlope(true),
-		SimplifiedChapmanRichards(true),
-		ChapmanRichards(true),
-		ChapmanRichardsWithRandomEffect(false),
-		ChapmanRichardsDerivative(true),
+		SimpleSlope(true), SimplifiedChapmanRichards(true), ChapmanRichards(true),
+		ChapmanRichardsWithRandomEffect(false), ChapmanRichardsDerivative(true),
 		ChapmanRichardsDerivativeWithRandomEffect(false);
-		
+
 		private static List<ModelImplEnum> ModelsWithoutRandomEffects;
 		private static Map<ModelImplEnum, ModelImplEnum> MatchingModelsWithRandomEffects;
-		
+
 		final boolean modelWithoutRandomEffect;
+
 		ModelImplEnum(boolean modelWithoutRandomEffect) {
 			this.modelWithoutRandomEffect = modelWithoutRandomEffect;
 		}
-		
+
 		public static List<ModelImplEnum> getModelsWithoutRandomEffects() {
 			if (ModelsWithoutRandomEffects == null) {
 				ModelsWithoutRandomEffects = new ArrayList<ModelImplEnum>();
@@ -96,22 +159,23 @@ public class MetaModel implements Saveable {
 			}
 			return ModelsWithoutRandomEffects;
 		}
-		
+
 		private static Map<ModelImplEnum, ModelImplEnum> getMatchingModelsWithRandomEffects() {
 			if (MatchingModelsWithRandomEffects == null) {
 				MatchingModelsWithRandomEffects = new HashMap<ModelImplEnum, ModelImplEnum>();
 				MatchingModelsWithRandomEffects.put(ChapmanRichards, ChapmanRichardsWithRandomEffect);
-				MatchingModelsWithRandomEffects.put(ChapmanRichardsDerivative, ChapmanRichardsDerivativeWithRandomEffect);
+				MatchingModelsWithRandomEffects.put(ChapmanRichardsDerivative,
+						ChapmanRichardsDerivativeWithRandomEffect);
 			}
 			return MatchingModelsWithRandomEffects;
 		}
-		
+
 		public static ModelImplEnum getMatchingModelWithRandomEffects(ModelImplEnum modelImplEnum) {
 			return getMatchingModelsWithRandomEffects().get(modelImplEnum);
 		}
-		
+
 	}
-	
+
 //	static class SimulationParameters implements Cloneable {
 //		protected int nbBurnIn = 5000;
 //		protected int nbRealizations = 500000 + nbBurnIn;
@@ -131,21 +195,25 @@ public class MetaModel implements Saveable {
 //			}
 //		}
 //	}
-	
-	
+
 	protected MetropolisHastingsParameters mhSimParms;
 	protected final Map<Integer, ScriptResult> scriptResults;
 	protected AbstractModelImplementation model;
 	private final String stratumGroup;
 	private DataSet modelComparison;
+	protected final String geoDomain;
+	protected final String dataSource;
 
-	
 	/**
-	 * Constructor. 
+	 * Constructor.
+	 * 
 	 * @param stratumGroup a String representing the stratum group
 	 */
-	public MetaModel(String stratumGroup) {
+	public MetaModel(String stratumGroup, String geoDomain, String dataSource) {
 		this.stratumGroup = stratumGroup;
+		this.geoDomain = geoDomain;
+		this.dataSource = dataSource;
+		
 		scriptResults = new ConcurrentHashMap<Integer, ScriptResult>();
 		setDefaultSettings();
 	}
@@ -153,23 +221,25 @@ public class MetaModel implements Saveable {
 	private void setDefaultSettings() {
 		mhSimParms = new MetropolisHastingsParameters();
 	}
-		
+
 	/**
 	 * Provide the stratum group for this mate-model.
+	 * 
 	 * @return a String
 	 */
 	public String getStratumGroup() {
 		return stratumGroup;
 	}
-	
+
 	/**
 	 * Return the state of the model. The model can be used if it has converged.
+	 * 
 	 * @return
 	 */
 	public boolean hasConverged() {
 		return model != null ? model.hasConverged() : false;
 	}
-	
+
 	void add(int initialAge, ScriptResult result) {
 		boolean canBeAdded;
 		if (scriptResults.isEmpty()) {
@@ -184,16 +254,17 @@ public class MetaModel implements Saveable {
 		}
 		if (canBeAdded) {
 			scriptResults.put(initialAge, result);
-			model = null;	// so that converge is set to false by default
+			model = null; // so that converge is set to false by default	
 		} else {
-			throw new InvalidParameterException("The result parameter is not compatible with previous results in the map!");
+			throw new InvalidParameterException(
+					"The result parameter is not compatible with previous results in the map!");
 		}
 	}
 
-
-	private AbstractModelImplementation getInnerModel(String outputType, ModelImplEnum modelImplEnum) throws StatisticalDataException {
+	private AbstractModelImplementation getInnerModel(String outputType, ModelImplEnum modelImplEnum)
+			throws StatisticalDataException {
 		AbstractModelImplementation model;
-		switch(modelImplEnum) {
+		switch (modelImplEnum) {
 		case SimpleSlope:
 			model = new SimpleSlopeModelImplementation(outputType, this);
 			break;
@@ -213,22 +284,23 @@ public class MetaModel implements Saveable {
 			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(outputType, this);
 			break;
 		default:
-			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
+			throw new InvalidParameterException(
+					"This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
 		}
 		return model;
 	}
-	
 
 	/**
 	 * Return the possible output types given what they are in the ScriptResult
 	 * instances.
+	 * 
 	 * @return a List of String
 	 * @throws MetaModelException
 	 */
 	public List<String> getPossibleOutputTypes() {
 		return getPossibleOutputTypes(scriptResults);
 	}
-	
+
 	protected static List<String> getPossibleOutputTypes(Map<Integer, ScriptResult> scriptResults) {
 		List<String> possibleOutputTypes = new ArrayList<String>();
 		if (!scriptResults.isEmpty()) {
@@ -237,9 +309,9 @@ public class MetaModel implements Saveable {
 		}
 		return possibleOutputTypes;
 	}
-	
+
 	static class InnerWorker extends Thread implements Comparable<InnerWorker> {
-		
+
 		final AbstractModelImplementation ami;
 		double prob;
 
@@ -248,7 +320,7 @@ public class MetaModel implements Saveable {
 			this.ami = ami;
 			setName(ami.getModelImplementation().name());
 		}
-		
+
 		@Override
 		public int compareTo(InnerWorker o) {
 			if (prob > o.prob) {
@@ -260,7 +332,7 @@ public class MetaModel implements Saveable {
 			}
 		}
 	}
-	
+
 	private InnerWorker performModelSelection(List<InnerWorker> innerWorkers) {
 		double sumProb = 0;
 		List<InnerWorker> newList = new ArrayList<InnerWorker>();
@@ -268,37 +340,36 @@ public class MetaModel implements Saveable {
 			if (w.ami.hasConverged()) {
 				newList.add(w);
 				sumProb += Math.exp(w.ami.mh.getLogPseudomarginalLikelihood());
-				REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
-						Level.INFO, 
-						"Meta-model " + stratumGroup, 
+				REpiceaLogManager.logMessage(MetaModelManager.LoggerName, Level.INFO, "Meta-model " + stratumGroup,
 						"Result for the implementation " + w.ami.getModelImplementation().name());
 			}
 		}
-		DataSet d = new DataSet(Arrays.asList(new String[] {"ModelImplementation", "LPML", "Prob"}));
+		DataSet d = new DataSet(Arrays.asList(new String[] { "ModelImplementation", "LPML", "Prob" }));
 		for (InnerWorker w : newList) {
 			w.prob = Math.exp(w.ami.mh.getLogPseudomarginalLikelihood()) / sumProb;
-			d.addObservation(new Object[] {w.ami.getModelImplementation().name(), w.ami.mh.getLogPseudomarginalLikelihood(), w.prob});
+			d.addObservation(new Object[] { w.ami.getModelImplementation().name(),
+					w.ami.mh.getLogPseudomarginalLikelihood(), w.prob });
 //			System.out.println("Implementation " + w.ami.getModelImplementation().name() + ": " + w.prob);
 		}
 		modelComparison = d;
 		Collections.sort(newList);
 		return newList.get(0);
 	}
-	
+
 	/**
 	 * Fit the meta-model.
-	 * @param outputType the output type the model will be fitted to (e.g. volumeAlive_Coniferous)
-	 * @param e a ModelImplEnum enum 
+	 * 
+	 * @param outputType the output type the model will be fitted to (e.g.
+	 *                   volumeAlive_Coniferous)
+	 * @param e          a ModelImplEnum enum
 	 * @return a boolean true if the model has converged or false otherwise
 	 */
 	public boolean fitModel(String outputType, boolean enableMixedModelImplementations) {
-		model = null;	// reset the convergence to false 
-		REpiceaLogManager.logMessage(MetaModelManager.LoggerName,
-				Level.INFO, 
-				"Meta-model " + stratumGroup, 
+		model = null; // reset the convergence to false
+		REpiceaLogManager.logMessage(MetaModelManager.LoggerName, Level.INFO, "Meta-model " + stratumGroup,
 				"----------- Modeling output type: " + outputType + " ----------------");
 		try {
-			List<InnerWorker> modelList = new ArrayList<InnerWorker>(); 
+			List<InnerWorker> modelList = new ArrayList<InnerWorker>();
 
 			List<ModelImplEnum> myImplementations = new ArrayList<ModelImplEnum>();
 			myImplementations.add(ModelImplEnum.ChapmanRichards);
@@ -308,8 +379,8 @@ public class MetaModel implements Saveable {
 			myImplementations.add(ModelImplEnum.ChapmanRichardsDerivative);
 			if (enableMixedModelImplementations) {
 				myImplementations.add(ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
-			}			
-			for (ModelImplEnum e : myImplementations) {	// use the basic models first, i.e. those without random effects
+			}
+			for (ModelImplEnum e : myImplementations) { // use the basic models first, i.e. those without random effects
 				InnerWorker w = new InnerWorker(getInnerModel(outputType, e));
 				w.start();
 				modelList.add(w);
@@ -318,19 +389,16 @@ public class MetaModel implements Saveable {
 				w.join();
 			}
 			InnerWorker selectedWorker = performModelSelection(modelList);
-			REpiceaLogManager.logMessage(MetaModelManager.LoggerName, 
-					Level.INFO, 
-					"Meta-model " + stratumGroup,  
+			REpiceaLogManager.logMessage(MetaModelManager.LoggerName, Level.INFO, "Meta-model " + stratumGroup,
 					"Selected model is " + selectedWorker.ami.getModelImplementation().name());
 			model = selectedWorker.ami;
 //			System.out.println(model.getSummary());
-			return true; 
- 		} catch (Exception e1) {
- 			e1.printStackTrace();
- 			return false;
-		} 
+			return true;
+		} catch (Exception e1) {
+			e1.printStackTrace();
+			return false;
+		}
 	}
-
 
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (hasConverged()) {
@@ -340,11 +408,11 @@ public class MetaModel implements Saveable {
 			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
 		}
 	}
-	
+
 	protected Matrix getFinalParameterEstimates() {
 		return model.getParameters();
 	}
-  	
+
 //	/**
 //	 * Export the initial data set (before fitting the meta-model).
 //	 * @param filename
@@ -353,10 +421,11 @@ public class MetaModel implements Saveable {
 //	public void exportInitialDataSet(String filename) throws Exception {
 //		getDataStructureReady().getDataSet().save(filename);
 //	}
-	
+
 	/**
-	 * Export a final dataset, that is the initial data set plus the meta-model 
+	 * Export a final dataset, that is the initial data set plus the meta-model
 	 * predictions. This works only if the model has converged.
+	 * 
 	 * @param filename
 	 * @throws IOException
 	 */
@@ -367,8 +436,8 @@ public class MetaModel implements Saveable {
 	}
 
 	/**
-	 * Provide the selected output type that was set in the call to method
-	 * fitModel.
+	 * Provide the selected output type that was set in the call to method fitModel.
+	 * 
 	 * @return a String
 	 */
 	public String getSelectedOutputType() {
@@ -379,12 +448,13 @@ public class MetaModel implements Saveable {
 		}
 	}
 
-	
 	/**
-	 * Save a CSV file containing the final sequence produced by the Metropolis-Hastings algorithm, 
-	 * that is without the burn-in period and with only every nth observation. The number of 
-	 * burn-in samples to be dropped is set by the nbBurnIn member while every nth observation is 
-	 * set by the oneEach member.
+	 * Save a CSV file containing the final sequence produced by the
+	 * Metropolis-Hastings algorithm, that is without the burn-in period and with
+	 * only every nth observation. The number of burn-in samples to be dropped is
+	 * set by the nbBurnIn member while every nth observation is set by the oneEach
+	 * member.
+	 * 
 	 * @param filename
 	 * @throws IOException
 	 */
@@ -392,7 +462,6 @@ public class MetaModel implements Saveable {
 		model.mh.exportMetropolisHastingsSample(filename);
 	}
 
-	
 	protected DataSet getFinalDataSet() {
 		return model.getFinalDataSet();
 	}
@@ -401,10 +470,18 @@ public class MetaModel implements Saveable {
 	public void save(String filename) throws IOException {
 		XmlSerializer serializer = new XmlSerializer(filename);
 		serializer.writeObject(this);
+		
+		MetaDataHelper helper = new MetaDataHelper(); 
+		MetaModelMetaData data = helper.generate();
+				
+		FileOutputStream os = new FileOutputStream(FilenameUtils.removeExtension(filename).concat(".json"));
+		JsonWriter jw = new JsonWriter(os);
+		jw.write(data);		
 	}
 
 	/**
 	 * Load a meta-model instance from file
+	 * 
 	 * @param filename
 	 * @return a MetaModel instance
 	 * @throws IOException
@@ -425,7 +502,7 @@ public class MetaModel implements Saveable {
 			System.out.println(model.getSummary());
 		}
 	}
-	
+
 	public DataSet getSummary() {
 		if (hasConverged()) {
 			return model.getSummary();
@@ -442,11 +519,5 @@ public class MetaModel implements Saveable {
 			System.out.println("The model has not been fitted yet!");
 			return null;
 		}
-	}
-	
-	
-	MetaModelMetaData getMetaData() {
-		//MetaModelMetaData.Growth growth = new MetaModelMetaData.Growth(); 
-		return null;
 	}
 }
