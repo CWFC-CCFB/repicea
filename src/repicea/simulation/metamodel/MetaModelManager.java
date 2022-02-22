@@ -67,13 +67,29 @@ public class MetaModelManager extends ConcurrentHashMap<String, MetaModel> imple
 	 * @param stratumGroup a String that stands for the stratum group
 	 * @param initialAgeYr the age of the stratum at the beginning of the simulation
 	 * @param result an ExtScriptResult instance that contains the simulation results
+	 * @throws MetaModelException 
 	 */
-	public void addDataset(String stratumGroup, int initialAgeYr, ScriptResult result) {		
+	public void addDataset(String stratumGroup, int initialAgeYr, ScriptResult result) throws MetaModelException {		
 		if (!containsKey(stratumGroup)) {
-			put(stratumGroup, new MetaModel(stratumGroup));
+			throw new MetaModelException("No metamodel exists for the stratum group name " + stratumGroup);
 		}
 		MetaModel metaModel = get(stratumGroup);
 		metaModel.add(initialAgeYr, result);		
+	}
+	
+	/**
+	 * Add a DataSet instance to a particular stratum group. 
+	 * @param stratumGroup a String that stands for the stratum group
+	 * @param geoDomain the geographic domain of the source data
+	 * @param dataSource the origin of the source data (ex: fourth inventory)
+	 * @throws MetaModelException 
+	 */
+	public void createMetaModel(String stratumGroup, String geoDomain, String dataSource) throws MetaModelException {		
+		if (containsKey(stratumGroup)) {
+			throw new MetaModelException("A metamodel already exists for the stratum group name " + stratumGroup);
+		}	
+		
+		put(stratumGroup, new MetaModel(stratumGroup, geoDomain, dataSource));
 	}
 	
 	/**
