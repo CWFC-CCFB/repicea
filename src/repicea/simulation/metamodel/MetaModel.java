@@ -25,6 +25,7 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -100,6 +101,7 @@ public class MetaModel implements Saveable {
 					}
 				}
 				
+				data.fit.timeStamp = MetaModel.this.lastFitTimeStamp;
 				data.fit.outputType = MetaModel.this.model.getSelectedOutputType();
 				data.fit.fitModel = MetaModel.this.model.getModelImplementation().toString();
 				data.fit.stratumGroup = MetaModel.this.stratumGroup;			
@@ -203,6 +205,7 @@ public class MetaModel implements Saveable {
 	private DataSet modelComparison;
 	protected final String geoDomain;
 	protected final String dataSource;
+	public Date lastFitTimeStamp;
 
 	/**
 	 * Constructor.
@@ -392,6 +395,8 @@ public class MetaModel implements Saveable {
 			REpiceaLogManager.logMessage(MetaModelManager.LoggerName, Level.INFO, "Meta-model " + stratumGroup,
 					"Selected model is " + selectedWorker.ami.getModelImplementation().name());
 			model = selectedWorker.ami;
+			
+			lastFitTimeStamp = new Date(System.currentTimeMillis());
 //			System.out.println(model.getSummary());
 			return true;
 		} catch (Exception e1) {
@@ -475,7 +480,11 @@ public class MetaModel implements Saveable {
 		MetaModelMetaData data = helper.generate();
 				
 		FileOutputStream os = new FileOutputStream(FilenameUtils.removeExtension(filename).concat(".json"));
-		JsonWriter jw = new JsonWriter(os);
+		
+		Map<String, Object> options = new HashMap<String, Object>();
+		options.put(JsonWriter.PRETTY_PRINT, true);
+		options.put(JsonWriter.DATE_FORMAT, JsonWriter.ISO_DATE_TIME_FORMAT);
+		JsonWriter jw = new JsonWriter(os, options);
 		jw.write(data);		
 	}
 

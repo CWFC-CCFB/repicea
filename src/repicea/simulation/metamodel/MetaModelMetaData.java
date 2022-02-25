@@ -21,6 +21,7 @@ package repicea.simulation.metamodel;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.TreeMap;
@@ -57,6 +58,7 @@ public class MetaModelMetaData {
 	}
 	
 	public class Fit {
+		public Date timeStamp;	// the datetime at which the MM was fitted
 		public String outputType;	
 		public String fitModel; 	
 		public String stratumGroup;		
