@@ -483,7 +483,7 @@ public class MetaModel implements Saveable {
 		
 		Map<String, Object> options = new HashMap<String, Object>();
 		options.put(JsonWriter.PRETTY_PRINT, true);
-		options.put(JsonWriter.DATE_FORMAT, JsonWriter.ISO_DATE_TIME_FORMAT);
+		options.put(JsonWriter.DATE_FORMAT, JsonWriter.ISO_DATE_TIME_FORMAT+"Z");
 		JsonWriter jw = new JsonWriter(os, options);
 		jw.write(data);		
 	}
