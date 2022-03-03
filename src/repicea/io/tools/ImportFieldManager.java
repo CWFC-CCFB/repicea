@@ -20,6 +20,7 @@ package repicea.io.tools;
 
 import java.awt.Container;
 import java.awt.Window;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -115,6 +116,15 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		loadDefaultValues();
 		
 		setFileSpecifications(fileSpec); 
+		
+		if (new File(fileSpec[0]).exists() && new File(fileSpec[0]).isFile()) {
+			String potentialIfeFilename = fileSpec[0].substring(0, fileSpec[0].lastIndexOf(".")).concat(GFileFilter.IFE.getExtension());
+			if (new File(potentialIfeFilename).exists() && new File(potentialIfeFilename).isFile()) {
+				try {
+					load(potentialIfeFilename);
+				} catch (Exception e) {} 
+			}
+		}
 	}
 	
 
@@ -189,7 +199,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 			if (!QueueReader.NOT_USING_FILES.equals(fileSpec[0])) {
 				synchonizeImportFieldElementsWithAvailableFields();
 			}
-//			formatReader.close();
 		} catch (FileNotFoundException e1) {
 			System.out.println("Could not find file : " + getFileSpecifications()[0]);
 			throw e1;
