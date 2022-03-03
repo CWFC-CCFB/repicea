@@ -21,15 +21,17 @@ package repicea.gui.components;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JButton;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.gui.REpiceaGUITestRobot;
 import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.StatusClass;
 
 public class REpiceaMatchSelectorTest {
 
-	private final static int WAIT_TIME = 500;
-	
+
 	static class MyComplexObjectClass implements REpiceaMatchComplexObject<MyComplexObjectClass> {
 
 		String name;
@@ -84,12 +86,12 @@ public class REpiceaMatchSelectorTest {
 				selector.showUI(null);
 			}
 		};
-		Thread t = new Thread(toRun);
-		t.start();
-		Thread.sleep(WAIT_TIME);
-		while (dlg.isVisible()) {
-			dlg.controlPanel.doClickCancelButton();
-		}
+		
+		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
+		
+		Thread t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
+		JButton cancel = (JButton) robot.findContainerWithThisName("Cancel");
+		cancel.doClick();
 		dlg.dispose();
 		t.join();
 		
@@ -111,15 +113,13 @@ public class REpiceaMatchSelectorTest {
 				selector2.showUI(null);
 			}
 		};
-		t = new Thread(toRun);
-		t.start();
-//		while (!dlg.isVisible()) {}
-		Thread.sleep(WAIT_TIME);
-		while (dlg.isVisible()) {
-			dlg.controlPanel.doClickOkButton();
-		}
+		
+		t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
+		JButton ok = (JButton) robot.findContainerWithThisName("Ok");
+		ok.doClick();
 		dlg.dispose();
 		t.join();
+		robot.shutdown();
 		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
 		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
 		System.out.println("Test cancelOkTest successfully carried out!");
@@ -142,21 +142,22 @@ public class REpiceaMatchSelectorTest {
 				selector.showUI(null);
 			}
 		};
-		Thread t = new Thread(toRun);
-		t.start();
-		Thread.sleep(WAIT_TIME);
+		
+		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
+		Thread t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
 		REpiceaTableModel model = (REpiceaTableModel) dlg.getTable().getModel();
 		model.setValueAt(complexObjects.get(0), 1, 1);
-		Thread.sleep(WAIT_TIME);
+		robot.letDispatchThreadProcess();
 		MyComplexObjectClass match = selector.matchMap.get("b");
+		
 		Assert.assertEquals("Testing the match", StatusClass.alive.name(), match.name);
 		Assert.assertEquals("Testing the match index", StatusClass.alive.ordinal(), match.index);
 		
-		while (dlg.isVisible()) {
-			dlg.controlPanel.doClickOkButton();
-		}
+		JButton ok = (JButton) robot.findContainerWithThisName("Ok");
+		ok.doClick();
 		dlg.dispose();
 		t.join();
+		robot.shutdown();
 		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
 		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
 		System.out.println("Test changeValue successfully carried out!");

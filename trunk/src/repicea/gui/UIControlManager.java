@@ -341,6 +341,7 @@ public class UIControlManager {
 	public static JButton createCommonButton(CommonControlID buttonID) {
 		JButton button = new JButton();
 		String text = REpiceaTranslator.getString(buttonID);
+		button.setName(buttonID.name());
 		if (text == null) {
 			text = "Unnamed";
 		}
