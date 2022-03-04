@@ -21,8 +21,6 @@ package repicea.gui.components;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.JButton;
-
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -74,7 +72,7 @@ public class REpiceaMatchSelectorTest {
 	}
 	
 	@Test
-	public void cancelOkTest() throws InterruptedException {
+	public void cancelOkTest() throws Exception {
 		REpiceaMatchSelector<StatusClass> selector = new REpiceaMatchSelector<StatusClass>(new String[]{"a","b","c","d","e","f"},
 				StatusClass.values(), 
 				-1, 
@@ -124,7 +122,7 @@ public class REpiceaMatchSelectorTest {
 	}
 
 	@Test
-	public void changeValueTest() throws InterruptedException {
+	public void changeValueTest() throws Exception {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (StatusClass sc : StatusClass.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));

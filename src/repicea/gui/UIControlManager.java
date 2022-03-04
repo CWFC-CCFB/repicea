@@ -179,7 +179,8 @@ public class UIControlManager {
 		Tools("Tools", "Outils"),
 		View("View", "Affichage"),
 		Options("Options", "Options"),
-		About("?", "?");
+		About("?", "?"),
+		Import("Import", "Importer");
 		
 		CommonMenuTitle(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -338,17 +339,21 @@ public class UIControlManager {
 	 * @param buttonID a enum that represents the button
 	 * @return a JButton instance.
 	 */
-	public static JButton createCommonButton(CommonControlID buttonID) {
+	public static JButton createCommonButton(TextableEnum buttonID) {
 		JButton button = new JButton();
 		String text = REpiceaTranslator.getString(buttonID);
-		button.setName(buttonID.name());
 		if (text == null) {
 			text = "Unnamed";
 		}
 		button.setText(text);
-		Icon icon = buttonID.getIcon();
-		if (icon != null) {
-			button.setIcon(buttonID.getIcon());
+		if (buttonID instanceof Enum) {
+			button.setName(((Enum) buttonID).name());
+		}
+		if (buttonID instanceof CommonControlID) {
+			Icon icon = ((CommonControlID) buttonID).getIcon();
+			if (icon != null) {
+				button.setIcon(icon);
+			}
 		}
 		setFontOfThisComponent(button, FontType.ButtonFont);
 		return button;
@@ -360,22 +365,26 @@ public class UIControlManager {
 	 * @param menuItemID a enum that represents the control
 	 * @return a JMenuItem instance.
 	 */
-	public static JMenuItem createCommonMenuItem(CommonControlID menuItemID) {
+	public static JMenuItem createCommonMenuItem(TextableEnum menuItemID) {
 		JMenuItem menuItem = new JMenuItem();
 		formatMenuItem(menuItem, menuItemID, true);
 		return menuItem;
 	}
 
-	private static void formatMenuItem(JMenuItem menuItem, CommonControlID menuItemID, boolean addAccelerator) {
+	private static void formatMenuItem(JMenuItem menuItem, TextableEnum menuItemID, boolean addAccelerator) {
 		String text = REpiceaTranslator.getString(menuItemID);
 		if (text == null) {
 			text = "Unnamed";
 		}
 		menuItem.setText(text);
-		menuItem.setName(menuItemID.name());
-		Icon icon = menuItemID.getIcon();
-		if (icon != null) {
-			menuItem.setIcon(menuItemID.getIcon());
+		if (menuItemID instanceof Enum) {
+			menuItem.setName(((Enum) menuItemID).name());
+		}
+		if (menuItemID instanceof CommonControlID) {
+			Icon icon = ((CommonControlID) menuItemID).getIcon();
+			if (icon != null) {
+				menuItem.setIcon(icon);
+			}
 		}
 		if (addAccelerator) {
 			if (menuItemID == CommonControlID.Export) {
@@ -401,19 +410,9 @@ public class UIControlManager {
 	 * @param taskMaker a GenericTaskFactory insUIControlManagertance
 	 * @return a RepiceaMenuItem instance.
 	 */
-	public static REpiceaMenuItem createCommonMenuItem(CommonControlID menuItemID, GenericTaskFactory taskMaker) {
+	public static REpiceaMenuItem createCommonMenuItem(TextableEnum menuItemID, GenericTaskFactory taskMaker) {
 		REpiceaMenuItem menuItem = new REpiceaMenuItem(taskMaker);
 		formatMenuItem(menuItem, menuItemID, false);
-//		String text = REpiceaTranslator.getString(menuItemID);
-//		if (text == null) {
-//			text = "Unnamed";
-//		}
-//		menuItem.setText(text);
-//		Icon icon = menuItemID.getIcon();
-//		if (icon != null) {
-//			menuItem.setIcon(menuItemID.getIcon());
-//		}
-//		setFontOfThisComponent(menuItem, FontType.MenuItemFont);
 		return menuItem;
 	}
 
@@ -423,14 +422,16 @@ public class UIControlManager {
 	 * @param menuTitle a enum that represents the control
 	 * @return a JMenu instance.
 	 */
-	public static JMenu createCommonMenu(CommonMenuTitle menuTitle) {
+	public static JMenu createCommonMenu(TextableEnum menuTitle) {
 		JMenu menu = new JMenu();
 		String text = REpiceaTranslator.getString(menuTitle);
 		if (text == null) {
 			text = "Unnamed";
 		}
 		menu.setText(text);
-		menu.setName(menuTitle.name());
+		if (menuTitle instanceof Enum) {
+			menu.setName(((Enum) menuTitle).name());
+		}
 		setFontOfThisComponent(menu, FontType.MenuFont);
 		return menu;
 	}

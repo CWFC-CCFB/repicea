@@ -131,8 +131,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		new REpiceaIOFileHandlerUI(this, caller, save, saveAs, load);
 
 		if (isBatikExtensionAvailable()) {	// The handler should not be instantiated before checking if batik is available otherwise this throws an exception
-			exportAsSVG = new JMenuItem(MessageID.ExportAsSVG.toString());
-			exportAsSVG.setName(MessageID.ExportAsSVG.name());
+			exportAsSVG = UIControlManager.createCommonMenuItem(MessageID.ExportAsSVG);
 			new REpiceaOSVGFileHandlerUI(this, exportAsSVG, systemPanel.getInternalPanel());
 		}
 		
