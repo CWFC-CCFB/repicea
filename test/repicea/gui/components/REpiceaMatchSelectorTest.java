@@ -90,8 +90,7 @@ public class REpiceaMatchSelectorTest {
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
 		
 		Thread t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
-		JButton cancel = (JButton) robot.findContainerWithThisName("Cancel");
-		cancel.doClick();
+		robot.clickThisButton("Cancel");
 		dlg.dispose();
 		t.join();
 		
@@ -115,8 +114,7 @@ public class REpiceaMatchSelectorTest {
 		};
 		
 		t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
-		JButton ok = (JButton) robot.findContainerWithThisName("Ok");
-		ok.doClick();
+		robot.clickThisButton("Ok");
 		dlg.dispose();
 		t.join();
 		robot.shutdown();
@@ -153,8 +151,7 @@ public class REpiceaMatchSelectorTest {
 		Assert.assertEquals("Testing the match", StatusClass.alive.name(), match.name);
 		Assert.assertEquals("Testing the match index", StatusClass.alive.ordinal(), match.index);
 		
-		JButton ok = (JButton) robot.findContainerWithThisName("Ok");
-		ok.doClick();
+		robot.clickThisButton("Ok");
 		dlg.dispose();
 		t.join();
 		robot.shutdown();

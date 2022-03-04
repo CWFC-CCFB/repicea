@@ -112,12 +112,8 @@ public class ImportToolTest {
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
 		Thread t = robot.startGUI(toRun, ImportFieldManagerDialog.class);
-		JButton ok = (JButton) robot.findContainerWithThisName("Ok");
-		ok.doClick();
-		REpiceaGUITestRobot.letDispatchThreadProcess();
-		JButton cancel = (JButton) robot.findContainerWithThisName("Cancel");
-		cancel.doClick();
-		REpiceaGUITestRobot.letDispatchThreadProcess();
+		robot.clickThisButton("Ok");
+		robot.clickThisButton("Cancel");
 		t.join();
 		robot.shutdown();
 		
