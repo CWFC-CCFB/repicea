@@ -21,13 +21,19 @@ package repicea.gui;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Window;
+import java.lang.ref.WeakReference;
+import java.lang.reflect.InvocationTargetException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.AbstractButton;
 import javax.swing.JMenu;
-import javax.swing.JMenuItem;
+import javax.swing.SwingUtilities;
+import javax.swing.text.JTextComponent;
 
 import repicea.gui.UIToolKit.WindowTrackerListener;
 
@@ -40,10 +46,10 @@ import repicea.gui.UIToolKit.WindowTrackerListener;
  */
 public class REpiceaGUITestRobot implements WindowTrackerListener {
 
-	private static final int WAIT_TIME_BETWEEN_INSTRUCTIONS = 500;
+	private static final int WAIT_TIME_BETWEEN_INSTRUCTIONS = 1000;
 	
-	private BlockingQueue<Window> q = new LinkedBlockingQueue<Window>();
-	private Window currentWindow;
+	private final BlockingQueue<Window> q = new LinkedBlockingQueue<Window>();
+	private final Vector<WeakReference<Window>> windows = new Vector<WeakReference<Window>>();
 	
 	public REpiceaGUITestRobot() {
 		UIToolKit.addWindowTrackerListener(this);
@@ -63,7 +69,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 	 */
 	private static Component findComponentWithThisName(Component comp, String name) {
 		if (comp == null)
-			throw new InvalidParameterException("The comp argument must be non null!");
+			return null;
 		if  (name == null)
 			throw new InvalidParameterException("The name must be non null!");
 
@@ -88,21 +94,56 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 		return null;
 	}
 	
-	public Component findComponentWithThisName(String name) { 
-		return findComponentWithThisName(currentWindow, name);
+	
+	private Window getLastVisibleWindow() {
+		List<WeakReference<Window>> emptyReferences = new ArrayList<WeakReference<Window>>();
+		for (int i = windows.size() - 1; i >= 0; i--) {
+			WeakReference<Window> ref = windows.get(i);
+			if (ref.get() == null)
+				emptyReferences.add(ref);
+			else if (ref.get().isVisible()) {
+				windows.removeAll(emptyReferences);
+				return ref.get();
+			}
+		}
+		return null;
 	}
 	
-	public void clickThisButton(String buttonName) throws InterruptedException {
-		Object o = findComponentWithThisName(currentWindow, buttonName);
+	
+	public Component findComponentWithThisName(String name) { 
+		return findComponentWithThisName(getLastVisibleWindow(), name);
+	}
+	
+	public void clickThisButton(String buttonName) throws InterruptedException, InvocationTargetException {
+		Object o = findComponentWithThisName(getLastVisibleWindow(), buttonName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + buttonName);
 		if (!(o instanceof AbstractButton)) 
 			throw new InvalidParameterException("The component named " + buttonName + " is not a button!");
 		AbstractButton b = (AbstractButton) o;	
-		b.doClick();
+		SwingUtilities.invokeAndWait(new Runnable() { 
+			public void run() {
+				b.doClick();
+			}
+		});
 		letDispatchThreadProcess();
 	}
-	
+
+	public void fillThisTextField(String textFieldName, String fillingString) throws InterruptedException, InvocationTargetException {
+		Object o = findComponentWithThisName(getLastVisibleWindow(), textFieldName);
+		if (o == null) 
+			throw new InvalidParameterException("Unable to find the component with name: " + textFieldName);
+		if (!(o instanceof JTextComponent)) 
+			throw new InvalidParameterException("The component named " + textFieldName + " is not a JTextCompoenent!");
+		JTextComponent b = (JTextComponent) o;	
+		SwingUtilities.invokeAndWait(new Runnable() { 
+			public void run() {
+				b.setText(fillingString);
+			}
+		});
+		letDispatchThreadProcess();
+	}
+
 	
 	public Thread startGUI(Runnable toRun, Class<? extends Window> classToExpect) throws InterruptedException {
 		Thread t = new Thread(toRun, "REpiceaGUIRobot");
@@ -117,7 +158,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 	
 	@Override
 	public void receiveThisWindow(Window retrievedWindow) {
-		currentWindow = retrievedWindow;
+		windows.add(new WeakReference<Window>(retrievedWindow));
 		q.add(retrievedWindow);
 	}
 	

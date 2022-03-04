@@ -32,6 +32,7 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
 import javax.swing.BoxLayout;
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -57,6 +58,8 @@ import repicea.gui.UIControlManager.CommonControlID;
 import repicea.util.ExtendedFileFilter;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.Language;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * The CommonGuiUtility class includes static methods that facilitates the Gui management.
@@ -190,7 +193,7 @@ public class CommonGuiUtility {
 	 * @param fileFilters a Vector of FileFilter instances
 	 * @param dialogType either JFileChooser.SAVE_DIALOG or JFileChooser.OPEN_DIALOG
 	 * @param fsv a FileSystemView instance
-	 * @return a FileChooserOutput instance
+	 * @return a FileChooserOutput instance (can be null)
 	 * @throws IOException if the dialog type is not recognized
 	 */
 	public static FileChooserOutput browseAction(Component owner,
@@ -242,9 +245,12 @@ public class CommonGuiUtility {
 			System.out.println("Error while opening JFileChooser.");
 			return new FileChooserOutput("", false);
 		}
-		//chooser.setFileSelectionMode ();
 		boolean acceptable = false;
 		int returnVal = JFileChooser.CANCEL_OPTION;
+		CommonGuiUtility.findAndAdaptButtonOfThisKindInFileChooser(chooser, CommonControlID.Open);
+		CommonGuiUtility.findAndAdaptButtonOfThisKindInFileChooser(chooser, CommonControlID.Save);
+		CommonGuiUtility.findAndAdaptButtonOfThisKindInFileChooser(chooser, CommonControlID.Cancel);
+		CommonGuiUtility.mapComponents(chooser, JTextField.class).get(0).setName("Filename");
 		while (!acceptable) {
 			if (dialogType == JFileChooser.OPEN_DIALOG) {
 				returnVal = chooser.showOpenDialog(owner);
@@ -273,7 +279,20 @@ public class CommonGuiUtility {
 		}
 	}
 	
-	
+	static void findAndAdaptButtonOfThisKindInFileChooser(JFileChooser fc, TextableEnum controlID) {
+		List<Component> buttons = CommonGuiUtility.mapComponents(fc, JButton.class);
+		for (Component c : buttons) {
+			if (REpiceaTranslator.getString(controlID).equals(((JButton) c).getText())) {
+				if (controlID instanceof Enum)
+					((JButton) c).setName(((Enum) controlID).name());
+				if (controlID instanceof CommonControlID) {
+					Icon icon = ((CommonControlID) controlID).getIcon();
+					if (icon != null) 
+						((JButton) c).setIcon(icon);
+				}
+			}
+		}
+	}
 	
 	
 
@@ -362,20 +381,6 @@ public class CommonGuiUtility {
 		}
 	}
 
-//	THIS METHOD DOES NOT WORK PROPERLY. THE FIELD ARE TOO SHORT IN HEIGHT	
-//	/**
-//	 * This method sets the number of column of a particular component
-//	 * @param component a JComponent instance
-//	 * @param numberOfColumns the number of columns
-//	 */
-//	public static void setNumberOfColumns(JComponent component, int numberOfColumns) {
-//		FontMetrics fm = component.getFontMetrics(component.getFont());
-//		int height = fm.getHeight() + 5;
-//		int width = fm.stringWidth("e") * numberOfColumns + 10;
-//		Dimension dim = new Dimension(width, height);
-//		component.setPreferredSize(dim);
-//	}
-	
 	/**
 	 * This method causes a JOptionPane.showErrorMessage to be sent on the Event Dispatch Thread.
 	 * @param message the error message to be displayed
@@ -493,18 +498,10 @@ public class CommonGuiUtility {
 		return convertedFilename;
 	}
 	
-//	static public void main(String[] args) {
-//		JDialog dialog = new JDialog();
-//		JLabel label = new JLabel();
-//		JPanel panel = new JPanel();
-//		panel.add(label);
-//		dialog.add(panel);
-//
-//		Object obj1 = getParentComponent(label, JPanel.class);
-//		Object obj2 = getParentWindow(label);
-//		int u = 0;
-////		popupWriteOverWarningDialog(null);
-//	}
+	static public void main(String[] args) {
+		REpiceaTranslator.setCurrentLanguage(Language.French);
+		CommonGuiUtility.browseAction(null, JFileChooser.FILES_ONLY, null, null, JFileChooser.SAVE_DIALOG);
+	}
 
 	
 }
