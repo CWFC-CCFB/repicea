@@ -64,9 +64,9 @@ public class REpiceaLicenseWindow extends REpiceaGenericShowDialog implements Ac
 	/*
 	 * Members of this class
 	 */
-	private JButton continueButton;
-	private JButton cancelButton;
-	private JRadioButton acceptingLicenseButton;
+	private final JButton continueButton;
+	private final JButton cancelButton;
+	private final JRadioButton acceptingLicenseButton;
 	private boolean licenseHasBeenAccepted;
 	
 	/**
@@ -77,6 +77,10 @@ public class REpiceaLicenseWindow extends REpiceaGenericShowDialog implements Ac
 	 */
 	public REpiceaLicenseWindow(Window parent, String licensePath) throws IOException {
 		super(parent, licensePath);
+		continueButton = UIControlManager.createCommonButton(CommonControlID.Continue);
+		cancelButton = UIControlManager.createCommonButton(CommonControlID.Cancel);
+		acceptingLicenseButton = new JRadioButton();
+		acceptingLicenseButton.setName("acceptLicense");
 		initUI();
 	}
 	
@@ -121,8 +125,6 @@ public class REpiceaLicenseWindow extends REpiceaGenericShowDialog implements Ac
 		 * Control panel
 		 */
 		JPanel controlPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-		continueButton = UIControlManager.createCommonButton(CommonControlID.Continue);
-		cancelButton = UIControlManager.createCommonButton(CommonControlID.Cancel);
 		controlPanel.add(continueButton);
 		controlPanel.add(cancelButton);
 		continueButton.setEnabled(false);				// set to disable until the user accepts the license
@@ -130,7 +132,6 @@ public class REpiceaLicenseWindow extends REpiceaGenericShowDialog implements Ac
 
 		JPanel accLicencePanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
 		
-		acceptingLicenseButton = new JRadioButton();
 		acceptingLicenseButton.setText(REpiceaTranslator.getString(ControlID.AcceptLicense));
 		acceptingLicenseButton.setFont(UIControlManager.getFont(FontType.ButtonFont));
 		acceptingLicenseButton.setSelected(false);	// by default is set to false
