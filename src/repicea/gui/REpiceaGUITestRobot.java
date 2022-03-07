@@ -163,7 +163,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 	}
 
 	private void waitForThisProperty(REpiceaAWTProperty property) throws InterruptedException {
-		while(!property.equals(repiceaEventQueue.take())) {}
+		while(!property.equals(repiceaEventQueue.take().property)) {}
 	}
 
 
