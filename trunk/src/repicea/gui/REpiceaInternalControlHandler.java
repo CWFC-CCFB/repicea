@@ -22,9 +22,11 @@ import java.awt.Window;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 
 import repicea.gui.REpiceaDialog.MessageID;
+import repicea.gui.UIControlManager.CommonControlID;
 import repicea.util.REpiceaTranslator;
 
 /**
@@ -42,12 +44,24 @@ class REpiceaInternalControlHandler implements PropertyChangeListener {
 	
 	protected void cancelRequestedAction() {
 		if (((REpiceaWindow) owner).askUserBeforeExit()) {
-			int reply = JOptionPane.showConfirmDialog((Window) owner, 
-					REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
-					REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning), 
+			
+//			int reply = JOptionPane.showConfirmDialog((Window) owner, 
+//					REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
+//					REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning), 
+//					JOptionPane.YES_NO_OPTION);
+			JOptionPane optionPane = new JOptionPane(REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
+					JOptionPane.QUESTION_MESSAGE,
 					JOptionPane.YES_NO_OPTION);
-			if (reply == 0) {
-				owner.firePropertyChange(REpiceaAWTProperty.WindowCancelledConfirmed, null, this);
+			JDialog dlg = optionPane.createDialog((Window) owner,	REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning));
+			CommonGuiUtility.findAndAdaptButtonOfThisKind(optionPane, CommonControlID.Yes);
+			CommonGuiUtility.findAndAdaptButtonOfThisKind(optionPane, CommonControlID.No);
+
+			dlg.setVisible(true);
+			Object reply = optionPane.getValue();
+			if (reply != null && reply instanceof Integer) {
+				if ((int) reply == 0) {
+					owner.firePropertyChange(REpiceaAWTProperty.WindowCancelledConfirmed, null, this);
+				}
 			}
 		} else {
 			owner.firePropertyChange(REpiceaAWTProperty.WindowCancelledConfirmed, null, this);

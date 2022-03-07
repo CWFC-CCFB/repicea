@@ -142,7 +142,10 @@ public class UIControlManager {
 		StopRecord("Stop", "Arr\u00EAter", "stoprecord.png"),
 		PlayRecord("Play", "Jouer", "playrecord.png"),
 		Record("Record", "Enregistrer", "record.png"),
-		FullScreen("Full screen", "Plein ecran", null);
+		FullScreen("Full screen", "Plein ecran", null),
+		Yes("Yes", "Oui", "ok.png"),
+		No("No", "Non", "cancel.png");
+
 		
 		String iconFilename;
 		
