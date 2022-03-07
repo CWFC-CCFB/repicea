@@ -28,12 +28,13 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.gui.REpiceaGUITestRobot;
 import repicea.gui.dnd.LocatedEvent;
 import repicea.util.ObjectUtility;
 
 public class ProcessSystemTest {
 
-	private final static int WAIT_TIME = 500;
+//	private final static int WAIT_TIME = 500;
 
 	private static enum FakeEnum {class1, class2}
 	
@@ -90,39 +91,34 @@ public class ProcessSystemTest {
 	public void creatingProcessorsLinksAndChangingValuesOfSliderAsASingleAction() throws InterruptedException {
 		SystemManager man = new SystemManager();
 		SystemManagerDialog dlg = man.getUI(null);
-		Runnable toRun = new Runnable() {
-			@Override
-			public void run() {
-				man.showUI(null);
-			}
-		};
-		Thread t = new Thread(toRun);
-		t.start();
-		Thread.sleep(WAIT_TIME);
+		
+		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
+		Thread t = robot.showWindow(man);
+		
 		SystemPanel sysPane = dlg.systemPanel;
 		Point loc = sysPane.getLocation();
 		LocatedEvent evt = new LocatedEvent(sysPane, new Point(loc.x + 50, loc.y + 50));
 			sysPane.acceptThisObject(new Processor("1"), evt);
-			Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		Assert.assertEquals("Testing if the processor has been recorded in the manager", 1, man.getList().size());
 		
 		evt = new LocatedEvent(sysPane, new Point(loc.x + 125, loc.y + 50));
 		sysPane.acceptThisObject(new Processor("2"), evt);
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		Assert.assertEquals("Testing if the processor has been recorded in the manager", 2, man.getList().size());
 		
 		sysPane.addLinkLine(new ProcessorLinkLine(sysPane, man.getList().get(0), man.getList().get(1)));
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		Assert.assertEquals("Testing if the link has been recorded in the manager", 1, sysPane.linkLines.size());
 		Assert.assertEquals("Testing if the link has been recorded in father processor", 1, man.getList().get(0).getSubProcessors().size());
 
 		dlg.undo.doClick();
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		Assert.assertEquals("Testing if the link has been undone in the manager", 0, sysPane.linkLines.size());
 		Assert.assertEquals("Testing if the link has been undone in father processor", 0, man.getList().get(0).getSubProcessors().size());
 		
 		dlg.redo.doClick();
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		Assert.assertEquals("Testing if the link has been redone in the manager", 1, sysPane.linkLines.size());
 		Assert.assertEquals("Testing if the link has been redone in father processor", 1, man.getList().get(0).getSubProcessors().size());
 
@@ -131,35 +127,28 @@ public class ProcessSystemTest {
 		Assert.assertEquals("Testing if initial flow is set to 0", 0, intake);
 		ProcessorLinkLineSlider linkDlg = link.getUI(dlg);
 		
-		toRun = new Runnable() {
-			@Override
-			public void run() {
-				link.showUI(dlg);
-			}
-		};
-		Thread t2 = new Thread(toRun);
-		t2.start();
+		Thread t2 = robot.showWindow(link);
 		
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		linkDlg.slider.setValue(25);
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		linkDlg.slider.setValue(55);
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		
 		linkDlg.setVisible(false);
 		linkDlg.windowClosing(new WindowEvent(linkDlg, WindowEvent.WINDOW_CLOSING));
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 
 		intake = man.getList().get(0).getSubProcessorIntakes().get(man.getList().get(1));
 		Assert.assertEquals("Testing if flow is now set to 55", 55, intake);
 		
 		dlg.undo.doClick();
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		intake = man.getList().get(0).getSubProcessorIntakes().get(man.getList().get(1));
 		Assert.assertEquals("Testing if intake has been properly undone", 0, intake);
 
 		dlg.redo.doClick();
-		Thread.sleep(WAIT_TIME);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
 		intake = man.getList().get(0).getSubProcessorIntakes().get(man.getList().get(1));
 		Assert.assertEquals("Testing if intake has been properly redone", 55, intake);
 

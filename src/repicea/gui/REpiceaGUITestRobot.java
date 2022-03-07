@@ -35,6 +35,7 @@ import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
+import repicea.gui.REpiceaToolKit.REpiceaEventListener;
 import repicea.gui.REpiceaToolKit.WindowTrackerListener;
 
 
@@ -44,19 +45,23 @@ import repicea.gui.REpiceaToolKit.WindowTrackerListener;
  * IMPORTANT: The method shutdown must be called when the robot is no longer needed.
  * @author Mathieu Fortin - March 2022
  */
-public class REpiceaGUITestRobot implements WindowTrackerListener {
+public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventListener {
 
-	private static final int WAIT_TIME_BETWEEN_INSTRUCTIONS = 1000;
+	private static final int WAIT_TIME_BETWEEN_INSTRUCTIONS = 500;
 	
 	private final BlockingQueue<Window> q = new LinkedBlockingQueue<Window>();
 	private final Vector<WeakReference<Window>> windows = new Vector<WeakReference<Window>>();
-	
+
+	private final BlockingQueue<REpiceaAWTEvent> repiceaEventQueue = new LinkedBlockingQueue<REpiceaAWTEvent>();
+
 	public REpiceaGUITestRobot() {
 		REpiceaToolKit.addWindowTrackerListener(this);
+		REpiceaToolKit.addREpiceaEventListener(this);
 	}
 
 	public void shutdown() {
 		REpiceaToolKit.removeWindowTrackerListener(this);
+		REpiceaToolKit.removeREpiceaEventListener(this);
 	}
 	
 	/**
@@ -109,12 +114,12 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 		return null;
 	}
 	
-	
 	public Component findComponentWithThisName(String name) { 
 		return findComponentWithThisName(getLastVisibleWindow(), name);
 	}
 	
-	public void clickThisButton(String buttonName) throws InterruptedException, InvocationTargetException {
+	public void clickThisButton(String buttonName, REpiceaAWTProperty property) throws InterruptedException, InvocationTargetException {
+		repiceaEventQueue.clear();
 		Object o = findComponentWithThisName(getLastVisibleWindow(), buttonName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + buttonName);
@@ -126,10 +131,44 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 				b.doClick();
 			}
 		});
-		letDispatchThreadProcess();
+		if (property != null) {
+			waitForThisProperty(property);
+		} else {
+			letDispatchThreadProcess();
+		}
+	}
+	
+	public void clickThisButton(String buttonName) throws InterruptedException, InvocationTargetException {
+		clickThisButton(buttonName, (REpiceaAWTProperty) null);
 	}
 
+	public void clickThisButton(String buttonName,  Class<? extends Window> windowToExpect) throws InterruptedException, InvocationTargetException {
+		q.clear();
+		Object o = findComponentWithThisName(getLastVisibleWindow(), buttonName);
+		if (o == null) 
+			throw new InvalidParameterException("Unable to find the component with name: " + buttonName);
+		if (!(o instanceof AbstractButton)) 
+			throw new InvalidParameterException("The component named " + buttonName + " is not a button!");
+		AbstractButton b = (AbstractButton) o;	
+		SwingUtilities.invokeAndWait(new Runnable() { 
+			public void run() {
+				b.doClick();
+			}
+		});
+		if (windowToExpect != null) {
+			while (!windowToExpect.isAssignableFrom(q.take().getClass())) {}
+		} else {
+			letDispatchThreadProcess();
+		}
+	}
+
+	private void waitForThisProperty(REpiceaAWTProperty property) throws InterruptedException {
+		while(!property.equals(repiceaEventQueue.take())) {}
+	}
+
+
 	public void fillThisTextField(String textFieldName, String fillingString) throws InterruptedException, InvocationTargetException {
+		repiceaEventQueue.clear();
 		Object o = findComponentWithThisName(getLastVisibleWindow(), textFieldName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + textFieldName);
@@ -152,6 +191,23 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 		return t;
 	}
 	
+	public Thread showWindow(REpiceaShowableUIWithParent showable) throws InterruptedException {
+		Component w = showable.getUI(null); 
+		if (!(w instanceof Window)) {
+			throw new InvalidParameterException("The showWindow method only works with REpiceaShowableUIWithParent instances that provide a Window as UI.");
+		}
+		Runnable doRun = new Runnable() {
+			public void run() {
+				showable.showUI(null);
+			}
+		};
+		Thread t = new Thread(doRun, "REpiceaGUIRobot");
+		t.start();
+		while (!w.getClass().isAssignableFrom(q.take().getClass())) {}
+		return t;
+	}
+
+	
 	public static void letDispatchThreadProcess() throws InterruptedException {
 		Thread.sleep(WAIT_TIME_BETWEEN_INSTRUCTIONS);
 	}
@@ -160,6 +216,11 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 	public void receiveThisWindow(Window retrievedWindow) {
 		windows.add(new WeakReference<Window>(retrievedWindow));
 		q.add(retrievedWindow);
+	}
+
+	@Override
+	public void receiveREpiceaEvent(REpiceaAWTEvent e) {
+		repiceaEventQueue.add(e);
 	}
 	
 }

@@ -140,10 +140,12 @@ public abstract class REpiceaFrame extends JFrame implements REpiceaWindow, Acti
 			} else {
 				setLocationRelativeTo(getOwner());
 			}
+			REpiceaAWTEvent.fireEvent(new REpiceaAWTEvent(this, REpiceaAWTProperty.WindowsAboutToBeVisible));
 			super.setVisible(bool);
 		} else if (isVisible() && !bool) {
 			doNotListenToAnymore();
 			super.setVisible(bool);
+			REpiceaAWTEvent.fireEvent(new REpiceaAWTEvent(this, REpiceaAWTProperty.WindowsJustSetToInvisible));
 		}
 	}
 	

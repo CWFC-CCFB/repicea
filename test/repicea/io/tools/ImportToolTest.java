@@ -2,16 +2,15 @@ package repicea.io.tools;
 
 import static org.junit.Assert.assertEquals;
 
-import java.awt.Window;
 import java.io.IOException;
 import java.util.List;
-
-import javax.swing.JButton;
 
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaGUITestRobot;
+import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.io.FileUtility;
 import repicea.io.ImportTest;
 import repicea.lang.REpiceaSystem;
@@ -94,11 +93,9 @@ public class ImportToolTest {
 	 * Rerun the same test than above but using the csv file instance + it tests 
 	 * the resetting of the CSVReader within the ImportFieldManager instance
 	 */
-	@SuppressWarnings("unchecked")
 	@Test
 	public void testWithGUI() throws Exception {
 		String sourcePath = ObjectUtility.getPackagePath(ImportTest.class) + "TEST6152.csv";
-		String results = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "result1.xml";
 			
 		RecordReaderImpl recordReader = new RecordReaderImpl();
 		
@@ -112,8 +109,8 @@ public class ImportToolTest {
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
 		Thread t = robot.startGUI(toRun, ImportFieldManagerDialog.class);
-		robot.clickThisButton("Ok");
-		robot.clickThisButton("Cancel");
+		robot.clickThisButton("Ok", REpiceaSimpleListDialog.class);
+		robot.clickThisButton("Cancel", REpiceaAWTProperty.WindowsJustSetToInvisible);
 		t.join();
 		robot.shutdown();
 		
