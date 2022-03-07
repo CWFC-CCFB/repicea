@@ -33,6 +33,8 @@ import org.apache.batik.svggen.SVGGraphics2D;
 import org.w3c.dom.DOMImplementation;
 import org.w3c.dom.Document;
 
+import repicea.gui.REpiceaAWTEvent;
+import repicea.gui.REpiceaAWTProperty;
 import repicea.io.GFileFilter.FileType;
 
 /**
@@ -82,7 +84,7 @@ public class REpiceaOSVGFileHandlerUI extends REpiceaSaveAsHandlerUI implements 
 	    svgGenerator.stream(writer, useCSS);
 	    writer.close();
 	    fos.close();
-
+	    REpiceaAWTEvent.fireEvent(new REpiceaAWTEvent(REpiceaAWTProperty.SVGFileSaved));
 	}
 	
 	
