@@ -247,9 +247,9 @@ public class CommonGuiUtility {
 		}
 		boolean acceptable = false;
 		int returnVal = JFileChooser.CANCEL_OPTION;
-		CommonGuiUtility.findAndAdaptButtonOfThisKindInFileChooser(chooser, CommonControlID.Open);
-		CommonGuiUtility.findAndAdaptButtonOfThisKindInFileChooser(chooser, CommonControlID.Save);
-		CommonGuiUtility.findAndAdaptButtonOfThisKindInFileChooser(chooser, CommonControlID.Cancel);
+		CommonGuiUtility.findAndAdaptButtonOfThisKind(chooser, CommonControlID.Open);
+		CommonGuiUtility.findAndAdaptButtonOfThisKind(chooser, CommonControlID.Save);
+		CommonGuiUtility.findAndAdaptButtonOfThisKind(chooser, CommonControlID.Cancel);
 		CommonGuiUtility.mapComponents(chooser, JTextField.class).get(0).setName("Filename");
 		while (!acceptable) {
 			if (dialogType == JFileChooser.OPEN_DIALOG) {
@@ -279,7 +279,7 @@ public class CommonGuiUtility {
 		}
 	}
 	
-	static void findAndAdaptButtonOfThisKindInFileChooser(JFileChooser fc, TextableEnum controlID) {
+	static void findAndAdaptButtonOfThisKind(Container fc, TextableEnum controlID) {
 		List<Component> buttons = CommonGuiUtility.mapComponents(fc, JButton.class);
 		for (Component c : buttons) {
 			if (REpiceaTranslator.getString(controlID).equals(((JButton) c).getText())) {
