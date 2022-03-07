@@ -30,13 +30,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * The UIToolKit class provides some static methods that are useful to interact with the User Interface.
  * @author Mathieu Fortin - May 2014
  */
-public class UIToolKit implements AWTEventListener {
+public class REpiceaToolKit implements AWTEventListener {
 
 	public static interface WindowTrackerListener {
 		public void receiveThisWindow(Window retrievedWindow);
 	}
 
-	private static final UIToolKit UIToolKit = new UIToolKit();
+	private static final REpiceaToolKit UIToolKit = new REpiceaToolKit();
 	
 	private final List<WindowTrackerListener> listeners = new CopyOnWriteArrayList<WindowTrackerListener>();
 	
@@ -44,7 +44,7 @@ public class UIToolKit implements AWTEventListener {
 	 * 
 	 * @param windowClass the class of the window to expect
 	 */
-	private UIToolKit() {
+	private REpiceaToolKit() {
 		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.WINDOW_EVENT_MASK);
 	}
 

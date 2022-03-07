@@ -35,7 +35,7 @@ import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
-import repicea.gui.UIToolKit.WindowTrackerListener;
+import repicea.gui.REpiceaToolKit.WindowTrackerListener;
 
 
 /**
@@ -52,11 +52,11 @@ public class REpiceaGUITestRobot implements WindowTrackerListener {
 	private final Vector<WeakReference<Window>> windows = new Vector<WeakReference<Window>>();
 	
 	public REpiceaGUITestRobot() {
-		UIToolKit.addWindowTrackerListener(this);
+		REpiceaToolKit.addWindowTrackerListener(this);
 	}
 
 	public void shutdown() {
-		UIToolKit.removeWindowTrackerListener(this);
+		REpiceaToolKit.removeWindowTrackerListener(this);
 	}
 	
 	/**
