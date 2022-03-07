@@ -33,7 +33,7 @@ public class REpiceaAWTProperty {
 	public static final REpiceaAWTProperty DisconnectAutoShutdown = new REpiceaAWTProperty("DisconnectAutoShutdown");
 	public static final REpiceaAWTProperty WindowsAboutToBeVisible = new REpiceaAWTProperty("WindowsAboutToBeVisible");
 	public static final REpiceaAWTProperty WindowsJustSetToInvisible = new REpiceaAWTProperty("WindowsJustSetToInvisible");
-
+	public static final REpiceaAWTProperty SVGFileSaved = new REpiceaAWTProperty("SVGFileSaved");
 	public static final REpiceaAWTProperty ActionPerformed = new REpiceaAWTProperty("ActionPerformed");
 
 	private final String propertyName;

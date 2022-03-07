@@ -66,7 +66,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 	public static enum MessageID implements TextableEnum {
 		SliderTitle("Output flux", "Flux sortant"),
 		Unnamed("Unnamed", "SansNom"),
-		ExportAsSVG("Export as SVG", "Exporter au format SVG");
+		ExportToSVG("Export to SVG", "Exporter au format SVG");
 
 		MessageID(String englishText, String frenchText) {
 			setText(englishText, frenchText);
@@ -131,7 +131,7 @@ public class SystemManagerDialog extends REpiceaDialog implements ActionListener
 		new REpiceaIOFileHandlerUI(this, caller, save, saveAs, load);
 
 		if (isBatikExtensionAvailable()) {	// The handler should not be instantiated before checking if batik is available otherwise this throws an exception
-			exportAsSVG = UIControlManager.createCommonMenuItem(MessageID.ExportAsSVG);
+			exportAsSVG = UIControlManager.createCommonMenuItem(MessageID.ExportToSVG);
 			new REpiceaOSVGFileHandlerUI(this, exportAsSVG, systemPanel.getInternalPanel());
 		}
 		

@@ -43,6 +43,8 @@ import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.permissions.DefaultREpiceaGUIPermission;
 import repicea.gui.permissions.REpiceaGUIPermission;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.TextableEnum;
 
 @SuppressWarnings("serial")
 public class REpiceaComboBoxOpenButton<P extends REpiceaShowableUIWithParent> extends REpiceaPanel implements ActionListener {
@@ -53,11 +55,12 @@ public class REpiceaComboBoxOpenButton<P extends REpiceaShowableUIWithParent> ex
 
 	/**
 	 * Specific constructor with eventual restricted permissions.
-	 * @param label the label of the combobox
+	 * @param label a {@code TextableEnum} instance
 	 * @param permission a REpiceaGUIPermission instance 
 	 */
-	public REpiceaComboBoxOpenButton(String label, REpiceaGUIPermission permission) {
+	public REpiceaComboBoxOpenButton(TextableEnum label, REpiceaGUIPermission permission) {
 		comboBox = new JComboBox<P>();
+		comboBox.setName(((Enum) label).name() + "_ComboBox");
 		FontMetrics fm = comboBox.getFontMetrics(comboBox.getFont());
 		int width = fm.stringWidth("e") * 35 + 2;
 		int height = fm.getHeight() + 5;
@@ -67,13 +70,14 @@ public class REpiceaComboBoxOpenButton<P extends REpiceaShowableUIWithParent> ex
 		
 		openButton = UIControlManager.createCommonButton(CommonControlID.Open);
 		openButton.setText("");
+		openButton.setName(((Enum) label).name());
 		openButton.setMargin(new Insets(2,2,2,2));
 		openButton.setToolTipText(CommonControlID.Open.toString());
 //		openButton.setEnabled(permission.isEnablingGranted());		// correction even if the option cannot be changed it should be at least opened
 
 		setLayout(new BorderLayout());
 		Border border = BorderFactory.createEtchedBorder();
-		setBorder(BorderFactory.createTitledBorder(border, label));
+		setBorder(BorderFactory.createTitledBorder(border, REpiceaTranslator.getString(label)));
 //		add(UIControlManager.getLabel(label));
 //		add(Box.createHorizontalStrut(5));
 		JPanel subPanel = new JPanel(new BorderLayout());
@@ -85,9 +89,9 @@ public class REpiceaComboBoxOpenButton<P extends REpiceaShowableUIWithParent> ex
 
 	/**
 	 * Default constructor with permissions granted.
-	 * @param label the label of the combobox
+	 * @param label a {@code TextableEnum} instance
 	 */
-	public REpiceaComboBoxOpenButton(String label) {
+	public REpiceaComboBoxOpenButton(TextableEnum label) {
 		this(label, new DefaultREpiceaGUIPermission(true));
 	}
 
