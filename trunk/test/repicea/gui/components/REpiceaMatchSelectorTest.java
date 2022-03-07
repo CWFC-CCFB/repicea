@@ -24,6 +24,8 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.gui.REpiceaAWTEvent;
+import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaGUITestRobot;
 import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.StatusClass;
 
@@ -78,17 +80,16 @@ public class REpiceaMatchSelectorTest {
 				-1, 
 				new String[]{"string", "status"});
 		REpiceaMatchSelectorDialog dlg = selector.getUI(null);
-		Runnable toRun = new Runnable() {
-			@Override
-			public void run() {
-				selector.showUI(null);
-			}
-		};
+//		Runnable toRun = new Runnable() {
+//			@Override
+//			public void run() {
+//				selector.showUI(null);
+//			}
+//		};
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
-		
-		Thread t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
-		robot.clickThisButton("Cancel");
+		Thread t = robot.showWindow(selector);
+		robot.clickThisButton("Cancel", REpiceaAWTProperty.WindowsJustSetToInvisible);
 		dlg.dispose();
 		t.join();
 		
@@ -104,15 +105,9 @@ public class REpiceaMatchSelectorTest {
 				complexObjects.toArray(new MyComplexObjectClass[]{}), 
 				new String[]{"string", "status", "index"});
 		dlg = selector2.getUI(null);
-		toRun = new Runnable() {
-			@Override
-			public void run() {
-				selector2.showUI(null);
-			}
-		};
 		
-		t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
-		robot.clickThisButton("Ok");
+		t = robot.showWindow(selector2);
+		robot.clickThisButton("Ok", REpiceaAWTProperty.WindowsJustSetToInvisible);
 		dlg.dispose();
 		t.join();
 		robot.shutdown();
@@ -132,15 +127,9 @@ public class REpiceaMatchSelectorTest {
 				complexObjects.toArray(new MyComplexObjectClass[]{}), 
 				new String[]{"string", "status", "index"});
 		REpiceaMatchSelectorDialog dlg = selector.getUI(null);
-		Runnable toRun = new Runnable() {
-			@Override
-			public void run() {
-				selector.showUI(null);
-			}
-		};
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
-		Thread t = robot.startGUI(toRun, REpiceaMatchSelectorDialog.class);
+		Thread t = robot.showWindow(selector);
 		REpiceaTableModel model = (REpiceaTableModel) dlg.getTable().getModel();
 		model.setValueAt(complexObjects.get(0), 1, 1);
 		robot.letDispatchThreadProcess();
@@ -149,7 +138,7 @@ public class REpiceaMatchSelectorTest {
 		Assert.assertEquals("Testing the match", StatusClass.alive.name(), match.name);
 		Assert.assertEquals("Testing the match index", StatusClass.alive.ordinal(), match.index);
 		
-		robot.clickThisButton("Ok");
+		robot.clickThisButton("Ok", REpiceaAWTProperty.WindowsJustSetToInvisible);
 		dlg.dispose();
 		t.join();
 		robot.shutdown();

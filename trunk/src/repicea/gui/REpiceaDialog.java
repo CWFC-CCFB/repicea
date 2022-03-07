@@ -109,11 +109,13 @@ public abstract class REpiceaDialog extends JDialog implements REpiceaWindow, Re
 			} else {
 				setLocation(location);
 			}
+			REpiceaAWTEvent.fireEvent(new REpiceaAWTEvent(this, REpiceaAWTProperty.WindowsAboutToBeVisible));
 			super.setVisible(bool);
 		} else if (isVisible() && !bool) {
 			doNotListenToAnymore();
 			UIControlManager.registerLocation(this);
 			super.setVisible(bool);
+			REpiceaAWTEvent.fireEvent(new REpiceaAWTEvent(this, REpiceaAWTProperty.WindowsJustSetToInvisible));
 		}
 	}
 	

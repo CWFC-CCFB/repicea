@@ -35,10 +35,15 @@ public class REpiceaToolKit implements AWTEventListener {
 	public static interface WindowTrackerListener {
 		public void receiveThisWindow(Window retrievedWindow);
 	}
+	
+	public static interface REpiceaEventListener {
+		public void receiveREpiceaEvent(REpiceaAWTEvent e);
+	}
 
 	private static final REpiceaToolKit UIToolKit = new REpiceaToolKit();
 	
-	private final List<WindowTrackerListener> listeners = new CopyOnWriteArrayList<WindowTrackerListener>();
+	private final List<WindowTrackerListener> windowListeners = new CopyOnWriteArrayList<WindowTrackerListener>();
+	private final List<REpiceaEventListener> repiceaListeners = new CopyOnWriteArrayList<REpiceaEventListener>();
 	
 	/**
 	 * 
@@ -48,6 +53,9 @@ public class REpiceaToolKit implements AWTEventListener {
 		Toolkit.getDefaultToolkit().addAWTEventListener(this, AWTEvent.WINDOW_EVENT_MASK);
 	}
 
+	public static REpiceaToolKit getInstance() {
+		return UIToolKit;
+	}
 	
    /**
      * Invoked when an event is dispatched in the AWT.
@@ -56,26 +64,44 @@ public class REpiceaToolKit implements AWTEventListener {
     public void eventDispatched(AWTEvent event) {
     	if (event instanceof WindowEvent) {
     		WindowEvent we = (WindowEvent) event;
-    		if (we.getID() == WindowEvent.WINDOW_OPENED) {
+    		if (we.getID() == WindowEvent.WINDOW_OPENED || we.getID() == WindowEvent.WINDOW_CLOSING) {
     			if (we.getSource() instanceof Window) {
-        			for (WindowTrackerListener listener : listeners) {
+        			for (WindowTrackerListener listener : windowListeners) {
         				listener.receiveThisWindow((Window) we.getSource()); 
         			}
     			}
-    		}
+    		} 
     	}
     }
 
+	public void rEpiceaEventDispatched(REpiceaAWTEvent e) {
+		for (REpiceaEventListener listener : repiceaListeners) {
+			listener.receiveREpiceaEvent(e);
+		}
+	}
 
     public static void addWindowTrackerListener(WindowTrackerListener listener) {
-    	if (!UIToolKit.listeners.contains(listener)) {
-    		UIToolKit.listeners.add(listener);
+    	if (!UIToolKit.windowListeners.contains(listener)) {
+    		UIToolKit.windowListeners.add(listener);
     	}
     }
     
     public static void removeWindowTrackerListener(WindowTrackerListener listener) {
-    	if (UIToolKit.listeners.contains(listener)) {
-    		UIToolKit.listeners.remove(listener);
+    	if (UIToolKit.windowListeners.contains(listener)) {
+    		UIToolKit.windowListeners.remove(listener);
+    	}
+    }
+
+    
+    public static void addREpiceaEventListener(REpiceaEventListener listener) {
+    	if (!UIToolKit.repiceaListeners.contains(listener)) {
+    		UIToolKit.repiceaListeners.add(listener);
+    	}
+    }
+    
+    public static void removeREpiceaEventListener(REpiceaEventListener listener) {
+    	if (UIToolKit.repiceaListeners.contains(listener)) {
+    		UIToolKit.repiceaListeners.remove(listener);
     	}
     }
 
