@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2015 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge Epicea.
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -43,43 +43,35 @@ class REpiceaInternalControlHandler implements PropertyChangeListener {
 	}
 	
 	protected void cancelRequestedAction() {
-		if (((REpiceaWindow) owner).askUserBeforeExit()) {
-			
-//			int reply = JOptionPane.showConfirmDialog((Window) owner, 
-//					REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
-//					REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning), 
-//					JOptionPane.YES_NO_OPTION);
-			JOptionPane optionPane = new JOptionPane(REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
-					JOptionPane.QUESTION_MESSAGE,
-					JOptionPane.YES_NO_OPTION);
-			JDialog dlg = optionPane.createDialog((Window) owner,	REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning));
-			CommonGuiUtility.findAndAdaptButtonOfThisKind(optionPane, CommonControlID.Yes);
-			CommonGuiUtility.findAndAdaptButtonOfThisKind(optionPane, CommonControlID.No);
-
-			dlg.setVisible(true);
-			Object reply = optionPane.getValue();
-			if (reply != null && reply instanceof Integer) {
-				if ((int) reply == 0) {
-					owner.firePropertyChange(REpiceaAWTProperty.WindowCancelledConfirmed, null, this);
-				}
-			}
-		} else {
+		if (owner.askUserBeforeExit()) 
+			askUserBeforeExit(REpiceaAWTProperty.WindowCancelledConfirmed);
+		else 
 			owner.firePropertyChange(REpiceaAWTProperty.WindowCancelledConfirmed, null, this);
-		}
 	}
 
-	protected void okRequestedAction() {
-		if (owner.askUserBeforeExit()) {
-			int reply = JOptionPane.showConfirmDialog((Window) owner, 
-					REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
-					REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning), 
-					JOptionPane.YES_NO_OPTION);
-			if (reply == 0) {
-				owner.firePropertyChange(REpiceaAWTProperty.WindowAcceptedConfirmed, null, this);
+	private void askUserBeforeExit(REpiceaAWTProperty propertyToBeConfirmed) {
+		JOptionPane optionPane = new JOptionPane(REpiceaTranslator.getString(MessageID.ConfirmQuitMessage),
+				JOptionPane.QUESTION_MESSAGE,
+				JOptionPane.YES_NO_OPTION);
+		JDialog dlg = optionPane.createDialog((Window) owner,	REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning));
+		CommonGuiUtility.findAndAdaptButtonOfThisKind(optionPane, CommonControlID.Yes);
+		CommonGuiUtility.findAndAdaptButtonOfThisKind(optionPane, CommonControlID.No);
+
+		dlg.setVisible(true);
+		Object reply = optionPane.getValue();
+		if (reply != null && reply instanceof Integer) {
+			if ((int) reply == 0) {
+				owner.firePropertyChange(propertyToBeConfirmed, null, this);
 			}
-		} else {
-			owner.firePropertyChange(REpiceaAWTProperty.WindowAcceptedConfirmed, null, this);
 		}
+	}
+	
+	
+	protected void okRequestedAction() {
+		if (owner.askUserBeforeExit()) 
+			askUserBeforeExit(REpiceaAWTProperty.WindowAcceptedConfirmed);
+		else 
+			owner.firePropertyChange(REpiceaAWTProperty.WindowAcceptedConfirmed, null, this);
 	}
 	
 	protected void helpRequestedAction() {
