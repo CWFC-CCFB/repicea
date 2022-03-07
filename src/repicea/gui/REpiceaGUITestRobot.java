@@ -49,7 +49,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 
 	private static final int WAIT_TIME_BETWEEN_INSTRUCTIONS = 500;
 	
-	private final BlockingQueue<Window> q = new LinkedBlockingQueue<Window>();
+	private final BlockingQueue<Window> windowQueue = new LinkedBlockingQueue<Window>();
 	private final Vector<WeakReference<Window>> windows = new Vector<WeakReference<Window>>();
 
 	private final BlockingQueue<REpiceaAWTEvent> repiceaEventQueue = new LinkedBlockingQueue<REpiceaAWTEvent>();
@@ -143,7 +143,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 	}
 
 	public void clickThisButton(String buttonName,  Class<? extends Window> windowToExpect) throws InterruptedException, InvocationTargetException {
-		q.clear();
+		windowQueue.clear();
 		Object o = findComponentWithThisName(getLastVisibleWindow(), buttonName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + buttonName);
@@ -156,7 +156,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 			}
 		});
 		if (windowToExpect != null) {
-			while (!windowToExpect.isAssignableFrom(q.take().getClass())) {}
+			while (!windowToExpect.isAssignableFrom(windowQueue.take().getClass())) {}
 		} else {
 			letDispatchThreadProcess();
 		}
@@ -185,13 +185,15 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 
 	
 	public Thread startGUI(Runnable toRun, Class<? extends Window> classToExpect) throws InterruptedException {
+		windowQueue.clear();
 		Thread t = new Thread(toRun, "REpiceaGUIRobot");
 		t.start();
-		while (!classToExpect.isAssignableFrom(q.take().getClass())) {}
+		while (!classToExpect.isAssignableFrom(windowQueue.take().getClass())) {}
 		return t;
 	}
 	
 	public Thread showWindow(REpiceaShowableUIWithParent showable) throws InterruptedException {
+		windowQueue.clear();
 		Component w = showable.getUI(null); 
 		if (!(w instanceof Window)) {
 			throw new InvalidParameterException("The showWindow method only works with REpiceaShowableUIWithParent instances that provide a Window as UI.");
@@ -203,7 +205,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		};
 		Thread t = new Thread(doRun, "REpiceaGUIRobot");
 		t.start();
-		while (!w.getClass().isAssignableFrom(q.take().getClass())) {}
+		while (!w.getClass().isAssignableFrom(windowQueue.take().getClass())) {}
 		return t;
 	}
 
@@ -215,7 +217,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 	@Override
 	public void receiveThisWindow(Window retrievedWindow) {
 		windows.add(new WeakReference<Window>(retrievedWindow));
-		q.add(retrievedWindow);
+		windowQueue.add(retrievedWindow);
 	}
 
 	@Override
