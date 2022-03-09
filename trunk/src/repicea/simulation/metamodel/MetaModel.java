@@ -27,9 +27,9 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
@@ -41,9 +41,10 @@ import repicea.io.Saveable;
 import repicea.math.Matrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
+import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.mcmc.MetropolisHastingsParameters;
 import repicea.util.REpiceaLogManager;
 
@@ -120,21 +121,6 @@ public class MetaModel implements Saveable {
 				"repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper");
 	}
 
-//	protected static VerboseLevel Verbose = VerboseLevel.Minimum; 
-
-//	public static enum VerboseLevel {None,
-//		Minimum,
-//		Medium,
-//		High;
-//		
-//		public boolean shouldVerboseAtThisLevel(VerboseLevel level) {
-//			if (ordinal() >= level.ordinal()) {
-//				return true;
-//			} else {
-//				return false;
-//			}
-//		}
-//	}
 
 	public static enum ModelImplEnum {
 		SimpleSlope(true), SimplifiedChapmanRichards(true), ChapmanRichards(true),
@@ -178,26 +164,6 @@ public class MetaModel implements Saveable {
 
 	}
 
-//	static class SimulationParameters implements Cloneable {
-//		protected int nbBurnIn = 5000;
-//		protected int nbRealizations = 500000 + nbBurnIn;
-//		protected int nbInternalIter = 10000;
-//		protected int oneEach = 50;
-//		protected int nbInitialGrid = 10000;	
-//		
-//		SimulationParameters() {}
-//		
-//		@Override
-//		public SimulationParameters clone() {
-//			try {
-//				return (SimulationParameters) super.clone();
-//			} catch (CloneNotSupportedException e) {
-//				e.printStackTrace();
-//				return null;
-//			}
-//		}
-//	}
-
 	protected MetropolisHastingsParameters mhSimParms;
 	protected final Map<Integer, ScriptResult> scriptResults;
 	protected AbstractModelImplementation model;
@@ -206,6 +172,18 @@ public class MetaModel implements Saveable {
 	protected final String geoDomain;
 	protected final String dataSource;
 	public Date lastFitTimeStamp;
+	private transient GaussianEstimate parameterEstimateGenerator;
+	public static final String PREDICTIONS = "predictions";
+	public static final String PREDICTION_VARIANCE = "predictionVariance";
+	
+	public enum PredictionVarianceOutputType {
+		// no variance output
+		NONE,			
+		// Parameter estimates variance only
+		PARAMEST,
+		// parameter estimates variance including random effects
+		PARAMESTRE,
+	}
 
 	/**
 	 * Constructor.
@@ -405,10 +383,113 @@ public class MetaModel implements Saveable {
 		}
 	}
 
+	/**
+	 * Gets a single prediction using the model parameters
+	 * 
+	 * @param ageYr The ageYr for which the prediction is to be computed                   
+	 * @param timeSinceInitialDateYr The number of years since initial date year for the prediction
+	 * @return the prediction
+	 */
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (hasConverged()) {
 			double pred = model.getPrediction(ageYr, timeSinceInitialDateYr, 0d);
 			return pred;
+		} else {
+			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
+		}
+	}
+	
+	private GaussianEstimate getParameterEstimateGenerator() {
+		if (parameterEstimateGenerator == null)
+			parameterEstimateGenerator = new GaussianEstimate(model.getParameters().getSubMatrix(model.fixedEffectsParameterIndices, null),
+					model.getParmsVarCov().getSubMatrix(model.fixedEffectsParameterIndices, model.fixedEffectsParameterIndices));
+		return parameterEstimateGenerator;
+	}
+	
+	
+	/**
+	 * Gets multiple predictions and associated variance using the model parameters  
+	 * 
+	 * @param ageYr An array of all ageYrs for which the predictions are to be computed                   
+	 * @param timeSinceInitialDateYr The number of years since initial date year for the predictions
+	 * @param varianceOutputType The desired variance output type.  
+	 * 			NONE means no variance output for predictions 
+	 * 			PARAMETER_ESTIMATES returns simple variance for parameter estimates
+	 * 			PARAMETER_ESTIMATES_WITH_RANDOM_EFFECT returns variance for parameter estimates including random effect on variance
+	 * 			 
+	 * @return the predictions two different maps : one for PREDICTIONS and one for PREDICTION_VARIANCE
+	 */
+	public LinkedHashMap<String, LinkedHashMap<Integer, Double>> getPredictions(int[] ageYr, int timeSinceInitialDateYr, PredictionVarianceOutputType varianceOutputType) throws MetaModelException {
+		LinkedHashMap<String, LinkedHashMap<Integer, Double>> result = new LinkedHashMap<String, LinkedHashMap<Integer, Double>>();
+		result.put(PREDICTIONS, getMonteCarloPredictions(ageYr, timeSinceInitialDateYr, 0, 0).get(0).get(0));
+		if (varianceOutputType != PredictionVarianceOutputType.NONE) {
+			LinkedHashMap<Integer, Double> variance = new LinkedHashMap<Integer, Double>(ageYr.length);
+			for (int k = 0; k < ageYr.length; k++) {
+				variance.put(ageYr[k], getPredictionVariance(ageYr[k], timeSinceInitialDateYr, varianceOutputType == PredictionVarianceOutputType.PARAMESTRE));
+			}
+			
+			result.put(PREDICTION_VARIANCE, variance);
+		}
+		
+		return result;
+	}
+	
+	/**
+	 * Gets multiple predictions sets using the model parameters using Monte Carlo simulation on model parameters 
+	 * 
+	 * @param ageYr An array of all ageYrs for which the predictions are to be computed                   
+	 * @param timeSinceInitialDateYr The number of years since initial date year for the predictions
+	 * @param nbSubjects The number of subjects to generate random parameters for  (use 0 to disable MC simulation) 
+	 * @param nbRealizations The number of realizations to generate random parameters for (use 0 to disable MC simulation)
+	 * 			 
+	 * @return the predictions two different maps : one for PREDICTIONS and one for PREDICTION_VARIANCE
+	 */	public LinkedHashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> getMonteCarloPredictions(int[] ageYr, int timeSinceInitialDateYr, int nbSubjects, int nbRealizations) throws MetaModelException {
+		if (hasConverged()) {
+			boolean randomEffectVariabilityEnabled = nbSubjects > 0;
+			boolean parameterVariabilityEnabled = nbRealizations > 0;
+			
+			List<Matrix> parmDeviates = new ArrayList<Matrix>();
+			for (int i = 0; i < nbRealizations; i++) {
+				parmDeviates.add(getParameterEstimateGenerator().getRandomDeviate());
+			}
+			
+			double varianceRandomEffect = model instanceof AbstractMixedModelFullImplementation ? 
+					model.getParameters().getValueAt(((AbstractMixedModelFullImplementation)model).indexRandomEffectVariance, 0) : 0.0;
+					
+			double stdRandomEffect = Math.sqrt(varianceRandomEffect);
+				
+			int ns = randomEffectVariabilityEnabled ? nbSubjects : 1;
+			int nr = parameterVariabilityEnabled ? nbRealizations : 1;
+			LinkedHashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>> result = new LinkedHashMap<Integer, LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>>();
+			for (int i = 0; i < nr; i++) {
+				result.put(i, new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>());
+				for (int j = 0; j < ns; j++) {
+					result.get(i).put(j, new LinkedHashMap<Integer, Double>());
+					double rj = StatisticalUtility.getRandom().nextGaussian() * stdRandomEffect;
+					for (int k = 0; k < ageYr.length; k++) {						
+						double pred = model.getPrediction(ageYr[k], 
+								timeSinceInitialDateYr, 
+								rj, 
+								parameterVariabilityEnabled ? parmDeviates.get(i) : getFinalParameterEstimates());
+								
+						result.get(i).get(j).put(ageYr[k], pred);
+					}
+				}
+			}
+						
+			return result;
+		} else {
+			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
+		}
+	}
+	
+	public double getPredictionVariance(int ageYr, int timeSinceInitialDateYr, boolean includeRandomEffectVariance) throws MetaModelException {
+		if (hasConverged()) {
+			double variance = model.getPredictionVariance(ageYr, timeSinceInitialDateYr, 0d);
+			if (includeRandomEffectVariance && model instanceof AbstractMixedModelFullImplementation) {
+				variance += ((AbstractMixedModelFullImplementation)model).getVarianceDueToRandomEffect(ageYr, timeSinceInitialDateYr);
+			}
+			return variance;
 		} else {
 			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
 		}
