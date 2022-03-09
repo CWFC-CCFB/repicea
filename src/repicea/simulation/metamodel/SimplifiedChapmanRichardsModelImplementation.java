@@ -32,9 +32,10 @@ class SimplifiedChapmanRichardsModelImplementation extends ChapmanRichardsModelI
 	}
 
 	@Override
-	double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
-		double b1 = getParameters().getValueAt(0, 0);
-		double b2 = getParameters().getValueAt(1, 0);
+	double getPrediction(double ageYr, double timeSinceBeginning, double r1, Matrix parameters) {
+		Matrix params = parameters == null ? getParameters() : parameters;
+		double b1 = params.getValueAt(0, 0);
+		double b2 = params.getValueAt(1, 0);
 		double pred = (b1 + r1) * (1 - Math.exp(-b2 * ageYr));
 		return pred;
 	}

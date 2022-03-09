@@ -52,4 +52,11 @@ abstract class AbstractMixedModelFullImplementation extends AbstractModelImpleme
 		dbw.setParameterValue(0, parameters.getValueAt(indexFirstRandomEffect + i, 0));
 		return dbw.getLogLikelihood();
 	}	
+	
+	protected double getVarianceDueToRandomEffect(double ageYr, double timeSinceBeginning) {		
+		double randomEffectVariance = getParameters().getValueAt(this.indexRandomEffectVariance , 0);
+		double value = this.getFirstDerivative(ageYr, timeSinceBeginning, 0.0).getValueAt(0, 0);
+		
+		return value * value * randomEffectVariance;   
+	}
 }

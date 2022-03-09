@@ -268,7 +268,11 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		return generatePredictions(dbw, randomEffect, false);
 	}
 	
-	abstract double getPrediction(double ageYr, double timeSinceBeginning, double r1);
+	final double getPrediction(double ageYr, double timeSinceBeginning, double r1) {
+		return this.getPrediction(ageYr, timeSinceBeginning, r1, null);
+	}
+	
+	abstract double getPrediction(double ageYr, double timeSinceBeginning, double r1, Matrix parameters);
 	
 	abstract Matrix getFirstDerivative(double ageYr, double timeSinceBeginning, double r1);
 
