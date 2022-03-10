@@ -465,7 +465,7 @@ public class MetaModel implements Saveable {
 				result.put(i, new LinkedHashMap<Integer, LinkedHashMap<Integer, Double>>());
 				for (int j = 0; j < ns; j++) {
 					result.get(i).put(j, new LinkedHashMap<Integer, Double>());
-					double rj = StatisticalUtility.getRandom().nextGaussian() * stdRandomEffect;
+					double rj = randomEffectVariabilityEnabled ? StatisticalUtility.getRandom().nextGaussian() * stdRandomEffect: 0.0;
 					for (int k = 0; k < ageYr.length; k++) {						
 						double pred = model.getPrediction(ageYr[k], 
 								timeSinceInitialDateYr, 
