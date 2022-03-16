@@ -26,24 +26,14 @@ import repicea.util.JarUtility;
 public class REpiceaAppVersionTest {
 	
 	@Test
-	public void compileAndRetrieveRevision() {
-		String build = REpiceaAppVersion.getInstance().getBuild();
-		System.out.println("Build is: " + build);
+	public void compileAndRetrieveRevision() {		
 		String version = REpiceaAppVersion.getInstance().getVersion();
 		System.out.println("Version is: " + version);
 		if (JarUtility.isEmbeddedInJar(REpiceaAppVersion.class)) {
-			try {
-				Integer.parseInt(build);
-			} catch (NumberFormatException e) {
-				Assert.fail("The revision cannot be parsed to an integer!");
-			}
-			try {
-				Double.parseDouble(version);
-			} catch (NumberFormatException e) {
-				Assert.fail("The version cannot be parsed to a double!");
-			}
+			String[] split = version.split("\\.");
+			Assert.assertEquals(3, split.length);			
 		} else {
-			Assert.assertEquals("Unknown", build);
+			Assert.assertEquals("Unknown", version);
 		}
 	}
 }

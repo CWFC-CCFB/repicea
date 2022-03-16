@@ -18,16 +18,12 @@
  */
 package repicea.app;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.security.InvalidParameterException;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
 import repicea.util.JarUtility;
-import repicea.util.ObjectUtility;
 
 /**
  * This class retrieves information on the version and other features of the repicea.jar application. 
@@ -37,24 +33,19 @@ public class REpiceaAppVersion {
 
 	private static REpiceaAppVersion SINGLETON;
 
-	private final String version;
-	private final String revision;
+	private final String version;	
 	
 	protected REpiceaAppVersion() {
 		String filePath = JarUtility.getJarFileImInIfAny(getClass());
 		if (filePath != null) {
 			try {
-				String filename = ObjectUtility.getRelativePackagePath(getClass()) + "revision";
-				InputStream in = getClass().getResourceAsStream("/" + filename);
-				BufferedReader br = new BufferedReader(new InputStreamReader(in));
-				revision = br.readLine().split("=")[1];
-				version = br.readLine().split("=")[1];
+				Manifest m = JarUtility.getManifestFromThisJarFile(filePath);
+				version = m.getMainAttributes().get(Attributes.Name.SPECIFICATION_VERSION).toString();				
 			} catch (IOException e) {
 				throw new InvalidParameterException("Cannot retrieve manifest from jar file: " + filePath);
 			}
 		} else {
-			version = "Unknown";
-			revision = "Unknown";
+			version = "Unknown";			
 		}
 	}
 
@@ -65,18 +56,6 @@ public class REpiceaAppVersion {
 		return SINGLETON;
 	}
 	
-	/**
-	 * This method returns the revision number, i.e. the label "revision" + the build number.
-	 * @return a String
-	 */
-	public final String getRevision() {return "Revision " + revision.trim();}
-
-	/**
-	 * This method returns the build. It is just the number without any other string.
-	 * @return the build number as a string.
-	 */
-	public final String getBuild() {return revision.trim();}
-
 	/**
 	 * Return the version number. Typically, 1.1.819. The last number represents the revision.
 	 * @return
