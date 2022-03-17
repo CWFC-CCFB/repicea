@@ -414,8 +414,8 @@ public class MetaModel implements Saveable {
 	 * @param timeSinceInitialDateYr The number of years since initial date year for the predictions
 	 * @param varianceOutputType The desired variance output type.  
 	 * 			NONE means no variance output for predictions 
-	 * 			PARAMETER_ESTIMATES returns simple variance for parameter estimates
-	 * 			PARAMETER_ESTIMATES_WITH_RANDOM_EFFECT returns variance for parameter estimates including random effect on variance
+	 * 			PARAMEST returns simple variance for parameter estimates
+	 * 			PARAMESTRE returns variance for parameter estimates including random effect on variance
 	 * 			 
 	 * @return the predictions two different maps : one for PREDICTIONS and one for PREDICTION_VARIANCE
 	 */
