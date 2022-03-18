@@ -30,6 +30,7 @@ import java.net.Socket;
  * The TCPSocketWrapper class handles the output and input of a TCP/IP socket. 
  * @author Mathieu Fortin - December 2011 (refactoring January 2019)
  */
+@Deprecated
 public class TCPSocketWrapper implements SocketWrapper {
 	
 	private final byte[] buffer = new byte[100000];

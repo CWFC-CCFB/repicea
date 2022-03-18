@@ -21,6 +21,7 @@ package repicea.net;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+@Deprecated
 public class RemotePropertyChangeListener extends RemoteListener implements PropertyChangeListener {
 
 	private static final long serialVersionUID = 20111223L;

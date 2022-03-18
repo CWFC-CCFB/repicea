@@ -30,6 +30,7 @@ import java.util.EventObject;
  * EventObject instance from any class it listens to, it sends this instance through the socket to the local listener.
  * @author Mathieu Fortin - December 2011
  */
+@Deprecated
 public abstract class RemoteListener implements Serializable {
 
 	private static final long serialVersionUID = 20111223L;

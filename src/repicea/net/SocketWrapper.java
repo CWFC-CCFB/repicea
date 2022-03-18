@@ -27,6 +27,7 @@ import java.net.InetAddress;
  * it is closed or not.
  * @author Mathieu Fortin - January 2019
  */
+@Deprecated
 public interface SocketWrapper extends Closeable {
 
 	/**
