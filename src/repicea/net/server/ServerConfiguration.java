@@ -49,13 +49,13 @@ public class ServerConfiguration implements Serializable {
 		} else {
 			this.numberOfClientThreads = numberOfClientThreads;
 		}
-		if (outerPort < 1024 || outerPort > 49151) {
-			throw new InvalidParameterException("The outer port must be between 1024 and 49151");
+		if (outerPort < 1024 || outerPort > 65535) {
+			throw new InvalidParameterException("The outer port must be between 1024 and 65535");
 		} else {
 			this.outerPort = outerPort;
 		}
-		if (internalPort != null && (internalPort < 1024 || internalPort > 49151)) {
-			throw new InvalidParameterException("The inner port must be between 1024 and 49151");
+		if (internalPort != null && (internalPort < 1024 || internalPort > 65535)) {
+			throw new InvalidParameterException("The inner port must be between 1024 and 65535");
 		} else {
 			this.innerPort = internalPort;
 		}

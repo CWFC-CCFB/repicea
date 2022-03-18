@@ -29,6 +29,7 @@ import java.net.SocketException;
  * The UDPSocketWrapper class handles the output and input of a UDP socket. 
  * @author Mathieu Fortin - January 2019 (still under development)
  */
+@Deprecated
 public class UDPSocketWrapper implements SocketWrapper {
 
 	private final boolean isJavaObjectExpected;

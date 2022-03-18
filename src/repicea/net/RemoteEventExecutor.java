@@ -30,6 +30,7 @@ import repicea.util.AbstractEventExecutor;
  * for the event object. If the object belongs to a component, it is run on the Event Dispatch Thread.
  * @author Mathieu Fortin - December 2011
  */
+@Deprecated
 @SuppressWarnings("rawtypes")
 public class RemoteEventExecutor extends AbstractEventExecutor {
 	

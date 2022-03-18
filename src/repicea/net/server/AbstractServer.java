@@ -51,7 +51,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 	 * This internal class handles the calls and stores these in the queue.
 	 * @author Mathieu Fortin - October 2011
 	 */
-	private class CallReceiverThread extends Thread {
+	protected class CallReceiverThread extends Thread {
 
 		private boolean shutdownCall;
 		protected final ServerSocket serverSocket;
@@ -171,7 +171,7 @@ public abstract class AbstractServer extends AbstractGenericEngine implements Pr
 //	private ServerSocket serverSocket;
 	private ArrayList<ClientThread> clientThreads;
 	protected final LinkedBlockingQueue<SocketWrapper> clientQueue;
-	private CallReceiverThread callReceiver;
+	protected final CallReceiverThread callReceiver;
 	
 	protected final boolean isCallerAJavaApplication;
 	

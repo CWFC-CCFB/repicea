@@ -31,7 +31,7 @@ public class REpiceaAppVersionTest {
 		System.out.println("Version is: " + version);
 		if (JarUtility.isEmbeddedInJar(REpiceaAppVersion.class)) {
 			String[] split = version.split("\\.");
-			Assert.assertNotEquals(0, split);			
+			Assert.assertTrue(split.length > 1);			
 		} else {
 			Assert.assertEquals("Unknown", version);
 		}
