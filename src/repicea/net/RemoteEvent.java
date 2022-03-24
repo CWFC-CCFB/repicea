@@ -26,6 +26,7 @@ import java.util.EventObject;
  * the local listener.
  * @author Mathieu Fortin - December 2011
  */
+@Deprecated
 public class RemoteEvent implements Serializable {
 	
 	private static final long serialVersionUID = 1L;

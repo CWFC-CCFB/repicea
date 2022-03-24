@@ -21,6 +21,7 @@ package repicea.net;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
+@Deprecated
 public class RemoteActionListener extends RemoteListener implements	ActionListener {
 
 	private static final long serialVersionUID = 20111227L;

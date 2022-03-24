@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 
+@Deprecated
 public abstract class RemoteEventManager implements Closeable {
 
 	protected enum InternalCall {CloseConnection};
