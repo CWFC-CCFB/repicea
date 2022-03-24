@@ -175,6 +175,7 @@ public class MetaModel implements Saveable {
 	private transient GaussianEstimate parameterEstimateGenerator;
 	public static final String PREDICTIONS = "predictions";
 	public static final String PREDICTION_VARIANCE = "predictionVariance";
+	private transient Date lastAccessed;	// the last datetime at which this metamodel was accessed (used in cache management in CFSStandGrowth) 
 	
 	public enum PredictionVarianceOutputType {
 		// no variance output
@@ -219,6 +220,15 @@ public class MetaModel implements Saveable {
 	 */
 	public boolean hasConverged() {
 		return model != null ? model.hasConverged() : false;
+	}
+	
+	/**
+	 * Returns the timestamp of the last prediction from this metamodel
+	 * 
+	 * @return a valid Date or null if never accessed
+	 */
+	public Date getLastAccessed() {
+		return lastAccessed;
 	}
 
 	void add(int initialAge, ScriptResult result) {
@@ -393,6 +403,7 @@ public class MetaModel implements Saveable {
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (hasConverged()) {
 			double pred = model.getPrediction(ageYr, timeSinceInitialDateYr, 0d);
+			this.lastAccessed = new Date(System.currentTimeMillis());
 			return pred;
 		} else {
 			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
@@ -476,6 +487,8 @@ public class MetaModel implements Saveable {
 					}
 				}
 			}
+			
+			this.lastAccessed = new Date(System.currentTimeMillis());
 						
 			return result;
 		} else {
