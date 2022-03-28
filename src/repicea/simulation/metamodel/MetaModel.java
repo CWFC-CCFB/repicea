@@ -22,6 +22,7 @@ package repicea.simulation.metamodel;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -175,7 +176,7 @@ public class MetaModel implements Saveable {
 	private transient GaussianEstimate parameterEstimateGenerator;
 	public static final String PREDICTIONS = "predictions";
 	public static final String PREDICTION_VARIANCE = "predictionVariance";
-	private transient Date lastAccessed;	// the last datetime at which this metamodel was accessed (used in cache management in CFSStandGrowth) 
+	private transient LocalDateTime lastAccessed;	// the last datetime at which this metamodel was accessed (used in cache management in CFSStandGrowth) 
 	
 	public enum PredictionVarianceOutputType {
 		// no variance output
@@ -227,7 +228,7 @@ public class MetaModel implements Saveable {
 	 * 
 	 * @return a valid Date or null if never accessed
 	 */
-	public Date getLastAccessed() {
+	public LocalDateTime getLastAccessed() {
 		return lastAccessed;
 	}
 
@@ -403,7 +404,7 @@ public class MetaModel implements Saveable {
 	public double getPrediction(int ageYr, int timeSinceInitialDateYr) throws MetaModelException {
 		if (hasConverged()) {
 			double pred = model.getPrediction(ageYr, timeSinceInitialDateYr, 0d);
-			this.lastAccessed = new Date(System.currentTimeMillis());
+			lastAccessed = LocalDateTime.now();
 			return pred;
 		} else {
 			throw new MetaModelException("The meta-model has not converged or has not been fitted yet!");
@@ -488,7 +489,7 @@ public class MetaModel implements Saveable {
 				}
 			}
 			
-			this.lastAccessed = new Date(System.currentTimeMillis());
+			lastAccessed = LocalDateTime.now();
 						
 			return result;
 		} else {
