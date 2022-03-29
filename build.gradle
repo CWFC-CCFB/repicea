@@ -175,4 +175,5 @@ publishRepiceaPublicationToMavenLocal {
 publishRepiceaPublicationToLocalFileRepository {
 	dependsOn integrationTest
 }
+
  
