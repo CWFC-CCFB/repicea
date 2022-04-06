@@ -21,6 +21,7 @@ package repicea.math;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.Assert;
@@ -136,7 +137,8 @@ public class MatrixTest {
 		
 		Matrix coordinates = new Matrix(20,1,0,1);
 		
-		Matrix rMatrix = StatisticalUtility.constructRMatrix(coordinates, 2, 0.2, TypeMatrixR.LINEAR);
+//		Matrix rMatrix = StatisticalUtility.constructRMatrix(coordinates, 2, 0.2, TypeMatrixR.LINEAR);
+		Matrix rMatrix = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {2d, 0.2}), TypeMatrixR.LINEAR, coordinates);
 		Matrix invMat = rMatrix.getInverseMatrix();
 	
 		Matrix ident = rMatrix.multiply(invMat);
@@ -182,7 +184,8 @@ public class MatrixTest {
 			record[0] = size;
 			startingTime = System.currentTimeMillis();
 			Matrix coordinates = new Matrix(size,1,0,1);
-			Matrix rMatrix = StatisticalUtility.constructRMatrix(coordinates, 2, 0.2, TypeMatrixR.LINEAR);
+//			Matrix rMatrix = StatisticalUtility.constructRMatrix(coordinates, 2, 0.2, TypeMatrixR.LINEAR);
+			Matrix rMatrix = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {2d, 0.2}), TypeMatrixR.LINEAR, coordinates);
 			rMatrix.getInverseMatrix();
 			record[1] = (System.currentTimeMillis() - startingTime) * .001;
 			writer.addRecord(record);

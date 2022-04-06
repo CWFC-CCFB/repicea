@@ -20,6 +20,7 @@ package repicea.stats.distributions;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -101,7 +102,8 @@ public final class CenteredGaussianDistribution implements Distribution {
 			List<Integer> referenceList = new ArrayList<Integer>();
 			referenceList.addAll(((List) key));		// make a copy to avoid changes through reference
 			Matrix distances = new Matrix(referenceList);
-			Matrix correlationMatrix = StatisticalUtility.constructRMatrix(distances, 1d, correlationParameter, type);
+//			Matrix correlationMatrix = StatisticalUtility.constructRMatrix(distances, 1d, correlationParameter, type);
+			Matrix correlationMatrix = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, correlationParameter}), type, distances);
 			Matrix varianceCovariance = correlationMatrix.scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
 			structuredVarianceCovarianceMap.put(referenceList, varianceCovariance);
 			Matrix lowerChol = varianceCovariance.getLowerCholTriangle();
