@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2017 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,13 +28,26 @@ import repicea.math.Matrix;
 
 /**
  * This class contains static methods that are useful for statistical regressions.
- * @author Mathieu Fortin - August 2012, December 2017
+ * @author Mathieu Fortin - August 2012, December 2017, April 2022
  */
-public class StatisticalUtility {
+public final class StatisticalUtility {
 
 	private static REpiceaRandom random;
 	
-	public static enum TypeMatrixR {LINEAR, LINEAR_LOG, COMPOUND_SYMMETRY, POWER, ARMA}
+	public static enum TypeMatrixR {
+		LINEAR(2), 
+		LINEAR_LOG(2), 
+		COMPOUND_SYMMETRY(2), 
+		POWER(2), 
+		ARMA(3);
+		
+		public final int nbParameters;
+		
+		TypeMatrixR(int nbParameters) {
+			this.nbParameters = nbParameters;
+		}
+		
+	}
 	
 	/**
 	 * This method is a shortcut for inverting an AR1 correlation matrix.
@@ -69,14 +82,19 @@ public class StatisticalUtility {
 	}
 	
 	/**
-	 * Construct a within-subject correlation matrix using a variance parameter, a correlation parameter and a column vector of coordinates.
+	 * Construct a within-subject correlation matrix using a variance parameter, a correlation parameter and a column vector of coordinates. <br>
+	 * <br>
+	 * @deprecated
+     * This method is no longer acceptable.
+     * <p> Use {@link constructRMatrix(covParms, type, coordinates)} instead.
 	 * @param coordinates a column vector of coordinates from which the distances are calculated
 	 * @param varianceParameter the variance parameter
 	 * @param covarianceParameter the covariance parameter
 	 * @param type the type of correlation
 	 * @return the resulting matrix
 	 */
-	public static Matrix constructRMatrix(Matrix coordinates, double varianceParameter, double covarianceParameter, TypeMatrixR type) {
+	@Deprecated
+	protected static Matrix constructRMatrix(Matrix coordinates, double varianceParameter, double covarianceParameter, TypeMatrixR type) {
 		if (!coordinates.isColumnVector()) {
 			throw new UnsupportedOperationException("Matrix.constructRMatrix() : The coordinates matrix is not a column vector");
 		} else {
@@ -134,7 +152,143 @@ public class StatisticalUtility {
 	}
 	
 	/**
-	 * Construct a within-subject correlation matrix using a rho parameter, a gamma parameter, a residual parameter and a column vector of coordinates.
+	 * Compute the Euclidean distance between two points. <br>
+	 * <br>
+	 * This method assumes that the checks have been performed on the coordinates argument. Basically,
+	 * these matrices should be column vectors of the same size. Each one of them represents a dimensions.
+	 * 
+	 * @param i the index of the first point
+	 * @param j the index of the second point
+	 * @param coordinates A series of column matrices that stand for the coordinates. 
+	 * @return
+	 */
+	protected final static double getEuclideanDistance(int i, int j, Matrix... coordinates) {
+		double squareDiffSum = 0d;
+		for (int k = 0; k < coordinates.length; k++) {
+			Matrix c = coordinates[k];
+			double diff = c.getValueAt(i, 0) - c.getValueAt(j, 0); 
+			squareDiffSum += diff * diff;
+		}
+		return Math.sqrt(squareDiffSum);
+	}
+	
+	
+	/**
+	 * Compute the R matrix <br>
+	 * <br>
+	 * Compute the R matrix of the type set by the type argument. 
+	 * 
+	 * @param covParms a List of double containing the parameter. The first is the variance parameter, the second is the 
+	 * covariance parameter. In case of ARMA type, there is a third parameter which is the gamma parameter.
+	 * @param type a TypeMatrixR enum
+	 * @param coordinates a series of Matrices instance that stand for the coordinates. These should be column vectors of 
+	 * the same size. Specifying two matrices implies that the Euclidean distance is based on two dimensions. Three matrices
+	 * means three dimensions and so on.
+	 * @return a Matrix instance
+	 */
+	public static Matrix constructRMatrix(List<Double> covParms, TypeMatrixR type, Matrix... coordinates) {
+		if (covParms == null || covParms.size() < type.nbParameters) {
+			throw new InvalidParameterException("The covParms list should contain this number of parameters: " + type.nbParameters + " when using type " + type.name());
+		}
+		if (coordinates == null || coordinates.length == 0) {
+			throw new InvalidParameterException("The coordinates argument should contain at least one matrix.");
+		}
+		int nrow = -1;
+		// check if the coordinates argument complies
+		for (int i = 0; i < coordinates.length; i++) {
+			if (!coordinates[i].isColumnVector()) {
+				throw new InvalidParameterException("The coordinates should contain only column vectors!");
+			} else {
+				if (nrow == -1) {
+					nrow = coordinates[i].m_iRows;
+				} else {
+					if (coordinates[i].m_iRows != nrow) {
+						throw new InvalidParameterException("The coordinates should contain only column vectors of the same size!");
+					}
+				}	
+			}
+		}
+		
+		double varianceParameter = covParms.get(0);
+		double covarianceParameter = covParms.get(1);
+		double gamma = type == TypeMatrixR.ARMA ? covParms.get(2) : 0;
+		
+		double distance;
+		Matrix matrixR = new Matrix(nrow,nrow);
+		for (int i = 0; i < nrow; i++) {
+			for (int j = i; j < nrow; j++) {
+				double corr = 0d;
+				switch(type) {
+				case LINEAR:					// linear case
+					distance = getEuclideanDistance(i, j, coordinates);
+					corr = 1 - covarianceParameter * distance;
+					if (corr >= 0) {
+						matrixR.setValueAt(i, j, varianceParameter * corr);
+						matrixR.setValueAt(j, i, varianceParameter * corr);
+					}
+					break;
+				case LINEAR_LOG:				// linear log case
+					distance = getEuclideanDistance(i, j, coordinates);
+					if (distance == 0) {
+						corr = 1d;
+					} else {
+						corr = 1 - covarianceParameter*Math.log(distance);
+					}
+					if (corr >= 0) {
+						matrixR.setValueAt(i, j, varianceParameter * corr);
+						matrixR.setValueAt(j, i, varianceParameter * corr);
+					}
+					break;
+				case COMPOUND_SYMMETRY:
+					if (i == j) {
+						matrixR.setValueAt(i, j, varianceParameter + covarianceParameter);
+					} else {
+						matrixR.setValueAt(i, j, covarianceParameter);
+						matrixR.setValueAt(j, i, covarianceParameter);
+					}
+					break;
+				case POWER:                  // power case
+					distance = getEuclideanDistance(i, j, coordinates);
+					if (distance == 0) {
+						corr = 1d;
+					} else {
+						corr = Math.pow (covarianceParameter, distance);
+					}
+					if (corr >= 0) {
+						matrixR.setValueAt(i, j, varianceParameter * corr);
+						matrixR.setValueAt(j, i, varianceParameter * corr);
+					}
+					break;   
+				case ARMA:		
+					if (i == j) {
+						matrixR.setValueAt(i, i, varianceParameter);
+					} else {
+						distance = Math.abs(i - j) - 1;
+						double powCol = Math.pow(covarianceParameter, distance);
+						matrixR.setValueAt(i, j, varianceParameter * gamma * powCol);
+						matrixR.setValueAt(j, i, matrixR.getValueAt(i, j));						
+					}
+					break;
+
+				default:
+					throw new UnsupportedOperationException("Matrix.ConstructRMatrix() : This type of correlation structure is not supported in this function");
+				}
+			}
+		}
+		return matrixR;
+	}
+
+	
+	
+	
+	
+	
+	/**
+	 * Construct a within-subject correlation matrix using a rho parameter, a gamma parameter, a residual parameter and a column vector of coordinates. <br>
+	 * @deprecated
+     * This method is no longer acceptable.
+     * <p> Use {@link constructRMatrix(covParms, type, coordinates)} instead.
+	 * <br>
 	 * @param coordinates a column vector of coordinates from which the distances are calculated
 	 * @param rho the rho parameter
 	 * @param gamma the gamma parameter
@@ -142,7 +296,8 @@ public class StatisticalUtility {
 	 * @param type the type of correlation
 	 * @return the resulting matrix
 	 */
-	public static Matrix constructRMatrix(Matrix coordinates, double rho, double gamma, double residual, TypeMatrixR type) {
+	@Deprecated
+	protected static Matrix constructRMatrix(Matrix coordinates, double rho, double gamma, double residual, TypeMatrixR type) {
 		if (!coordinates.isColumnVector()) {
 			throw new UnsupportedOperationException("Matrix.constructRMatrix() : The coordinates matrix is not a column vector");
 		} else {

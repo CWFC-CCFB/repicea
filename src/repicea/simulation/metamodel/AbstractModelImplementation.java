@@ -72,7 +72,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		@Override
 		void updateCovMat(Matrix parameters) {
 			double rhoParm = parameters.getValueAt(indexCorrelationParameter, 0);	
-			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
+//			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
+			Matrix corrMat = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, rhoParm}), TypeMatrixR.POWER, distances);
 			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
 
 			Matrix invCorr = StatisticalUtility.getInverseCorrelationAR1Matrix(distances.m_iRows, rhoParm);
