@@ -39,7 +39,8 @@ public final class StatisticalUtility {
 		LINEAR_LOG(2), 
 		COMPOUND_SYMMETRY(2), 
 		POWER(2), 
-		ARMA(3);
+		ARMA(3),
+		EXPONENTIAL(2);
 		
 		public final int nbParameters;
 		
@@ -141,9 +142,8 @@ public final class StatisticalUtility {
                               matrixR.setValueAt(j, i, varianceParameter * corr);
                         }
                         break;   
-
 					default:
-						throw new UnsupportedOperationException("Matrix.ConstructRMatrix() : This type of correlation structure is not supported in this function");
+						throw new UnsupportedOperationException("Matrix.ConstructRMatrix() : This type of correlation structure: " + type + " is not supported in this function");
 					}
 				}
 			}
@@ -251,12 +251,13 @@ public final class StatisticalUtility {
 					distance = getEuclideanDistance(i, j, coordinates);
 					if (distance == 0) {
 						corr = 1d;
+						matrixR.setValueAt(i, j, varianceParameter * corr);
 					} else {
 						corr = Math.pow (covarianceParameter, distance);
-					}
-					if (corr >= 0) {
-						matrixR.setValueAt(i, j, varianceParameter * corr);
-						matrixR.setValueAt(j, i, varianceParameter * corr);
+						if (corr >= 0) {
+							matrixR.setValueAt(i, j, varianceParameter * corr);
+							matrixR.setValueAt(j, i, varianceParameter * corr);
+						}
 					}
 					break;   
 				case ARMA:		
@@ -269,7 +270,19 @@ public final class StatisticalUtility {
 						matrixR.setValueAt(j, i, matrixR.getValueAt(i, j));						
 					}
 					break;
-
+				case EXPONENTIAL:
+					distance = getEuclideanDistance(i, j, coordinates);
+					if (distance == 0) {
+						corr = 1d;
+						matrixR.setValueAt(i, j, varianceParameter * corr);
+					} else {
+						corr = Math.exp(-distance / covarianceParameter);
+						if (corr >= 0) {
+							matrixR.setValueAt(i, j, varianceParameter * corr);
+							matrixR.setValueAt(j, i, varianceParameter * corr);
+						}
+					}
+					break;   
 				default:
 					throw new UnsupportedOperationException("Matrix.ConstructRMatrix() : This type of correlation structure is not supported in this function");
 				}

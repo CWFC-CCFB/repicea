@@ -93,13 +93,15 @@ public class StatisticalUtilityTest {
 		Matrix coordinate = new Matrix(10,1,1,1);
 		Matrix formerImpl, newImpl;
 		for (TypeMatrixR type : TypeMatrixR.values()) {
-			if (type == TypeMatrixR.ARMA) {
-				formerImpl = StatisticalUtility.constructRMatrix(coordinate, covParms.get(1), covParms.get(2), covParms.get(0), type);
-			} else {
-				formerImpl = StatisticalUtility.constructRMatrix(coordinate, covParms.get(0), covParms.get(1), type);
+			if (type != TypeMatrixR.EXPONENTIAL) { // has been implemented after this function got deprecated MF2022-05-11
+				if (type == TypeMatrixR.ARMA) {
+					formerImpl = StatisticalUtility.constructRMatrix(coordinate, covParms.get(1), covParms.get(2), covParms.get(0), type);
+				} else {	
+					formerImpl = StatisticalUtility.constructRMatrix(coordinate, covParms.get(0), covParms.get(1), type);
+				}
+				newImpl = StatisticalUtility.constructRMatrix(covParms, type, coordinate);
+				Assert.assertTrue("Testing type " + type.name(), !formerImpl.subtract(newImpl).anyElementDifferentFrom(0d));
 			}
-			newImpl = StatisticalUtility.constructRMatrix(covParms, type, coordinate);
-			Assert.assertTrue("Testing type " + type.name(), !formerImpl.subtract(newImpl).anyElementDifferentFrom(0d));
 		}
 	}
 
@@ -114,5 +116,26 @@ public class StatisticalUtilityTest {
 		Assert.assertEquals("Testing correlation at 0, 1", expected, actual, 1E-8);
 	}
 
+	@Test
+	public void simpleComparisonBetweenExponentialAndPowerCovarianceStructure() {
+		List<Double> covParmsExponential = Arrays.asList(new Double[]{1d, 1.00});
+		double conversionToPower = Math.exp(-1d/covParmsExponential.get(1));
+		List<Double> covParmsPower = Arrays.asList(new Double[]{1d, conversionToPower});
+		
+		Matrix coordinateX = new Matrix(2,1,0,1);
+		Matrix coordinateY = new Matrix(2,1,1,-1);
+		Matrix matRPower = StatisticalUtility.constructRMatrix(covParmsPower, TypeMatrixR.POWER, coordinateX, coordinateY);
+		Matrix matRExp = StatisticalUtility.constructRMatrix(covParmsExponential, TypeMatrixR.EXPONENTIAL, coordinateX, coordinateY);
+		double expectedPow = Math.pow(covParmsPower.get(1), Math.sqrt(2d));
+		double actualPow = matRPower.getValueAt(0, 1);
+		Assert.assertEquals("Testing correlation at 0, 1", expectedPow, actualPow, 1E-8);
+
+		double expectedExp = Math.exp(-Math.sqrt(2d) / covParmsExponential.get(1));
+		double actualExp = matRPower.getValueAt(0, 1);
+		Assert.assertEquals("Testing correlation at 0, 1", expectedExp, actualExp, 1E-8);
+
+		boolean areEqual = !matRPower.subtract(matRExp).getAbsoluteValue().anyElementLargerThan(1E-8);
+		Assert.assertTrue("Testing if the two matrices are equal", areEqual);
+	}
 	
 }
