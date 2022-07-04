@@ -88,4 +88,14 @@ public class Observation implements Comparable {
 			return true;
 		}
 	}
+	
+	/**
+	 * Return the value at a particular index within this observation instance.
+	 * @param index the index an integer.
+	 * @return an Object instance
+	 */
+	public Object getValueAt(int index) {
+		return values.get(index);
+	}
+	
 }
