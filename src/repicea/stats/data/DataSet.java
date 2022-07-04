@@ -43,10 +43,6 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  */
 public class DataSet implements Saveable, REpiceaUIObject {
 
-	protected static enum ActionType {Replace,
-		Add;
-	}
-
 	private static enum MessageID implements TextableEnum {
 
 		ReadingFileMessage("Reading file...", "Lecture du fichier...");
@@ -125,47 +121,15 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		}
 	}
 
-	private void setValueAt(int i, int j, Object value) {
+	protected final void setValueAt(int i, int j, Object value) {
 		if (value.getClass().equals(fieldTypes.get(j))) {
 			observations.get(i).values.remove(j);
 			observations.get(i).values.add(j, value);
 		} 
 	}
 	
-	private Object addTwoNumbers(Number number1, Number number2) {
-		if (number1 instanceof Integer && number2 instanceof Integer) {
-			return number1.intValue() + number2.intValue();
-		} else {
-			return number1.doubleValue() + number2.doubleValue();
-		}
-	}
-	
-	
-	protected void setValueAt(int i, int j, Object newValue, ActionType actionType) {
-		if (actionType == ActionType.Replace) {
-			setValueAt(i, j, newValue);
-		} else if (actionType == ActionType.Add) {
-			Object formerValue = getValueAt(i, j);
-			Object addedNewValue;
-			if (formerValue instanceof Number && newValue instanceof Number) {
-				addedNewValue = addTwoNumbers((Number) newValue, (Number) formerValue);
-			} else {
-				if (formerValue.toString().isEmpty()) {
-					addedNewValue = newValue.toString();
-				} else {
-					addedNewValue = formerValue.toString().concat(" - " + newValue.toString());
-				}
-			}
-			setValueAt(i, j, addedNewValue);
-		}
-	}
 
-	protected void setValueAt(int i, String fieldName, Object value, ActionType actionType) {
-		int j = getIndexOfThisField(fieldName);
-		if (j != -1) {
-			setValueAt(i, j, value, actionType);
-		}
-	}
+	
 
 	/**
 	 * Indexes the different field types. More specifically, it goes 
@@ -261,36 +225,6 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		Collections.sort(observations);
 	}
 	
-	/**
-	 * Split the data set into different data sets following the values of the fields specified in the
-	 * fieldIndicesForSplitting parameters. 
-	 * @param fieldIndicesForSplitting
-	 * @param fieldIndicesForSorting
-	 * @return a Map of DataSet
-	 */
-	DataSetGroupMap splitAndOrder(List<Integer> fieldIndicesForSplitting, List<Integer> fieldIndicesForSorting) {
-		DataSetGroupMap outputMap = new DataSetGroupMap(this);
-		for (Observation obs : observations) {
-			DataGroup id = new DataGroup();
-			for (Integer index : fieldIndicesForSplitting) {
-				id.add(obs.values.get(index));
-			}
-			if (!outputMap.containsKey(id)) {
-				DataSet ds = new DataSet("");
-				ds.fieldNames = this.fieldNames;
-				ds.fieldTypes = this.fieldTypes;
-				outputMap.put(id, ds);
-			} 
-			DataSet ds = outputMap.get(id);
-			ds.observations.add(obs);
-		}
-		if (fieldIndicesForSorting != null && !fieldIndicesForSorting.isEmpty()) {
-			for (DataSet ds : outputMap.values()) {
-				ds.sortObservations(fieldIndicesForSorting);
-			}
-		}
-		return outputMap;
-	}
 	
 	/**
 	 * This method returns the number of observations in the dataset.
@@ -508,19 +442,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		return observations;
 	}
 	
-	void correctValue(int i, String fieldName, Object newValue, String javaComment, boolean setOtherObservationsToOk, String javaCommentOtherObservations) {
-		for (int j = 0; j < getNumberOfObservations(); j++) {
-			if (j == i) {
-				setValueAt(j, fieldName, newValue, ActionType.Replace);
-				setValueAt(j, DataPattern.JavaComments, javaComment, ActionType.Replace);
-			} else {
-				if (setOtherObservationsToOk) {
-					setValueAt(j, DataPattern.JavaComments, javaCommentOtherObservations, ActionType.Replace);
-				}
-			}
-			 
-		}
-	}
+	
 	
 	@Override
 	public String toString() {
