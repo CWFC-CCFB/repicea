@@ -40,6 +40,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	protected boolean isInterceptModel;
 	protected Matrix vectorY;
 	protected Matrix matrixX;
+	protected List<String> effects;
 	
 	/**
 	 * General constructor.
@@ -136,7 +137,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		vectorY = dataSet.getVectorOfThisField(yName);
 		String modelEffects = responseAndFixedEffects.get(1);
 
-		List<String> effects = ObjectUtility.decomposeUsingToken(modelEffects, "+");
+		effects = ObjectUtility.decomposeUsingToken(modelEffects, "+");
 
 		for (String effectName : effects) {
 			StringTokenizer tkzInclusiveInteraction = new StringTokenizer(effectName, "*");
@@ -207,5 +208,13 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	@Override
 	public DataSet getDataSet() {return dataSet;}
 
-	
+	@Override
+	public boolean isThisEffectInModelDefinition(String effect) {
+		for (String e : effects) {
+			if (e.equals(effect)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

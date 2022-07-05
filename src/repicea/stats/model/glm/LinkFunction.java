@@ -33,7 +33,7 @@ import repicea.stats.LinearStatisticalExpression;
  * @author Mathieu Fortin - May 2012
  */
 @SuppressWarnings("serial")
-public final class LinkFunction extends AbstractMathematicalFunctionWrapper implements Serializable {
+public class LinkFunction extends AbstractMathematicalFunctionWrapper implements Serializable {
 	
 	public static enum Type {Logit, Log, CLogLog}
 	

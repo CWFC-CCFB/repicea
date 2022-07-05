@@ -86,4 +86,10 @@ public interface StatisticalDataStructure {
 	public List getPossibleValueForDummyVariable(String fieldName, String refClass);
 
 
+	/**
+	 * Checks if a particular effect is part of the model definition.
+	 * @param effect
+	 * @return a boolean
+	 */
+	public boolean isThisEffectInModelDefinition(String effect);
 }

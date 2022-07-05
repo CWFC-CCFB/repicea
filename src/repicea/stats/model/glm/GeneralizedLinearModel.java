@@ -105,10 +105,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 	
 	protected void initializeLinkFunction(Type linkFunctionType) {
-//		LinearStatisticalExpression le = new LinearStatisticalExpression();
 		LinkFunction lf = new LinkFunction(linkFunctionType);
-//		lf.setParameterValue(LFParameter.Eta, le);
-		
 		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(lf));
 		setCompleteLLK();
 	}
