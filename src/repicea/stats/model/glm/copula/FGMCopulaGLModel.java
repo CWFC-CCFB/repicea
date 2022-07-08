@@ -41,35 +41,6 @@ import repicea.stats.model.glm.GeneralizedLinearModel;
  */
 public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	
-	@SuppressWarnings("rawtypes")
-	protected static class LikelihoodValue implements Comparable {
-
-		private double llk;
-		private Matrix beta;
-		
-		protected LikelihoodValue(Matrix beta, double llk) {
-			this.beta = beta.getDeepClone();
-			this.llk = llk;
-		}
-		
-		@Override
-		public int compareTo(Object arg0) {
-			double reference = ((LikelihoodValue) arg0).llk;
-			if (this.llk < reference) {
-				return 1;
-			} else if (this.llk == reference) {
-				return 0;
-			} else {
-				return -1;
-			}
-		}
-		
-		protected Matrix getParameters() {return beta;}
-	}
-	
-	
-	
-	
 	private CopulaExpression copula;
 	
 	/**
@@ -103,45 +74,6 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		}
 	}
 
-	/**
-	 * This method scans the log likelihood function within a range of values for a particular parameter.
-	 * @param parameterName the index of the parameter
-	 * @param start the starting value
-	 * @param end the ending value
-	 * @param step the step between these two values.
-	 */
-	@SuppressWarnings("unchecked")
-	public void gridSearch(int parameterName, double start, double end, double step) {
-		System.out.println("Initializing grid search...");
-		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
-		Matrix originalParameters = getParameters();
-		double llk;
-		for (double value = start; value < end + step; value+=step) {
-			Matrix beta = originalParameters.getDeepClone();
-			beta.setValueAt(parameterName, 0, value);
-			setParameters(beta);
-			((FGMCompositeLogLikelihood) getCompleteLogLikelihood()).reset();
-			llk = getCompleteLogLikelihood().getValue();
-			likelihoodValues.add(new LikelihoodValue(beta, llk));
-			System.out.println("Parameter value : " + value + "; Log-likelihood : " + llk);
-		}
-		
-		Collections.sort(likelihoodValues);
-		LikelihoodValue lk;
-		Matrix bestFittingParameters = null;
-		for (int i = 0; i < likelihoodValues.size(); i++) {
-			lk = likelihoodValues.get(i);
-			if (!Double.isNaN(lk.llk)) {
-				bestFittingParameters = lk.getParameters();
-				break;
-			}
-		}
-		if (bestFittingParameters == null) {
-			throw new InvalidParameterException("All the likelihoods of the grid are NaN!");
-		} else {
-			setParameters(bestFittingParameters);
-		}
-	}
 	
 	@Override
 	protected void setCompleteLLK() {completeLLK = new FGMCompositeLogLikelihood(individualLLK,	matrixX, y,	getDataStructure(),	copula);}

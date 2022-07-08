@@ -19,14 +19,14 @@
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
 
 /**
  * The GaussLegendreQuadrature class implements a numerical integration method based
@@ -115,7 +115,7 @@ public class GaussLegendreQuadrature extends GaussQuadrature implements Unidimen
 	}
 
 	@Override
-	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate, int index,
+	public double getIntegralApproximation(EvaluableFunction<Double> functionToEvaluate, int index,
 			boolean isParameter) {
 		
 		double originalValue;
@@ -146,5 +146,37 @@ public class GaussLegendreQuadrature extends GaussQuadrature implements Unidimen
 		return sum;
 	}
 
-	
+	@Override
+	public Matrix getIntegralApproximationForMatrixFunction(EvaluableFunction<Matrix> functionToEvaluate, 
+											int index,
+											boolean isParameter) {
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+		
+		Matrix sum = null;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			Matrix value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i) * getRescalingFactors().get(i));
+			sum = i == 0 ? value : sum.add(value);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+		
+		return sum;
+	}
+
 }

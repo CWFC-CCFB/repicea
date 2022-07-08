@@ -49,8 +49,9 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 		this.hierarchicalStructure = hierarchicalStructure;
 		this.copulaExpression = copulaExpression;
 	}
-			
-	protected void reset() {
+		
+	@Override
+	public void reset() {
 		llkUptoDate = false;
 		additionalLlkTermUptoDate = false;
 		gradientVectorUptoDate = false;

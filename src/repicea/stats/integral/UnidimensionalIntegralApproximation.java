@@ -18,7 +18,8 @@
  */
 package repicea.stats.integral;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
 
 /**
  * Provides a simple method for numerical integration of unidimensional integrals.
@@ -33,6 +34,15 @@ public interface UnidimensionalIntegralApproximation {
 	 * @param isParameter a boolean true it is a parameter, false it is a variable
 	 * @return a double
 	 */
-	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate, int index,	boolean isParameter);
+	public double getIntegralApproximation(EvaluableFunction<Double> functionToEvaluate, int index, boolean isParameter);
+
+	/**
+	 * Compute the numerical integration for one-dimension integrals.
+	 * @param functionToEvaluate an AbstractMathematicalFunction function
+	 * @param index the index of the parameter or the variable that is integrated
+	 * @param isParameter a boolean true it is a parameter, false it is a variable
+	 * @return a double
+	 */
+	public Matrix getIntegralApproximationForMatrixFunction(EvaluableFunction<Matrix> functionToEvaluate, int index, boolean isParameter);
 
 }

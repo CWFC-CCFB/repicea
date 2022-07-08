@@ -73,4 +73,11 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	}
 
 	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+	
+	/**
+	 * Resets this composite likelihood to its initial values.
+	 */
+	public void reset() {}
+
+	
 }

@@ -68,5 +68,15 @@ public class MathUtility {
 			return result;
 		}
 	}
+	
+	/**
+	 * Makes it possible to determine if a double is negative or not. Useful to identify -0.0 for example.
+	 * After Peter Lawrey on <a href=https://stackoverflow.com/questions/10399801/how-to-check-if-double-value-is-negative-or-not> StackOverFlow </a>
+	 * @param d
+	 * @return
+	 */
+	public static boolean isNegative(double d) {
+	     return Double.doubleToRawLongBits(d) < 0;
+	}
 
 }

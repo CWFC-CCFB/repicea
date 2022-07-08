@@ -20,14 +20,17 @@ package repicea.stats.estimators;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import repicea.math.Matrix;
+import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.StatisticalModel;
+import repicea.util.REpiceaLogManager;
 
 /**
  * This interface specifies if the optimizer is based on a maximum likelihood theory.
@@ -35,11 +38,13 @@ import repicea.stats.model.StatisticalModel;
  */
 public class MaximumLikelihoodEstimator implements Estimator {
 	
+	public static String LOGGER_NAME = "MLEstimator";
 	protected boolean hasConverged;
 	protected GaussianEstimate parameterEstimate;
 	
 	protected final repicea.math.optimizer.NewtonRaphsonOptimizer nro;
 
+	
 	public MaximumLikelihoodEstimator() {
 		nro = new repicea.math.optimizer.NewtonRaphsonOptimizer();
 	}
@@ -55,8 +60,10 @@ public class MaximumLikelihoodEstimator implements Estimator {
 			indices.add(i);
 		}
 		try {
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.INFO, LOGGER_NAME, "Starting optimization");
 			nro.optimize(llk, indices);
 		} catch (OptimizationException e) {
+			e.printStackTrace();
 			System.out.println("Newton-Raphson optimisation failed.");
 			parameterEstimate = null;
 			return false;
@@ -90,4 +97,17 @@ public class MaximumLikelihoodEstimator implements Estimator {
 	@Override
 	public String toString() {return "Maximum likelihood estimator";}
 
+	/**
+	 * Sets the line search method. <br>
+	 * <br>
+	 *  
+	 * If the lsm parameter is null,
+	 * the line search method is set to LineSearchMethod.TEN_EQUAL 
+	 * by default.
+	 * @param lsm a LineSearchMethod enum
+	 */
+	public void setLineSearchMethod(LineSearchMethod lineSearchMethod) {
+		nro.setLineSearchMethod(lineSearchMethod);
+	}
+	
 }

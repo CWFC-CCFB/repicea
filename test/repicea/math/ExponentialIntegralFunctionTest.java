@@ -25,12 +25,26 @@ public class ExponentialIntegralFunctionTest {
 
 	@Test
 	public void testE1() {
-		Assert.assertEquals("Testing the E1(z) function", 0.04890051070808066, ExponentialIntegralFunction.getE1(2), 1E-10);
+		double observed = ExponentialIntegralFunction.getE1(2);
+		Assert.assertEquals("Testing the E1(z) function", 0.04890051070808066, observed, 1E-8);
 	}
 	
 	@Test
 	public void testEi() {
-		Assert.assertEquals("Testing the Ei(z) function", 4.954234356001867, ExponentialIntegralFunction.getEi(2), 1E-10);
+		double observed = ExponentialIntegralFunction.getEi(2);
+		Assert.assertEquals("Testing the Ei(z) function", 4.954234356001867, observed, 1E-8);
+	}
+
+	@Test
+	public void testE1_negative() {
+		double observed = ExponentialIntegralFunction.getE1(-2);
+		Assert.assertEquals("Testing the E1(z) function", -4.954234356001867, observed, 1E-8);
+	}
+	
+	@Test
+	public void testEi_negative() {
+		double observed = ExponentialIntegralFunction.getEi(-2);
+		Assert.assertEquals("Testing the Ei(z) function", -0.04890051070808066, observed, 1E-8);
 	}
 
 }

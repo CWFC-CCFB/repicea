@@ -42,11 +42,7 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		variableValues = new FastArrayList<Double>();
 	}
 
-	/**
-	 * This method sets the parameter value.
-	 * @param parameterIndex the parameter index
-	 * @param parameterValue the parameter value
-	 */
+	@Override
 	public void setParameterValue(int parameterIndex, double parameterValue) {
 		if (parameterBounds != null && parameterBounds.containsKey(parameterIndex)) {
 			ParameterBound bound = parameterBounds.get(parameterIndex);
@@ -61,20 +57,12 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		}
 	}
 
-	/**
-	 * This method retrieve the parameter defined by the parameterName parameter.
-	 * @param parameterIndex the index of the parameter to be retrieved
-	 * @return a double
-	 */
+	@Override
 	public double getParameterValue(int parameterIndex) {
 		return parameterValues.get(parameterIndex);
 	}
 
-	/**
-	 * This method sets the variable value associated with this variable name.
-	 * @param variableIndex the index of the variable 
-	 * @param variableValue its value (a double)
-	 */
+	@Override
 	public void setVariableValue(int variableIndex, double variableValue) {
 		if (variableIndex < getNumberOfVariables()) {
 			variableValues.set(variableIndex, variableValue);
@@ -85,11 +73,7 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		}
 	}
 	
-	/**
-	 * This method returns the value of the variable at index variableIndex
-	 * @param variableIndex an integer
-	 * @return a double
-	 */
+	@Override
 	public double getVariableValue(int variableIndex) {
 		return variableValues.get(variableIndex);
 	}

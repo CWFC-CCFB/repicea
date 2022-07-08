@@ -33,7 +33,8 @@ public abstract class AbstractOptimizer {
 	
 	public static enum LineSearchMethod {
 		TEN_EQUAL(10),	
-		SINGLE_TRIAL(0);
+		SINGLE_TRIAL(0),
+		HALF_STEP(10);
 		private Number numberOfTrial;
 
 		private LineSearchMethod(int numberOfTrial) {
