@@ -209,12 +209,12 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	public DataSet getDataSet() {return dataSet;}
 
 	@Override
-	public boolean isThisEffectInModelDefinition(String effect) {
-		for (String e : effects) {
-			if (e.equals(effect)) {
-				return true;
-			}
+	public int indexOfThisEffect(String effect) {
+		int index = effects.indexOf(effect);
+		if (index != -1 && isInterceptModel()) {
+			return index + 1;
+		} else {
+			return index;
 		}
-		return false;
 	}
 }

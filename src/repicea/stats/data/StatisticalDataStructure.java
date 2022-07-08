@@ -87,9 +87,9 @@ public interface StatisticalDataStructure {
 
 
 	/**
-	 * Checks if a particular effect is part of the model definition.
+	 * Returns the index of this field in the model definition. The "0" refers to the intercept.
 	 * @param effect
-	 * @return a boolean
+	 * @return an integer (-1 if the effect is not found)
 	 */
-	public boolean isThisEffectInModelDefinition(String effect);
+	public int indexOfThisEffect(String effect);
 }
