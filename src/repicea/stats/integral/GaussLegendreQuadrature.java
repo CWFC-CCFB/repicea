@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import repicea.math.AbstractMathematicalFunction;
+
 /**
  * The GaussLegendreQuadrature class implements a numerical integration method based
  * on Legendre polynomials. The current implementation is based on 2, 3, 4 or 5 points,
@@ -33,7 +35,7 @@ import java.util.Set;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class GaussLegendreQuadrature extends GaussQuadrature {
+public class GaussLegendreQuadrature extends GaussQuadrature implements UnidimensionalIntegralApproximation {
 	
 	private static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
 	static {
@@ -85,9 +87,8 @@ public class GaussLegendreQuadrature extends GaussQuadrature {
 
 	@Override
 	public List<Double> getXValues() {
-		if (xValues == null) {
-			xValues = new ArrayList<Double>();
-			weights = new ArrayList<Double>();
+		if (xValues.isEmpty()) {
+			weights.clear();
 			List<QuadratureNode> orderedNodes = getOrderedNodes(GaussLegendreQuadrature.NODE_MAP.get(numberOfPoints));
 			double intercept = (getLowerBound() + getUpperBound()) * .5;
 			double slope = (getUpperBound() - getLowerBound()) * .5;
@@ -103,8 +104,7 @@ public class GaussLegendreQuadrature extends GaussQuadrature {
 
 	@Override
 	public List<Double> getRescalingFactors() {
-		if (rescalingFactors == null) {
-			rescalingFactors = new ArrayList<Double>();
+		if (rescalingFactors.isEmpty()) {
 			List<Double> xValues = getXValues();
 			double rescaling = (getUpperBound() - getLowerBound()) * .5;
 			for (int i = 0; i < xValues.size(); i++) {
@@ -112,6 +112,38 @@ public class GaussLegendreQuadrature extends GaussQuadrature {
 			}
 		}
 		return rescalingFactors;
+	}
+
+	@Override
+	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate, int index,
+			boolean isParameter) {
+		
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+
+		double sum = 0;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			sum += functionToEvaluate.getValue() * getWeights().get(i) * getRescalingFactors().get(i);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+
+		return sum;
 	}
 
 	

@@ -36,7 +36,7 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class GaussHermiteQuadrature extends GaussQuadrature implements Serializable {
+public class GaussHermiteQuadrature extends GaussQuadrature implements MultidimensionalIntegralApproximation, Serializable {
 	
 	private static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
 	static {
@@ -99,9 +99,8 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 
 	@Override
 	public List<Double> getXValues() {
-		if (xValues == null) {
-			xValues = new ArrayList<Double>();
-			weights = new ArrayList<Double>();
+		if (xValues.isEmpty()) {
+			weights.clear();
 			List<QuadratureNode> orderedNodes = getOrderedNodes(GaussHermiteQuadrature.NODE_MAP.get(numberOfPoints));
 			for (QuadratureNode node : orderedNodes) {
 				xValues.add(node.getValue());
@@ -115,8 +114,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 
 	@Override
 	public List<Double> getRescalingFactors() {
-		if (rescalingFactors == null) {
-			rescalingFactors = new ArrayList<Double>();
+		if (rescalingFactors.isEmpty()) {
 			List<Double> xValues = getXValues();
 			for (int i = 0; i < xValues.size(); i++) {
 				rescalingFactors.add(1d);
@@ -198,6 +196,7 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Serializa
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
+	@Override
 	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
 											List<Integer> parameterIndices, 
 											Matrix lowerCholeskyTriangle) {

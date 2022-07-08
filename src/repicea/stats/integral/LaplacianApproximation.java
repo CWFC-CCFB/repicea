@@ -41,9 +41,7 @@ public class LaplacianApproximation extends AdaptativeGaussHermiteQuadrature {
 	 */
 	public LaplacianApproximation() {
 		super();
-		weights = new ArrayList<Double>();
 		weights.add(Math.sqrt(2d * Math.PI));
-		xValues = new ArrayList<Double>();
 		xValues.add(0d);
 	}
 
@@ -61,6 +59,7 @@ public class LaplacianApproximation extends AdaptativeGaussHermiteQuadrature {
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
+	@Override
 	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
 			List<Integer> parameterIndices, 
 			Matrix lowerCholeskyTriangle) {

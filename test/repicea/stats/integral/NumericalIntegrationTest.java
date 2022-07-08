@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.stats.integral;
 
 import static org.junit.Assert.assertEquals;
@@ -8,6 +26,7 @@ import java.util.Random;
 
 import org.junit.Test;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
@@ -497,6 +516,35 @@ public class NumericalIntegrationTest {
 		assertEquals(trueMean, sum, 1E-8);
 	}
 
+	
+	@Test
+    public void TestWithGaussLegendreQuadratureBetweenMinus1AndPlus1_NewImplementation() throws Exception {
+		GaussLegendreQuadrature ghq2 = new GaussLegendreQuadrature(NumberOfPoints.N2);
+		GaussLegendreQuadrature ghq3 = new GaussLegendreQuadrature(NumberOfPoints.N3);
+		GaussLegendreQuadrature ghq4 = new GaussLegendreQuadrature(NumberOfPoints.N4);
+		GaussLegendreQuadrature ghq5 = new GaussLegendreQuadrature(NumberOfPoints.N5);
+
+		double trueMean = (1d/3 + 1d/2) - (-1d/3 + 1d/2); 
+		
+		System.out.println("Function x^2 + x between [-1,1] =  " + trueMean);
+
+		double sum = ghq2.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 2 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+
+		sum = ghq3.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 3 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+
+		sum = ghq4.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 4 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+
+		sum = ghq5.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 5 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+	}
+
 
 	
 	@Test
@@ -566,7 +614,68 @@ public class NumericalIntegrationTest {
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(trueMean, sum, 1E-8);
 	}
+	
+	@Test
+    public void TestWithGaussLegendreQuadratureBetweenOtherBounds_NewImplementation() throws Exception {
+		double upperBound = 5;
+		double lowerBound = -2;
+		
+		GaussLegendreQuadrature ghq2 = new GaussLegendreQuadrature(NumberOfPoints.N2);
+		ghq2.setLowerBound(lowerBound);
+		ghq2.setUpperBound(upperBound);
+		GaussLegendreQuadrature ghq3 = new GaussLegendreQuadrature(NumberOfPoints.N3);
+		ghq3.setLowerBound(lowerBound);
+		ghq3.setUpperBound(upperBound);
+		GaussLegendreQuadrature ghq4 = new GaussLegendreQuadrature(NumberOfPoints.N4);
+		ghq4.setLowerBound(lowerBound);
+		ghq4.setUpperBound(upperBound);
+		GaussLegendreQuadrature ghq5 = new GaussLegendreQuadrature(NumberOfPoints.N5);
+		ghq5.setLowerBound(lowerBound);
+		ghq5.setUpperBound(upperBound);
 
+		double trueMean = (Math.pow(upperBound, 3d)/3 + Math.pow(upperBound, 2d)/2) - (Math.pow(lowerBound, 3d)/3 + Math.pow(lowerBound, 2d)/2); 
+		System.out.println("Function x^2 + x between [" + lowerBound + "," + upperBound + "] =  " + trueMean);
+
+		double sum = ghq2.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 2 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+
+		sum = ghq3.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 3 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+
+		sum = ghq4.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 4 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+
+		sum = ghq5.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integrate the variable and not the parameter
+		System.out.println("Mean with 5 points =  " + sum);
+		assertEquals(trueMean, sum, 1E-8);
+	}
+
+	
+
+	protected static class SquarePlusXFunction extends AbstractMathematicalFunction {
+
+		SquarePlusXFunction() {
+			setVariableValue(0, 2);
+		}
+		
+		@Override
+		public Double getValue() {
+			double x = this.getVariableValue(0);
+			return x * x + x;
+		}
+
+		@Override
+		public Matrix getGradient() {return null;}
+
+		@Override
+		public Matrix getHessian() {return null;}
+		
+	}
+	
+	
 	@Test
     public void TestWithTrapezoidalRule() throws Exception {
 		double lowerBound = -1;
@@ -591,12 +700,30 @@ public class NumericalIntegrationTest {
 		Matrix yMatrix = new Matrix(yValues);
 		Matrix weights = new Matrix(trapezoidalRule.getWeights());
 		Matrix rescalingFactors = new Matrix(trapezoidalRule.getRescalingFactors());
-		
+		double sumX = weights.getSumOfElements();
 		double sum = rescalingFactors.elementWiseMultiply(weights).elementWiseMultiply(yMatrix).getSumOfElements();
 		
 		System.out.println("Mean with TrapezoidalRule instance  =  " + sum);
 		assertEquals(trueMean, sum, 1E-2);
 	}
+	
+	@Test
+    public void TestWithTrapezoidalRule2() throws Exception {
+		double lowerBound = -1;
+		double upperBound = 5;
+		double trueMean = (Math.pow(upperBound, 3d)/3 + Math.pow(upperBound, 2d)/2) - (Math.pow(lowerBound, 3d)/3 + Math.pow(lowerBound, 2d)/2); 
+		System.out.println("Function x^2 + x between [" + lowerBound + "," + upperBound + "] =  " + trueMean);
+
+		TrapezoidalRule trapezoidalRule = new TrapezoidalRule(.05d);
+		trapezoidalRule.setLowerBound(lowerBound);
+		trapezoidalRule.setUpperBound(upperBound);
+
+		double sum = trapezoidalRule.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integration on the variable and not the parameter
+		
+		System.out.println("Mean with TrapezoidalRule instance  =  " + sum);
+		assertEquals(trueMean, sum, 1E-2);
+	}
+
 
 	
 	@Test
@@ -625,6 +752,23 @@ public class NumericalIntegrationTest {
 		Matrix rescalingFactors = new Matrix(trapezoidalRule.getRescalingFactors());
 		
 		double sum = rescalingFactors.elementWiseMultiply(weights).elementWiseMultiply(yMatrix).getSumOfElements();
+		
+		System.out.println("Mean with CompositeSimpsonRule instance =  " + sum);
+		assertEquals(trueMean, sum, 1E-2);
+	}
+
+	@Test
+    public void TestWithCompositeSimpsonRule2() throws Exception {
+		double lowerBound = -1;
+		double upperBound = 5;
+		double trueMean = (Math.pow(upperBound, 3d)/3 + Math.pow(upperBound, 2d)/2) - (Math.pow(lowerBound, 3d)/3 + Math.pow(lowerBound, 2d)/2); 
+		System.out.println("Function x^2 + x between [" + lowerBound + "," + upperBound + "] =  " + trueMean);
+
+		CompositeSimpsonRule compositeRule = new CompositeSimpsonRule(16);
+		compositeRule.setLowerBound(lowerBound);
+		compositeRule.setUpperBound(upperBound);
+
+		double sum = compositeRule.getIntegralApproximation(new SquarePlusXFunction(), 0, false); // integral on the variable and not the parameter
 		
 		System.out.println("Mean with CompositeSimpsonRule instance =  " + sum);
 		assertEquals(trueMean, sum, 1E-2);

@@ -23,7 +23,7 @@ package repicea.stats.integral;
  * a value and a weight.
  * @author Mathieu Fortin - July 2012
  */
-public final class QuadratureNode implements Comparable<Object> {
+class QuadratureNode implements Comparable<Object> {
 
 	private double value;
 	private double weight;

@@ -33,10 +33,15 @@ public abstract class NumericalIntegrationMethod implements Serializable {
 	
 	private double upperBound = Double.NaN;
 	private double lowerBound = Double.NaN;
-	protected List<Double> xValues;
-	protected List<Double> weights;
-	protected List<Double> rescalingFactors;
+	protected final List<Double> xValues;
+	protected final List<Double> weights;
+	protected final List<Double> rescalingFactors;
 
+	protected NumericalIntegrationMethod() {
+		xValues = new ArrayList<Double>();
+		weights = new ArrayList<Double>();
+		rescalingFactors = new ArrayList<Double>();
+	}
 	
 	/**
 	 * This method sets the upper and lower bounds from a list of Double instances. It also sets the
@@ -46,7 +51,7 @@ public abstract class NumericalIntegrationMethod implements Serializable {
 	 */
 	protected void setXValuesFromListOfPoints(List<Double> points) {
 		setUpperAndLowerBoundsFromListOfDouble(points);
-		xValues = new ArrayList<Double>();
+		xValues.clear();
 		for (Double point : points) {
 			if (!xValues.contains(point)) {
 				xValues.add(point);
