@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.math.EvaluableFunction;
 import repicea.math.Matrix;
+import repicea.math.MatrixUtility;
 
 /**
  * The TrapezoidalRule class implements the trapezoidal rule integration method.
@@ -31,7 +32,7 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public final class TrapezoidalRule extends NumericalIntegrationMethod implements UnidimensionalIntegralApproximation {
+public class TrapezoidalRule extends NumericalIntegrationMethod implements UnidimensionalIntegralApproximation {
 
 	private double resolution;
 	
@@ -54,6 +55,13 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod implements
 	 */
 	public TrapezoidalRule(List<Double> points) {
 		setXValuesFromListOfPoints(points);
+	}
+
+	/**
+	 * Constructor for derived classes.
+	 */
+	protected TrapezoidalRule() {
+		super();
 	}
 
 	private void setXValues() {
@@ -183,7 +191,12 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod implements
 				functionToEvaluate.setVariableValue(index, point);
 			}
 			Matrix value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i) * getRescalingFactors().get(i));
-			sum = i == 0 ? value : sum.add(value);
+			if (i == 0) {
+				sum = value;
+			} else {
+				MatrixUtility.add(sum, value);
+			}
+//			sum = i == 0 ? value : sum.add(value);
 		}
 		
 		if (isParameter) {

@@ -112,15 +112,9 @@ public abstract class NumericalIntegrationMethod implements Serializable {
 	}
 
 	private void resetArrays() {
-		if (xValues != null) {
-			xValues.clear();
-		}
-		if (weights != null) {
-			weights.clear();
-		}
-		if (rescalingFactors != null) {
-			rescalingFactors.clear();
-		}
+		xValues.clear();
+		weights.clear();
+		rescalingFactors.clear();
 	}
 	
 	

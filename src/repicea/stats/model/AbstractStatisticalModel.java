@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -18,16 +18,11 @@
  */
 package repicea.stats.model;
 
-import java.text.NumberFormat;
-
-import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
-import repicea.stats.estimates.Estimate;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.Estimator.EstimatorException;
-import repicea.stats.estimators.MaximumLikelihoodEstimator;
 
 /**
  * The AbstractStatisticalModel class implements the StatisticalModel interface. It contains the
@@ -132,51 +127,12 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 			e.printStackTrace();
 		}
 	}
-	
+
+	@Override
 	public void getSummary() {
-		
 		System.out.println(toString());
 		System.out.println("Model definition : " + getModelDefinition() + System.lineSeparator());
 		System.out.println(estimator.getReport());
-//		if (estimator instanceof MaximumLikelihoodEstimator) {
-//				System.out.println(((MaximumLikelihoodEstimator) estimator).getConvergenceStatusReport().toString());
-////				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) estimator).getMaximumLogLikelihood();
-////				double AIC = - 2 * maximumLogLikelihood + 2 * getParameters().getNumberOfElements(); 
-////				double BIC = - 2 * maximumLogLikelihood + getParameters().getNumberOfElements() * Math.log(dataStructure.getNumberOfObservations());
-////				NumberFormat formatter = NumberFormat.getInstance();
-////				formatter.setMaximumFractionDigits(2);
-////				formatter.setMinimumFractionDigits(2);
-////				System.out.println("Log-likelihood : " + formatter.format(maximumLogLikelihood));
-////				System.out.println("AIC            : " + formatter.format(AIC));
-////				System.out.println("BIC            : " + formatter.format(BIC));
-//			}
-//			
-//			Estimate<?> parameterEstimates = estimator.getParameterEstimates();
-//			
-//			Matrix report;
-//			boolean varianceAvailable = false;
-//			if (parameterEstimates.getVariance() != null) {
-//				Matrix std = parameterEstimates.getVariance().diagonalVector().elementWisePower(0.5);
-//				report = parameterEstimates.getMean().matrixStack(std, false);
-//				varianceAvailable = true;
-//			} else {
-//				report = parameterEstimates.getMean();
-//			}
-//			
-//			NumberFormat formatter = NumberFormat.getInstance();
-//			formatter.setMaximumFractionDigits(6);
-//			formatter.setMinimumFractionDigits(6);
-//
-//			System.out.println("Parameter estimates");
-//			String output;
-//			for (int i = 0; i < report.m_iRows; i++) {
-//				output = "Parameter " + i + "; Estimate : " + formatter.format(report.getValueAt(i, 0));
-//				if (varianceAvailable) {
-//					output = output.concat("; Standard error : " + formatter.format(report.getValueAt(i, 1)));
-//				}
-//				System.out.println(output);
-//			}
-//		}
 	}
 
 	@Override

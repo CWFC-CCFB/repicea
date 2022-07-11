@@ -2,18 +2,20 @@ package repicea.stats.model.glm;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import org.junit.Test;
 
-import repicea.math.ExponentialIntegralFunction;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.FGMCopulaGLModelTest;
+import repicea.stats.model.glm.measerr.GLMMeasErrorDefinition;
 import repicea.stats.model.glm.measerr.GLMWithUniformMeasError;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaLogManager;
@@ -50,15 +52,26 @@ public class GLModelTest {
 //		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + distanceToConspecific");
 		glm.doEstimation();
 		glm.getSummary();
-
+		
+		List<Double> potentialXValues = new ArrayList<Double>();
+		for (double d = 0; d < 4.99; d = d + 0.1) {
+			potentialXValues.add(d);
+		}
+		for (double d = 5; d < 14.99; d = d + 0.5) {
+			potentialXValues.add(d);
+		}
+		for (double d = 15; d < 3000; d = d + 5) {
+			potentialXValues.add(d);
+		}
+		
 		GLMWithUniformMeasError glmWithMeasError = new GLMWithUniformMeasError(dataSet, "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin +   \r\n"
 				+ "                    lnPente + hasExpo:cosExpo + \r\n"
 				+ "                    dummyDrainage4hydrique +\r\n"
 				+ "                    G_F + lnG_F + G_R + lnG_R + distanceToConspecificOLD + G_SpGr + lnG_SpGr +\r\n"
 				+ "                    dummyPastDist3OtherNatural +\r\n"
 				+ "                    timeSince1970",
-				"distanceToConspecificOLD", glm.getParameters());
-//		glmWithMeasError.gridSearch(1, -10.00, -3.00, 0.5);
+				new GLMMeasErrorDefinition("distanceToConspecificOLD", 0d, potentialXValues), 
+				glm.getParameters());
 		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glmWithMeasError.doEstimation();
 		glmWithMeasError.getSummary();
