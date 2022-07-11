@@ -92,17 +92,6 @@ public abstract class AbstractOptimizer {
 
 	public Matrix getHessianAtMaximum() {return hessianMatrix;}
 
-//	public Matrix getCorrelationMatrix() {
-//		Matrix std;
-//		try {
-//			Matrix omegaMatrix = betaVector.getVariance();
-//			std = omegaMatrix.diagonalVector().matrixDiagonal().getLowerCholTriangle().diagonalVector();
-//			Matrix correlationMatrix = omegaMatrix.elementWiseDivide(std.multiply(std.transpose()));
-//			return correlationMatrix;
-//		} catch (Exception e) {
-//			return null;
-//		}
-//	}
 
 	/**
 	 * This method sets the verbose to true or false.

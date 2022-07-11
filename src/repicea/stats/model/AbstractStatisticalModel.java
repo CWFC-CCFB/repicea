@@ -134,49 +134,49 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	}
 	
 	public void getSummary() {
-		if (!getEstimator().isConvergenceAchieved()) {
-			System.out.println("The log-likelihood function has not been or cannot be optimized.");
-		} else {
-			System.out.println(toString());
-			System.out.println("Model definition : " + getModelDefinition());
-			if (estimator instanceof MaximumLikelihoodEstimator) {
-				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) estimator).getMaximumLogLikelihood();
-				double AIC = - 2 * maximumLogLikelihood + 2 * getParameters().getNumberOfElements(); 
-				double BIC = - 2 * maximumLogLikelihood + getParameters().getNumberOfElements() * Math.log(dataStructure.getNumberOfObservations());
-				NumberFormat formatter = NumberFormat.getInstance();
-				formatter.setMaximumFractionDigits(2);
-				formatter.setMinimumFractionDigits(2);
-				System.out.println("Log-likelihood : " + formatter.format(maximumLogLikelihood));
-				System.out.println("AIC            : " + formatter.format(AIC));
-				System.out.println("BIC            : " + formatter.format(BIC));
-			}
-			
-			Estimate<?> parameterEstimates = estimator.getParameterEstimates();
-			
-			Matrix report;
-			boolean varianceAvailable = false;
-			if (parameterEstimates.getVariance() != null) {
-				Matrix std = parameterEstimates.getVariance().diagonalVector().elementWisePower(0.5);
-				report = parameterEstimates.getMean().matrixStack(std, false);
-				varianceAvailable = true;
-			} else {
-				report = parameterEstimates.getMean();
-			}
-			
-			NumberFormat formatter = NumberFormat.getInstance();
-			formatter.setMaximumFractionDigits(6);
-			formatter.setMinimumFractionDigits(6);
-
-			System.out.println("Parameter estimates");
-			String output;
-			for (int i = 0; i < report.m_iRows; i++) {
-				output = "Parameter " + i + "; Estimate : " + formatter.format(report.getValueAt(i, 0));
-				if (varianceAvailable) {
-					output = output.concat("; Standard error : " + formatter.format(report.getValueAt(i, 1)));
-				}
-				System.out.println(output);
-			}
-		}
+		
+		System.out.println(toString());
+		System.out.println("Model definition : " + getModelDefinition() + System.lineSeparator());
+		System.out.println(estimator.getReport());
+//		if (estimator instanceof MaximumLikelihoodEstimator) {
+//				System.out.println(((MaximumLikelihoodEstimator) estimator).getConvergenceStatusReport().toString());
+////				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) estimator).getMaximumLogLikelihood();
+////				double AIC = - 2 * maximumLogLikelihood + 2 * getParameters().getNumberOfElements(); 
+////				double BIC = - 2 * maximumLogLikelihood + getParameters().getNumberOfElements() * Math.log(dataStructure.getNumberOfObservations());
+////				NumberFormat formatter = NumberFormat.getInstance();
+////				formatter.setMaximumFractionDigits(2);
+////				formatter.setMinimumFractionDigits(2);
+////				System.out.println("Log-likelihood : " + formatter.format(maximumLogLikelihood));
+////				System.out.println("AIC            : " + formatter.format(AIC));
+////				System.out.println("BIC            : " + formatter.format(BIC));
+//			}
+//			
+//			Estimate<?> parameterEstimates = estimator.getParameterEstimates();
+//			
+//			Matrix report;
+//			boolean varianceAvailable = false;
+//			if (parameterEstimates.getVariance() != null) {
+//				Matrix std = parameterEstimates.getVariance().diagonalVector().elementWisePower(0.5);
+//				report = parameterEstimates.getMean().matrixStack(std, false);
+//				varianceAvailable = true;
+//			} else {
+//				report = parameterEstimates.getMean();
+//			}
+//			
+//			NumberFormat formatter = NumberFormat.getInstance();
+//			formatter.setMaximumFractionDigits(6);
+//			formatter.setMinimumFractionDigits(6);
+//
+//			System.out.println("Parameter estimates");
+//			String output;
+//			for (int i = 0; i < report.m_iRows; i++) {
+//				output = "Parameter " + i + "; Estimate : " + formatter.format(report.getValueAt(i, 0));
+//				if (varianceAvailable) {
+//					output = output.concat("; Standard error : " + formatter.format(report.getValueAt(i, 1)));
+//				}
+//				System.out.println(output);
+//			}
+//		}
 	}
 
 	@Override

@@ -19,6 +19,7 @@
 package repicea.stats.data;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -216,5 +217,10 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		} else {
 			return index;
 		}
+	}
+	
+	@Override
+	public List<String> getEffectList() {
+		return new ArrayList<String>(effects);
 	}
 }

@@ -92,4 +92,10 @@ public interface StatisticalDataStructure {
 	 * @return an integer (-1 if the effect is not found)
 	 */
 	public int indexOfThisEffect(String effect);
+
+	/**
+	 * Returns the list of effects and interactions in the model.
+	 * @return
+	 */
+	public List<String> getEffectList();
 }

@@ -37,7 +37,6 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 
 	public static String LOGGER_NAME = "NewtonRaphsonOptimizer";
 	
-	protected boolean verbose = false;
 	protected int maxNumberOfIterations = 20;
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
@@ -125,6 +124,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 
 	@Override
 	public boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
+		convergenceAchieved = false;
 
 		if (function instanceof OptimizerListener) {
 			addOptimizerListener((OptimizerListener) function);
@@ -142,7 +142,6 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		
 		double gconv = calculateConvergence(gradient, hessian, value0);
 		
-		convergenceAchieved = false;
 		if (Math.abs(gconv) < convergenceCriterion) {
 			convergenceAchieved = true;
 		}
@@ -163,10 +162,10 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "LLK at iteration " + iterationID + " = " + value0);
 
 				gradient = function.getGradient();
-				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Gradient at iteration " + iterationID + " = " + gradient.toString());
 				hessian = function.getHessian();
 				currentBeta = extractParameters(function, indicesOfParametersToOptimize);
 				gconv = calculateConvergence(gradient, hessian, value0);
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
 				
 				if (gconv < 0) {
 					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5);
@@ -174,9 +173,6 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 					throw new OptimizationException("Convergence could not be achieved after " + ((Integer) iterationID).toString() + " iterations!");
 				} else if (gconv < convergenceCriterion) {
 					convergenceAchieved = true;
-				}
-				if (verbose) {
-					System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
 				}
 			}  
 
@@ -246,12 +242,5 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			return -1;
 		}
 	}
-
-	/**
-	 * This method enables the verbose, i.e. some messages will be displayed in the console. 
-	 * The default verbose value is false.
-	 * @param verbose a boolean
-	 */
-	public void setVerbose(boolean verbose) {this.verbose = verbose;}
 	
 }

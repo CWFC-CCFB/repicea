@@ -35,22 +35,28 @@ public class GLModelTest {
     public void TestWithGLModel() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelTest.class).concat("OccurrencePartDataset_ERS.csv");
 		DataSet dataSet = new DataSet(filename, true);
+//		System.out.println(dataSet.toString());
 		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.FINE);
 		ConsoleHandler ch = new ConsoleHandler();
 		ch.setLevel(Level.FINE);
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);
-//		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin +   \r\n"
-//				+ "                    lnPente + hasExpo:cosExpo + \r\n"
-//				+ "                    dummyDrainage4hydrique +\r\n"
-//				+ "                    G_F + lnG_F + G_R + lnG_R + distanceToConspecific + G_SpGr + lnG_SpGr +\r\n"
-//				+ "                    dummyPastDist3OtherNatural +\r\n"
-//				+ "                    timeSince1970");
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin +   \r\n"
+				+ "                    lnPente + hasExpo:cosExpo + \r\n"
+				+ "                    dummyDrainage4hydrique +\r\n"
+				+ "                    G_F + lnG_F + G_R + lnG_R + distanceToConspecific + G_SpGr + lnG_SpGr +\r\n"
+				+ "                    dummyPastDist3OtherNatural +\r\n"
+				+ "                    timeSince1970");
+//		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + distanceToConspecific");
 		glm.doEstimation();
 		glm.getSummary();
 
-		GLMWithUniformMeasError glmWithMeasError = new GLMWithUniformMeasError(dataSet, "occurred ~ lnDt + distanceToConspecificOLD",
+		GLMWithUniformMeasError glmWithMeasError = new GLMWithUniformMeasError(dataSet, "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin +   \r\n"
+				+ "                    lnPente + hasExpo:cosExpo + \r\n"
+				+ "                    dummyDrainage4hydrique +\r\n"
+				+ "                    G_F + lnG_F + G_R + lnG_R + distanceToConspecificOLD + G_SpGr + lnG_SpGr +\r\n"
+				+ "                    dummyPastDist3OtherNatural +\r\n"
+				+ "                    timeSince1970",
 				"distanceToConspecificOLD", glm.getParameters());
 //		glmWithMeasError.gridSearch(1, -10.00, -3.00, 0.5);
 		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);

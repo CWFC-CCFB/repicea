@@ -18,6 +18,7 @@
  */
 package repicea.stats.estimators;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -25,6 +26,7 @@ import java.util.logging.Level;
 import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
+import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -33,18 +35,19 @@ import repicea.stats.model.StatisticalModel;
 import repicea.util.REpiceaLogManager;
 
 /**
- * This interface specifies if the optimizer is based on a maximum likelihood theory.
+ * Implements a maximum likelihood estimator based on 
+ * the Newton-Raphson algorithm.
  * @author Mathieu Fortin - August 2011
  */
-public class MaximumLikelihoodEstimator implements Estimator {
+public class MaximumLikelihoodEstimator extends AbstractEstimator {
 	
 	public static String LOGGER_NAME = "MLEstimator";
-	protected boolean hasConverged;
 	protected GaussianEstimate parameterEstimate;
-	
 	protected final repicea.math.optimizer.NewtonRaphsonOptimizer nro;
 
-	
+	/**
+	 * Constructor. 
+	 */
 	public MaximumLikelihoodEstimator() {
 		nro = new repicea.math.optimizer.NewtonRaphsonOptimizer();
 	}
@@ -53,6 +56,7 @@ public class MaximumLikelihoodEstimator implements Estimator {
 	@Override
 	public boolean doEstimation(StatisticalModel<? extends StatisticalDataStructure> model) throws EstimatorException {
 		nro.setConvergenceCriterion(model.getConvergenceCriterion());
+		dataStruct = model.getDataStructure();
 		
 		CompositeLogLikelihood llk = model.getCompleteLogLikelihood();
 		List<Integer> indices = new ArrayList<Integer>();
@@ -110,4 +114,47 @@ public class MaximumLikelihoodEstimator implements Estimator {
 		nro.setLineSearchMethod(lineSearchMethod);
 	}
 	
+	@Override
+	public DataSet getConvergenceStatusReport() {
+		if (dataStruct == null) {
+			throw new UnsupportedOperationException("The doEstimation method should be called first!");
+		}
+		NumberFormat formatter = NumberFormat.getInstance();
+		formatter.setMaximumFractionDigits(3);
+		formatter.setMinimumFractionDigits(3);
+		List<String> fieldNames = new ArrayList<String>();
+		fieldNames.add("Element");
+		fieldNames.add("Value");
+		DataSet dataSet = new DataSet(fieldNames);
+		Object[] record = new Object[2];
+		record[0] = "Converged";
+		record[1] = isConvergenceAchieved();
+		dataSet.addObservation(record);
+		record[0] = "Maximum log-likelihood";
+		record[1] = getMaximumLogLikelihood();
+		dataSet.addObservation(record);
+		record[0] = "AIC";
+		record[1] = - 2 * getMaximumLogLikelihood() + 2 * nro.getParametersAtMaximum().getNumberOfElements();
+		dataSet.addObservation(record);
+		record[0] = "BIC";
+		record[1] = - 2 * getMaximumLogLikelihood() + nro.getParametersAtMaximum().getNumberOfElements() * Math.log(dataStruct.getNumberOfObservations());
+		dataSet.addObservation(record);
+		return dataSet;
+	}
+
+
+	@Override
+	public String getReport() {
+		if (!isConvergenceAchieved()) {
+			return "The log-likelihood function has not been or cannot be optimized.";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			DataSet convergenceDataset = getConvergenceStatusReport();
+			sb.append(convergenceDataset.toString() + System.lineSeparator());
+			DataSet parameterDataset = getParameterEstimatesReport();
+			sb.append(parameterDataset.toString() + System.lineSeparator());
+			return sb.toString();
+		}
+
+	}
 }
