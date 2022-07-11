@@ -1,24 +1,31 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.stats.model.glm;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.Level;
-
 import org.junit.Test;
 
-import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.FGMCopulaGLModelTest;
-import repicea.stats.model.glm.measerr.GLMMeasErrorDefinition;
-import repicea.stats.model.glm.measerr.GLMWithUniformMeasError;
 import repicea.util.ObjectUtility;
-import repicea.util.REpiceaLogManager;
 
 public class GLModelTest {
 
@@ -34,51 +41,4 @@ public class GLModelTest {
 		assertEquals(expectedLlk, actualLlk, 1E-5);
 	}
 
-    public void TestWithGLModel() throws Exception {
- 		String filename = ObjectUtility.getPackagePath(GLModelTest.class).concat("OccurrencePartDataset_ERS.csv");
-		DataSet dataSet = new DataSet(filename, true);
-//		System.out.println(dataSet.toString());
-		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
-		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.FINE);
-		ConsoleHandler ch = new ConsoleHandler();
-		ch.setLevel(Level.FINE);
-		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin +   \r\n"
-				+ "                    lnPente + hasExpo:cosExpo + \r\n"
-				+ "                    dummyDrainage4hydrique +\r\n"
-				+ "                    G_F + lnG_F + G_R + lnG_R + distanceToConspecific + G_SpGr + lnG_SpGr +\r\n"
-				+ "                    dummyPastDist3OtherNatural +\r\n"
-				+ "                    timeSince1970");
-//		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + distanceToConspecific");
-		glm.doEstimation();
-		glm.getSummary();
-		
-		List<Double> potentialXValues = new ArrayList<Double>();
-		for (double d = 0; d < 4.99; d = d + 0.1) {
-			potentialXValues.add(d);
-		}
-		for (double d = 5; d < 14.99; d = d + 0.5) {
-			potentialXValues.add(d);
-		}
-		for (double d = 15; d < 3000; d = d + 5) {
-			potentialXValues.add(d);
-		}
-		
-		GLMWithUniformMeasError glmWithMeasError = new GLMWithUniformMeasError(dataSet, "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin +   \r\n"
-				+ "                    lnPente + hasExpo:cosExpo + \r\n"
-				+ "                    dummyDrainage4hydrique +\r\n"
-				+ "                    G_F + lnG_F + G_R + lnG_R + distanceToConspecificOLD + G_SpGr + lnG_SpGr +\r\n"
-				+ "                    dummyPastDist3OtherNatural +\r\n"
-				+ "                    timeSince1970",
-				new GLMMeasErrorDefinition("distanceToConspecificOLD", 0d, potentialXValues), 
-				glm.getParameters());
-		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
-		glmWithMeasError.doEstimation();
-		glmWithMeasError.getSummary();
-	}
-
-    public static void main(String[] args) throws Exception {
-    	GLModelTest o = new GLModelTest();
-    	o.TestWithGLModel();
-    }
 }
