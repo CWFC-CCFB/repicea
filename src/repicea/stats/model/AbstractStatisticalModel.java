@@ -18,11 +18,14 @@
  */
 package repicea.stats.model;
 
+import java.util.logging.Level;
+
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.Estimator.EstimatorException;
+import repicea.util.REpiceaLogManager;
 
 /**
  * The AbstractStatisticalModel class implements the StatisticalModel interface. It contains the
@@ -33,6 +36,8 @@ import repicea.stats.estimators.Estimator.EstimatorException;
  */
 public abstract class AbstractStatisticalModel<D extends StatisticalDataStructure> implements StatisticalModel<D> {
 
+	public static String LOGGER_NAME = "AbstractStatisticalModel";
+	
 	private Estimator estimator;
 	private D dataStructure;
 	
@@ -115,15 +120,15 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	
 	@Override
 	public void doEstimation() {
-		System.out.println("Optimization using " + getEstimator().toString() + ".");
+		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Optimization using " + getEstimator().toString() + ".");
 		try {
 			if (getEstimator().doEstimation(this)) {
-				System.out.println("Convergence achieved!");
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME,"Convergence achieved!");
 			} else {
-				System.out.println("Unable to reach convergence.");
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.WARNING, LOGGER_NAME, "Unable to reach convergence.");
 			}
 		} catch (EstimatorException e) {
-			System.out.println("An error occured while optimizing the log likelihood function.");
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME,"An error occured while optimizing the log likelihood function.");
 			e.printStackTrace();
 		}
 	}

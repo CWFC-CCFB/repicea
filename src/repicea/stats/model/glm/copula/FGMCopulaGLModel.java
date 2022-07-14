@@ -18,17 +18,13 @@
  */
 package repicea.stats.model.glm.copula;
 
-import java.security.InvalidParameterException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.estimates.CorrelationEstimate;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 
 /**
@@ -39,7 +35,7 @@ import repicea.stats.model.glm.GeneralizedLinearModel;
  * </a>
  * @author Mathieu Fortin - June 2011
  */
-public class FGMCopulaGLModel extends GeneralizedLinearModel {
+public class FGMCopulaGLModel extends GeneralizedLinearModel<HierarchicalStatisticalDataStructure> {
 	
 	private CopulaExpression copula;
 	
@@ -83,10 +79,10 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 		return "Generalized linear model based on FGM copula";
 	}
 
-	@Override
-	public HierarchicalStatisticalDataStructure getDataStructure() {
-		return (HierarchicalStatisticalDataStructure) super.getDataStructure();
-	}
+//	@Override
+//	public HierarchicalStatisticalDataStructure getDataStructure() {
+//		return (HierarchicalStatisticalDataStructure) super.getDataStructure();
+//	}
 	
 	@Override
 	public void getSummary() {

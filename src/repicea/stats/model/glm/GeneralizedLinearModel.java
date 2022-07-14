@@ -26,9 +26,9 @@ import java.util.logging.Level;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
-import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
@@ -41,7 +41,7 @@ import repicea.util.REpiceaLogManager;
  * This class implements generalized linear models. 
  * @author Mathieu Fortin - August 2011
  */
-public class GeneralizedLinearModel extends AbstractStatisticalModel<HierarchicalStatisticalDataStructure> {
+public class GeneralizedLinearModel<P extends StatisticalDataStructure> extends AbstractStatisticalModel<P> {
 
 	protected static class LikelihoodValue implements Comparable<LikelihoodValue> {
 
@@ -246,8 +246,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 
 	@Override
-	protected HierarchicalStatisticalDataStructure getDataStructureFromDataSet(DataSet dataSet) {
-		return new GenericHierarchicalStatisticalDataStructure(dataSet);
+	protected P getDataStructureFromDataSet(DataSet dataSet) {
+		return (P) new GenericStatisticalDataStructure(dataSet);
 	}
 
 	@Override

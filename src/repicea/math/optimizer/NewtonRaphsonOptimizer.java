@@ -37,7 +37,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 
 	public static String LOGGER_NAME = "NewtonRaphsonOptimizer";
 	
-	protected int maxNumberOfIterations = 20;
+	protected int maxNumberOfIterations = 50;
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
 	private LineSearchMethod lineSearchMethod;
@@ -169,8 +169,8 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				
 				if (gconv < 0) {
 					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5);
-					System.out.println("GConv is negative!");
-					throw new OptimizationException("Convergence could not be achieved after " + ((Integer) iterationID).toString() + " iterations!");
+					REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "GConv is negative!");
+					REpiceaLogManager.logMessage(LOGGER_NAME, Level.WARNING, LOGGER_NAME, "Convergence could not be achieved after " + ((Integer) iterationID).toString() + " iterations!");
 				} else if (gconv < convergenceCriterion) {
 					convergenceAchieved = true;
 				}
@@ -181,7 +181,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			}
 
 			if (gradient.getAbsoluteValue().anyElementLargerThan(gradientCriterion)) {
-				System.out.println("A least one element of the gradient vector is larger than 1E-3.");
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "A least one element of the gradient vector is larger than 1E-3.");
 			}
 
 			optimalValue = value0;

@@ -20,6 +20,7 @@ package repicea.stats.model.glm.measerr;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,6 +29,7 @@ import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.util.ObjectUtility;
+import repicea.util.REpiceaLogManager;
 
 public class GLModelWithMeasErrorTest {
 
@@ -35,20 +37,10 @@ public class GLModelWithMeasErrorTest {
     public void TestGLModelWithMeasurementError() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("OccurrencePartDataset_ERS.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		
-		List<Double> potentialXValues = new ArrayList<Double>();
-		for (double d = 0; d < 4.99; d = d + 0.1) {
-			potentialXValues.add(d);
-		}
-		for (double d = 5; d < 14.99; d = d + 0.5) {
-			potentialXValues.add(d);
-		}
-		for (double d = 15; d < 3000; d = d + 5) {
-			potentialXValues.add(d);
-		}
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
 		
 		GLMWithUniformMeasError glmWithMeasError = new GLMWithUniformMeasError(dataSet, "occurred ~ lnDt + distanceToConspecificOLD",
-				new GLMMeasErrorDefinition("distanceToConspecificOLD", 0d, potentialXValues));
+				new GLMMeasErrorDefinition("distanceToConspecificOLD", 0d, null, null));
 		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glmWithMeasError.doEstimation();
 		glmWithMeasError.getSummary();

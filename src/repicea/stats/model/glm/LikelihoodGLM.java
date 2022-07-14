@@ -34,7 +34,7 @@ public class LikelihoodGLM extends IndividualLikelihood {
 		super(linkFunction.getOriginalFunction());
 		this.linkFunction = linkFunction;
 	}
-
+	
 	@Override
 	public Matrix getPredictionVector() {
 		Matrix mat = new Matrix(1,1);

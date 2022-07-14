@@ -26,20 +26,26 @@ public class GLMMeasErrorDefinition {
 
 	protected final String effectWithMeasError;
 	protected final double minimumValueForConsideringMeasurementError;
-	protected final List<Double> xValuesForIntegration; 
+//	protected final List<Double> xValuesForIntegration; 
+	protected final String lowerBoundVar;
+	protected final String upperBoundVar;
 	
 	public GLMMeasErrorDefinition(String effectWithMeasError, 
 			double minimumValueForConsideringMeasurementError,
-			List<Double> xValuesForIntegration) {
+//			List<Double> xValuesForIntegration,
+			String lowerBoundVar,
+			String upperBoundVar) {
 		this.effectWithMeasError = effectWithMeasError;
 		this.minimumValueForConsideringMeasurementError = minimumValueForConsideringMeasurementError;
-		this.xValuesForIntegration = new ArrayList<Double>();
-		for (Double d : xValuesForIntegration) {
-			if (!this.xValuesForIntegration.contains(d)) {
-				this.xValuesForIntegration.add(d);
-			}
-		}
-		Collections.sort(this.xValuesForIntegration);
+//		this.xValuesForIntegration = new ArrayList<Double>();
+//		for (Double d : xValuesForIntegration) {
+//			if (!this.xValuesForIntegration.contains(d)) {
+//				this.xValuesForIntegration.add(d);
+//			}
+//		}
+//		Collections.sort(this.xValuesForIntegration);
+		this.lowerBoundVar = lowerBoundVar;
+		this.upperBoundVar = upperBoundVar;
 	}
 	
 }

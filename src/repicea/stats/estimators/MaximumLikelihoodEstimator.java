@@ -67,8 +67,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator {
 			REpiceaLogManager.logMessage(LOGGER_NAME, Level.INFO, LOGGER_NAME, "Starting optimization");
 			nro.optimize(llk, indices);
 		} catch (OptimizationException e) {
-			e.printStackTrace();
-			System.out.println("Newton-Raphson optimisation failed.");
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME, e.getMessage());
 			parameterEstimate = null;
 			return false;
 		}
