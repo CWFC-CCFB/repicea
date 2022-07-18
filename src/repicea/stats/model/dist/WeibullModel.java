@@ -1,16 +1,26 @@
 package repicea.stats.model.dist;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import repicea.math.Matrix;
-import repicea.stats.data.DataSet;
-import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.AbstractStatisticalModel;
+import repicea.stats.model.CompositeLogLikelihood;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
 
-public class WeibullModel extends AbstractStatisticalModel<GenericStatisticalDataStructure> {
+public class WeibullModel extends AbstractStatisticalModel implements MaximumLikelihoodCompatibleModel {
 
-	protected WeibullModel(DataSet dataSet, String variable) {
-		super(dataSet);
+	private final List<Double> values;
+	private Matrix beta;
+	private CompositeLogLikelihoodWithExplanatoryVariable cLL;
+	
+	public WeibullModel(List<Double> values) {
+		super();
+		this.values = new ArrayList<Double>();
+		this.values.addAll(values);
 	}
 
 	@Override
@@ -25,29 +35,28 @@ public class WeibullModel extends AbstractStatisticalModel<GenericStatisticalDat
 		return null;
 	}
 
+
+
 	@Override
-	public Matrix getPredicted() {
-		// TODO Auto-generated method stub
+	protected Estimator instantiateDefaultEstimator() {return new MaximumLikelihoodEstimator(this);}
+
+	@Override
+	public boolean isInterceptModel() {return false;}
+
+	@Override
+	public List<String> getEffectList() {return null;}
+
+	@Override
+	public int getNumberOfObservations() {return values.size();}
+
+	@Override
+	public double getConvergenceCriterion() {
+		return 1E-8;
+	}
+
+	@Override
+	public CompositeLogLikelihood getCompleteLogLikelihood() {
 		return null;
 	}
-
-	@Override
-	public Matrix getResiduals() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-
-	@Override
-	protected void setCompleteLLK() {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	protected GenericStatisticalDataStructure getDataStructureFromDataSet(DataSet dataSet) {return new GenericStatisticalDataStructure(dataSet);}
-
-	@Override
-	protected Estimator instantiateDefaultEstimator() {return new MaximumLikelihoodEstimator();}
 
 }

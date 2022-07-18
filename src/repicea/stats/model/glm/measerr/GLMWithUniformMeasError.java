@@ -28,21 +28,18 @@ import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.integral.TrapezoidalRule;
-import repicea.stats.model.CompositeLogLikelihood;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
 import repicea.stats.model.IndividualLogLikelihood;
-import repicea.stats.model.WrappedIndividualLogLikelihood;
 import repicea.stats.model.glm.GeneralizedLinearModel;
-import repicea.stats.model.glm.LikelihoodGLM;
 import repicea.stats.model.glm.LinkFunction;
 import repicea.stats.model.glm.LinkFunction.Type;
-import repicea.stats.model.glm.measerr.GLMWithUniformMeasError.GLMWithUniformMeasErrorDataStructure;
 
 /**
  * A class implementing the generalized linear model with measurement
  * error on one variable.
  * @author Mathieu Fortin - July 2022
  */
-public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUniformMeasErrorDataStructure> {
+public class GLMWithUniformMeasError extends GeneralizedLinearModel {
 
 
 	static class GLMWithUniformMeasErrorDataStructure extends GenericStatisticalDataStructure {
@@ -82,7 +79,7 @@ public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUnifo
 	
 	
 	@SuppressWarnings("serial")
-	class GLMWithUniformMeasErrorCompositeLogLikelihood extends CompositeLogLikelihood {
+	class GLMWithUniformMeasErrorCompositeLogLikelihood extends CompositeLogLikelihoodWithExplanatoryVariable {
 		
 		public GLMWithUniformMeasErrorCompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
 			super(innerLogLikelihoodFunction, xValues, yValues);
@@ -91,7 +88,7 @@ public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUnifo
 		@Override
 		protected void setValuesInLikelihoodFunction(int index) {
 			super.setValuesInLikelihoodFunction(index);
-			linkFunction.setBounds(bounds.getValueAt(index, 0), bounds.getValueAt(index, 1));
+			((LinkFunctionWithMeasError) lf).setBounds(bounds.getValueAt(index, 0), bounds.getValueAt(index, 1));
 		}
 
 	}
@@ -243,7 +240,7 @@ public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUnifo
 	protected final int indexEffectWithMeasError;
 	protected final GLMMeasErrorDefinition measError;
 	protected final Matrix bounds;
-	private LinkFunctionWithMeasError linkFunction;
+//	private LinkFunctionWithMeasError linkFunction;
 	
 	public GLMWithUniformMeasError(DataSet dataSet, String modelDefinition, GLMMeasErrorDefinition measError, Matrix startingValues) {
 		super(dataSet, Type.CLogLog, modelDefinition, startingValues);
@@ -255,23 +252,30 @@ public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUnifo
 		bounds = getDataStructure().setMeasErrorDefinition(this.measError);
 	}
 
+	
+	
+	
 	public GLMWithUniformMeasError(DataSet dataSet, String modelDefinition, GLMMeasErrorDefinition measError) {
 		this(dataSet, modelDefinition, measError, null);
 	}
 	
 	@Override
-	protected void setCompleteLLK() {completeLLK = new GLMWithUniformMeasErrorCompositeLogLikelihood(individualLLK, matrixX, y);}
-
+	protected GLMWithUniformMeasErrorCompositeLogLikelihood createCompleteLLK() {
+		return new GLMWithUniformMeasErrorCompositeLogLikelihood(individualLLK, matrixX, y);
+	}
+	
+	protected GLMWithUniformMeasErrorDataStructure getDataStructure() {
+		return (GLMWithUniformMeasErrorDataStructure) super.getDataStructure();
+	}
+	
 	@Override
-	protected GLMWithUniformMeasErrorDataStructure getDataStructureFromDataSet(DataSet dataSet) {
+	protected GLMWithUniformMeasErrorDataStructure createDataStructure(DataSet dataSet) {
 		return new GLMWithUniformMeasErrorDataStructure(dataSet);
 	}
 
 	@Override
-	protected void initializeLinkFunction(Type linkFunctionType) {
-		linkFunction = new LinkFunctionWithMeasError(RESOLUTION);
-		individualLLK = new WrappedIndividualLogLikelihood(new LikelihoodGLM(linkFunction));
-		setCompleteLLK();
+	protected LinkFunction createLinkFunction(Type linkFunctionType) {
+		return new LinkFunctionWithMeasError(RESOLUTION);
 	}
-
+	
 }

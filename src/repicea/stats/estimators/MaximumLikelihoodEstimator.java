@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,7 @@ import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimators.AbstractEstimator.AbstractEstimatorCompatibleModel;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.CompositeLogLikelihood;
+//import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
 import repicea.util.REpiceaLogManager;
 
 /**

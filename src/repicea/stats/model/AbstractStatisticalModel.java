@@ -38,7 +38,6 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	
 	private Estimator estimator;
 	
-	private double convergenceCriterion;
 	private Object optimizerParameters; 
 	
 	private String modelDefinition;
@@ -46,33 +45,10 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	/**
 	 * Default constructor.
 	 */
-	protected AbstractStatisticalModel() {
-//		protected AbstractStatisticalModel(DataSet dataSet) {
-//		dataStructure = getDataStructureFromDataSet(dataSet);
-		setConvergenceCriterion(1E-8);			// default value
-	}
-	
-	
-//	/**
-//	 * This method returns the appropriate StatisticalDataStructure from the dataSet. It
-//	 * is the first instruction to be called in the constructor.
-//	 * @param dataSet a DataSet instance
-//	 * @return a StatisticalDataStructure derived instance
-//	 */
-//	protected abstract D getDataStructureFromDataSet(DataSet dataSet);
-
-
-//	@Override
-//	public CompositeLogLikelihood getCompleteLogLikelihood() {return completeLLK;}
-	
-//	/**
-//	 * This method sets the log-likelihood function of the model. It is to be defined in the derived class, since the 
-//	 * log-likelihood function depends on the different features of the model.
-//	 */
-//	protected abstract void setCompleteLLK();
+	protected AbstractStatisticalModel() {}
 	
 	/**
-	 * This method sets the optimizer for the model.
+	 * Set the optimizer for the model.
 	 * @param optimizer an Optimizer instance
 	 */
 	public void setOptimizer(Estimator optimizer) {this.estimator = optimizer;}
@@ -85,9 +61,6 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 		return estimator;
 	}
 
-
-//	@Override
-//	public D getDataStructure() {return dataStructure;}
 	
 	/**
 	 * This method defines the default optimizer which is to be specific to the derived classes.
@@ -95,14 +68,6 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	 */
 	protected abstract Estimator instantiateDefaultEstimator();
 
-	/**
-	 * This method sets the convergence criterion.
-	 * @param convergenceCriterion a double
-	 */
-	public void setConvergenceCriterion(double convergenceCriterion) {this.convergenceCriterion = convergenceCriterion;}
-
-	@Override
-	public double getConvergenceCriterion() {return convergenceCriterion;}
 	
 	/**
 	 * This method sets the parameter for the optimizer.

@@ -34,7 +34,7 @@ import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.AbstractStatisticalModel;
-import repicea.stats.model.CompositeLogLikelihood;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.PredictableModel;
 import repicea.stats.model.WrappedIndividualLogLikelihood;
@@ -74,11 +74,13 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 
 	
 	private final StatisticalDataStructure dataStruct;
-	private final CompositeLogLikelihood completeLLK;
+	private final CompositeLogLikelihoodWithExplanatoryVariable completeLLK;
 	protected final IndividualLogLikelihood individualLLK;
-	private final LinkFunction lf;
+	protected final LinkFunction lf;
 	protected Matrix matrixX;		// reference
 	protected Matrix y;				// reference
+	
+	private double convergenceCriterion = 1E-8;
 
 	
 
@@ -90,6 +92,18 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	 * @param startingBeta the starting values of the parameters
 	 */
 	public GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingBeta) {
+		this(dataSet, linkFunctionType, modelDefinition, null, startingBeta);
+	}
+	
+	/**
+	 * Generic private constructor.
+	 * @param dataSet
+	 * @param linkFunctionType
+	 * @param modelDefinition
+	 * @param llk
+	 * @param startingBeta
+	 */
+	private GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta) {
 		super();
 		dataStruct = createDataStructure(dataSet);
 
@@ -100,8 +114,12 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 			System.out.println("Unable to define this model : " + modelDefinition);
 			e.printStackTrace();
 		}
-		lf = new LinkFunction(linkFunctionType);
-		individualLLK = new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
+		lf = createLinkFunction(linkFunctionType);
+		if (llk != null) {
+			individualLLK = llk;
+		} else {
+			individualLLK = createIndividualLLK();
+		}
 		// first initialize the model structure
 		setParameters(startingBeta);
 		completeLLK = createCompleteLLK();
@@ -117,12 +135,11 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		this(dataSet, linkFunctionType, modelDefinition, null);
 	}
 
-
 	/**
 	 * Constructor for derived class.
 	 */
 	protected GeneralizedLinearModel(GeneralizedLinearModel glm) {
-		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition());
+		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition(), glm.individualLLK, null);
 	}
 
 
@@ -134,8 +151,16 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		return (GenericStatisticalDataStructure) dataStruct;
 	}
 	
-	protected CompositeLogLikelihood createCompleteLLK() {
-		return new CompositeLogLikelihood(individualLLK, matrixX, y);
+	protected CompositeLogLikelihoodWithExplanatoryVariable createCompleteLLK() {
+		return new CompositeLogLikelihoodWithExplanatoryVariable(individualLLK, matrixX, y);
+	}
+
+	protected LinkFunction createLinkFunction(Type linkFunctionType) {
+		return new LinkFunction(linkFunctionType);
+	}
+
+	protected IndividualLogLikelihood createIndividualLLK() {
+		return new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
 	}
 
 	/**
@@ -259,13 +284,23 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	}
 
 	@Override
-	public CompositeLogLikelihood getCompleteLogLikelihood() {return completeLLK;}
+	public CompositeLogLikelihoodWithExplanatoryVariable getCompleteLogLikelihood() {return completeLLK;}
 
 	@Override
 	public boolean isInterceptModel() {return getDataStructure().isInterceptModel();}
 
 	@Override
 	public List<String> getEffectList() {return getDataStructure().getEffectList();}
+
+	@Override
+	public double getConvergenceCriterion() {return convergenceCriterion;}
+	
+	public void setConvergenceCriterion(double d) {
+		if (d < 1E-16) {
+			throw new InvalidParameterException("The minimum value for the convergence criterion is 1E-16");
+		} 
+		convergenceCriterion = d;
+	}
 
 
 

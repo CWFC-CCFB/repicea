@@ -27,12 +27,8 @@ import repicea.stats.estimators.Estimator;
  */
 public interface StatisticalModel { //<P extends StatisticalDataStructure> {
 
-//	/**
-//	 * This method returns the model log-likelihood function.
-//	 * @return a LogLikelihood instance
-//	 */
-//	public CompositeLogLikelihood getCompleteLogLikelihood();
 	public void setParameters(Matrix beta);
+
 	public Matrix getParameters();
 	
 	/**
@@ -52,11 +48,11 @@ public interface StatisticalModel { //<P extends StatisticalDataStructure> {
 	public String getModelDefinition();
 	
 	
-	/**
-	 * This method returns the value of the convergence criterion.
-	 * @return a double
-	 */
-	public double getConvergenceCriterion();
+//	/**
+//	 * This method returns the value of the convergence criterion.
+//	 * @return a double
+//	 */
+//	public double getConvergenceCriterion();
 	
 	/**
 	 * This method returns the optimizer of the log-likelihood function.

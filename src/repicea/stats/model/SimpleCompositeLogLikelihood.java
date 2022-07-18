@@ -4,16 +4,12 @@ import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.MatrixUtility;
 
-@SuppressWarnings("serial")
-public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper {
+public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWrapper implements CompositeLogLikelihood {
 
+	private final Matrix yValues;
 	
-	private Matrix yValues;
-	private Matrix xValues;
-	
-	public CompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
+	public SimpleCompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix yValues) {
 		super(innerLogLikelihoodFunction);
-		this.xValues = xValues;
 		this.yValues = yValues;
 	}
 		
@@ -23,7 +19,7 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	@Override
 	public Double getValue() {
 		double loglikelihood = 0;
-		for (int i = 0; i < xValues.m_iRows; i++) {
+		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
 			loglikelihood += getOriginalFunction().getValue();
 		}
@@ -33,7 +29,7 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	@Override
 	public Matrix getGradient() {
 		Matrix resultingGradient = new Matrix(getNumberOfParameters(), 1);
-		for (int i = 0; i < xValues.m_iRows; i++) {
+		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
 			MatrixUtility.add(resultingGradient, getOriginalFunction().getGradient());
 		}
@@ -43,7 +39,7 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	@Override
 	public Matrix getHessian() {
 		Matrix resultingHessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
-		for (int i = 0; i < xValues.m_iRows; i++) {
+		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
 			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
 		}
@@ -51,24 +47,9 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	}
 
 	protected void setValuesInLikelihoodFunction(int index) {
-//		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
-//		getOriginalFunction().getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
-		getOriginalFunction().setVariables(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
 		getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
 	}
 
-	/**
-	 * This method returns all the predicted values.
-	 * @return a Matrix instance
-	 */
-	public Matrix getPredictions() {
-		Matrix predictedValues = new Matrix(yValues.m_iRows, 1);
-		for (int i = 0; i < xValues.m_iRows; i++) {
-			setValuesInLikelihoodFunction(i);
-			predictedValues.setSubMatrix(getOriginalFunction().getPredictionVector(), i, 0);
-		}
-		return predictedValues;
-	}
 		
 	@Override
 	public void setParameters(Matrix beta) {
@@ -78,10 +59,5 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	@Override
 	public Matrix getParameters() {return getOriginalFunction().getParameters();}
 	
-	/**
-	 * Resets this composite likelihood to its initial values.
-	 */
-	public void reset() {}
-
 	
 }

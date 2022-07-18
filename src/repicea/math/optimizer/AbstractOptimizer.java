@@ -21,7 +21,7 @@ package repicea.math.optimizer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 
 /**
@@ -127,7 +127,7 @@ public abstract class AbstractOptimizer {
 	 * @param function a AbstractMathematicalFunction object
 	 * @param indicesOfParametersToOptimize	a List instance that contains the indices of the parameters to be optimized
 	 */
-	public abstract boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
+	public abstract boolean optimize(MathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
 
 	protected void fireOptimizerEvent(String actionString) {
 		for (OptimizerListener listener : listeners) {
