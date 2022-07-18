@@ -18,15 +18,21 @@
  */
 package repicea.stats.model.glm.measerr.simulation;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import repicea.io.FormatField;
+import repicea.io.Saveable;
+import repicea.io.javacsv.CSVField;
+import repicea.io.javacsv.CSVWriter;
 import repicea.stats.model.glm.measerr.simulation.DistanceCalculator.SpatialPopulationUnitDistance;
 
 
 @SuppressWarnings("serial")
-class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> {
+class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implements Saveable {
 	
 	static final class SpatialPopulationUnitDistance implements Comparable<SpatialPopulationUnitDistance> {
 		final double distance;
@@ -67,12 +73,14 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> {
 			double distance = Double.POSITIVE_INFINITY;
 			for (SpatialPopulationUnit pu : pus) {
 				double thisDistance = thisUnit.getDistanceFrom(pu);
-				if (isPopulation && pu.isConspecificIn) {
-					if (thisDistance < distance) {
+				if (isPopulation) {
+					if (pu.isConspecificIn && thisDistance < distance) {
 						distance = thisDistance;
 					}							
 				} else {
-					add(new SpatialPopulationUnitDistance(thisDistance, pu));
+					if (!thisUnit.equals(pu)) {
+						add(new SpatialPopulationUnitDistance(thisDistance, pu));
+					}
 				}
 			}
 			Collections.sort(this);
@@ -96,5 +104,32 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> {
 			newList.add(spud.pu);
 		}
 		return newList;
+	}
+
+	@Override
+	public void save(String filename) throws IOException {
+		CSVWriter writer = new CSVWriter(new File(filename), false);
+		List<FormatField> fields = new ArrayList<FormatField>();
+		fields.add(new CSVField("id"));
+		fields.add(new CSVField("distance"));
+		fields.add(new CSVField("isConspecificIn"));
+		writer.setFields(fields);
+		
+		Object[] record;
+//		int nbOccurrences = 0;
+		for (SpatialPopulationUnitDistance spdu : this) {
+			record = new Object[3];
+			record[0] = spdu.pu.id;
+			record[1] = spdu.distance;
+			record[2] = spdu.pu.isConspecificIn ? 1 : 0;
+			writer.addRecord(record);
+//			if (spdu.pu.isConspecificIn) {
+//				nbOccurrences++;
+//			}
+//			if (nbOccurrences >= 30) {
+//				break;
+//			}
+		}
+		writer.close();
 	}
 }

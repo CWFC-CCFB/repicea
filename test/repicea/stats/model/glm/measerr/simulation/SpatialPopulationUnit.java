@@ -36,42 +36,6 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 	}
 
 	
-//	class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> {
-//		void setDistanceToConspecific(List<SpatialPopulationUnit> pus, boolean isPopulation) {
-//			clear();
-//			if (isConspecificIn) {
-//				if (isPopulation) {
-//					trueDistanceToConspecific = 0d;
-//				} else {
-//					measuredDistanceToConspecific = 0d;
-//				}
-//			} else {
-//				
-//				double distance = Double.POSITIVE_INFINITY;
-//				for (SpatialPopulationUnit pu : pus) {
-//					if (pu.isConspecificIn) {
-//						double thisDistance = SpatialPopulationUnit.this.getDistanceFrom(pu);
-//						if (isPopulation) {
-//							if (thisDistance < distance) {
-//								distance = thisDistance;
-//							}							
-//						} else {
-//							add(new SpatialPopulationUnitDistance(thisDistance, pu));
-//						}
-//					}
-//				}
-//				Collections.sort(this);
-//				if (isPopulation) {
-//					trueDistanceToConspecific = distance;
-//				} else {
-//					measuredDistanceToConspecific = get(0).distance * .5;
-//				}
-//			}
-//
-//		}
-//	}
-	
-	
 	
 	final int xCoord;
 	final int yCoord;
@@ -112,25 +76,10 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 			Object[] record = new Object[5];
 			record[0] = y;
 			record[1] = measuredDistanceToConspecific;
-			record[2] = measuredDistanceToConspecific * 2;
+			record[2] = measuredDistanceToConspecific * 2;	// FIXME this quantity is now useless
 			record[3] = trueDistanceToConspecific;
-			double distanceMin;
-			if (isConspecificIn) {
-				distanceMin = 0d;
-			} else {
-				double res = StatisticalUtility.getRandom().nextDouble();
-				distanceMin = (trueDistanceToConspecific - res * measuredDistanceToConspecific * 2) / (1 - res);
-//				DistanceCalculator secDC = new DistanceCalculator(dc.get(0).pu, false); // false: dont consider this unit
-//				secDC.setDistanceToConspecific(dc.retrievePopulationUnits(), false, false); // false: it is not the population, false: we do not update fields
-//				distanceMin = measuredDistanceToConspecific * 2 - secDC.get(0).distance;
-//				if (distanceMin < 0) {
-//					distanceMin = 0d;
-//				}
-			}
+			double distanceMin = 0d; // FIXME this quantity is useless at the moment
 			record[4] = distanceMin;
-			if (distanceMin > measuredDistanceToConspecific * 2) {
-				int u = 0;
-			}
 			return record;
 		}
 	}

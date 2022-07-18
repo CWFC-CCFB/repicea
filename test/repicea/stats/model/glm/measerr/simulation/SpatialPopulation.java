@@ -87,6 +87,11 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		DataSet ds = new DataSet(sample.get(0).getFieldname(false));
 		for (PopulationUnit pu : sample) {
 			ds.addObservation(pu.asObservation(false));
+			if (!((SpatialPopulationUnit) pu).isConspecificIn) {
+				try {
+					((SpatialPopulationUnit) pu).dc.save(PATH + "exampleDistanceSample.csv");
+				} catch (Exception e) {}
+			}
 		}
 		ds.indexFieldType();
 //		try {

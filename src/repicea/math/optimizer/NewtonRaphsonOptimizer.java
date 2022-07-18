@@ -165,12 +165,13 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				hessian = function.getHessian();
 				currentBeta = extractParameters(function, indicesOfParametersToOptimize);
 				gconv = calculateConvergence(gradient, hessian, value0);
-				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; gconv : " + gconv + "; parms : " + currentBeta.toString());
 				
 				if (gconv < 0) {
 					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5);
 					REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "GConv is negative!");
 					REpiceaLogManager.logMessage(LOGGER_NAME, Level.WARNING, LOGGER_NAME, "Convergence could not be achieved after " + ((Integer) iterationID).toString() + " iterations!");
+					break;
 				} else if (gconv < convergenceCriterion) {
 					convergenceAchieved = true;
 				}
