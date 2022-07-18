@@ -74,7 +74,7 @@ public class CopulaLibrary {
 		protected void setX(int indexFirstObservation, int indexSecondObservation) {}
 
 		@Override
-		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
+		protected void initialize(StatisticalModel model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
 			ParameterBound bound = new ParameterBound(-1d, 1d);
 			getOriginalFunction().setBounds(0, bound);
@@ -114,7 +114,7 @@ public class CopulaLibrary {
 		public int getNumberOfVariables() {return getOriginalFunction().getNumberOfVariables();}
 
 		@Override
-		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
+		protected void initialize(StatisticalModel model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
 			linkFunction = new LinkFunction(Type.Logit, getOriginalFunction());
 		}
@@ -195,7 +195,7 @@ public class CopulaLibrary {
 
 
 		@Override
-		protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
+		protected void initialize(StatisticalModel model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 			super.initialize(model, data);
 			List<List<String>> distanceParameterization = new ArrayList<List<String>>();
 			List<String> distanceDimensions = ObjectUtility.decomposeUsingToken(distanceFieldsEnumeration, ",");

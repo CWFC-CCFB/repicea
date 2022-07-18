@@ -27,36 +27,46 @@ import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
+import repicea.stats.estimators.AbstractEstimator.AbstractEstimatorCompatibleModel;
+import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.CompositeLogLikelihood;
-import repicea.stats.model.StatisticalModel;
 import repicea.util.REpiceaLogManager;
 
 /**
- * Implements a maximum likelihood estimator based on 
+ * Implement a maximum likelihood estimator based on 
  * the Newton-Raphson algorithm.
  * @author Mathieu Fortin - August 2011
  */
-public class MaximumLikelihoodEstimator extends AbstractEstimator {
+public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelihoodCompatibleModel> {
+
+	
+	public interface MaximumLikelihoodCompatibleModel extends AbstractEstimatorCompatibleModel {
+	
+		public double getConvergenceCriterion();
+		
+		public CompositeLogLikelihood getCompleteLogLikelihood();
+		
+		public Matrix getParameters();
+	}
 	
 	public static String LOGGER_NAME = "MLEstimator";
 	protected GaussianEstimate parameterEstimate;
 	protected final repicea.math.optimizer.NewtonRaphsonOptimizer nro;
-
+	
 	/**
 	 * Constructor. 
 	 */
-	public MaximumLikelihoodEstimator() {
+	public MaximumLikelihoodEstimator(MaximumLikelihoodCompatibleModel model) {
+		super(model);
 		nro = new repicea.math.optimizer.NewtonRaphsonOptimizer();
 	}
 	
 	
 	@Override
-	public boolean doEstimation(StatisticalModel<? extends StatisticalDataStructure> model) throws EstimatorException {
+	public boolean doEstimation() throws EstimatorException {
 		nro.setConvergenceCriterion(model.getConvergenceCriterion());
-		dataStruct = model.getDataStructure();
 		
 		CompositeLogLikelihood llk = model.getCompleteLogLikelihood();
 		List<Integer> indices = new ArrayList<Integer>();
@@ -115,9 +125,6 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator {
 	
 	@Override
 	public DataSet getConvergenceStatusReport() {
-		if (dataStruct == null) {
-			throw new UnsupportedOperationException("The doEstimation method should be called first!");
-		}
 		NumberFormat formatter = NumberFormat.getInstance();
 		formatter.setMaximumFractionDigits(3);
 		formatter.setMinimumFractionDigits(3);
@@ -136,7 +143,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator {
 		record[1] = - 2 * getMaximumLogLikelihood() + 2 * nro.getParametersAtMaximum().getNumberOfElements();
 		dataSet.addObservation(record);
 		record[0] = "BIC";
-		record[1] = - 2 * getMaximumLogLikelihood() + nro.getParametersAtMaximum().getNumberOfElements() * Math.log(dataStruct.getNumberOfObservations());
+		record[1] = - 2 * getMaximumLogLikelihood() + nro.getParametersAtMaximum().getNumberOfElements() * Math.log(model.getNumberOfObservations());
 		dataSet.addObservation(record);
 		return dataSet;
 	}

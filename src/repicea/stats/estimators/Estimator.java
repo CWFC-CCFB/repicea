@@ -19,7 +19,6 @@
 package repicea.stats.estimators;
 
 import repicea.stats.data.DataSet;
-import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.model.StatisticalModel;
 
@@ -38,7 +37,7 @@ public interface Estimator {
 		}
 	}
 	
-	public boolean doEstimation(StatisticalModel<? extends StatisticalDataStructure> model)	throws EstimatorException;
+	public boolean doEstimation() throws EstimatorException;
 
 	/**
 	 * This method returns true if the estimator successfully estimated the parameters.

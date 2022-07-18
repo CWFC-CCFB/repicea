@@ -20,11 +20,15 @@ package repicea.stats.model.glm.copula;
 
 import java.text.NumberFormat;
 
+import javax.management.remote.SubjectDelegationPermission;
+
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
+import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 
 /**
@@ -35,9 +39,9 @@ import repicea.stats.model.glm.GeneralizedLinearModel;
  * </a>
  * @author Mathieu Fortin - June 2011
  */
-public class FGMCopulaGLModel extends GeneralizedLinearModel<HierarchicalStatisticalDataStructure> {
+public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	
-	private CopulaExpression copula;
+	private final CopulaExpression copula;
 	
 	/**
 	 * Constructor for this class
@@ -53,7 +57,12 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel<HierarchicalStatist
 		glm.setParameters(glm.getEstimator().getParameterEstimates().getMean());
 		this.copula = copula;
 		this.copula.initialize(this, getDataStructure());
-		setCompleteLLK();
+		getCompleteLogLikelihood().initialize(getDataStructure(), copula);
+	}
+	
+	@Override
+	public FGMCompositeLogLikelihood getCompleteLogLikelihood() {
+		return (FGMCompositeLogLikelihood) super.getCompleteLogLikelihood();
 	}
 	
 	@Override
@@ -70,20 +79,16 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel<HierarchicalStatist
 		}
 	}
 
-	
 	@Override
-	protected void setCompleteLLK() {completeLLK = new FGMCompositeLogLikelihood(individualLLK,	matrixX, y,	getDataStructure(),	copula);}
+	protected CompositeLogLikelihood createCompleteLLK() {
+		return new FGMCompositeLogLikelihood(individualLLK,	matrixX, y);
+	}
 	
 	@Override
 	public String toString() {
 		return "Generalized linear model based on FGM copula";
 	}
 
-//	@Override
-//	public HierarchicalStatisticalDataStructure getDataStructure() {
-//		return (HierarchicalStatisticalDataStructure) super.getDataStructure();
-//	}
-	
 	@Override
 	public void getSummary() {
 		super.getSummary();
@@ -106,10 +111,14 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel<HierarchicalStatist
 	
 	
 	@Override
-	protected HierarchicalStatisticalDataStructure getDataStructureFromDataSet(	DataSet dataSet) {
+	protected HierarchicalStatisticalDataStructure createDataStructure(DataSet dataSet) {
 		return new GenericHierarchicalSpatialDataStructure(dataSet);
 	}
 
-	
+	@Override
+	protected HierarchicalStatisticalDataStructure getDataStructure() {
+		return (HierarchicalStatisticalDataStructure) super.getDataStructure();
+	}
+
 	
 }

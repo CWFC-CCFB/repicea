@@ -38,15 +38,16 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 	protected Map<List<Integer>, Matrix> additionalHessians;
 	protected boolean additionalHessianTermUptoDate;
 
-	protected final HierarchicalStatisticalDataStructure hierarchicalStructure;
-	protected final CopulaExpression copulaExpression;
+	protected HierarchicalStatisticalDataStructure hierarchicalStructure;
+	protected CopulaExpression copulaExpression;
 	
 	protected FGMCompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, 
 			Matrix xValues, 
-			Matrix yValues, 
-			HierarchicalStatisticalDataStructure hierarchicalStructure,
-			CopulaExpression copulaExpression) {
+			Matrix yValues) {
 		super(innerLogLikelihoodFunction, xValues, yValues);
+	}
+	
+	protected void initialize(HierarchicalStatisticalDataStructure hierarchicalStructure, CopulaExpression copulaExpression) {
 		this.hierarchicalStructure = hierarchicalStructure;
 		this.copulaExpression = copulaExpression;
 	}

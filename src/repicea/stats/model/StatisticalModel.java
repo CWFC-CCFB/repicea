@@ -19,20 +19,19 @@
 package repicea.stats.model;
 
 import repicea.math.Matrix;
-import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 
 /**
  * This interface defines the services provided by a statistical model.
  * @author Mathieu Fortin - October 2011
  */
-public interface StatisticalModel<P extends StatisticalDataStructure> {
+public interface StatisticalModel { //<P extends StatisticalDataStructure> {
 
-	/**
-	 * This method returns the model log-likelihood function.
-	 * @return a LogLikelihood instance
-	 */
-	public CompositeLogLikelihood getCompleteLogLikelihood();
+//	/**
+//	 * This method returns the model log-likelihood function.
+//	 * @return a LogLikelihood instance
+//	 */
+//	public CompositeLogLikelihood getCompleteLogLikelihood();
 	public void setParameters(Matrix beta);
 	public Matrix getParameters();
 	
@@ -41,19 +40,6 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	 */
 	public void getSummary();
 	
-	/**
-	 * This method returns a vector of predicted values.
-	 * @return a Matrix instance
-	 */
-	public Matrix getPredicted();
-	
-
-	/**
-	 * This method returns a vector of residuals, that is observed values minus predictions.
-	 * @return a Matrix instance
-	 */
-	public Matrix getResiduals();
-
 	/**
 	 * This method computes the parameter estimates.
 	 */
@@ -78,9 +64,4 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	 */
 	public Estimator getEstimator();
 	
-	/**
-	 * This method returns the data structure.
-	 * @return a StatisticalDataStructure derived instance
-	 */
-	public P getDataStructure();
 }

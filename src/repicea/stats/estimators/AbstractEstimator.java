@@ -23,12 +23,26 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.StatisticalDataStructure;
+import repicea.stats.estimators.AbstractEstimator.AbstractEstimatorCompatibleModel;
 
-public abstract class AbstractEstimator implements Estimator {
+public abstract class AbstractEstimator<P extends AbstractEstimatorCompatibleModel> implements Estimator {
 
-	protected StatisticalDataStructure dataStruct;
+	
+	protected interface AbstractEstimatorCompatibleModel {
+		
+		public boolean isInterceptModel();
+		
+		public List<String> getEffectList();
+		
+		public int getNumberOfObservations();
 
+	}
+
+	protected final P model;
+	
+	protected AbstractEstimator(P model) {
+		this.model = model;
+	}
 	
 	@Override
 	public DataSet getParameterEstimatesReport() {
@@ -46,10 +60,10 @@ public abstract class AbstractEstimator implements Estimator {
 		} 
 
 		Object[] record = new Object[3];
-		boolean isWithIntercept = dataStruct.isInterceptModel();
+		boolean isWithIntercept = model.isInterceptModel();
 		for (int i = 0; i < parameterEstimates.m_iRows; i++) {
 			int j = isWithIntercept ? i - 1 : i;
-			record[0] = j == -1 ? "intercept" : dataStruct.getEffectList().get(j);
+			record[0] = j == -1 ? "intercept" : model.getEffectList().get(j);
 			record[1] = parameterEstimates.getValueAt(i, 0);
 			record[2] = varianceAvailable ? std.getValueAt(i, 0) : Double.NaN;
 			dataSet.addObservation(record);

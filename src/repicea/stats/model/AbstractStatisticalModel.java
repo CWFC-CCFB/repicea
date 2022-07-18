@@ -20,9 +20,7 @@ package repicea.stats.model;
 
 import java.util.logging.Level;
 
-import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.Estimator.EstimatorException;
 import repicea.util.REpiceaLogManager;
@@ -34,48 +32,44 @@ import repicea.util.REpiceaLogManager;
  * @author Mathieu Fortin - August 2011
  * @param <D> a StatisticalDataStructure-derived class
  */
-public abstract class AbstractStatisticalModel<D extends StatisticalDataStructure> implements StatisticalModel<D> {
+public abstract class AbstractStatisticalModel implements StatisticalModel {
 
 	public static String LOGGER_NAME = "AbstractStatisticalModel";
 	
 	private Estimator estimator;
-	private D dataStructure;
 	
 	private double convergenceCriterion;
 	private Object optimizerParameters; 
 	
-	/**
-	 * The complete model likelihood.
-	 */
-	protected CompositeLogLikelihood completeLLK;
 	private String modelDefinition;
 
 	/**
 	 * Default constructor.
 	 */
-	protected AbstractStatisticalModel(DataSet dataSet) {
-		dataStructure = getDataStructureFromDataSet(dataSet);
+	protected AbstractStatisticalModel() {
+//		protected AbstractStatisticalModel(DataSet dataSet) {
+//		dataStructure = getDataStructureFromDataSet(dataSet);
 		setConvergenceCriterion(1E-8);			// default value
 	}
 	
 	
-	/**
-	 * This method returns the appropriate StatisticalDataStructure from the dataSet. It
-	 * is the first instruction to be called in the constructor.
-	 * @param dataSet a DataSet instance
-	 * @return a StatisticalDataStructure derived instance
-	 */
-	protected abstract D getDataStructureFromDataSet(DataSet dataSet);
+//	/**
+//	 * This method returns the appropriate StatisticalDataStructure from the dataSet. It
+//	 * is the first instruction to be called in the constructor.
+//	 * @param dataSet a DataSet instance
+//	 * @return a StatisticalDataStructure derived instance
+//	 */
+//	protected abstract D getDataStructureFromDataSet(DataSet dataSet);
 
 
-	@Override
-	public CompositeLogLikelihood getCompleteLogLikelihood() {return completeLLK;}
+//	@Override
+//	public CompositeLogLikelihood getCompleteLogLikelihood() {return completeLLK;}
 	
-	/**
-	 * This method sets the log-likelihood function of the model. It is to be defined in the derived class, since the 
-	 * log-likelihood function depends on the different features of the model.
-	 */
-	protected abstract void setCompleteLLK();
+//	/**
+//	 * This method sets the log-likelihood function of the model. It is to be defined in the derived class, since the 
+//	 * log-likelihood function depends on the different features of the model.
+//	 */
+//	protected abstract void setCompleteLLK();
 	
 	/**
 	 * This method sets the optimizer for the model.
@@ -92,8 +86,8 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	}
 
 
-	@Override
-	public D getDataStructure() {return dataStructure;}
+//	@Override
+//	public D getDataStructure() {return dataStructure;}
 	
 	/**
 	 * This method defines the default optimizer which is to be specific to the derived classes.
@@ -122,7 +116,7 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	public void doEstimation() {
 		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Optimization using " + getEstimator().toString() + ".");
 		try {
-			if (getEstimator().doEstimation(this)) {
+			if (getEstimator().doEstimation()) {
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME,"Convergence achieved!");
 			} else {
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.WARNING, LOGGER_NAME, "Unable to reach convergence.");
@@ -150,7 +144,6 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	 */
 	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
 		this.modelDefinition = modelDefinition;
-		getDataStructure().constructMatrices(modelDefinition);
 	}
 	
 
