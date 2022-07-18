@@ -34,6 +34,7 @@ import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.WrappedIndividualLogLikelihood;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.REpiceaLogManager;
 
@@ -139,7 +140,7 @@ public class GeneralizedLinearModel<P extends StatisticalDataStructure> extends 
 	
 	protected void initializeLinkFunction(Type linkFunctionType) {
 		LinkFunction lf = new LinkFunction(linkFunctionType);
-		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(lf));
+		individualLLK = new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
 		setCompleteLLK();
 	}
 
@@ -147,14 +148,14 @@ public class GeneralizedLinearModel<P extends StatisticalDataStructure> extends 
 	@Override
 	public void setParameters(Matrix beta) {
 		if (beta == null) {
-			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
 		} else {
-			individualLLK.setBeta(beta);
+			individualLLK.setParameters(beta);
 		}
 	}
 		
 	@Override
-	public Matrix getParameters() {return individualLLK.getBeta();}
+	public Matrix getParameters() {return individualLLK.getParameters();}
 
 	@Override
 	protected Estimator instantiateDefaultEstimator() {
@@ -229,7 +230,7 @@ public class GeneralizedLinearModel<P extends StatisticalDataStructure> extends 
 	@Override
 	public Matrix getPredicted() {
 		if (getEstimator().isConvergenceAchieved()) {
-			getCompleteLogLikelihood().setBeta(getEstimator().getParameterEstimates().getMean());
+			getCompleteLogLikelihood().setParameters(getEstimator().getParameterEstimates().getMean());
 			return getCompleteLogLikelihood().getPredictions();
 		} else {
 			return null;

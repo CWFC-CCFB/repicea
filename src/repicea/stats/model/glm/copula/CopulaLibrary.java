@@ -54,8 +54,8 @@ public class CopulaLibrary {
 
 		public SimpleCopulaExpression(double value, String hierarchicalLevelSpecifications) {
 			super(hierarchicalLevelSpecifications);
-			setBeta(new Matrix(1,1,value,0));
-			setX(new Matrix(1,1,1d,0));
+			setParameters(new Matrix(1,1,value,0));
+			setVariables(new Matrix(1,1,1d,0));
 		}
 		
 		@Override
@@ -94,8 +94,8 @@ public class CopulaLibrary {
 				
 		public SimpleLogisticCopulaExpression(double origin, String hierarchicalLevelSpecifications) throws StatisticalDataException {
 			super(hierarchicalLevelSpecifications);
-			setX(new Matrix(1,1,1d,0));
-			setBeta(new Matrix(1,1,origin,0));
+			setParameters(new Matrix(1,1,origin,0));
+			setVariables(new Matrix(1,1,1d,0));
 		}
 		
 		@Override
@@ -151,7 +151,7 @@ public class CopulaLibrary {
 			this.distanceFieldsEnumeration = distanceFieldsEnumeration;
 			
 			Matrix beta = new Matrix(1,1,parameterStartingValue,0);
-			setBeta(beta);
+			setParameters(beta);
 		
 			linkFunction = new LinkFunction(linkFunctionType, getOriginalFunction());
 		}
@@ -168,7 +168,7 @@ public class CopulaLibrary {
 		
 		@Deprecated
 		@Override
-		public void setX(Matrix x) {}
+		public void setVariables(Matrix x) {}
 		
 		@Override
 		protected void setX(int indexFirstObservation, int indexSecondObservation) {

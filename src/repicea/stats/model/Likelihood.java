@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -18,34 +18,31 @@
  */
 package repicea.stats.model;
 
-import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 
-
 /**
- * The Likelihood class provides the basic services for all Likelihood classes
- * @author Mathieu Fortin - June 2011
+ * An interface that makes sure the instance can be interpreted as a likelihood
+ * @author Mathieu Fortin - 2012
  */
-@SuppressWarnings("serial")
-public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements Likelihood {
-
-	protected Matrix observedValues;
-
-	protected IndividualLikelihood(MathematicalFunction originalFunction) {
-		super(originalFunction);
-	}
+public interface Likelihood extends MathematicalFunction {
 	
-	@Override
-	public void setYVector(Matrix yVector) {
-		this.observedValues = yVector;
-	}
+	/**
+	 * This method sets the vector of observed values.
+	 * @param yVector a row vector (Matrix instance)
+	 */
+	public void setYVector(Matrix yVector);
 
-	@Override
-	public Matrix getYVector() {return observedValues;}
-	 
-	@Override
-	public abstract Matrix getPredictionVector();
+	/**
+	 * This method returns the vector of observed values.
+	 * @return a Matrix instance
+	 */
+	public Matrix getYVector();
+
+	/**
+	 * This method returns the prediction associated with the observation.
+	 * @return a Matrix instance
+	 */
+	public Matrix getPredictionVector();
 	
-
 }

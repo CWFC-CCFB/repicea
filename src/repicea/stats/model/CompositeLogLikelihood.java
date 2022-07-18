@@ -51,8 +51,10 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 	}
 
 	protected void setValuesInLikelihoodFunction(int index) {
-		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
-		getOriginalFunction().getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
+//		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
+//		getOriginalFunction().getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
+		getOriginalFunction().setVariables(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
+		getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
 	}
 
 	/**
@@ -68,11 +70,13 @@ public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper 
 		return predictedValues;
 	}
 		
-	public void setBeta(Matrix beta) {
-		getOriginalFunction().setBeta(beta);
+	@Override
+	public void setParameters(Matrix beta) {
+		getOriginalFunction().setParameters(beta);
 	}
 
-	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+	@Override
+	public Matrix getParameters() {return getOriginalFunction().getParameters();}
 	
 	/**
 	 * Resets this composite likelihood to its initial values.

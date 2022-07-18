@@ -28,7 +28,7 @@ import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
-import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.WrappedIndividualLogLikelihood;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaLogManager;
@@ -114,7 +114,7 @@ public class TwoStepGeneralizedLinearModel<P extends StatisticalDataStructure> e
 	@Override
 	protected void initializeLinkFunction(Type linkFunctionType) {
 		LinkFunction lf = new DoubleLinkFunction(linkFunctionType);
-		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(lf));
+		individualLLK = new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
 		setCompleteLLK();
 	}
 	

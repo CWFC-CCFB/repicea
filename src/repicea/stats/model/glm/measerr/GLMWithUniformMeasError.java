@@ -30,6 +30,7 @@ import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.integral.TrapezoidalRule;
 import repicea.stats.model.CompositeLogLikelihood;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.WrappedIndividualLogLikelihood;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LikelihoodGLM;
 import repicea.stats.model.glm.LinkFunction;
@@ -129,6 +130,12 @@ public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUnifo
 		public double getParameterValue(int parameterIndex) {
 			return originalFunction.getParameterValue(parameterIndex);
 		}
+
+		@Override
+		public void setParameters(Matrix beta) {}
+
+		@Override
+		public void setVariables(Matrix xVector) {}
 		
 	}
 	
@@ -263,7 +270,7 @@ public class GLMWithUniformMeasError extends GeneralizedLinearModel<GLMWithUnifo
 	@Override
 	protected void initializeLinkFunction(Type linkFunctionType) {
 		linkFunction = new LinkFunctionWithMeasError(RESOLUTION);
-		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(linkFunction));
+		individualLLK = new WrappedIndividualLogLikelihood(new LikelihoodGLM(linkFunction));
 		setCompleteLLK();
 	}
 

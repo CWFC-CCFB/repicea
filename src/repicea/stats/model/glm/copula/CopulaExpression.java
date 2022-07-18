@@ -58,11 +58,4 @@ public abstract class CopulaExpression extends AbstractMathematicalFunctionWrapp
 		data.setHierarchicalStructureLevel(levels);
 	}
 	
-	public void setX(Matrix x) {getOriginalFunction().setX(x);}
-	
-	public void setBeta(Matrix beta) {getOriginalFunction().setBeta(beta);}
-	
-	public Matrix getBeta() {return getOriginalFunction().getBeta();}
-
-	
 }

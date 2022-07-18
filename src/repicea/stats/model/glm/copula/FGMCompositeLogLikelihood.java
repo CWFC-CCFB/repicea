@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.MatrixUtility;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
@@ -11,8 +12,8 @@ import repicea.math.optimizer.OptimizerListener;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.model.CompositeLogLikelihood;
-import repicea.stats.model.IndividualLikelihood;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.Likelihood;
 
 @SuppressWarnings("serial")
 public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements OptimizerListener {
@@ -61,8 +62,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 	}
 	
 
-//	private IndividualLogLikelihood getIndividualLLK() {return getOriginalFunction();}
-	private IndividualLikelihood getIndividualLikelihood() {return getOriginalFunction().getOriginalFunction();}
+	private Likelihood getIndividualLikelihood() {return (Likelihood) ((AbstractMathematicalFunctionWrapper) getOriginalFunction()).getOriginalFunction();}
 	private int getTotalNumberOfParameters() {return getIndividualLikelihood().getNumberOfParameters() + copulaExpression.getNumberOfParameters();}
 			
 			

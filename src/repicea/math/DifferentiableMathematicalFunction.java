@@ -16,15 +16,26 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.model;
+package repicea.math;
+
 
 /**
- * The LogLikelihood interface provides the basic services for all LogLikelihood classes. A 
- * LogLLikelihood instance must be able to provide its original likelihood function and its 
- * derivatives.
- * @author Mathieu Fortin - June 2011
+ * This interface returns the first and second derivatives of a mathematical function.
+ * @author Mathieu Fortin - October 2011
  */
-public interface IndividualLogLikelihood extends Likelihood {
+public interface DifferentiableMathematicalFunction {
+
+	/**
+	 * This method returns a vector that contains the first derivatives of the function with respect to its parameters.
+	 * @return a Matrix instance
+	 */
+	public Matrix getGradient();
 	
+	
+	/**
+	 * This method returns a matrix that contains the second derivatives of the function with respect to its parameters.
+	 * @return a Matrix instance
+	 */
+	public Matrix getHessian();
 	
 }

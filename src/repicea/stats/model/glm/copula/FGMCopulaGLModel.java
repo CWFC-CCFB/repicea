@@ -57,16 +57,16 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel<HierarchicalStatist
 	}
 	
 	@Override
-	public Matrix getParameters() {return individualLLK.getBeta().matrixStack(copula.getBeta(), true);}
+	public Matrix getParameters() {return individualLLK.getParameters().matrixStack(copula.getParameters(), true);}
 	
 
 	@Override
 	public void setParameters(Matrix beta) {
 		if (beta == null) {
-			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
 		} else {
-			individualLLK.setBeta(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
-			copula.setBeta(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
+			individualLLK.setParameters(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
+			copula.setParameters(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
 		}
 	}
 

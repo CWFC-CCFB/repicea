@@ -21,8 +21,8 @@ package repicea.stats.model.glm;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 import repicea.stats.LinearStatisticalExpression;
 
@@ -54,7 +54,7 @@ public class LinkFunction extends AbstractMathematicalFunctionWrapper implements
 	 * @param eta an AbstractMathematicalFunction instance
 	 * @throws InvalidParameterException if type is null
 	 */
-	public LinkFunction(Type type, AbstractMathematicalFunction eta) {
+	public LinkFunction(Type type, MathematicalFunction eta) {
 		super(eta);
 		if (type == null) {
 			this.type = Type.Logit;
@@ -110,7 +110,7 @@ public class LinkFunction extends AbstractMathematicalFunctionWrapper implements
 
 	@Override
 	public Matrix getHessian() {
-		AbstractMathematicalFunction eta = getOriginalFunction();
+		MathematicalFunction eta = getOriginalFunction();
 		double expEta = Math.exp(eta.getValue());
 		Matrix gradientProduct = eta.getGradient().multiply(eta.getGradient().transpose());
 		

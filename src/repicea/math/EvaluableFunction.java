@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -26,20 +26,20 @@ package repicea.math;
 public interface EvaluableFunction<P> {
 
 	/**
-	 * Provides the result of the function evaluation.
+	 * Provide the result of the function evaluation.
 	 * @return a P instance
 	 */
 	public P getValue();
 
 	/**
-	 * Sets the variable value associated with this variable name.
+	 * Set the variable value associated with this variable name.
 	 * @param variableIndex the index of the variable 
 	 * @param variableValue its value (a double)
 	 */
 	public void setVariableValue(int variableIndex, double variableValue);
 	
 	/**
-	 * Sets the parameter value.
+	 * Set the value of a particular parameter.
 	 * @param parameterIndex the parameter index
 	 * @param parameterValue the parameter value
 	 */
@@ -47,14 +47,28 @@ public interface EvaluableFunction<P> {
 
 	
 	/**
-	 * Returns the value of the variable at index variableIndex
+	 * Set all the parameters at once.
+	 * @param beta a column vector
+	 */
+	public void setParameters(Matrix beta);
+	
+	
+	/**
+	 * Set all the variables at once.
+	 * @param xVector a row vector
+	 */
+	public void setVariables(Matrix xVector);
+	
+	
+	/**
+	 * Return the value of the variable at index variableIndex
 	 * @param variableIndex an integer
 	 * @return a double
 	 */
 	public double getVariableValue(int variableIndex);
 
 	/**
-	 * Retrieves the parameter defined by the parameterName parameter.
+	 * Retrieve the parameter defined by the parameterName parameter.
 	 * @param parameterIndex the index of the parameter to be retrieved
 	 * @return a double
 	 */
