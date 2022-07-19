@@ -48,15 +48,15 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	protected AbstractStatisticalModel() {}
 	
 	/**
-	 * Set the optimizer for the model.
-	 * @param optimizer an Optimizer instance
+	 * Set the Estimator for the model.
+	 * @param estimator an Estimator instance
 	 */
-	public void setOptimizer(Estimator optimizer) {this.estimator = optimizer;}
+	public void setEstimator(Estimator estimator) {this.estimator = estimator;}
 	
 	@Override
 	public Estimator getEstimator() {
 		if (estimator == null) {
-			setOptimizer(instantiateDefaultEstimator());
+			setEstimator(instantiateDefaultEstimator());
 		}
 		return estimator;
 	}

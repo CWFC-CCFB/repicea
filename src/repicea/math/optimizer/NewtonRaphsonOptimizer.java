@@ -96,7 +96,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		do {
 			fireOptimizerEvent(NewtonRaphsonOptimizer.InnerIterationStarted);
 			scalingFactor = getScalingFactor(numberSubIter);
-			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor - numberSubIter * .1));
+			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor));
 			setParameters(function, indicesOfParametersToOptimize, newBeta);
 			currentLlkValue = function.getValue();
 			REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Log-likelihood : " + currentLlkValue);
