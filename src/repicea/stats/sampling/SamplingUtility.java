@@ -30,14 +30,16 @@ import repicea.stats.StatisticalUtility;
 public class SamplingUtility {
 
 	/**
-	 * This method returns a sample from a population.
-	 * @param population a List instance with the population
-	 * @param sampleSize an integer 
-	 * @param withReplacement true if sampling with replacement or false otherwise
-	 * @return a List instance containing the sample
+	 * Returns a sample from a population.
+	 * 
+	 * @param <T> the type of object in the population and the sample
+	 * @param population a List of instances T standing for the population
+	 * @param sampleSize the sample size (int)
+	 * @param withReplacement a boolean true if sampling with replacement or false otherwise
+	 * @return a List of instances T standing for the sample
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public static List<?> getSample(List<?> population, int sampleSize, boolean withReplacement) {
+	public static <T> List<T> getSample(List<T> population, int sampleSize, boolean withReplacement) {
 		if (sampleSize <= 0 || sampleSize > population.size()) {
 			throw new InvalidParameterException("The sample size must be greater than 0 and smaller than or equal to the population size!");
 		}
@@ -49,6 +51,19 @@ public class SamplingUtility {
 		}
 		return sample;
 	}
+	
+	/**
+	 * Returns a sample from a population drawn without replacement.
+	 * 
+	 * @param <T> the type of object in the population and the sample
+	 * @param population a List of instances T standing for the population
+	 * @param sampleSize the sample size (int)
+	 * @return a List of instances T standing for the sample
+	 */
+	public static <T> List<T> getSample(List<T> population, int sampleSize) {
+		return getSample(population, sampleSize, false);
+	}
+
 	
 	/**
 	 * This method returns the list of different observations and their frequency. 
@@ -68,16 +83,6 @@ public class SamplingUtility {
 	}
 	
 	
-	/**
-	 * This method returns a sample from a population drawn according to a random sample without replacement.
-	 * design.
-	 * @param population a List instance with the population
-	 * @param sampleSize an integer 
-	 * @return a List instance containing the sample
-	 */
-	public static List<?> getSample(List<?> population, int sampleSize) {
-		return getSample(population, sampleSize, false);
-	}
 	
 
 	private static List<Integer> getSampleIndex(int sampleSize, int populationSize, boolean withReplacement) {

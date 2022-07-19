@@ -60,7 +60,7 @@ class NonSpatialPopulation extends AbstractPopulation<NonSpatialPopulationUnit>{
 		Object[] record = new Object[6];
 		int nbPositive = generateRealizations();
 //		System.out.println("Nb positive cases = " + nbPositive);
-		List<PopulationUnit> sample = (List<PopulationUnit>) SamplingUtility.getSample(populationUnits, n);
+		List<NonSpatialPopulationUnit> sample = SamplingUtility.getSample(populationUnits, n);
 		
 		DataSet ds = new DataSet(sample.get(0).getFieldname(false));
 		for (PopulationUnit pu : sample) {

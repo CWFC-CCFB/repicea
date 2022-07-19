@@ -81,23 +81,23 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		Object[] record = new Object[6];
 		int nbPositive = generateRealizations();
 //		System.out.println("Nb positive cases = " + nbPositive);
-		List<SpatialPopulationUnit> sample = (List<SpatialPopulationUnit>) SamplingUtility.getSample(populationUnits, n);
+		List<SpatialPopulationUnit> sample = SamplingUtility.getSample(populationUnits, n);
 		determineDistanceToConspecific(sample, false); // false is the sample
 		
 		DataSet ds = new DataSet(sample.get(0).getFieldname(false));
 		for (PopulationUnit pu : sample) {
 			ds.addObservation(pu.asObservation(false));
-			if (!((SpatialPopulationUnit) pu).isConspecificIn) {
-				try {
-					((SpatialPopulationUnit) pu).dc.save(PATH + "exampleDistanceSample.csv");
-				} catch (Exception e) {}
-			}
+//			if (!((SpatialPopulationUnit) pu).isConspecificIn) {
+//				try {
+//					((SpatialPopulationUnit) pu).dc.save(PATH + "exampleDistanceSample.csv");
+//				} catch (Exception e) {}
+//			}
 		}
 		ds.indexFieldType();
-//		try {
-//			if (realID < 10)
-//				ds.save(PATH + "sample" + realID++ + ".csv");
-//		} catch(Exception e) {}
+		try {
+			if (realID < 10)
+				ds.save(PATH + "sample" + realID++ + ".csv");
+		} catch(Exception e) {}
 		
 		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
 		pre_glm.doEstimation();

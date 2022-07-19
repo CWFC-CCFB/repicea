@@ -28,6 +28,7 @@ import repicea.io.FormatField;
 import repicea.io.Saveable;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
+import repicea.stats.model.dist.WeibullModel;
 import repicea.stats.model.glm.measerr.simulation.DistanceCalculator.SpatialPopulationUnitDistance;
 
 
@@ -87,13 +88,24 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implem
 			if (isPopulation) {
 				thisUnit.trueDistanceToConspecific = distance;
 			} else {
+				List<Double> distances = new ArrayList<Double>();
 				for (SpatialPopulationUnitDistance spdu : this) {
 					if (spdu.pu.isConspecificIn) {
-						distance = spdu.distance;
-						break;
+						distances.add(spdu.distance);
 					}
 				}
-				thisUnit.measuredDistanceToConspecific = distance;
+				WeibullModel wm = new WeibullModel(distances, true); // true: enable location parameter
+				double theta_pct = wm.getParameters().getValueAt(2, 0);
+				wm.doEstimation();
+				double theta_hat = wm.getParameters().getValueAt(2, 0);
+				System.out.println("True distance = " + thisUnit.trueDistanceToConspecific + "; theta_pct = " + theta_pct + "; theta_hat = " + theta_hat + "; Smallest observed distance = " + distances.get(0));
+//				for (SpatialPopulationUnitDistance spdu : this) {
+//					if (spdu.pu.isConspecificIn) {
+//						distance = spdu.distance;
+//						break;
+//					}
+//				}
+				thisUnit.measuredDistanceToConspecific = theta_pct;
 			}
 		}
 	}
