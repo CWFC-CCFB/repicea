@@ -18,8 +18,6 @@
  */
 package repicea.stats.model.glm.measerr;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 
 import org.junit.Assert;
@@ -39,8 +37,8 @@ public class GLModelWithMeasErrorTest {
 		DataSet dataSet = new DataSet(filename, true);
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
 		
-		GLMWithUniformMeasError glmWithMeasError = new GLMWithUniformMeasError(dataSet, "occurred ~ lnDt + distanceToConspecificOLD",
-				new GLMMeasErrorDefinition("distanceToConspecificOLD", 0d, null, null));
+		GLMWithMeasurementError glmWithMeasError = new GLMWithMeasurementError(dataSet, "occurred ~ lnDt + distanceToConspecificOLD",
+				new GLMUniformBerksonMeasErrorDefinition("distanceToConspecificOLD", 0d, null, null, .1));
 		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glmWithMeasError.doEstimation();
 		glmWithMeasError.getSummary();

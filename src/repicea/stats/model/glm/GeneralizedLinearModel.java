@@ -34,7 +34,7 @@ import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.AbstractStatisticalModel;
-import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.PredictableModel;
 import repicea.stats.model.WrappedIndividualLogLikelihood;
@@ -74,7 +74,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 
 	
 	private final StatisticalDataStructure dataStruct;
-	private final CompositeLogLikelihoodWithExplanatoryVariable completeLLK;
+	private final CompositeLogLikelihoodWithExplanatoryVariables completeLLK;
 	protected final IndividualLogLikelihood individualLLK;
 	protected final LinkFunction lf;
 	protected Matrix matrixX;		// reference
@@ -92,7 +92,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	 * @param startingBeta the starting values of the parameters
 	 */
 	public GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingBeta) {
-		this(dataSet, linkFunctionType, modelDefinition, null, startingBeta);
+		this(dataSet, linkFunctionType, modelDefinition, null, startingBeta, null);
 	}
 	
 	/**
@@ -103,9 +103,9 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	 * @param llk
 	 * @param startingBeta
 	 */
-	private GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta) {
+	protected GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta, Object additionalParm) {
 		super();
-		dataStruct = createDataStructure(dataSet);
+		dataStruct = createDataStructure(dataSet, additionalParm);
 
 		// then define the model effects and retrieve matrix X and vector y
 		try {
@@ -114,15 +114,14 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 			System.out.println("Unable to define this model : " + modelDefinition);
 			e.printStackTrace();
 		}
-		lf = createLinkFunction(linkFunctionType);
+		lf = createLinkFunction(linkFunctionType, additionalParm);
 		if (llk != null) {
 			individualLLK = llk;
 		} else {
-			individualLLK = createIndividualLLK();
+			individualLLK = createIndividualLLK(additionalParm);
 		}
-		// first initialize the model structure
 		setParameters(startingBeta);
-		completeLLK = createCompleteLLK();
+		completeLLK = createCompleteLLK(additionalParm);
 	}
 	
 	/**
@@ -139,11 +138,11 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	 * Constructor for derived class.
 	 */
 	protected GeneralizedLinearModel(GeneralizedLinearModel glm) {
-		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition(), glm.individualLLK, null);
+		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition(), glm.individualLLK, null, null);
 	}
 
 
-	protected StatisticalDataStructure createDataStructure(DataSet dataSet) {
+	protected StatisticalDataStructure createDataStructure(DataSet dataSet, Object addParm) {
 		return new GenericStatisticalDataStructure(dataSet);
 	}
 
@@ -151,15 +150,15 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		return (GenericStatisticalDataStructure) dataStruct;
 	}
 	
-	protected CompositeLogLikelihoodWithExplanatoryVariable createCompleteLLK() {
-		return new CompositeLogLikelihoodWithExplanatoryVariable(individualLLK, matrixX, y);
+	protected CompositeLogLikelihoodWithExplanatoryVariables createCompleteLLK(Object addParm) {
+		return new CompositeLogLikelihoodWithExplanatoryVariables(individualLLK, matrixX, y);
 	}
 
-	protected LinkFunction createLinkFunction(Type linkFunctionType) {
+	protected LinkFunction createLinkFunction(Type linkFunctionType, Object addParm) {
 		return new LinkFunction(linkFunctionType);
 	}
 
-	protected IndividualLogLikelihood createIndividualLLK() {
+	protected IndividualLogLikelihood createIndividualLLK(Object addParm) {
 		return new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
 	}
 
@@ -211,7 +210,6 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	 * @param end the ending value
 	 * @param step the step between these two values.
 	 */
-	@SuppressWarnings("unchecked")
 	public void gridSearch(int parameterName, double start, double end, double step) {
 		System.out.println("Initializing grid search...");
 		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
@@ -284,7 +282,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	}
 
 	@Override
-	public CompositeLogLikelihoodWithExplanatoryVariable getCompleteLogLikelihood() {return completeLLK;}
+	public CompositeLogLikelihoodWithExplanatoryVariables getCompleteLogLikelihood() {return completeLLK;}
 
 	@Override
 	public boolean isInterceptModel() {return getDataStructure().isInterceptModel();}

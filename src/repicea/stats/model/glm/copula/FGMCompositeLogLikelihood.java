@@ -11,12 +11,12 @@ import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.math.optimizer.OptimizerListener;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
-import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.Likelihood;
 
 @SuppressWarnings("serial")
-public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplanatoryVariable implements OptimizerListener {
+public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplanatoryVariables implements OptimizerListener {
 
 	private final static double VERY_SMALL = 1E-8;
 

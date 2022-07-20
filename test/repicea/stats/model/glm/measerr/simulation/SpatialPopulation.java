@@ -29,7 +29,8 @@ import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.measerr.GLMMeasErrorDefinition;
-import repicea.stats.model.glm.measerr.GLMWithUniformMeasError;
+import repicea.stats.model.glm.measerr.GLMUniformBerksonMeasErrorDefinition;
+import repicea.stats.model.glm.measerr.GLMWithMeasurementError;
 import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
 
@@ -102,8 +103,8 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
 		pre_glm.doEstimation();
 //		pre_glm.getSummary();
-		GLMWithUniformMeasError glm = new GLMWithUniformMeasError(ds, "y ~ distanceToConspecificMax", 
-				new GLMMeasErrorDefinition("distanceToConspecificMax", 0d, "distanceToConspecificMin", "distanceToConspecificMax"), pre_glm.getParameters());
+		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, "y ~ distanceToConspecificMax", pre_glm.getParameters(),
+				new GLMUniformBerksonMeasErrorDefinition("distanceToConspecificMax", 0d, "distanceToConspecificMin", "distanceToConspecificMax", .1));
 		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 
 		glm.doEstimation();

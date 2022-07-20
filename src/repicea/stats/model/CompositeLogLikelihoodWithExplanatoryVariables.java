@@ -21,11 +21,11 @@ package repicea.stats.model;
 import repicea.math.Matrix;
 
 @SuppressWarnings("serial")
-public class CompositeLogLikelihoodWithExplanatoryVariable extends SimpleCompositeLogLikelihood {
+public class CompositeLogLikelihoodWithExplanatoryVariables extends SimpleCompositeLogLikelihood {
 
 	private final Matrix xValues;
 	
-	public CompositeLogLikelihoodWithExplanatoryVariable(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
+	public CompositeLogLikelihoodWithExplanatoryVariables(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
 		super(innerLogLikelihoodFunction, yValues);
 		this.xValues = xValues;
 	}

@@ -21,14 +21,16 @@ package repicea.stats.model.glm.measerr.simulation;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import repicea.io.FormatField;
 import repicea.io.Saveable;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
-import repicea.stats.model.dist.WeibullModel;
+import repicea.math.Matrix;
+import repicea.stats.StatisticalUtility;
+import repicea.stats.estimates.ConfidenceInterval;
+import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.model.glm.measerr.simulation.DistanceCalculator.SpatialPopulationUnitDistance;
 
 
@@ -64,49 +66,21 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implem
 	
 	void setDistanceToConspecific(List<SpatialPopulationUnit> pus, boolean isPopulation, boolean updateFields) {
 		clear();
-		if (thisUnit.isConspecificIn) {
-			if (isPopulation) {
-				thisUnit.trueDistanceToConspecific = 0d;
-			} else {
-				thisUnit.measuredDistanceToConspecific = 0d;
+		double p = 0.01;
+		List<Double> distances = new ArrayList<Double>();
+		for (SpatialPopulationUnit pu : pus) {
+			if (pu.isConspecificIn) {
+				distances.add(thisUnit.getDistanceFrom(pu));
 			}
+		}
+		if (isPopulation) {
+			thisUnit.trueDistanceToConspecific = StatisticalUtility.getQuantileFromPopulation(distances, p);
 		} else {
-			double distance = Double.POSITIVE_INFINITY;
-			for (SpatialPopulationUnit pu : pus) {
-				double thisDistance = thisUnit.getDistanceFrom(pu);
-				if (isPopulation) {
-					if (pu.isConspecificIn && thisDistance < distance) {
-						distance = thisDistance;
-					}							
-				} else {
-					if (!thisUnit.equals(pu)) {
-						add(new SpatialPopulationUnitDistance(thisDistance, pu));
-					}
-				}
-			}
-			Collections.sort(this);
-			if (isPopulation) {
-				thisUnit.trueDistanceToConspecific = distance;
-			} else {
-				List<Double> distances = new ArrayList<Double>();
-				for (SpatialPopulationUnitDistance spdu : this) {
-					if (spdu.pu.isConspecificIn) {
-						distances.add(spdu.distance);
-					}
-				}
-				WeibullModel wm = new WeibullModel(distances, true); // true: enable location parameter
-				double theta_pct = wm.getParameters().getValueAt(2, 0);
-				wm.doEstimation();
-				double theta_hat = wm.getParameters().getValueAt(2, 0);
-				System.out.println("True distance = " + thisUnit.trueDistanceToConspecific + "; theta_pct = " + theta_pct + "; theta_hat = " + theta_hat + "; Smallest observed distance = " + distances.get(0));
-//				for (SpatialPopulationUnitDistance spdu : this) {
-//					if (spdu.pu.isConspecificIn) {
-//						distance = spdu.distance;
-//						break;
-//					}
-//				}
-				thisUnit.measuredDistanceToConspecific = theta_pct;
-			}
+			MonteCarloEstimate estimate = StatisticalUtility.getQuantileEstimateFromSample(distances, p);
+			Matrix var = estimate.getVariance();
+			ConfidenceInterval b = estimate.getConfidenceIntervalBounds(0.99);
+			thisUnit.measuredDistanceToConspecific = StatisticalUtility.getQuantileFromSample(distances, p);
+			int u = 0;
 		}
 	}
 	

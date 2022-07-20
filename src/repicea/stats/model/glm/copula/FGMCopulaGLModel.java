@@ -28,7 +28,7 @@ import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariable;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 
 /**
@@ -80,7 +80,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	}
 
 	@Override
-	protected CompositeLogLikelihoodWithExplanatoryVariable createCompleteLLK() {
+	protected CompositeLogLikelihoodWithExplanatoryVariables createCompleteLLK(Object addParm) {
 		return new FGMCompositeLogLikelihood(individualLLK,	matrixX, y);
 	}
 	
@@ -111,7 +111,7 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	
 	
 	@Override
-	protected HierarchicalStatisticalDataStructure createDataStructure(DataSet dataSet) {
+	protected HierarchicalStatisticalDataStructure createDataStructure(DataSet dataSet, Object addParm) {
 		return new GenericHierarchicalSpatialDataStructure(dataSet);
 	}
 

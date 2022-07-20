@@ -73,13 +73,10 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 			record[4] = isConspecificIn;
 			return record;
 		} else {
-			Object[] record = new Object[5];
+			Object[] record = new Object[3];
 			record[0] = y;
 			record[1] = measuredDistanceToConspecific;
-			record[2] = measuredDistanceToConspecific * 2;	// FIXME this quantity is now useless
-			record[3] = trueDistanceToConspecific;
-			double distanceMin = 0d; // FIXME this quantity is useless at the moment
-			record[4] = distanceMin;
+			record[2] = trueDistanceToConspecific;
 			return record;
 		}
 	}

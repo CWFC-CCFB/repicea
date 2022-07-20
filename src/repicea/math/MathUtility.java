@@ -28,6 +28,28 @@ public class MathUtility {
 
 
 	/**
+	 * Compute the Euclidean distance between two points. <br>
+	 * <br>
+	 * This method assumes that the checks have been performed on the coordinates argument. Basically,
+	 * these matrices should be column vectors of the same size. Each one of them represents a dimensions.
+	 * 
+	 * @param i the index of the first point
+	 * @param j the index of the second point
+	 * @param coordinates A series of column matrices that stand for the coordinates. 
+	 * @return
+	 */
+	public final static double getEuclideanDistance(int i, int j, Matrix... coordinates) {
+		double squareDiffSum = 0d;
+		for (int k = 0; k < coordinates.length; k++) {
+			Matrix c = coordinates[k];
+			double diff = c.getValueAt(i, 0) - c.getValueAt(j, 0); 
+			squareDiffSum += diff * diff;
+		}
+		return Math.sqrt(squareDiffSum);
+	}
+
+	
+	/**
 	 * This method returns the factorial of parameter i.
 	 * @param i an integer
 	 * @return the result as an integer
