@@ -64,7 +64,7 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implem
 		thisUnit = pu;
 	}
 	
-	void setDistanceToConspecific(List<SpatialPopulationUnit> pus, boolean isPopulation, boolean updateFields) {
+	void setDistanceToConspecific(List<SpatialPopulationUnit> pus, boolean isPopulation) {
 		clear();
 		double p = 0.01;
 		List<Double> distances = new ArrayList<Double>();
@@ -76,10 +76,9 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implem
 		if (isPopulation) {
 			thisUnit.trueDistanceToConspecific = StatisticalUtility.getQuantileFromPopulation(distances, p);
 		} else {
-			MonteCarloEstimate estimate = StatisticalUtility.getQuantileEstimateFromSample(distances, p);
-			Matrix var = estimate.getVariance();
-			ConfidenceInterval b = estimate.getConfidenceIntervalBounds(0.99);
 			thisUnit.measuredDistanceToConspecific = StatisticalUtility.getQuantileFromSample(distances, p);
+			MonteCarloEstimate estimate = StatisticalUtility.getQuantileEstimateFromSample(distances, p, 100);
+			thisUnit.variance = estimate.getVariance().getValueAt(0, 0);
 			int u = 0;
 		}
 	}

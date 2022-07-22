@@ -464,14 +464,17 @@ public final class StatisticalUtility {
 		return q;
 	}
 	
-	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p) {
+	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p, int nReal) {
 		if (p < 0d || p > 1d)
 			throw new InvalidParameterException("The p argument must range from 0 to 1!");
 		if (sample == null || sample.isEmpty()) {
 			throw new InvalidParameterException("The sample argument should be a non empty list of doubles!");
 		}
+		if (nReal <= 0) {
+			throw new InvalidParameterException("The nReal argument should be a strictly positive integer (i.e. > 0)!");
+		}
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
-		for (int i = 0; i < 1000; i++) {
+		for (int i = 0; i < nReal; i++) {
 			List<Double> bootstrapSample = SamplingUtility.getSample(sample, sample.size(), true);
 			double quantile = StatisticalUtility.getQuantileFromSample(bootstrapSample, p);
 			estimate.addRealization(new Matrix(1,1,quantile,0));

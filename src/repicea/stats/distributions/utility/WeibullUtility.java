@@ -20,6 +20,8 @@ package repicea.stats.distributions.utility;
 
 import java.security.InvalidParameterException;
 
+import repicea.stats.StatisticalUtility;
+
 public class WeibullUtility {
 
 	
@@ -113,7 +115,6 @@ public class WeibullUtility {
 		return lambda * Math.pow(-Math.log(1 - q), 1/k) + theta;
 	}
 	
-	
 	/**
 	 * Return the quantile of a Weibull distribution. <br>
 	 * <br>
@@ -126,5 +127,6 @@ public class WeibullUtility {
 	public static double getQuantile(double q, double k, double lambda) {
 		return getQuantile(q, k, lambda, 0d);
 	}
+
 
 }

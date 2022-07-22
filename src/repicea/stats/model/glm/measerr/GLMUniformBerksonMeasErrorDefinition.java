@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.EvaluableFunction;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
@@ -41,52 +42,10 @@ import repicea.stats.model.glm.LinkFunction.Type;
  */
 public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDefinition {
 
-	static class GradientHessianProvider implements EvaluableFunction<Matrix> {
-
-		private final AbstractMathematicalFunction originalFunction;
-		private final boolean isForGradient;
-		
-		GradientHessianProvider(AbstractMathematicalFunction originalFunction, boolean isForGradient) {
-			this.originalFunction = originalFunction;
-			this.isForGradient = isForGradient;
-		}
-		
-		@Override
-		public Matrix getValue() {
-			return isForGradient ? originalFunction.getGradient() : originalFunction.getHessian();
-		}
-
-		@Override
-		public void setVariableValue(int variableIndex, double variableValue) {
-			originalFunction.setVariableValue(variableIndex, variableValue);
-		}
-
-		@Override
-		public void setParameterValue(int parameterIndex, double parameterValue) {
-			originalFunction.setParameterValue(parameterIndex, parameterValue);
-		}
-
-		@Override
-		public double getVariableValue(int variableIndex) {
-			return originalFunction.getVariableValue(variableIndex);
-		}
-
-		@Override
-		public double getParameterValue(int parameterIndex) {
-			return originalFunction.getParameterValue(parameterIndex);
-		}
-
-		@Override
-		public void setParameters(Matrix beta) {}
-
-		@Override
-		public void setVariables(Matrix xVector) {}
-		
-	}
  
-	static class GLMWithUniformMeasErrorDataStructure extends GenericStatisticalDataStructure {
+	private static class GLMWithUniformMeasErrorDataStructure extends GenericStatisticalDataStructure {
 
-		public GLMWithUniformMeasErrorDataStructure(DataSet dataSet) {
+		private GLMWithUniformMeasErrorDataStructure(DataSet dataSet) {
 			super(dataSet);
 		}
 
@@ -121,12 +80,12 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 	
 	
 	@SuppressWarnings("serial")
-	static class GLMWithUniformMeasErrorCompositeLogLikelihood extends CompositeLogLikelihoodWithExplanatoryVariables {
+	private static class GLMWithUniformMeasErrorCompositeLogLikelihood extends CompositeLogLikelihoodWithExplanatoryVariables {
 		
 		private final GLMUniformBerksonMeasErrorDefinition measErr;
 		private final LinkFunctionWithMeasError lf;
 		
-		public GLMWithUniformMeasErrorCompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, 
+		private GLMWithUniformMeasErrorCompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, 
 				Matrix xValues, 
 				Matrix yValues, 
 				GLMUniformBerksonMeasErrorDefinition measErr,
@@ -144,7 +103,7 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 	}
 
 	@SuppressWarnings("serial")
-	static class LinkFunctionWithMeasError extends LinkFunction {
+	private static class LinkFunctionWithMeasError extends LinkFunction {
 
 		private final LinkFunction linkFunctionErrorFreeObs;
 		private final GradientHessianProvider gradientProvider;
@@ -155,9 +114,9 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 		private final TrapezoidalRule adaptedTr;
 		private final GLMUniformBerksonMeasErrorDefinition measErr;
 		
-		public LinkFunctionWithMeasError(Type linkFunctionType, double resolution, GLMUniformBerksonMeasErrorDefinition measErr) {
+		private LinkFunctionWithMeasError(Type linkFunctionType, double resolution, GLMUniformBerksonMeasErrorDefinition measErr) {
 			super(linkFunctionType);
-			linkFunctionErrorFreeObs = new LinkFunction(Type.CLogLog, getOriginalFunction());
+			linkFunctionErrorFreeObs = new LinkFunction(linkFunctionType, getOriginalFunction());
 			gradientProvider = new GradientHessianProvider(linkFunctionErrorFreeObs, true);
 			hessianProvider = new GradientHessianProvider(linkFunctionErrorFreeObs, false);
 			adaptedTr = new TrapezoidalRule(resolution);
@@ -213,13 +172,11 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 		}
 	}
 
-	private final String effectWithMeasError;
 	private final double valueForNotConsideringMeasurementError;
 	private final String lowerBoundVar;
 	private final String upperBoundVar;
 	private final double resolution;
 	
-	private int indexEffectWithMeasError;
 	private Matrix bounds;
 	
 	/**
@@ -235,13 +192,12 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 			String lowerBoundVar,
 			String upperBoundVar,
 			double resolution) {
-		super(MeasurementErrorModel.Berkson);
+		super(MeasurementErrorModel.Berkson, effectWithMeasError);
 		if (resolution <= 0) {
 			throw new InvalidParameterException("The resolution argument must be strictly positive!");
 		} else {
 			this.resolution = resolution;
 		}
-		this.effectWithMeasError = effectWithMeasError;
 		this.valueForNotConsideringMeasurementError = valueForNotConsideringMeasurementError;
 		this.lowerBoundVar = lowerBoundVar;
 		this.upperBoundVar = upperBoundVar;
@@ -249,10 +205,7 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 
 	@Override
 	public void validate(GLMWithMeasurementError glm) {
-		indexEffectWithMeasError = glm.getDataStructure().indexOfThisEffect(effectWithMeasError);
-		if (indexEffectWithMeasError == -1) {
-			throw new InvalidParameterException("The effect with measurement error " + effectWithMeasError + " is not part of the model definition!");
-		} 
+		super.validate(glm);
 		bounds = ((GLMWithUniformMeasErrorDataStructure) glm.getDataStructure()).setMeasErrorDefinition(this);
 	}
 

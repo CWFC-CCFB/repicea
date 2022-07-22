@@ -40,6 +40,7 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 	final int xCoord;
 	final int yCoord;
 	final DistanceCalculator dc;
+	double variance;
 
 	SpatialPopulationUnit(int id, int xCoord, int yCoord, boolean isConspecificIn) {
 		super(id, isConspecificIn);
@@ -73,10 +74,11 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 			record[4] = isConspecificIn;
 			return record;
 		} else {
-			Object[] record = new Object[3];
+			Object[] record = new Object[4];
 			record[0] = y;
 			record[1] = measuredDistanceToConspecific;
-			record[2] = trueDistanceToConspecific;
+			record[2] = variance;
+			record[3] = trueDistanceToConspecific;
 			return record;
 		}
 	}

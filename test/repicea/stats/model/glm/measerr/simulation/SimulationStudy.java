@@ -106,14 +106,14 @@ public class SimulationStudy {
 		Population pop;
 		System.out.println("Creating population...");
 		// Create a new population
-		Matrix trueBeta = new Matrix(2,1);
-		trueBeta.setValueAt(0, 0, -0.5);
-		trueBeta.setValueAt(1, 0, -0.25);
-		pop = isSpatial ? new SpatialPopulation(trueBeta, popSize) : new NonSpatialPopulation(trueBeta, popSize);
-		String popFilename = path + "population" + suffix + "_" + popSize + ".csv";
-		((AbstractPopulation) pop).save(popFilename);
-		XmlSerializer serializer = new XmlSerializer(path + "population" + suffix + "_" + popSize + ".zml");
-		serializer.writeObject(pop);
+//		Matrix trueBeta = new Matrix(2,1);
+//		trueBeta.setValueAt(0, 0, -0.2);
+//		trueBeta.setValueAt(1, 0, -0.05);
+//		pop = isSpatial ? new SpatialPopulation(trueBeta, popSize) : new NonSpatialPopulation(trueBeta, popSize);
+//		String popFilename = path + "population" + suffix + "_" + popSize + ".csv";
+//		((AbstractPopulation) pop).save(popFilename);
+//		XmlSerializer serializer = new XmlSerializer(path + "population" + suffix + "_" + popSize + ".zml");
+//		serializer.writeObject(pop);
 		
 		// Deserialize the population
 		XmlDeserializer deserializer = new XmlDeserializer(path + "population" + suffix + "_" + popSize + ".zml");
@@ -121,15 +121,19 @@ public class SimulationStudy {
 		System.out.println("Population created.");
 		
 		
-		Thread[] threadArray = new Thread[nbThreads];
-		int real = (int) ((double) nbRealizations / nbThreads);
-		for (int k = 0; k < threadArray.length; k++) {
-			Thread t = new WorkerThread(k, pop, real, sampleSize);
-			threadArray[k] = t;
-			t.start();
-		}
-		for (Thread t : threadArray) {
-			t.join();
+		if (nbThreads > 1) {
+			Thread[] threadArray = new Thread[nbThreads];
+			int real = (int) ((double) nbRealizations / nbThreads);
+			for (int k = 0; k < threadArray.length; k++) {
+				Thread t = new WorkerThread(k, pop, real, sampleSize);
+				threadArray[k] = t;
+				t.start();
+			}
+			for (Thread t : threadArray) {
+				t.join();
+			}
+		} else {
+			new WorkerThread(0, pop, nbRealizations, sampleSize).run();
 		}
 		writer.close();
 
@@ -142,7 +146,7 @@ public class SimulationStudy {
 		AbstractStatisticalModel.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
 		SimulationStudy.VERBOSE = true;
-		new SimulationStudy(1000, 200, 500, 1);
+		new SimulationStudy(1, 200, 2000, 1);
 	}
 	
 }

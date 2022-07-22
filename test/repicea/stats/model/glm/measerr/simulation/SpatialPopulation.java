@@ -28,8 +28,7 @@ import repicea.stats.estimates.Estimate;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
-import repicea.stats.model.glm.measerr.GLMMeasErrorDefinition;
-import repicea.stats.model.glm.measerr.GLMUniformBerksonMeasErrorDefinition;
+import repicea.stats.model.glm.measerr.GLMNormalClassicalMeasErrorDefinition;
 import repicea.stats.model.glm.measerr.GLMWithMeasurementError;
 import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
@@ -73,7 +72,7 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 	static void determineDistanceToConspecific(List<SpatialPopulationUnit> popUnits, boolean isPopulation) {
 		for (int i = 0; i < popUnits.size(); i++) {
 			SpatialPopulationUnit pu_i = popUnits.get(i);
-			pu_i.dc.setDistanceToConspecific(popUnits, isPopulation, true); // true: we update the fields
+			pu_i.dc.setDistanceToConspecific(popUnits, isPopulation);
 		}
 	}
 
@@ -100,15 +99,30 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 				ds.save(PATH + "sample" + realID++ + ".csv");
 		} catch(Exception e) {}
 		
-		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
+//		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ trueDistanceToConspecific");
 		pre_glm.doEstimation();
-//		pre_glm.getSummary();
-		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, "y ~ distanceToConspecificMax", pre_glm.getParameters(),
-				new GLMUniformBerksonMeasErrorDefinition("distanceToConspecificMax", 0d, "distanceToConspecificMin", "distanceToConspecificMax", .1));
+		pre_glm.getSummary();
+		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, "y ~ distanceToConspecific", pre_glm.getParameters(),
+				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
 		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
-
 		glm.doEstimation();
-//		glm.getSummary();
+		glm.getSummary();
+
+		
+		GeneralizedLinearModel pre_glm2 = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
+		pre_glm2.doEstimation();
+		pre_glm2.getSummary();
+		
+		GLMWithMeasurementError glm2 = new GLMWithMeasurementError(ds, "y ~ distanceToConspecific", pre_glm2.getParameters(),
+				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
+		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
+		glm2.doEstimation();
+		glm2.getSummary();
+
+		
+		
+		
 		if (glm.getEstimator().isConvergenceAchieved()) {
 			record = new Object[8];
 			Estimate<?> est = glm.getEstimator().getParameterEstimates();

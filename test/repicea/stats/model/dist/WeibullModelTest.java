@@ -30,7 +30,6 @@ import org.junit.Test;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.distributions.utility.WeibullUtility;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.util.REpiceaLogManager;
 
@@ -50,7 +49,8 @@ public class WeibullModelTest {
 	public void WeibullModelWithoutLocationParameterTest() {
 		List<Double> values = new ArrayList<Double>();
 		for (int i = 0; i < 100000; i++) {
-			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 1, 1, 0));
+//			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 1, 1, 0));
+			values.add(StatisticalUtility.getRandom().nextWeibull(1, 1));
 		}
 		
 		WeibullModel wm = new WeibullModel(values, false);
@@ -65,7 +65,8 @@ public class WeibullModelTest {
 	public void WeibullModelWithoutLocationParameterTest2() {
 		List<Double> values = new ArrayList<Double>();
 		for (int i = 0; i < 100000; i++) {
-			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 1, 2, 0));
+//			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 1, 2, 0));
+			values.add(StatisticalUtility.getRandom().nextWeibull(1, 2));
 		}
 		
 		WeibullModel wm = new WeibullModel(values, false);
@@ -81,7 +82,8 @@ public class WeibullModelTest {
 		
 		List<Double> values = new ArrayList<Double>();
 		for (int i = 0; i < 100000; i++) {
-			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 3, 5, 10));
+//			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 3, 5, 10));
+			values.add(StatisticalUtility.getRandom().nextWeibull(3, 5, 10));
 		}
 	
 		WeibullModel wm = new WeibullModel(values, true);
