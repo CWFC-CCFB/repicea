@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import repicea.math.utility.MatrixUtility;
+
 @SuppressWarnings("serial")
 public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 
@@ -102,7 +104,7 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 				}
 			}
 			Matrix wGradient = reformateGradient(w);
-			gradient.add(wGradient.scalarMultiply(multiplier));
+			MatrixUtility.add(gradient, wGradient.scalarMultiply(multiplier));
 		}
 		return gradient;
 	}
@@ -144,7 +146,7 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 			Matrix theirGradient = getGradientFromTheseInternalWrapper(wrappersOtherThanW);
 			Matrix gradientPart = reformateGradient(w).multiply(theirGradient.transpose());
 			Matrix hessianPart = reformateHessian(w).scalarMultiply(multiplier);
-			hessian.add(hessianPart.add(gradientPart));
+			MatrixUtility.add(hessian, hessianPart.add(gradientPart));
 		}
 		return hessian;
 	}
