@@ -2,12 +2,12 @@ package repicea.stats.model.glm.copula;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.math.ParameterBound;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.CopulaLibrary.DistanceLinkFunctionCopulaExpression;
@@ -63,7 +63,7 @@ public class FGMCopulaGLModelTest {
 			((DistanceLinkFunctionCopulaExpression) distanceCopula).setBounds(0, new ParameterBound(null, 0d));
 			FGMCopulaGLModel copulaModel = new FGMCopulaGLModel(glm, distanceCopula);
 			copulaModel.setConvergenceCriterion(1E-8);
-			copulaModel.gridSearch(copulaModel.getParameters().m_iRows - 1, -.25d, -.15d, .01);
+			((MaximumLikelihoodEstimator) copulaModel.getEstimator()).gridSearch(copulaModel.getParameters().m_iRows - 1, -.25d, -.15d, .01);
 			copulaModel.doEstimation();
 			double actual = distanceCopula.getParameters().getValueAt(0, 0);
 			assertEquals(expectedCopulaValue, actual, 1E-5);

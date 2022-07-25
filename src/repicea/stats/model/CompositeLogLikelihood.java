@@ -22,4 +22,8 @@ import repicea.math.MathematicalFunction;
 
 public interface CompositeLogLikelihood extends MathematicalFunction {
 
+	/**
+	 * Reset the composite log likelihood function if needs be.
+	 */
+	public void reset();
 }

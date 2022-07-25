@@ -95,4 +95,7 @@ public class TruncatedGaussianBound extends BasicBound implements Serializable {
 		return standardizedValue;
 	}
 	
+	public void reset() {
+		isCompletelySet = false;
+	}
 }

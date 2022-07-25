@@ -26,7 +26,7 @@ import repicea.math.Matrix;
 import repicea.math.ParameterBound;
 import repicea.stats.distributions.TruncatedGaussianBound;
 import repicea.stats.distributions.TruncatedGaussianBound.TruncatedGaussianBoundCompatible;
-import repicea.stats.distributions.utility.GaussianUtility;
+import repicea.stats.distributions.utility.TruncatedGaussianUtility;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
@@ -77,11 +77,13 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 
 		@Override
 		public void setVariableValue(int variableIndex, double variableValue) {
-			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
+			throw new InvalidParameterException("The TruncatedGaussianModel class does not implement variables!");
 		}
 
 		@Override
 		public void setParameterValue(int parameterIndex, double parameterValue) {
+			upperBound.reset();
+			lowerBound.reset();
 			parameters.setValueAt(parameterIndex, 0, parameterValue);
 		}
 
@@ -94,7 +96,7 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 
 		@Override
 		public void setVariables(Matrix xVector) {
-			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
+			throw new InvalidParameterException("The TruncatedGaussianModel class does not implement variables!");
 		}
 
 		@Override
@@ -114,7 +116,10 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 			double y = getYVector().getValueAt(0, 0);
 			double Z = upperBound.getCdfValue() - lowerBound.getCdfValue();
 			double llk = -0.5 * Math.log(sigma2) - 0.5 * Math.log(2 * Math.PI) - 0.5 * (y - mu) * (y -mu) / sigma2 - Math.log(Z);
-			double llk2 = Math.log(GaussianUtility.getProbabilityDensity(y, mu, sigma2) / Z);
+			double llk2 = Math.log(TruncatedGaussianUtility.getProbabilityDensity(y, mu, sigma2, lowerBound.getBoundValue().getValueAt(0, 0), upperBound.getBoundValue().getValueAt(0, 0)));
+			if (Math.abs(llk - llk2) > 1E-6) {
+				int u = 0;
+			}
 			return llk;
 		}
 
@@ -126,22 +131,22 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 			double y = getYVector().getValueAt(0, 0);
 			double Z = upperBound.getCdfValue() - lowerBound.getCdfValue();
 			
-			double dAlpha_dMu = -1/sigma;
 			double dBeta_dMu = -1/sigma;
-			double dAlpha_dSigma2 = - 0.5 * lowerBound.getStandardizedValue() / sigma2;
+			double dAlpha_dMu = -1/sigma;
 			double dBeta_dSigma2 = - 0.5 * upperBound.getStandardizedValue() / sigma2;
-
-			Matrix gradient = new Matrix(parameters.m_iRows, 0);
+			double dAlpha_dSigma2 = - 0.5 * lowerBound.getStandardizedValue() / sigma2;
+			double dZBeta_dSigma2 = upperBound.getPdfValueOnStandardNormal() == 0d ? 0d : upperBound.getPdfValueOnStandardNormal() * dBeta_dSigma2;
+			double dZAlpha_dSigma2 = lowerBound.getPdfValueOnStandardNormal() == 0d ? 0d : lowerBound.getPdfValueOnStandardNormal() * dAlpha_dSigma2;
+			
+			Matrix gradient = new Matrix(parameters.m_iRows, 1);
 
 			double dL_dMu =  (y - mu)/sigma2 - 
-					(upperBound.getPdfValueOnStandardNormal() * dBeta_dMu - 
-					 lowerBound.getPdfValueOnStandardNormal() * dAlpha_dMu) / Z;
+					(upperBound.getPdfValueOnStandardNormal() * dBeta_dMu - lowerBound.getPdfValueOnStandardNormal() * dAlpha_dMu) / Z;
 			gradient.setValueAt(0, 0, dL_dMu);
 
 			double dL_dSigma2 = -0.5/sigma2 + 
 					0.5  * (y - mu) * (y -mu) / (sigma2 * sigma2) -
-					 (upperBound.getPdfValueOnStandardNormal() * dBeta_dSigma2 - 
-					  lowerBound.getPdfValueOnStandardNormal() * dAlpha_dSigma2) / Z;
+					 (dZBeta_dSigma2 - dZAlpha_dSigma2) / Z;
 			gradient.setValueAt(1, 0, dL_dSigma2);
 			
 			return gradient;
@@ -155,42 +160,47 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 			double y = getYVector().getValueAt(0, 0);
 			double Z = upperBound.getCdfValue() - lowerBound.getCdfValue();
 
-			double dAlpha_dMu = -1/sigma;
-			double dBeta_dMu = -1/sigma;
-			double dAlpha_dSigma2 = - 0.5 * lowerBound.getStandardizedValue() / sigma2;
-			double dBeta_dSigma2 = - 0.5 * upperBound.getStandardizedValue() / sigma2;
-			double d2Alpha_d2Sigma2 = 0.75 * lowerBound.getStandardizedValue() / (sigma2 * sigma2);
-			double d2Beta_d2Sigma2 = 0.75 * upperBound.getStandardizedValue() / (sigma2 * sigma2);
-			double d2Alpha_dMu_dSigma2 = 0.5 * (sigma2 * sigma);
-			double d2Beta_dMu_dSigma2 = 0.5 * (sigma2 * sigma);
+			double dBeta_dMu = -1 / sigma;
+			double dAlpha_dMu = -1 / sigma;
+			double dBeta_dSigma2 = - upperBound.getStandardizedValue() / (2 * sigma2);
+			double dAlpha_dSigma2 = - lowerBound.getStandardizedValue() / (2 * sigma2);
+			double d2Beta_d2Sigma2 = 3 * upperBound.getStandardizedValue() / (4 * sigma2 * sigma2);
+			double d2Alpha_d2Sigma2 = 3 * lowerBound.getStandardizedValue() / (4 * sigma2 * sigma2);
+			double d2Beta_dMu_dSigma2 = 1 / (2 * sigma2 * sigma);
+			double d2Alpha_dMu_dSigma2 = 1 / (2 * sigma2 * sigma);
+			
+			double dZBeta_dMu = upperBound.getPdfValueOnStandardNormal() == 0d ? 0d : upperBound.getPdfValueOnStandardNormal() * dBeta_dMu;
+			double dZAlpha_dMu = lowerBound.getPdfValueOnStandardNormal() == 0d ? 0d : lowerBound.getPdfValueOnStandardNormal() * dAlpha_dMu;
+			double dZBeta_dSigma2 = upperBound.getPdfValueOnStandardNormal() == 0d ? 0d : upperBound.getPdfValueOnStandardNormal() * dBeta_dSigma2;
+			double dZAlpha_dSigma2 = lowerBound.getPdfValueOnStandardNormal() == 0d ? 0d : lowerBound.getPdfValueOnStandardNormal() * dAlpha_dSigma2;
+			double dPDFBeta_dBeta = upperBound.getPdfValueOnStandardNormal() == 0d ? 0d : - upperBound.getPdfValueOnStandardNormal() * upperBound.getStandardizedValue();
+			double dPDFAlpha_dAlpha = lowerBound.getPdfValueOnStandardNormal() == 0d ? 0d : - lowerBound.getPdfValueOnStandardNormal() * lowerBound.getStandardizedValue();
+			double d2ZBeta_d2Sigma2_part1 = dPDFBeta_dBeta == 0d ? 0d : dPDFBeta_dBeta * dBeta_dSigma2 * dBeta_dSigma2; 
+			double d2ZBeta_d2Sigma2_part2 = upperBound.getPdfValueOnStandardNormal() == 0d ? 0d : upperBound.getPdfValueOnStandardNormal() * d2Beta_d2Sigma2; 
+			double d2ZAlpha_d2Sigma2_part1 = dPDFAlpha_dAlpha == 0d ? 0d : dPDFAlpha_dAlpha * dAlpha_dSigma2 * dAlpha_dSigma2; 
+			double d2ZAlpha_d2Sigma2_part2 = lowerBound.getPdfValueOnStandardNormal() == 0d ? 0d : lowerBound.getPdfValueOnStandardNormal() * d2Alpha_d2Sigma2; 
+
+			double d2ZBeta_dSigma2_dMu_part1 = dPDFBeta_dBeta == 0d ? 0d : dPDFBeta_dBeta * dBeta_dSigma2 * dBeta_dMu; 
+			double d2ZBeta_dSigma2_dMu_part2 = upperBound.getPdfValueOnStandardNormal() == 0d ? 0d : upperBound.getPdfValueOnStandardNormal() * d2Beta_dMu_dSigma2; 
+			double d2ZAlpha_dSigma2_dMu_part1 = dPDFAlpha_dAlpha == 0d ? 0d : dPDFAlpha_dAlpha * dAlpha_dSigma2 * dAlpha_dMu; 
+			double d2ZAlpha_dSigma2_dMu_part2 = lowerBound.getPdfValueOnStandardNormal() == 0d ? 0d : lowerBound.getPdfValueOnStandardNormal() * d2Alpha_dMu_dSigma2; 
+
 			
 			
 			Matrix hessian = new Matrix(parameters.m_iRows, parameters.m_iRows);
 			double d2L_d2Mu = - 1d/sigma2 - 
-					(- Math.pow(
-							(upperBound.getPdfValueOnStandardNormal() * dBeta_dMu - lowerBound.getPdfValueOnStandardNormal() * dAlpha_dMu) / Z,
-							2) 
-					+ (-upperBound.getPdfValueOnStandardNormal() * upperBound.getStandardizedValue() * dBeta_dMu * dBeta_dMu - 
-					   -lowerBound.getPdfValueOnStandardNormal() * lowerBound.getStandardizedValue() * dAlpha_dMu * dAlpha_dMu) / Z); 
+					(- (dZBeta_dMu - dZAlpha_dMu) * (dZBeta_dMu - dZAlpha_dMu) / (Z * Z) +
+							(dPDFBeta_dBeta * dBeta_dMu * dBeta_dMu - dPDFAlpha_dAlpha * dAlpha_dMu * dAlpha_dMu) / Z); 
 			hessian.setValueAt(0, 0, d2L_d2Mu);	
 			
-			double d2L_d2Sigma2 = 0.5/(sigma2*sigma2) -  
-					(y - mu) * (y -mu) / (sigma2*sigma2*sigma2) -
-					(- Math.pow(
-							(upperBound.getPdfValueOnStandardNormal() * dBeta_dSigma2 - 
-					       lowerBound.getPdfValueOnStandardNormal() * dAlpha_dSigma2) / Z, 2) +
-					((-upperBound.getPdfValueOnStandardNormal() * upperBound.getStandardizedValue() * dBeta_dSigma2 * dBeta_dSigma2 
-							+ upperBound.getPdfValueOnStandardNormal() * d2Beta_d2Sigma2) -
-					 (-lowerBound.getPdfValueOnStandardNormal() * lowerBound.getStandardizedValue() * dAlpha_dSigma2 * dAlpha_dSigma2
-							+ lowerBound.getPdfValueOnStandardNormal() * d2Alpha_d2Sigma2)) / Z);
+			double d2L_d2Sigma2 = 1d/(2 * sigma2 * sigma2) -  
+					(y - mu) * (y -mu) / (sigma2 * sigma2 * sigma2) -
+					(- (dZBeta_dSigma2 - dZAlpha_dSigma2) * (dZBeta_dSigma2 - dZAlpha_dSigma2) / (Z * Z) + 
+							((d2ZBeta_d2Sigma2_part1 + d2ZBeta_d2Sigma2_part2) - (d2ZAlpha_d2Sigma2_part1 + d2ZAlpha_d2Sigma2_part2)) / Z);
 			hessian.setValueAt(1, 1, d2L_d2Sigma2);	
 			double d2L_dMu_dSigma2 = - (y - mu) / (sigma2 * sigma2) -
-					(-(upperBound.getPdfValueOnStandardNormal() * upperBound.getPdfValueOnStandardNormal() * dBeta_dMu * dBeta_dSigma2 -
-						lowerBound.getPdfValueOnStandardNormal() * lowerBound.getPdfValueOnStandardNormal() * dAlpha_dMu * dAlpha_dSigma2) / (Z * Z) +
-					 ((-upperBound.getPdfValueOnStandardNormal() * upperBound.getStandardizedValue() * dBeta_dMu * dBeta_dSigma2 +
-							 upperBound.getPdfValueOnStandardNormal() * d2Beta_dMu_dSigma2) -
-					  (-lowerBound.getPdfValueOnStandardNormal() * lowerBound.getStandardizedValue() * dAlpha_dMu * dAlpha_dSigma2 +
-							 lowerBound.getPdfValueOnStandardNormal() * d2Beta_dMu_dSigma2)) / Z);
+					(- (dZBeta_dMu - dZAlpha_dMu) * (dZBeta_dSigma2 * dZAlpha_dSigma2) / (Z * Z) +
+					        ((d2ZBeta_dSigma2_dMu_part1 + d2ZBeta_dSigma2_dMu_part2) - (d2ZAlpha_dSigma2_dMu_part1 - d2ZAlpha_dSigma2_dMu_part2)) / Z);
 			hessian.setValueAt(0, 1, d2L_dMu_dSigma2);	
 			hessian.setValueAt(1, 0, d2L_dMu_dSigma2);	
 			return hessian;
@@ -209,6 +219,10 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 		this.values = new ArrayList<Double>();
 		this.values.addAll(values);
 		this.individualLLK = new TruncatedGaussianLogLikelihood();
+		this.lowerBound = new TruncatedGaussianBound(this, false);
+		this.lowerBound.setBoundValue(new Matrix(1,1,lowBound, 0));
+		this.upperBound = new TruncatedGaussianBound(this, true);
+		this.upperBound.setBoundValue(new Matrix(1,1,uppBound, 0));
 		cLL = new SimpleCompositeLogLikelihood(individualLLK, new Matrix(values));
 		setParameters(startingValues);
 		try {
@@ -217,10 +231,6 @@ public class TruncatedGaussianModel extends AbstractStatisticalModel implements 
 		if (uppBound <= lowBound) {
 			throw new InvalidParameterException("The uppBound parameter must be larger than the lowBound parameter!");
 		}
-		this.lowerBound = new TruncatedGaussianBound(this, false);
-		this.lowerBound.setBoundValue(new Matrix(1,1,lowBound, 0));
-		this.upperBound = new TruncatedGaussianBound(this, true);
-		this.upperBound.setBoundValue(new Matrix(1,1,uppBound, 0));
 	}
 
 	public TruncatedGaussianModel(List<Double> values, double lowBound, double uppBound) {
