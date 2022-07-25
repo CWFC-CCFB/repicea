@@ -25,40 +25,40 @@ import repicea.math.Matrix;
 import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
- * The GaussianFunction class implements the pdf of the normal distribution. <br>
+ * The LogGaussianFunction class implements the pdf of the lognormal distribution. <br>
  * <br>
  * The function has two parameters, namely mu (the mean) and sigma2 (the variance).
  * 
  * @author Mathieu Fortin - July 2022
  */
 @SuppressWarnings("serial")
-public class GaussianFunction extends AbstractMathematicalFunction {
+public class LogGaussianFunction extends AbstractMathematicalFunction {
 
 	private static final int MU_INDEX = 0;
 	private static final int SIGMA2_INDEX = 1;
 	
 	/**
 	 * Constructor 1.
-	 * @param mu the mean of the function
+	 * @param mu the mean of the function 
 	 * @param sigma2 the variance of the function
 	 */
-	public GaussianFunction(double mu, double sigma2) {
+	public LogGaussianFunction(double mu, double sigma2) {
 		setParameterValue(MU_INDEX, mu);
 		setParameterValue(SIGMA2_INDEX, sigma2);
-		setVariableValue(0, 0d);
+		setVariableValue(0, 1d);
 	}
 
 	/**
 	 * A default contructor with mu and sigma2 set to 0 and 1 respectively.
 	 */
-	public GaussianFunction() {
+	public LogGaussianFunction() {
 		this(0,1);
 	}
 
 	@Override
 	public void setParameterValue(int index, double value) {
 		if (index > 1) {
-			throw new InvalidParameterException("The Gaussian function only has two parameters!");
+			throw new InvalidParameterException("The log-Gaussian function only has two parameters!");
 		} else {
 			if (index == SIGMA2_INDEX && value <= 0) {
 				throw new InvalidParameterException("The sigma2 parameter must be strictly positive (ie. > 0)!");
@@ -70,8 +70,11 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 	@Override
 	public void setVariableValue(int index, double value) {
 		if (index > 0) {
-			throw new InvalidParameterException("The Gaussian function only has one variable (namely the observation x)!");
+			throw new InvalidParameterException("The log-Gaussian function only has one variable (namely the observation x)!");
 		} else {
+			if (value <= 0) {
+				throw new InvalidParameterException("The log-Gaussian function supports only positive variables!");
+			}
 			super.setVariableValue(index, value);
 		}
 	}
@@ -81,7 +84,8 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 		double x = getVariableValue(0);
 		double mu = getParameterValue(MU_INDEX);
 		double sigma2 = getParameterValue(SIGMA2_INDEX);
-		return GaussianUtility.getProbabilityDensity(x, mu, sigma2);
+		double logX = Math.log(x);
+		return GaussianUtility.getProbabilityDensity(logX, mu, sigma2) / x;
 	}
 
 	@Override
@@ -89,13 +93,14 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 		double x = getVariableValue(0);
 		double mu = getParameterValue(MU_INDEX);
 		double sigma2 = getParameterValue(SIGMA2_INDEX);
+		double logX = Math.log(x);
 		
-		double f = GaussianUtility.getProbabilityDensity(x, mu, sigma2);
+		double f = GaussianUtility.getProbabilityDensity(logX, mu, sigma2) / x;
 		
 		Matrix gradient = new Matrix(2,1);
-		double df_dMu =  f * (x - mu) / sigma2;
+		double df_dMu =  f * (logX - mu) / sigma2;
 		gradient.setValueAt(MU_INDEX, 0, df_dMu);
-		double df_dSigma2 = f * ((x-mu) * (x-mu)/(2 * sigma2 * sigma2) - 1d / (2 * sigma2));
+		double df_dSigma2 = f * ((logX - mu) * (logX - mu)/(2 * sigma2 * sigma2) - 1d / (2 * sigma2));
 		gradient.setValueAt(SIGMA2_INDEX, 0, df_dSigma2);
 
 		return gradient;
@@ -106,19 +111,20 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 		double x = getVariableValue(0);
 		double mu = getParameterValue(MU_INDEX);
 		double sigma2 = getParameterValue(SIGMA2_INDEX);
+		double logX = Math.log(x);
 
-		double f = GaussianUtility.getProbabilityDensity(x, mu, sigma2);
+		double f = GaussianUtility.getProbabilityDensity(logX, mu, sigma2) / x;
 
 		Matrix gradient = getGradient();
 		
 		Matrix hessian = new Matrix(2,2);
-		double d2f_d2Mu = gradient.getValueAt(MU_INDEX, 0) * (x - mu) / sigma2 - f / sigma2;
+		double d2f_d2Mu = gradient.getValueAt(MU_INDEX, 0) * (logX - mu) / sigma2 - f / sigma2;
 		hessian.setValueAt(MU_INDEX, MU_INDEX, d2f_d2Mu);
-		double d2f_dMu_dSigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * (x - mu) / sigma2 - f * (x - mu) / (sigma2 * sigma2);
+		double d2f_dMu_dSigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * (logX - mu) / sigma2 - f * (logX - mu) / (sigma2 * sigma2);
 		hessian.setValueAt(MU_INDEX, SIGMA2_INDEX, d2f_dMu_dSigma2);
 		hessian.setValueAt(SIGMA2_INDEX, MU_INDEX, d2f_dMu_dSigma2);
-		double d2f_d2Sigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * ((x-mu) * (x-mu)/(2 * sigma2 * sigma2) - 1d / (2* sigma2)) +
-				f * (-(x-mu) * (x-mu)/(sigma2 * sigma2 * sigma2) + 1d / (2 * sigma2 * sigma2));
+		double d2f_d2Sigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * ((logX - mu) * (logX - mu)/(2 * sigma2 * sigma2) - 1d / (2* sigma2)) +
+				f * (-(logX - mu) * (logX - mu)/(sigma2 * sigma2 * sigma2) + 1d / (2 * sigma2 * sigma2));
 		hessian.setValueAt(SIGMA2_INDEX, SIGMA2_INDEX, d2f_d2Sigma2);
 		return hessian;
 	}
