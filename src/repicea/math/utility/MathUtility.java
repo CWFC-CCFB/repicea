@@ -16,9 +16,11 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.math;
+package repicea.math.utility;
 
 import java.security.InvalidParameterException;
+
+import repicea.math.Matrix;
 
 /**
  * This class implements simple static methods in mathematics.

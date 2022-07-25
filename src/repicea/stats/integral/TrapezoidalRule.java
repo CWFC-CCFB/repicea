@@ -23,7 +23,7 @@ import java.util.List;
 
 import repicea.math.EvaluableFunction;
 import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
+import repicea.math.utility.MatrixUtility;
 
 /**
  * The TrapezoidalRule class implements the trapezoidal rule integration method.

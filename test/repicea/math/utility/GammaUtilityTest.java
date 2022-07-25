@@ -1,4 +1,4 @@
-package repicea.math;
+package repicea.math.utility;
 
 import java.io.IOException;
 
@@ -6,6 +6,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.io.javacsv.CSVReader;
+import repicea.math.utility.GammaUtility;
 import repicea.util.ObjectUtility;
 
 public class GammaUtilityTest {
@@ -19,7 +20,7 @@ public class GammaUtilityTest {
 		while ((record = reader.nextRecord()) != null) {
 			double x = Double.parseDouble(record[1].toString());
 			double expectedValue = Double.parseDouble(record[2].toString());
-			double actualValue = GammaFunction.gamma(x);
+			double actualValue = GammaUtility.gamma(x);
 			Assert.assertEquals("Testing observation" + i, expectedValue, actualValue, 1E-8);
 			i++;
 		}
@@ -31,8 +32,8 @@ public class GammaUtilityTest {
 	@Test
 	public void testInverseGammaFunction() {
 		for (double d = 2; d < 15; d+=0.5) {
-			double gammaValue = GammaFunction.gamma(d);
-			double actual = GammaFunction.inverseGamma(gammaValue);
+			double gammaValue = GammaUtility.gamma(d);
+			double actual = GammaUtility.inverseGamma(gammaValue);
 			System.out.println("Expected = " + d + "; Gamma value = " + gammaValue + "; Actual = " + actual);
 			double tolerance = 1E-2;
 			if (d == 2) {

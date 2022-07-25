@@ -24,8 +24,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import repicea.math.MathUtility;
 import repicea.math.Matrix;
+import repicea.math.utility.MathUtility;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.sampling.SamplingUtility;
 

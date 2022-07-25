@@ -16,34 +16,36 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.math;
+package repicea.math.utility;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ExponentialIntegralFunctionTest {
+import repicea.math.utility.ExponentialIntegralUtility;
+
+public class ExponentialIntegralUtilityTest {
 
 	@Test
 	public void testE1() {
-		double observed = ExponentialIntegralFunction.getE1(2);
+		double observed = ExponentialIntegralUtility.getE1(2);
 		Assert.assertEquals("Testing the E1(z) function", 0.04890051070808066, observed, 1E-8);
 	}
 	
 	@Test
 	public void testEi() {
-		double observed = ExponentialIntegralFunction.getEi(2);
+		double observed = ExponentialIntegralUtility.getEi(2);
 		Assert.assertEquals("Testing the Ei(z) function", 4.954234356001867, observed, 1E-8);
 	}
 
 	@Test
 	public void testE1_negative() {
-		double observed = ExponentialIntegralFunction.getE1(-2);
+		double observed = ExponentialIntegralUtility.getE1(-2);
 		Assert.assertEquals("Testing the E1(z) function", -4.954234356001867, observed, 1E-8);
 	}
 	
 	@Test
 	public void testEi_negative() {
-		double observed = ExponentialIntegralFunction.getEi(-2);
+		double observed = ExponentialIntegralUtility.getEi(-2);
 		Assert.assertEquals("Testing the Ei(z) function", -0.04890051070808066, observed, 1E-8);
 	}
 

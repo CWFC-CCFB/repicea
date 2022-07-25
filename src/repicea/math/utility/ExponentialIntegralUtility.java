@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.math;
+package repicea.math.utility;
 
 import java.security.InvalidParameterException;
 
@@ -24,7 +24,7 @@ import java.security.InvalidParameterException;
  * A class that implements the Exponential Integral function.
  * @author Mathieu Fortin - June 2022
  */
-public class ExponentialIntegralFunction {
+public class ExponentialIntegralUtility {
 
 	private final static double EULER_CONSTANT = 0.57721566490153286060651209008240243104215933593992;
 	private static int K_MAX = 30;

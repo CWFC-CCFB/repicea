@@ -6,9 +6,9 @@ import java.util.Map;
 
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.math.optimizer.OptimizerListener;
+import repicea.math.utility.MatrixUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;

@@ -20,7 +20,7 @@ package repicea.stats.model;
 
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
+import repicea.math.utility.MatrixUtility;
 
 /**
  * A simple composite log likelihood for distribution models.

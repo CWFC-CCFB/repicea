@@ -45,6 +45,7 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 	public GaussianFunction(double mu, double sigma2) {
 		setParameterValue(MU_INDEX, mu);
 		setParameterValue(SIGMA2_INDEX, sigma2);
+		setVariableValue(0, 0d);
 	}
 
 	/**
@@ -73,7 +74,6 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 		} else {
 			super.setVariableValue(index, value);
 		}
-		
 	}
 	
 	@Override
@@ -123,4 +123,5 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 		return hessian;
 	}
 
+	
 }
