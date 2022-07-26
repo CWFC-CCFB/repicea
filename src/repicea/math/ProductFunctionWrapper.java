@@ -10,7 +10,7 @@ import java.util.Map;
 import repicea.math.utility.MatrixUtility;
 
 @SuppressWarnings("serial")
-public class ProductFunctionWrapper extends AbstractMathematicalFunction {
+public final class ProductFunctionWrapper extends AbstractMathematicalFunction {
 
 	private final List<InternalMathematicalFunctionWrapper> originalFunctions;
 	private final Map<Integer, List<InternalMathematicalFunctionWrapper>> parameterMap;
@@ -21,15 +21,17 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 	 * @param wrappedOriginalFunctions a series of InternalMathematicalFunctionWrapper instances 
 	 */
 	public ProductFunctionWrapper(InternalMathematicalFunctionWrapper... wrappedOriginalFunctions) {
+		this();
+		initialize(wrappedOriginalFunctions);
+	}
+
+	protected void initialize(InternalMathematicalFunctionWrapper... wrappedOriginalFunctions) {
 		if (wrappedOriginalFunctions == null || wrappedOriginalFunctions.length < 2) {
 			throw new InvalidParameterException("There must be at least two instances of InternalMathematicalFunctionWrapper in the arguments of the constructor!");
 		}
-		parameterMap = new HashMap<Integer, List<InternalMathematicalFunctionWrapper>>();
-		variableMap = new HashMap<Integer, List<InternalMathematicalFunctionWrapper>>();
 		List<Integer> newParameterIndex = new ArrayList<Integer>();
 		List<Integer> newVariableIndex = new ArrayList<Integer>();
 
-		originalFunctions = new ArrayList<InternalMathematicalFunctionWrapper>();
 		for (InternalMathematicalFunctionWrapper originalFunction : wrappedOriginalFunctions) {
 			originalFunctions.add(originalFunction);
 		}
@@ -76,8 +78,17 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 				}
 			}
 		}
-
 	}
+	
+	/**
+	 * Constructor for derived classes.
+	 */
+	protected ProductFunctionWrapper() {
+		parameterMap = new HashMap<Integer, List<InternalMathematicalFunctionWrapper>>();
+		variableMap = new HashMap<Integer, List<InternalMathematicalFunctionWrapper>>();
+		originalFunctions = new ArrayList<InternalMathematicalFunctionWrapper>();
+	}
+	
 	
 	@Override
 	public Double getValue() {

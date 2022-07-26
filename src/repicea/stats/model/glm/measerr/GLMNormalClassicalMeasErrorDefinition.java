@@ -22,16 +22,20 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.InternalMathematicalFunctionWrapper;
 import repicea.math.Matrix;
+import repicea.math.ProductFunctionWrapper;
+import repicea.math.functions.LogGaussianFunction;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataStructure;
-import repicea.stats.distributions.TruncatedGaussianDistribution;
 import repicea.stats.distributions.utility.GaussianUtility;
-import repicea.stats.integral.TrapezoidalRule;
+import repicea.stats.integral.GaussHermiteQuadrature;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.Likelihood;
 import repicea.stats.model.WrappedIndividualLogLikelihood;
 import repicea.stats.model.glm.LikelihoodGLM;
 import repicea.stats.model.glm.LinkFunction;
@@ -55,219 +59,141 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 			for (int i = 0; i < dataSet.getNumberOfObservations(); i++) {
 				measErr.wVector.add((Double) dataSet.getObservations().get(i).getValueAt(indexField));
 			}
-
-			measErr.varianceVector = new ArrayList<Double>();
-			// populating the varianceVector
-			indexField = dataSet.getIndexOfThisField(measErr.varianceFieldName);
-			if (indexField == -1) {
-				throw new InvalidParameterException("The field " + measErr.varianceFieldName + " containing the variances is not in the dataset!");
-			}
-			for (int i = 0; i < dataSet.getNumberOfObservations(); i++) {
-				measErr.varianceVector.add((Double) dataSet.getObservations().get(i).getValueAt(indexField));
-			}
 		}
-		
 
 	}
 	
 	@SuppressWarnings("serial")
-	static class LikelihoodGLMWithNormalClassicalMeasErr extends LikelihoodGLM {
+	private static class AlteredGaussianFunction extends AbstractMathematicalFunction {
 
-		class ConditionalLikelihood extends AbstractMathematicalFunctionWrapper {
+		private static final int SIGMA2_INDEX = 0;
+		private static final int X_INDEX = 0;
 
-			public ConditionalLikelihood(LikelihoodGLM originalFunction) {
-				super(originalFunction);
-			}
-
-			@Override
-			public Double getValue() {
-				double x = getOriginalFunction().getVariableValue(measErr.indexEffectWithMeasError);
-				double w_density = GaussianUtility.getProbabilityDensity(w, x, variance);
-				return getOriginalFunction().getValue() * w_density;
-			}
-
-			@Override
-			public Matrix getGradient() {
-				double x = getOriginalFunction().getVariableValue(measErr.indexEffectWithMeasError);
-				return getOriginalFunction().getGradient().scalarMultiply(GaussianUtility.getProbabilityDensity(w, x, variance));
-			}
-
-			@Override
-			public Matrix getHessian() {
-				double x = getOriginalFunction().getVariableValue(measErr.indexEffectWithMeasError);
-				return getOriginalFunction().getHessian().scalarMultiply(GaussianUtility.getProbabilityDensity(w, x, variance));
-			}
-			
-		}
+		double wValue;
 		
-		
-		
-		private double w;
-		private double variance;
-		private final TrapezoidalRule adaptedTr;
-		private final GLMNormalClassicalMeasErrorDefinition measErr;
-		private final LikelihoodGLM glmLikelihoodWithoutError;
-		private final ConditionalLikelihood conditionalLikelihood;
-		private final GradientHessianProvider gradientProvider;
-		private final GradientHessianProvider hessianProvider;
-
-
-		
-		public LikelihoodGLMWithNormalClassicalMeasErr(LinkFunction linkFunction, GLMNormalClassicalMeasErrorDefinition measErr) {
-			super(linkFunction);
-			this.glmLikelihoodWithoutError = new LikelihoodGLM(linkFunction);
-			this.conditionalLikelihood = new ConditionalLikelihood(glmLikelihoodWithoutError);
-			this.measErr = measErr;
-			adaptedTr = new TrapezoidalRule(measErr.resolution);
-			gradientProvider = new GradientHessianProvider(conditionalLikelihood, true);
-			hessianProvider = new GradientHessianProvider(conditionalLikelihood, false);
+		private AlteredGaussianFunction() {
+			setParameterValue(SIGMA2_INDEX, 1d);
+			setVariableValue(X_INDEX, 0d);
 		}
 
 		@Override
-		public void setYVector(Matrix yVector) {
-			this.observedValues = yVector;
-			glmLikelihoodWithoutError.setYVector(yVector);
+		public void setParameterValue(int index, double value) {
+			if (index > 0) {
+				throw new InvalidParameterException("The altered Gaussian function only has one parameter!");
+			} else {
+				if (index == SIGMA2_INDEX && value <= 0) {
+					throw new InvalidParameterException("The sigma2 parameter must be strictly positive (ie. > 0)!");
+				}
+				super.setParameterValue(index, value);
+			}
 		}
 
-
-		
-		private double[] getInitialization() {
-			double[] output = new double[3];
-			double std = Math.sqrt(variance);
-			double lowerBound = w - 3*std;
-			output[0] = lowerBound < 0 ? 0 : lowerBound;
-			output[1] = w + 3*std;
-			output[2] = GaussianUtility.getCumulativeProbability(3) - GaussianUtility.getCumulativeProbability((output[0] - w)/std);
-			return output;
+		@Override
+		public void setVariableValue(int index, double value) {
+			if (index > 0) {
+				throw new InvalidParameterException("The altered Gaussian function only has one variable (namely the observation x)!");
+			} else {
+				super.setVariableValue(index, value);
+			}
 		}
-	
-	
-
 		
 		@Override
 		public Double getValue() {
-			double[] v = getInitialization();
-			double invDensity = v[1] - v[0];
-			adaptedTr.setLowerBound(v[0]);
-			adaptedTr.setUpperBound(v[1]);
-			double conditionalProbability = this.glmLikelihoodWithoutError.getValue();
-			double marginalProbability = adaptedTr.getIntegralApproximation(conditionalLikelihood, measErr.indexEffectWithMeasError, false) / (v[2] * invDensity); // false: it is a variable.
-			return marginalProbability;
+			double mu = getVariableValue(X_INDEX);
+			double sigma2 = getParameterValue(SIGMA2_INDEX);
+			return GaussianUtility.getProbabilityDensity(wValue, mu, sigma2);
 		}
 
+		@Override
 		public Matrix getGradient() {
-			double[] v = getInitialization();
-			double invDensity = v[1] - v[0];
-			adaptedTr.setLowerBound(v[0]);
-			adaptedTr.setUpperBound(v[1]);
-			Matrix marginalGradient = adaptedTr.getIntegralApproximationForMatrixFunction(gradientProvider, measErr.indexEffectWithMeasError, false).scalarMultiply(1d/(v[2] * invDensity)); // false: it is a variable.
-			return marginalGradient;
+			double mu = getVariableValue(X_INDEX);
+			double sigma2 = getParameterValue(SIGMA2_INDEX);
+			
+			double f = GaussianUtility.getProbabilityDensity(wValue, mu, sigma2);
+			
+			Matrix gradient = new Matrix(1,1);
+			double df_dSigma2 = f * ((wValue-mu) * (wValue-mu)/(2 * sigma2 * sigma2) - 1d / (2 * sigma2));
+			gradient.setValueAt(SIGMA2_INDEX, 0, df_dSigma2);
+
+			return gradient;
 		}
 
 		@Override
 		public Matrix getHessian() {
-			double[] v = getInitialization();
-			double invDensity = v[1] - v[0];
-			adaptedTr.setLowerBound(v[0]);
-			adaptedTr.setUpperBound(v[1]);
-			Matrix marginalHessian = adaptedTr.getIntegralApproximationForMatrixFunction(hessianProvider, measErr.indexEffectWithMeasError, false).scalarMultiply(1d/(v[2] * invDensity)); // false: it is a variable.
-			return marginalHessian;
+			double mu = getVariableValue(X_INDEX);
+			double sigma2 = getParameterValue(SIGMA2_INDEX);
+
+			double f = GaussianUtility.getProbabilityDensity(wValue, mu, sigma2);
+
+			Matrix gradient = getGradient();
+			
+			Matrix hessian = new Matrix(1,1);
+			double d2f_d2Sigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * ((wValue-mu) * (wValue-mu)/(2 * sigma2 * sigma2) - 1d / (2* sigma2)) +
+					f * (-(wValue-mu) * (wValue-mu)/(sigma2 * sigma2 * sigma2) + 1d / (2 * sigma2 * sigma2));
+			hessian.setValueAt(SIGMA2_INDEX, SIGMA2_INDEX, d2f_d2Sigma2);
+			return hessian;
 		}
 
+	}
+
+	
+	
+	
+	@SuppressWarnings("serial")
+	static class LikelihoodGLMWithNormalClassicalMeasErr extends AbstractMathematicalFunctionWrapper implements Likelihood {
+
+		private double w;
+		private final GLMNormalClassicalMeasErrorDefinition measErr;
+		private final GaussHermiteQuadrature ghq;
+
+		public LikelihoodGLMWithNormalClassicalMeasErr(ProductFunctionWrapper pfw, GLMNormalClassicalMeasErrorDefinition measErr) {
+			super(pfw);
+			this.measErr = measErr;
+		}
+
+		@Override
+		public void setYVector(Matrix yVector) {
+			measErr.originalModelLikelihood.setYVector(yVector);
+			measErr.errorModelLikelihood.wValue = w;
+		}
+
+		@Override
+		public Matrix getYVector() {return null;}
+
+		@Override
+		public Matrix getPredictionVector() {return null;}
+
 		
+		public void setVariableValue(int index, double value) {
+			if (index == measErr.indexEffectWithMeasError) {	// here we rescale the value for the Gauss-Hermite quadrature
+				super.setVariableValue(index, w + getMinusSquareRootOfTwiceSigma2() * value);
+			} else {
+				super.setVariableValue(index, value);
+			}
+		}
+		
+		private double getMinusSquareRootOfTwiceSigma2() {
+			return -Math.sqrt(2 * measErr.errorModelLikelihood.getParameterValue(measErr.errorModelLikelihood.SIGMA2_INDEX));
+		}
+		
+		
+		@Override
+		public Double getValue() {
+			return getOriginalFunction().getValue() * getMinusSquareRootOfTwiceSigma2();
+		}
+
+		@Override
+		public Matrix getGradient() {
+			return getOriginalFunction().getGradient().scalarMultiply(getMinusSquareRootOfTwiceSigma2());
+		}
+
+		@Override
+		public Matrix getHessian() {
+			return getOriginalFunction().getGradient().scalarMultiply(getMinusSquareRootOfTwiceSigma2());
+		}
+
 	}
 	
-//	@SuppressWarnings("serial")
-//	static class LinkFunctionWithMeasError extends LinkFunction {
-//
-////		class InternalLinkFunction extends LinkFunction {
-////			
-////			public InternalLinkFunction(Type type, MathematicalFunction originalFunction) {
-////				super(type, originalFunction);
-////			}
-////		
-////			@Override
-////			public Double getValue() {
-////				double x = getOriginalFunction().getVariableValue(measErr.indexEffectWithMeasError);
-////				double w_density = GaussianUtility.getProbabilityDensity(w, x, variance);
-////				return super.getValue() * w_density;
-////			}
-////
-////			@Override
-////			public Matrix getGradient() {
-////				double x = getOriginalFunction().getVariableValue(measErr.indexEffectWithMeasError);
-////				return super.getGradient().scalarMultiply(GaussianUtility.getProbabilityDensity(w, x, variance));
-////			}
-////
-////			@Override
-////			public Matrix getHessian() {
-////				double x = getOriginalFunction().getVariableValue(measErr.indexEffectWithMeasError);
-////				return super.getHessian().scalarMultiply(GaussianUtility.getProbabilityDensity(w, x, variance));
-////			}
-////		}
-//		
-//		private final GradientHessianProvider gradientProvider;
-//		private final GradientHessianProvider hessianProvider;
-//		private double w;
-//		private double variance;
-//		private final InternalLinkFunction conditionOnXLinkFunctionErrorFreeObs;
-//		private final TrapezoidalRule adaptedTr;
-//		private final GLMNormalClassicalMeasErrorDefinition measErr;
-//		private LinkFunction noErrorLinkFunction;
-//		
-//		public LinkFunctionWithMeasError(Type linkFunctionType, GLMNormalClassicalMeasErrorDefinition measErr) {
-//			super(linkFunctionType);
-//			noErrorLinkFunction = new LinkFunction(linkFunctionType, getOriginalFunction());
-//			conditionOnXLinkFunctionErrorFreeObs = new InternalLinkFunction(linkFunctionType, getOriginalFunction());
-//			gradientProvider = new GradientHessianProvider(conditionOnXLinkFunctionErrorFreeObs, true);
-//			hessianProvider = new GradientHessianProvider(conditionOnXLinkFunctionErrorFreeObs, false);
-//			adaptedTr = new TrapezoidalRule(measErr.resolution);
-//			this.measErr = measErr;
-//			
-//		}
-//
-//		private double[] getInitialization() {
-//			double[] output = new double[3];
-//			double std = Math.sqrt(variance);
-//			double lowerBound = w - 3*std;
-//			output[0] = lowerBound < 0 ? 0 : lowerBound;
-//			output[1] = w + 3*std;
-//			output[2] = GaussianUtility.getCumulativeProbability(3) - GaussianUtility.getCumulativeProbability((output[0] - w)/std);
-//			return output;
-//		}
-//		
-//		
-//		@Override
-//		public Double getValue() {
-//			double[] v = getInitialization();
-////			double invDensity = v[1] - v[0];
-//			adaptedTr.setLowerBound(v[0]);
-//			adaptedTr.setUpperBound(v[1]);
-//			double conditionalProbability = this.noErrorLinkFunction.getValue();
-//			double marginalProbability = adaptedTr.getIntegralApproximation(conditionOnXLinkFunctionErrorFreeObs, measErr.indexEffectWithMeasError, false) / v[2]; // false: it is a variable.
-//			return marginalProbability;
-//		}
-//
-//		@Override
-//		public Matrix getGradient() {
-//			double[] v = getInitialization();
-////			double invdensity = v[1] - v[0];
-//			adaptedTr.setLowerBound(v[0]);
-//			adaptedTr.setUpperBound(v[1]);
-//			Matrix marginalGradient = adaptedTr.getIntegralApproximationForMatrixFunction(gradientProvider, measErr.indexEffectWithMeasError, false).scalarMultiply(1d/v[2]); // false: it is a variable.
-//			return marginalGradient;
-//		}
-//
-//		@Override
-//		public Matrix getHessian() {
-//			double[] v = getInitialization();
-////			double invdensity = v[1] - v[0];
-//			adaptedTr.setLowerBound(v[0]);
-//			adaptedTr.setUpperBound(v[1]);
-//			Matrix marginalHessian = adaptedTr.getIntegralApproximationForMatrixFunction(hessianProvider, measErr.indexEffectWithMeasError, false).scalarMultiply(1d/v[2]); // false: it is a variable.
-//			return marginalHessian;
-//		}
-//	}
 
 	
 	@SuppressWarnings("serial")
@@ -287,26 +213,21 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		protected void setValuesInLikelihoodFunction(int index) {
 			super.setValuesInLikelihoodFunction(index);
 			measErr.setValuesForObservation(index);
-//			lf.variance = measErr.varianceVector.getValueAt(index, 0);
-//			lf.w = measErr.wVector.getValueAt(index, 0);
 		}
 	}
 
 	
 	private final double resolution;
-	private List<Double> varianceVector;
 	private List<Double> wVector;
-	private final String varianceFieldName;
-	private LikelihoodGLMWithNormalClassicalMeasErr lk;
-	private TruncatedGaussianDistribution truncGaussDist;
 	
-	public GLMNormalClassicalMeasErrorDefinition(String effectWithMeasError, String varianceFieldName, double resolution) {
+	private LikelihoodGLM originalModelLikelihood;
+	private AlteredGaussianFunction errorModelLikelihood;
+	private LogGaussianFunction xDistribution;
+	
+	private LikelihoodGLMWithNormalClassicalMeasErr lk;
+	
+	public GLMNormalClassicalMeasErrorDefinition(String effectWithMeasError, double resolution) {
 		super(MeasurementErrorModel.Classical, effectWithMeasError);
-		if (varianceFieldName == null || varianceFieldName.isEmpty()) {
-			throw new InvalidParameterException("The varianceFieldName argument cannot be null or empty!");
-		} else {
-			this.varianceFieldName = varianceFieldName;
-		}
 		if (resolution <= 0) {
 			throw new InvalidParameterException("The resolution argument must be strictly positive!");
 		} else {
@@ -316,27 +237,12 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 
 	private void setValuesForObservation(int index) {
 		lk.w = wVector.get(index);
-		lk.variance = varianceVector.get(index);
 	}
 
 	@Override
 	public void validate(GLMWithMeasurementError glm) {
 		super.validate(glm);
 		((GLMWithNormalClassicalMeasErrorDataStructure) glm.getDataStructure()).initializeMeasurementErrorDefinition();
-		double mu = 0d;
-		double min = Double.MAX_VALUE;
-		for (Double d : wVector) {
-			mu += d;
-			min = d < min ? d : min;
-		}
-		mu /= wVector.size();
-		double sigma2 = 0;
-		for (Double d : wVector) {
-			sigma2 += (d - mu) * (d - mu);
-		}
-		sigma2 /= wVector.size() - 1;
-		truncGaussDist = new TruncatedGaussianDistribution(mu, sigma2);
-		
 	}
 
 	@Override
@@ -354,13 +260,28 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 
 	@Override
 	public IndividualLogLikelihood createIndividualLogLikelihoodFromModel(GLMWithMeasurementError glm) {
+		originalModelLikelihood = new LikelihoodGLM(glm.getLinkFunction());
+		InternalMathematicalFunctionWrapper wrapper1 = new InternalMathematicalFunctionWrapper(originalModelLikelihood, 
+				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfParameters() - 1),
+				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfVariables() - 1)); 
+		errorModelLikelihood = new AlteredGaussianFunction();
+		List<Integer> newVariableIndices = InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfVariables(), originalModelLikelihood.getNumberOfVariables()); 
+		newVariableIndices.add(indexEffectWithMeasError);
+		InternalMathematicalFunctionWrapper wrapper2 = new InternalMathematicalFunctionWrapper(errorModelLikelihood, 
+				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters(), originalModelLikelihood.getNumberOfParameters()),
+				newVariableIndices);
+		xDistribution = new LogGaussianFunction();
+		InternalMathematicalFunctionWrapper wrapper3 = new InternalMathematicalFunctionWrapper(xDistribution, 
+				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters() + errorModelLikelihood.getNumberOfParameters(), 
+						originalModelLikelihood.getNumberOfParameters()  + errorModelLikelihood.getNumberOfParameters() + xDistribution.getNumberOfParameters() - 1),
+				InternalMathematicalFunctionWrapper.produceListFromTo(indexEffectWithMeasError, indexEffectWithMeasError)); 
+		ProductFunctionWrapper pfw = new ProductFunctionWrapper(wrapper1, wrapper2, wrapper3);
 		lk = new LikelihoodGLMWithNormalClassicalMeasErr(glm.getLinkFunction(), this);
 		return new WrappedIndividualLogLikelihood(lk);
 	}
 
 	@Override
 	public LinkFunction createLinkFunction(Type linkFunctionType) {
-//		return new LinkFunctionWithMeasError(linkFunctionType, this);
 		return null;		// use the default method instead
 	}
 

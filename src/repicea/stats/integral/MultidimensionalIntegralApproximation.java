@@ -33,11 +33,14 @@ public interface MultidimensionalIntegralApproximation {
 	/**
 	 * This method returns the value of a multi-dimension integral
 	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param parameterIndices the indices of the parameters over which the integration is made
+	 * @param indices the indices of the parameters over which the integration is made
+	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
+	 * indices refer to variables.
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
 	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
-			List<Integer> parameterIndices, 
+			List<Integer> indices, 
+			boolean isParameter,
 			Matrix lowerCholeskyTriangle);
 }

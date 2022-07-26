@@ -65,7 +65,7 @@ public class NumericalIntegrationTest {
 		parameterIndices.add(0);
 
 		LaplacianApproximation la = new LaplacianApproximation();
-		double sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		double sum = la.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 
 		System.out.println("Mean with Laplace Approximation =  " + sum);
 		assertEquals(mean, sum, 5E-3);
@@ -83,7 +83,7 @@ public class NumericalIntegrationTest {
 		System.out.println("Simulated mean =  " + mean);
 		logit.setParameterValue(0, xBeta);
 		
-		sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		sum = la.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 
 		System.out.println("Mean with Laplace Approximation =  " + sum);
 		assertEquals(mean, sum, 5E-3);
@@ -128,7 +128,7 @@ public class NumericalIntegrationTest {
 		parameterIndices.add(1);
 
 		LaplacianApproximation la = new LaplacianApproximation();
-		double sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		double sum = la.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 
 		System.out.println("Mean with Laplace Approximation =  " + sum);
 		assertEquals(mean, sum, 1E-2);
@@ -150,7 +150,7 @@ public class NumericalIntegrationTest {
 		logit.setParameterValue(0, xBeta);
 		logit.setParameterValue(1, 0d);
 		
-		sum = la.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		sum = la.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 
 		System.out.println("Mean with Laplace Approximation =  " + sum);
 		assertEquals(mean, sum, 1E-2);
@@ -191,22 +191,22 @@ public class NumericalIntegrationTest {
 		List<Integer> parameterIndices = new ArrayList<Integer>();
 		parameterIndices.add(0);
 
-		double sum2 = rghq5.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
-		double sum = ghq5.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		double sum2 = rghq5.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
+		double sum = ghq5.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 		
 		System.out.println("Mean with 5 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-3);
 
 		logit.setParameterValue(0, xBeta);
-		sum2 = rghq10.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
-		sum = ghq10.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		sum2 = rghq10.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
+		sum = ghq10.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 		
 		System.out.println("Mean with 10 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-3);
 
 		logit.setParameterValue(0, xBeta);
-		sum2 = rghq15.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
-		sum = ghq15.getIntegralApproximation(logit, parameterIndices, lowerCholeskyTriangle);
+		sum2 = rghq15.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
+		sum = ghq15.getIntegralApproximation(logit, parameterIndices, true, lowerCholeskyTriangle);
 		
 		System.out.println("Mean with 15 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-3);
@@ -260,8 +260,8 @@ public class NumericalIntegrationTest {
 		List<Integer> indices = new ArrayList<Integer>();
 		indices.add(1);
 		indices.add(2);
-		double sum2 = rghq5.getIntegralApproximation(linkFunction, indices, chol);
-		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
+		double sum2 = rghq5.getIntegralApproximation(linkFunction, indices, true, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-2);
@@ -269,8 +269,8 @@ public class NumericalIntegrationTest {
 		linkFunction.setParameterValue(1, oriVal1);
 		linkFunction.setParameterValue(2, oriVal2);
 		
-		sum2 = rghq10.getIntegralApproximation(linkFunction, indices, chol);
-		sum = ghq10.getIntegralApproximation(linkFunction, indices, chol);
+		sum2 = rghq10.getIntegralApproximation(linkFunction, indices, true, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-2);
@@ -278,8 +278,8 @@ public class NumericalIntegrationTest {
 		linkFunction.setParameterValue(1, oriVal1);
 		linkFunction.setParameterValue(2, oriVal2);
 
-		sum2 = rghq15.getIntegralApproximation(linkFunction, indices, chol);
-		sum = ghq15.getIntegralApproximation(linkFunction, indices, chol);
+		sum2 = rghq15.getIntegralApproximation(linkFunction, indices, true, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum + " compared with " + sum2);
 		assertEquals(mean, sum, 1E-2);
@@ -388,19 +388,19 @@ public class NumericalIntegrationTest {
 		List<Integer> indices = new ArrayList<Integer>();
 		indices.add(1);
 		indices.add(2);
-		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 		
-		sum = ghq10.getIntegralApproximation(linkFunction, indices, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
 
-		sum = ghq15.getIntegralApproximation(linkFunction, indices, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
@@ -439,17 +439,17 @@ public class NumericalIntegrationTest {
 		Matrix chol = new Matrix(1,1);
 		chol.setValueAt(0, 0, stdDev);
 		
-		double sum = ghq5.getIntegralApproximation(linkFunction, indices, chol);
+		double sum = ghq5.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 5 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 
-		sum = ghq10.getIntegralApproximation(linkFunction, indices, chol);
+		sum = ghq10.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 10 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);
 		
-		sum = ghq15.getIntegralApproximation(linkFunction, indices, chol);
+		sum = ghq15.getIntegralApproximation(linkFunction, indices, true, chol);
 		
 		System.out.println("Mean with 15 points =  " + sum);
 		assertEquals(mean, sum, 1E-3);

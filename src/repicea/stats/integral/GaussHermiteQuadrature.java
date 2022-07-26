@@ -126,90 +126,107 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Multidime
 	/**
 	 * This method makes it possible to integrate an AbstractStatisticalExpression through Gauss-Hermite quadrature. 
 	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param parameterIndex the index of the parameter over which the integration is made
+	 * @param index the index of the parameter over which the integration is made
+	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
+	 * indices refer to variables.
 	 * @param standardDeviation the standard deviation of this variable
 	 * @return the approximation of the integral
 	 */
 	protected double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
-											Integer parameterIndex, 
+											int index, 
+											boolean isParameter,
 											double standardDeviation) {
-		double originalValue = functionToEvaluate.getParameterValue(parameterIndex);
+		double originalValue = functionToEvaluate.getParameterValue(index);
 		double sum = 0;
 		double value;
 		for (int i = 0; i < getXValues().size(); i++) {
 			double tmp = getXValues().get(i) * standardDeviation * Math.sqrt(2d);
-			functionToEvaluate.setParameterValue(parameterIndex, originalValue + tmp);
+			functionToEvaluate.setParameterValue(index, originalValue + tmp);
 			value = functionToEvaluate.getValue() * getWeights().get(i);
 			sum += value;
 		}
-		functionToEvaluate.setParameterValue(parameterIndex, originalValue);
+		functionToEvaluate.setParameterValue(index, originalValue);
 		return sum;
 	}
 	
 	/**
 	 * This method returns the value of a multi-dimension integral
 	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param parameterIndices the indices of the parameters over which the integration is made
+	 * @param indices the indices of the parameters over which the integration is made
+	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
+	 * indices refer to variables.
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
 	protected double getMultiDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
-												List<Integer> parameterIndices, 
+												List<Integer> indices, 
+												boolean isParameter,
 												Matrix lowerCholeskyTriangle) {
-		Integer parameterIndex = parameterIndices.get(0);
-		if (parameterIndices.size() == 1) {
-			return getOneDimensionIntegral(functionToEvaluate, parameterIndex, lowerCholeskyTriangle.getValueAt(0, 0));
+		Integer thisIndex = indices.get(0);
+		if (indices.size() == 1) {
+			return getOneDimensionIntegral(functionToEvaluate, thisIndex, isParameter, lowerCholeskyTriangle.getValueAt(0, 0));
 		} else {
-			List<Integer> remainingIndices = parameterIndices.subList(1, parameterIndices.size());
-			double originalValue = functionToEvaluate.getParameterValue(parameterIndices.get(0));
+			List<Integer> remainingIndices = indices.subList(1, indices.size());
+			double originalValue = isParameter ? functionToEvaluate.getParameterValue(indices.get(0)) : functionToEvaluate.getVariableValue(indices.get(0));
 			double sum = 0;
 			double value;
 			for (int i = 0; i < getXValues().size(); i++) {
 				double tmp = getXValues().get(i) * lowerCholeskyTriangle.getValueAt(0, 0) * Math.sqrt(2d);
-				functionToEvaluate.setParameterValue(parameterIndex, originalValue + tmp);
+				if (isParameter) {
+					functionToEvaluate.setParameterValue(thisIndex, originalValue + tmp);
+				} else {
+					functionToEvaluate.setVariableValue(thisIndex, originalValue + tmp);
+				}
 				List<Double> originalValues = new ArrayList<Double>();
 				for (Integer index : remainingIndices) {
-					double original = functionToEvaluate.getParameterValue(index);
+					double original = isParameter ? functionToEvaluate.getParameterValue(index) : functionToEvaluate.getVariableValue(index);
 					originalValues.add(original);
-					int indexInCholesky = parameterIndices.indexOf(index);
-					functionToEvaluate.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.getValueAt(indexInCholesky, 0));
+					int indexInCholesky = indices.indexOf(index);
+					if (isParameter) {
+						functionToEvaluate.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.getValueAt(indexInCholesky, 0));
+					} else {
+						functionToEvaluate.setVariableValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.getValueAt(indexInCholesky, 0));
+					}
 				}
 				Matrix subCholesky = lowerCholeskyTriangle.getSubMatrix(1, lowerCholeskyTriangle.m_iRows - 1, 1, lowerCholeskyTriangle.m_iCols - 1);
 				value = getMultiDimensionIntegral(functionToEvaluate,
 						remainingIndices, 
+						isParameter,
 						subCholesky) * getWeights().get(i);
 				sum += value;
 				for (int j = 0; j < remainingIndices.size(); j++) {
-					functionToEvaluate.setParameterValue(remainingIndices.get(j), originalValues.get(j));
+					if (isParameter) {
+						functionToEvaluate.setParameterValue(remainingIndices.get(j), originalValues.get(j));
+					} else {
+						functionToEvaluate.setVariableValue(remainingIndices.get(j), originalValues.get(j));
+					}
 				}
 			}
-			functionToEvaluate.setParameterValue(parameterIndex, originalValue);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(thisIndex, originalValue);
+			} else {
+				functionToEvaluate.setVariableValue(thisIndex, originalValue);
+			}
 			return sum;
-
 		}
 	}
 	
-	/**
-	 * This method returns the value of a multi-dimension integral
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param parameterIndices the indices of the parameters over which the integration is made
-	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
-	 * @return the approximation of the integral
-	 */
 	@Override
 	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
-											List<Integer> parameterIndices, 
+											List<Integer> indices, 
+											boolean isParameter,
 											Matrix lowerCholeskyTriangle) {
-		if (!lowerCholeskyTriangle.isSquare() || parameterIndices.size() != lowerCholeskyTriangle.m_iRows) {
+		if (!lowerCholeskyTriangle.isSquare() || indices.size() != lowerCholeskyTriangle.m_iRows) {
 			throw new InvalidParameterException("The indices are not compatible with the lower Cholesky triangle!");
 		} else {
-			for (Integer index : parameterIndices) {
-				if (index < 0 || index >= functionToEvaluate.getNumberOfParameters()) {
-					throw new InvalidParameterException("One index is either negative or it exceeds the number of parameters in the function!");
+			int maxIndex = isParameter ? functionToEvaluate.getNumberOfParameters() : functionToEvaluate.getNumberOfVariables();
+			for (Integer index : indices) {
+				if (index < 0 || index >= maxIndex) {
+					throw new InvalidParameterException("One index is either negative or it exceeds the number of " + (isParameter ? "parameters" : "variables") + " in the function!");
 				}
 			}
 			int dimensions = lowerCholeskyTriangle.m_iRows;
-			return Math.pow(Math.PI, -dimensions/2d) * getMultiDimensionIntegral(functionToEvaluate, parameterIndices, lowerCholeskyTriangle);
+			return Math.pow(Math.PI, -dimensions/2d) * getMultiDimensionIntegral(functionToEvaluate, indices, isParameter, lowerCholeskyTriangle);
 		}
 	}
 	

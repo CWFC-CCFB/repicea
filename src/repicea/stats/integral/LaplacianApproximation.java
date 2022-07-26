@@ -19,7 +19,6 @@
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
@@ -52,17 +51,14 @@ public class LaplacianApproximation extends AdaptativeGaussHermiteQuadrature {
 	public List<Double> getXValues() {return xValues;}
 	
 	
-	/**
-	 * This method returns the value of a multi-dimension integral
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param parameterIndices the indices of the parameters over which the integration is made
-	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
-	 * @return the approximation of the integral
-	 */
 	@Override
 	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
 			List<Integer> parameterIndices, 
+			boolean isParameter,
 			Matrix lowerCholeskyTriangle) {
+		if (!isParameter) {
+			throw new UnsupportedOperationException("The LaplacianApproximation class has not been implemented for integral over the variables yet!");
+		}
 		if (!lowerCholeskyTriangle.isSquare() || parameterIndices.size() != lowerCholeskyTriangle.m_iRows) {
 			throw new InvalidParameterException("The indices are not compatible with the lower Cholesky triangle!");
 		} else {

@@ -120,4 +120,21 @@ public class InternalMathematicalFunctionWrapper extends AbstractMathematicalFun
 		return varMap.keySet();
 	}
 
+	/**
+	 * Produce a list of integers. 
+	 * 
+	 * @param from the initial value of the list.
+	 * @param to the final value of the list.
+	 * @return a List instance with Integers
+	 */
+	public static List<Integer> produceListFromTo(int from, int to) {
+		if (to < from) {
+			throw new InvalidParameterException("The to argument should be equal to or greater than the from argument!");
+		}
+		List<Integer> myList = new ArrayList<Integer>();
+		for (int i = from; i <= to; i++) {
+			myList.add(i);
+		}
+		return myList;
+	}
 }
