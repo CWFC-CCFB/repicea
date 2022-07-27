@@ -20,27 +20,25 @@ package repicea.stats.integral;
 
 import java.util.List;
 
-import repicea.math.AbstractMathematicalFunction;
-import repicea.math.Matrix;
+import repicea.math.EvaluableFunction;
 
 /**
  * Provides a simple method for numerical integration of multidimensional integrals.
  * @author Mathieu Fortin - July 2022
  */
-public interface MultidimensionalIntegralApproximation {
+public interface MultidimensionalIntegralApproximation<P extends EvaluableFunction<Double>> {
 
 	
 	/**
 	 * This method returns the value of a multi-dimension integral
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
+	 * @param functionToEvaluate a MathematicalFunction instance that returns Double 
 	 * @param indices the indices of the parameters over which the integration is made
 	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
 	 * indices refer to variables.
 	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
 	 * @return the approximation of the integral
 	 */
-	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
+	public double getMultiDimensionalIntegralApproximation(P functionToEvaluate,
 			List<Integer> indices, 
-			boolean isParameter,
-			Matrix lowerCholeskyTriangle);
+			boolean isParameter);
 }

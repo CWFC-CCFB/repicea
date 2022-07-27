@@ -20,17 +20,6 @@ package repicea.math;
 
 public interface MathematicalFunction extends EvaluableFunction<Double>, DifferentiableMathematicalFunction {
 
-	/**
-	 * Provide the number of parameters in the function.
-	 * @return an integer
-	 */
-	public int getNumberOfParameters();
-	
-	/**
-	 * Provide the number of variables in the function.
-	 * @return an integer
-	 */
-	public int getNumberOfVariables();
 	
 	/**
 	 * Return all the parameters in a column vector.

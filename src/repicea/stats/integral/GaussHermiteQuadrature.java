@@ -18,17 +18,15 @@
  */
 package repicea.stats.integral;
 
-import java.io.Serializable;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.EvaluableFunction;
 import repicea.math.Matrix;
+import repicea.stats.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 
 /**
  * The GaussHermiteQuadrature class provides the x values and their weights for numerical integration.
@@ -36,48 +34,55 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class GaussHermiteQuadrature extends GaussQuadrature implements MultidimensionalIntegralApproximation, Serializable {
+public class GaussHermiteQuadrature extends AbstractGaussHermiteQuadrature implements UnidimensionalIntegralApproximation<GaussHermiteQuadratureCompatibleFunction<Double>>,
+																				UnidimensionalIntegralApproximationForMatrix<GaussHermiteQuadratureCompatibleFunction<Matrix>>,
+																				MultidimensionalIntegralApproximation<GaussHermiteQuadratureCompatibleFunction<Double>> {
 	
-	private static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
-	static {
-		Set<QuadratureNode> nodes = new HashSet<QuadratureNode>();
-		nodes.add(new QuadratureNode(0d, 0.945308720482942));
-		nodes.add(new QuadratureNode(0.958572464613819, 0.393619323152241));
-		nodes.add(new QuadratureNode(0.202018287045609E1, 0.199532420590459E-1));
-		NODE_MAP.put(NumberOfPoints.N5, nodes);
+	
+	/**
+	 * An interface for a better management of function rescaling.
+	 * @author Mathieu Fortin - July 2022
+	 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+	 */
+	public static interface GaussHermiteQuadratureCompatibleFunction<P> extends EvaluableFunction<P> {
 		
-		nodes = new HashSet<QuadratureNode>();
-		nodes.add(new QuadratureNode(0.342901327223704609, 0.610862633735325799));
-		nodes.add(new QuadratureNode(0.103661082978951365E1, 0.240138611082314686));
-		nodes.add(new QuadratureNode(0.175668364929988177E1, 0.338743944554810631E-1));
-		nodes.add(new QuadratureNode(0.253273167423278980E1, 0.134364574678123269E-2));
-		nodes.add(new QuadratureNode(0.343615911883773760E1, 0.764043285523262063E-5));
-		NODE_MAP.put(NumberOfPoints.N10, nodes);
+		/**
+		 * Convert the value to the original scale.<br>
+		 * <br>
+		 * In most cases, the function is not e^-(x^2) and consequently, the function
+		 * has to be rescaled. For instance, with the pdf of the normal distribution, 
+		 * x = (y - mu)/((2 * sigma2)^(1/2)). From x, we can calculate the y on the 
+		 * original scale as y = (2 * sigma2)^(1/2) * x + mu.
+		 * 
+		 * @param x the value used in the Gauss-Hermite quadrature.
+		 * @param mu the mu value on the original scale
+		 * @param covarianceIndexI the row index where to find the std in the Cholesky matrix.
+		 * @param covarianceIndexJ the column index where to find the std in the Cholesky matrix.
+		 * @return the value on the original scale.
+		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+		 */
+		public double convertFromGaussToOriginal(double x, double mu, int covarianceIndexI, int covarianceIndexJ);
 		
-		nodes = new HashSet<QuadratureNode>();
-		nodes.add(new QuadratureNode(0d, 0.564100308726417532853));
-		nodes.add(new QuadratureNode(0.565069583255575748526, 0.412028687498898627026));
-		nodes.add(new QuadratureNode(0.113611558521092066632E1, 0.158488915795935746884));
-		nodes.add(new QuadratureNode(0.171999257518648893242E1, 0.307800338725460822287E-1));
-		nodes.add(new QuadratureNode(0.232573248617385774545E1, 0.277806884291277589608E-2));
-		nodes.add(new QuadratureNode(0.296716692790560324849E1, 0.100004441232499868127E-3));
-		nodes.add(new QuadratureNode(0.366995037340445253473E1, 0.105911554771106663578E-5));
-		nodes.add(new QuadratureNode(0.449999070730939155366E1, 0.152247580425351702016E-8));
-		NODE_MAP.put(NumberOfPoints.N15, nodes);
-		  			
+		/**
+		 * Calculate the adjustment to the integral. <br>
+		 * <br>
+		 * For instance if the relationship between x and y is y = (2 * sigma2)^(1/2) * x + mu,
+		 * then dy = (2 * sigma2)^(1/2) * dx.
+		 * @param dimensions the number of dimensions
+		 * @return a double
+		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+		 */
+		public double getIntegralAdjustment(int dimensions);
+		
 	}
-	
-	private final NumberOfPoints numberOfPoints;
+
 	
 	/**
 	 * Constructor.
 	 * @param numberOfPoints a NumberOfPoints enum variable (either NumberOfPoints.N5, NumberOfPoints.N10, or NumberOfPoints.N15) 
 	 */
 	public GaussHermiteQuadrature(NumberOfPoints numberOfPoints) {
-		if (!NODE_MAP.containsKey(numberOfPoints)) {
-			throw new InvalidParameterException("The Gauss-Hermite quadrature with this number of points is not implemented!");
-		}
-		this.numberOfPoints = numberOfPoints;
+		super(numberOfPoints);
 	}
 	
 	/**
@@ -87,137 +92,36 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Multidime
 		this(NumberOfPoints.N5);
 	}
 	
-	@Override
-	public List<Double> getWeights() {
-		if (weights == null) {
-			getXValues();
-		}
-		return weights;
-	}
-
-
 
 	@Override
-	public List<Double> getXValues() {
-		if (xValues.isEmpty()) {
-			weights.clear();
-			List<QuadratureNode> orderedNodes = getOrderedNodes(GaussHermiteQuadrature.NODE_MAP.get(numberOfPoints));
-			for (QuadratureNode node : orderedNodes) {
-				xValues.add(node.getValue());
-				weights.add(node.getWeight());
-			}
-		}
-		return xValues;
-	}
-
-
-
-	@Override
-	public List<Double> getRescalingFactors() {
-		if (rescalingFactors.isEmpty()) {
-			List<Double> xValues = getXValues();
-			for (int i = 0; i < xValues.size(); i++) {
-				rescalingFactors.add(1d);
-			}
-		}
-		return rescalingFactors;
-	}
-
-	/**
-	 * This method makes it possible to integrate an AbstractStatisticalExpression through Gauss-Hermite quadrature. 
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param index the index of the parameter over which the integration is made
-	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
-	 * indices refer to variables.
-	 * @param standardDeviation the standard deviation of this variable
-	 * @return the approximation of the integral
-	 */
-	protected double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
-											int index, 
-											boolean isParameter,
-											double standardDeviation) {
-		double originalValue = functionToEvaluate.getParameterValue(index);
+	protected double getOneDimensionIntegral(GaussHermiteQuadratureCompatibleFunction<Double> functionToEvaluate,
+												List<Integer> indices, 
+												boolean isParameter,
+												int startingIndex) {
+		Integer thisIndex = indices.get(startingIndex);
+		double originalValue = isParameter ? functionToEvaluate.getParameterValue(thisIndex) : functionToEvaluate.getVariableValue(thisIndex);
 		double sum = 0;
 		double value;
 		for (int i = 0; i < getXValues().size(); i++) {
-			double tmp = getXValues().get(i) * standardDeviation * Math.sqrt(2d);
-			functionToEvaluate.setParameterValue(index, originalValue + tmp);
+			double thisValueOnTheOriginalScale = functionToEvaluate.convertFromGaussToOriginal(getXValues().get(i), originalValue, startingIndex, startingIndex); // the first variance in the vcov matrix
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(thisIndex, thisValueOnTheOriginalScale);
+			} else {
+				functionToEvaluate.setVariableValue(thisIndex, thisValueOnTheOriginalScale);
+			}
 			value = functionToEvaluate.getValue() * getWeights().get(i);
 			sum += value;
 		}
-		functionToEvaluate.setParameterValue(index, originalValue);
+		functionToEvaluate.setParameterValue(thisIndex, originalValue);
 		return sum;
 	}
 	
-	/**
-	 * This method returns the value of a multi-dimension integral
-	 * @param functionToEvaluate an EvaluableFunction instance that returns Double 
-	 * @param indices the indices of the parameters over which the integration is made
-	 * @param isParameter a boolean to indicate that indices refer to parameters. If false, it is assumed that the
-	 * indices refer to variables.
-	 * @param lowerCholeskyTriangle the lower triangle of the Cholesky factorization of the variance-covariance matrix
-	 * @return the approximation of the integral
-	 */
-	protected double getMultiDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
-												List<Integer> indices, 
-												boolean isParameter,
-												Matrix lowerCholeskyTriangle) {
-		Integer thisIndex = indices.get(0);
-		if (indices.size() == 1) {
-			return getOneDimensionIntegral(functionToEvaluate, thisIndex, isParameter, lowerCholeskyTriangle.getValueAt(0, 0));
-		} else {
-			List<Integer> remainingIndices = indices.subList(1, indices.size());
-			double originalValue = isParameter ? functionToEvaluate.getParameterValue(indices.get(0)) : functionToEvaluate.getVariableValue(indices.get(0));
-			double sum = 0;
-			double value;
-			for (int i = 0; i < getXValues().size(); i++) {
-				double tmp = getXValues().get(i) * lowerCholeskyTriangle.getValueAt(0, 0) * Math.sqrt(2d);
-				if (isParameter) {
-					functionToEvaluate.setParameterValue(thisIndex, originalValue + tmp);
-				} else {
-					functionToEvaluate.setVariableValue(thisIndex, originalValue + tmp);
-				}
-				List<Double> originalValues = new ArrayList<Double>();
-				for (Integer index : remainingIndices) {
-					double original = isParameter ? functionToEvaluate.getParameterValue(index) : functionToEvaluate.getVariableValue(index);
-					originalValues.add(original);
-					int indexInCholesky = indices.indexOf(index);
-					if (isParameter) {
-						functionToEvaluate.setParameterValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.getValueAt(indexInCholesky, 0));
-					} else {
-						functionToEvaluate.setVariableValue(index, original + Math.sqrt(2d) * getXValues().get(i) * lowerCholeskyTriangle.getValueAt(indexInCholesky, 0));
-					}
-				}
-				Matrix subCholesky = lowerCholeskyTriangle.getSubMatrix(1, lowerCholeskyTriangle.m_iRows - 1, 1, lowerCholeskyTriangle.m_iCols - 1);
-				value = getMultiDimensionIntegral(functionToEvaluate,
-						remainingIndices, 
-						isParameter,
-						subCholesky) * getWeights().get(i);
-				sum += value;
-				for (int j = 0; j < remainingIndices.size(); j++) {
-					if (isParameter) {
-						functionToEvaluate.setParameterValue(remainingIndices.get(j), originalValues.get(j));
-					} else {
-						functionToEvaluate.setVariableValue(remainingIndices.get(j), originalValues.get(j));
-					}
-				}
-			}
-			if (isParameter) {
-				functionToEvaluate.setParameterValue(thisIndex, originalValue);
-			} else {
-				functionToEvaluate.setVariableValue(thisIndex, originalValue);
-			}
-			return sum;
-		}
-	}
-	
 	@Override
-	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
+	public double getMultiDimensionalIntegralApproximation(GaussHermiteQuadratureCompatibleFunction<Double> functionToEvaluate,
 											List<Integer> indices, 
-											boolean isParameter,
-											Matrix lowerCholeskyTriangle) {
-		if (!lowerCholeskyTriangle.isSquare() || indices.size() != lowerCholeskyTriangle.m_iRows) {
-			throw new InvalidParameterException("The indices are not compatible with the lower Cholesky triangle!");
+											boolean isParameter) {
+		if (indices == null || indices.isEmpty()) {
+			throw new InvalidParameterException("The indices argument must be a non empty list of integers!");
 		} else {
 			int maxIndex = isParameter ? functionToEvaluate.getNumberOfParameters() : functionToEvaluate.getNumberOfVariables();
 			for (Integer index : indices) {
@@ -225,10 +129,53 @@ public class GaussHermiteQuadrature extends GaussQuadrature implements Multidime
 					throw new InvalidParameterException("One index is either negative or it exceeds the number of " + (isParameter ? "parameters" : "variables") + " in the function!");
 				}
 			}
-			int dimensions = lowerCholeskyTriangle.m_iRows;
-			return Math.pow(Math.PI, -dimensions/2d) * getMultiDimensionIntegral(functionToEvaluate, indices, isParameter, lowerCholeskyTriangle);
+			return functionToEvaluate.getIntegralAdjustment(indices.size()) * getMultiDimensionIntegral(functionToEvaluate, indices, isParameter, 0);
 		}
 	}
+
+	@Override
+	public double getIntegralApproximation(GaussHermiteQuadratureCompatibleFunction<Double> functionToEvaluate, 
+			int index,
+			boolean isParameter) {
+		return functionToEvaluate.getIntegralAdjustment(1) * getOneDimensionIntegral(functionToEvaluate, 
+				Arrays.asList(new Integer[] {index}), 
+				isParameter, 
+				0);
+	}
+
+	@Override
+	public Matrix getIntegralApproximationForMatrixFunction(GaussHermiteQuadratureCompatibleFunction<Matrix> functionToEvaluate, 
+			int index,
+			boolean isParameter) {
+		return getOneDimensionIntegralForMatrix(functionToEvaluate, 
+				Arrays.asList(new Integer[] {index}), 
+				isParameter, 
+				0).scalarMultiply(functionToEvaluate.getIntegralAdjustment(1));
+
+	}
+
+	private Matrix getOneDimensionIntegralForMatrix(GaussHermiteQuadratureCompatibleFunction<Matrix> functionToEvaluate,
+			List<Integer> indices, 
+			boolean isParameter, 
+			int startingIndex) {
+		Integer thisIndex = indices.get(startingIndex);
+		double originalValue = isParameter ? functionToEvaluate.getParameterValue(thisIndex) : functionToEvaluate.getVariableValue(thisIndex);
+		Matrix sum = null;
+		Matrix value;
+		for (int i = 0; i < getXValues().size(); i++) {
+			double thisValueOnTheOriginalScale = functionToEvaluate.convertFromGaussToOriginal(getXValues().get(i), originalValue, startingIndex, startingIndex); // the first variance in the vcov matrix
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(thisIndex, thisValueOnTheOriginalScale);
+			} else {
+				functionToEvaluate.setVariableValue(thisIndex, thisValueOnTheOriginalScale);
+			}
+			value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i));
+			sum =  sum == null ? value : sum.add(value);
+		}
+		functionToEvaluate.setParameterValue(thisIndex, originalValue);
+		return sum;
+	}
+
 	
 	
 	

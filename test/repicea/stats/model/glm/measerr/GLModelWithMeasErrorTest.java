@@ -18,32 +18,70 @@
  */
 package repicea.stats.model.glm.measerr;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import repicea.math.Matrix;
+import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.glm.GeneralizedLinearModel;
+import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaLogManager;
 
 public class GLModelWithMeasErrorTest {
 
+	@BeforeClass
+	public static void doThis() {
+		Level l = Level.OFF;
+		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
+	}
+
+//	@Ignore
+//	@Test
+//    public void TestGLModelWithMeasurementError() throws Exception {
+// 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("OccurrencePartDataset_ERS.csv");
+//		DataSet dataSet = new DataSet(filename, true);
+//		
+//		GLMWithMeasurementError glmWithMeasError = new GLMWithMeasurementError(dataSet, "occurred ~ lnDt + distanceToConspecificOLD",
+//				new GLMUniformBerksonMeasErrorDefinition("distanceToConspecificOLD", 0d, null, null, .1));
+//		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
+//		glmWithMeasError.doEstimation();
+//		glmWithMeasError.getSummary();
+//		Assert.assertTrue("Testing if convergence has been reached", glmWithMeasError.getEstimator().isConvergenceAchieved());
+//		Assert.assertEquals("Testing the parameter estimate", -13.911668422111854, glmWithMeasError.getParameters().getValueAt(2, 0), 1E-8);
+//	}
+
+	
 	@Test
-    public void TestGLModelWithMeasurementError() throws Exception {
- 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("OccurrencePartDataset_ERS.csv");
+    public void TestGLModelWithClassicalMeasurementError() throws Exception {
+ 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
-		
-		GLMWithMeasurementError glmWithMeasError = new GLMWithMeasurementError(dataSet, "occurred ~ lnDt + distanceToConspecificOLD",
-				new GLMUniformBerksonMeasErrorDefinition("distanceToConspecificOLD", 0d, null, null, .1));
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		glm.doEstimation();
+		glm.getSummary();
+		GLMWithMeasurementError glmWithMeasError = new GLMWithMeasurementError(dataSet, "y ~ distanceToConspecific",
+				glm.getParameters(), new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", .2));
 		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glmWithMeasError.doEstimation();
 		glmWithMeasError.getSummary();
 		Assert.assertTrue("Testing if convergence has been reached", glmWithMeasError.getEstimator().isConvergenceAchieved());
-		Assert.assertEquals("Testing the parameter estimate", -13.911668422111854, glmWithMeasError.getParameters().getValueAt(2, 0), 1E-8);
+		Assert.assertEquals("Testing the parameter estimate", -0.05426475567951968, glmWithMeasError.getParameters().getValueAt(1, 0), 1E-8);
 	}
+
+	
 
  }

@@ -29,7 +29,7 @@ import java.util.List;
  * @author Mathieu Fortin - October 2012
  */
 @SuppressWarnings("serial")
-public abstract class NumericalIntegrationMethod implements Serializable {
+public abstract class AbstractNumericalIntegrationMethod implements Serializable {
 	
 	private double upperBound = Double.NaN;
 	private double lowerBound = Double.NaN;
@@ -37,7 +37,7 @@ public abstract class NumericalIntegrationMethod implements Serializable {
 	protected final List<Double> weights;
 	protected final List<Double> rescalingFactors;
 
-	protected NumericalIntegrationMethod() {
+	protected AbstractNumericalIntegrationMethod() {
 		xValues = new ArrayList<Double>();
 		weights = new ArrayList<Double>();
 		rescalingFactors = new ArrayList<Double>();

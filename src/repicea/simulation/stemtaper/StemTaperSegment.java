@@ -23,7 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.stats.integral.CompositeSimpsonRule;
-import repicea.stats.integral.NumericalIntegrationMethod;
+import repicea.stats.integral.AbstractNumericalIntegrationMethod;
 import repicea.stats.integral.TrapezoidalRule;
 
 /**
@@ -36,7 +36,7 @@ public class StemTaperSegment {
 
 	public static final double VERY_SMALL = 1E-3;
 
-	private NumericalIntegrationMethod nim;
+	private AbstractNumericalIntegrationMethod nim;
 	
 	/**
 	 * Constructor 1.
@@ -44,7 +44,7 @@ public class StemTaperSegment {
 	 * @param topCrossSection a double that represents the height of the upper cross section (m)
 	 * @param nim a NumericalIntegrationMethod instance
 	 */
-	public StemTaperSegment(double bottomCrossSection, double topCrossSection, NumericalIntegrationMethod nim) {
+	public StemTaperSegment(double bottomCrossSection, double topCrossSection, AbstractNumericalIntegrationMethod nim) {
 		if (bottomCrossSection > 0 && bottomCrossSection < topCrossSection) {
 			nim.setLowerBound(bottomCrossSection);
 			nim.setUpperBound(topCrossSection);
@@ -58,7 +58,7 @@ public class StemTaperSegment {
 	 * Constructor 2. 
 	 * @param nim a NumericalIntegrationMethod instance that already contains the lower bound and upper bounds
 	 */
-	public StemTaperSegment(NumericalIntegrationMethod nim) {
+	public StemTaperSegment(AbstractNumericalIntegrationMethod nim) {
 		if (nim.getLowerBound() > 0 && nim.getLowerBound() < nim.getUpperBound()) {
 			this.nim = nim;
 		} else {
@@ -75,7 +75,7 @@ public class StemTaperSegment {
 	 */
 	protected StemTaperSegment(StemTaperCrossSection bottonStemTaperCrossSection, 
 			StemTaperCrossSection topStemTaperCrossSection,
-			NumericalIntegrationMethod nim) {
+			AbstractNumericalIntegrationMethod nim) {
 		this(bottonStemTaperCrossSection.getSectionHeight(), topStemTaperCrossSection.getSectionHeight(), nim);
 	}
 

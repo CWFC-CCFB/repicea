@@ -32,7 +32,8 @@ import repicea.math.utility.MatrixUtility;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class TrapezoidalRule extends NumericalIntegrationMethod implements UnidimensionalIntegralApproximation {
+public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																					UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
 
 	private double resolution;
 	
@@ -147,7 +148,6 @@ public class TrapezoidalRule extends NumericalIntegrationMethod implements Unidi
 		} else {
 			originalValue = functionToEvaluate.getVariableValue(index);
 		}
-		
 		double sum = 0d;
 		double point;
 		for (int i = 0; i < getXValues().size(); i++) {

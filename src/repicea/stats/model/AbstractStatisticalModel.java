@@ -107,9 +107,12 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	 * @param modelDefinition a String that defines the model
 	 * @throws StatisticalDataException
 	 */
-	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
+	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
 		this.modelDefinition = modelDefinition;
 	}
 	
+	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
+		setModelDefinition(modelDefinition, null);
+	}
 
 }

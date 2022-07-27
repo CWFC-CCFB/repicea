@@ -81,7 +81,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 
 		// then define the model effects and retrieve matrix X and vector y
 		try {
-			setModelDefinition(modelDefinition);
+			setModelDefinition(modelDefinition, additionalParm);
 		} catch (StatisticalDataException e) {
 			System.out.println("Unable to define this model : " + modelDefinition);
 			e.printStackTrace();
@@ -144,8 +144,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	
 
 	@Override
-	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
-		super.setModelDefinition(modelDefinition);
+	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
+		super.setModelDefinition(modelDefinition, additionalParm);
 		getDataStructure().constructMatrices(modelDefinition);
 		matrixX = getDataStructure().getMatrixX();
 		y = getDataStructure().getVectorY();

@@ -29,7 +29,8 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public final class CompositeSimpsonRule extends NumericalIntegrationMethod implements UnidimensionalIntegralApproximation {
+public final class CompositeSimpsonRule extends AbstractNumericalIntegrationMethod implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																								UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
 
 	private static final double EPSILON = 1E-12;
 	private final int numberOfSubintervals;

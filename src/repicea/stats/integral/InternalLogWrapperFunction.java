@@ -22,8 +22,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.LogFunctionWrapper;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 
 /**
@@ -44,7 +44,7 @@ class InternalLogWrapperFunction extends LogFunctionWrapper {
 	 * @param originalFunction the nested function
 	 * @param gMatrix the variance-covariance matrix of the deviate
 	 */
-	InternalLogWrapperFunction(AbstractMathematicalFunction originalFunction, List<Integer> parameterIndices, Matrix gMatrix) {
+	InternalLogWrapperFunction(MathematicalFunction originalFunction, List<Integer> parameterIndices, Matrix gMatrix) {
 		super(originalFunction);
 		if (!gMatrix.isSymmetric()) {
 			throw new InvalidParameterException("Matrix G is supposed to be symmetric!");

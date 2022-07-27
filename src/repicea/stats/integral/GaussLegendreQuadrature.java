@@ -35,8 +35,9 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class GaussLegendreQuadrature extends GaussQuadrature implements UnidimensionalIntegralApproximation {
-	
+public class GaussLegendreQuadrature extends AbstractGaussQuadrature implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																				UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
+
 	private static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
 	static {
 		Set<QuadratureNode> nodes = new HashSet<QuadratureNode>();

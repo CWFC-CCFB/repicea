@@ -134,7 +134,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		fireOptimizerEvent(OptimizerListener.optimizationStarted);
 		
 		double value0 = function.getValue();
-		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Initial LLK = " + value0);
+		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Initial parameter estimates = " + function.getParameters().toString() + "; Initial LLK = " + value0);
 		Matrix gradient = function.getGradient();
 		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Gradient = " + gradient.toString());
 		Matrix hessian = function.getHessian();

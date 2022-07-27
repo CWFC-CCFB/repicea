@@ -18,6 +18,8 @@
  */
 package repicea.stats.model.glm.measerr;
 
+import java.util.List;
+
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
@@ -91,10 +93,16 @@ public interface GLMMeasErrorDefinition {
 	 * If this method returns null, then the method in the super class will be used instead.
 	 *
 	 * @param linkFunctionType a Type enum that stands for the link function type
+	 * @param glm a GLMWithMeasurementError instance
 	 * @return a LinkFunction instance
 	 */
-	public LinkFunction createLinkFunction(Type linkFunctionType);
+	public LinkFunction createLinkFunction(Type linkFunctionType, GLMWithMeasurementError glm);
 
-	
+	/**
+	 * Provide the additional labels for the parameters other than those of the model likelihood.
+	 * @return a List of strings
+	 */
+	public List<String> getAdditionalEffects();
+
 	
 }

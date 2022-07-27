@@ -74,4 +74,16 @@ public interface EvaluableFunction<P> {
 	 */
 	public double getParameterValue(int parameterIndex);
 
+	/**
+	 * Provide the number of parameters in the function.
+	 * @return an integer
+	 */
+	public int getNumberOfParameters();
+	
+	/**
+	 * Provide the number of variables in the function.
+	 * @return an integer
+	 */
+	public int getNumberOfVariables();
+
 }

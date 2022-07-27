@@ -10,7 +10,7 @@ import java.util.Map;
 import repicea.math.utility.MatrixUtility;
 
 @SuppressWarnings("serial")
-public final class ProductFunctionWrapper extends AbstractMathematicalFunction {
+public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 
 	private final List<InternalMathematicalFunctionWrapper> originalFunctions;
 	private final Map<Integer, List<InternalMathematicalFunctionWrapper>> parameterMap;
@@ -83,7 +83,7 @@ public final class ProductFunctionWrapper extends AbstractMathematicalFunction {
 	/**
 	 * Constructor for derived classes.
 	 */
-	protected ProductFunctionWrapper() {
+	public ProductFunctionWrapper() {
 		parameterMap = new HashMap<Integer, List<InternalMathematicalFunctionWrapper>>();
 		variableMap = new HashMap<Integer, List<InternalMathematicalFunctionWrapper>>();
 		originalFunctions = new ArrayList<InternalMathematicalFunctionWrapper>();
@@ -203,14 +203,18 @@ public final class ProductFunctionWrapper extends AbstractMathematicalFunction {
 		if (!variableMap.containsKey(variableIndex)) {
 			throw new InvalidParameterException("The variable index is invalid!");
 		}
-		return variableMap.get(variableIndex).get(0).getParameterValue(variableIndex);
+		return variableMap.get(variableIndex).get(0).getVariableValue(variableIndex);
 	}
 
 	@Override
-	public final int getNumberOfParameters() {return parameterMap.size();}
+	public final int getNumberOfParameters() {
+		return parameterMap.size();
+	}
 
 	@Override
-	public final int getNumberOfVariables() {return variableMap.size();}
+	public final int getNumberOfVariables() {
+		return variableMap.size();
+	}
 
 	
 	@Override
@@ -232,6 +236,6 @@ public final class ProductFunctionWrapper extends AbstractMathematicalFunction {
 	public void setBounds(int parameterIndex, ParameterBound bound) {
 		throw new UnsupportedOperationException("The bounds have not been implemented in the ProductFunctionWrapper class!");
 	}
-
+	
 	
 }

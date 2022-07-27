@@ -18,8 +18,12 @@
  */
 package repicea.stats.model.glm.measerr;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
+import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
@@ -35,11 +39,9 @@ import repicea.stats.model.glm.LinkFunction.Type;
 public class GLMWithMeasurementError extends GeneralizedLinearModel {
 
 	protected final GLMMeasErrorDefinition measError;
-//	private LinkFunctionWithMeasError linkFunction;
 	
 	public GLMWithMeasurementError(DataSet dataSet, String modelDefinition, Matrix startingValues, GLMMeasErrorDefinition measError) {
 		super(dataSet, Type.CLogLog, modelDefinition, null, startingValues, measError);
-		measError.validate(this);
 		this.measError = measError;
 	}
 	
@@ -62,6 +64,12 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 	Matrix getMatrixX() {return matrixX;}
 	
 	Matrix getVectorY() {return y;}
+
+	@Override
+	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
+		super.setModelDefinition(modelDefinition, additionalParm);
+		((GLMMeasErrorDefinition) additionalParm).validate(this);
+	}
 	
 	@Override
 	protected final CompositeLogLikelihoodWithExplanatoryVariables createCompleteLLK(Object addParm) {
@@ -77,7 +85,7 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 
 	@Override
 	protected LinkFunction createLinkFunction(Type linkFunctionType, Object addParm) {
-		LinkFunction lf = ((GLMMeasErrorDefinition) addParm).createLinkFunction(linkFunctionType);
+		LinkFunction lf = ((GLMMeasErrorDefinition) addParm).createLinkFunction(linkFunctionType, this);
 		return lf != null ? lf : super.createLinkFunction(linkFunctionType, addParm);
 	}
 
@@ -87,4 +95,11 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 		return llk != null ? llk : super.createIndividualLLK(addParm);
 	}
 
+	@Override
+	public List<String> getEffectList() {
+		List<String> effects = new ArrayList<String>();
+		effects.addAll(super.getEffectList());
+		effects.addAll(measError.getAdditionalEffects());
+		return effects;
+	}
 }

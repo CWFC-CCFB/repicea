@@ -66,6 +66,12 @@ public abstract class AbstractGLMMeasErrorDefinition implements GLMMeasErrorDefi
 
 		@Override
 		public void setVariables(Matrix xVector) {}
+
+		@Override
+		public int getNumberOfParameters() {return originalFunction.getNumberOfParameters();}
+
+		@Override
+		public int getNumberOfVariables() {return originalFunction.getNumberOfVariables();}
 	}
 
 	protected final MeasurementErrorModel mesErrMod;

@@ -19,7 +19,6 @@ public class FGMCopulaGLModelTest {
 	 * This test implements a constant parameter copula model.
 	 * @throws Exception
 	 */
-//	@Ignore
 	@Test
     public void TestWithSimpleCopula() throws Exception {
 		double expectedCopulaValue = 0.18072198394164396;
@@ -48,7 +47,6 @@ public class FGMCopulaGLModelTest {
 	 * This test implements a constant parameter copula model.
 	 * @throws Exception
 	 */
-//	@Ignore
 	@Test
     public void TestWithDistanceCopula() throws Exception {
 		double expectedCopulaValue = -0.17037528040263983;

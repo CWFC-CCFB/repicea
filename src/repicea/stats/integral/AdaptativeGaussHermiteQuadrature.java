@@ -18,98 +18,149 @@
  */
 package repicea.stats.integral;
 
-import java.security.InvalidParameterException;
-import java.util.List;
-
-import repicea.math.AbstractMathematicalFunction;
-import repicea.math.ExponentialFunctionWrapper;
-import repicea.math.Matrix;
-import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
-
 /**
  * The AdaptativeGaussHermiteQuadrature class implements the adaptative algorithm, i.e.
  * the maximum of the function is first found before integrating.
- * @author Mathieu Fortin - December 2015
+ * @author Mathieu Fortin - December 2015, July 2022
  *
  */
 @SuppressWarnings("serial")
-public class AdaptativeGaussHermiteQuadrature extends GaussHermiteQuadrature {
+abstract class AdaptativeGaussHermiteQuadrature { //extends AbstractGaussHermiteQuadrature implements UnidimensionalIntegralApproximation<AdaptativeGaussHermiteQuadratureCompatibleFunction>,
+													//											MultidimensionalIntegralApproximation<AdaptativeGaussHermiteQuadratureCompatibleFunction>{
 	
-	/**
-	 * Constructor.
-	 * @param numberOfPoints the number of points the integral is based on.
-	 */
-	public AdaptativeGaussHermiteQuadrature(NumberOfPoints numberOfPoints) {
-		super(numberOfPoints);
-	}
-	
-	/**
-	 * Constructor for the LaplaceApproximation class.
-	 */
-	AdaptativeGaussHermiteQuadrature() {
-		super();
-	}
-	
-	
-	@Override
-	public double getIntegralApproximation(AbstractMathematicalFunction functionToEvaluate,
-											List<Integer> indices, 
-											boolean isParameter,
-											Matrix lowerCholeskyTriangle) {
-		if (!isParameter) {
-			throw new UnsupportedOperationException("The AdaptativeGaussianHermiteQuadrature class has not been implemented for integral over the variables yet!");
-		}
-		if (!lowerCholeskyTriangle.isSquare() || indices.size() != lowerCholeskyTriangle.m_iRows) {
-			throw new InvalidParameterException("The indices are not compatible with the lower Cholesky triangle!");
-		} else {
-			int maxIndex = functionToEvaluate.getNumberOfParameters();
-			for (Integer index : indices) {
-				if (index < 0 || index >= maxIndex) {
-					throw new InvalidParameterException("One index is either negative or it exceeds the number of parameters in the function!");
-				}
-			}
-			Matrix matrixG = lowerCholeskyTriangle.multiply(lowerCholeskyTriangle.transpose());
-			InternalLogWrapperFunction functionToBeOptimized = new InternalLogWrapperFunction(functionToEvaluate, indices, matrixG);
-			
-			NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
-			try {
-				nro.optimize(functionToBeOptimized, indices);
-			} catch (OptimizationException e) {
-				e.printStackTrace();
-			}
 
-			Matrix newHessian = nro.getHessianAtMaximum();
-			Matrix varCov = newHessian.getInverseMatrix().scalarMultiply(-1d);
-			Matrix newLowerCholeskyTriangle = varCov.getLowerCholTriangle();
+//	/**
+//	 * An interface for a better management of function rescaling.
+//	 * @author Mathieu Fortin - July 2022
+//	 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
+//	 */
+//	public static interface AdaptativeGaussHermiteQuadratureCompatibleFunction extends MathematicalFunction, GaussHermiteQuadratureCompatibleFunction<Double> {
+//		
+//		/**
+//		 * Return the variance-covariance matrix.
+//		 * @return a positive definite square matrix
+//		 */
+//		public Matrix getVariance();
+//	}
+//	
+//	private static class InternalExponentialFunctionWrapper extends ExponentialFunctionWrapper implements AdaptativeGaussHermiteQuadratureCompatibleFunction {
+//
+//		final Matrix variance;
+//		
+//		private InternalExponentialFunctionWrapper(AdaptativeGaussHermiteQuadratureCompatibleFunction originalFunction, Matrix variance) {
+//			super(originalFunction);
+//			this.variance = variance;
+//		}
+//
+//		@Override
+//		public AdaptativeGaussHermiteQuadratureCompatibleFunction getOriginalFunction() {
+//			return (AdaptativeGaussHermiteQuadratureCompatibleFunction) super.getOriginalFunction();
+//		}
+//		
+//		@Override
+//		public double convertFromGaussToOriginal(double x, double mu, int covarianceIndexI, int covarianceIndexJ) {
+//			return getOriginalFunction().convertFromGaussToOriginal(x, mu, covarianceIndexI, covarianceIndexJ);
+//		}
+//
+//		@Override
+//		public double getIntegralAdjustment(int dimensions) {
+//			// TODO Auto-generated method stub
+//			return 0;
+//		}
+//
+//		@Override
+//		public Matrix getVariance() {
+//			return variance;
+//		}
+//	}
+//
+//	/**
+//	 * Constructor.
+//	 * @param numberOfPoints the number of points the integral is based on.
+//	 */
+//	public AdaptativeGaussHermiteQuadrature(NumberOfPoints numberOfPoints) {
+//		super(numberOfPoints);
+//	}
+//	
+//	/**
+//	 * Constructor for the LaplaceApproximation class.
+//	 */
+//	AdaptativeGaussHermiteQuadrature() {
+//		super();
+//	}
+//	
+//	
+//	@Override
+//	public double getMultiDimensionalIntegralApproximation(AdaptativeGaussHermiteQuadratureCompatibleFunction functionToEvaluate,
+//											List<Integer> indices, 
+//											boolean isParameter) {
+//		if (!isParameter) {
+//			throw new UnsupportedOperationException("The AdaptativeGaussianHermiteQuadrature class has not been implemented for integral over the variables yet!");
+//		}
+//		if (indices == null || indices.isEmpty()) {
+//			throw new InvalidParameterException("The indices argument must be a non empty list of integers!");
+//		} else {
+//			int maxIndex = functionToEvaluate.getNumberOfParameters();
+//			for (Integer index : indices) {
+//				if (index < 0 || index >= maxIndex) {
+//					throw new InvalidParameterException("One index is either negative or it exceeds the number of parameters in the function!");
+//				}
+//			}
+//			InternalLogWrapperFunction functionToBeOptimized = new InternalLogWrapperFunction(functionToEvaluate, indices, functionToEvaluate.getVariance());
+//			
+//			NewtonRaphsonOptimizer nro = new NewtonRaphsonOptimizer();
+//			try {
+//				nro.optimize(functionToBeOptimized, indices);
+//			} catch (OptimizationException e) {
+//				e.printStackTrace();
+//			}
+//
+//			Matrix newHessian = nro.getHessianAtMaximum();
+//			Matrix varCov = newHessian.getInverseMatrix().scalarMultiply(-1d);
+////			Matrix newLowerCholeskyTriangle = varCov.getLowerCholTriangle();
+//
+//			ExponentialFunctionWrapper efw = new InternalExponentialFunctionWrapper(functionToBeOptimized, varCov);
+//			double approximation = getMultiDimensionIntegral(efw, indices, isParameter, newLowerCholeskyTriangle);
+//			int dimensions = newHessian.m_iRows;
+//			approximation *= Math.pow(2d, (2 * dimensions - 1) * .5) * Math.sqrt(varCov.getDeterminant());
+//			return approximation;
+//		}
+//	}
+//
+//	@Override
+//	protected double getOneDimensionIntegral(GaussHermiteQuadratureCompatibleFunction<Double> functionToEvaluate,
+//			List<Integer> indices, 
+//			boolean isParameter,
+//			int startingIndex) {
+//		int index = indices.get(startingIndex);
+//		double originalValue = functionToEvaluate.getParameterValue(index);
+//		double sum = 0;
+//		double value;
+//		for (int i = 0; i < getXValues().size(); i++) {
+//			double z = getXValues().get(i);
+//			double valueOnOriginalScale = functionToEvaluate.convertFromGaussToOriginal(z, originalValue, index, index);
+////			double tmp =  z * standardDeviation * Math.sqrt(2d);
+////			functionToEvaluate.setParameterValue(index, originalValue + tmp);
+//			functionToEvaluate.setParameterValue(index, valueOnOriginalScale);
+//			value = functionToEvaluate.getValue() * Math.exp(z*z) * getWeights().get(i);
+//			sum += value;
+//		}
+//		functionToEvaluate.setParameterValue(index, originalValue);
+//		return sum;
+//	}
+//	
+//	
+//	
+//	@Override
+//	public double getIntegralApproximation(AdaptativeGaussHermiteQuadratureCompatibleFunction functionToEvaluate, 
+//			int index,
+//			boolean isParameter) {
+//		return functionToEvaluate.getIntegralAdjustment(1) * getOneDimensionIntegral(functionToEvaluate, 
+//				Arrays.asList(new Integer[] {index}), 
+//				isParameter, 
+//				0);
+//	}
+//
 
-			ExponentialFunctionWrapper efw = new ExponentialFunctionWrapper(functionToBeOptimized);
-			double approximation = super.getMultiDimensionIntegral(efw, indices, isParameter, newLowerCholeskyTriangle);
-			int dimensions = newHessian.m_iRows;
-			approximation *= Math.pow(2d, (2 * dimensions - 1) * .5) * Math.sqrt(varCov.getDeterminant());
-			return approximation;
-		}
-	}
-
-	@Override
-	protected double getOneDimensionIntegral(AbstractMathematicalFunction functionToEvaluate,
-			int index,
-			boolean isParameter,
-			double standardDeviation) {
-		double originalValue = functionToEvaluate.getParameterValue(index);
-		double sum = 0;
-		double value;
-		for (int i = 0; i < getXValues().size(); i++) {
-			double z = getXValues().get(i);
-			double tmp =  z * standardDeviation * Math.sqrt(2d);
-			functionToEvaluate.setParameterValue(index, originalValue + tmp);
-			value = functionToEvaluate.getValue() * Math.exp(z*z) * getWeights().get(i);
-			sum += value;
-		}
-		functionToEvaluate.setParameterValue(index, originalValue);
-		return sum;
-	}
-
-	
 	
 }

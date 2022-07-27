@@ -40,7 +40,7 @@ import repicea.stats.model.glm.LinkFunction.Type;
  * 
  * @author Mathieu Fortin - July 2022
  */
-public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDefinition {
+abstract class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDefinition {
 
  
 	private static class GLMWithUniformMeasErrorDataStructure extends GenericStatisticalDataStructure {
@@ -229,7 +229,7 @@ public class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasErrorDe
 	}
 
 	@Override
-	public LinkFunction createLinkFunction(Type linkFunctionType) {
+	public LinkFunction createLinkFunction(Type linkFunctionType, GLMWithMeasurementError glm) {
 		return new LinkFunctionWithMeasError(linkFunctionType, resolution, this);
 	}
 

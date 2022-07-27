@@ -32,7 +32,8 @@ import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.distributions.utility.GaussianUtility;
-import repicea.stats.integral.GaussHermiteQuadrature;
+//import repicea.stats.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
+import repicea.stats.integral.TrapezoidalRule;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.Likelihood;
@@ -137,24 +138,49 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 	}
 
 	
-	
+//	@SuppressWarnings("serial")
+//	static class InternalProductFunctionWrapper extends ProductFunctionWrapper implements GaussHermiteQuadratureCompatibleFunction<Double> {
+//
+//		private final AlteredGaussianFunction agf;
+//		
+//		InternalProductFunctionWrapper(AlteredGaussianFunction agf, InternalMathematicalFunctionWrapper... wrappedOriginalFunctions) {
+//			super(wrappedOriginalFunctions);
+//			this.agf = agf;
+//		}
+//		
+//		@Override
+//		public double convertFromGaussToOriginal(double x, double mu, int covarianceIndexI, int covarianceIndexJ) {
+//			return agf.wValue - Math.sqrt(2 * agf.getParameterValue(AlteredGaussianFunction.SIGMA2_INDEX)) * x;
+//		}
+//
+//		@Override
+//		public double getIntegralAdjustment(int dimensions) {
+//			return - Math.sqrt(2 * agf.getParameterValue(AlteredGaussianFunction.SIGMA2_INDEX));
+//		}
+//	}
 	
 	@SuppressWarnings("serial")
 	static class LikelihoodGLMWithNormalClassicalMeasErr extends AbstractMathematicalFunctionWrapper implements Likelihood {
 
-		private double w;
 		private final GLMNormalClassicalMeasErrorDefinition measErr;
-		private final GaussHermiteQuadrature ghq;
+		private final TrapezoidalRule integrator;
+		private final GradientHessianProvider gradientProvider;
+		private final GradientHessianProvider hessianProvider;
+
 
 		public LikelihoodGLMWithNormalClassicalMeasErr(ProductFunctionWrapper pfw, GLMNormalClassicalMeasErrorDefinition measErr) {
 			super(pfw);
 			this.measErr = measErr;
+			integrator = new TrapezoidalRule(measErr.resolution);
+			integrator.setLowerBound(0.1);
+			integrator.setUpperBound(100);
+			gradientProvider = new GradientHessianProvider(pfw , true) ;
+			hessianProvider = new GradientHessianProvider(pfw, false);
 		}
 
 		@Override
 		public void setYVector(Matrix yVector) {
 			measErr.originalModelLikelihood.setYVector(yVector);
-			measErr.errorModelLikelihood.wValue = w;
 		}
 
 		@Override
@@ -163,33 +189,24 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		@Override
 		public Matrix getPredictionVector() {return null;}
 
-		
-		public void setVariableValue(int index, double value) {
-			if (index == measErr.indexEffectWithMeasError) {	// here we rescale the value for the Gauss-Hermite quadrature
-				super.setVariableValue(index, w + getMinusSquareRootOfTwiceSigma2() * value);
-			} else {
-				super.setVariableValue(index, value);
-			}
+		@Override
+		public ProductFunctionWrapper getOriginalFunction() {
+			return (ProductFunctionWrapper) super.getOriginalFunction();
 		}
-		
-		private double getMinusSquareRootOfTwiceSigma2() {
-			return -Math.sqrt(2 * measErr.errorModelLikelihood.getParameterValue(measErr.errorModelLikelihood.SIGMA2_INDEX));
-		}
-		
 		
 		@Override
 		public Double getValue() {
-			return getOriginalFunction().getValue() * getMinusSquareRootOfTwiceSigma2();
+			return integrator.getIntegralApproximation(getOriginalFunction(), measErr.indexEffectWithMeasError, false);
 		}
 
 		@Override
 		public Matrix getGradient() {
-			return getOriginalFunction().getGradient().scalarMultiply(getMinusSquareRootOfTwiceSigma2());
+			return integrator.getIntegralApproximationForMatrixFunction(gradientProvider, measErr.indexEffectWithMeasError, false);
 		}
 
 		@Override
 		public Matrix getHessian() {
-			return getOriginalFunction().getGradient().scalarMultiply(getMinusSquareRootOfTwiceSigma2());
+			return integrator.getIntegralApproximationForMatrixFunction(hessianProvider, measErr.indexEffectWithMeasError, false);
 		}
 
 	}
@@ -211,8 +228,8 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		
 		@Override
 		protected void setValuesInLikelihoodFunction(int index) {
-			super.setValuesInLikelihoodFunction(index);
 			measErr.setValuesForObservation(index);
+			super.setValuesInLikelihoodFunction(index);
 		}
 	}
 
@@ -236,9 +253,28 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 	}
 
 	private void setValuesForObservation(int index) {
-		lk.w = wVector.get(index);
+		errorModelLikelihood.wValue = wVector.get(index);
 	}
 
+	/**
+	 * Approximate the first two central moments of the distribution of x from the sample of w.
+	 * @return an 2-slot array (the first is the mean, the second is the variance)
+	 */
+	private double[] getLogScaleMuAndVariance() {
+		double[] muAndSigma2 = new double[2];
+		double sumW = 0d;
+		for (Double w : wVector) {
+			sumW += Math.log(w);
+		}
+		muAndSigma2[0] = sumW / wVector.size();
+		double sse = 0d;
+		for (Double w : wVector) {
+			sse += (Math.log(w) - muAndSigma2[0]) * (Math.log(w) - muAndSigma2[0]);
+		}
+		muAndSigma2[1] = sse / (wVector.size() - 1);
+		return muAndSigma2;
+	}
+	
 	@Override
 	public void validate(GLMWithMeasurementError glm) {
 		super.validate(glm);
@@ -265,24 +301,39 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfParameters() - 1),
 				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfVariables() - 1)); 
 		errorModelLikelihood = new AlteredGaussianFunction();
-		List<Integer> newVariableIndices = InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfVariables(), originalModelLikelihood.getNumberOfVariables()); 
+		List<Integer> newVariableIndices = new ArrayList<Integer>(); 
 		newVariableIndices.add(indexEffectWithMeasError);
 		InternalMathematicalFunctionWrapper wrapper2 = new InternalMathematicalFunctionWrapper(errorModelLikelihood, 
 				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters(), originalModelLikelihood.getNumberOfParameters()),
 				newVariableIndices);
-		xDistribution = new LogGaussianFunction();
+		double[] approxMuAndSigma2 = getLogScaleMuAndVariance();
+		xDistribution = new LogGaussianFunction(approxMuAndSigma2[0], approxMuAndSigma2[1]);
 		InternalMathematicalFunctionWrapper wrapper3 = new InternalMathematicalFunctionWrapper(xDistribution, 
 				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters() + errorModelLikelihood.getNumberOfParameters(), 
 						originalModelLikelihood.getNumberOfParameters()  + errorModelLikelihood.getNumberOfParameters() + xDistribution.getNumberOfParameters() - 1),
 				InternalMathematicalFunctionWrapper.produceListFromTo(indexEffectWithMeasError, indexEffectWithMeasError)); 
 		ProductFunctionWrapper pfw = new ProductFunctionWrapper(wrapper1, wrapper2, wrapper3);
-		lk = new LikelihoodGLMWithNormalClassicalMeasErr(glm.getLinkFunction(), this);
+		lk = new LikelihoodGLMWithNormalClassicalMeasErr(pfw, this);
 		return new WrappedIndividualLogLikelihood(lk);
 	}
 
 	@Override
-	public LinkFunction createLinkFunction(Type linkFunctionType) {
-		return null;		// use the default method instead
+	public LinkFunction createLinkFunction(Type linkFunctionType, GLMWithMeasurementError glm) {
+		LinkFunction lf = new LinkFunction(linkFunctionType);
+		int dimension = glm.getDataStructure().getMatrixX().m_iCols;
+		lf.setParameters(new Matrix(dimension, 1));
+		lf.setVariables(new Matrix(1, dimension));
+		return lf;
 	}
+
+	@Override
+	public List<String> getAdditionalEffects() {
+		List<String> additionalEffects = new ArrayList<String>();
+		additionalEffects.add("Variance error model");
+		additionalEffects.add("Mean distribution of X");
+		additionalEffects.add("Variance distribution of X");
+		return additionalEffects;
+	}
+	
 
 }
