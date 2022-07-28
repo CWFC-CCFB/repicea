@@ -94,34 +94,19 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 //			}
 		}
 		ds.indexFieldType();
-		try {
-			if (realID < 10)
-				ds.save(PATH + "sample" + realID++ + ".csv");
-		} catch(Exception e) {}
+//		try {
+//			if (realID < 10)
+//				ds.save(PATH + "sample" + realID++ + ".csv");
+//		} catch(Exception e) {}
 		
-//		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
-		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ trueDistanceToConspecific");
+		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
 		pre_glm.doEstimation();
-		pre_glm.getSummary();
+//		pre_glm.getSummary();
 		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, "y ~ distanceToConspecific", pre_glm.getParameters(),
-				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
+				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", .1));
 		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glm.doEstimation();
-		glm.getSummary();
-
-		
-		GeneralizedLinearModel pre_glm2 = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
-		pre_glm2.doEstimation();
-		pre_glm2.getSummary();
-		
-		GLMWithMeasurementError glm2 = new GLMWithMeasurementError(ds, "y ~ distanceToConspecific", pre_glm2.getParameters(),
-				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
-		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
-		glm2.doEstimation();
-		glm2.getSummary();
-
-		
-		
+//		glm.getSummary();
 		
 		if (glm.getEstimator().isConvergenceAchieved()) {
 			record = new Object[8];

@@ -22,7 +22,6 @@ import java.security.InvalidParameterException;
 import java.util.List;
 import java.util.logging.Level;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 import repicea.util.REpiceaLogManager;
@@ -71,15 +70,15 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	
 	
 	/**
-	 * This method optimize the log-likelihood function using the Newton-Raphson optimisation step.
+	 * This method optimize the log-likelihood function using the Newton-Raphson optimization step.
 	 * @param function an AbstractMathematicalFunction instance
 	 * @param indicesOfParametersToOptimize a list of the indices of the parameters to be optimized
-	 * @param originalBeta the vector that contains the parameters of the previous outer optimisation
-	 * @param optimisationStep the optimisation step from the Newton-Raphson algorithm
-	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimisation
+	 * @param originalBeta the vector that contains the parameters of the previous outer optimization
+	 * @param optimisationStep the optimization step from the Newton-Raphson algorithm
+	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimization
 	 * @param lineSearchMethod
 	 * @return the value of the function
-	 * @throws OptimisationException if the inner optimisation is not successful
+	 * @throws OptimisationException if the inner optimization is not successful
 	 */
 	protected double runInnerOptimisation(MathematicalFunction function, 
 			List<Integer> indicesOfParametersToOptimize,
@@ -97,9 +96,14 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			fireOptimizerEvent(NewtonRaphsonOptimizer.InnerIterationStarted);
 			scalingFactor = getScalingFactor(numberSubIter);
 			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor));
-			setParameters(function, indicesOfParametersToOptimize, newBeta);
-			currentLlkValue = function.getValue();
-			REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Log-likelihood : " + currentLlkValue);
+			if (areParametersWithinBounds(function, newBeta)) {
+				setParameters(function, indicesOfParametersToOptimize, newBeta);
+				currentLlkValue = function.getValue();
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Log-likelihood : " + currentLlkValue);
+			} else {
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Some parameters exceed bounds!");
+				currentLlkValue = Double.NaN;
+			}
 			numberSubIter++;
 		} while ((Double.isNaN(currentLlkValue) || currentLlkValue < previousLogLikelihood) && numberSubIter < maxNumberOfSubiterations); // loop if the number of iterations is not over the maximum number and either the likelihood is still higher or non defined
 		
@@ -108,6 +112,15 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		} else {
 			return currentLlkValue;
 		}
+	}
+	
+	private boolean areParametersWithinBounds(MathematicalFunction function, Matrix beta) {
+		for (int i = 0; i < beta.m_iRows; i++) {
+			if (!function.isThisParameterValueWithinBounds(i, beta.getValueAt(i, 0))) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	private double getScalingFactor(int numberSubIter) {

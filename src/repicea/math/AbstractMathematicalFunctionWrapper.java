@@ -19,6 +19,7 @@
 package repicea.math;
 
 import java.security.InvalidParameterException;
+import java.util.Map;
 
 /**
  * The AbstractMathematicalFunctionWrapper class makes it possible to create a function
@@ -99,4 +100,8 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 		getOriginalFunction().setBounds(parameterIndex, bound);
 	}
 
+	@Override
+	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue) {
+		return getOriginalFunction().isThisParameterValueWithinBounds(parameterIndex, parameterValue);
+	}
 }

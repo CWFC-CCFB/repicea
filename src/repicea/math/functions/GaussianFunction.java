@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.ParameterBound;
 import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
@@ -43,9 +44,13 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 	 * @param sigma2 the variance of the function
 	 */
 	public GaussianFunction(double mu, double sigma2) {
+		if (sigma2 <= 0) {
+			throw new InvalidParameterException("The sigma2 argument must be strictly positive (ie. > 0)!");
+		}
 		setParameterValue(MU_INDEX, mu);
 		setParameterValue(SIGMA2_INDEX, sigma2);
 		setVariableValue(0, 0d);
+		setBounds(SIGMA2_INDEX, new ParameterBound(MINIMUM_ACCEPTABLE_POSITIVE_VALUE, null));	// sigma2 must be strictly positive
 	}
 
 	/**
@@ -60,9 +65,6 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 		if (index > 1) {
 			throw new InvalidParameterException("The Gaussian function only has two parameters!");
 		} else {
-			if (index == SIGMA2_INDEX && value <= 0) {
-				throw new InvalidParameterException("The sigma2 parameter must be strictly positive (ie. > 0)!");
-			}
 			super.setParameterValue(index, value);
 		}
 	}

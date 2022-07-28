@@ -18,19 +18,15 @@
  */
 package repicea.stats.model.glm.measerr;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
 import org.junit.Assert;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
-import repicea.math.Matrix;
-import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
+import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
@@ -42,7 +38,7 @@ public class GLModelWithMeasErrorTest {
 
 	@BeforeClass
 	public static void doThis() {
-		Level l = Level.OFF;
+		Level l = Level.FINEST;
 		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		ConsoleHandler ch = new ConsoleHandler();
 		ch.setLevel(l);
@@ -74,7 +70,7 @@ public class GLModelWithMeasErrorTest {
 		glm.doEstimation();
 		glm.getSummary();
 		GLMWithMeasurementError glmWithMeasError = new GLMWithMeasurementError(dataSet, "y ~ distanceToConspecific",
-				glm.getParameters(), new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", .2));
+				glm.getParameters(), new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", 3, .2));
 		((MaximumLikelihoodEstimator) glmWithMeasError.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glmWithMeasError.doEstimation();
 		glmWithMeasError.getSummary();

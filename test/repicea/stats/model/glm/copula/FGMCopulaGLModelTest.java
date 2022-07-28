@@ -2,9 +2,14 @@ package repicea.stats.model.glm.copula;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import repicea.math.ParameterBound;
+import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
@@ -12,8 +17,19 @@ import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.CopulaLibrary.DistanceLinkFunctionCopulaExpression;
 import repicea.util.ObjectUtility;
+import repicea.util.REpiceaLogManager;
 
 public class FGMCopulaGLModelTest {
+
+	@BeforeClass
+	public static void doThis() {
+		Level l = Level.OFF;
+		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
+	}
 
 	/**
 	 * This test implements a constant parameter copula model.

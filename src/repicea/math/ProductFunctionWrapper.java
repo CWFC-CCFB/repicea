@@ -127,7 +127,6 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 			gradientTmp.setValueAt(w.reverseParmMap.get(i), 0, wGradient.getValueAt(i, 0));
 		}
 		return gradientTmp;
-		
 	}
 	
 	private Matrix reformateHessian(InternalMathematicalFunctionWrapper w) {
@@ -234,8 +233,25 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 
 	@Override
 	public void setBounds(int parameterIndex, ParameterBound bound) {
-		throw new UnsupportedOperationException("The bounds have not been implemented in the ProductFunctionWrapper class!");
+		if (!parameterMap.containsKey(parameterIndex)) {
+			throw new InvalidParameterException("The parameter index is not valid!");
+		} else {
+			for (InternalMathematicalFunctionWrapper w : parameterMap.get(parameterIndex)) {
+				w.setBounds(parameterIndex, bound);
+			}
+		}
 	}
 	
+	@Override
+	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue) {
+		if (parameterMap.containsKey(parameterIndex)) {
+			for (InternalMathematicalFunctionWrapper w : parameterMap.get(parameterIndex)) {
+				if (!w.isThisParameterValueWithinBounds(parameterIndex, parameterValue)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
 	
 }

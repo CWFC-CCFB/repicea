@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
 import repicea.stats.estimators.Estimator;
@@ -52,14 +53,15 @@ import repicea.stats.model.SimpleCompositeLogLikelihood;
 public class WeibullModel extends AbstractStatisticalModel implements MaximumLikelihoodCompatibleModel {
 
 	
-	private class WeibullLogLikehood implements IndividualLogLikelihood {
+	private class WeibullLogLikehood extends AbstractMathematicalFunction implements IndividualLogLikelihood {
 
-		private final Matrix parameters;
+//		private final Matrix parameters;
 		private Matrix yVector;
 		
 		private WeibullLogLikehood() {
 			if (isLocationParameterEnabled) {
-				parameters = new Matrix(3, 1); 
+//				parameters = new Matrix(3, 1); 
+				setParameters(new Matrix(3, 1));
 			} else {
 				parameters = new Matrix(2, 1);
 			}

@@ -40,11 +40,11 @@ public class SimulationStudy {
 	static boolean VERBOSE = false;
 	
 	class WorkerThread extends Thread {
-		final Population p;
+		final SpatialPopulation p;
 		final int real;
 		final int n;
 				
-		WorkerThread(int id, Population p, int real, int n) {
+		WorkerThread(int id, SpatialPopulation p, int real, int n) {
 			this.setName("Worker " + id);
 			this.p = p.clone();
 			this.real = real;
@@ -85,8 +85,7 @@ public class SimulationStudy {
 	private final CSVWriter writer;
 	
 	SimulationStudy(int nbRealizations, int popSize, int sampleSize, int nbThreads) throws IOException, InterruptedException {
-		boolean isSpatial = true;
-		String suffix = isSpatial ? "S" : "NS";
+		String suffix = "S";
 		String path = ObjectUtility.getPackagePath(getClass());
 		
 		// Set the csv writer
@@ -103,21 +102,21 @@ public class SimulationStudy {
 		fields.add(new CSVField("beta1_GLM"));
 		writer.setFields(fields);
 		
-		Population pop;
+		SpatialPopulation pop;
 		System.out.println("Creating population...");
 		// Create a new population
 //		Matrix trueBeta = new Matrix(2,1);
 //		trueBeta.setValueAt(0, 0, -0.2);
 //		trueBeta.setValueAt(1, 0, -0.05);
-//		pop = isSpatial ? new SpatialPopulation(trueBeta, popSize) : new NonSpatialPopulation(trueBeta, popSize);
+//		pop = new SpatialPopulation(trueBeta, popSize);
 //		String popFilename = path + "population" + suffix + "_" + popSize + ".csv";
-//		((AbstractPopulation) pop).save(popFilename);
+//		pop.save(popFilename);
 //		XmlSerializer serializer = new XmlSerializer(path + "population" + suffix + "_" + popSize + ".zml");
 //		serializer.writeObject(pop);
 		
 		// Deserialize the population
 		XmlDeserializer deserializer = new XmlDeserializer(path + "population" + suffix + "_" + popSize + ".zml");
-		pop = (AbstractPopulation) deserializer.readObject();
+		pop = (SpatialPopulation) deserializer.readObject();
 		System.out.println("Population created.");
 		
 		
@@ -146,7 +145,7 @@ public class SimulationStudy {
 		AbstractStatisticalModel.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
 		SimulationStudy.VERBOSE = true;
-		new SimulationStudy(1, 200, 2000, 1);
+		new SimulationStudy(20, 200, 500, 3);
 	}
 	
 }

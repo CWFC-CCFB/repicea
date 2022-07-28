@@ -32,7 +32,9 @@ import java.util.Map;
 @SuppressWarnings("serial")
 public abstract class AbstractMathematicalFunction implements MathematicalFunction, Serializable {
 	
-	protected Map<Integer, ParameterBound> parameterBounds;
+	public static final double MINIMUM_ACCEPTABLE_POSITIVE_VALUE = 1E-8;
+
+	protected final Map<Integer, ParameterBound> parameterBounds;
 
 	private final FastArrayList<Double> parameterValues;
 	private final FastArrayList<Double> variableValues;
@@ -40,11 +42,12 @@ public abstract class AbstractMathematicalFunction implements MathematicalFuncti
 	protected AbstractMathematicalFunction() {
 		parameterValues = new FastArrayList<Double>();
 		variableValues = new FastArrayList<Double>();
+		parameterBounds = new HashMap<Integer, ParameterBound>();
 	}
 
 	@Override
 	public void setParameterValue(int parameterIndex, double parameterValue) {
-		if (parameterBounds != null && parameterBounds.containsKey(parameterIndex)) {
+		if (parameterBounds.containsKey(parameterIndex)) {
 			ParameterBound bound = parameterBounds.get(parameterIndex);
 			parameterValue = bound.validateParameter(parameterValue);
 		}
@@ -95,9 +98,6 @@ public abstract class AbstractMathematicalFunction implements MathematicalFuncti
 
 	@Override
 	public void setBounds(int parameterIndex, ParameterBound bound) {
-		if (parameterBounds == null) {
-			parameterBounds = new HashMap<Integer, ParameterBound>();
-		}
 		parameterBounds.put(parameterIndex, bound);
 	}
 
@@ -134,4 +134,23 @@ public abstract class AbstractMathematicalFunction implements MathematicalFuncti
 		return m;
 	}
 
+	@Override
+	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue) {
+		if (parameterBounds.containsKey(parameterIndex)) {
+			ParameterBound bound = parameterBounds.get(parameterIndex);
+			if (!bound.isParameterValueValid(parameterValue)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+//	@Override
+//	public Map<Integer, ParameterBound> getBounds() {
+//		Map<Integer,ParameterBound> newMap = new HashMap<Integer, ParameterBound>();
+//		for (Integer k : parameterBounds.keySet()) {
+//			newMap.put(k, parameterBounds.get(k).clone());
+//		}
+//		return newMap;
+//	}
 }

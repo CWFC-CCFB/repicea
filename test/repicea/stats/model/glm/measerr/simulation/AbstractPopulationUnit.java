@@ -27,7 +27,6 @@ abstract class AbstractPopulationUnit implements PopulationUnit {
 	static {
 		FIELDNAMES_INPUT_DATASET.add("y");
 		FIELDNAMES_INPUT_DATASET.add("distanceToConspecific");
-		FIELDNAMES_INPUT_DATASET.add("variance");
 		FIELDNAMES_INPUT_DATASET.add("trueDistanceToConspecific");
 	}
 

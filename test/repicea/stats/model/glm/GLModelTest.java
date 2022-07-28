@@ -20,14 +20,31 @@ package repicea.stats.model.glm;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
+import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
+import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.FGMCopulaGLModelTest;
 import repicea.util.ObjectUtility;
+import repicea.util.REpiceaLogManager;
 
 public class GLModelTest {
+
+	@BeforeClass
+	public static void doThis() {
+		Level l = Level.OFF;
+		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
+	}
 
 	@Test
     public void TestWithSimpleGLModel() throws Exception {

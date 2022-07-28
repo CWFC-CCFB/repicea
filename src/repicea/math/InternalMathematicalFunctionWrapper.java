@@ -34,10 +34,10 @@ import java.util.TreeMap;
 @SuppressWarnings("serial")
 public class InternalMathematicalFunctionWrapper extends AbstractMathematicalFunctionWrapper {
 
-	final TreeMap<Integer, Integer> parmMap;
-	final TreeMap<Integer, Integer> reverseParmMap;
-	final TreeMap<Integer, Integer> varMap;
-	final TreeMap<Integer, Integer> reverseVarMap;
+	final TreeMap<Integer, Integer> parmMap;		// from new to original
+	final TreeMap<Integer, Integer> reverseParmMap; // from original to new
+	final TreeMap<Integer, Integer> varMap;			// from new to original
+	final TreeMap<Integer, Integer> reverseVarMap;  // from original to new
 	
 	/**
 	 * Constructor.
@@ -137,4 +137,23 @@ public class InternalMathematicalFunctionWrapper extends AbstractMathematicalFun
 		}
 		return myList;
 	}
+
+	@Override
+	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue) {
+		if (!parmMap.containsKey(parameterIndex)) {
+			throw new InvalidParameterException("This parameter index is invalid!");
+		} else {
+			return getOriginalFunction().isThisParameterValueWithinBounds(parmMap.get(parameterIndex), parameterValue);
+		}
+	}
+	
+	@Override 
+	public void setBounds(int parameterIndex, ParameterBound bounds) {
+		if (!parmMap.containsKey(parameterIndex)) {
+			throw new InvalidParameterException("This parameter index is invalid!");
+		} else {
+			getOriginalFunction().setBounds(parmMap.get(parameterIndex), bounds);
+		}
+	}
+	
 }
