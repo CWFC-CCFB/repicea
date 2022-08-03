@@ -25,6 +25,7 @@ import java.util.List;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.InternalMathematicalFunctionWrapper;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
 import repicea.math.ProductFunctionWrapper;
@@ -33,6 +34,7 @@ import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.distributions.utility.GaussianUtility;
+import repicea.stats.functions.EmpiricalDistributionProbabilityDensityFunction;
 import repicea.stats.integral.TrapezoidalRule;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
@@ -60,44 +62,42 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 			for (int i = 0; i < dataSet.getNumberOfObservations(); i++) {
 				measErr.wVector.add((Double) dataSet.getObservations().get(i).getValueAt(indexField));
 			}
+			measErr.varianceVector = new ArrayList<Double>();
+			// populating variance
+			indexField = dataSet.getIndexOfThisField(measErr.varianceField);
+			for (int i = 0; i < dataSet.getNumberOfObservations(); i++) {
+				measErr.varianceVector.add((Double) dataSet.getObservations().get(i).getValueAt(indexField));
+			}
 		}
 
 	}
 	
 	@SuppressWarnings("serial")
-	private static class AlteredGaussianFunction extends AbstractMathematicalFunction {
+	static class AlteredGaussianFunction extends AbstractMathematicalFunction {
 
-		private static final int SIGMA2_INDEX = 0;
-		private static final int X_INDEX = 0;
+		static final int SIGMA2_INDEX = 1;
+		static final int X_INDEX = 0;
 
 		double wValue;
 		
-		private AlteredGaussianFunction(double variance) {
-			if (variance < MINIMUM_ACCEPTABLE_POSITIVE_VALUE) {
-				throw new InvalidParameterException("The variance argument must be stricly positive!");
-			}
-			setParameterValue(SIGMA2_INDEX, variance);
+		AlteredGaussianFunction() {
 			setVariableValue(X_INDEX, 0d);
-			setBounds(SIGMA2_INDEX, new ParameterBound(MINIMUM_ACCEPTABLE_POSITIVE_VALUE, null));	
+			setVariableValue(SIGMA2_INDEX, 1d);
 		}
 
 		@Override
 		public void setParameterValue(int index, double value) {
-			if (index > 0) {
-				throw new InvalidParameterException("The altered Gaussian function only has one parameter!");
-			} else {
-				if (index == SIGMA2_INDEX && value <= 0) {
-					throw new InvalidParameterException("The sigma2 parameter must be strictly positive (ie. > 0)!");
-				}
-				super.setParameterValue(index, value);
-			}
+			throw new UnsupportedOperationException("The AlteredGaussianFunction only has variables!");
 		}
 
 		@Override
 		public void setVariableValue(int index, double value) {
-			if (index > 0) {
-				throw new InvalidParameterException("The altered Gaussian function only has one variable (namely the observation x)!");
+			if (index > 1) {
+				throw new InvalidParameterException("The AlteredGaussianFunction only has two variable (namely the observation x and the variance)!");
 			} else {
+				if (index == SIGMA2_INDEX && value <= 0) {
+					throw new InvalidParameterException("The sigma2 variable must be strictly positive!");
+				}
 				super.setVariableValue(index, value);
 			}
 		}
@@ -105,38 +105,18 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		@Override
 		public Double getValue() {
 			double mu = getVariableValue(X_INDEX);
-			double sigma2 = getParameterValue(SIGMA2_INDEX);
+			double sigma2 = getVariableValue(SIGMA2_INDEX);
 			return GaussianUtility.getProbabilityDensity(wValue, mu, sigma2);
 		}
 
 		@Override
 		public Matrix getGradient() {
-			double mu = getVariableValue(X_INDEX);
-			double sigma2 = getParameterValue(SIGMA2_INDEX);
-			
-			double f = GaussianUtility.getProbabilityDensity(wValue, mu, sigma2);
-			
-			Matrix gradient = new Matrix(1,1);
-			double df_dSigma2 = f * ((wValue-mu) * (wValue-mu)/(2 * sigma2 * sigma2) - 1d / (2 * sigma2));
-			gradient.setValueAt(SIGMA2_INDEX, 0, df_dSigma2);
-
-			return gradient;
+			return null;
 		}
 
 		@Override
 		public Matrix getHessian() {
-			double mu = getVariableValue(X_INDEX);
-			double sigma2 = getParameterValue(SIGMA2_INDEX);
-
-			double f = GaussianUtility.getProbabilityDensity(wValue, mu, sigma2);
-
-			Matrix gradient = getGradient();
-			
-			Matrix hessian = new Matrix(1,1);
-			double d2f_d2Sigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * ((wValue-mu) * (wValue-mu)/(2 * sigma2 * sigma2) - 1d / (2* sigma2)) +
-					f * (-(wValue-mu) * (wValue-mu)/(sigma2 * sigma2 * sigma2) + 1d / (2 * sigma2 * sigma2));
-			hessian.setValueAt(SIGMA2_INDEX, SIGMA2_INDEX, d2f_d2Sigma2);
-			return hessian;
+			return null;
 		}
 
 	}
@@ -239,46 +219,46 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 	
 	private final double resolution;
 	private List<Double> wVector;
+	private List<Double> varianceVector;
 	
 	private LikelihoodGLM originalModelLikelihood;
 	private AlteredGaussianFunction errorModelLikelihood;
-	private LogGaussianFunction xDistribution;
-	private final double startingVariance;
+	private MathematicalFunction xDistribution;
+	private final String varianceField;
 	private LikelihoodGLMWithNormalClassicalMeasErr lk;
 	private double maxX;
 	
-	public GLMNormalClassicalMeasErrorDefinition(String effectWithMeasError, double startingVariance, double resolution) {
+	public GLMNormalClassicalMeasErrorDefinition(String effectWithMeasError, String varianceField, double resolution) {
 		super(MeasurementErrorModel.Classical, effectWithMeasError);
 		if (resolution <= 0) {
 			throw new InvalidParameterException("The resolution argument must be strictly positive!");
 		} else {
 			this.resolution = resolution;
 		}
-		if (startingVariance <= 0d) {
-			throw new InvalidParameterException("The startingVariance argument must be strictly positive!");
-		} else {
-			this.startingVariance = startingVariance; 
-		}
+		this.varianceField = varianceField;
 	}
 
 	private void setValuesForObservation(int index) {
 		errorModelLikelihood.wValue = wVector.get(index);
-		double sigma2 = errorModelLikelihood.getParameterValue(AlteredGaussianFunction.SIGMA2_INDEX);
+		double sigma2 = varianceVector.get(index);
+		errorModelLikelihood.setVariableValue(AlteredGaussianFunction.SIGMA2_INDEX, sigma2);
 		double p = 1E-16;
 		double delta = Math.sqrt(-2 * sigma2 * Math.log(Math.sqrt(2 * Math.PI * sigma2) * p));
 		double lowerBound = errorModelLikelihood.wValue - delta;
 		double upperBound = errorModelLikelihood.wValue + delta;
-		if (lowerBound <= 0) {
-			lowerBound = 0.1;
+		if (xDistribution instanceof EmpiricalDistributionProbabilityDensityFunction) {
+			double officialLowerBound = ((EmpiricalDistributionProbabilityDensityFunction) xDistribution).getLowerBoundForX();
+			if (lowerBound <= officialLowerBound) 
+				lowerBound = officialLowerBound;
+			double officialUpperBound = ((EmpiricalDistributionProbabilityDensityFunction) xDistribution).getUpperBoundForX();
+			if (upperBound > officialUpperBound) 
+				upperBound = officialUpperBound;
+		} else {
+			if (lowerBound <= 0) 
+				lowerBound = 0.1;
+			if (upperBound > maxX) 
+				upperBound = maxX;
 		}
-		if (upperBound > maxX) {
-			upperBound = maxX;		// TODO FP This supposes that Pr(X) = 0 for X > maxX
-		}
-		if (upperBound <= 0) {
-			throw new InvalidParameterException("The upperbound cannot be null or negative!");
-		}
-//		double pLowerBound = GaussianUtility.getProbabilityDensity(errorModelLikelihood.wValue, lowerBound, sigma2);
-//		double pUpperBound = GaussianUtility.getProbabilityDensity(errorModelLikelihood.wValue, upperBound, sigma2);
 		lk.integrator.setLowerBound(lowerBound);
 		lk.integrator.setUpperBound(upperBound);
 	}
@@ -292,7 +272,7 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 	 */
 	private double[] getLogScaleMuAndVarianceAndMaximumX() {
 		double[] muAndSigma2 = new double[3];
-		double maxX = Double.MIN_VALUE;
+		double maxX = Double.NEGATIVE_INFINITY;
 		double sumW = 0d;
 		for (Double w : wVector) {
 			sumW += Math.log(w);
@@ -333,18 +313,23 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		InternalMathematicalFunctionWrapper wrapper1 = new InternalMathematicalFunctionWrapper(originalModelLikelihood, 
 				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfParameters() - 1),
 				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfVariables() - 1)); 
-		errorModelLikelihood = new AlteredGaussianFunction(startingVariance);
+		errorModelLikelihood = new AlteredGaussianFunction();
 		List<Integer> newVariableIndices = new ArrayList<Integer>(); 
 		newVariableIndices.add(indexEffectWithMeasError);
+		newVariableIndices.add(originalModelLikelihood.getNumberOfVariables());
 		InternalMathematicalFunctionWrapper wrapper2 = new InternalMathematicalFunctionWrapper(errorModelLikelihood, 
-				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters(), originalModelLikelihood.getNumberOfParameters()),
+				new ArrayList<Integer>(),
 				newVariableIndices);
-		double[] approxMuAndSigma2 = getLogScaleMuAndVarianceAndMaximumX();
-		maxX = approxMuAndSigma2[2];
-		xDistribution = new LogGaussianFunction(approxMuAndSigma2[0], approxMuAndSigma2[1]);
+//		double[] approxMuAndSigma2 = getLogScaleMuAndVarianceAndMaximumX();
+//		maxX = approxMuAndSigma2[2];
+//		xDistribution = new LogGaussianFunction(approxMuAndSigma2[0], approxMuAndSigma2[1]);
+//		InternalMathematicalFunctionWrapper wrapper3 = new InternalMathematicalFunctionWrapper(xDistribution, 
+//				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters() + errorModelLikelihood.getNumberOfParameters(), 
+//						originalModelLikelihood.getNumberOfParameters()  + errorModelLikelihood.getNumberOfParameters() + xDistribution.getNumberOfParameters() - 1),
+//				InternalMathematicalFunctionWrapper.produceListFromTo(indexEffectWithMeasError, indexEffectWithMeasError)); 
+		xDistribution = new EmpiricalDistributionProbabilityDensityFunction(wVector, null);	// null: no weighting here
 		InternalMathematicalFunctionWrapper wrapper3 = new InternalMathematicalFunctionWrapper(xDistribution, 
-				InternalMathematicalFunctionWrapper.produceListFromTo(originalModelLikelihood.getNumberOfParameters() + errorModelLikelihood.getNumberOfParameters(), 
-						originalModelLikelihood.getNumberOfParameters()  + errorModelLikelihood.getNumberOfParameters() + xDistribution.getNumberOfParameters() - 1),
+				new ArrayList<Integer>(),
 				InternalMathematicalFunctionWrapper.produceListFromTo(indexEffectWithMeasError, indexEffectWithMeasError)); 
 		ProductFunctionWrapper pfw = new ProductFunctionWrapper(wrapper1, wrapper2, wrapper3);
 		lk = new LikelihoodGLMWithNormalClassicalMeasErr(pfw, this);

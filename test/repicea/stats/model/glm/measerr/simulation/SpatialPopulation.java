@@ -82,6 +82,10 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		int nbPositive = generateRealizations();
 //		System.out.println("Nb positive cases = " + nbPositive);
 		List<SpatialPopulationUnit> sample = SamplingUtility.getSample(populationUnits, n);
+		int nbPositiveInSample = 0;
+		for (SpatialPopulationUnit spu : sample) {
+			nbPositiveInSample += spu.getY();
+		}
 		determineDistanceToConspecific(sample, false); // false is the sample
 		
 		DataSet ds = new DataSet(sample.get(0).getFieldname(false));
@@ -94,19 +98,21 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 //			}
 		}
 		ds.indexFieldType();
-//		try {
-//			if (realID < 10)
-//				ds.save(PATH + "sample" + realID++ + ".csv");
-//		} catch(Exception e) {}
+		try {
+			if (realID < 10)
+				ds.save(PATH + "sample" + realID++ + ".csv");
+		} catch(Exception e) {}
 		
 		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
 		pre_glm.doEstimation();
-//		pre_glm.getSummary();
-		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, "y ~ distanceToConspecific", pre_glm.getParameters(),
-				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", .1));
+		pre_glm.getSummary();
+		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, 
+				"y ~ distanceToConspecific", 
+				pre_glm.getParameters(),
+				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
 		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
 		glm.doEstimation();
-//		glm.getSummary();
+		glm.getSummary();
 		
 		if (glm.getEstimator().isConvergenceAchieved()) {
 			record = new Object[8];

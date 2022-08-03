@@ -106,8 +106,8 @@ public class SimulationStudy {
 		System.out.println("Creating population...");
 		// Create a new population
 //		Matrix trueBeta = new Matrix(2,1);
-//		trueBeta.setValueAt(0, 0, -0.2);
-//		trueBeta.setValueAt(1, 0, -0.05);
+//		trueBeta.setValueAt(0, 0, 1.0);
+//		trueBeta.setValueAt(1, 0, -0.1);
 //		pop = new SpatialPopulation(trueBeta, popSize);
 //		String popFilename = path + "population" + suffix + "_" + popSize + ".csv";
 //		pop.save(popFilename);
@@ -135,8 +135,6 @@ public class SimulationStudy {
 			new WorkerThread(0, pop, nbRealizations, sampleSize).run();
 		}
 		writer.close();
-
-
 	}
 
 	
@@ -145,7 +143,7 @@ public class SimulationStudy {
 		AbstractStatisticalModel.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
 		SimulationStudy.VERBOSE = true;
-		new SimulationStudy(20, 200, 500, 3);
+		new SimulationStudy(1, 200, 1000, 1);
 	}
 	
 }

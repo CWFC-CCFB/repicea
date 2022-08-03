@@ -26,14 +26,18 @@ package repicea.math;
 public interface DifferentiableMathematicalFunction {
 
 	/**
-	 * This method returns a vector that contains the first derivatives of the function with respect to its parameters.
+	 * Provide a vector that contains the first derivatives of the function with respect to its parameters. <br>
+	 * <br>
+	 * IMPORTANT: the method should return null if the function has no parameter.
 	 * @return a Matrix instance
 	 */
 	public Matrix getGradient();
 	
 	
 	/**
-	 * This method returns a matrix that contains the second derivatives of the function with respect to its parameters.
+	 * Provide a matrix that contains the second derivatives of the function with respect to its parameters. <br>
+	 * <br>
+	 * IMPORTANT: the method should return null if the function has no parameter.
 	 * @return a Matrix instance
 	 */
 	public Matrix getHessian();

@@ -27,6 +27,7 @@ abstract class AbstractPopulationUnit implements PopulationUnit {
 	static {
 		FIELDNAMES_INPUT_DATASET.add("y");
 		FIELDNAMES_INPUT_DATASET.add("distanceToConspecific");
+		FIELDNAMES_INPUT_DATASET.add("variance");
 		FIELDNAMES_INPUT_DATASET.add("trueDistanceToConspecific");
 	}
 
@@ -36,7 +37,7 @@ abstract class AbstractPopulationUnit implements PopulationUnit {
 	final boolean isConspecificIn;
 	double trueDistanceToConspecific;
 	double measuredDistanceToConspecific;
-	int y;
+	private int y;
 
 	AbstractPopulationUnit(int id, boolean isConspecificIn) {
 		this.id = id;
@@ -48,4 +49,8 @@ abstract class AbstractPopulationUnit implements PopulationUnit {
 
 	@Override
 	public abstract PopulationUnit clone();
+	
+	protected void setY(int y) {this.y = y;}
+	
+	protected int getY() {return this.y;}
 }

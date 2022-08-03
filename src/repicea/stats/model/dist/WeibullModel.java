@@ -24,8 +24,10 @@ import java.util.Collections;
 import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
+import repicea.math.LogFunctionWrapper;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
+import repicea.math.functions.WeibullFunction;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
@@ -53,159 +55,185 @@ import repicea.stats.model.SimpleCompositeLogLikelihood;
 public class WeibullModel extends AbstractStatisticalModel implements MaximumLikelihoodCompatibleModel {
 
 	
-	private class WeibullLogLikehood extends AbstractMathematicalFunction implements IndividualLogLikelihood {
+	@SuppressWarnings("serial")
+	private class WeibullLogLikehood extends LogFunctionWrapper implements IndividualLogLikelihood {
 
-//		private final Matrix parameters;
-		private Matrix yVector;
-		
-		private WeibullLogLikehood() {
-			if (isLocationParameterEnabled) {
-//				parameters = new Matrix(3, 1); 
-				setParameters(new Matrix(3, 1));
-			} else {
-				parameters = new Matrix(2, 1);
-			}
-		 }
-		
+		private WeibullLogLikehood(boolean isLocationParameterEnabled) {
+			super(isLocationParameterEnabled ? new WeibullFunction(1,1,0) : new WeibullFunction(1,1));
+		}
+
 		@Override
 		public void setYVector(Matrix yVector) {
-			if (yVector.m_iCols > 1 || yVector.m_iRows > 1)
-				throw new InvalidParameterException("The y value should be embedded in a 1x1 matrix!");
-			this.yVector = yVector;
-		}
-
-		@Override
-		public Matrix getYVector() {return yVector;}
-
-		@Override
-		public Matrix getPredictionVector() {
-			// TODO Auto-generated method stub
-			return null;
-		}
-
-		@Override
-		public int getNumberOfParameters() {return parameters.m_iRows;}
-
-		@Override
-		public int getNumberOfVariables() {return 0;}
-
-		@Override
-		public Matrix getParameters() {return parameters;}
-
-		@Override
-		public void setBounds(int parameterIndex, ParameterBound bound) {}
-
-		@Override
-		public void setVariableValue(int variableIndex, double variableValue) {
-			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
-		}
-
-		@Override
-		public void setParameterValue(int parameterIndex, double parameterValue) {
-			parameters.setValueAt(parameterIndex, 0, parameterValue);
-		}
-
-		@Override
-		public void setParameters(Matrix beta) {
-			for (int i = 0; i < beta.m_iRows; i++) {
-				setParameterValue(i, beta.getValueAt(i, 0));
+			if (yVector.getNumberOfElements() != 1) {
+				throw new InvalidParameterException("The yVector should be a unique element!");
 			}
+			getOriginalFunction().setVariableValue(0, yVector.getValueAt(0, 0));
 		}
 
 		@Override
-		public void setVariables(Matrix xVector) {
-			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
+		public Matrix getYVector() {
+			return new Matrix(1, 1, getOriginalFunction().getVariableValue(0), 0d);
 		}
 
 		@Override
-		public double getVariableValue(int variableIndex) {
-			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
-		}
-
-		@Override
-		public double getParameterValue(int parameterIndex) {
-			return parameters.getValueAt(parameterIndex, 0);
-		}
-		
-		@Override
-		public Double getValue() {
-			double k = parameters.getValueAt(0, 0);
-			double lambda = parameters.getValueAt(1, 0);
-			double yMod = isLocationParameterEnabled ? 
-					yVector.getValueAt(0, 0) - parameters.getValueAt(2, 0) :
-						yVector.getValueAt(0, 0);
-			double value = Math.log(k) + (k-1) * Math.log(yMod) - k * Math.log(lambda) - Math.pow(yMod / lambda, k);
-			if (Double.isNaN(value)) {
-				int u = 0;
-			}
-			return value;
-		}
-
-		@Override
-		public Matrix getGradient() {
-			double k = parameters.getValueAt(0, 0);
-			double lambda = parameters.getValueAt(1, 0);
-			double yMod = isLocationParameterEnabled ? 
-					yVector.getValueAt(0, 0) - parameters.getValueAt(2, 0) :
-						yVector.getValueAt(0, 0);
-			Matrix gradient = new Matrix(parameters.m_iRows, 1);
-			double yMod_lambda = yMod / lambda;
-			double yMod_lambda_powK = Math.pow(yMod_lambda, k);
-			double k_lambda = k/lambda;
-			
-			double dl_dk = 1/k + Math.log(yMod) - Math.log(lambda) - yMod_lambda_powK * Math.log(yMod_lambda);
- 			gradient.setValueAt(0, 0, dl_dk);
-   			
-			double dl_dlambda = -k_lambda + k_lambda * yMod_lambda_powK;
- 			gradient.setValueAt(1, 0, dl_dlambda);
-
- 			if (isLocationParameterEnabled) {
- 				double dl_dtheta = -(k-1)/yMod + k_lambda * Math.pow(yMod_lambda, k - 1); 
- 	 			gradient.setValueAt(2, 0, dl_dtheta);
- 			}
- 			
-			return gradient;
-		}
-
-		@Override
-		public Matrix getHessian() {
-			Matrix hessian = new Matrix(parameters.m_iRows, parameters.m_iRows);
-			double k = parameters.getValueAt(0, 0);
-			double lambda = parameters.getValueAt(1, 0);
-			double yMod = isLocationParameterEnabled ? 
-					yVector.getValueAt(0, 0) - parameters.getValueAt(2, 0) :
-						yVector.getValueAt(0, 0);
-			double yMod_lambda = yMod / lambda;
-			double yMod_lambda_powK = Math.pow(yMod_lambda, k);
-			double logYMod_lambda = Math.log(yMod_lambda);
-			double k_lambda = k/lambda;
-
-			double d2l_d2k = -1/(k*k) - yMod_lambda_powK * logYMod_lambda * logYMod_lambda;
-			hessian.setValueAt(0, 0, d2l_d2k);
-			
-			double d2l_d2lambda = k_lambda / lambda * (-yMod_lambda_powK + 1 - k *yMod_lambda_powK);
-			hessian.setValueAt(1, 1, d2l_d2lambda);
-
-			double d2l_dkdlambda = -1/lambda + yMod_lambda_powK / lambda * (k * logYMod_lambda + 1);
-			hessian.setValueAt(0, 1, d2l_dkdlambda);
-			hessian.setValueAt(1, 0, d2l_dkdlambda);
-			
-			if (isLocationParameterEnabled) {
-				double d2l_d2theta = -(k-1)/(yMod * yMod) - k_lambda/lambda * (k-1) * Math.pow(yMod_lambda, k-2); 
-				hessian.setValueAt(2, 2, d2l_d2theta);
-				
-				double d2l_dkdtheta = -1/yMod + Math.pow(yMod_lambda, k - 1) / lambda * (k * logYMod_lambda + 1);
-				hessian.setValueAt(2, 0, d2l_dkdtheta);
-				hessian.setValueAt(0, 2, d2l_dkdtheta);
-				
-				double d2l_dlambdadtheta = - k_lambda * k_lambda * Math.pow(yMod_lambda, k - 1);
-				hessian.setValueAt(2, 1, d2l_dlambdadtheta);
-				hessian.setValueAt(1, 2, d2l_dlambdadtheta);
-			}
-
-			return hessian;
-		}
+		public Matrix getPredictionVector() {return null;}
 	}
+
+	
+	
+//	private class WeibullLogLikehood extends AbstractMathematicalFunction implements IndividualLogLikelihood {
+//
+////		private final Matrix parameters;
+//		private Matrix yVector;
+//		
+//		private WeibullLogLikehood() {
+//			if (isLocationParameterEnabled) {
+////				parameters = new Matrix(3, 1); 
+//				setParameters(new Matrix(3, 1));
+//			} else {
+//				parameters = new Matrix(2, 1);
+//			}
+//		 }
+//		
+//		@Override
+//		public void setYVector(Matrix yVector) {
+//			if (yVector.m_iCols > 1 || yVector.m_iRows > 1)
+//				throw new InvalidParameterException("The y value should be embedded in a 1x1 matrix!");
+//			this.yVector = yVector;
+//		}
+//
+//		@Override
+//		public Matrix getYVector() {return yVector;}
+//
+//		@Override
+//		public Matrix getPredictionVector() {
+//			// TODO Auto-generated method stub
+//			return null;
+//		}
+//
+//		@Override
+//		public int getNumberOfParameters() {return parameters.m_iRows;}
+//
+//		@Override
+//		public int getNumberOfVariables() {return 0;}
+//
+//		@Override
+//		public Matrix getParameters() {return parameters;}
+//
+//		@Override
+//		public void setBounds(int parameterIndex, ParameterBound bound) {}
+//
+//		@Override
+//		public void setVariableValue(int variableIndex, double variableValue) {
+//			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
+//		}
+//
+//		@Override
+//		public void setParameterValue(int parameterIndex, double parameterValue) {
+//			parameters.setValueAt(parameterIndex, 0, parameterValue);
+//		}
+//
+//		@Override
+//		public void setParameters(Matrix beta) {
+//			for (int i = 0; i < beta.m_iRows; i++) {
+//				setParameterValue(i, beta.getValueAt(i, 0));
+//			}
+//		}
+//
+//		@Override
+//		public void setVariables(Matrix xVector) {
+//			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
+//		}
+//
+//		@Override
+//		public double getVariableValue(int variableIndex) {
+//			throw new InvalidParameterException("The WeibullModel class does not implement variables!");
+//		}
+//
+//		@Override
+//		public double getParameterValue(int parameterIndex) {
+//			return parameters.getValueAt(parameterIndex, 0);
+//		}
+//		
+//		@Override
+//		public Double getValue() {
+//			double k = parameters.getValueAt(0, 0);
+//			double lambda = parameters.getValueAt(1, 0);
+//			double yMod = isLocationParameterEnabled ? 
+//					yVector.getValueAt(0, 0) - parameters.getValueAt(2, 0) :
+//						yVector.getValueAt(0, 0);
+//			double value = Math.log(k) + (k-1) * Math.log(yMod) - k * Math.log(lambda) - Math.pow(yMod / lambda, k);
+//			if (Double.isNaN(value)) {
+//				int u = 0;
+//			}
+//			return value;
+//		}
+//
+//		@Override
+//		public Matrix getGradient() {
+//			double k = parameters.getValueAt(0, 0);
+//			double lambda = parameters.getValueAt(1, 0);
+//			double yMod = isLocationParameterEnabled ? 
+//					yVector.getValueAt(0, 0) - parameters.getValueAt(2, 0) :
+//						yVector.getValueAt(0, 0);
+//			Matrix gradient = new Matrix(parameters.m_iRows, 1);
+//			double yMod_lambda = yMod / lambda;
+//			double yMod_lambda_powK = Math.pow(yMod_lambda, k);
+//			double k_lambda = k/lambda;
+//			
+//			double dl_dk = 1/k + Math.log(yMod) - Math.log(lambda) - yMod_lambda_powK * Math.log(yMod_lambda);
+// 			gradient.setValueAt(0, 0, dl_dk);
+//   			
+//			double dl_dlambda = -k_lambda + k_lambda * yMod_lambda_powK;
+// 			gradient.setValueAt(1, 0, dl_dlambda);
+//
+// 			if (isLocationParameterEnabled) {
+// 				double dl_dtheta = -(k-1)/yMod + k_lambda * Math.pow(yMod_lambda, k - 1); 
+// 	 			gradient.setValueAt(2, 0, dl_dtheta);
+// 			}
+// 			
+//			return gradient;
+//		}
+//
+//		@Override
+//		public Matrix getHessian() {
+//			Matrix hessian = new Matrix(parameters.m_iRows, parameters.m_iRows);
+//			double k = parameters.getValueAt(0, 0);
+//			double lambda = parameters.getValueAt(1, 0);
+//			double yMod = isLocationParameterEnabled ? 
+//					yVector.getValueAt(0, 0) - parameters.getValueAt(2, 0) :
+//						yVector.getValueAt(0, 0);
+//			double yMod_lambda = yMod / lambda;
+//			double yMod_lambda_powK = Math.pow(yMod_lambda, k);
+//			double logYMod_lambda = Math.log(yMod_lambda);
+//			double k_lambda = k/lambda;
+//
+//			double d2l_d2k = -1/(k*k) - yMod_lambda_powK * logYMod_lambda * logYMod_lambda;
+//			hessian.setValueAt(0, 0, d2l_d2k);
+//			
+//			double d2l_d2lambda = k_lambda / lambda * (-yMod_lambda_powK + 1 - k *yMod_lambda_powK);
+//			hessian.setValueAt(1, 1, d2l_d2lambda);
+//
+//			double d2l_dkdlambda = -1/lambda + yMod_lambda_powK / lambda * (k * logYMod_lambda + 1);
+//			hessian.setValueAt(0, 1, d2l_dkdlambda);
+//			hessian.setValueAt(1, 0, d2l_dkdlambda);
+//			
+//			if (isLocationParameterEnabled) {
+//				double d2l_d2theta = -(k-1)/(yMod * yMod) - k_lambda/lambda * (k-1) * Math.pow(yMod_lambda, k-2); 
+//				hessian.setValueAt(2, 2, d2l_d2theta);
+//				
+//				double d2l_dkdtheta = -1/yMod + Math.pow(yMod_lambda, k - 1) / lambda * (k * logYMod_lambda + 1);
+//				hessian.setValueAt(2, 0, d2l_dkdtheta);
+//				hessian.setValueAt(0, 2, d2l_dkdtheta);
+//				
+//				double d2l_dlambdadtheta = - k_lambda * k_lambda * Math.pow(yMod_lambda, k - 1);
+//				hessian.setValueAt(2, 1, d2l_dlambdadtheta);
+//				hessian.setValueAt(1, 2, d2l_dlambdadtheta);
+//			}
+//
+//			return hessian;
+//		}
+//	}
 		
 	private final List<Double> values;
 	private final SimpleCompositeLogLikelihood cLL;
@@ -217,7 +245,7 @@ public class WeibullModel extends AbstractStatisticalModel implements MaximumLik
 		this.isLocationParameterEnabled = isLocationParameterEnabled;
 		this.values = new ArrayList<Double>();
 		this.values.addAll(values);
-		this.individualLLK = new WeibullLogLikehood();
+		this.individualLLK = new WeibullLogLikehood(isLocationParameterEnabled);
 		cLL = new SimpleCompositeLogLikelihood(individualLLK, new Matrix(values));
 		setParameters(startingValues);
 		try {

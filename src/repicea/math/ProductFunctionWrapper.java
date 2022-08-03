@@ -94,7 +94,11 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 	public Double getValue() {
 		double value = 1d;
 		for (InternalMathematicalFunctionWrapper w : originalFunctions) {
-			value *= w.getValue();
+			double wValue = w.getValue();
+			if (wValue < 0 || Double.isNaN(wValue)) {
+				int u = 0;
+			}
+			value *= wValue;
 		}
 		return value;
 	}
@@ -123,8 +127,10 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 	private Matrix reformateGradient(InternalMathematicalFunctionWrapper w) {
 		Matrix gradientTmp = new Matrix(getNumberOfParameters(), 1);
 		Matrix wGradient = w.getGradient();
-		for (int i = 0; i < wGradient.m_iRows; i++) {
-			gradientTmp.setValueAt(w.reverseParmMap.get(i), 0, wGradient.getValueAt(i, 0));
+		if (wGradient != null) {	// the function has no parameter
+			for (int i = 0; i < wGradient.m_iRows; i++) {
+				gradientTmp.setValueAt(w.reverseParmMap.get(i), 0, wGradient.getValueAt(i, 0));
+			}
 		}
 		return gradientTmp;
 	}
@@ -132,11 +138,13 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 	private Matrix reformateHessian(InternalMathematicalFunctionWrapper w) {
 		Matrix hessianTmp = new Matrix(getNumberOfParameters(), getNumberOfParameters());
 		Matrix wHessian = w.getHessian();
-		for (int i = 0; i < wHessian.m_iRows; i++) {
-			for (int j = i; j < wHessian.m_iRows; j++) {
-				hessianTmp.setValueAt(w.reverseParmMap.get(i), w.reverseParmMap.get(j), wHessian.getValueAt(i, j));
-				if (i !=  j) {
-					hessianTmp.setValueAt(w.reverseParmMap.get(j), w.reverseParmMap.get(i), wHessian.getValueAt(j, i));
+		if (wHessian != null) {		// the function has no parameter
+			for (int i = 0; i < wHessian.m_iRows; i++) {
+				for (int j = i; j < wHessian.m_iRows; j++) {
+					hessianTmp.setValueAt(w.reverseParmMap.get(i), w.reverseParmMap.get(j), wHessian.getValueAt(i, j));
+					if (i !=  j) {
+						hessianTmp.setValueAt(w.reverseParmMap.get(j), w.reverseParmMap.get(i), wHessian.getValueAt(j, i));
+					}
 				}
 			}
 		}

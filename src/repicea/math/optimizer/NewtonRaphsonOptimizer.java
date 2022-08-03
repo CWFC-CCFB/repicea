@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.utility.MatrixUtility;
 import repicea.util.REpiceaLogManager;
 
 /**
@@ -155,11 +156,12 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		iterationID = 0;
 		
 		double gconv = calculateConvergence(gradient, hessian, value0);
-		
 		if (Math.abs(gconv) < convergenceCriterion) {
 			convergenceAchieved = true;
 		}
 		Matrix currentBeta = null;
+		double previousLLK = 0;
+		double fconv;
 		try {
 			while (!convergenceAchieved && iterationID <= maxNumberOfIterations) {
 				iterationID++;
@@ -167,7 +169,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Optimization step at iteration " + iterationID + " = " + optimisationStep.toString());
 
 				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
-
+				previousLLK = value0;	
 				value0 = runInnerOptimisation(function, 
 						indicesOfParametersToOptimize, 
 						originalBeta, 
@@ -178,13 +180,24 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				gradient = function.getGradient();
 				hessian = function.getHessian();
 				currentBeta = extractParameters(function, indicesOfParametersToOptimize);
+				boolean originalHessian = true;
 				gconv = calculateConvergence(gradient, hessian, value0);
+				fconv = Math.abs(value0 - previousLLK) / Math.abs(previousLLK);
+				int iterForHessianCorrection = 0;
+				while (gconv < 0 && iterForHessianCorrection < 1000) {
+					originalHessian = false;
+					MatrixUtility.add(hessian, Matrix.getIdentityMatrix(hessian.m_iRows));
+					gconv = calculateConvergence(gradient, hessian, value0);
+					iterForHessianCorrection++;
+				}
+				if (!originalHessian) {
+					REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Hessian was not positive-definite!");
+				}
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; gconv : " + gconv + "; parms : " + currentBeta.toString() + "; gradient : " + gradient.toString());
 				
 				if (gconv < 0) {
-					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5);
 					REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "GConv is negative!");
-					REpiceaLogManager.logMessage(LOGGER_NAME, Level.WARNING, LOGGER_NAME, "Convergence could not be achieved after " + ((Integer) iterationID).toString() + " iterations!");
+					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5) || fconv < 1E-8;
 					break;
 				} else if (gconv < convergenceCriterion) {
 					convergenceAchieved = true;

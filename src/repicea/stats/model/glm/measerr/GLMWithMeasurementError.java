@@ -43,6 +43,7 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 	public GLMWithMeasurementError(DataSet dataSet, String modelDefinition, Matrix startingValues, GLMMeasErrorDefinition measError) {
 		super(dataSet, Type.CLogLog, modelDefinition, null, startingValues, measError);
 		this.measError = measError;
+		this.setConvergenceCriterion(1E-6);
 	}
 	
 	public GLMWithMeasurementError(DataSet dataSet, String modelDefinition, GLMMeasErrorDefinition measError) {

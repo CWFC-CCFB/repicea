@@ -40,6 +40,7 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 	final int xCoord;
 	final int yCoord;
 	final DistanceCalculator dc;
+	double variance;
 
 	SpatialPopulationUnit(int id, int xCoord, int yCoord, boolean isConspecificIn) {
 		super(id, isConspecificIn);
@@ -58,25 +59,26 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 	public int setY(Matrix parameters) {
 		double pred = 1 - Math.exp(-Math.exp(parameters.getValueAt(0, 0) + parameters.getValueAt(1, 0) * trueDistanceToConspecific));
 		boolean occurred = StatisticalUtility.getRandom().nextDouble() < pred;
-		y = occurred ? 1 : 0;
-		return y;
+		setY(occurred ? 1 : 0);
+		return getY();
 	}
 
 	@Override
 	public Object[] asObservation(boolean detailed) {
 		if (detailed) {
 			Object[] record = new Object[5];
-			record[0] = y;
+			record[0] = getY();
 			record[1] = xCoord;
 			record[2] = yCoord;
 			record[3] = trueDistanceToConspecific;
 			record[4] = isConspecificIn;
 			return record;
 		} else {
-			Object[] record = new Object[3];
-			record[0] = y;
+			Object[] record = new Object[4];
+			record[0] = getY();
 			record[1] = measuredDistanceToConspecific;
-			record[2] = trueDistanceToConspecific;
+			record[2] = variance;
+			record[3] = trueDistanceToConspecific;
 			return record;
 		}
 	}
@@ -86,7 +88,7 @@ class SpatialPopulationUnit extends AbstractPopulationUnit {
 		SpatialPopulationUnit pu = new SpatialPopulationUnit(this.id, this.xCoord, this.yCoord, this.isConspecificIn);
 		pu.trueDistanceToConspecific = trueDistanceToConspecific;
 		pu.measuredDistanceToConspecific = measuredDistanceToConspecific;
-		pu.y = y;
+		pu.setY(getY());
 		return pu;
 	}
 

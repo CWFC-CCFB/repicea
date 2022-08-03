@@ -65,7 +65,6 @@ public class WeibullModelTest {
 	public void WeibullModelWithoutLocationParameterTest2() {
 		List<Double> values = new ArrayList<Double>();
 		for (int i = 0; i < 100000; i++) {
-//			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 1, 2, 0));
 			values.add(StatisticalUtility.getRandom().nextWeibull(1, 2));
 		}
 		
@@ -74,7 +73,7 @@ public class WeibullModelTest {
 		wm.getSummary();
 		Assert.assertTrue("Is convergence achieved?", wm.getEstimator().isConvergenceAchieved());
 		Assert.assertEquals("Shape parameter", 1d, wm.getParameters().getValueAt(0, 0), 1E-2);
-		Assert.assertEquals("Scale parameter", 2d, wm.getParameters().getValueAt(1, 0), 1E-2);
+		Assert.assertEquals("Scale parameter", 2d, wm.getParameters().getValueAt(1, 0), 3E-2);
 	}
 
 	@Test
@@ -82,7 +81,6 @@ public class WeibullModelTest {
 		
 		List<Double> values = new ArrayList<Double>();
 		for (int i = 0; i < 100000; i++) {
-//			values.add(WeibullUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(), 3, 5, 10));
 			values.add(StatisticalUtility.getRandom().nextWeibull(3, 5, 10));
 		}
 	
