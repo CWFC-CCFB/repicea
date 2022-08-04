@@ -23,10 +23,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.LogFunctionWrapper;
 import repicea.math.Matrix;
-import repicea.math.ParameterBound;
 import repicea.math.functions.WeibullFunction;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
@@ -297,10 +295,6 @@ public class WeibullModel extends AbstractStatisticalModel implements MaximumLik
 		}
 	}
 
-	@Override
-	public Matrix getParameters() {
-		return individualLLK.getParameters();
-	}
 
 	@Override
 	protected Estimator instantiateDefaultEstimator() {return new MaximumLikelihoodEstimator(this);}

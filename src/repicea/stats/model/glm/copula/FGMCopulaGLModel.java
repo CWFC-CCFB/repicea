@@ -20,12 +20,10 @@ package repicea.stats.model.glm.copula;
 
 import java.text.NumberFormat;
 
-import javax.management.remote.SubjectDelegationPermission;
-
 import repicea.math.Matrix;
+import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
-import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
@@ -44,15 +42,18 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	private final CopulaExpression copula;
 	
 	/**
-	 * Constructor for this class
+	 * Constructor.
 	 * @param glm a GeneralizedLinearModel instance
 	 * @param copula a CopulaExpression instance
 	 * @throws StatisticalDataException if the hierarchical level specification in the copula is not found in the data set
+	 * @throws OptimizationException if the preliminary generalized linear model fails to converge
 	 */
-	public FGMCopulaGLModel(GeneralizedLinearModel glm, CopulaExpression copula) throws StatisticalDataException {
+	public FGMCopulaGLModel(GeneralizedLinearModel glm, CopulaExpression copula) throws StatisticalDataException, OptimizationException {
 		super(glm);
 		if (!glm.getEstimator().isConvergenceAchieved()) {
 			glm.doEstimation();
+		} else {
+			throw new OptimizationException("The generalized linear model could not be fitted!");
 		}
 		glm.setParameters(glm.getEstimator().getParameterEstimates().getMean());
 		this.copula = copula;
@@ -71,12 +72,18 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 
 	@Override
 	public void setParameters(Matrix beta) {
-		if (beta == null) {
-			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+		if (copula == null) {
+			individualLLK.setParameters(beta);
 		} else {
 			individualLLK.setParameters(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
 			copula.setParameters(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
 		}
+//		if (beta == null) {
+//			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+//		} else {
+//			individualLLK.setParameters();
+//			copula.setParameters(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
+//		}
 	}
 
 	@Override

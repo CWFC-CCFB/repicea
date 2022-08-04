@@ -36,7 +36,7 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 
 	public static String LOGGER_NAME = "AbstractStatisticalModel";
 	
-	private Estimator estimator;
+	protected Estimator estimator;
 	
 	private Object optimizerParameters; 
 	

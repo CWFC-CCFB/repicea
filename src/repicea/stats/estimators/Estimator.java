@@ -20,7 +20,6 @@ package repicea.stats.estimators;
 
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
-import repicea.stats.model.StatisticalModel;
 
 public interface Estimator {
 

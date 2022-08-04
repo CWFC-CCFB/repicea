@@ -110,10 +110,10 @@ public class GaussianModel extends AbstractStatisticalModel implements MaximumLi
 		}
 	}
 
-	@Override
-	public Matrix getParameters() {
-		return individualLLK.getParameters();
-	}
+//	@Override
+//	public Matrix getParameters() {
+//		return individualLLK.getParameters();
+//	}
 
 	protected Estimator instantiateDefaultEstimator() {return new MaximumLikelihoodEstimator(this);}
 

@@ -27,10 +27,8 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import repicea.math.Matrix;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.util.REpiceaLogManager;
 

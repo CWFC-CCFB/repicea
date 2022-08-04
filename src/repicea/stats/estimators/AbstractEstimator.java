@@ -23,12 +23,12 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.estimators.AbstractEstimator.AbstractEstimatorCompatibleModel;
+import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 
-public abstract class AbstractEstimator<P extends AbstractEstimatorCompatibleModel> implements Estimator {
+public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> implements Estimator {
 
 	
-	protected interface AbstractEstimatorCompatibleModel {
+	public interface EstimatorCompatibleModel {
 		
 		public boolean isInterceptModel();
 		

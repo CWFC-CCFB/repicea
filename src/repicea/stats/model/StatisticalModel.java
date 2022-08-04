@@ -25,12 +25,20 @@ import repicea.stats.estimators.Estimator;
  * This interface defines the services provided by a statistical model.
  * @author Mathieu Fortin - October 2011
  */
-public interface StatisticalModel { //<P extends StatisticalDataStructure> {
+public interface StatisticalModel { 
 
-	public void setParameters(Matrix beta);
+	/**
+	 * Return the parameter estimates produced by the estimator.
+	 * @return a Matrix instance
+	 */
+	public default Matrix getParameters() {
+		if (getEstimator().isConvergenceAchieved()) {
+			return getEstimator().getParameterEstimates().getMean();
+		} else {
+			throw new UnsupportedOperationException("The model parameters have not been estimated yet!");
+		}
+	}
 
-	public Matrix getParameters();
-	
 	/**
 	 * This method returns the results of the fit on screen.
 	 */
@@ -47,12 +55,6 @@ public interface StatisticalModel { //<P extends StatisticalDataStructure> {
 	 */
 	public String getModelDefinition();
 	
-	
-//	/**
-//	 * This method returns the value of the convergence criterion.
-//	 * @return a double
-//	 */
-//	public double getConvergenceCriterion();
 	
 	/**
 	 * This method returns the optimizer of the log-likelihood function.

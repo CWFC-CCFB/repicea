@@ -23,7 +23,7 @@ import repicea.math.Matrix;
 @SuppressWarnings("serial")
 public class CompositeLogLikelihoodWithExplanatoryVariables extends SimpleCompositeLogLikelihood {
 
-	private final Matrix xValues;
+	protected final Matrix xValues;
 	
 	public CompositeLogLikelihoodWithExplanatoryVariables(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
 		super(innerLogLikelihoodFunction, yValues);

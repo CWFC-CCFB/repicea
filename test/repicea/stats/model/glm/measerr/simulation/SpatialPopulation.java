@@ -21,15 +21,12 @@ package repicea.stats.model.glm.measerr.simulation;
 import java.util.List;
 
 import repicea.math.Matrix;
-import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
-import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
-import repicea.stats.model.glm.measerr.GLMNormalClassicalMeasErrorDefinition;
-import repicea.stats.model.glm.measerr.GLMWithMeasurementError;
+import repicea.stats.model.glm.measerr.SIMEXModel;
 import repicea.stats.sampling.SamplingUtility;
 import repicea.util.ObjectUtility;
 
@@ -105,14 +102,15 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 		
 		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
 		pre_glm.doEstimation();
-		pre_glm.getSummary();
-		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, 
-				"y ~ distanceToConspecific", 
-				pre_glm.getParameters(),
-				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
-		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
+//		pre_glm.getSummary();
+//		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, 
+//				"y ~ distanceToConspecific", 
+//				pre_glm.getParameters(),
+//				new GLMNormalClassicalMeasErrorDefinition("distanceToConspecific", "variance", .1));
+//		((MaximumLikelihoodEstimator) glm.getEstimator()).setLineSearchMethod(LineSearchMethod.HALF_STEP);
+		SIMEXModel glm = new SIMEXModel(pre_glm, "distanceToConspecific", "variance");
 		glm.doEstimation();
-		glm.getSummary();
+//		glm.getSummary();
 		
 		if (glm.getEstimator().isConvergenceAchieved()) {
 			record = new Object[8];

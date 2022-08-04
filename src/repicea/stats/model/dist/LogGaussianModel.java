@@ -110,10 +110,10 @@ public class LogGaussianModel extends AbstractStatisticalModel implements Maximu
 		}
 	}
 
-	@Override
-	public Matrix getParameters() {
-		return individualLLK.getParameters();
-	}
+//	@Override
+//	public Matrix getParameters() {
+//		return individualLLK.getParameters();
+//	}
 
 	protected Estimator instantiateDefaultEstimator() {return new MaximumLikelihoodEstimator(this);}
 

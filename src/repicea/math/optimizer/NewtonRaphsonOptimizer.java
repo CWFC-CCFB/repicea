@@ -159,7 +159,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		if (Math.abs(gconv) < convergenceCriterion) {
 			convergenceAchieved = true;
 		}
-		Matrix currentBeta = null;
+		Matrix currentBeta = function.getParameters();
 		double previousLLK = 0;
 		double fconv;
 		try {

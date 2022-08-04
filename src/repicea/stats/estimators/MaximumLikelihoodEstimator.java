@@ -31,7 +31,7 @@ import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
-import repicea.stats.estimators.AbstractEstimator.AbstractEstimatorCompatibleModel;
+import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.CompositeLogLikelihood;
 import repicea.util.REpiceaLogManager;
@@ -44,7 +44,7 @@ import repicea.util.REpiceaLogManager;
 public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelihoodCompatibleModel> {
 
 	
-	public interface MaximumLikelihoodCompatibleModel extends AbstractEstimatorCompatibleModel {
+	public interface MaximumLikelihoodCompatibleModel extends EstimatorCompatibleModel {
 	
 		public double getConvergenceCriterion();
 
@@ -55,16 +55,17 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 		public CompositeLogLikelihood getCompleteLogLikelihood();
 		
 		/**
-		 * Return the model parameters.
-		 * @return a Matrix instance
-		 */
-		public Matrix getParameters();
-		
-		/**
-		 * Set the model parameters.
+		 * Set the parameters in the log-likelihood function.
 		 * @param beta a Matrix instance
 		 */
-		public void setParameters(Matrix beta);
+		public default void setParameters(Matrix beta) {
+			for (int i = 0; i < beta.m_iRows; i++) {
+				getCompleteLogLikelihood().setParameterValue(i, beta.getValueAt(i, 0));
+			}
+		}
+
+		
+		
 	}
 	
 	
@@ -107,6 +108,22 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	
 	
 	/**
+	 * Return the model parameters. <br>
+	 * <br>
+	 * A new Matrix instance is created each time this method is called.
+	 * @return a Matrix instance
+	 */
+	private Matrix getParameters(MaximumLikelihoodCompatibleModel model) {
+		int nbParms = model.getCompleteLogLikelihood().getNumberOfParameters();
+		Matrix beta = new Matrix(nbParms, 1);
+		for (int i = 0; i < nbParms; i++) {
+			beta.setValueAt(i, 0, model.getCompleteLogLikelihood().getParameterValue(i));
+		}
+		return beta;
+	}
+	
+	
+	/**
 	 * This method scans the log likelihood function within a range of values for a particular parameter.
 	 * @param parameterName the index of the parameter
 	 * @param start the starting value
@@ -116,7 +133,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	public void gridSearch(int parameterName, double start, double end, double step) {
 		REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Initializing grid search...");
 		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
-		Matrix originalParameters = model.getParameters();
+		Matrix originalParameters = getParameters(model);
 		double llk;
 		for (double value = start; value < end + step; value+=step) {
 			Matrix beta = originalParameters.getDeepClone();
@@ -125,7 +142,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 			model.getCompleteLogLikelihood().reset();
 			llk = model.getCompleteLogLikelihood().getValue();
 			likelihoodValues.add(new LikelihoodValue(beta, llk));
-			REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Parameters : " + model.getParameters().toString() + "; Log-likelihood : " + llk);
+			REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Parameters : " + beta.toString() + "; Log-likelihood : " + llk);
 		}
 		
 		Collections.sort(likelihoodValues);
@@ -152,7 +169,8 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 		
 		CompositeLogLikelihood llk = model.getCompleteLogLikelihood();
 		List<Integer> indices = new ArrayList<Integer>();
-		for (int i = 0; i < model.getParameters().m_iRows; i++) {
+		int nbParameters = model.getCompleteLogLikelihood().getNumberOfParameters();
+		for (int i = 0; i < nbParameters; i++) {
 			indices.add(i);
 		}
 		try {

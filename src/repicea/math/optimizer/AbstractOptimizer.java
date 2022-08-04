@@ -66,13 +66,11 @@ public abstract class AbstractOptimizer {
 	protected Matrix betaVector;
 	protected Matrix hessianMatrix;
 
-	private boolean verboseEnabled;
 	
 	/**
 	 * Default constructor.
 	 */
 	public AbstractOptimizer() {
-		verboseEnabled = false;
 		listeners = new CopyOnWriteArrayList<OptimizerListener>();
 	}
 	
@@ -92,14 +90,6 @@ public abstract class AbstractOptimizer {
 
 	public Matrix getHessianAtMaximum() {return hessianMatrix;}
 
-
-	/**
-	 * This method sets the verbose to true or false.
-	 * @param verboseEnabled true to get the information about the subiteration or false (DEFAULT VALUE).
-	 */
-	public void setVerboseEnabled(boolean verboseEnabled) {this.verboseEnabled = verboseEnabled;}
-
-	protected boolean isVerboseEnabled() {return verboseEnabled;}
 	
 	@Override
 	public String toString() {

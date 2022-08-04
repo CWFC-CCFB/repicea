@@ -27,7 +27,7 @@ import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.VarianceEstimate;
-import repicea.stats.estimators.AbstractEstimator.AbstractEstimatorCompatibleModel;
+import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 import repicea.stats.estimators.OLSEstimator.OLSCompatibleModel;
 import repicea.stats.model.lm.LinearModel;
 
@@ -37,7 +37,7 @@ import repicea.stats.model.lm.LinearModel;
  */
 public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 
-	public interface OLSCompatibleModel extends AbstractEstimatorCompatibleModel {
+	public interface OLSCompatibleModel extends EstimatorCompatibleModel {
 	
 		public Matrix getMatrixX();
 		

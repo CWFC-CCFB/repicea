@@ -51,7 +51,7 @@ public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWr
 
 	@Override
 	public Matrix getGradient() {
-		Matrix resultingGradient = new Matrix(getNumberOfParameters(), 1);
+		Matrix resultingGradient = new Matrix(getOriginalFunction().getNumberOfParameters(), 1);
 		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
 			MatrixUtility.add(resultingGradient, getOriginalFunction().getGradient());
@@ -61,7 +61,8 @@ public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWr
 
 	@Override
 	public Matrix getHessian() {
-		Matrix resultingHessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
+		Matrix resultingHessian = new Matrix(getOriginalFunction().getNumberOfParameters(), 
+				getOriginalFunction().getNumberOfParameters());
 		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
 			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());

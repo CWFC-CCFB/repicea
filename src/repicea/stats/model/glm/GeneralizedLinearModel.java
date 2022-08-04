@@ -92,8 +92,12 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		} else {
 			individualLLK = createIndividualLLK(additionalParm);
 		}
-		setParameters(startingBeta);
 		completeLLK = createCompleteLLK(additionalParm);
+		if (startingBeta == null) {
+			setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+		} else {
+			setParameters(startingBeta);
+		}
 	}
 	
 	/**
@@ -153,17 +157,17 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	
 
 	
-	@Override
-	public void setParameters(Matrix beta) {
-		if (beta == null) {
-			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
-		} else {
-			individualLLK.setParameters(beta);
-		}
-	}
+//	@Override
+//	public void setParameters(Matrix beta) {
+//		if (beta == null) {
+//			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+//		} else {
+//			individualLLK.setParameters(beta);
+//		}
+//	}
 		
-	@Override
-	public Matrix getParameters() {return individualLLK.getParameters();}
+//	@Override
+//	public Matrix getParameters() {return individualLLK.getParameters();}
 
 	@Override
 	protected Estimator instantiateDefaultEstimator() {

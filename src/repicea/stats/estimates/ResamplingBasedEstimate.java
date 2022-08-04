@@ -55,6 +55,9 @@ abstract class ResamplingBasedEstimate extends Estimate<EmpiricalDistribution> i
 			return true; 
 		} else {
 			Matrix firstObservation = observations.get(0);
+			if (value == null || firstObservation == null) {
+				int u = 0;
+			}
 			return (firstObservation.m_iRows == value.m_iRows && firstObservation.m_iCols == value.m_iCols);
 		}
 	}

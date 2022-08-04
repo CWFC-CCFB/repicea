@@ -64,10 +64,10 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 	@Override
 	public void setParameters(Matrix beta) {}
 
-	@Override
-	public Matrix getParameters() {
-		return getEstimator().getParameterEstimates().getMean();
-	}
+//	@Override
+//	public Matrix getParameters() {
+//		return getEstimator().getParameterEstimates().getMean();
+//	}
 	
 	/**
 	 * This method returns the residual variance only if the optimizer is an instance

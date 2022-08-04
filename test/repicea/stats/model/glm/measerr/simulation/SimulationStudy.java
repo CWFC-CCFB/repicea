@@ -143,7 +143,7 @@ public class SimulationStudy {
 		AbstractStatisticalModel.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(Level.OFF);
 		SimulationStudy.VERBOSE = true;
-		new SimulationStudy(1, 200, 1000, 1);
+		new SimulationStudy(1000, 200, 2000, 2);
 	}
 	
 }
