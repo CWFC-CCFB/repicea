@@ -30,9 +30,11 @@ import java.util.Map;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public abstract class AbstractMathematicalFunction implements EvaluableFunction<Double>, DerivableMathematicalFunction, Serializable {
+public abstract class AbstractMathematicalFunction implements MathematicalFunction, Serializable {
 	
-	protected Map<Integer, ParameterBound> parameterBounds;
+	public static final double MINIMUM_ACCEPTABLE_POSITIVE_VALUE = 1E-8;
+
+	protected final Map<Integer, ParameterBound> parameterBounds;
 
 	private final FastArrayList<Double> parameterValues;
 	private final FastArrayList<Double> variableValues;
@@ -40,15 +42,12 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 	protected AbstractMathematicalFunction() {
 		parameterValues = new FastArrayList<Double>();
 		variableValues = new FastArrayList<Double>();
+		parameterBounds = new HashMap<Integer, ParameterBound>();
 	}
 
-	/**
-	 * This method sets the parameter value.
-	 * @param parameterIndex the parameter index
-	 * @param parameterValue the parameter value
-	 */
+	@Override
 	public void setParameterValue(int parameterIndex, double parameterValue) {
-		if (parameterBounds != null && parameterBounds.containsKey(parameterIndex)) {
+		if (parameterBounds.containsKey(parameterIndex)) {
 			ParameterBound bound = parameterBounds.get(parameterIndex);
 			parameterValue = bound.validateParameter(parameterValue);
 		}
@@ -61,20 +60,12 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		}
 	}
 
-	/**
-	 * This method retrieve the parameter defined by the parameterName parameter.
-	 * @param parameterIndex the index of the parameter to be retrieved
-	 * @return a double
-	 */
+	@Override
 	public double getParameterValue(int parameterIndex) {
 		return parameterValues.get(parameterIndex);
 	}
 
-	/**
-	 * This method sets the variable value associated with this variable name.
-	 * @param variableIndex the index of the variable 
-	 * @param variableValue its value (a double)
-	 */
+	@Override
 	public void setVariableValue(int variableIndex, double variableValue) {
 		if (variableIndex < getNumberOfVariables()) {
 			variableValues.set(variableIndex, variableValue);
@@ -85,25 +76,15 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		}
 	}
 	
-	/**
-	 * This method returns the value of the variable at index variableIndex
-	 * @param variableIndex an integer
-	 * @return a double
-	 */
+	@Override
 	public double getVariableValue(int variableIndex) {
 		return variableValues.get(variableIndex);
 	}
 	
-	/**
-	 * This method returns the number of parameters involved in the function.
-	 * @return a integer
-	 */
+	@Override
 	public int getNumberOfParameters() {return parameterValues.size();}
 	
-	/**
-	 * This method returns the number of variables in the function. 
-	 * @return an integer
-	 */
+	@Override
 	public int getNumberOfVariables() {return variableValues.size();}
 
 	@Override
@@ -115,42 +96,25 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 	@Override
 	public abstract Matrix getHessian();
 
-	/**
-	 * This method sets a bound for a particular parameter
-	 * @param parameterIndex an Integer instance that defines the parameter
-	 * @param bound a ParameterBound object
-	 */
+	@Override
 	public void setBounds(int parameterIndex, ParameterBound bound) {
-		if (parameterBounds == null) {
-			parameterBounds = new HashMap<Integer, ParameterBound>();
-		}
 		parameterBounds.put(parameterIndex, bound);
 	}
 
-	/**
-	 * This method sets the vector of explanatory variables. The method essentially
-	 * relies on the setVariableValue() of the AbstractMathematicalFunction class.
-	 * @param x a Matrix instance 
-	 * @throws IllegalArgumentException if the parameter x is not a row vector
-	 */
-	public void setX(Matrix x) {
-		if (!x.isRowVector()) {
+	@Override
+	public void setVariables(Matrix xVector) {
+		if (!xVector.isRowVector()) {
 			throw new IllegalArgumentException("The vector is not a row vector!");
 		} else {
 			variableValues.clear();
-			for (int j = 0; j < x.m_iCols; j++) {
-				setVariableValue(j, x.getValueAt(0, j));
+			for (int j = 0; j < xVector.m_iCols; j++) {
+				setVariableValue(j, xVector.getValueAt(0, j));
 			}
 		}
 	}
 	
-	/**
-	 * This method sets the vector of parameters. The method essentially relies on
-	 * the setParameterValue() of the AbstractMathematicalFunction class.
-	 * @param beta a Matrix instance
-	 * @throws IllegalArgumentException if beta is not a column vector
-	 */
-	public void setBeta(Matrix beta) {
+	@Override
+	public void setParameters(Matrix beta) {
 		if (!beta.isColumnVector()) {
 			throw new IllegalArgumentException("The vector is not a column vector!");
 		} else {
@@ -161,11 +125,8 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		}
 	}
 	
-	/**
-	 * This method returns the vector of parameters.
-	 * @return a Matrix instance
-	 */
-	public Matrix getBeta() {
+	@Override
+	public Matrix getParameters() {
 		Matrix m = new Matrix(getNumberOfParameters(), 1);
 		for (int i = 0; i < getNumberOfParameters(); i++) {
 			m.setValueAt(i, 0, getParameterValue(i));
@@ -173,4 +134,23 @@ public abstract class AbstractMathematicalFunction implements EvaluableFunction<
 		return m;
 	}
 
+	@Override
+	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue) {
+		if (parameterBounds.containsKey(parameterIndex)) {
+			ParameterBound bound = parameterBounds.get(parameterIndex);
+			if (!bound.isParameterValueValid(parameterValue)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+//	@Override
+//	public Map<Integer, ParameterBound> getBounds() {
+//		Map<Integer,ParameterBound> newMap = new HashMap<Integer, ParameterBound>();
+//		for (Integer k : parameterBounds.keySet()) {
+//			newMap.put(k, parameterBounds.get(k).clone());
+//		}
+//		return newMap;
+//	}
 }

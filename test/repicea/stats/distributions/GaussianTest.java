@@ -54,9 +54,17 @@ public class GaussianTest {
 		Matrix mat = new Matrix(1,1);
 		mat.setValueAt(0, 0, 1d);
 		sgd.getProbabilityDensity(mat);
-		
-		
-		
+	}
+	
+	@Test
+	public void testingDensities() {
+		double w = 2;
+		double mu = 1.2;
+		double variance = 2;
+		double std = Math.sqrt(variance);
+		double dens1 = GaussianUtility.getProbabilityDensity((w - mu) / std) / Math.sqrt(variance);
+		double dens2 = GaussianUtility.getProbabilityDensity(w, mu, variance);
+		Assert.assertEquals("Comparing density of standardized and non standardized value", dens2, dens1, 1E-8);
 	}
 
 }

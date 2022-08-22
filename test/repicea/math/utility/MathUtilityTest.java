@@ -1,7 +1,9 @@
-package repicea.math;
+package repicea.math.utility;
 
 import org.junit.Assert;
 import org.junit.Test;
+
+import repicea.math.utility.MathUtility;
 
 public class MathUtilityTest {
 

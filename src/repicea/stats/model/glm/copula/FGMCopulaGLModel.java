@@ -18,17 +18,15 @@
  */
 package repicea.stats.model.glm.copula;
 
-import java.security.InvalidParameterException;
 import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 
 import repicea.math.Matrix;
+import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.estimates.CorrelationEstimate;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 
 /**
@@ -41,121 +39,63 @@ import repicea.stats.model.glm.GeneralizedLinearModel;
  */
 public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	
-	@SuppressWarnings("rawtypes")
-	protected static class LikelihoodValue implements Comparable {
-
-		private double llk;
-		private Matrix beta;
-		
-		protected LikelihoodValue(Matrix beta, double llk) {
-			this.beta = beta.getDeepClone();
-			this.llk = llk;
-		}
-		
-		@Override
-		public int compareTo(Object arg0) {
-			double reference = ((LikelihoodValue) arg0).llk;
-			if (this.llk < reference) {
-				return 1;
-			} else if (this.llk == reference) {
-				return 0;
-			} else {
-				return -1;
-			}
-		}
-		
-		protected Matrix getParameters() {return beta;}
-	}
-	
-	
-	
-	
-	private CopulaExpression copula;
+	private final CopulaExpression copula;
 	
 	/**
-	 * Constructor for this class
+	 * Constructor.
 	 * @param glm a GeneralizedLinearModel instance
 	 * @param copula a CopulaExpression instance
 	 * @throws StatisticalDataException if the hierarchical level specification in the copula is not found in the data set
+	 * @throws OptimizationException if the preliminary generalized linear model fails to converge
 	 */
-	public FGMCopulaGLModel(GeneralizedLinearModel glm, CopulaExpression copula) throws StatisticalDataException {
+	public FGMCopulaGLModel(GeneralizedLinearModel glm, CopulaExpression copula) throws StatisticalDataException, OptimizationException {
 		super(glm);
 		if (!glm.getEstimator().isConvergenceAchieved()) {
 			glm.doEstimation();
+		} else {
+			throw new OptimizationException("The generalized linear model could not be fitted!");
 		}
 		glm.setParameters(glm.getEstimator().getParameterEstimates().getMean());
 		this.copula = copula;
 		this.copula.initialize(this, getDataStructure());
-		setCompleteLLK();
+		getCompleteLogLikelihood().initialize(getDataStructure(), copula);
 	}
 	
 	@Override
-	public Matrix getParameters() {return individualLLK.getBeta().matrixStack(copula.getBeta(), true);}
+	public FGMCompositeLogLikelihood getCompleteLogLikelihood() {
+		return (FGMCompositeLogLikelihood) super.getCompleteLogLikelihood();
+	}
+	
+	@Override
+	public Matrix getParameters() {return individualLLK.getParameters().matrixStack(copula.getParameters(), true);}
 	
 
 	@Override
 	public void setParameters(Matrix beta) {
-		if (beta == null) {
-			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+		if (copula == null) {
+			individualLLK.setParameters(beta);
 		} else {
-			individualLLK.setBeta(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
-			copula.setBeta(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
+			individualLLK.setParameters(beta.getSubMatrix(0, beta.m_iRows - copula.getNumberOfParameters() - 1, 0, 0));
+			copula.setParameters(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
 		}
+//		if (beta == null) {
+//			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+//		} else {
+//			individualLLK.setParameters();
+//			copula.setParameters(beta.getSubMatrix(beta.m_iRows - copula.getNumberOfParameters(), beta.m_iRows - 1, 0, 0));
+//		}
 	}
 
-	/**
-	 * This method scans the log likelihood function within a range of values for a particular parameter.
-	 * @param parameterName the index of the parameter
-	 * @param start the starting value
-	 * @param end the ending value
-	 * @param step the step between these two values.
-	 */
-	@SuppressWarnings("unchecked")
-	public void gridSearch(int parameterName, double start, double end, double step) {
-		System.out.println("Initializing grid search...");
-		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
-		Matrix originalParameters = getParameters();
-		double llk;
-		for (double value = start; value < end + step; value+=step) {
-			Matrix beta = originalParameters.getDeepClone();
-			beta.setValueAt(parameterName, 0, value);
-			setParameters(beta);
-			((FGMCompositeLogLikelihood) getCompleteLogLikelihood()).reset();
-			llk = getCompleteLogLikelihood().getValue();
-			likelihoodValues.add(new LikelihoodValue(beta, llk));
-			System.out.println("Parameter value : " + value + "; Log-likelihood : " + llk);
-		}
-		
-		Collections.sort(likelihoodValues);
-		LikelihoodValue lk;
-		Matrix bestFittingParameters = null;
-		for (int i = 0; i < likelihoodValues.size(); i++) {
-			lk = likelihoodValues.get(i);
-			if (!Double.isNaN(lk.llk)) {
-				bestFittingParameters = lk.getParameters();
-				break;
-			}
-		}
-		if (bestFittingParameters == null) {
-			throw new InvalidParameterException("All the likelihoods of the grid are NaN!");
-		} else {
-			setParameters(bestFittingParameters);
-		}
-	}
-	
 	@Override
-	protected void setCompleteLLK() {completeLLK = new FGMCompositeLogLikelihood(individualLLK,	matrixX, y,	getDataStructure(),	copula);}
+	protected CompositeLogLikelihoodWithExplanatoryVariables createCompleteLLK(Object addParm) {
+		return new FGMCompositeLogLikelihood(individualLLK,	matrixX, y);
+	}
 	
 	@Override
 	public String toString() {
 		return "Generalized linear model based on FGM copula";
 	}
 
-	@Override
-	public HierarchicalStatisticalDataStructure getDataStructure() {
-		return (HierarchicalStatisticalDataStructure) super.getDataStructure();
-	}
-	
 	@Override
 	public void getSummary() {
 		super.getSummary();
@@ -178,10 +118,14 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	
 	
 	@Override
-	protected HierarchicalStatisticalDataStructure getDataStructureFromDataSet(	DataSet dataSet) {
+	protected HierarchicalStatisticalDataStructure createDataStructure(DataSet dataSet, Object addParm) {
 		return new GenericHierarchicalSpatialDataStructure(dataSet);
 	}
 
-	
+	@Override
+	protected HierarchicalStatisticalDataStructure getDataStructure() {
+		return (HierarchicalStatisticalDataStructure) super.getDataStructure();
+	}
+
 	
 }

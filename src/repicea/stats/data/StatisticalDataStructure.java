@@ -86,4 +86,16 @@ public interface StatisticalDataStructure {
 	public List getPossibleValueForDummyVariable(String fieldName, String refClass);
 
 
+	/**
+	 * Returns the index of this field in the model definition. The "0" refers to the intercept.
+	 * @param effect
+	 * @return an integer (-1 if the effect is not found)
+	 */
+	public int indexOfThisEffect(String effect);
+
+	/**
+	 * Returns the list of effects and interactions in the model.
+	 * @return
+	 */
+	public List<String> getEffectList();
 }

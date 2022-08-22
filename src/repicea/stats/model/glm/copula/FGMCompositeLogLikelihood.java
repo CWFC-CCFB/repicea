@@ -4,18 +4,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.math.optimizer.OptimizerListener;
+import repicea.math.utility.MatrixUtility;
 import repicea.stats.data.DataBlock;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
-import repicea.stats.model.CompositeLogLikelihood;
-import repicea.stats.model.IndividualLikelihood;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.Likelihood;
 
 @SuppressWarnings("serial")
-public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements OptimizerListener {
+public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplanatoryVariables implements OptimizerListener {
 
 	private final static double VERY_SMALL = 1E-8;
 
@@ -37,20 +38,22 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 	protected Map<List<Integer>, Matrix> additionalHessians;
 	protected boolean additionalHessianTermUptoDate;
 
-	protected final HierarchicalStatisticalDataStructure hierarchicalStructure;
-	protected final CopulaExpression copulaExpression;
+	protected HierarchicalStatisticalDataStructure hierarchicalStructure;
+	protected CopulaExpression copulaExpression;
 	
 	protected FGMCompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, 
 			Matrix xValues, 
-			Matrix yValues, 
-			HierarchicalStatisticalDataStructure hierarchicalStructure,
-			CopulaExpression copulaExpression) {
+			Matrix yValues) {
 		super(innerLogLikelihoodFunction, xValues, yValues);
+	}
+	
+	protected void initialize(HierarchicalStatisticalDataStructure hierarchicalStructure, CopulaExpression copulaExpression) {
 		this.hierarchicalStructure = hierarchicalStructure;
 		this.copulaExpression = copulaExpression;
 	}
-			
-	protected void reset() {
+		
+	@Override
+	public void reset() {
 		llkUptoDate = false;
 		additionalLlkTermUptoDate = false;
 		gradientVectorUptoDate = false;
@@ -60,15 +63,14 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 	}
 	
 
-//	private IndividualLogLikelihood getIndividualLLK() {return getOriginalFunction();}
-	private IndividualLikelihood getIndividualLikelihood() {return getOriginalFunction().getOriginalFunction();}
-	private int getTotalNumberOfParameters() {return getIndividualLikelihood().getNumberOfParameters() + copulaExpression.getNumberOfParameters();}
+	private Likelihood getIndividualLikelihood() {return (Likelihood) ((AbstractMathematicalFunctionWrapper) getOriginalFunction()).getOriginalFunction();}
+//	private int getTotalNumberOfParameters() {return getIndividualLikelihood().getNumberOfParameters() + copulaExpression.getNumberOfParameters();}
 			
 			
 	@Override
 	public Matrix getGradient() {
 		if (!gradientVectorUptoDate) {
-			Matrix gradient = new Matrix(getTotalNumberOfParameters(), 1);
+			Matrix gradient = new Matrix(getNumberOfParameters(), 1);
 			gradient.setSubMatrix(super.getGradient(),0,0);		// get the gradient under the assumption of independence
 			
 			for (Matrix additionalGradient : getAdditionalGradients().values()) {
@@ -84,7 +86,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 	@Override
 	public Matrix getHessian() {
 		if (!hessianMatrixUptoDate) {
-			Matrix hessian = new Matrix(getTotalNumberOfParameters(), getTotalNumberOfParameters());
+			Matrix hessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
 			hessian.setSubMatrix(super.getHessian(), 0, 0); 	// get the hessian under the assumption of independence
 			
 			for (Matrix additionalHessian : getAdditionalHessians().values()) {
@@ -188,7 +190,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 
 			for (DataBlock db : map.values()) {
 				List<Integer> index = db.getIndices();
-				Matrix additionalGradient = new Matrix(getTotalNumberOfParameters(),1);	
+				Matrix additionalGradient = new Matrix(getNumberOfParameters(), 1);	
 				double inverseAdditionalLikelihoodTerm = 1d / getAdditionalLikelihoodTerm().get(index);			
 
 				for (int i = 0; i < index.size() - 1; i++) {
@@ -270,7 +272,7 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 			Map<String, DataBlock> map = hierarchicalStructure.getHierarchicalStructure();
 			for (DataBlock db : map.values()) {
 				List<Integer> index = db.getIndices();
-				Matrix additionalHessian = new Matrix(getTotalNumberOfParameters(), getTotalNumberOfParameters());
+				Matrix additionalHessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
 
 				double inverseAdditionalLikelihoodTerm = 1d / getAdditionalLikelihoodTerm().get(index);		
 				additionalGradient = additionalGradients.get(index);
@@ -345,6 +347,11 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihood implements
 		} else {
 			return Double.NaN;
 		}
+	}
+
+	@Override
+	public int getNumberOfParameters() {
+		return getIndividualLikelihood().getNumberOfParameters() + copulaExpression.getNumberOfParameters();
 	}
 
 	@Override

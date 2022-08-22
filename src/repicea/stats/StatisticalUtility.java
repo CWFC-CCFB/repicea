@@ -20,11 +20,14 @@ package repicea.stats;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import repicea.math.MathUtility;
 import repicea.math.Matrix;
+import repicea.math.utility.MathUtility;
+import repicea.stats.estimates.MonteCarloEstimate;
+import repicea.stats.sampling.SamplingUtility;
 
 /**
  * This class contains static methods that are useful for statistical regressions.
@@ -151,26 +154,6 @@ public final class StatisticalUtility {
 		}
 	}
 	
-	/**
-	 * Compute the Euclidean distance between two points. <br>
-	 * <br>
-	 * This method assumes that the checks have been performed on the coordinates argument. Basically,
-	 * these matrices should be column vectors of the same size. Each one of them represents a dimensions.
-	 * 
-	 * @param i the index of the first point
-	 * @param j the index of the second point
-	 * @param coordinates A series of column matrices that stand for the coordinates. 
-	 * @return
-	 */
-	protected final static double getEuclideanDistance(int i, int j, Matrix... coordinates) {
-		double squareDiffSum = 0d;
-		for (int k = 0; k < coordinates.length; k++) {
-			Matrix c = coordinates[k];
-			double diff = c.getValueAt(i, 0) - c.getValueAt(j, 0); 
-			squareDiffSum += diff * diff;
-		}
-		return Math.sqrt(squareDiffSum);
-	}
 	
 	
 	/**
@@ -220,7 +203,7 @@ public final class StatisticalUtility {
 				double corr = 0d;
 				switch(type) {
 				case LINEAR:					// linear case
-					distance = getEuclideanDistance(i, j, coordinates);
+					distance = MathUtility.getEuclideanDistance(i, j, coordinates);
 					corr = 1 - covarianceParameter * distance;
 					if (corr >= 0) {
 						matrixR.setValueAt(i, j, varianceParameter * corr);
@@ -228,7 +211,7 @@ public final class StatisticalUtility {
 					}
 					break;
 				case LINEAR_LOG:				// linear log case
-					distance = getEuclideanDistance(i, j, coordinates);
+					distance = MathUtility.getEuclideanDistance(i, j, coordinates);
 					if (distance == 0) {
 						corr = 1d;
 					} else {
@@ -248,7 +231,7 @@ public final class StatisticalUtility {
 					}
 					break;
 				case POWER:                  // power case
-					distance = getEuclideanDistance(i, j, coordinates);
+					distance = MathUtility.getEuclideanDistance(i, j, coordinates);
 					if (distance == 0) {
 						corr = 1d;
 						matrixR.setValueAt(i, j, varianceParameter * corr);
@@ -271,7 +254,7 @@ public final class StatisticalUtility {
 					}
 					break;
 				case EXPONENTIAL:
-					distance = getEuclideanDistance(i, j, coordinates);
+					distance = MathUtility.getEuclideanDistance(i, j, coordinates);
 					if (distance == 0) {
 						corr = 1d;
 						matrixR.setValueAt(i, j, varianceParameter * corr);
@@ -452,32 +435,81 @@ public final class StatisticalUtility {
 		}
 	}
 
-//	/**
-//	 * This method returns a sample from a population. 
-//	 * @param observations a list of observations that compose the population
-//	 * @param sampleSize the sample size (n)
-//	 * @param withReplacement a boolean to indicate whether the sample is with or without replacement
-//	 * @return a List that contains the sample
-//	 */
-//	public static List<Object> getSampleFromPopulation(List<?> observations, int sampleSize, boolean withReplacement) {
-//		if (sampleSize < 1) {
-//			throw new InvalidParameterException("The sample size must be at least of 1.");
-//		}
-//		List<Integer> sampleIndex = new ArrayList<Integer>();
-//		int index;
-//		while (sampleIndex.size() < sampleSize) {
-//			index = (int) Math.floor(getRandom().nextDouble() * observations.size());
-//			if (!sampleIndex.contains(index) || withReplacement) {
-//				sampleIndex.add(index);
-//			}
-//		}
-//		ArrayList<Object> sample = new ArrayList<Object>();
-//		for (Integer ind : sampleIndex) {
-//			sample.add(observations.get(ind));
-//		}
-//		return sample;
-//	}
+	/**
+	 * Return the quantile of a distribution estimated from a sample. <br>
+	 * <br>
+	 * The quantile is calculated following the Definition 8 found in <a href=https://doi.org/10.1080/00031305.1996.10473566>
+	 * Hyndman, R. J. and Fan, Y. 1996. Sample quantiles in statistical packages. The American Statistician
+	 * 50(4): 361-365. </a>
+	 * 
+	 * @param sample the sample of the distribution
+	 * @param p the probability of the quantile (between 0 and 1)
+	 * @return the estimated quantile of the distribution
+	 */
+	public static double getQuantileFromSample(List<Double> sample, double p) {
+		if (p < 0d || p > 1d)
+			throw new InvalidParameterException("The p argument must range from 0 to 1!");
+		if (sample == null || sample.isEmpty()) {
+			throw new InvalidParameterException("The sample argument should be a non empty list of doubles!");
+		}
+		List<Double> copyList = new ArrayList<Double>();
+		copyList.addAll(sample);
+		Collections.sort(copyList);
+		double N = copyList.size();
+		double h = (N + 1d/3) * p + 1d/3;
+		int h_floor = (int) Math.floor(h);
+		int h_ceiling = (int) Math.ceil(h);
+		double x_floor = copyList.get(h_floor - 1);
+		double q = x_floor + (h - h_floor) * (copyList.get(h_ceiling - 1) - x_floor);
+		return q;
+	}
+	
+	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p, int nReal) {
+		if (p < 0d || p > 1d)
+			throw new InvalidParameterException("The p argument must range from 0 to 1!");
+		if (sample == null || sample.isEmpty()) {
+			throw new InvalidParameterException("The sample argument should be a non empty list of doubles!");
+		}
+		if (nReal <= 0) {
+			throw new InvalidParameterException("The nReal argument should be a strictly positive integer (i.e. > 0)!");
+		}
+		MonteCarloEstimate estimate = new MonteCarloEstimate();
+		for (int i = 0; i < nReal; i++) {
+			List<Double> bootstrapSample = SamplingUtility.getSample(sample, sample.size(), true);
+			double quantile = StatisticalUtility.getQuantileFromSample(bootstrapSample, p);
+			estimate.addRealization(new Matrix(1,1,quantile,0));
+		}
+		return estimate;
+	}
 
+	
+	
+	/**
+	 * Return the quantile of a distribution calculated from the population. <br>
+	 * <br>
+	 * 
+	 * @param population the population
+	 * @param p the probability of the quantile (between 0 and 1)
+	 * @return the calculated quantile of the distribution
+	 */
+	public static double getQuantileFromPopulation(List<Double> population, double p) {
+		if (p < 0d || p > 1d)
+			throw new InvalidParameterException("The p argument must range from 0 to 1!");
+		if (population == null || population.isEmpty()) {
+			throw new InvalidParameterException("The population argument should be a non empty list of doubles!");
+		}
+		List<Double> copyList = new ArrayList<Double>();
+		copyList.addAll(population);
+		Collections.sort(copyList);
+		double N = copyList.size();
+		int h = (int) Math.round(p*N);
+		double q = copyList.get(h - 1);
+		return q;
+	}
+
+	
+	
+	
 	/**
 	 * This method returns the number of combinations.
 	 * @param n the number of units

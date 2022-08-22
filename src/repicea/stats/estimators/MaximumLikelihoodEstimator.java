@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,46 +18,166 @@
  */
 package repicea.stats.estimators;
 
+import java.security.InvalidParameterException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.logging.Level;
 
 import repicea.math.Matrix;
+import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
-import repicea.stats.data.StatisticalDataStructure;
+import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
+import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
+import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.CompositeLogLikelihood;
-import repicea.stats.model.StatisticalModel;
+import repicea.util.REpiceaLogManager;
 
 /**
- * This interface specifies if the optimizer is based on a maximum likelihood theory.
+ * Implement a maximum likelihood estimator based on 
+ * the Newton-Raphson algorithm.
  * @author Mathieu Fortin - August 2011
  */
-public class MaximumLikelihoodEstimator implements Estimator {
-	
-	protected boolean hasConverged;
-	protected GaussianEstimate parameterEstimate;
-	
-	protected final repicea.math.optimizer.NewtonRaphsonOptimizer nro;
+public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelihoodCompatibleModel> {
 
-	public MaximumLikelihoodEstimator() {
+	
+	public interface MaximumLikelihoodCompatibleModel extends EstimatorCompatibleModel {
+	
+		public double getConvergenceCriterion();
+
+		/**
+		 * Return the model log-likelihood function.
+		 * @return a CompositeLogLikelihood instance
+		 */
+		public CompositeLogLikelihood getCompleteLogLikelihood();
+		
+		/**
+		 * Set the parameters in the log-likelihood function.
+		 * @param beta a Matrix instance
+		 */
+		public default void setParameters(Matrix beta) {
+			for (int i = 0; i < beta.m_iRows; i++) {
+				getCompleteLogLikelihood().setParameterValue(i, beta.getValueAt(i, 0));
+			}
+		}
+
+		
+		
+	}
+	
+	
+	protected static class LikelihoodValue implements Comparable<LikelihoodValue> {
+
+		private double llk;
+		private Matrix beta;
+		
+		protected LikelihoodValue(Matrix beta, double llk) {
+			this.beta = beta.getDeepClone();
+			this.llk = llk;
+		}
+		
+		@Override
+		public int compareTo(LikelihoodValue arg0) {
+			double reference = ((LikelihoodValue) arg0).llk;
+			if (this.llk < reference) {
+				return 1;
+			} else if (this.llk == reference) {
+				return 0;
+			} else {
+				return -1;
+			}
+		}
+		
+		protected Matrix getParameters() {return beta;}
+	}
+
+	public static String LOGGER_NAME = "MLEstimator";
+	protected GaussianEstimate parameterEstimate;
+	protected final repicea.math.optimizer.NewtonRaphsonOptimizer nro;
+	
+	/**
+	 * Constructor. 
+	 */
+	public MaximumLikelihoodEstimator(MaximumLikelihoodCompatibleModel model) {
+		super(model);
 		nro = new repicea.math.optimizer.NewtonRaphsonOptimizer();
 	}
 	
 	
+	/**
+	 * Return the model parameters. <br>
+	 * <br>
+	 * A new Matrix instance is created each time this method is called.
+	 * @return a Matrix instance
+	 */
+	private Matrix getParameters(MaximumLikelihoodCompatibleModel model) {
+		int nbParms = model.getCompleteLogLikelihood().getNumberOfParameters();
+		Matrix beta = new Matrix(nbParms, 1);
+		for (int i = 0; i < nbParms; i++) {
+			beta.setValueAt(i, 0, model.getCompleteLogLikelihood().getParameterValue(i));
+		}
+		return beta;
+	}
+	
+	
+	/**
+	 * This method scans the log likelihood function within a range of values for a particular parameter.
+	 * @param parameterName the index of the parameter
+	 * @param start the starting value
+	 * @param end the ending value
+	 * @param step the step between these two values.
+	 */
+	public void gridSearch(int parameterName, double start, double end, double step) {
+		REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Initializing grid search...");
+		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
+		Matrix originalParameters = getParameters(model);
+		double llk;
+		for (double value = start; value < end + step; value+=step) {
+			Matrix beta = originalParameters.getDeepClone();
+			beta.setValueAt(parameterName, 0, value);
+			model.setParameters(beta);
+			model.getCompleteLogLikelihood().reset();
+			llk = model.getCompleteLogLikelihood().getValue();
+			likelihoodValues.add(new LikelihoodValue(beta, llk));
+			REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Parameters : " + beta.toString() + "; Log-likelihood : " + llk);
+		}
+		
+		Collections.sort(likelihoodValues);
+		LikelihoodValue lk;
+		Matrix bestFittingParameters = null;
+		for (int i = 0; i < likelihoodValues.size(); i++) {
+			lk = likelihoodValues.get(i);
+			if (!Double.isNaN(lk.llk)) {
+				bestFittingParameters = lk.getParameters();
+				break;
+			}
+		}
+		if (bestFittingParameters == null) {
+			throw new InvalidParameterException("All the likelihoods of the grid are NaN!");
+		} else {
+			model.setParameters(bestFittingParameters);
+		}
+	}
+
+	
 	@Override
-	public boolean doEstimation(StatisticalModel<? extends StatisticalDataStructure> model) throws EstimatorException {
+	public boolean doEstimation() throws EstimatorException {
 		nro.setConvergenceCriterion(model.getConvergenceCriterion());
 		
 		CompositeLogLikelihood llk = model.getCompleteLogLikelihood();
 		List<Integer> indices = new ArrayList<Integer>();
-		for (int i = 0; i < model.getParameters().m_iRows; i++) {
+		int nbParameters = model.getCompleteLogLikelihood().getNumberOfParameters();
+		for (int i = 0; i < nbParameters; i++) {
 			indices.add(i);
 		}
 		try {
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.INFO, LOGGER_NAME, "Starting optimization");
 			nro.optimize(llk, indices);
 		} catch (OptimizationException e) {
-			System.out.println("Newton-Raphson optimisation failed.");
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME, e.getMessage());
 			parameterEstimate = null;
 			return false;
 		}
@@ -90,4 +210,57 @@ public class MaximumLikelihoodEstimator implements Estimator {
 	@Override
 	public String toString() {return "Maximum likelihood estimator";}
 
+	/**
+	 * Sets the line search method. <br>
+	 * <br>
+	 *  
+	 * If the lsm parameter is null,
+	 * the line search method is set to LineSearchMethod.TEN_EQUAL 
+	 * by default.
+	 * @param lsm a LineSearchMethod enum
+	 */
+	public void setLineSearchMethod(LineSearchMethod lineSearchMethod) {
+		nro.setLineSearchMethod(lineSearchMethod);
+	}
+	
+	@Override
+	public DataSet getConvergenceStatusReport() {
+		NumberFormat formatter = NumberFormat.getInstance();
+		formatter.setMaximumFractionDigits(3);
+		formatter.setMinimumFractionDigits(3);
+		List<String> fieldNames = new ArrayList<String>();
+		fieldNames.add("Element");
+		fieldNames.add("Value");
+		DataSet dataSet = new DataSet(fieldNames);
+		Object[] record = new Object[2];
+		record[0] = "Converged";
+		record[1] = isConvergenceAchieved();
+		dataSet.addObservation(record);
+		record[0] = "Maximum log-likelihood";
+		record[1] = getMaximumLogLikelihood();
+		dataSet.addObservation(record);
+		record[0] = "AIC";
+		record[1] = - 2 * getMaximumLogLikelihood() + 2 * nro.getParametersAtMaximum().getNumberOfElements();
+		dataSet.addObservation(record);
+		record[0] = "BIC";
+		record[1] = - 2 * getMaximumLogLikelihood() + nro.getParametersAtMaximum().getNumberOfElements() * Math.log(model.getNumberOfObservations());
+		dataSet.addObservation(record);
+		return dataSet;
+	}
+
+
+	@Override
+	public String getReport() {
+		if (!isConvergenceAchieved()) {
+			return "The log-likelihood function has not been or cannot be optimized.";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			DataSet convergenceDataset = getConvergenceStatusReport();
+			sb.append(convergenceDataset.toString() + System.lineSeparator());
+			DataSet parameterDataset = getParameterEstimatesReport();
+			sb.append(parameterDataset.toString() + System.lineSeparator());
+			return sb.toString();
+		}
+
+	}
 }

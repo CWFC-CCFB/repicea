@@ -1,7 +1,7 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
- * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,8 +19,11 @@
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.List;
+
+import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
+import repicea.math.utility.MatrixUtility;
 
 /**
  * The TrapezoidalRule class implements the trapezoidal rule integration method.
@@ -29,7 +32,8 @@ import java.util.List;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public final class TrapezoidalRule extends NumericalIntegrationMethod {
+public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																					UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
 
 	private double resolution;
 	
@@ -54,9 +58,16 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod {
 		setXValuesFromListOfPoints(points);
 	}
 
-	private List<Double> setXValues() {
+	/**
+	 * Constructor for derived classes.
+	 */
+	protected TrapezoidalRule() {
+		super();
+	}
+
+	private void setXValues() {
 		if (Double.isNaN(getLowerBound()) || Double.isNaN(getUpperBound())) {
-			return null;
+			return;
 		} else {
 			double difference = getUpperBound() - getLowerBound();
 			double numberOfSectionsWithDigits = difference / resolution;
@@ -65,7 +76,6 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod {
 				numberOfSections++;			// add one section for the top section
 			}
 			numberOfSections++;
-			List<Double> output = new ArrayList<Double>();
 			double height;
 			int i = 0;
 			while (i < numberOfSections) {
@@ -73,26 +83,25 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod {
 				if (height >= getUpperBound()) {
 					height = getUpperBound();
 				}
-				output.add(height);
+				xValues.add(height);
 				i++;
 			}
-			return output;
 		}
 	}
 
 	/*
-	 * Calculates the weights based on the distance between the sections. The distances does not need to be even. 
+	 * Calculates the weights based on the distance between the sections. 
+	 * The distances does not need to be even. 
 	 * (non-Javadoc)
 	 * @see repicea.stats.integral.NumericalIntegrationMethod#getWeights()
 	 */
 	@Override
 	public List<Double> getWeights() {
-		if (weights == null) {
+		if (weights.isEmpty()) {
 			List<Double> xValues = getXValues();
 			if (xValues != null) {
-				weights = new ArrayList<Double>();
 				double diff;
-				double lag = 0;
+				double lag = 0d;
 				for (int i = 0; i < xValues.size(); i++) {
 					if (i == xValues.size() - 1) {
 						diff = 0;
@@ -110,18 +119,17 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod {
 
 	@Override
 	public List<Double> getXValues() {
-		if (xValues == null) {
-			xValues = setXValues();
+		if (xValues.isEmpty()) {
+			setXValues();
 		}
 		return xValues;
 	}
 
 	@Override
 	public List<Double> getRescalingFactors() {
-		if (rescalingFactors == null) {
+		if (rescalingFactors.isEmpty()) {
 			List<Double> xValues = getXValues();
-			if (xValues != null) {
-				rescalingFactors = new ArrayList<Double>();
+			if (!xValues.isEmpty()) {
 				for (int i = 0; i < xValues.size(); i++) {
 					rescalingFactors.add(1d);
 				}
@@ -130,8 +138,76 @@ public final class TrapezoidalRule extends NumericalIntegrationMethod {
 		return rescalingFactors;
 	}
 
-
+	@Override
+	public double getIntegralApproximation(EvaluableFunction<Double> functionToEvaluate, 
+											int index,
+											boolean isParameter) {
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+		double sum = 0d;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			sum += functionToEvaluate.getValue() * getWeights().get(i) * getRescalingFactors().get(i);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+		
+		return sum;
+	}
 	
+	
+	@Override
+	public Matrix getIntegralApproximationForMatrixFunction(EvaluableFunction<Matrix> functionToEvaluate, 
+											int index,
+											boolean isParameter) {
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+		
+		Matrix sum = null;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			Matrix value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i) * getRescalingFactors().get(i));
+			if (i == 0) {
+				sum = value;
+			} else {
+				MatrixUtility.add(sum, value);
+			}
+//			sum = i == 0 ? value : sum.add(value);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+		
+		return sum;
+	}
+
 //	public static void main(String[] args) {
 //		TrapezoidalRule tr = new TrapezoidalRule(3);
 //		tr.setLowerBound(0);

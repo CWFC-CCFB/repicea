@@ -19,6 +19,7 @@
 package repicea.stats.data;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -40,6 +41,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	protected boolean isInterceptModel;
 	protected Matrix vectorY;
 	protected Matrix matrixX;
+	protected List<String> effects;
 	
 	/**
 	 * General constructor.
@@ -136,7 +138,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		vectorY = dataSet.getVectorOfThisField(yName);
 		String modelEffects = responseAndFixedEffects.get(1);
 
-		List<String> effects = ObjectUtility.decomposeUsingToken(modelEffects, "+");
+		effects = ObjectUtility.decomposeUsingToken(modelEffects, "+");
 
 		for (String effectName : effects) {
 			StringTokenizer tkzInclusiveInteraction = new StringTokenizer(effectName, "*");
@@ -207,5 +209,18 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	@Override
 	public DataSet getDataSet() {return dataSet;}
 
+	@Override
+	public int indexOfThisEffect(String effect) {
+		int index = effects.indexOf(effect);
+		if (index != -1 && isInterceptModel()) {
+			return index + 1;
+		} else {
+			return index;
+		}
+	}
 	
+	@Override
+	public List<String> getEffectList() {
+		return new ArrayList<String>(effects);
+	}
 }

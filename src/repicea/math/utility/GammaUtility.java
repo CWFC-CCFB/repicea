@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.math;
+package repicea.math.utility;
 
 import java.security.InvalidParameterException;
 
@@ -24,7 +24,7 @@ import java.security.InvalidParameterException;
  * This class implements the Gamma function.
  * @author Mathieu Fortin - November 2015
  */
-public class GammaFunction {
+public class GammaUtility {
 	
 	private static final double[] COEF = new double[]{1.000000000000000174663, 5716.400188274341379136, -14815.30426768413909044, 14291.49277657478554025,
     		-6348.160217641458813289, 1301.608286058321874105, -108.1767053514369634679, 2.605696505611755827729, -0.7423452510201416151527e-2,

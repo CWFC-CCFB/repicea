@@ -18,10 +18,14 @@
  */
 package repicea.math.optimizer;
 
+import java.security.InvalidParameterException;
 import java.util.List;
+import java.util.logging.Level;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.utility.MatrixUtility;
+import repicea.util.REpiceaLogManager;
 
 /**
  * The NewtonRaphsonOptimizer class implements the Optimizer interface. It optimizes a log-likelihood function using the
@@ -29,17 +33,36 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - June 2011
  */
 public class NewtonRaphsonOptimizer extends AbstractOptimizer {
-
-	public final static String InnerIterationStarted = "InnerIterationStarted";
-//	public final static String OuterIterationStarted = "OuterIterationStarted";
 	
-	protected boolean verbose = false;
-	protected int maxNumberOfIterations = 20;
+	public final static String InnerIterationStarted = "InnerIterationStarted";
+
+	public static String LOGGER_NAME = "NewtonRaphsonOptimizer";
+	
+	protected int maxNumberOfIterations = 50;
 	protected double gradientCriterion = 1E-3;
 	private int iterationID;
+	private LineSearchMethod lineSearchMethod;
+	
+	public NewtonRaphsonOptimizer(LineSearchMethod lineSearchMethod) {
+		this.convergenceCriterion = 1E-8; // default value
+		setLineSearchMethod(lineSearchMethod);
+	}
 	
 	public NewtonRaphsonOptimizer() {
-		this.convergenceCriterion = 1E-8; // default value
+		this(null);
+	}
+	
+	/**
+	 * Sets the line search method. <br>
+	 * <br>
+	 *  
+	 * If the lsm parameter is null,
+	 * the line search method is set to LineSearchMethod.TEN_EQUAL 
+	 * by default.
+	 * @param lsm a LineSearchMethod enum
+	 */
+	public void setLineSearchMethod(LineSearchMethod lsm) {
+		lineSearchMethod = lsm == null ? LineSearchMethod.TEN_EQUAL : lsm;
 	}
 
 	/**
@@ -48,36 +71,39 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 	
 	
 	/**
-	 * This method optimize the log-likelihood function using the Newton-Raphson optimisation step.
+	 * This method optimize the log-likelihood function using the Newton-Raphson optimization step.
 	 * @param function an AbstractMathematicalFunction instance
 	 * @param indicesOfParametersToOptimize a list of the indices of the parameters to be optimized
-	 * @param originalBeta the vector that contains the parameters of the previous outer optimisation
-	 * @param optimisationStep the optimisation step from the Newton-Raphson algorithm
-	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimisation
+	 * @param originalBeta the vector that contains the parameters of the previous outer optimization
+	 * @param optimisationStep the optimization step from the Newton-Raphson algorithm
+	 * @param previousLogLikelihood the value of the log-likelihood function in the last outer optimization
 	 * @param lineSearchMethod
 	 * @return the value of the function
-	 * @throws OptimisationException if the inner optimisation is not successful
+	 * @throws OptimisationException if the inner optimization is not successful
 	 */
-	protected double runInnerOptimisation(AbstractMathematicalFunction function, 
+	protected double runInnerOptimisation(MathematicalFunction function, 
 			List<Integer> indicesOfParametersToOptimize,
 			Matrix originalBeta, 
 			Matrix optimisationStep,
-			double previousLogLikelihood,
-			AbstractOptimizer.LineSearchMethod lineSearchMethod) throws OptimizationException {
+			double previousLogLikelihood) throws OptimizationException {
 		
 		int numberSubIter = 0;
 		int maxNumberOfSubiterations = (Integer) lineSearchMethod.getParameter();
 		
-		double scalingFactor = 1d;
+		double scalingFactor;
 		double currentLlkValue;
 		
 		do {
 			fireOptimizerEvent(NewtonRaphsonOptimizer.InnerIterationStarted);
-			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor - numberSubIter * .1));
-			setParameters(function, indicesOfParametersToOptimize, newBeta);
-			currentLlkValue = function.getValue();
-			if (isVerboseEnabled()) {
-				System.out.println("    Subiteration : " + numberSubIter + "; Log-likelihood : " + currentLlkValue);
+			scalingFactor = getScalingFactor(numberSubIter);
+			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor));
+			if (areParametersWithinBounds(function, newBeta)) {
+				setParameters(function, indicesOfParametersToOptimize, newBeta);
+				currentLlkValue = function.getValue();
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Log-likelihood : " + currentLlkValue);
+			} else {
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Some parameters exceed bounds!");
+				currentLlkValue = Double.NaN;
 			}
 			numberSubIter++;
 		} while ((Double.isNaN(currentLlkValue) || currentLlkValue < previousLogLikelihood) && numberSubIter < maxNumberOfSubiterations); // loop if the number of iterations is not over the maximum number and either the likelihood is still higher or non defined
@@ -89,8 +115,31 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		}
 	}
 	
+	private boolean areParametersWithinBounds(MathematicalFunction function, Matrix beta) {
+		for (int i = 0; i < beta.m_iRows; i++) {
+			if (!function.isThisParameterValueWithinBounds(i, beta.getValueAt(i, 0))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private double getScalingFactor(int numberSubIter) {
+		switch(lineSearchMethod) {
+		case TEN_EQUAL:
+			return 1d - numberSubIter * .1;
+		case SINGLE_TRIAL:
+			return 1d;
+		case HALF_STEP:
+			return 1d * Math.pow(0.5, numberSubIter);
+		default:
+			throw new InvalidParameterException("The line search method " + lineSearchMethod.name() + " has not been implemented yet!");
+		}
+	}
+
 	@Override
-	public boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
+	public boolean optimize(MathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException {
+		convergenceAchieved = false;
 
 		if (function instanceof OptimizerListener) {
 			addOptimizerListener((OptimizerListener) function);
@@ -99,45 +148,59 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		fireOptimizerEvent(OptimizerListener.optimizationStarted);
 		
 		double value0 = function.getValue();
+		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Initial parameter estimates = " + function.getParameters().toString() + "; Initial LLK = " + value0);
 		Matrix gradient = function.getGradient();
+		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Gradient = " + gradient.toString());
 		Matrix hessian = function.getHessian();
 				
 		iterationID = 0;
 		
 		double gconv = calculateConvergence(gradient, hessian, value0);
-		
-		convergenceAchieved = false;
 		if (Math.abs(gconv) < convergenceCriterion) {
 			convergenceAchieved = true;
 		}
-		Matrix currentBeta = null;
+		Matrix currentBeta = function.getParameters();
+		double previousLLK = 0;
+		double fconv;
 		try {
 			while (!convergenceAchieved && iterationID <= maxNumberOfIterations) {
 				iterationID++;
 				Matrix optimisationStep = hessian.getInverseMatrix().multiply(gradient).scalarMultiply(-1d);
-				
-				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Optimization step at iteration " + iterationID + " = " + optimisationStep.toString());
 
+				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
+				previousLLK = value0;	
 				value0 = runInnerOptimisation(function, 
 						indicesOfParametersToOptimize, 
 						originalBeta, 
 						optimisationStep, 
-						value0, 
-						LineSearchMethod.TEN_EQUAL);		// if it does not throw an Exception, it means the inner optimisation was successful. 
+						value0);		// if it does not throw an Exception, it means the inner optimisation was successful. 
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "LLK at iteration " + iterationID + " = " + value0);
+
 				gradient = function.getGradient();
 				hessian = function.getHessian();
 				currentBeta = extractParameters(function, indicesOfParametersToOptimize);
+				boolean originalHessian = true;
 				gconv = calculateConvergence(gradient, hessian, value0);
+				fconv = Math.abs(value0 - previousLLK) / Math.abs(previousLLK);
+				int iterForHessianCorrection = 0;
+				while (gconv < 0 && iterForHessianCorrection < 1000) {
+					originalHessian = false;
+					MatrixUtility.add(hessian, Matrix.getIdentityMatrix(hessian.m_iRows));
+					gconv = calculateConvergence(gradient, hessian, value0);
+					iterForHessianCorrection++;
+				}
+				if (!originalHessian) {
+					REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Hessian was not positive-definite!");
+				}
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; gconv : " + gconv + "; parms : " + currentBeta.toString() + "; gradient : " + gradient.toString());
 				
 				if (gconv < 0) {
-					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5);
-					System.out.println("GConv is negative!");
-					throw new OptimizationException("Convergence could not be achieved after " + ((Integer) iterationID).toString() + " iterations!");
+					REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "GConv is negative!");
+					convergenceAchieved = !gradient.getAbsoluteValue().anyElementLargerThan(1E-5) || fconv < 1E-8;
+					break;
 				} else if (gconv < convergenceCriterion) {
 					convergenceAchieved = true;
-				}
-				if (verbose) {
-					System.out.println("Iteration : " + iterationID + "; Log-likelihood : " + value0 + "; df : " + gconv + "; parms : " + currentBeta.toString());
 				}
 			}  
 
@@ -146,7 +209,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			}
 
 			if (gradient.getAbsoluteValue().anyElementLargerThan(gradientCriterion)) {
-				System.out.println("A least one element of the gradient vector is larger than 1E-3.");
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "A least one element of the gradient vector is larger than 1E-3.");
 			}
 
 			optimalValue = value0;
@@ -165,7 +228,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		}
 	}
 	
-	private Matrix extractParameters(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) {
+	private Matrix extractParameters(MathematicalFunction function, List<Integer> indicesOfParametersToOptimize) {
 		Matrix beta = new Matrix(indicesOfParametersToOptimize.size(),1);
 		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
 			int parameterIndex = indicesOfParametersToOptimize.get(i);
@@ -174,7 +237,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		return beta;
 	}
 
-	private void setParameters(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize, Matrix newBeta) {
+	private void setParameters(MathematicalFunction function, List<Integer> indicesOfParametersToOptimize, Matrix newBeta) {
 		for (int i = 0; i < indicesOfParametersToOptimize.size(); i++) {
 			int index = indicesOfParametersToOptimize.get(i);
 			function.setParameterValue(index, newBeta.getValueAt(i, 0));
@@ -207,12 +270,5 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 			return -1;
 		}
 	}
-
-	/**
-	 * This method enables the verbose, i.e. some messages will be displayed in the console. 
-	 * The default verbose value is false.
-	 * @param verbose a boolean
-	 */
-	public void setVerbose(boolean verbose) {this.verbose = verbose;}
 	
 }

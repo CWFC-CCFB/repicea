@@ -21,8 +21,8 @@ package repicea.stats.model.glm;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 import repicea.stats.LinearStatisticalExpression;
 
@@ -33,7 +33,7 @@ import repicea.stats.LinearStatisticalExpression;
  * @author Mathieu Fortin - May 2012
  */
 @SuppressWarnings("serial")
-public final class LinkFunction extends AbstractMathematicalFunctionWrapper implements Serializable {
+public class LinkFunction extends AbstractMathematicalFunctionWrapper implements Serializable {
 	
 	public static enum Type {Logit, Log, CLogLog}
 	
@@ -54,7 +54,7 @@ public final class LinkFunction extends AbstractMathematicalFunctionWrapper impl
 	 * @param eta an AbstractMathematicalFunction instance
 	 * @throws InvalidParameterException if type is null
 	 */
-	public LinkFunction(Type type, AbstractMathematicalFunction eta) {
+	public LinkFunction(Type type, MathematicalFunction eta) {
 		super(eta);
 		if (type == null) {
 			this.type = Type.Logit;
@@ -110,7 +110,7 @@ public final class LinkFunction extends AbstractMathematicalFunctionWrapper impl
 
 	@Override
 	public Matrix getHessian() {
-		AbstractMathematicalFunction eta = getOriginalFunction();
+		MathematicalFunction eta = getOriginalFunction();
 		double expEta = Math.exp(eta.getValue());
 		Matrix gradientProduct = eta.getGradient().multiply(eta.getGradient().transpose());
 		

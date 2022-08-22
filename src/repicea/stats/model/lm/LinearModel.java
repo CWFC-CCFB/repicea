@@ -18,6 +18,8 @@
  */
 package repicea.stats.model.lm;
 
+import java.util.List;
+
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
@@ -25,21 +27,27 @@ import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.OLSEstimator;
+import repicea.stats.estimators.OLSEstimator.OLSCompatibleModel;
 import repicea.stats.model.AbstractStatisticalModel;
+import repicea.stats.model.PredictableModel;
 
 /**
  * The LinearModel is a traditional model fitted with an Ordinary Least Squares estimator.
  * @author Mathieu Fortin - November 2012
  */
-public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructure> {
+public class LinearModel extends AbstractStatisticalModel implements PredictableModel, OLSCompatibleModel {
 
+	private final StatisticalDataStructure dataStruct;
+	
 	/**
 	 * Constructor.
 	 * @param dataSet a DataSet instance
 	 * @param modelDefinition a model definition
 	 */
 	public LinearModel(DataSet dataSet, String modelDefinition) {
-		super(dataSet);
+		super();
+		dataStruct = new GenericStatisticalDataStructure(dataSet);
+
 		try {
 			setModelDefinition(modelDefinition);
 		} catch (StatisticalDataException e) {
@@ -56,10 +64,10 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	@Override
 	public void setParameters(Matrix beta) {}
 
-	@Override
-	public Matrix getParameters() {
-		return getEstimator().getParameterEstimates().getMean();
-	}
+//	@Override
+//	public Matrix getParameters() {
+//		return getEstimator().getParameterEstimates().getMean();
+//	}
 	
 	/**
 	 * This method returns the residual variance only if the optimizer is an instance
@@ -76,20 +84,13 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 
 	@Override
 	public Matrix getPredicted() {
-		return getDataStructure().getMatrixX().multiply(getParameters());
+		return getMatrixX().multiply(getParameters());
 	}
 
 	@Override
 	public Matrix getResiduals() {
-		return getDataStructure().getVectorY().subtract(getPredicted());
+		return getVectorY().subtract(getPredicted());
 	}
-
-	/*
-	 * Useless (non-Javadoc)
-	 * @see repicea.stats.model.AbstractStatisticalModel#setOverallLLK()
-	 */
-	@Override
-	protected void setCompleteLLK() {}
 
 	/*
 	 * Useless for this class (non-Javadoc)
@@ -97,12 +98,39 @@ public class LinearModel extends AbstractStatisticalModel<StatisticalDataStructu
 	 */
 	@Override
 	protected Estimator instantiateDefaultEstimator() {
-		return new OLSEstimator();
+		return new OLSEstimator(this);
 	}
+
+
+	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
+		super.setModelDefinition(modelDefinition);
+		dataStruct.constructMatrices(modelDefinition);
+	}
+
 
 	@Override
-	protected GenericStatisticalDataStructure getDataStructureFromDataSet(DataSet dataSet) {
-		return new GenericStatisticalDataStructure(dataSet);
+	public Matrix getMatrixX() {
+		return dataStruct.getMatrixX();
 	}
 
+
+	@Override
+	public Matrix getVectorY() {
+		return dataStruct.getVectorY();
+	}
+
+
+	@Override
+	public int getNumberOfObservations() {
+		return dataStruct.getNumberOfObservations();
+	}
+
+
+	@Override
+	public boolean isInterceptModel() {return dataStruct.isInterceptModel();}
+
+
+	@Override
+	public List<String> getEffectList() {return dataStruct.getEffectList();}
+	
 }

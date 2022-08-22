@@ -54,15 +54,8 @@ public abstract class CopulaExpression extends AbstractMathematicalFunctionWrapp
 	
 	protected abstract void setX(int indexFirstObservation, int indexSecondObservation);
 	
-	protected void initialize(StatisticalModel<?> model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
+	protected void initialize(StatisticalModel model, HierarchicalStatisticalDataStructure data) throws StatisticalDataException {
 		data.setHierarchicalStructureLevel(levels);
 	}
-	
-	public void setX(Matrix x) {getOriginalFunction().setX(x);}
-	
-	public void setBeta(Matrix beta) {getOriginalFunction().setBeta(beta);}
-	
-	public Matrix getBeta() {return getOriginalFunction().getBeta();}
-
 	
 }

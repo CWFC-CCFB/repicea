@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -19,29 +19,41 @@
 package repicea.stats.model.glm;
 
 
+import java.security.InvalidParameterException;
+import java.util.List;
+
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
-import repicea.stats.data.GenericHierarchicalStatisticalDataStructure;
-import repicea.stats.data.HierarchicalStatisticalDataStructure;
+import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.AbstractStatisticalModel;
-import repicea.stats.model.CompositeLogLikelihood;
+import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.PredictableModel;
+import repicea.stats.model.WrappedIndividualLogLikelihood;
 import repicea.stats.model.glm.LinkFunction.Type;
 
 /**
  * This class implements generalized linear models. 
  * @author Mathieu Fortin - August 2011
  */
-public class GeneralizedLinearModel extends AbstractStatisticalModel<HierarchicalStatisticalDataStructure> {
+public class GeneralizedLinearModel extends AbstractStatisticalModel implements MaximumLikelihoodCompatibleModel, PredictableModel {
+
+
 	
-	protected LinkFunction.Type linkFunctionType;
+	private final StatisticalDataStructure dataStruct;
+	private final CompositeLogLikelihoodWithExplanatoryVariables completeLLK;
+	protected final IndividualLogLikelihood individualLLK;
+	protected final LinkFunction lf;
 	protected Matrix matrixX;		// reference
 	protected Matrix y;				// reference
+	
+	private double convergenceCriterion = 1E-8;
 
-	protected IndividualLogLikelihood individualLLK;
 	
 
 	/**
@@ -52,21 +64,42 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	 * @param startingBeta the starting values of the parameters
 	 */
 	public GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingBeta) {
-		super(dataSet);
+		this(dataSet, linkFunctionType, modelDefinition, null, startingBeta, null);
+	}
+	
+	/**
+	 * Generic private constructor.
+	 * @param dataSet
+	 * @param linkFunctionType
+	 * @param modelDefinition
+	 * @param llk
+	 * @param startingBeta
+	 */
+	protected GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta, Object additionalParm) {
+		super();
+		dataStruct = createDataStructure(dataSet, additionalParm);
 
 		// then define the model effects and retrieve matrix X and vector y
 		try {
-			setModelDefinition(modelDefinition);
+			setModelDefinition(modelDefinition, additionalParm);
 		} catch (StatisticalDataException e) {
 			System.out.println("Unable to define this model : " + modelDefinition);
 			e.printStackTrace();
 		}
-		initializeLinkFunction(linkFunctionType);
-		this.linkFunctionType = linkFunctionType;
-		// first initialize the model structure
-		setParameters(startingBeta);
+		lf = createLinkFunction(linkFunctionType, additionalParm);
+		if (llk != null) {
+			individualLLK = llk;
+		} else {
+			individualLLK = createIndividualLLK(additionalParm);
+		}
+		completeLLK = createCompleteLLK(additionalParm);
+		if (startingBeta == null) {
+			setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+		} else {
+			setParameters(startingBeta);
+		}
 	}
-
+	
 	/**
 	 * Constructor using a vector of 0s as starting values for the parameters
 	 * @param dataSet the fitting data
@@ -81,11 +114,28 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	 * Constructor for derived class.
 	 */
 	protected GeneralizedLinearModel(GeneralizedLinearModel glm) {
-		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition());
-		this.matrixX = glm.matrixX;
-		this.y = glm.y;
+		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition(), glm.individualLLK, null, null);
+	}
 
-		this.individualLLK = glm.individualLLK;
+
+	protected StatisticalDataStructure createDataStructure(DataSet dataSet, Object addParm) {
+		return new GenericStatisticalDataStructure(dataSet);
+	}
+
+	protected StatisticalDataStructure getDataStructure() {
+		return (GenericStatisticalDataStructure) dataStruct;
+	}
+	
+	protected CompositeLogLikelihoodWithExplanatoryVariables createCompleteLLK(Object addParm) {
+		return new CompositeLogLikelihoodWithExplanatoryVariables(individualLLK, matrixX, y);
+	}
+
+	protected LinkFunction createLinkFunction(Type linkFunctionType, Object addParm) {
+		return new LinkFunction(linkFunctionType);
+	}
+
+	protected IndividualLogLikelihood createIndividualLLK(Object addParm) {
+		return new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
 	}
 
 	/**
@@ -93,42 +143,35 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	 * @return a LinkFunction.Type enum variable
 	 */
 	public LinkFunction.Type getLinkFunctionType() {
-		return linkFunctionType;
+		return lf.getType();
 	}
 	
 
 	@Override
-	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
-		super.setModelDefinition(modelDefinition);
+	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
+		super.setModelDefinition(modelDefinition, additionalParm);
+		getDataStructure().constructMatrices(modelDefinition);
 		matrixX = getDataStructure().getMatrixX();
 		y = getDataStructure().getVectorY();
 	}
 	
-	protected void initializeLinkFunction(Type linkFunctionType) {
-//		LinearStatisticalExpression le = new LinearStatisticalExpression();
-		LinkFunction lf = new LinkFunction(linkFunctionType);
-//		lf.setParameterValue(LFParameter.Eta, le);
-		
-		individualLLK = new IndividualLogLikelihood(new LikelihoodGLM(lf));
-		setCompleteLLK();
-	}
 
 	
-	@Override
-	public void setParameters(Matrix beta) {
-		if (beta == null) {
-			individualLLK.setBeta(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
-		} else {
-			individualLLK.setBeta(beta);
-		}
-	}
+//	@Override
+//	public void setParameters(Matrix beta) {
+//		if (beta == null) {
+//			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
+//		} else {
+//			individualLLK.setParameters(beta);
+//		}
+//	}
 		
-	@Override
-	public Matrix getParameters() {return individualLLK.getBeta();}
+//	@Override
+//	public Matrix getParameters() {return individualLLK.getParameters();}
 
 	@Override
 	protected Estimator instantiateDefaultEstimator() {
-		return new MaximumLikelihoodEstimator();
+		return new MaximumLikelihoodEstimator(this);
 	}
 
 	@Override
@@ -136,15 +179,55 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 		return "Generalized linear model";
 	}
 
+//	/**
+//	 * This method scans the log likelihood function within a range of values for a particular parameter.
+//	 * @param parameterName the index of the parameter
+//	 * @param start the starting value
+//	 * @param end the ending value
+//	 * @param step the step between these two values.
+//	 */
+//	public void gridSearch(int parameterName, double start, double end, double step) {
+//		System.out.println("Initializing grid search...");
+//		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
+//		Matrix originalParameters = getParameters();
+//		double llk;
+//		for (double value = start; value < end + step; value+=step) {
+//			Matrix beta = originalParameters.getDeepClone();
+//			beta.setValueAt(parameterName, 0, value);
+//			setParameters(beta);
+//			completeLLK.reset();
+//			llk = completeLLK.getValue();
+//			likelihoodValues.add(new LikelihoodValue(beta, llk));
+//			REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Parameter value : " + value + "; Log-likelihood : " + llk);
+//		}
+//		
+//		Collections.sort(likelihoodValues);
+//		LikelihoodValue lk;
+//		Matrix bestFittingParameters = null;
+//		for (int i = 0; i < likelihoodValues.size(); i++) {
+//			lk = likelihoodValues.get(i);
+//			if (!Double.isNaN(lk.llk)) {
+//				bestFittingParameters = lk.getParameters();
+//				break;
+//			}
+//		}
+//		if (bestFittingParameters == null) {
+//			throw new InvalidParameterException("All the likelihoods of the grid are NaN!");
+//		} else {
+//			setParameters(bestFittingParameters);
+//		}
+//	}
+
+	@Override
+	public int getNumberOfObservations() {return getDataStructure().getNumberOfObservations();}
 	
 	public Matrix getLinearPredictions() {
 		if (getEstimator().isConvergenceAchieved()) {
-			int nbObs = getDataStructure().getNumberOfObservations();
-			Matrix pred = new Matrix(getDataStructure().getNumberOfObservations(),2);
+			Matrix pred = new Matrix(getNumberOfObservations(), 2);
 			Matrix beta = getEstimator().getParameterEstimates().getMean().getSubMatrix(0, matrixX.m_iCols - 1, 0, 0);
 			Matrix linearPred = matrixX.multiply(beta);
 			Matrix omega = getEstimator().getParameterEstimates().getVariance().getSubMatrix(0, matrixX.m_iCols - 1, 0, matrixX.m_iCols - 1);
-			for (int i = 0; i < nbObs; i++) {
+			for (int i = 0; i < getNumberOfObservations(); i++) {
 				pred.setValueAt(i, 0, linearPred.getValueAt(i, 0));
 				Matrix x_i = matrixX.getSubMatrix(i, i, 0, matrixX.m_iCols - 1);
 				pred.setValueAt(i, 1, x_i.multiply(omega).multiply(x_i.transpose()).getValueAt(0, 0));
@@ -155,12 +238,11 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 		}
 	}
 
-	
 	@Override
 	public Matrix getPredicted() {
 		if (getEstimator().isConvergenceAchieved()) {
-			getCompleteLogLikelihood().setBeta(getEstimator().getParameterEstimates().getMean());
-			return getCompleteLogLikelihood().getPredictions();
+			completeLLK.setParameters(getEstimator().getParameterEstimates().getMean());
+			return completeLLK.getPredictions();
 		} else {
 			return null;
 		}
@@ -176,11 +258,24 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel<Hierarchica
 	}
 
 	@Override
-	protected HierarchicalStatisticalDataStructure getDataStructureFromDataSet(DataSet dataSet) {
-		return new GenericHierarchicalStatisticalDataStructure(dataSet);
-	}
+	public CompositeLogLikelihoodWithExplanatoryVariables getCompleteLogLikelihood() {return completeLLK;}
 
 	@Override
-	protected void setCompleteLLK() {completeLLK = new CompositeLogLikelihood(individualLLK, matrixX, y);}
+	public boolean isInterceptModel() {return getDataStructure().isInterceptModel();}
+
+	@Override
+	public List<String> getEffectList() {return getDataStructure().getEffectList();}
+
+	@Override
+	public double getConvergenceCriterion() {return convergenceCriterion;}
+	
+	public void setConvergenceCriterion(double d) {
+		if (d < 1E-16) {
+			throw new InvalidParameterException("The minimum value for the convergence criterion is 1E-16");
+		} 
+		convergenceCriterion = d;
+	}
+
+
 
 }

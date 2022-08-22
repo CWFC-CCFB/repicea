@@ -19,6 +19,7 @@
 package repicea.math;
 
 import java.security.InvalidParameterException;
+import java.util.Map;
 
 /**
  * The AbstractMathematicalFunctionWrapper class makes it possible to create a function
@@ -29,13 +30,13 @@ import java.security.InvalidParameterException;
 @SuppressWarnings("serial")
 public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathematicalFunction {
 
-	private final AbstractMathematicalFunction originalFunction;
+	private final MathematicalFunction originalFunction;
 
 	/**
 	 * Constructor.
 	 * @param originalFunction the nested AbstractMathematicalFunction instance
 	 */
-	public AbstractMathematicalFunctionWrapper(AbstractMathematicalFunction originalFunction) {
+	public AbstractMathematicalFunctionWrapper(MathematicalFunction originalFunction) {
 		if (originalFunction == null) {
 			throw new InvalidParameterException("The originalFunction parameter cannot be null");
 		}
@@ -46,7 +47,7 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 	 * This method returns the original function.
 	 * @return an AbstractMathematicalFunction instance
 	 */
-	public AbstractMathematicalFunction getOriginalFunction() {return originalFunction;}
+	public MathematicalFunction getOriginalFunction() {return originalFunction;}
 	
 	@Override
 	public abstract Double getValue();
@@ -86,17 +87,21 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 
 	
 	@Override
-	public void setX(Matrix x) {getOriginalFunction().setX(x);}
+	public void setVariables(Matrix xVector) {getOriginalFunction().setVariables(xVector);}
 	
 	@Override
-	public void setBeta(Matrix beta) {getOriginalFunction().setBeta(beta);}
+	public void setParameters(Matrix beta) {getOriginalFunction().setParameters(beta);}
 	
 	@Override
-	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+	public Matrix getParameters() {return getOriginalFunction().getParameters();}
 
 	@Override
 	public void setBounds(int parameterIndex, ParameterBound bound) {
 		getOriginalFunction().setBounds(parameterIndex, bound);
 	}
 
+	@Override
+	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue) {
+		return getOriginalFunction().isThisParameterValueWithinBounds(parameterIndex, parameterValue);
+	}
 }

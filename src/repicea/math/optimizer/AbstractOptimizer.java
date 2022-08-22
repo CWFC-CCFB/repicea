@@ -21,7 +21,7 @@ package repicea.math.optimizer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import repicea.math.AbstractMathematicalFunction;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 
 /**
@@ -33,7 +33,8 @@ public abstract class AbstractOptimizer {
 	
 	public static enum LineSearchMethod {
 		TEN_EQUAL(10),	
-		SINGLE_TRIAL(0);
+		SINGLE_TRIAL(0),
+		HALF_STEP(20);
 		private Number numberOfTrial;
 
 		private LineSearchMethod(int numberOfTrial) {
@@ -65,13 +66,11 @@ public abstract class AbstractOptimizer {
 	protected Matrix betaVector;
 	protected Matrix hessianMatrix;
 
-	private boolean verboseEnabled;
 	
 	/**
 	 * Default constructor.
 	 */
 	public AbstractOptimizer() {
-		verboseEnabled = false;
 		listeners = new CopyOnWriteArrayList<OptimizerListener>();
 	}
 	
@@ -91,25 +90,6 @@ public abstract class AbstractOptimizer {
 
 	public Matrix getHessianAtMaximum() {return hessianMatrix;}
 
-//	public Matrix getCorrelationMatrix() {
-//		Matrix std;
-//		try {
-//			Matrix omegaMatrix = betaVector.getVariance();
-//			std = omegaMatrix.diagonalVector().matrixDiagonal().getLowerCholTriangle().diagonalVector();
-//			Matrix correlationMatrix = omegaMatrix.elementWiseDivide(std.multiply(std.transpose()));
-//			return correlationMatrix;
-//		} catch (Exception e) {
-//			return null;
-//		}
-//	}
-
-	/**
-	 * This method sets the verbose to true or false.
-	 * @param verboseEnabled true to get the information about the subiteration or false (DEFAULT VALUE).
-	 */
-	public void setVerboseEnabled(boolean verboseEnabled) {this.verboseEnabled = verboseEnabled;}
-
-	protected boolean isVerboseEnabled() {return verboseEnabled;}
 	
 	@Override
 	public String toString() {
@@ -137,7 +117,7 @@ public abstract class AbstractOptimizer {
 	 * @param function a AbstractMathematicalFunction object
 	 * @param indicesOfParametersToOptimize	a List instance that contains the indices of the parameters to be optimized
 	 */
-	public abstract boolean optimize(AbstractMathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
+	public abstract boolean optimize(MathematicalFunction function, List<Integer> indicesOfParametersToOptimize) throws OptimizationException;
 
 	protected void fireOptimizerEvent(String actionString) {
 		for (OptimizerListener listener : listeners) {

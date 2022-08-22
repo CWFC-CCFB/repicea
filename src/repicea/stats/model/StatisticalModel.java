@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -19,41 +19,31 @@
 package repicea.stats.model;
 
 import repicea.math.Matrix;
-import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.Estimator;
 
 /**
  * This interface defines the services provided by a statistical model.
  * @author Mathieu Fortin - October 2011
  */
-public interface StatisticalModel<P extends StatisticalDataStructure> {
+public interface StatisticalModel { 
 
 	/**
-	 * This method returns the model log-likelihood function.
-	 * @return a LogLikelihood instance
+	 * Return the parameter estimates produced by the estimator.
+	 * @return a Matrix instance
 	 */
-	public CompositeLogLikelihood getCompleteLogLikelihood();
-	public void setParameters(Matrix beta);
-	public Matrix getParameters();
-	
+	public default Matrix getParameters() {
+		if (getEstimator().isConvergenceAchieved()) {
+			return getEstimator().getParameterEstimates().getMean();
+		} else {
+			throw new UnsupportedOperationException("The model parameters have not been estimated yet!");
+		}
+	}
+
 	/**
 	 * This method returns the results of the fit on screen.
 	 */
 	public void getSummary();
 	
-	/**
-	 * This method returns a vector of predicted values.
-	 * @return a Matrix instance
-	 */
-	public Matrix getPredicted();
-	
-
-	/**
-	 * This method returns a vector of residuals, that is observed values minus predictions.
-	 * @return a Matrix instance
-	 */
-	public Matrix getResiduals();
-
 	/**
 	 * This method computes the parameter estimates.
 	 */
@@ -67,20 +57,9 @@ public interface StatisticalModel<P extends StatisticalDataStructure> {
 	
 	
 	/**
-	 * This method returns the value of the convergence criterion.
-	 * @return a double
-	 */
-	public double getConvergenceCriterion();
-	
-	/**
 	 * This method returns the optimizer of the log-likelihood function.
 	 * @return an Optimizer instance
 	 */
 	public Estimator getEstimator();
 	
-	/**
-	 * This method returns the data structure.
-	 * @return a StatisticalDataStructure derived instance
-	 */
-	public P getDataStructure();
 }

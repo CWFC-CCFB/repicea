@@ -1,76 +1,29 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.stats.model;
 
-import repicea.math.AbstractMathematicalFunctionWrapper;
-import repicea.math.Matrix;
-import repicea.math.MatrixUtility;
+import repicea.math.MathematicalFunction;
 
-@SuppressWarnings("serial")
-public class CompositeLogLikelihood extends AbstractMathematicalFunctionWrapper {
-
-	
-	private Matrix yValues;
-	private Matrix xValues;
-	
-	public CompositeLogLikelihood(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
-		super(innerLogLikelihoodFunction);
-		this.xValues = xValues;
-		this.yValues = yValues;
-	}
-		
-	@Override
-	public IndividualLogLikelihood getOriginalFunction() {return (IndividualLogLikelihood) super.getOriginalFunction();}
-	
-	@Override
-	public Double getValue() {
-		double loglikelihood = 0;
-		for (int i = 0; i < xValues.m_iRows; i++) {
-			setValuesInLikelihoodFunction(i);
-			loglikelihood += getOriginalFunction().getValue();
-		}
-		return loglikelihood;
-	}
-
-	@Override
-	public Matrix getGradient() {
-		Matrix resultingGradient = new Matrix(getNumberOfParameters(), 1);
-		for (int i = 0; i < xValues.m_iRows; i++) {
-			setValuesInLikelihoodFunction(i);
-			MatrixUtility.add(resultingGradient, getOriginalFunction().getGradient());
-		}
-		return resultingGradient;
-	}
-
-	@Override
-	public Matrix getHessian() {
-		Matrix resultingHessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
-		for (int i = 0; i < xValues.m_iRows; i++) {
-			setValuesInLikelihoodFunction(i);
-			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
-		}
-		return resultingHessian;
-	}
-
-	protected void setValuesInLikelihoodFunction(int index) {
-		getOriginalFunction().getOriginalFunction().setX(xValues.getSubMatrix(index, index, 0, xValues.m_iCols - 1));
-		getOriginalFunction().getOriginalFunction().setYVector(yValues.getSubMatrix(index, index, 0, 0));
-	}
+public interface CompositeLogLikelihood extends MathematicalFunction {
 
 	/**
-	 * This method returns all the predicted values.
-	 * @return a Matrix instance
+	 * Reset the composite log likelihood function if needs be.
 	 */
-	public Matrix getPredictions() {
-		Matrix predictedValues = new Matrix(yValues.m_iRows, 1);
-		for (int i = 0; i < xValues.m_iRows; i++) {
-			setValuesInLikelihoodFunction(i);
-			predictedValues.setSubMatrix(getOriginalFunction().getPredictionVector(), i, 0);
-		}
-		return predictedValues;
-	}
-		
-	public void setBeta(Matrix beta) {
-		getOriginalFunction().setBeta(beta);
-	}
-
-	public Matrix getBeta() {return getOriginalFunction().getBeta();}
+	public void reset();
 }

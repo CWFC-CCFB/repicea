@@ -119,7 +119,7 @@ public class HosmerLemeshow {
 	@SuppressWarnings("unchecked")
 	private void computeCValue() {
 		List<Couplet> couplets = new ArrayList<Couplet>();
-		Matrix observed = glm.getDataStructure().getVectorY();
+		Matrix observed = glm.y;
 		Matrix predicted = glm.getPredicted();
 		for (int i = 0; i < observed.m_iRows; i++) {
 			couplets.add(new Couplet(observed.getValueAt(i, 0), predicted.getValueAt(i, 0)));

@@ -2,24 +2,39 @@ package repicea.stats.model.glm.copula;
 
 import static org.junit.Assert.assertEquals;
 
-import org.junit.Ignore;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import repicea.math.ParameterBound;
+import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.CopulaLibrary.DistanceLinkFunctionCopulaExpression;
 import repicea.util.ObjectUtility;
+import repicea.util.REpiceaLogManager;
 
 public class FGMCopulaGLModelTest {
+
+	@BeforeClass
+	public static void doThis() {
+		Level l = Level.OFF;
+		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
+		ConsoleHandler ch = new ConsoleHandler();
+		ch.setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);
+		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
+	}
 
 	/**
 	 * This test implements a constant parameter copula model.
 	 * @throws Exception
 	 */
-//	@Ignore
 	@Test
     public void TestWithSimpleCopula() throws Exception {
 		double expectedCopulaValue = 0.18072198394164396;
@@ -48,7 +63,6 @@ public class FGMCopulaGLModelTest {
 	 * This test implements a constant parameter copula model.
 	 * @throws Exception
 	 */
-//	@Ignore
 	@Test
     public void TestWithDistanceCopula() throws Exception {
 		double expectedCopulaValue = -0.17037528040263983;
@@ -63,9 +77,9 @@ public class FGMCopulaGLModelTest {
 			((DistanceLinkFunctionCopulaExpression) distanceCopula).setBounds(0, new ParameterBound(null, 0d));
 			FGMCopulaGLModel copulaModel = new FGMCopulaGLModel(glm, distanceCopula);
 			copulaModel.setConvergenceCriterion(1E-8);
-			copulaModel.gridSearch(copulaModel.getParameters().m_iRows - 1, -.25d, -.15d, .01);
+			((MaximumLikelihoodEstimator) copulaModel.getEstimator()).gridSearch(copulaModel.getParameters().m_iRows - 1, -.25d, -.15d, .01);
 			copulaModel.doEstimation();
-			double actual = distanceCopula.getBeta().getValueAt(0, 0);
+			double actual = distanceCopula.getParameters().getValueAt(0, 0);
 			assertEquals(expectedCopulaValue, actual, 1E-5);
 			double actualLlk = copulaModel.getCompleteLogLikelihood().getValue();
 			assertEquals(expectedLlk, actualLlk, 1E-5);
@@ -74,47 +88,4 @@ public class FGMCopulaGLModelTest {
 			throw e;
 		}
 	}
-	
-	
-	@Ignore
-	@Test
-    public void TestWithSimpleCopulaHEG() throws Exception {
-		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("copulaHEG.csv");
-		DataSet dataSet = new DataSet(filename, true);
-		
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "occurred ~ lnDt + logDD + TotalPrcp + logPrcp + G_TOT + lnG_TOT + speciesThere + lnG_SpGr");
-		glm.doEstimation();
-		glm.getSummary();
-		try {
-// SIMPLE COPULA FOR NEWID_PE			
-//			CopulaExpression simpleCopula = new CopulaLibrary.SimpleCopulaExpression(0, "newID_PE");
-//			FGMCopulaGLModel copulaModel = new FGMCopulaGLModel(glm, simpleCopula);
-//			copulaModel.setConvergenceCriterion(1E-8);
-//			copulaModel.gridSearch(copulaModel.getParameters().m_iRows - 1, .1d, .9d, .1);
-//			copulaModel.doEstimation();
-//			copulaModel.getSummary();
-
-			
-			
-			CopulaExpression distanceCopula = new CopulaLibrary.DistanceLinkFunctionCopulaExpression(Type.Log, "newID_PE", "year.y", -.15);		// no intercept in the linear expression
-//			((DistanceLinkFunctionCopulaExpression) distanceCopula).setBounds(0, new ParameterBound(null, 0d));
-			FGMCopulaGLModel copulaModel = new FGMCopulaGLModel(glm, distanceCopula);
-			copulaModel.setConvergenceCriterion(1E-8);
-			copulaModel.gridSearch(copulaModel.getParameters().m_iRows - 1, -.5d, -.1d, .05);
-			copulaModel.doEstimation();
-			copulaModel.getSummary();
-//			double actual = distanceCopula.getBeta().getValueAt(0, 0);
-//			assertEquals(expectedCopulaValue, actual, 1E-5);
-//			double actualLlk = copulaModel.getCompleteLogLikelihood().getValue();
-//			assertEquals(expectedLlk, actualLlk, 1E-5);
-		} catch (StatisticalDataException e) {
-			e.printStackTrace();
-			throw e;
-		}
-	}
-
-	
-	
-	
-	
 }

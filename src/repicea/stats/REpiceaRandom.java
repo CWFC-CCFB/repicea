@@ -23,6 +23,8 @@ import java.util.Random;
 
 import repicea.math.Matrix;
 import repicea.stats.distributions.utility.NegativeBinomialUtility;
+import repicea.stats.distributions.utility.TruncatedGaussianUtility;
+import repicea.stats.distributions.utility.WeibullUtility;
 
 @SuppressWarnings("serial")
 public class REpiceaRandom extends Random {
@@ -180,5 +182,48 @@ public class REpiceaRandom extends Random {
 		return aMat;
 	}
 
+	/**
+	 * Return a random realization of a Weibull distribution. <br>
+	 * <br>
+	 * The method first draws a realization from a uniform distribution [0,1] and
+	 * then computes the quantile.
+	 * 
+	 * @param k the shape parameter (must be greater than 0)
+	 * @param lambda the scale parameter (must be greater than 0)
+	 * @param theta the location parameter
+	 * @return the realization
+	 */
+	public double nextWeibull(double k, double lambda, double theta) {
+		return WeibullUtility.getQuantile(nextDouble(), k, lambda, theta);
+	}
 	
+	/**
+	 * Return a random realization of a Weibull distribution without location parameter. <br>
+	 * <br>
+	 * The method first draws a realization from a uniform distribution [0,1] and
+	 * then computes the quantile.
+	 * 
+	 * @param k the shape parameter (must be greater than 0)
+	 * @param lambda the scale parameter (must be greater than 0)
+	 * @return the realization
+	 */
+	public double nextWeibull(double k, double lambda) {
+		return nextWeibull(k, lambda, 0d);
+	}
+
+	/**
+	 * Return a random realization of a truncated Gaussian distribution. <br>
+	 * <br>
+	 * The method first draws a realization from a uniform distribution [0,1] and
+	 * then computes the quantile.
+	 * 
+	 * @param mu the mean of the original normal distribution
+	 * @param sigma2 the variance of the original distribution
+	 * @param a the lower bound
+	 * @param b the upper bound
+	 * @return the realization
+	 */
+	public double nextTruncatedGaussian(double mu, double sigma2, double a, double b) {
+		return TruncatedGaussianUtility.getQuantile(nextDouble(), mu, sigma2, a, b);
+	}
 }

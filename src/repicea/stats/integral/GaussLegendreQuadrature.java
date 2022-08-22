@@ -19,12 +19,14 @@
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
 
 /**
  * The GaussLegendreQuadrature class implements a numerical integration method based
@@ -33,8 +35,9 @@ import java.util.Set;
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public class GaussLegendreQuadrature extends GaussQuadrature {
-	
+public class GaussLegendreQuadrature extends AbstractGaussQuadrature implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																				UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
+
 	private static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
 	static {
 		Set<QuadratureNode> nodes = new HashSet<QuadratureNode>();
@@ -85,9 +88,8 @@ public class GaussLegendreQuadrature extends GaussQuadrature {
 
 	@Override
 	public List<Double> getXValues() {
-		if (xValues == null) {
-			xValues = new ArrayList<Double>();
-			weights = new ArrayList<Double>();
+		if (xValues.isEmpty()) {
+			weights.clear();
 			List<QuadratureNode> orderedNodes = getOrderedNodes(GaussLegendreQuadrature.NODE_MAP.get(numberOfPoints));
 			double intercept = (getLowerBound() + getUpperBound()) * .5;
 			double slope = (getUpperBound() - getLowerBound()) * .5;
@@ -103,8 +105,7 @@ public class GaussLegendreQuadrature extends GaussQuadrature {
 
 	@Override
 	public List<Double> getRescalingFactors() {
-		if (rescalingFactors == null) {
-			rescalingFactors = new ArrayList<Double>();
+		if (rescalingFactors.isEmpty()) {
 			List<Double> xValues = getXValues();
 			double rescaling = (getUpperBound() - getLowerBound()) * .5;
 			for (int i = 0; i < xValues.size(); i++) {
@@ -114,5 +115,69 @@ public class GaussLegendreQuadrature extends GaussQuadrature {
 		return rescalingFactors;
 	}
 
-	
+	@Override
+	public double getIntegralApproximation(EvaluableFunction<Double> functionToEvaluate, int index,
+			boolean isParameter) {
+		
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+
+		double sum = 0;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			sum += functionToEvaluate.getValue() * getWeights().get(i) * getRescalingFactors().get(i);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+
+		return sum;
+	}
+
+	@Override
+	public Matrix getIntegralApproximationForMatrixFunction(EvaluableFunction<Matrix> functionToEvaluate, 
+											int index,
+											boolean isParameter) {
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+		
+		Matrix sum = null;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			Matrix value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i) * getRescalingFactors().get(i));
+			sum = i == 0 ? value : sum.add(value);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+		
+		return sum;
+	}
+
 }

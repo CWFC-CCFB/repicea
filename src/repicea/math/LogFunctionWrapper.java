@@ -30,7 +30,7 @@ public class LogFunctionWrapper extends AbstractMathematicalFunctionWrapper {
 	 * Constructor.
 	 * @param originalFunction the nested AbstractMathematicalFunction instance
 	 */
-	public LogFunctionWrapper(AbstractMathematicalFunction originalFunction) {
+	public LogFunctionWrapper(MathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
 

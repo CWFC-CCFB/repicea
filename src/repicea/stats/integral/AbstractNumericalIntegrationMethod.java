@@ -29,14 +29,19 @@ import java.util.List;
  * @author Mathieu Fortin - October 2012
  */
 @SuppressWarnings("serial")
-public abstract class NumericalIntegrationMethod implements Serializable {
+public abstract class AbstractNumericalIntegrationMethod implements Serializable {
 	
 	private double upperBound = Double.NaN;
 	private double lowerBound = Double.NaN;
-	protected List<Double> xValues;
-	protected List<Double> weights;
-	protected List<Double> rescalingFactors;
+	protected final List<Double> xValues;
+	protected final List<Double> weights;
+	protected final List<Double> rescalingFactors;
 
+	protected AbstractNumericalIntegrationMethod() {
+		xValues = new ArrayList<Double>();
+		weights = new ArrayList<Double>();
+		rescalingFactors = new ArrayList<Double>();
+	}
 	
 	/**
 	 * This method sets the upper and lower bounds from a list of Double instances. It also sets the
@@ -46,7 +51,7 @@ public abstract class NumericalIntegrationMethod implements Serializable {
 	 */
 	protected void setXValuesFromListOfPoints(List<Double> points) {
 		setUpperAndLowerBoundsFromListOfDouble(points);
-		xValues = new ArrayList<Double>();
+		xValues.clear();
 		for (Double point : points) {
 			if (!xValues.contains(point)) {
 				xValues.add(point);
@@ -107,15 +112,9 @@ public abstract class NumericalIntegrationMethod implements Serializable {
 	}
 
 	private void resetArrays() {
-		if (xValues != null) {
-			xValues.clear();
-		}
-		if (weights != null) {
-			weights.clear();
-		}
-		if (rescalingFactors != null) {
-			rescalingFactors.clear();
-		}
+		xValues.clear();
+		weights.clear();
+		rescalingFactors.clear();
 	}
 	
 	

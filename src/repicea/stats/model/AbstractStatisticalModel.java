@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -18,16 +18,12 @@
  */
 package repicea.stats.model;
 
-import java.text.NumberFormat;
+import java.util.logging.Level;
 
-import repicea.math.Matrix;
-import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.data.StatisticalDataStructure;
-import repicea.stats.estimates.Estimate;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.estimators.Estimator.EstimatorException;
-import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.util.REpiceaLogManager;
 
 /**
  * The AbstractStatisticalModel class implements the StatisticalModel interface. It contains the
@@ -36,64 +32,35 @@ import repicea.stats.estimators.MaximumLikelihoodEstimator;
  * @author Mathieu Fortin - August 2011
  * @param <D> a StatisticalDataStructure-derived class
  */
-public abstract class AbstractStatisticalModel<D extends StatisticalDataStructure> implements StatisticalModel<D> {
+public abstract class AbstractStatisticalModel implements StatisticalModel {
 
-	private Estimator estimator;
-	private D dataStructure;
+	public static String LOGGER_NAME = "AbstractStatisticalModel";
 	
-	private double convergenceCriterion;
+	protected Estimator estimator;
+	
 	private Object optimizerParameters; 
 	
-	/**
-	 * The complete model likelihood.
-	 */
-	protected CompositeLogLikelihood completeLLK;
 	private String modelDefinition;
 
 	/**
 	 * Default constructor.
 	 */
-	protected AbstractStatisticalModel(DataSet dataSet) {
-		dataStructure = getDataStructureFromDataSet(dataSet);
-		setConvergenceCriterion(1E-8);			// default value
-	}
-	
+	protected AbstractStatisticalModel() {}
 	
 	/**
-	 * This method returns the appropriate StatisticalDataStructure from the dataSet. It
-	 * is the first instruction to be called in the constructor.
-	 * @param dataSet a DataSet instance
-	 * @return a StatisticalDataStructure derived instance
+	 * Set the Estimator for the model.
+	 * @param estimator an Estimator instance
 	 */
-	protected abstract D getDataStructureFromDataSet(DataSet dataSet);
-
-
-	@Override
-	public CompositeLogLikelihood getCompleteLogLikelihood() {return completeLLK;}
-	
-	/**
-	 * This method sets the log-likelihood function of the model. It is to be defined in the derived class, since the 
-	 * log-likelihood function depends on the different features of the model.
-	 */
-	protected abstract void setCompleteLLK();
-	
-	/**
-	 * This method sets the optimizer for the model.
-	 * @param optimizer an Optimizer instance
-	 */
-	public void setOptimizer(Estimator optimizer) {this.estimator = optimizer;}
+	public void setEstimator(Estimator estimator) {this.estimator = estimator;}
 	
 	@Override
 	public Estimator getEstimator() {
 		if (estimator == null) {
-			setOptimizer(instantiateDefaultEstimator());
+			setEstimator(instantiateDefaultEstimator());
 		}
 		return estimator;
 	}
 
-
-	@Override
-	public D getDataStructure() {return dataStructure;}
 	
 	/**
 	 * This method defines the default optimizer which is to be specific to the derived classes.
@@ -101,14 +68,6 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	 */
 	protected abstract Estimator instantiateDefaultEstimator();
 
-	/**
-	 * This method sets the convergence criterion.
-	 * @param convergenceCriterion a double
-	 */
-	public void setConvergenceCriterion(double convergenceCriterion) {this.convergenceCriterion = convergenceCriterion;}
-
-	@Override
-	public double getConvergenceCriterion() {return convergenceCriterion;}
 	
 	/**
 	 * This method sets the parameter for the optimizer.
@@ -120,63 +79,24 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	
 	@Override
 	public void doEstimation() {
-		System.out.println("Optimization using " + getEstimator().toString() + ".");
+		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Optimization using " + getEstimator().toString() + ".");
 		try {
-			if (getEstimator().doEstimation(this)) {
-				System.out.println("Convergence achieved!");
+			if (getEstimator().doEstimation()) {
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME,"Convergence achieved!");
 			} else {
-				System.out.println("Unable to reach convergence.");
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.WARNING, LOGGER_NAME, "Unable to reach convergence.");
 			}
 		} catch (EstimatorException e) {
-			System.out.println("An error occured while optimizing the log likelihood function.");
+			REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME,"An error occured while optimizing the log likelihood function.");
 			e.printStackTrace();
 		}
 	}
-	
-	public void getSummary() {
-		if (!getEstimator().isConvergenceAchieved()) {
-			System.out.println("The log-likelihood function has not been or cannot be optimized.");
-		} else {
-			System.out.println(toString());
-			System.out.println("Model definition : " + getModelDefinition());
-			if (estimator instanceof MaximumLikelihoodEstimator) {
-				double maximumLogLikelihood = ((MaximumLikelihoodEstimator) estimator).getMaximumLogLikelihood();
-				double AIC = - 2 * maximumLogLikelihood + 2 * getParameters().getNumberOfElements(); 
-				double BIC = - 2 * maximumLogLikelihood + getParameters().getNumberOfElements() * Math.log(dataStructure.getNumberOfObservations());
-				NumberFormat formatter = NumberFormat.getInstance();
-				formatter.setMaximumFractionDigits(2);
-				formatter.setMinimumFractionDigits(2);
-				System.out.println("Log-likelihood : " + formatter.format(maximumLogLikelihood));
-				System.out.println("AIC            : " + formatter.format(AIC));
-				System.out.println("BIC            : " + formatter.format(BIC));
-			}
-			
-			Estimate<?> parameterEstimates = estimator.getParameterEstimates();
-			
-			Matrix report;
-			boolean varianceAvailable = false;
-			if (parameterEstimates.getVariance() != null) {
-				Matrix std = parameterEstimates.getVariance().diagonalVector().elementWisePower(0.5);
-				report = parameterEstimates.getMean().matrixStack(std, false);
-				varianceAvailable = true;
-			} else {
-				report = parameterEstimates.getMean();
-			}
-			
-			NumberFormat formatter = NumberFormat.getInstance();
-			formatter.setMaximumFractionDigits(6);
-			formatter.setMinimumFractionDigits(6);
 
-			System.out.println("Parameter estimates");
-			String output;
-			for (int i = 0; i < report.m_iRows; i++) {
-				output = "Parameter " + i + "; Estimate : " + formatter.format(report.getValueAt(i, 0));
-				if (varianceAvailable) {
-					output = output.concat("; Standard error : " + formatter.format(report.getValueAt(i, 1)));
-				}
-				System.out.println(output);
-			}
-		}
+	@Override
+	public void getSummary() {
+		System.out.println(toString());
+		System.out.println("Model definition : " + getModelDefinition() + System.lineSeparator());
+		System.out.println(estimator.getReport());
 	}
 
 	@Override
@@ -187,10 +107,12 @@ public abstract class AbstractStatisticalModel<D extends StatisticalDataStructur
 	 * @param modelDefinition a String that defines the model
 	 * @throws StatisticalDataException
 	 */
-	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
+	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
 		this.modelDefinition = modelDefinition;
-		getDataStructure().constructMatrices(modelDefinition);
 	}
 	
+	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
+		setModelDefinition(modelDefinition, null);
+	}
 
 }

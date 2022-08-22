@@ -26,7 +26,7 @@ package repicea.math;
 @SuppressWarnings("serial")
 public class ExponentialFunctionWrapper extends	AbstractMathematicalFunctionWrapper {
 
-	public ExponentialFunctionWrapper(AbstractMathematicalFunction originalFunction) {
+	public ExponentialFunctionWrapper(MathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
 

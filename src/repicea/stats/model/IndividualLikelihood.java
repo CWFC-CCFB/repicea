@@ -18,8 +18,8 @@
  */
 package repicea.stats.model;
 
-import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
 
 
@@ -28,11 +28,11 @@ import repicea.math.Matrix;
  * @author Mathieu Fortin - June 2011
  */
 @SuppressWarnings("serial")
-public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements LikelihoodCompatible {
+public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements Likelihood {
 
 	protected Matrix observedValues;
 
-	protected IndividualLikelihood(AbstractMathematicalFunction originalFunction) {
+	protected IndividualLikelihood(MathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
 	

@@ -443,11 +443,16 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	}
 	
 	
+	private static String addSpacesUpto(String str, int desiredLength) {
+		StringBuilder sb = new StringBuilder();
+		sb.append(str);
+		while (sb.length() < desiredLength)
+			sb.append(" ");
+		return sb.toString();
+	}
 	
 	@Override
 	public String toString() {
-		String output = "";
-		output += Arrays.toString(fieldNames.toArray());
 		boolean exceeds = false;
 		int maxLength;
 		if (getNumberOfObservations() <= 100) {
@@ -456,13 +461,40 @@ public class DataSet implements Saveable, REpiceaUIObject {
 			exceeds = true;
 			maxLength = 100;
 		}
+		int nbFields = getFieldNames().size();
+		int[] maxSizes = new int[nbFields];
+		for (int j = 0; j < nbFields; j++)  {
+			String fieldName = getFieldNames().get(j);
+			maxSizes[j] = fieldName.length();
+		}
+		
 		for (int i = 0; i < maxLength; i++) {
-			output += "\n" + Arrays.toString(getObservations().get(i).values.toArray());
+			for (int j = 0; j < nbFields; j++)  {
+				int currentLength = getObservations().get(i).getValueAt(j).toString().length();
+				if (maxSizes[j] < currentLength) {
+					maxSizes[j] = currentLength;
+				}
+			}
+		}
+		StringBuilder output = new StringBuilder();
+		for (int j = 0; j < nbFields; j++)  {
+			String fieldName = getFieldNames().get(j);
+			output.append(addSpacesUpto(fieldName, maxSizes[j] + 2));
+		}
+		
+		output.append(System.lineSeparator());
+		
+		for (int i = 0; i < maxLength; i++) {
+			for (int j = 0; j < nbFields; j++)  {
+				String value = getObservations().get(i).getValueAt(j).toString();
+				output.append(addSpacesUpto(value, maxSizes[j] + 2));
+			}
+			output.append(System.lineSeparator());
 		}
 		if (exceeds) {
-			output += "\n" + "Only " + maxLength + " out of " + getNumberOfObservations() + " observations printed!";
+			output.append("Only " + maxLength + " out of " + getNumberOfObservations() + " observations printed!");
 		}
-		return output;
+		return output.toString();
 	}
 
 	/**

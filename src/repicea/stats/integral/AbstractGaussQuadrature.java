@@ -29,7 +29,7 @@ import java.util.Set;
  * @author Mathieu Fortin- October 2012
  */
 @SuppressWarnings("serial")
-public abstract class GaussQuadrature extends NumericalIntegrationMethod {
+public abstract class AbstractGaussQuadrature extends AbstractNumericalIntegrationMethod {
 	
 	/**
 	 * The enum NumberOfPoints defines the number of quadrature points.

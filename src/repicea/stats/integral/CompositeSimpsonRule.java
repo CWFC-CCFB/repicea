@@ -19,20 +19,23 @@
 package repicea.stats.integral;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
 import java.util.List;
+
+import repicea.math.EvaluableFunction;
+import repicea.math.Matrix;
 
 /**
  * This class implements the Composite Simpson's rule.
  * @author Mathieu Fortin - July 2012
  */
 @SuppressWarnings("serial")
-public final class CompositeSimpsonRule extends NumericalIntegrationMethod {
+public final class CompositeSimpsonRule extends AbstractNumericalIntegrationMethod implements UnidimensionalIntegralApproximation<EvaluableFunction<Double>>,
+																								UnidimensionalIntegralApproximationForMatrix<EvaluableFunction<Matrix>> {
 
 	private static final double EPSILON = 1E-12;
 	private final int numberOfSubintervals;
 
-	
+
 	/**
 	 * Constructor.
 	 * @param numberOfSubintervals the number of sub intervals which must be even
@@ -44,7 +47,7 @@ public final class CompositeSimpsonRule extends NumericalIntegrationMethod {
 			this.numberOfSubintervals = numberOfSubintervals;
 		}
 	}
-	
+
 	/**
 	 * Constructor 2.
 	 * @param points a List of evenly spaced points.
@@ -66,13 +69,12 @@ public final class CompositeSimpsonRule extends NumericalIntegrationMethod {
 		}
 		setXValuesFromListOfPoints(points);
 		this.numberOfSubintervals = points.size() - 1;
-		
+
 	}
-	
+
 	@Override
 	public List<Double> getWeights() {
-		if (weights == null) {
-			weights = new ArrayList<Double>();
+		if (weights.isEmpty()) {
 			for (int i = 0; i < getXValues().size(); i++) {
 				if (i == 0 || i == getXValues().size() - 1) {
 					weights.add(1d);
@@ -86,38 +88,35 @@ public final class CompositeSimpsonRule extends NumericalIntegrationMethod {
 		return weights;
 	}
 
-	private List<Double> setXValues() {
+	private void setXValues() {
 		if (Double.isNaN(getLowerBound()) || Double.isNaN(getUpperBound())) {
-			return null;
+			return;
 		} else {
 			double difference = getUpperBound() - getLowerBound();
 			double slope = difference / numberOfSubintervals;
-			List<Double> output = new ArrayList<Double>();
 			double height;
 			int i = 0;
 			while (i <= numberOfSubintervals) {
 				height = getLowerBound() + i * slope;
-				output.add(height);
+				xValues.add(height);
 				i++;
 			}
-			return output;
 		}
 	}
 
-	
-	
+
+
 	@Override
 	public List<Double> getXValues() {
-		if (xValues == null) {
-			xValues = setXValues();
+		if (xValues.isEmpty()) {
+			setXValues();
 		}
 		return xValues;
 	}
 
 	@Override
 	public List<Double> getRescalingFactors() {
-		if (rescalingFactors == null) {
-			rescalingFactors = new ArrayList<Double>();
+		if (rescalingFactors.isEmpty()) {
 			double rf = (getUpperBound() - getLowerBound()) / numberOfSubintervals / 3;
 			for (int i = 0; i < getXValues().size(); i++) {
 				rescalingFactors.add(rf);
@@ -126,4 +125,70 @@ public final class CompositeSimpsonRule extends NumericalIntegrationMethod {
 		return rescalingFactors;
 	}
 
+	@Override
+	public double getIntegralApproximation(EvaluableFunction<Double> functionToEvaluate, 
+			int index,
+			boolean isParameter) {
+
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+
+		double sum = 0d;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			sum += functionToEvaluate.getValue() * getWeights().get(i) * getRescalingFactors().get(i);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+
+		return sum;
+	}
+
+	@Override
+	public Matrix getIntegralApproximationForMatrixFunction(EvaluableFunction<Matrix> functionToEvaluate, 
+											int index,
+											boolean isParameter) {
+		double originalValue;
+		if (isParameter) {
+			originalValue = functionToEvaluate.getParameterValue(index);
+		} else {
+			originalValue = functionToEvaluate.getVariableValue(index);
+		}
+		
+		Matrix sum = null;
+		double point;
+		for (int i = 0; i < getXValues().size(); i++) {
+			point = getXValues().get(i);
+			if (isParameter) {
+				functionToEvaluate.setParameterValue(index, point);
+			} else {
+				functionToEvaluate.setVariableValue(index, point);
+			}
+			Matrix value = functionToEvaluate.getValue().scalarMultiply(getWeights().get(i) * getRescalingFactors().get(i));
+			sum = i == 0 ? value : sum.add(value);
+		}
+		
+		if (isParameter) {
+			functionToEvaluate.setParameterValue(index, originalValue);
+		} else {
+			functionToEvaluate.setVariableValue(index, originalValue);
+		}
+		
+		return sum;
+	}
+	
 }

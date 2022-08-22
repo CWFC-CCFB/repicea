@@ -1,7 +1,7 @@
 /*
  * This file is part of the repicea library.
  *
- * Copyright (C) 2022 Mathieu Fortin for Rouge-Epicea
+ * Copyright (C) 2009-2022 Mathieu Fortin for Rouge-Epicea
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,21 +16,24 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.math;
+package repicea.stats.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import repicea.math.Matrix;
 
-public class ExponentialIntegralFunctionTest {
+public interface PredictableModel {
 
-	@Test
-	public void testE1() {
-		Assert.assertEquals("Testing the E1(z) function", 0.04890051070808066, ExponentialIntegralFunction.getE1(2), 1E-10);
-	}
 	
-	@Test
-	public void testEi() {
-		Assert.assertEquals("Testing the Ei(z) function", 4.954234356001867, ExponentialIntegralFunction.getEi(2), 1E-10);
-	}
+	/**
+	 * Return a column vector of predicted values.
+	 * @return a Matrix instance
+	 */
+	public Matrix getPredicted();
+
+
+	/**
+	 * Return a column vector of residuals, that is observed values minus predictions.
+	 * @return a Matrix instance
+	 */
+	public Matrix getResiduals();
 
 }
