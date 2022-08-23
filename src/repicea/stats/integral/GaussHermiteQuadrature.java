@@ -66,13 +66,18 @@ public class GaussHermiteQuadrature extends AbstractGaussHermiteQuadrature imple
 		/**
 		 * Calculate the adjustment to the integral. <br>
 		 * <br>
-		 * For instance if the relationship between x and y is y = (2 * sigma2)^(1/2) * x + mu,
-		 * then dy = (2 * sigma2)^(1/2) * dx.
+		 * For instance in the context of a Gaussian distribution, the relationship between x and y 
+		 * is y = (2 * sigma2)^(1/2) * x + mu. Consequently, dy = (2 * sigma2)^(1/2) * dx and the integral
+		 * adjustment reductes to to 1/PI^(-N/2) where N is the number of dimensions. This is the
+		 * default implementation.
+		 * 
 		 * @param dimensions the number of dimensions
 		 * @return a double
 		 * @see <a href=https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature /a> Gaussian-Hermite quadrature 
 		 */
-		public double getIntegralAdjustment(int dimensions);
+		public default double getIntegralAdjustment(int dimensions) {
+			return Math.pow(Math.PI, -dimensions/2d);
+		}
 		
 	}
 

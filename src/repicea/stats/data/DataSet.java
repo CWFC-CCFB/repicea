@@ -76,7 +76,6 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		observations = new ArrayList<Observation>();
 	}
 
-	
 	/**
 	 * General constructor.
 	 * @param filename the name of the file to be read
@@ -91,16 +90,22 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	}
 	
 	/**
-	 * An empty dataset ready to be filled with observations.
+	 * An empty DataSet instance with known field names.
 	 * @param fieldNames a List of String instances that represent the field names
 	 */
 	public DataSet(List<String> fieldNames) {
-		this((String) null);
+		this();
 		for (String fieldName : fieldNames) {
 			addFieldName(fieldName);
 		}
 	}
-	
+
+	/**
+	 * An empty DataSet to be populated using the addField method.
+	 */
+	public DataSet() {
+		this((String) null);
+	}
 
 	/**
 	 * This method returns any object in the dataset at row i and column j.
@@ -128,9 +133,6 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		} 
 	}
 	
-
-	
-
 	/**
 	 * Indexes the different field types. More specifically, it goes 
 	 * through the columns and find the appropriate class for a particular
@@ -164,8 +166,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 			throw new InvalidParameterException("The field type cannot be set!");
 		}
 	}
-	
-	
+		
 	private boolean isInteger(int j) {
 		boolean isInteger = true;
 		for (int i = 0; i < getNumberOfObservations(); i++) {
@@ -307,13 +308,17 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	}
 	
 	public void addField(String name, Object[] field) {
-		if (field.length != observations.size()) {
+		if (observations.size() > 0 && field.length != observations.size()) {	// will only trigger if there are some observations already
 			throw new InvalidParameterException("The number of observations in the new field does not match the number of observations in the dataset!");
 		}
 		addFieldName(name);
 		
 		for (int i = 0; i < field.length; i++) {
-			observations.get(i).values.add(field[i]);
+			if (i < observations.size()) { // means the observation exists already 
+				observations.get(i).values.add(field[i]);
+			} else {
+				observations.add(new Observation(new Object[] {field[i]}));
+			}
 		}
 		
 		setClassOfThisField(fieldNames.size() - 1);
