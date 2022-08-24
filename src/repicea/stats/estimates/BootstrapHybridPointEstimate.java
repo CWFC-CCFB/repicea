@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.distributions.UnknownDistribution;
 import repicea.stats.distributions.utility.GaussianUtility;
@@ -69,10 +70,10 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	class VarianceEstimate extends SimpleEstimate {
 		
 		final int numberOfRealizations;
-		final Matrix varMean;
-		final Matrix meanVar;
-		final Matrix designVarianceOfMeanRealizedY;
-		final Matrix varianceBiasCorrection;
+		final SymmetricMatrix varMean;
+		final SymmetricMatrix meanVar;
+		final SymmetricMatrix designVarianceOfMeanRealizedY;
+		final SymmetricMatrix varianceBiasCorrection;
 		final boolean isCalculable;
 		
 		/**
@@ -94,9 +95,9 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		 */
 		VarianceEstimate(int numberOfRealizations,
 				Matrix pointEstimate, 
-				Matrix varMean, 
-				Matrix meanVar, 
-				Matrix designVarianceOfMeanRealizedY, 
+				SymmetricMatrix varMean, 
+				SymmetricMatrix meanVar, 
+				SymmetricMatrix designVarianceOfMeanRealizedY, 
 				List<String> rowIndex) {
 			super(pointEstimate, null); 
 			if (pointEstimate == null) {
@@ -112,15 +113,15 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				isCalculable = false;
 			}
 			if (this.varMean != null && this.meanVar != null && this.designVarianceOfMeanRealizedY != null) {
-				Matrix varMeanPlusDesignVarianceOfMeanRealizedY = this.varMean.scalarMultiply((this.numberOfRealizations - 1d) / this.numberOfRealizations).add(this.designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
-				Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
+				SymmetricMatrix varMeanPlusDesignVarianceOfMeanRealizedY = (SymmetricMatrix) this.varMean.scalarMultiply((this.numberOfRealizations - 1d) / this.numberOfRealizations).add(this.designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
+				SymmetricMatrix modelRelatedVariance = (SymmetricMatrix) varMeanPlusDesignVarianceOfMeanRealizedY.subtract(this.meanVar);
 				
 				if (modelRelatedVariance.diagonalVector().anyElementSmallerOrEqualTo(0d) || !BootstrapHybridPointEstimate.IsVarianceCorrectionEnabled) { // means that the corrected variance estimator is inconsistent or it has been overriden
 					this.varianceBiasCorrection = null;
 				} else {
 					Matrix denominator = pointEstimate.multiply(pointEstimate.transpose()).subtract(this.designVarianceOfMeanRealizedY);
 					Matrix numerator = modelRelatedVariance.elementWiseMultiply(this.designVarianceOfMeanRealizedY);
-					varianceBiasCorrection = numerator.elementWiseDivide(denominator).scalarMultiply(-1d);
+					varianceBiasCorrection = SymmetricMatrix.convertToSymmetricIfPossible(numerator.elementWiseDivide(denominator).scalarMultiply(-1d));
 				}
 			} else {
 				this.varianceBiasCorrection = null;
@@ -129,19 +130,19 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 		}
 
 		@Override
-		protected Matrix getVarianceFromDistribution() {
+		protected SymmetricMatrix getVarianceFromDistribution() {
 			if (isCalculable) {
 				Matrix varMeanPlusDesignVarianceOfMeanRealizedY = varMean.
 						scalarMultiply((numberOfRealizations - 1d) / numberOfRealizations).
 						add(designVarianceOfMeanRealizedY);		// factor (n-1)/n in order to get the sum of square divided by n and not by n-1
-				Matrix modelRelatedVariance = varMeanPlusDesignVarianceOfMeanRealizedY.subtract(meanVar);
+				Matrix modelRelatedVariance = (SymmetricMatrix) varMeanPlusDesignVarianceOfMeanRealizedY.subtract(meanVar);
 				switch(BootstrapHybridPointEstimate.this.vei) {
 				case Corrected:
-					return modelRelatedVariance.add(designVarianceOfMeanRealizedY);
+					return (SymmetricMatrix) modelRelatedVariance.add(designVarianceOfMeanRealizedY);
 				case LessBiased:
-					return varMeanPlusDesignVarianceOfMeanRealizedY;
+					return (SymmetricMatrix) varMeanPlusDesignVarianceOfMeanRealizedY;
 				case RegularMultipleImputation:
-					return varMean.scalarMultiply((numberOfRealizations + 1d) / numberOfRealizations).add(meanVar);	// the (n + 1)/n factor comes from Rubin 1987 p.76;
+					return (SymmetricMatrix) varMean.scalarMultiply((numberOfRealizations + 1d) / numberOfRealizations).add(meanVar);	// the (n + 1)/n factor comes from Rubin 1987 p.76;
 				default:
 					throw new InvalidParameterException("This variance estimator implementation is unknown: " + BootstrapHybridPointEstimate.this.vei.name());
 				}
@@ -424,7 +425,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 				VarianceEstimate varEst = new VarianceEstimate(getNumberOfRealizations(),
 						getMean(),
 						mean.getVariance(),
-						variance.getMean(), 
+					    SymmetricMatrix.convertToSymmetricIfPossible(variance.getMean()), 
 						meanEstimate.getVariance(), 
 						rowIndex);
 				return varEst;
@@ -446,7 +447,7 @@ public final class BootstrapHybridPointEstimate extends Estimate<UnknownDistribu
 	
 
 	@Override
-	protected Matrix getVarianceFromDistribution() {
+	protected SymmetricMatrix getVarianceFromDistribution() {
 		return getVarianceEstimate().getVariance();
 	}
 

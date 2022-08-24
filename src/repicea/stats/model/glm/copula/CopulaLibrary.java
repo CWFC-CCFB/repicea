@@ -25,6 +25,7 @@ import java.util.Map;
 
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.HierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
@@ -65,7 +66,7 @@ public class CopulaLibrary {
 		public Matrix getGradient() {return getOriginalFunction().getGradient();}
 
 		@Override
-		public Matrix getHessian() {return getOriginalFunction().getHessian();}
+		public SymmetricMatrix getHessian() {return getOriginalFunction().getHessian();}
 
 		/**
 		 * This method is not necessary for this copula since the parameter is constant
@@ -105,7 +106,7 @@ public class CopulaLibrary {
 		public Matrix getGradient() {return linkFunction.getGradient();}
 
 		@Override
-		public Matrix getHessian() {return linkFunction.getHessian();}
+		public SymmetricMatrix getHessian() {return linkFunction.getHessian();}
 
 		@Override
 		protected void setX(int indexFirstObservation, int indexSecondObservation) {}
@@ -164,7 +165,7 @@ public class CopulaLibrary {
 		public Matrix getGradient() {return linkFunction.getGradient();}
 
 		@Override
-		public Matrix getHessian() {return linkFunction.getHessian();}
+		public SymmetricMatrix getHessian() {return linkFunction.getHessian();}
 		
 		@Deprecated
 		@Override

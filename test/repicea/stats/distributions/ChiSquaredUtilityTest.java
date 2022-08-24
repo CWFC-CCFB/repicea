@@ -22,6 +22,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 public class ChiSquaredUtilityTest {
 
@@ -45,11 +46,10 @@ public class ChiSquaredUtilityTest {
 	@Test
 	public void randomGenerationTestForMultivariateChiSquared() {
 		int df = 100;
-		Matrix expectedMean = new Matrix(2,2);
+		SymmetricMatrix expectedMean = new SymmetricMatrix(2);
 		expectedMean.setValueAt(0, 0, 5d);
 		expectedMean.setValueAt(1, 1, 5d);
 		expectedMean.setValueAt(0, 1, 0d);
-		expectedMean.setValueAt(1, 0, 0d);
 		
 		ChiSquaredDistribution dist = new ChiSquaredDistribution(df, expectedMean);
 		EmpiricalDistribution receiver = new EmpiricalDistribution();
@@ -58,7 +58,7 @@ public class ChiSquaredUtilityTest {
 		EmpiricalDistribution receiver10 = new EmpiricalDistribution();
 		EmpiricalDistribution receiver11 = new EmpiricalDistribution();
 		for (int i = 0; i < 1000000; i++) {
-			Matrix realization = dist.getRandomRealization();
+			SymmetricMatrix realization = dist.getRandomRealization();
 			receiver.addRealization(realization);
 			receiver00.addRealization(realization.getSubMatrix(0, 0, 0, 0));
 			receiver01.addRealization(realization.getSubMatrix(0, 0, 1, 1));

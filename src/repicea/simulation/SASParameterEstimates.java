@@ -21,6 +21,7 @@ package repicea.simulation;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 /**
  * The SASParameterEstimates class is customized for SAS outputs. The major difference
@@ -38,7 +39,7 @@ public class SASParameterEstimates extends ModelParameterEstimates {
 	 * @param mean a vector that corresponds to the mean value
 	 * @param variance a symmetric positive definite matrix 
 	 */
-	public SASParameterEstimates(Matrix mean, Matrix variance) {
+	public SASParameterEstimates(Matrix mean, SymmetricMatrix variance) {
 		super(mean, variance);
 	}
 

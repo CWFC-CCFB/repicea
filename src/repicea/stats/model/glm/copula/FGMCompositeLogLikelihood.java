@@ -6,6 +6,7 @@ import java.util.Map;
 
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.math.optimizer.OptimizerListener;
 import repicea.math.utility.MatrixUtility;
@@ -32,10 +33,10 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 	protected Map<List<Integer>, Matrix> additionalGradients;
 	protected boolean additionalGradientTermUptoDate;
 	
-	protected Matrix hessianMatrix;
+	protected SymmetricMatrix hessianMatrix;
 	protected boolean hessianMatrixUptoDate;
 	
-	protected Map<List<Integer>, Matrix> additionalHessians;
+	protected Map<List<Integer>, SymmetricMatrix> additionalHessians;
 	protected boolean additionalHessianTermUptoDate;
 
 	protected HierarchicalStatisticalDataStructure hierarchicalStructure;
@@ -74,7 +75,8 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 			gradient.setSubMatrix(super.getGradient(),0,0);		// get the gradient under the assumption of independence
 			
 			for (Matrix additionalGradient : getAdditionalGradients().values()) {
-				MatrixUtility.add(gradient, additionalGradient);			// get the additional part of the gradient on both the beta vector and the copula parameters
+//				MatrixUtility.add(gradient, additionalGradient);			// get the additional part of the gradient on both the beta vector and the copula parameters
+				gradient = gradient.add(additionalGradient);			// get the additional part of the gradient on both the beta vector and the copula parameters
 			}
 			
 			gradientVector = gradient;
@@ -84,13 +86,21 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		if (!hessianMatrixUptoDate) {
-			Matrix hessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
-			hessian.setSubMatrix(super.getHessian(), 0, 0); 	// get the hessian under the assumption of independence
+			SymmetricMatrix hessian = new SymmetricMatrix(getNumberOfParameters());
+			SymmetricMatrix originalHessian = super.getHessian();
+			for (int i = 0; i < originalHessian.m_iRows; i++) {
+				for (int j = i; j < originalHessian.m_iRows; j++) {
+					hessian.setValueAt(i, j, originalHessian.getValueAt(i, j));
+				}
+			}
 			
-			for (Matrix additionalHessian : getAdditionalHessians().values()) {
-				MatrixUtility.add(hessian, additionalHessian);
+//			hessian.setSubMatrix(super.getHessian(), 0, 0); 	// get the hessian under the assumption of independence
+			
+			for (SymmetricMatrix additionalHessian : getAdditionalHessians().values()) {
+//				MatrixUtility.add(hessian, additionalHessian);
+				hessian = (SymmetricMatrix) hessian.add(additionalHessian);
 			}
 			
 			hessianMatrix = hessian;
@@ -229,7 +239,8 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 
 						tmp = expansion1.matrixStack(expansion2, true);
 
-						MatrixUtility.add(additionalGradient, tmp);
+//						MatrixUtility.add(additionalGradient, tmp);
+						additionalGradient = additionalGradient.add(tmp);
 
 					}
 				}
@@ -246,9 +257,9 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 	}
 
 	
-	private Map<List<Integer>,Matrix> getAdditionalHessians() {
+	private Map<List<Integer>,SymmetricMatrix> getAdditionalHessians() {
 		if (!additionalHessianTermUptoDate) {
-			Map<List<Integer>,Matrix> additionalHessians = new HashMap<List<Integer>, Matrix>();
+			Map<List<Integer>, SymmetricMatrix> additionalHessians = new HashMap<List<Integer>, SymmetricMatrix>();
 			
 			Matrix additionalGradient;
 				
@@ -324,12 +335,13 @@ public class FGMCompositeLogLikelihood extends CompositeLogLikelihoodWithExplana
 
 						tmp = expansion11.matrixStack(expansion12, false).matrixStack(expansion12.transpose().matrixStack(expansion22, false), true);
 
-						MatrixUtility.add(additionalHessian, tmp);
+						additionalHessian = additionalHessian.add(tmp);
+//						MatrixUtility.add(additionalHessian, tmp);
 
 					}
 				}
 
-				additionalHessians.put(index, additionalHessian);
+				additionalHessians.put(index, SymmetricMatrix.convertToSymmetricIfPossible(additionalHessian));
 			}
 			this.additionalHessians = additionalHessians;
 			additionalHessianTermUptoDate = true;

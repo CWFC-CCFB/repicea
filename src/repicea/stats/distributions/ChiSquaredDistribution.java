@@ -21,6 +21,7 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 
@@ -34,8 +35,8 @@ public final class ChiSquaredDistribution implements Distribution {
 
 	private final int degreesOfFreedom;
 
-	private Matrix mean;
-	private Matrix variance;
+	private SymmetricMatrix mean;
+	private SymmetricMatrix variance;
 	
 	private Matrix lowerTriangleChol;
 	private Matrix upperTriangleChol;
@@ -54,7 +55,7 @@ public final class ChiSquaredDistribution implements Distribution {
 		if (meanValue < 0) {
 			throw new InvalidParameterException("The variance estimate must be larger than 0!");
 		}
-		Matrix mean = new Matrix(1,1);
+		SymmetricMatrix mean = new SymmetricMatrix(1);
 		mean.setValueAt(0, 0, meanValue);
 		this.mean = mean;
 	}
@@ -65,7 +66,7 @@ public final class ChiSquaredDistribution implements Distribution {
 	 * @param degreesOfFreedom the degrees of freedom
 	 * @param meanValues the mean value
 	 */
-	public ChiSquaredDistribution(int degreesOfFreedom, Matrix meanValues) {
+	public ChiSquaredDistribution(int degreesOfFreedom, SymmetricMatrix meanValues) {
 		if (degreesOfFreedom < 1) {
 			throw new InvalidParameterException("The number of degrees of freedom must be equal to or larger than 1!");
 		}
@@ -94,7 +95,7 @@ public final class ChiSquaredDistribution implements Distribution {
 	}
 
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		if (variance == null) {
 			variance = calculateVarianceMatrix();
 		}
@@ -104,19 +105,18 @@ public final class ChiSquaredDistribution implements Distribution {
 	/**
 	 * This method is based on Wishart's distribution.
 	 */
-	private Matrix calculateVarianceMatrix() {
+	private SymmetricMatrix calculateVarianceMatrix() {
 		int nRows = mean.m_iRows;
-		int nCols = mean.m_iCols;
-		Matrix varianceMat = new Matrix(nRows, nCols);
+		SymmetricMatrix varianceMat = new SymmetricMatrix(nRows);
 		double result;
 		for (int i = 0; i < nRows; i++) {
-			for (int j = i; j < nCols; j++) {
+			for (int j = i; j < nRows; j++) {
 				result = mean.getValueAt(i, j) * mean.getValueAt(i, j) + 
 						mean.getValueAt(i, i) * mean.getValueAt(j, j);  
 				varianceMat.setValueAt(i, j, result);
-				if (j != i) {
-					varianceMat.setValueAt(j, i, result);
-				}
+//				if (j != i) {
+//					varianceMat.setValueAt(j, i, result);
+//				}
 			}
 		}
 		return varianceMat.scalarMultiply(1d / getDegreesOfFreedom());
@@ -142,7 +142,7 @@ public final class ChiSquaredDistribution implements Distribution {
 	}
 
 	@Override
-	public Matrix getRandomRealization() {
+	public SymmetricMatrix getRandomRealization() {
 		if (isMultivariate()) {	// then we use Bartlett decomposition for a Wishart distribution
 			if (lowerTriangleChol == null) {
 				lowerTriangleChol = mean.getLowerCholTriangle();
@@ -150,7 +150,7 @@ public final class ChiSquaredDistribution implements Distribution {
 			}
 			Matrix aMat = StatisticalUtility.getRandom().nextBartlettDecompositionMatrix(getDegreesOfFreedom(), mean.m_iRows);
 			Matrix randomMat = lowerTriangleChol.multiply(aMat).multiply(aMat.transpose()).multiply(upperTriangleChol).scalarMultiply(1d/getDegreesOfFreedom());
-			return randomMat;
+			return SymmetricMatrix.convertToSymmetricIfPossible(randomMat);
 		} else {
 			double factor = StatisticalUtility.getRandom().nextChiSquare(getDegreesOfFreedom()) / getDegreesOfFreedom();
 			return mean.scalarMultiply(factor);

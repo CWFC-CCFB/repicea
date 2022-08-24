@@ -194,7 +194,8 @@ public class TrapezoidalRule extends AbstractNumericalIntegrationMethod implemen
 			if (i == 0) {
 				sum = value;
 			} else {
-				MatrixUtility.add(sum, value);
+//				MatrixUtility.add(sum, value);
+				sum = sum.add(value);
 			}
 //			sum = i == 0 ? value : sum.add(value);
 		}

@@ -41,10 +41,10 @@ public class ExponentialFunctionWrapper extends	AbstractMathematicalFunctionWrap
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		Matrix part1 = getGradient().multiply(getOriginalFunction().getGradient().transpose());
-		Matrix part2 = getOriginalFunction().getHessian().scalarMultiply(getValue());
-		return part1.add(part2);
+		SymmetricMatrix part2 = getOriginalFunction().getHessian().scalarMultiply(getValue());
+		return SymmetricMatrix.convertToSymmetricIfPossible(part1.add(part2));
 	}
 
 }

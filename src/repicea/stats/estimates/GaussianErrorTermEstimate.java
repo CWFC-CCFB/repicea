@@ -19,6 +19,7 @@
 package repicea.stats.estimates;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
 import repicea.stats.distributions.CenteredGaussianDistribution;
 import repicea.stats.distributions.GaussianErrorTermList;
@@ -40,7 +41,7 @@ public final class GaussianErrorTermEstimate extends Estimate<CenteredGaussianDi
 	 * @param correlationParameter a double 
 	 * @param type a TypeMatrixR enum
 	 */
-	public GaussianErrorTermEstimate(Matrix variance, double correlationParameter, TypeMatrixR type) {
+	public GaussianErrorTermEstimate(SymmetricMatrix variance, double correlationParameter, TypeMatrixR type) {
 		super(new CenteredGaussianDistribution(variance, correlationParameter, type));
 		estimatorType = EstimatorType.LikelihoodBased;
 	}
@@ -49,7 +50,7 @@ public final class GaussianErrorTermEstimate extends Estimate<CenteredGaussianDi
 	 * Constructor for univariate distribution.
 	 * @param variance a double
 	 */
-	public GaussianErrorTermEstimate(Matrix variance) {
+	public GaussianErrorTermEstimate(SymmetricMatrix variance) {
 		this(variance, 0, null);
 	}
 

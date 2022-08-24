@@ -22,6 +22,7 @@ import java.io.Serializable;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.utility.GaussianUtility;
@@ -47,7 +48,7 @@ public class LogNormalEstimate extends Estimate<GaussianDistribution> implements
 			throw new InvalidParameterException("The variance must be positive!");
 		}
 		Matrix m = new Matrix(1,1);
-		Matrix v = new Matrix(1,1);
+		SymmetricMatrix v = new SymmetricMatrix(1);
 		if (onLogScale) {
 			m.setValueAt(0, 0, mean);
 			setMeanOnLogScale(m);
@@ -86,7 +87,7 @@ public class LogNormalEstimate extends Estimate<GaussianDistribution> implements
 		getDistribution().setMean(mean);
 	}
 
-	private void setVarianceOnLogScale(Matrix variance) {
+	private void setVarianceOnLogScale(SymmetricMatrix variance) {
 		getDistribution().setVariance(variance);
 	}
 
@@ -95,7 +96,7 @@ public class LogNormalEstimate extends Estimate<GaussianDistribution> implements
 	 * through the constructor.
 	 */
 	@Override
-	public void setVariance(Matrix variance) {
+	public void setVariance(SymmetricMatrix variance) {
 		throw new InvalidParameterException("The setVariance(Matrix) method cannot be used with the LogNormalEstimate class!");
 	}
 	
@@ -120,9 +121,9 @@ public class LogNormalEstimate extends Estimate<GaussianDistribution> implements
 	}
 	
 	@Override
-	protected Matrix getVarianceFromDistribution() {
-		Matrix variance = getDistribution().getVariance();
-		return variance.expMatrix().scalarAdd(-1).elementWiseMultiply(getMeanFromDistribution().elementWisePower(2));
+	protected SymmetricMatrix getVarianceFromDistribution() {
+		SymmetricMatrix variance = getDistribution().getVariance();
+		return SymmetricMatrix.convertToSymmetricIfPossible(variance.expMatrix().scalarAdd(-1).elementWiseMultiply(getMeanFromDistribution().elementWisePower(2)));
 	}
 
 	@Override

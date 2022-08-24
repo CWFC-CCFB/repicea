@@ -21,6 +21,7 @@ package repicea.stats;
 import java.io.Serializable;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 /**
  * The RandomVariable class ensures the instance can provide its two first central moments (i.e. mean and variance) as
@@ -57,11 +58,11 @@ public abstract class RandomVariable<D extends Distribution> implements CentralM
 	}
 	
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		return getVarianceFromDistribution();
 	}
 
-	protected Matrix getVarianceFromDistribution() {
+	protected SymmetricMatrix getVarianceFromDistribution() {
 		return getDistribution().getVariance();
 	}
 }

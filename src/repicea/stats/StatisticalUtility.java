@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Random;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.utility.MathUtility;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.sampling.SamplingUtility;
@@ -154,8 +155,6 @@ public final class StatisticalUtility {
 		}
 	}
 	
-	
-	
 	/**
 	 * Compute the R matrix <br>
 	 * <br>
@@ -167,9 +166,9 @@ public final class StatisticalUtility {
 	 * @param coordinates a series of Matrices instance that stand for the coordinates. These should be column vectors of 
 	 * the same size. Specifying two matrices implies that the Euclidean distance is based on two dimensions. Three matrices
 	 * means three dimensions and so on.
-	 * @return a Matrix instance
+	 * @return a SymmetricMatrix instance
 	 */
-	public static Matrix constructRMatrix(List<Double> covParms, TypeMatrixR type, Matrix... coordinates) {
+	public static SymmetricMatrix constructRMatrix(List<Double> covParms, TypeMatrixR type, Matrix... coordinates) {
 		if (covParms == null || covParms.size() < type.nbParameters) {
 			throw new InvalidParameterException("The covParms list should contain this number of parameters: " + type.nbParameters + " when using type " + type.name());
 		}
@@ -197,7 +196,7 @@ public final class StatisticalUtility {
 		double gamma = type == TypeMatrixR.ARMA ? covParms.get(2) : 0;
 		
 		double distance;
-		Matrix matrixR = new Matrix(nrow,nrow);
+		SymmetricMatrix matrixR = new SymmetricMatrix(nrow);
 		for (int i = 0; i < nrow; i++) {
 			for (int j = i; j < nrow; j++) {
 				double corr = 0d;
@@ -207,7 +206,7 @@ public final class StatisticalUtility {
 					corr = 1 - covarianceParameter * distance;
 					if (corr >= 0) {
 						matrixR.setValueAt(i, j, varianceParameter * corr);
-						matrixR.setValueAt(j, i, varianceParameter * corr);
+//						matrixR.setValueAt(j, i, varianceParameter * corr);
 					}
 					break;
 				case LINEAR_LOG:				// linear log case
@@ -219,7 +218,7 @@ public final class StatisticalUtility {
 					}
 					if (corr >= 0) {
 						matrixR.setValueAt(i, j, varianceParameter * corr);
-						matrixR.setValueAt(j, i, varianceParameter * corr);
+//						matrixR.setValueAt(j, i, varianceParameter * corr);
 					}
 					break;
 				case COMPOUND_SYMMETRY:
@@ -227,7 +226,7 @@ public final class StatisticalUtility {
 						matrixR.setValueAt(i, j, varianceParameter + covarianceParameter);
 					} else {
 						matrixR.setValueAt(i, j, covarianceParameter);
-						matrixR.setValueAt(j, i, covarianceParameter);
+//						matrixR.setValueAt(j, i, covarianceParameter);
 					}
 					break;
 				case POWER:                  // power case
@@ -239,7 +238,7 @@ public final class StatisticalUtility {
 						corr = Math.pow (covarianceParameter, distance);
 						if (corr >= 0) {
 							matrixR.setValueAt(i, j, varianceParameter * corr);
-							matrixR.setValueAt(j, i, varianceParameter * corr);
+//							matrixR.setValueAt(j, i, varianceParameter * corr);
 						}
 					}
 					break;   
@@ -250,7 +249,7 @@ public final class StatisticalUtility {
 						distance = Math.abs(i - j) - 1;
 						double powCol = Math.pow(covarianceParameter, distance);
 						matrixR.setValueAt(i, j, varianceParameter * gamma * powCol);
-						matrixR.setValueAt(j, i, matrixR.getValueAt(i, j));						
+//						matrixR.setValueAt(j, i, matrixR.getValueAt(i, j));						
 					}
 					break;
 				case EXPONENTIAL:
@@ -262,7 +261,7 @@ public final class StatisticalUtility {
 						corr = Math.exp(-distance / covarianceParameter);
 						if (corr >= 0) {
 							matrixR.setValueAt(i, j, varianceParameter * corr);
-							matrixR.setValueAt(j, i, varianceParameter * corr);
+//							matrixR.setValueAt(j, i, varianceParameter * corr);
 						}
 					}
 					break;   

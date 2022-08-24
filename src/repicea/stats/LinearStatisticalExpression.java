@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 /**
  * This class specifies a linear term in the form x * beta.
@@ -31,7 +32,7 @@ import repicea.math.Matrix;
 public final class LinearStatisticalExpression extends AbstractMathematicalFunction implements Serializable {
 
 	protected Matrix gradient;
-	protected Matrix hessian;
+	protected SymmetricMatrix hessian;
 	
 	@Override
 	public Double getValue() {
@@ -59,9 +60,9 @@ public final class LinearStatisticalExpression extends AbstractMathematicalFunct
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		if (hessian == null || hessian.m_iCols != getNumberOfVariables()) {				// create a hessian matrix only once or only if the number of variables in x changes
-			hessian = new Matrix(getNumberOfVariables(), getNumberOfVariables());
+			hessian = new SymmetricMatrix(getNumberOfVariables());
 		}
 		return hessian;
 	}

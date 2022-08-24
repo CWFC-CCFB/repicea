@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.integral.GaussHermiteQuadrature;
 
@@ -96,7 +97,7 @@ abstract class AbstractDataBlockWrapper extends AbstractMathematicalFunction {
 	public final Matrix getGradient() {return null;}
 
 	@Override
-	public final Matrix getHessian() {return null;}
+	public final SymmetricMatrix getHessian() {return null;}
 
 }
 

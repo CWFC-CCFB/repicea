@@ -18,92 +18,80 @@
  */
 package repicea.math.utility;
 
-import java.security.InvalidParameterException;
-
-import repicea.math.Matrix;
-
 /**
  * This class provides some matrix operations. Some update the first argument matrix instead of
  * creating a new instance. Useful for optimizing some operations.
  * @author Mathieu Fortin - May 2012
  */
+@Deprecated
 public class MatrixUtility {
 	
-	/**
-	 * Add a matrix to a reference matrix. The result is returned in the reference matrix. NOTE:
-	 * No new matrix instance is created.
-	 * @param a a Matrix instance (the reference)
-	 * @param b a Matrix instance
-	 */
-	public static void add(Matrix a, Matrix b) {
-		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
-			throw new InvalidParameterException("Matrices a and b are not the same size!");
-		}
-		for (int i = 0 ; i < a.m_iRows; i++) {
-			for (int j = 0; j < a.m_iCols; j++) {
-				a.setValueAt(i, j, a.getValueAt(i, j) + b.getValueAt(i, j));
-			}
-		}
-	}
+//	/**
+//	 * Add a matrix to a reference matrix. The result is returned in the reference matrix. NOTE:
+//	 * No new matrix instance is created.
+//	 * @param a a Matrix instance (the reference)
+//	 * @param b a Matrix instance
+//	 */
+//	public static void add(Matrix a, Matrix b) {
+//		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
+//			throw new InvalidParameterException("Matrices a and b are not the same size!");
+//		}
+//		for (int i = 0 ; i < a.m_iRows; i++) {
+//			for (int j = 0; j < a.m_iCols; j++) {
+//				a.setValueAt(i, j, a.getValueAt(i, j) + b.getValueAt(i, j));
+//			}
+//		}
+//	}
 	
-	/**
-	 * Subtract a matrix from a reference matrix. The result is returned in the reference matrix. NOTE:
-	 * No new matrix instance is created.
-	 * @param a a Matrix instance (the reference)
-	 * @param b a Matrix instance
-	 */
-	public static void subtract(Matrix a, Matrix b) {
-		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
-			throw new InvalidParameterException("Matrices a and b are not the same size!");
-		}
-		for (int i = 0 ; i < a.m_iRows; i++) {
-			for (int j = 0; j < a.m_iCols; j++) {
-				a.setValueAt(i, j, a.getValueAt(i, j) - b.getValueAt(i, j));
-			}
-		}
-		
-	}
+//	/**
+//	 * Subtract a matrix from a reference matrix. The result is returned in the reference matrix. NOTE:
+//	 * No new matrix instance is created.
+//	 * @param a a Matrix instance (the reference)
+//	 * @param b a Matrix instance
+//	 */
+//	public static void subtract(Matrix a, Matrix b) {
+//		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
+//			throw new InvalidParameterException("Matrices a and b are not the same size!");
+//		}
+//		for (int i = 0 ; i < a.m_iRows; i++) {
+//			for (int j = 0; j < a.m_iCols; j++) {
+//				a.setValueAt(i, j, a.getValueAt(i, j) - b.getValueAt(i, j));
+//			}
+//		}
+//		
+//	}
 	
-	/**
-	 * Return the element wise product of two matrices. The result is returned in the first matrix. NOTE:
-	 * No new matrix instance is created.
-	 * @param a a Matrix instance (the reference)
-	 * @param b a Matrix instance
-	 */
-	public static void elementWiseMultiply(Matrix a, Matrix b) {
-		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
-			throw new InvalidParameterException("Matrices a and b are not the same size!");
-		}
-		for (int i = 0 ; i < a.m_iRows; i++) {
-			for (int j = 0; j < a.m_iCols; j++) {
-				a.setValueAt(i, j, a.getValueAt(i, j) * b.getValueAt(i, j));
-			}
-		}
-		
-	}
+//	/**
+//	 * Return the element wise product of two matrices. The result is returned in the first matrix. NOTE:
+//	 * No new matrix instance is created.
+//	 * @param a a Matrix instance (the reference)
+//	 * @param b a Matrix instance
+//	 */
+//	public static void elementWiseMultiply(Matrix a, Matrix b) {
+//		if (a.m_iCols != b.m_iCols || a.m_iRows != b.m_iRows) {
+//			throw new InvalidParameterException("Matrices a and b are not the same size!");
+//		}
+//		for (int i = 0 ; i < a.m_iRows; i++) {
+//			for (int j = 0; j < a.m_iCols; j++) {
+//				a.setValueAt(i, j, a.getValueAt(i, j) * b.getValueAt(i, j));
+//			}
+//		}
+//		
+//	}
 
-	/**
-	 * Multiply all the element of a matrix by a double. The result is returned in the same matrix. NOTE:
-	 * No new matrix instance is created.
-	 * @param a a Matrix instance 
-	 * @param b a double instance
-	 */
-	public static void scalarMultiply(Matrix a, double b) {
-		for (int i = 0 ; i < a.m_iRows; i++) {
-			for (int j = 0; j < a.m_iCols; j++) {
-				a.setValueAt(i, j, a.getValueAt(i, j) * b);
-			}
-		}
-	}
-	
-    /**
-     * This method returns an identity matrix of size i.
-     * @param i the dimension of the matrix
-     * @return a Matrix instance
-     */
-    public static Matrix getIdentityMatrix(int i) {
-    	return new Matrix(i,1,1,0).matrixDiagonal();
-    }
+//	/**
+//	 * Multiply all the element of a matrix by a double. The result is returned in the same matrix. NOTE:
+//	 * No new matrix instance is created.
+//	 * @param a a Matrix instance 
+//	 * @param b a double instance
+//	 */
+//	public static void scalarMultiply(Matrix a, double b) {
+//		for (int i = 0 ; i < a.m_iRows; i++) {
+//			for (int j = 0; j < a.m_iCols; j++) {
+//				a.setValueAt(i, j, a.getValueAt(i, j) * b);
+//			}
+//		}
+//	}
 
 
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
 /**
@@ -61,7 +62,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 	
 	
 	@Override
-	protected Matrix getVarianceFromDistribution() {
+	protected SymmetricMatrix getVarianceFromDistribution() {
 		MonteCarloEstimate meanOfVariances = new MonteCarloEstimate();
 		MonteCarloEstimate varianceOfMeans = new MonteCarloEstimate();
 		for (PopulationMeanEstimate realization : realizations) {
@@ -69,7 +70,7 @@ public class LawOfTotalVarianceMonteCarloEstimate extends MonteCarloEstimate {
 			varianceOfMeans.addRealization(realization.getMean());
 		}
 			
-		return meanOfVariances.getMean().add(varianceOfMeans.getVariance());
+		return SymmetricMatrix.convertToSymmetricIfPossible(meanOfVariances.getMean().add(varianceOfMeans.getVariance()));
 	}
 
 	private PopulationMeanEstimate unformatObservation(Matrix formattedObservation) {

@@ -19,6 +19,7 @@
 package repicea.stats.estimators;
 
 import java.security.InvalidParameterException;
+import java.text.DecimalFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.List;
 import java.util.logging.Level;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
 import repicea.stats.data.DataSet;
@@ -182,7 +184,7 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 			return false;
 		}
 		if (nro.isConvergenceAchieved()) {
-			Matrix varCov = nro.getHessianAtMaximum().getInverseMatrix().scalarMultiply(-1d);
+			SymmetricMatrix varCov = nro.getHessianAtMaximum().getInverseMatrix().scalarMultiply(-1d);
 			parameterEstimate = new GaussianEstimate(nro.getParametersAtMaximum(), varCov);
 			return true;
 		} else {
@@ -258,6 +260,16 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 			DataSet convergenceDataset = getConvergenceStatusReport();
 			sb.append(convergenceDataset.toString() + System.lineSeparator());
 			DataSet parameterDataset = getParameterEstimatesReport();
+			DecimalFormat decFormat1 = new DecimalFormat();
+			decFormat1.setMaximumFractionDigits(6);
+			decFormat1.setMinimumFractionDigits(6);
+			parameterDataset.setFormatter(1, decFormat1);
+			parameterDataset.setFormatter(2, decFormat1);
+			parameterDataset.setFormatter(4, decFormat1);
+			DecimalFormat decFormat2 = new DecimalFormat();
+			decFormat2.setMaximumFractionDigits(3);
+			decFormat2.setMinimumFractionDigits(3);
+			parameterDataset.setFormatter(3, decFormat2);
 			sb.append(parameterDataset.toString() + System.lineSeparator());
 			return sb.toString();
 		}

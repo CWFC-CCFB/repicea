@@ -19,6 +19,7 @@
 package repicea.stats;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 
 /**
@@ -36,8 +37,8 @@ public interface CentralMomentsSettable {
 	
 	/**
 	 * This method sets the variance-covariance matrix of the random variable.
-	 * @param variance a Matrix instance
+	 * @param variance a SymmetricMatrix instance
 	 */
-	public void setVariance(Matrix variance);
+	public void setVariance(SymmetricMatrix variance);
 
 }

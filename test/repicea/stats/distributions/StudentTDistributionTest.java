@@ -5,6 +5,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.estimates.ConfidenceInterval;
 import repicea.stats.estimates.MonteCarloEstimate;
 
@@ -81,7 +82,7 @@ public class StudentTDistributionTest {
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		Matrix mean = new Matrix(1,1);
 		mean.setValueAt(0, 0, 10d);
-		Matrix variance = new Matrix(1,1);
+		SymmetricMatrix variance = new SymmetricMatrix(1);
 		variance.setValueAt(0, 0, 20d);
 		StudentTDistribution dist = new StudentTDistribution(mean, variance, 10);
 		for (int i = 0; i < 5000000; i++) {

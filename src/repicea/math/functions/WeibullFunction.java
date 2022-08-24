@@ -23,6 +23,7 @@ import java.security.InvalidParameterException;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.utility.WeibullUtility;
 
 public class WeibullFunction extends AbstractMathematicalFunction {
@@ -133,7 +134,7 @@ public class WeibullFunction extends AbstractMathematicalFunction {
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		double x = getVariableValue(0);
 		double k = getParameterValue(K_INDEX);
 		double lambda = getParameterValue(LAMBDA_INDEX);
@@ -148,34 +149,34 @@ public class WeibullFunction extends AbstractMathematicalFunction {
 		double d2_d2lambda = k * k * Math.exp(-xMod_lambda_powK) * (-xMod_lambda_powK + k*(-3*xMod_lambda_powK + xMod_lambda_powK*xMod_lambda_powK + 1) + 1) * Math.pow(xMod_lambda, k - 1) / (lambda * lambda * lambda);
 		double d2_dkdLambda = - k * Math.exp(-xMod_lambda_powK) * Math.pow(xMod_lambda, k - 1) * (-2 * xMod_lambda_powK + k * (-3 * xMod_lambda_powK + xMod_lambda_powK * xMod_lambda_powK + 1) * Math.log(xMod_lambda)  + 2) / (lambda * lambda);
 		
-		Matrix hessian;
+		SymmetricMatrix hessian;
 		if (isLocationParameterEnabled) {
 			
 			double d2_d2theta = k * Math.exp(-xMod_lambda_powK) * (k *k *(-3 * xMod_lambda_powK + xMod_lambda_powK*xMod_lambda_powK + 1) + 3 * k * (xMod_lambda_powK - 1) + 2) *xMod_lambda_powK / (xMod * xMod * xMod);
 			double d2_dkdTheta = Math.exp(-xMod_lambda_powK) * xMod_lambda_powK * (2 * k * (xMod_lambda_powK - 1) - k * (xMod_lambda_powK + k*(-3*xMod_lambda_powK + xMod_lambda_powK*xMod_lambda_powK + 1) - 1)*Math.log(xMod_lambda) + 1) / (xMod * xMod);
 			double d2_dLambdadTheta = k*k* Math.exp(-xMod_lambda_powK) * (xMod_lambda_powK + k * (-3*xMod_lambda_powK + xMod_lambda_powK*xMod_lambda_powK + 1) -1) *Math.pow(xMod_lambda, k+1)  / (xMod * xMod * xMod);
 			
-			hessian = new Matrix(3,3);
+			hessian = new SymmetricMatrix(3);
 			hessian.setValueAt(K_INDEX, K_INDEX, d2_d2k);
 			hessian.setValueAt(LAMBDA_INDEX, LAMBDA_INDEX, d2_d2lambda);
 			hessian.setValueAt(K_INDEX, LAMBDA_INDEX, d2_dkdLambda);
-			hessian.setValueAt(LAMBDA_INDEX, K_INDEX, d2_dkdLambda);
+//			hessian.setValueAt(LAMBDA_INDEX, K_INDEX, d2_dkdLambda);
 
 			hessian.setValueAt(LAMBDA_INDEX, THETA_INDEX, d2_dLambdadTheta);
-			hessian.setValueAt(THETA_INDEX, LAMBDA_INDEX, d2_dLambdadTheta);
+//			hessian.setValueAt(THETA_INDEX, LAMBDA_INDEX, d2_dLambdadTheta);
 
 			hessian.setValueAt(K_INDEX, THETA_INDEX, d2_dkdTheta);
-			hessian.setValueAt(THETA_INDEX, K_INDEX, d2_dkdTheta);
+//			hessian.setValueAt(THETA_INDEX, K_INDEX, d2_dkdTheta);
 			hessian.setValueAt(THETA_INDEX, THETA_INDEX, d2_d2theta);
 			
 			return hessian;
 			
 		} else {
-			hessian = new Matrix(2,2);
+			hessian = new SymmetricMatrix(2);
 			hessian.setValueAt(K_INDEX, K_INDEX, d2_d2k);
 			hessian.setValueAt(LAMBDA_INDEX, LAMBDA_INDEX, d2_d2lambda);
 			hessian.setValueAt(K_INDEX, LAMBDA_INDEX, d2_dkdLambda);
-			hessian.setValueAt(LAMBDA_INDEX, K_INDEX, d2_dkdLambda);
+//			hessian.setValueAt(LAMBDA_INDEX, K_INDEX, d2_dkdLambda);
 			return hessian;
 		}
 	}

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 @SuppressWarnings("serial")
 public class LinkedGaussianEstimate extends GaussianEstimate {
@@ -26,7 +27,7 @@ public class LinkedGaussianEstimate extends GaussianEstimate {
 		}
 		
 		Matrix mean = firstEstimate.getMean().matrixStack(secondEstimate.getMean(), true);
-		Matrix variance = new Matrix(mean.m_iRows, mean.m_iRows);
+		SymmetricMatrix variance = new SymmetricMatrix(mean.m_iRows);
 		variance.setSubMatrix(firstEstimate.getVariance(), 0, 0);
 		variance.setSubMatrix(secondEstimate.getVariance(), nbParms1, nbParms1);
 		for (int i = nbParms1; i < (nbParms1 + nbParms2); i++) {
@@ -34,10 +35,9 @@ public class LinkedGaussianEstimate extends GaussianEstimate {
 				double var1 = variance.getValueAt(i, i);
 				double var2 = variance.getValueAt(j, j);
 				variance.setValueAt(i, j, Math.sqrt(var1 * var2) * correlation);
-				variance.setValueAt(j, i, variance.getValueAt(i, j));
+//				variance.setValueAt(j, i, variance.getValueAt(i, j));
 			}
 		}
-
 		this.setMean(mean);
 		this.setVariance(variance);
 	}

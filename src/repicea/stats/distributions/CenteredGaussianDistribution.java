@@ -25,7 +25,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import repicea.math.DiagonalMatrix;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
@@ -55,7 +57,7 @@ public final class CenteredGaussianDistribution implements Distribution {
 	 * @param correlationParameter the correlation parameter in the correlation structure
 	 * @param type a TypeMatrixR enum
 	 */
-	public CenteredGaussianDistribution(Matrix variance, double correlationParameter, TypeMatrixR type) {
+	public CenteredGaussianDistribution(SymmetricMatrix variance, double correlationParameter, TypeMatrixR type) {
 		underlyingDistribution = new GaussianDistribution(new Matrix(variance.m_iRows,1), variance);
 		this.correlationParameter = correlationParameter;
 		this.type = type;
@@ -77,7 +79,7 @@ public final class CenteredGaussianDistribution implements Distribution {
 	 * Constructor for univariate distribution.
 	 * @param variance the homogeneous variance
 	 */
-	public CenteredGaussianDistribution(Matrix variance) {
+	public CenteredGaussianDistribution(SymmetricMatrix variance) {
 		this(variance, 0, null);
 	}
 
@@ -103,14 +105,14 @@ public final class CenteredGaussianDistribution implements Distribution {
 			referenceList.addAll(((List) key));		// make a copy to avoid changes through reference
 			Matrix distances = new Matrix(referenceList);
 //			Matrix correlationMatrix = StatisticalUtility.constructRMatrix(distances, 1d, correlationParameter, type);
-			Matrix correlationMatrix = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, correlationParameter}), type, distances);
-			Matrix varianceCovariance = correlationMatrix.scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
+			SymmetricMatrix correlationMatrix = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, correlationParameter}), type, distances);
+			SymmetricMatrix varianceCovariance = correlationMatrix.scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
 			structuredVarianceCovarianceMap.put(referenceList, varianceCovariance);
 			Matrix lowerChol = varianceCovariance.getLowerCholTriangle();
 			structuredLowerCholeskyMap.put(referenceList, lowerChol);
 		} else {
 			int size = (Integer) key;
-			Matrix varianceCovariance = Matrix.getIdentityMatrix(size).scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
+			DiagonalMatrix varianceCovariance = Matrix.getIdentityMatrix(size).scalarMultiply(underlyingDistribution.getVariance().getValueAt(0, 0));
 			simpleVarianceCovarianceMap.put(size, varianceCovariance);
 			Matrix lowerChol = varianceCovariance.getLowerCholTriangle();
 			simpleLowerCholeskyMap.put(size, lowerChol);
@@ -152,7 +154,7 @@ public final class CenteredGaussianDistribution implements Distribution {
 	}
 	
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		return underlyingDistribution.getVariance();
 	}
 

@@ -19,6 +19,7 @@
 package repicea.stats.distributions;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.Distribution;
 
@@ -31,7 +32,7 @@ import repicea.stats.Distribution;
 public class UnknownDistribution implements Distribution, CentralMomentsSettable {
 
 	private Matrix mean;
-	private Matrix variance;
+	private SymmetricMatrix variance;
 	
 	
 	@Override
@@ -45,7 +46,7 @@ public class UnknownDistribution implements Distribution, CentralMomentsSettable
 	}
 
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		return variance;
 	}
 
@@ -60,7 +61,7 @@ public class UnknownDistribution implements Distribution, CentralMomentsSettable
 	}
 
 	@Override
-	public void setVariance(Matrix variance) {
+	public void setVariance(SymmetricMatrix variance) {
 		this.variance = variance;
 	}
 

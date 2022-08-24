@@ -49,7 +49,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 	 * Basic constructor without population size.
 	 */
 	protected PointEstimate() {
-		super(new GaussianDistribution(new Matrix(new double[]{0}), new Matrix(new double[]{1})));
+		super(new GaussianDistribution(0d, 1d));
 		observations = new ConcurrentHashMap<String, O>();
 		populationSize = -1d;
 		estimatorType = EstimatorType.LeastSquares;
@@ -60,7 +60,7 @@ public abstract class PointEstimate<O extends PopulationUnit> extends Estimate<G
 	 * @param populationSize the number of units in the population.
 	 */
 	protected PointEstimate(double populationSize) {
-		super(new GaussianDistribution(new Matrix(new double[]{0}), new Matrix(new double[]{1})));
+		super(new GaussianDistribution(0d, 1d));
 		if (populationSize <= 0) {
 			throw new InvalidParameterException("The population size must be greater than 0!");
 		}

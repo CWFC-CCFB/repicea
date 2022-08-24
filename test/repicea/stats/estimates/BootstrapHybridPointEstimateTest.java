@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
@@ -149,11 +150,10 @@ public class BootstrapHybridPointEstimateTest {
 		Matrix meanX = new Matrix(2,1);
 		meanX.setValueAt(0, 0, 20d);
 		meanX.setValueAt(1, 0, 12d);
-		Matrix varianceX = new Matrix(2,2);
+		SymmetricMatrix varianceX = new SymmetricMatrix(2);
 		varianceX.setValueAt(0, 0, 10d * 10d);
 		varianceX.setValueAt(1, 1, 4d * 4d);
 		varianceX.setValueAt(1, 0, 4d * 10d * .5);
-		varianceX.setValueAt(0, 1, varianceX.getValueAt(1, 0));
 
 		GaussianEstimate popUnitGenerator = new GaussianEstimate(meanX, varianceX);
 		PopulationMeanEstimate pe = new PopulationMeanEstimate();

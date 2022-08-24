@@ -23,6 +23,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.DataSet;
+import repicea.stats.distributions.utility.GaussianUtility;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 
 public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> implements Estimator {
@@ -49,7 +50,10 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 		List<String> fieldNames = new ArrayList<String>();
 		fieldNames.add("Effect");
 		fieldNames.add("Estimate");
-		fieldNames.add("Standard Error");
+		fieldNames.add("Std. Error");
+		fieldNames.add("z value");
+		fieldNames.add("Pr(>|z|)");
+		
 		DataSet dataSet = new DataSet(fieldNames);
 		Matrix parameterEstimates = getParameterEstimates().getMean();
 		boolean varianceAvailable = false;
@@ -59,13 +63,16 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 			varianceAvailable = true;
 		} 
 
-		Object[] record = new Object[3];
+		Object[] record = new Object[5];
 		boolean isWithIntercept = model.isInterceptModel();
 		for (int i = 0; i < parameterEstimates.m_iRows; i++) {
 			int j = isWithIntercept ? i - 1 : i;
 			record[0] = j == -1 ? "intercept" : model.getEffectList().get(j);
 			record[1] = parameterEstimates.getValueAt(i, 0);
 			record[2] = varianceAvailable ? std.getValueAt(i, 0) : Double.NaN;
+			double z = varianceAvailable ? parameterEstimates.getValueAt(i, 0) / std.getValueAt(i, 0) : Double.NaN;
+			record[3] = z;
+			record[4] = varianceAvailable ? GaussianUtility.getCumulativeProbability(Math.abs(z), true) * 2: Double.NaN;
 			dataSet.addObservation(record);
 		}
 		return dataSet;

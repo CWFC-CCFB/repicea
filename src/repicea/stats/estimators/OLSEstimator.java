@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -71,7 +72,7 @@ public class OLSEstimator extends AbstractEstimator<OLSCompatibleModel> {
 		Matrix matrixY = model.getVectorY();
 		Matrix matrixXT = matrixX.transpose();
 		betaVector = new GaussianEstimate();
-		Matrix inverseProduct = matrixXT.multiply(matrixX).getInverseMatrix();
+		SymmetricMatrix inverseProduct = SymmetricMatrix.convertToSymmetricIfPossible(matrixXT.multiply(matrixX).getInverseMatrix());
 		((GaussianEstimate) betaVector).setMean(inverseProduct.multiply(matrixX.transpose()).multiply(matrixY));
 		model.setParameters(betaVector.getMean());
 		Matrix residual = model.getResiduals();

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
 
@@ -71,7 +72,7 @@ public class MetropolisHastingsPriorHandler {
 			ContinuousDistribution varianceDist = randomEffectDistributions.get(d);
 			int index = distributions.get(varianceDist).get(0);	// TODO FP MF2021-11-01 here we assume that there is only one index 
 			Matrix realizedRandomEffectVariance = realizedParameters.getSubMatrix(index, index, 0, 0);
-			((GaussianDistribution) d).setVariance(realizedRandomEffectVariance);
+			((GaussianDistribution) d).setVariance(SymmetricMatrix.convertToSymmetricIfPossible(realizedRandomEffectVariance));
 		}
 	}
 

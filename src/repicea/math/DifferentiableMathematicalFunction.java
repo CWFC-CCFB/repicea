@@ -40,6 +40,6 @@ public interface DifferentiableMathematicalFunction {
 	 * IMPORTANT: the method should return null if the function has no parameter.
 	 * @return a Matrix instance
 	 */
-	public Matrix getHessian();
+	public SymmetricMatrix getHessian();
 	
 }

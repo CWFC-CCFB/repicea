@@ -19,6 +19,7 @@
 package repicea.stats.model.glm;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.model.IndividualLikelihood;
 
 /**
@@ -64,8 +65,8 @@ public class LikelihoodGLM extends IndividualLikelihood {
 	}
 
 	@Override
-	public Matrix getHessian() {
-		Matrix lfHessian = linkFunction.getHessian();
+	public SymmetricMatrix getHessian() {
+		SymmetricMatrix lfHessian = linkFunction.getHessian();
 		if (observedValues.getValueAt(0, 0) == 1d) {
 			return lfHessian;
 		} else {

@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.estimates.GaussianEstimate;
 import repicea.stats.estimates.MonteCarloEstimate;
 
@@ -19,10 +20,9 @@ public class DistributionTest {
 		Matrix mean = new Matrix(2,1);
 		mean.setValueAt(0, 0, 2d);
 		mean.setValueAt(1, 0, 3d);
-		Matrix variance = new Matrix(2,2);
+		SymmetricMatrix variance = new SymmetricMatrix(2);
 		variance.setValueAt(0, 0, 0.5);
 		variance.setValueAt(1, 0, 0.4);
-		variance.setValueAt(0, 1, 0.4);
 		variance.setValueAt(1, 1, 1d);
 		
 		GaussianEstimate estimate = new GaussianEstimate(mean, variance);

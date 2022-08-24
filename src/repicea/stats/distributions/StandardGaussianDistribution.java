@@ -21,12 +21,14 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
+import repicea.serial.xml.PostXmlUnmarshalling;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.utility.GaussianUtility;
 
 @SuppressWarnings("serial")
-public class StandardGaussianDistribution implements ContinuousDistribution {
+public class StandardGaussianDistribution implements ContinuousDistribution, PostXmlUnmarshalling {
 
 	private static StandardGaussianDistribution Singleton;
 	
@@ -39,7 +41,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 	 */
 	protected StandardGaussianDistribution() {
 		Matrix mu = new Matrix(1,1);
-		Matrix sigma2 = new Matrix(1,1);
+		SymmetricMatrix sigma2 = new SymmetricMatrix(1);
 		sigma2.setValueAt(0, 0, 1d);
 		setMean(mu);
 		setVariance(sigma2);
@@ -84,7 +86,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 	public Matrix getMean() {return getMu();}
 
 	@Override
-	public Matrix getVariance() {return getSigma2();}
+	public SymmetricMatrix getVariance() {return getSigma2();}
 
 	@Override
 	public Type getType() {return Distribution.Type.GAUSSIAN;}
@@ -93,7 +95,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 		this.mu = mu;
 	}
 
-	protected void setVariance(Matrix sigma2) {
+	protected void setVariance(SymmetricMatrix sigma2) {
 		if (sigma2 != null && !sigma2.isSymmetric()) {
 			throw new InvalidParameterException("The variance-covariance matrix must be symmetric!");
 		}
@@ -103,7 +105,7 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 
 	protected Matrix getMu() {return mu;}
 	
-	protected Matrix getSigma2() {return sigma2;}
+	protected SymmetricMatrix getSigma2() {return (SymmetricMatrix) sigma2;}
 	
 	
 	@Override
@@ -131,6 +133,13 @@ public class StandardGaussianDistribution implements ContinuousDistribution {
 				Matrix invSigma2 = getSigma2().getInverseMatrix();
 				return 1d / (Math.pow(2 * Math.PI, 0.5 * k) * Math.sqrt(getSigma2().getDeterminant())) * Math.exp(- 0.5 * residuals.transpose().multiply(invSigma2).multiply(residuals).getSumOfElements());
 			}
+		}
+	}
+
+	@Override
+	public void postUnmarshallingAction() {
+		if (!(sigma2 instanceof SymmetricMatrix)) {
+			setVariance(SymmetricMatrix.convertToSymmetricIfPossible(sigma2));	// MF20220824 to ensure a proper deserialization of previously saved meta models.
 		}
 	}
 

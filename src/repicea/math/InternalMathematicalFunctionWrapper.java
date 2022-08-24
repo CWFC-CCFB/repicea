@@ -110,7 +110,7 @@ public class InternalMathematicalFunctionWrapper extends AbstractMathematicalFun
 	public Matrix getGradient() {return getOriginalFunction().getGradient();}
 
 	@Override
-	public Matrix getHessian() {return getOriginalFunction().getHessian();}
+	public SymmetricMatrix getHessian() {return getOriginalFunction().getHessian();}
 
 	Collection<Integer> getNewParameterIndices() {
 		return parmMap.keySet();
