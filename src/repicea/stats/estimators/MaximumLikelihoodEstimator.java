@@ -227,9 +227,6 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 	
 	@Override
 	public DataSet getConvergenceStatusReport() {
-		NumberFormat formatter = NumberFormat.getInstance();
-		formatter.setMaximumFractionDigits(3);
-		formatter.setMinimumFractionDigits(3);
 		List<String> fieldNames = new ArrayList<String>();
 		fieldNames.add("Element");
 		fieldNames.add("Value");
@@ -258,18 +255,22 @@ public class MaximumLikelihoodEstimator extends AbstractEstimator<MaximumLikelih
 		} else {
 			StringBuilder sb = new StringBuilder();
 			DataSet convergenceDataset = getConvergenceStatusReport();
+			DecimalFormat decFormat = new DecimalFormat();
+			decFormat.setMaximumFractionDigits(4);
+			decFormat.setMinimumFractionDigits(4);
+			convergenceDataset.setFormatter(1, decFormat);
 			sb.append(convergenceDataset.toString() + System.lineSeparator());
 			DataSet parameterDataset = getParameterEstimatesReport();
-			DecimalFormat decFormat1 = new DecimalFormat();
-			decFormat1.setMaximumFractionDigits(6);
-			decFormat1.setMinimumFractionDigits(6);
-			parameterDataset.setFormatter(1, decFormat1);
-			parameterDataset.setFormatter(2, decFormat1);
-			parameterDataset.setFormatter(4, decFormat1);
-			DecimalFormat decFormat2 = new DecimalFormat();
-			decFormat2.setMaximumFractionDigits(3);
-			decFormat2.setMinimumFractionDigits(3);
-			parameterDataset.setFormatter(3, decFormat2);
+			decFormat = new DecimalFormat();
+			decFormat.setMaximumFractionDigits(6);
+			decFormat.setMinimumFractionDigits(6);
+			parameterDataset.setFormatter(1, decFormat);
+			parameterDataset.setFormatter(2, decFormat);
+			parameterDataset.setFormatter(4, decFormat);
+			decFormat = new DecimalFormat();
+			decFormat.setMaximumFractionDigits(3);
+			decFormat.setMinimumFractionDigits(3);
+			parameterDataset.setFormatter(3, decFormat);
 			sb.append(parameterDataset.toString() + System.lineSeparator());
 			return sb.toString();
 		}

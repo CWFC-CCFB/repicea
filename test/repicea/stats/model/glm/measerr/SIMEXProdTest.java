@@ -45,7 +45,7 @@ public class SIMEXProdTest {
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
 	}
 
-	@Ignore
+	@Ignore // it takes 5 minutes...
 	@Test
 	public void sugarMapleRecruitmentTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("ERSTestFile.csv");
@@ -55,7 +55,8 @@ public class SIMEXProdTest {
 		glm.doEstimation();
 		System.out.print(glm.getSummary());
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
-		s.setNumberOfBootstrapRealizations(200);
+		s.setNumberOfBootstrapRealizations(100);
+		s.setNbThreads(4);
 		s.doEstimation();
 		System.out.print(s.getSummary());
 //		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());

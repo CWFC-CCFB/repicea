@@ -18,7 +18,7 @@
  */
 package repicea.stats.model.glm.measerr;
 
-import java.text.NumberFormat;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,16 +121,19 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 					}
 				}
 			}
-			for (Thread t : threads) 
+			for (@SuppressWarnings("unused") Thread t : threads) 
 				queue.add(Double.NaN);
 			for (Thread t : threads)
 				t.join();
 			
 			Matrix epsilon = new Matrix(getModel().factors);
+			// A quadratic extrapolation x = [1, epsilon, epsilon2]
 			Matrix x = new Matrix(epsilon.m_iRows, 1, 1, 0).matrixStack(epsilon, false).matrixStack(epsilon.elementWisePower(2), false);
 			Matrix invXtX_Xt = x.transpose().multiply(x).getInverseMatrix().multiply(x.transpose());
+			// Extrapolation is then at X = [1, -1, 1]
 			Matrix extrapolation = new Matrix(1,3,1,0);
 			extrapolation.setValueAt(0, 1, -1);
+			extrapolation.setValueAt(0, 2, 1);
 			Matrix parameters = null;
 			Matrix variances = null;
 			for (Double d : getModel().factors) {
@@ -184,9 +187,6 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 
 	@Override
 	public DataSet getConvergenceStatusReport() {
-		NumberFormat formatter = NumberFormat.getInstance();
-		formatter.setMaximumFractionDigits(3);
-		formatter.setMinimumFractionDigits(3);
 		List<String> fieldNames = new ArrayList<String>();
 		fieldNames.add("Element");
 		fieldNames.add("Value");
@@ -197,5 +197,36 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 		dataSet.addObservation(record);
 		return dataSet;
 	}
+	
+	@Override
+	public String getReport() {
+		if (!isConvergenceAchieved()) {
+			return "Convergence could not be achieved!";
+		} else {
+			StringBuilder sb = new StringBuilder();
+			DataSet convergenceDataset = getConvergenceStatusReport();
+			DecimalFormat decFormat = new DecimalFormat();
+			decFormat.setMaximumFractionDigits(4);
+			decFormat.setMinimumFractionDigits(4);
+			convergenceDataset.setFormatter(1, decFormat);
+			sb.append(convergenceDataset.toString() + System.lineSeparator());
+			DataSet parameterDataset = getParameterEstimatesReport();
+			decFormat = new DecimalFormat();
+			decFormat.setMaximumFractionDigits(6);
+			decFormat.setMinimumFractionDigits(6);
+			parameterDataset.setFormatter(1, decFormat);
+			parameterDataset.setFormatter(2, decFormat);
+			parameterDataset.setFormatter(4, decFormat);
+			decFormat = new DecimalFormat();
+			decFormat.setMaximumFractionDigits(3);
+			decFormat.setMinimumFractionDigits(3);
+			parameterDataset.setFormatter(3, decFormat);
+			sb.append(parameterDataset.toString() + System.lineSeparator());
+			return sb.toString();
+		}
+
+	}
+
+	
 }
 

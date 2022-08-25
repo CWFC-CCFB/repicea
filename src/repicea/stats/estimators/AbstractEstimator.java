@@ -45,6 +45,8 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 		this.model = model;
 	}
 	
+	
+	
 	@Override
 	public DataSet getParameterEstimatesReport() {
 		List<String> fieldNames = new ArrayList<String>();
@@ -53,6 +55,7 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 		fieldNames.add("Std. Error");
 		fieldNames.add("z value");
 		fieldNames.add("Pr(>|z|)");
+		fieldNames.add("Significant");
 		
 		DataSet dataSet = new DataSet(fieldNames);
 		Matrix parameterEstimates = getParameterEstimates().getMean();
@@ -63,7 +66,7 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 			varianceAvailable = true;
 		} 
 
-		Object[] record = new Object[5];
+		Object[] record = new Object[6];
 		boolean isWithIntercept = model.isInterceptModel();
 		for (int i = 0; i < parameterEstimates.m_iRows; i++) {
 			int j = isWithIntercept ? i - 1 : i;
@@ -72,7 +75,19 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 			record[2] = varianceAvailable ? std.getValueAt(i, 0) : Double.NaN;
 			double z = varianceAvailable ? parameterEstimates.getValueAt(i, 0) / std.getValueAt(i, 0) : Double.NaN;
 			record[3] = z;
-			record[4] = varianceAvailable ? GaussianUtility.getCumulativeProbability(Math.abs(z), true) * 2: Double.NaN;
+			double significanceLevel = varianceAvailable ? GaussianUtility.getCumulativeProbability(Math.abs(z), true) * 2: Double.NaN;
+			record[4] = significanceLevel;
+			String symbol = "";
+			if (!Double.isNaN(significanceLevel)) {
+				if (significanceLevel <= 0.01) {
+					symbol = "**";
+				} else if (significanceLevel <= 0.05) {
+					symbol = "*";
+				} else if (significanceLevel <= 0.10) {
+					symbol = ".";
+				}
+			}
+			record[5] = symbol;
 			dataSet.addObservation(record);
 		}
 		return dataSet;
