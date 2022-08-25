@@ -62,7 +62,7 @@ public class LogGaussianModelTest {
 		double observedSigma2 = gm.getParameters().getValueAt(1, 0);
 		Assert.assertTrue("Checking if the model has converged", ((MaximumLikelihoodEstimator) gm.getEstimator()).isConvergenceAchieved());
 		Assert.assertEquals("Checking mu parameter", mu, observedMu, 5E-2);
-		Assert.assertEquals("Checking variance parameter", sigma2, observedSigma2, 1E-1);
+		Assert.assertEquals("Checking variance parameter", sigma2, observedSigma2, 1.5E-1);
 	}
 
 }

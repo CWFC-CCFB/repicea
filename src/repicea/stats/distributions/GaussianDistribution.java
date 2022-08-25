@@ -19,6 +19,7 @@
 package repicea.stats.distributions;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.CentralMomentsSettable;
 
 /**
@@ -38,7 +39,7 @@ public class GaussianDistribution extends StandardGaussianDistribution implement
 	 * @param sigma2 the variance of the function
 	 * @throws UnsupportedOperationException if the matrix sigma2 is not positive definite
 	 */
-	public GaussianDistribution(Matrix mu, Matrix sigma2) {
+	public GaussianDistribution(Matrix mu, SymmetricMatrix sigma2) {
 		setMean(mu);
 		setVariance(sigma2);
 	}
@@ -49,7 +50,20 @@ public class GaussianDistribution extends StandardGaussianDistribution implement
 	 * @param variance
 	 */
 	public GaussianDistribution(double mean, double variance) {
-		this(new Matrix(1,1,mean,0d), new Matrix(1,1,variance,0d));
+		Matrix mu = new Matrix(1,1);
+		mu.setValueAt(0, 0, mean);
+		setMean(mu);
+		SymmetricMatrix sigma2 = new SymmetricMatrix(1);
+		sigma2.setValueAt(0, 0, variance);
+		setVariance(sigma2);
+//		this(new Matrix(1,1,mean,0d), new Matrix(1,1,variance,0d));
+	}
+	
+	/**
+	 * Constructor for univariate Gaussian distribution centered on 0 with variance 1.
+	 */
+	public GaussianDistribution() {
+		this(0d, 1d);
 	}
 
 	@Override
@@ -58,7 +72,7 @@ public class GaussianDistribution extends StandardGaussianDistribution implement
 	}
 
 	@Override
-	public void setVariance(Matrix variance) {
+	public void setVariance(SymmetricMatrix variance) {
 		super.setVariance(variance);
 	}
 

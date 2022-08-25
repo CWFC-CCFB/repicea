@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.simulation.HierarchicalLevel;
 import repicea.simulation.REpiceaPredictor;
 import repicea.stats.distributions.GaussianErrorTerm;
@@ -216,11 +217,11 @@ public abstract class HDRelationshipPredictor<Stand extends HDRelationshipStand,
 				Matrix invV_i = matV_i.getInverseMatrix();
 				Matrix blups_i = matGbck.multiply(matZ_i.transpose()).multiply(invV_i).multiply(res_i);
 
-				Matrix newMatG_i = null;
+				SymmetricMatrix newMatG_i = null;
 
 				if (isRandomEffectsVariabilityEnabled) {
 					Matrix matP = invV_i.subtract(invV_i.multiply(matX_i).multiply(omega).multiply(matX_i.transpose()).multiply(invV_i));  
-					newMatG_i = matGbck.subtract(matGbck.multiply(matZ_i.transpose()).multiply(matP).multiply(matZ_i).multiply(matGbck));
+					newMatG_i = SymmetricMatrix.convertToSymmetricIfPossible(matGbck.subtract(matGbck.multiply(matZ_i.transpose()).multiply(matP).multiply(matZ_i).multiply(matGbck)));
 				}
 
 				setBlupsForThisSubject(stand, new GaussianEstimate(blups_i, newMatG_i));

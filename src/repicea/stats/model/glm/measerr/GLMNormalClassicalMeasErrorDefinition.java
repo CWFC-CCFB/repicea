@@ -27,9 +27,8 @@ import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.InternalMathematicalFunctionWrapper;
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
-import repicea.math.ParameterBound;
 import repicea.math.ProductFunctionWrapper;
-import repicea.math.functions.LogGaussianFunction;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataStructure;
@@ -115,7 +114,7 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		}
 
 		@Override
-		public Matrix getHessian() {
+		public SymmetricMatrix getHessian() {
 			return null;
 		}
 
@@ -188,8 +187,9 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 		}
 
 		@Override
-		public Matrix getHessian() {
-			return integrator.getIntegralApproximationForMatrixFunction(hessianProvider, measErr.indexEffectWithMeasError, false);
+		public SymmetricMatrix getHessian() {
+			SymmetricMatrix hessian = SymmetricMatrix.convertToSymmetricIfPossible(integrator.getIntegralApproximationForMatrixFunction(hessianProvider, measErr.indexEffectWithMeasError, false));
+			return hessian;
 		}
 
 	}

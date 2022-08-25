@@ -56,7 +56,7 @@ public abstract class AbstractMathematicalFunctionWrapper extends AbstractMathem
 	public abstract Matrix getGradient();
 
 	@Override
-	public abstract Matrix getHessian();
+	public abstract SymmetricMatrix getHessian();
 	
 
 	@Override

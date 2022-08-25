@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.Distribution;
 import repicea.stats.distributions.GaussianDistribution;
@@ -150,15 +151,22 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 		((GaussianEstimate) result).setMean(null);
 		((GaussianEstimate) result).setVariance(null);
 
-		Matrix variance;
+		SymmetricMatrix variance;
 
 		Matrix taper = getSquaredDiameters(reshapeMatrixAccordingToSegments(segments, getMean()));
 
 		Matrix volumeEstim = taper.elementWiseMultiply(volumeFactor);
 		((GaussianEstimate) result).setMean(volumeEstim);
 		if (getVariance() != null) {
-			variance = getVarianceOfSquaredDiameter(reshapeMatrixAccordingToSegments(segments, getVariance()));
-			((GaussianEstimate) result).setVariance(variance.elementWiseMultiply(varianceFactor));
+			variance = getVarianceOfSquaredDiameter(
+					SymmetricMatrix.convertToSymmetricIfPossible(
+							reshapeMatrixAccordingToSegments(segments, getVariance())));
+			Matrix scaledVariance = variance.elementWiseMultiply(varianceFactor);
+			if (scaledVariance instanceof SymmetricMatrix) {
+				((GaussianEstimate) result).setVariance((SymmetricMatrix) scaledVariance);
+			} else {
+				throw new UnsupportedOperationException("The scaledVariance object is not a SymmetricMatrix instance!");
+			}
 		}
 		return result;
 	}
@@ -172,7 +180,7 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 	
 	protected abstract Matrix getSquaredDiameters(Matrix predictedDiameters);
 	
-	protected abstract Matrix getVarianceOfSquaredDiameter(Matrix variancePredictedDiameters);
+	protected abstract SymmetricMatrix getVarianceOfSquaredDiameter(SymmetricMatrix variancePredictedDiameters);
 	
 	protected abstract double getScalingFactor();
 	
@@ -182,7 +190,7 @@ public abstract class AbstractStemTaperEstimate extends Estimate<Distribution> i
 	}
 
 	@Override
-	public void setVariance(Matrix variance) {
+	public void setVariance(SymmetricMatrix variance) {
 		((GaussianDistribution) getDistribution()).setVariance(variance);
 	}
 

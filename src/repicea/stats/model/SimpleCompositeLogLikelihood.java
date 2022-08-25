@@ -20,6 +20,7 @@ package repicea.stats.model;
 
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.utility.MatrixUtility;
 
 /**
@@ -54,18 +55,19 @@ public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWr
 		Matrix resultingGradient = new Matrix(getOriginalFunction().getNumberOfParameters(), 1);
 		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
-			MatrixUtility.add(resultingGradient, getOriginalFunction().getGradient());
+//			MatrixUtility.add(resultingGradient, getOriginalFunction().getGradient());
+			resultingGradient = resultingGradient.add(getOriginalFunction().getGradient());
 		}
 		return resultingGradient;
 	}
 
 	@Override
-	public Matrix getHessian() {
-		Matrix resultingHessian = new Matrix(getOriginalFunction().getNumberOfParameters(), 
-				getOriginalFunction().getNumberOfParameters());
+	public SymmetricMatrix getHessian() {
+		SymmetricMatrix resultingHessian = new SymmetricMatrix(getOriginalFunction().getNumberOfParameters());
 		for (int i = 0; i < yValues.m_iRows; i++) {
 			setValuesInLikelihoodFunction(i);
-			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
+//			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
+			resultingHessian = (SymmetricMatrix) resultingHessian.add(getOriginalFunction().getHessian());
 		}
 		return resultingHessian;
 	}

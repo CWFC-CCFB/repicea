@@ -21,6 +21,7 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 
@@ -34,7 +35,7 @@ public class StudentTDistribution implements Distribution {
 
 	
 	private Matrix mu;
-	private Matrix sigma2;
+	private SymmetricMatrix sigma2;
 	private Matrix lowerCholTriangle;
 	private final int degreesOfFreedom;
 	
@@ -47,7 +48,7 @@ public class StudentTDistribution implements Distribution {
 	 * @param variance the variance of the distribution
 	 * @param degreesOfFreedom the degrees of freedom of the distribution
 	 */
-	public StudentTDistribution(Matrix mu, Matrix variance, int degreesOfFreedom) {
+	public StudentTDistribution(Matrix mu, SymmetricMatrix variance, int degreesOfFreedom) {
 		this.degreesOfFreedom = degreesOfFreedom;
 		setMean(mu);
 		setVariance(variance);
@@ -60,7 +61,7 @@ public class StudentTDistribution implements Distribution {
 	public StudentTDistribution(int degreesOfFreedom) {
 		this.degreesOfFreedom = degreesOfFreedom;
 		Matrix mu = new Matrix(1,1);
-		Matrix variance = new Matrix(1,1);
+		SymmetricMatrix variance = new SymmetricMatrix(1);
 		variance.setValueAt(0, 0, 1d);
 		setMean(mu);
 		setVariance(variance);
@@ -98,7 +99,7 @@ public class StudentTDistribution implements Distribution {
 	public Matrix getMean() {return getMu();}
 
 	@Override
-	public Matrix getVariance() {return getSigma2().scalarMultiply(((double) degreesOfFreedom)/(degreesOfFreedom - 2));}
+	public SymmetricMatrix getVariance() {return getSigma2().scalarMultiply(((double) degreesOfFreedom)/(degreesOfFreedom - 2));}
 
 	@Override
 	public Type getType() {return Distribution.Type.STUDENT;}
@@ -107,7 +108,7 @@ public class StudentTDistribution implements Distribution {
 		this.mu = mu;
 	}
 
-	private void setVariance(Matrix sigma2) {
+	private void setVariance(SymmetricMatrix sigma2) {
 		if (sigma2 != null && !sigma2.isSymmetric()) {
 			throw new InvalidParameterException("The variance-covariance matrix must be symmetric!");
 		}
@@ -117,7 +118,7 @@ public class StudentTDistribution implements Distribution {
 
 	private Matrix getMu() {return mu;}
 	
-	private Matrix getSigma2() {return sigma2;}
+	private SymmetricMatrix getSigma2() {return sigma2;}
 	
 	
 	@Override

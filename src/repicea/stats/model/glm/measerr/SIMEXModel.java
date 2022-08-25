@@ -143,7 +143,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			throw new InvalidParameterException("The field " + varianceField + " is not found in the original dataset!");
 		Matrix varVector = new Matrix(ds.getNumberOfObservations(), 1);
 		for (int i = 0; i < ds.getNumberOfObservations(); i++) {
-			varVector.setValueAt(i, 0, (Double) ds.getObservations().get(i).getValueAt(indexVarianceField));
+			varVector.setValueAt(i, 0, ((Number) ds.getObservations().get(i).getValueAt(indexVarianceField)).doubleValue());
 		}
 		this.originalGLM.getCompleteLogLikelihood().variance = varVector;
 		this.originalGLM.getCompleteLogLikelihood().indexVarWithMeasErr = indexVarWithMeasErr;

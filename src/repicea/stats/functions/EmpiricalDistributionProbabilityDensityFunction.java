@@ -25,6 +25,7 @@ import java.util.List;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 @SuppressWarnings("serial")
 public class EmpiricalDistributionProbabilityDensityFunction extends AbstractMathematicalFunction {
@@ -164,7 +165,7 @@ public class EmpiricalDistributionProbabilityDensityFunction extends AbstractMat
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		return null;	// this function has no parameter
 	}
 

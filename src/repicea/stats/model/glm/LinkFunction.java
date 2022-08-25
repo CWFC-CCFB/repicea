@@ -24,6 +24,7 @@ import java.security.InvalidParameterException;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.LinearStatisticalExpression;
 
 /**
@@ -109,7 +110,7 @@ public class LinkFunction extends AbstractMathematicalFunctionWrapper implements
 
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		MathematicalFunction eta = getOriginalFunction();
 		double expEta = Math.exp(eta.getValue());
 		Matrix gradientProduct = eta.getGradient().multiply(eta.getGradient().transpose());
@@ -124,11 +125,11 @@ public class LinkFunction extends AbstractMathematicalFunctionWrapper implements
 			double secondDerivative = (- expEta * expEta + expEta) * denominator * denominator * denominator;
 			Matrix secondTerm = gradientProduct.scalarMultiply(secondDerivative);
 		
-			return firstTerm.add(secondTerm);
+			return SymmetricMatrix.convertToSymmetricIfPossible(firstTerm.add(secondTerm));
 		case Log:
-			return gradientProduct.scalarMultiply(expEta).add(eta.getHessian().scalarMultiply(expEta));
+			return SymmetricMatrix.convertToSymmetricIfPossible(gradientProduct.scalarMultiply(expEta).add(eta.getHessian().scalarMultiply(expEta)));
 		case CLogLog:
-			return gradientProduct.scalarMultiply(-expEta).add(gradientProduct).add(eta.getHessian()).scalarMultiply(Math.exp(-expEta) * expEta);
+			return SymmetricMatrix.convertToSymmetricIfPossible(gradientProduct.scalarMultiply(-expEta).add(gradientProduct).add(eta.getHessian()).scalarMultiply(Math.exp(-expEta) * expEta));
 		default:
 			return null;
 		}

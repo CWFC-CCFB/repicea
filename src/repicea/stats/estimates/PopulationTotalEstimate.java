@@ -22,6 +22,7 @@ import java.security.InvalidParameterException;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.sampling.PopulationUnitWithUnequalInclusionProbability;
 
 /**
@@ -63,7 +64,7 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 	 * @return a Matrix
 	 */
 	@Override
-	protected Matrix getVarianceFromDistribution() {
+	protected SymmetricMatrix getVarianceFromDistribution() {
 		int n = getObservations().size();
 		PopulationUnitWithUnequalInclusionProbability obs_i;
 		PopulationUnitWithUnequalInclusionProbability obs_j;
@@ -93,7 +94,7 @@ public class PopulationTotalEstimate extends PointEstimate<PopulationUnitWithUne
 				}
 			}
 		}
-		return variance;
+		return SymmetricMatrix.convertToSymmetricIfPossible(variance);
 	}
 
 	

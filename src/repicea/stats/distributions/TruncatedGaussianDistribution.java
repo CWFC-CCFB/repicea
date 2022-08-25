@@ -21,6 +21,7 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.distributions.TruncatedGaussianBound.TruncatedGaussianBoundCompatible;
 import repicea.stats.distributions.utility.GaussianUtility;
@@ -110,7 +111,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 		Matrix mean = new Matrix(1,1);
 		mean.setValueAt(0, 0, mu);
 		setMean(mean);
-		Matrix variance = new Matrix(1,1);
+		SymmetricMatrix variance = new SymmetricMatrix(1);
 		variance.setValueAt(0, 0, sigma2);
 		setVariance(variance);
 		lowerBound = new TruncatedGaussianBound(this, false);	// false: lower bound
@@ -152,7 +153,7 @@ public class TruncatedGaussianDistribution extends StandardGaussianDistribution 
 	}
 
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		double zFactor = 1d / (upperBound.getCdfValue() - lowerBound.getCdfValue());
 		double mult1;
 		if (lowerBound.getBoundValue() != null) {

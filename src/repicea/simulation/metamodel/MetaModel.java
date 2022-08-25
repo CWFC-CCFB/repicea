@@ -40,6 +40,7 @@ import com.cedarsoftware.util.io.JsonWriter;
 
 import repicea.io.Saveable;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
 import repicea.stats.StatisticalUtility;
@@ -413,8 +414,9 @@ public class MetaModel implements Saveable {
 	
 	private GaussianEstimate getParameterEstimateGenerator() {
 		if (parameterEstimateGenerator == null)
-			parameterEstimateGenerator = new GaussianEstimate(model.getParameters().getSubMatrix(model.fixedEffectsParameterIndices, null),
-					model.getParmsVarCov().getSubMatrix(model.fixedEffectsParameterIndices, model.fixedEffectsParameterIndices));
+			parameterEstimateGenerator = new GaussianEstimate(
+					model.getParameters().getSubMatrix(model.fixedEffectsParameterIndices, null),
+					SymmetricMatrix.convertToSymmetricIfPossible(model.getParmsVarCov().getSubMatrix(model.fixedEffectsParameterIndices, model.fixedEffectsParameterIndices)));
 		return parameterEstimateGenerator;
 	}
 	

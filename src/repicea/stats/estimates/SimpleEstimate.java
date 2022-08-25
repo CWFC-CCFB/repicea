@@ -21,6 +21,7 @@ package repicea.stats.estimates;
 import java.io.Serializable;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.UnknownDistribution;
 
@@ -45,7 +46,7 @@ public class SimpleEstimate extends Estimate<UnknownDistribution> implements Cen
 	 * @param mean a Matrix instance
 	 * @param variance a Matrix instance
 	 */
-	public SimpleEstimate(Matrix mean, Matrix variance) {
+	public SimpleEstimate(Matrix mean, SymmetricMatrix variance) {
 		this();
 		setMean(mean);
 		setVariance(variance);
@@ -57,7 +58,7 @@ public class SimpleEstimate extends Estimate<UnknownDistribution> implements Cen
 	}
 	
 	@Override
-	public void setVariance(Matrix variance) {
+	public void setVariance(SymmetricMatrix variance) {
 		getDistribution().setVariance(variance);
 	}
 

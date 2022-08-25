@@ -21,6 +21,7 @@ package repicea.stats.distributions;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility;
 
 @SuppressWarnings("serial")
@@ -71,9 +72,10 @@ public class UniformDistribution implements ContinuousDistribution, BoundedDistr
 	}
 
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		Matrix diagonalDifference = upperBound.getBoundValue().subtract(lowerBound.getBoundValue()).matrixDiagonal();
-		return diagonalDifference.multiply(diagonalDifference).scalarMultiply(1d/12);
+		SymmetricMatrix variance = SymmetricMatrix.convertToSymmetricIfPossible(diagonalDifference.multiply(diagonalDifference).scalarMultiply(1d/12));
+		return variance;
 	}
 
 	@Override

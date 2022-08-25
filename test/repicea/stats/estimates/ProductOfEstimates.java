@@ -8,6 +8,7 @@ import repicea.io.FormatField;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.util.ObjectUtility;
 
 public class ProductOfEstimates {
@@ -26,13 +27,14 @@ public class ProductOfEstimates {
 
 			Matrix alphaMean = currentEstimate.getMean();
 			Matrix betaMean = estimates.get(i).getMean();
-			Matrix alphaVariance = currentEstimate.getVariance();
-			Matrix betaVariance = estimates.get(i).getVariance();
+			SymmetricMatrix alphaVariance = currentEstimate.getVariance();
+			SymmetricMatrix betaVariance = estimates.get(i).getVariance();
 			Matrix newMean = alphaMean.multiply(betaMean);
-			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
-					add(betaMean.elementWisePower(2d).multiply(alphaVariance));
+			SymmetricMatrix newVariance = SymmetricMatrix.convertToSymmetricIfPossible( 
+					alphaMean.elementWisePower(2d).multiply(betaVariance).add(betaMean.elementWisePower(2d).multiply(alphaVariance))
+					);
 			if (method == Method.Naive) {
-				newVariance = newVariance.add(alphaVariance.multiply(betaVariance));
+				newVariance = (SymmetricMatrix) newVariance.add(alphaVariance.multiply(betaVariance));
 			}
 			if (newVariance.getValueAt(0, 0) < 0d) {
 				throw new UnsupportedOperationException("The product of the estimates yields negative variance");

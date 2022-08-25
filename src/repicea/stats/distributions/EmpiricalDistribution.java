@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 
@@ -81,7 +82,7 @@ public class EmpiricalDistribution implements Distribution, Serializable {
 	}
 
 	@Override
-	public Matrix getVariance() {
+	public SymmetricMatrix getVariance() {
 		Matrix mean = getMean();
 		Matrix sse = null;
 		Matrix error;
@@ -93,7 +94,8 @@ public class EmpiricalDistribution implements Distribution, Serializable {
 				sse = sse.add(error.multiply(error.transpose()));
 			}
 		}
-		return sse.scalarMultiply(1d / (observations.size()-1));
+		SymmetricMatrix convertedSse = SymmetricMatrix.convertToSymmetricIfPossible(sse);
+		return convertedSse.scalarMultiply(1d / (observations.size()-1));
 	}
 
 	@Override

@@ -28,6 +28,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimates.GaussianEstimate;
@@ -135,11 +136,12 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 			for (Double d : getModel().factors) {
 				Matrix theseParms = estimateMap.get(d).getMean().transpose();
 				Matrix theseVCov;
+				SymmetricMatrix varianceMapResult = SymmetricMatrix.convertToSymmetricIfPossible(varianceMap.get(d).getMean());
 				if (d == 0) {
-					theseVCov = varianceMap.get(d).getMean().symSquare().transpose(); 
+					theseVCov = varianceMapResult.symSquare().transpose(); 
 				} else {
 					Matrix s2_delta = estimateMap.get(d).getVariance();
-					theseVCov = varianceMap.get(d).getMean().subtract(s2_delta).symSquare().transpose(); 
+					theseVCov = ((SymmetricMatrix) varianceMapResult.subtract(s2_delta)).symSquare().transpose(); 
 				}
 				if (parameters == null) {
 					parameters = theseParms;
@@ -164,8 +166,8 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 				Matrix simexValue = extrapolation.multiply(beta);
 				simexVCov.setValueAt(j, 0, simexValue.getValueAt(0, 0));
 			}
-			simexVCov = simexVCov.squareSym();
-			estimate = new GaussianEstimate(simexParms, simexVCov);
+			SymmetricMatrix simexVCovSymm = simexVCov.squareSym();
+			estimate = new GaussianEstimate(simexParms, simexVCovSymm);
 			convergenceAchieved = true;
 			return true;
 		} catch(InterruptedException e) {

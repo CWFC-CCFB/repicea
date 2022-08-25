@@ -42,7 +42,7 @@ public interface StatisticalModel {
 	/**
 	 * This method returns the results of the fit on screen.
 	 */
-	public void getSummary();
+	public String getSummary();
 	
 	/**
 	 * This method computes the parameter estimates.

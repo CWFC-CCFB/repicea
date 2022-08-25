@@ -21,6 +21,7 @@ package repicea.stats.estimates;
 import java.io.Serializable;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.CentralMomentsSettable;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.utility.GaussianUtility;
@@ -37,16 +38,16 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 	 * Common constructor. By default the Gaussian distribution that supports this estimate has a mean 0 and a variance 1.
 	 */
 	public GaussianEstimate() {
-		super(new GaussianDistribution(new Matrix(1,1), new Matrix(1,1,1,0)));
+		super(new GaussianDistribution());
 		estimatorType = EstimatorType.LikelihoodBased;
 	}
 	
 	/**
 	 * Constructor with the mean and variance.
 	 * @param mean a Matrix instance that contains the mean 
-	 * @param variance a Matrix that contains the variance
+	 * @param variance a SymmetricMatrix instance that contains the variance-covariance
 	 */
-	public GaussianEstimate(Matrix mean, Matrix variance) {
+	public GaussianEstimate(Matrix mean, SymmetricMatrix variance) {
 		this();
 		setMean(mean);
 		setVariance(variance);
@@ -61,7 +62,7 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 		this();
 		Matrix meanMat = new Matrix(1,1);
 		meanMat.setValueAt(0, 0, mean);
-		Matrix varianceMat = new Matrix(1,1);
+		SymmetricMatrix varianceMat = new SymmetricMatrix(1);
 		varianceMat.setValueAt(0, 0, variance);
 		setMean(meanMat);
 		setVariance(varianceMat);
@@ -70,7 +71,7 @@ public class GaussianEstimate extends Estimate<GaussianDistribution> implements 
 	
 
 	@Override
-	public void setVariance(Matrix variance) {
+	public void setVariance(SymmetricMatrix variance) {
 		getDistribution().setVariance(variance);
 	}
 

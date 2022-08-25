@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.simulation.metamodel.MetaModel.ModelImplEnum;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.StatisticalUtility.TypeMatrixR;
@@ -73,7 +74,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		void updateCovMat(Matrix parameters) {
 			double rhoParm = parameters.getValueAt(indexCorrelationParameter, 0);	
 //			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
-			Matrix corrMat = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, rhoParm}), TypeMatrixR.POWER, distances);
+			SymmetricMatrix corrMat = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, rhoParm}), TypeMatrixR.POWER, distances);
 			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
 
 			Matrix invCorr = StatisticalUtility.getInverseCorrelationAR1Matrix(distances.m_iRows, rhoParm);

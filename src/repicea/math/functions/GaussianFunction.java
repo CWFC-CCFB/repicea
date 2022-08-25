@@ -23,6 +23,7 @@ import java.security.InvalidParameterException;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.ParameterBound;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.utility.GaussianUtility;
 
 /**
@@ -104,7 +105,7 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		double x = getVariableValue(0);
 		double mu = getParameterValue(MU_INDEX);
 		double sigma2 = getParameterValue(SIGMA2_INDEX);
@@ -113,12 +114,12 @@ public class GaussianFunction extends AbstractMathematicalFunction {
 
 		Matrix gradient = getGradient();
 		
-		Matrix hessian = new Matrix(2,2);
+		SymmetricMatrix hessian = new SymmetricMatrix(2);
 		double d2f_d2Mu = gradient.getValueAt(MU_INDEX, 0) * (x - mu) / sigma2 - f / sigma2;
 		hessian.setValueAt(MU_INDEX, MU_INDEX, d2f_d2Mu);
 		double d2f_dMu_dSigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * (x - mu) / sigma2 - f * (x - mu) / (sigma2 * sigma2);
 		hessian.setValueAt(MU_INDEX, SIGMA2_INDEX, d2f_dMu_dSigma2);
-		hessian.setValueAt(SIGMA2_INDEX, MU_INDEX, d2f_dMu_dSigma2);
+//		hessian.setValueAt(SIGMA2_INDEX, MU_INDEX, d2f_dMu_dSigma2);
 		double d2f_d2Sigma2 = gradient.getValueAt(SIGMA2_INDEX, 0) * ((x-mu) * (x-mu)/(2 * sigma2 * sigma2) - 1d / (2* sigma2)) +
 				f * (-(x-mu) * (x-mu)/(sigma2 * sigma2 * sigma2) + 1d / (2 * sigma2 * sigma2));
 		hessian.setValueAt(SIGMA2_INDEX, SIGMA2_INDEX, d2f_d2Sigma2);

@@ -21,6 +21,7 @@ package repicea.stats.estimates;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.distributions.EmpiricalDistribution;
 import repicea.stats.sampling.PopulationUnitWithEqualInclusionProbability;
 
@@ -61,7 +62,7 @@ public class PopulationMeanEstimate extends PointEstimate<PopulationUnitWithEqua
 	private int getSampleSize() {return getObservations().size();}
 	
 	@Override
-	protected Matrix getVarianceFromDistribution() {
+	protected SymmetricMatrix getVarianceFromDistribution() {
 		double smallAreaCorrectionFactor = 1d;
 		if (isPopulationSizeKnown()) {
 			smallAreaCorrectionFactor = 1d - getSampleSize()/getPopulationSize();

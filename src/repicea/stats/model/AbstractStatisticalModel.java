@@ -93,10 +93,12 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 	}
 
 	@Override
-	public void getSummary() {
-		System.out.println(toString());
-		System.out.println("Model definition : " + getModelDefinition() + System.lineSeparator());
-		System.out.println(estimator.getReport());
+	public String getSummary() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(toString() + System.lineSeparator());
+		sb.append("Model definition : " + getModelDefinition() + System.lineSeparator() + System.lineSeparator());
+		sb.append(estimator.getReport() + System.lineSeparator());
+		return sb.toString();
 	}
 
 	@Override

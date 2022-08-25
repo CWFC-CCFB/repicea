@@ -24,6 +24,7 @@ import java.util.logging.Level;
 
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.math.utility.MatrixUtility;
 import repicea.util.REpiceaLogManager;
 
@@ -151,7 +152,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINE, LOGGER_NAME, "Initial parameter estimates = " + function.getParameters().toString() + "; Initial LLK = " + value0);
 		Matrix gradient = function.getGradient();
 		REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINER, LOGGER_NAME, "Gradient = " + gradient.toString());
-		Matrix hessian = function.getHessian();
+		SymmetricMatrix hessian = function.getHessian();
 				
 		iterationID = 0;
 		
@@ -186,7 +187,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				int iterForHessianCorrection = 0;
 				while (gconv < 0 && iterForHessianCorrection < 1000) {
 					originalHessian = false;
-					MatrixUtility.add(hessian, Matrix.getIdentityMatrix(hessian.m_iRows));
+					hessian = (SymmetricMatrix) hessian.add(Matrix.getIdentityMatrix(hessian.m_iRows));
 					gconv = calculateConvergence(gradient, hessian, value0);
 					iterForHessianCorrection++;
 				}

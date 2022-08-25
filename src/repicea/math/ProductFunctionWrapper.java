@@ -119,7 +119,8 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 				}
 			}
 			Matrix wGradient = reformateGradient(w);
-			MatrixUtility.add(gradient, wGradient.scalarMultiply(multiplier));
+			gradient = gradient.add(wGradient.scalarMultiply(multiplier));
+//			MatrixUtility.add(gradient, wGradient.scalarMultiply(multiplier));
 		}
 		return gradient;
 	}
@@ -135,16 +136,16 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 		return gradientTmp;
 	}
 	
-	private Matrix reformateHessian(InternalMathematicalFunctionWrapper w) {
-		Matrix hessianTmp = new Matrix(getNumberOfParameters(), getNumberOfParameters());
-		Matrix wHessian = w.getHessian();
+	private SymmetricMatrix reformateHessian(InternalMathematicalFunctionWrapper w) {
+		SymmetricMatrix hessianTmp = new SymmetricMatrix(getNumberOfParameters());
+		SymmetricMatrix wHessian = w.getHessian();
 		if (wHessian != null) {		// the function has no parameter
 			for (int i = 0; i < wHessian.m_iRows; i++) {
 				for (int j = i; j < wHessian.m_iRows; j++) {
 					hessianTmp.setValueAt(w.reverseParmMap.get(i), w.reverseParmMap.get(j), wHessian.getValueAt(i, j));
-					if (i !=  j) {
-						hessianTmp.setValueAt(w.reverseParmMap.get(j), w.reverseParmMap.get(i), wHessian.getValueAt(j, i));
-					}
+//					if (i !=  j) {
+//						hessianTmp.setValueAt(w.reverseParmMap.get(j), w.reverseParmMap.get(i), wHessian.getValueAt(j, i));
+//					}
 				}
 			}
 		}
@@ -153,7 +154,7 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 
 	
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		Matrix hessian = new Matrix(getNumberOfParameters(), getNumberOfParameters());
 		for (InternalMathematicalFunctionWrapper w : originalFunctions) {
 			List<InternalMathematicalFunctionWrapper> wrappersOtherThanW = getWrapperListWithoutThisOne(w);
@@ -163,10 +164,11 @@ public class ProductFunctionWrapper extends AbstractMathematicalFunction {
 			}
 			Matrix theirGradient = getGradientFromTheseInternalWrapper(wrappersOtherThanW);
 			Matrix gradientPart = reformateGradient(w).multiply(theirGradient.transpose());
-			Matrix hessianPart = reformateHessian(w).scalarMultiply(multiplier);
-			MatrixUtility.add(hessian, hessianPart.add(gradientPart));
+			SymmetricMatrix hessianPart = reformateHessian(w).scalarMultiply(multiplier);
+//			MatrixUtility.add(hessian, hessianPart.add(gradientPart));
+			hessian = hessian.add(hessianPart.add(gradientPart));
 		}
-		return hessian;
+		return SymmetricMatrix.convertToSymmetricIfPossible(hessian);
 	}
 	
 	private List<InternalMathematicalFunctionWrapper> getWrapperListWithoutThisOne(InternalMathematicalFunctionWrapper w) {

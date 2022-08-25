@@ -25,6 +25,7 @@ import java.util.List;
 import repicea.math.LogFunctionWrapper;
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 /**
  * The InternalLogWrapperFunction class is used by the LaplaceApproximation and 
@@ -74,8 +75,8 @@ class InternalLogWrapperFunction extends LogFunctionWrapper {
 
 
 	@Override
-	public Matrix getHessian() {
-		return super.getHessian().getSubMatrix(parameterIndices, parameterIndices).subtract(invG);
+	public SymmetricMatrix getHessian() {
+		return SymmetricMatrix.convertToSymmetricIfPossible(super.getHessian().getSubMatrix(parameterIndices, parameterIndices).subtract(invG));
 	}
 
 	private Matrix getParametersFromNestedFunction() {

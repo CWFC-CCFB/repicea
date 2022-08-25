@@ -21,6 +21,7 @@ package repicea.stats.estimates;
 import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.StatisticalUtility;
 
 /**
@@ -46,13 +47,13 @@ public class JackknifeEstimate extends ResamplingBasedEstimate {
 	}
 
 	@Override
-	protected Matrix getVarianceFromDistribution() {
+	protected SymmetricMatrix getVarianceFromDistribution() {
 		long nCombinations = StatisticalUtility.getCombinations(n, d);
 		long nRealizations = getNumberOfRealizations();
 		if (nCombinations != nRealizations) {
 			throw new InvalidParameterException("The number of realizations is inconsistent with the n and d parameters of the constructor!");
 		}
-		Matrix ss = getDistribution().getVariance().scalarMultiply(getNumberOfRealizations() - 1);	// sum of squared difference
+		SymmetricMatrix ss = getDistribution().getVariance().scalarMultiply(getNumberOfRealizations() - 1);	// sum of squared difference
 		double scalingFactor = ((double) n - d) / (d * nCombinations);
 		return ss.scalarMultiply(scalingFactor);
 	}

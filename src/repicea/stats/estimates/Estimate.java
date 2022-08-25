@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.stats.Distribution;
 import repicea.stats.RandomVariable;
@@ -116,7 +117,11 @@ s	 */
 	public Estimate<?> getDifferenceEstimate(Estimate<?> estimate2) {
 		Matrix diff = getMean().subtract(estimate2.getMean());
 		Matrix variance = getVariance().add(estimate2.getVariance());
-		return new GaussianEstimate(diff, variance);
+		if (variance instanceof SymmetricMatrix) {
+			return new GaussianEstimate(diff, (SymmetricMatrix) variance);
+		} else {
+			throw new UnsupportedOperationException("The variance object is not a SymmetricMatrix instance!");
+		}
 	}
 	
 	/**
@@ -127,7 +132,12 @@ s	 */
 	public Estimate<?> getSumEstimate(Estimate<?> estimate2) {
 		Matrix diff = getMean().add(estimate2.getMean());
 		Matrix variance = getVariance().add(estimate2.getVariance());
-		return new GaussianEstimate(diff, variance);
+		if (variance instanceof SymmetricMatrix) {
+			return new GaussianEstimate(diff, (SymmetricMatrix) variance);
+		} else {
+			throw new UnsupportedOperationException("The variance object is not a SymmetricMatrix instance!");
+		}
+			
 	}
 
 	
@@ -138,7 +148,7 @@ s	 */
 	 */
 	public Estimate<?> getProductEstimate(double scalar) {
 		Matrix diff = getMean().scalarMultiply(scalar);
-		Matrix variance = getVariance().scalarMultiply(scalar * scalar);
+		SymmetricMatrix variance = getVariance().scalarMultiply(scalar * scalar);
 		return new GaussianEstimate(diff, variance);
 	}
 
@@ -178,7 +188,7 @@ s	 */
 			Matrix newVariance = alphaMean.elementWisePower(2d).multiply(betaVariance).
 					add(betaMean.elementWisePower(2d).multiply(alphaVariance)).
 					subtract(alphaVariance.multiply(betaVariance));
-			return new SimpleEstimate(newMean, newVariance);
+			return new SimpleEstimate(newMean,  SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
 		}
 		throw new InvalidParameterException("The getProductEstimate is only implemented for parametric univariate distribution ");
 	}
@@ -234,7 +244,7 @@ s	 */
 		Matrix oldVariance = getVariance();
 		Matrix newVariance = collapseSquareMatrix(oldVariance, desiredIndicesForCollapsing);
 		
-		Estimate<?> outputEstimate = new SimpleEstimate(newMean, newVariance);
+		Estimate<?> outputEstimate = new SimpleEstimate(newMean, SymmetricMatrix.convertToSymmetricIfPossible(newVariance));
 		
 		List<String> newIndexRow = new ArrayList<String>(desiredIndicesForCollapsing.keySet());
 		Collections.sort(newIndexRow);
@@ -290,7 +300,7 @@ s	 */
 	}
 
 	@Override
-	public final Matrix getVariance() {
+	public final SymmetricMatrix getVariance() {
 		return super.getVariance();
 	}
 	

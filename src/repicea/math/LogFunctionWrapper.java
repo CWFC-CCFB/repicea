@@ -45,12 +45,12 @@ public class LogFunctionWrapper extends AbstractMathematicalFunctionWrapper {
 	}
 
 	@Override
-	public Matrix getHessian() {
+	public SymmetricMatrix getHessian() {
 		double invValue = 1d/getOriginalFunction().getValue();
 		Matrix originalGradient = getOriginalFunction().getGradient();
 		Matrix part1 = originalGradient.multiply(originalGradient.transpose()).scalarMultiply(- invValue * invValue);
-		Matrix part2 = getOriginalFunction().getHessian().scalarMultiply(invValue);
-		return part1.add(part2);
+		SymmetricMatrix part2 = getOriginalFunction().getHessian().scalarMultiply(invValue);
+		return SymmetricMatrix.convertToSymmetricIfPossible(part1.add(part2));
 	}
 
 }

@@ -24,12 +24,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.AbstractMathematicalFunctionWrapper;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.integral.AbstractGaussQuadrature.NumberOfPoints;
@@ -44,7 +44,7 @@ public class NumericalIntegrationTest {
 
 		private final Matrix randomEffectStd;
 		
-		public LinkFunctionWithRandomEffect(LinkFunction originalFunction, Matrix randomEffectVariance) {
+		public LinkFunctionWithRandomEffect(LinkFunction originalFunction, SymmetricMatrix randomEffectVariance) {
 			super(originalFunction);
 			this.randomEffectStd = randomEffectVariance.getLowerCholTriangle();
 		}
@@ -66,11 +66,10 @@ public class NumericalIntegrationTest {
 		public Matrix getGradient() {return getOriginalFunction().getGradient();}
 
 		@Override
-		public Matrix getHessian() {return getOriginalFunction().getHessian();}
+		public SymmetricMatrix getHessian() {return getOriginalFunction().getHessian();}
 	}
 
 	
-//	@Ignore	// TODO remove this when done
 //	@Test
 //    public void TestWithUnivariateLaplacianApproximation() throws Exception {
 //		
@@ -124,7 +123,6 @@ public class NumericalIntegrationTest {
 //	}
 
 
-//	@Ignore	// TODO remove this when done
 //	@Test
 //    public void TestWithBivariateLaplacianApproximation() throws Exception {
 //		
@@ -192,7 +190,6 @@ public class NumericalIntegrationTest {
 //	}
 
 	
-//	@Ignore	// TODO remove this when done
 //	@Test
 //    public void TestWithUnivariateAdaptativeGaussHermiteQuadrature() throws Exception {
 //		AdaptativeGaussHermiteQuadrature ghq5 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N5);
@@ -249,7 +246,6 @@ public class NumericalIntegrationTest {
 //
 //	}
 //
-//	@Ignore	// TODO remove this when done
 //	@Test
 //    public void TestWithTwoDimensionAdaptativeGaussHermiteQuadratureAndStatisticalFunction() throws Exception {
 //		AdaptativeGaussHermiteQuadrature ghq5 = new AdaptativeGaussHermiteQuadrature(NumberOfPoints.N5);
@@ -385,10 +381,9 @@ public class NumericalIntegrationTest {
 		GaussHermiteQuadrature ghq10 = new GaussHermiteQuadrature(NumberOfPoints.N10);
 		GaussHermiteQuadrature ghq15 = new GaussHermiteQuadrature(NumberOfPoints.N15);
 		
-		Matrix matG = new Matrix(2,2);
+		SymmetricMatrix matG = new SymmetricMatrix(2);
 		matG.setValueAt(0, 0, 1d);
 		matG.setValueAt(1, 0, .2);
-		matG.setValueAt(0, 1, .2);
 		matG.setValueAt(1, 1, .5);
 		Matrix chol = matG.getLowerCholTriangle();
 		
@@ -474,7 +469,7 @@ public class NumericalIntegrationTest {
 		List<Integer> indices = new ArrayList<Integer>();
 		indices.add(1);
 		
-		Matrix var = new Matrix(1,1);
+		SymmetricMatrix var = new SymmetricMatrix(1);
 		var.setValueAt(0, 0, stdDev);
 		
 		LinkFunctionWithRandomEffect lf = new LinkFunctionWithRandomEffect(linkFunction, var);
@@ -698,6 +693,7 @@ public class NumericalIntegrationTest {
 
 	
 
+	@SuppressWarnings("serial")
 	protected static class SquarePlusXFunction extends AbstractMathematicalFunction {
 
 		SquarePlusXFunction() {
@@ -714,7 +710,7 @@ public class NumericalIntegrationTest {
 		public Matrix getGradient() {return null;}
 
 		@Override
-		public Matrix getHessian() {return null;}
+		public SymmetricMatrix getHessian() {return null;}
 		
 	}
 	
@@ -743,7 +739,7 @@ public class NumericalIntegrationTest {
 		Matrix yMatrix = new Matrix(yValues);
 		Matrix weights = new Matrix(trapezoidalRule.getWeights());
 		Matrix rescalingFactors = new Matrix(trapezoidalRule.getRescalingFactors());
-		double sumX = weights.getSumOfElements();
+//		double sumX = weights.getSumOfElements();
 		double sum = rescalingFactors.elementWiseMultiply(weights).elementWiseMultiply(yMatrix).getSumOfElements();
 		
 		System.out.println("Mean with TrapezoidalRule instance  =  " + sum);

@@ -94,7 +94,7 @@ public abstract class AbstractMathematicalFunction implements MathematicalFuncti
 	public abstract Matrix getGradient();
 	
 	@Override
-	public abstract Matrix getHessian();
+	public abstract SymmetricMatrix getHessian();
 
 	@Override
 	public void setBounds(int parameterIndex, ParameterBound bound) {

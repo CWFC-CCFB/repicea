@@ -23,6 +23,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 
 /**
  * This class is the main class for all optimizers.
@@ -64,7 +65,7 @@ public abstract class AbstractOptimizer {
 	protected double optimalValue;
 	
 	protected Matrix betaVector;
-	protected Matrix hessianMatrix;
+	protected SymmetricMatrix hessianMatrix;
 
 	
 	/**
@@ -88,7 +89,7 @@ public abstract class AbstractOptimizer {
 
 	public Matrix getParametersAtMaximum() {return betaVector;}
 
-	public Matrix getHessianAtMaximum() {return hessianMatrix;}
+	public SymmetricMatrix getHessianAtMaximum() {return hessianMatrix;}
 
 	
 	@Override

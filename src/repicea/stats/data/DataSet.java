@@ -20,10 +20,12 @@ package repicea.stats.data;
 
 import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.text.NumberFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import repicea.gui.REpiceaUIObject;
 import repicea.gui.components.REpiceaTable;
@@ -34,8 +36,6 @@ import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
 import repicea.io.Saveable;
 import repicea.math.Matrix;
-import repicea.util.REpiceaTranslator;
-import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
  * The DataSet class contains many observations and implements the method to read a dataset with a FormatReader instance.
@@ -43,22 +43,22 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  */
 public class DataSet implements Saveable, REpiceaUIObject {
 
-	private static enum MessageID implements TextableEnum {
-
-		ReadingFileMessage("Reading file...", "Lecture du fichier...");
-
-		MessageID(String englishText, String frenchText) {
-			setText(englishText, frenchText);
-		}
-		
-		@Override
-		public void setText(String englishText, String frenchText) {
-			REpiceaTranslator.setString(this, englishText, frenchText);
-		}
-
-		@Override
-		public String toString() {return REpiceaTranslator.getString(this);}
-	}
+//	private static enum MessageID implements TextableEnum {
+//
+//		ReadingFileMessage("Reading file...", "Lecture du fichier...");
+//
+//		MessageID(String englishText, String frenchText) {
+//			setText(englishText, frenchText);
+//		}
+//		
+//		@Override
+//		public void setText(String englishText, String frenchText) {
+//			REpiceaTranslator.setString(this, englishText, frenchText);
+//		}
+//
+//		@Override
+//		public String toString() {return REpiceaTranslator.getString(this);}
+//	}
 	
 
 	
@@ -68,6 +68,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	private final String originalFilename;
 	
 	private transient REpiceaTable table;
+	private Map<Integer, NumberFormat> formatters;
 	
 	protected DataSet(String filename) {
 		this.originalFilename = filename;
@@ -76,7 +77,6 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		observations = new ArrayList<Observation>();
 	}
 
-	
 	/**
 	 * General constructor.
 	 * @param filename the name of the file to be read
@@ -91,16 +91,22 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	}
 	
 	/**
-	 * An empty dataset ready to be filled with observations.
+	 * An empty DataSet instance with known field names.
 	 * @param fieldNames a List of String instances that represent the field names
 	 */
 	public DataSet(List<String> fieldNames) {
-		this((String) null);
+		this();
 		for (String fieldName : fieldNames) {
 			addFieldName(fieldName);
 		}
 	}
-	
+
+	/**
+	 * An empty DataSet to be populated using the addField method.
+	 */
+	public DataSet() {
+		this((String) null);
+	}
 
 	/**
 	 * This method returns any object in the dataset at row i and column j.
@@ -128,9 +134,6 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		} 
 	}
 	
-
-	
-
 	/**
 	 * Indexes the different field types. More specifically, it goes 
 	 * through the columns and find the appropriate class for a particular
@@ -155,7 +158,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		}
 	}
 
-	private void setFieldType(int fieldIndex, Class clazz) {
+	private void setFieldType(int fieldIndex, Class<?> clazz) {
 		if (fieldIndex < fieldTypes.size()) {
 			fieldTypes.set(fieldIndex, clazz);	
 		} else if (fieldIndex == fieldTypes.size()) {
@@ -164,8 +167,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 			throw new InvalidParameterException("The field type cannot be set!");
 		}
 	}
-	
-	
+		
 	private boolean isInteger(int j) {
 		boolean isInteger = true;
 		for (int i = 0; i < getNumberOfObservations(); i++) {
@@ -280,7 +282,7 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		return possibleValues;
 	}
 
-	protected Matrix getDummyMatrix(List possibleValues, int fieldIndex) {
+	protected Matrix getDummyMatrix(List<?> possibleValues, int fieldIndex) {
 		Matrix outputMatrix = new Matrix(getNumberOfObservations(), possibleValues.size());
 		for (int i = 0; i < getNumberOfObservations(); i++) {
 			int position = possibleValues.indexOf(getValueAt(i, fieldIndex));
@@ -307,13 +309,17 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	}
 	
 	public void addField(String name, Object[] field) {
-		if (field.length != observations.size()) {
+		if (observations.size() > 0 && field.length != observations.size()) {	// will only trigger if there are some observations already
 			throw new InvalidParameterException("The number of observations in the new field does not match the number of observations in the dataset!");
 		}
 		addFieldName(name);
 		
 		for (int i = 0; i < field.length; i++) {
-			observations.get(i).values.add(field[i]);
+			if (i < observations.size()) { // means the observation exists already 
+				observations.get(i).values.add(field[i]);
+			} else {
+				observations.add(new Observation(new Object[] {field[i]}));
+			}
 		}
 		
 		setClassOfThisField(fieldNames.size() - 1);
@@ -364,16 +370,16 @@ public class DataSet implements Saveable, REpiceaUIObject {
 				fieldNames.add(field.getName());
 			}
 
-			int nbRecords = reader.getRecordCount();
-			int recordsRead = 0;
+//			int nbRecords = reader.getRecordCount();
+//			int recordsRead = 0;
 			
 //			firePropertyChange(REpiceaProgressBarDialog.LABEL, 0d, MessageID.ReadingFileMessage.toString());
 			
 			Object[] lineRead = reader.nextRecord();
 			while (lineRead != null) {
 				addObservation(lineRead);
-				recordsRead++;
-				int progress = (int) ((recordsRead * 100d) / nbRecords);
+//				recordsRead++;
+//				int progress = (int) ((recordsRead * 100d) / nbRecords);
 //				firePropertyChange(REpiceaProgressBarDialog.PROGRESS, recordsRead, progress);
 				lineRead = reader.nextRecord();
 			}
@@ -443,12 +449,51 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	}
 	
 	
-	private static String addSpacesUpto(String str, int desiredLength) {
+	private static String addSpacesUpTo(String str, int desiredLength, int buffer, boolean isNumber) {
 		StringBuilder sb = new StringBuilder();
-		sb.append(str);
-		while (sb.length() < desiredLength)
+		if (isNumber) {
+			int nbSpaceToAdd = desiredLength - str.length();
+			while (sb.length() < nbSpaceToAdd)
+				sb.append(" ");
+			sb.append(str);
+		} else {
+			sb.append(str);
+			while (sb.length() < desiredLength)
+				sb.append(" ");
+		}
+		while(sb.length() < desiredLength + buffer) 
 			sb.append(" ");
 		return sb.toString();
+	}
+	
+	private Map<Integer, NumberFormat> getFormatters() {
+		if (formatters == null) {
+			formatters = new HashMap<Integer, NumberFormat>();
+		}
+		return formatters;
+	}
+	
+	private NumberFormat getFormatter(int j) {
+		return getFormatters().get(j);
+	}
+	
+	/**
+	 * Set a NumberFormat instance for a particular field
+	 * @param fieldId the id of the field
+	 * @param formatter a NumberFormat instance
+	 */
+	public void setFormatter(int fieldId, NumberFormat formatter) {
+		if (fieldId < 0 || fieldId >= this.getFieldNames().size()) {
+			throw new InvalidParameterException("The fieldId argument must be positive (>= 0) and smaller than the number of fields!");
+		}
+		getFormatters().put(fieldId, formatter);
+	}
+
+	/**
+	 * Clear the NumberFormat instances associated with the fields.
+	 */
+	public void clearFormatters() {
+		getFormatters().clear();
 	}
 	
 	@Override
@@ -470,7 +515,8 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		
 		for (int i = 0; i < maxLength; i++) {
 			for (int j = 0; j < nbFields; j++)  {
-				int currentLength = getObservations().get(i).getValueAt(j).toString().length();
+				Object o = getObservations().get(i).getValueAt(j);
+				int currentLength = o instanceof Double && getFormatter(j) != null ? getFormatter(j).format((Double) o).length() : o.toString().length();
 				if (maxSizes[j] < currentLength) {
 					maxSizes[j] = currentLength;
 				}
@@ -479,15 +525,16 @@ public class DataSet implements Saveable, REpiceaUIObject {
 		StringBuilder output = new StringBuilder();
 		for (int j = 0; j < nbFields; j++)  {
 			String fieldName = getFieldNames().get(j);
-			output.append(addSpacesUpto(fieldName, maxSizes[j] + 2));
+			output.append(addSpacesUpTo(fieldName, maxSizes[j], 2, false));	// not number instances
 		}
 		
 		output.append(System.lineSeparator());
 		
 		for (int i = 0; i < maxLength; i++) {
 			for (int j = 0; j < nbFields; j++)  {
-				String value = getObservations().get(i).getValueAt(j).toString();
-				output.append(addSpacesUpto(value, maxSizes[j] + 2));
+				Object o = getObservations().get(i).getValueAt(j);
+				String value = o instanceof Double && getFormatter(j) != null ? getFormatter(j).format((Double) o) : o.toString();
+				output.append(addSpacesUpTo(value, maxSizes[j], 2, o instanceof Number));
 			}
 			output.append(System.lineSeparator());
 		}

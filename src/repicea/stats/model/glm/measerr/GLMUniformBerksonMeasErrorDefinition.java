@@ -20,10 +20,8 @@ package repicea.stats.model.glm.measerr;
 
 import java.security.InvalidParameterException;
 
-import repicea.math.AbstractMathematicalFunction;
-import repicea.math.EvaluableFunction;
-import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataStructure;
@@ -159,7 +157,7 @@ abstract class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasError
 		}
 
 		@Override
-		public Matrix getHessian() {
+		public SymmetricMatrix getHessian() {
 			if (isObservationErrorFree()) {
 				return linkFunctionErrorFreeObs.getHessian();
 			} else {
@@ -167,7 +165,7 @@ abstract class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasError
 				adaptedTr.setLowerBound(lowerBound);
 				adaptedTr.setUpperBound(upperBound);
 				Matrix marginalHessian = adaptedTr.getIntegralApproximationForMatrixFunction(hessianProvider, measErr.indexEffectWithMeasError, false).scalarMultiply(1d/invdensity); // false: it is a variable.
-				return marginalHessian;
+				return SymmetricMatrix.convertToSymmetricIfPossible(marginalHessian);
 			}
 		}
 	}

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.estimates.GaussianEstimate;
@@ -43,7 +44,7 @@ public class ModelParameterEstimates extends GaussianEstimate {
 	 * @param mean a vector that corresponds to the mean value
 	 * @param variance a symmetric positive definite matrix 
 	 */
-	public ModelParameterEstimates(Matrix mean, Matrix variance) {
+	public ModelParameterEstimates(Matrix mean, SymmetricMatrix variance) {
 		super(mean, variance);
 		estimatedParameterIndices = new ArrayList<Integer>();
 		setEstimatedParameterIndices();
