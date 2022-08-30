@@ -27,9 +27,8 @@ import repicea.io.FormatField;
 import repicea.io.Saveable;
 import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
-import repicea.math.Matrix;
+import repicea.stats.QuantileUtility;
 import repicea.stats.StatisticalUtility;
-import repicea.stats.estimates.ConfidenceInterval;
 import repicea.stats.estimates.MonteCarloEstimate;
 import repicea.stats.model.glm.measerr.simulation.DistanceCalculator.SpatialPopulationUnitDistance;
 
@@ -74,10 +73,10 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implem
 			}
 		}
 		if (isPopulation) {
-			thisUnit.trueDistanceToConspecific = StatisticalUtility.getQuantileFromPopulation(distances, p);
+			thisUnit.trueDistanceToConspecific = QuantileUtility.getQuantileFromPopulation(distances, p);
 		} else {
-			thisUnit.measuredDistanceToConspecific = StatisticalUtility.getQuantileEstimateFromSample(distances, p, null);
-			MonteCarloEstimate estimate = StatisticalUtility.getQuantileEstimateFromSample(distances, p, null, 100);
+			thisUnit.measuredDistanceToConspecific = QuantileUtility.getQuantileEstimateFromSample(distances, p, null);
+			MonteCarloEstimate estimate = QuantileUtility.getQuantileEstimateFromSample(distances, p, null, 100);
 			thisUnit.variance = estimate.getVariance().getValueAt(0, 0);
 		}
 	}

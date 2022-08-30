@@ -1,6 +1,5 @@
 package repicea.stats;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -139,85 +138,6 @@ public class StatisticalUtilityTest {
 		Assert.assertTrue("Testing if the two matrices are equal", areEqual);
 	}
 	
-	@Test
-	public void quantileTest() {
-		List<Double> myList = new ArrayList<Double>();
-		for (double i = 0; i < 100;  i++) {
-			myList.add(i);
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, null);
-		Assert.assertEquals("Comparing quantile", 29.4333333333, q, 1E-8);
-	}
-	
-	@Test
-	public void quantileTest2() {
-		List<Double> myList = new ArrayList<Double>();
-		for (double i = 0; i < 200;  i++) {
-			myList.add(i);
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, null);
-		Assert.assertEquals("Comparing quantile", 59.4333333333, q, 1E-8);
-	}
 
-	
-	@Test
-	public void quantileTest3() {
-		List<Double> myList = new ArrayList<Double>();
-		for (double i = 0; i < 200;  i = i + 2) {
-			myList.add(i);
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, null);
-		Assert.assertEquals("Comparing quantile", 58.8666666666, q, 1E-8);
-	}
 
-	
-	@Test
-	public void quantileTest4() {
-		List<Double> myList = new ArrayList<Double>();
-		for (double i = 0; i < 100;  i++) {
-			myList.add(i * i);
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, null);
-		Assert.assertEquals("Comparing quantile", 866.5666666666, q, 1E-8);
-	}
-	
-	@Test
-	public void quantileTest5() {
-		List<Double> myList = new ArrayList<Double>();
-		for (double i = 0; i < 200;  i++) {
-			myList.add(i * i);
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, null);
-		Assert.assertEquals("Comparing quantile", 3532.5666666666666, q, 1E-8);
-	}
-
-	
-	@Test
-	public void quantileTest6() {
-		List<Double> myList = new ArrayList<Double>();
-		for (double i = 0; i < 200;  i = i + 2) {
-			myList.add(i * i);
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, null);
-		Assert.assertEquals("Comparing quantile", 3466.2666666666, q, 1E-8);
-	}
-
-	
-	@Test
-	public void quantileTest7() {
-		List<Double> myList = new ArrayList<Double>();
-		List<Integer> myWeights = new ArrayList<Integer>();
-		for (double i = 0; i < 200;  i = i + 2) {
-			myList.add(i * i);
-			if (i==0) {
-				myWeights.add(20);
-			} else {
-				myWeights.add(1);
-			}
-		}
-		double q = StatisticalUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights);
-		Assert.assertEquals("Comparing quantile", 1041.6, q, 1E-8);
-	}
-
-	
 }
