@@ -26,7 +26,7 @@ import java.util.StringTokenizer;
 import java.util.Vector;
 
 import repicea.math.Matrix;
-import repicea.stats.StatisticalUtility;
+import repicea.math.utility.MatrixUtility;
 import repicea.util.ObjectUtility;
 
 /**
@@ -187,7 +187,7 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 				if (subMatrixX == null) {
 					subMatrixX = matrixTmp;
 				} else {
-					subMatrixX = StatisticalUtility.combineMatrices(subMatrixX, matrixTmp);
+					subMatrixX = MatrixUtility.combineMatrices(subMatrixX, matrixTmp);
 				}
 
 			}
