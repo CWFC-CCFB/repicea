@@ -381,61 +381,13 @@ public final class StatisticalUtility {
 			return null;		
 		}
 	}
-
-	/**
-	 * Perform a special addition in which only the elements different from 0 and 1 
-	 * are involved. NOTE: this method is used with SAS output. 
-	 * @param originalMatrix the matrix of parameters
-	 * @param matrixToAdd the matrix of parameter deviates
-	 * @return the new parameters in a new Matrix instance
-	 */
-	public static Matrix performSpecialAdd(Matrix originalMatrix, Matrix matrixToAdd) {
-		Matrix oMat = originalMatrix.getDeepClone();
-		List<Integer> oVector = new ArrayList<Integer>();
-		oVector.clear();
-		
-		for (int i = 0; i < originalMatrix.m_iRows; i++) {
-			if (oMat.getValueAt(i, 0) != 0d && oMat.getValueAt(i, 0) != 1d) { 
-				oVector.add(i);
-			}
-		}
-
-		if (oVector.size() != matrixToAdd.m_iRows) {
-			throw new InvalidParameterException("The number of rows do not match!");
-		} else {
-			for (int j = 0; j < oVector.size(); j++) {
-				double newValue = oMat.getValueAt(oVector.get(j), 0) + matrixToAdd.getValueAt(j, 0);
-				oMat.setValueAt(oVector.get(j), 0, newValue);
-			}
-		}
-		return oMat;
-	}
 	
-	/**
-	 * Combine two row vectors of dummy variables. Useful for regressions.
-	 * @param mat1 the first row vector
-	 * @param mat2 the second row vector
-	 * @return the resulting matrix
-	 */
-	public static Matrix combineMatrices(Matrix mat1, Matrix mat2) {
-		if (mat1.m_iRows == mat2.m_iRows) {
-			int nbCols = mat1.m_iCols * mat2.m_iCols;
-			Matrix oMat = new Matrix(mat1.m_iRows, nbCols);
-			for (int i = 0; i < mat1.m_iRows; i++) {
-				for (int j = 0; j < mat1.m_iCols; j++) {
-					for (int j_prime = 0; j_prime < mat2.m_iCols; j_prime++) {
-						oMat.setValueAt(i, j*mat2.m_iCols+j_prime, mat1.getValueAt(i, j) * mat2.getValueAt(i, j_prime));
-					}
-				}
-			}
-			return oMat;
-		} else {
-			throw new UnsupportedOperationException("The two matrices do not have the same number of rows!");
-		}
-	}
 
 	/**
 	 * Return the quantile of a distribution estimated from a sample. <br>
+	 * <br>
+	 * The optional weighting is based on the replication of the original data. Thus, a weight of 4 implies 
+	 * the original value is replicated four times. <br>
 	 * <br>
 	 * The quantile is calculated following the Definition 8 found in <a href=https://doi.org/10.1080/00031305.1996.10473566>
 	 * Hyndman, R. J. and Fan, Y. 1996. Sample quantiles in statistical packages. The American Statistician
@@ -443,17 +395,40 @@ public final class StatisticalUtility {
 	 * 
 	 * @param sample the sample of the distribution
 	 * @param p the probability of the quantile (between 0 and 1)
+	 * @param weights an optional list of integers representing the weighting (must be positive)
 	 * @return the estimated quantile of the distribution
 	 */
-	public static double getQuantileFromSample(List<Double> sample, double p) {
-		if (p < 0d || p > 1d)
-			throw new InvalidParameterException("The p argument must range from 0 to 1!");
-		if (sample == null || sample.isEmpty()) {
-			throw new InvalidParameterException("The sample argument should be a non empty list of doubles!");
+	public static double getQuantileEstimateFromSample(List<Double> sample, double p, List<Integer> weights) {
+		return internalQuantileEstimationFromSample(sample, p, weights, true);
+	}
+
+	/**
+	 * Internal estimation for quantiles.
+	 * @param sample the sample of the distribution
+	 * @param p the probability of the quantile (between 0 and 1)
+	 * @param weights an optional list of integers representing the weighting (must be positive)
+	 * @param boolean performChecks checks whether the input are correct
+	 * @return a double
+	 */
+	private static double internalQuantileEstimationFromSample(List<Double> sample, double p, List<Integer> weights, boolean performChecks) {
+		if (performChecks) 
+			checkInputBeforeQuantileEstimation(sample, p, weights);
+		int nbObs = sample.size(); // default value
+		if (weights != null) {
+			nbObs = 0;
+			for (Integer i : weights)
+				nbObs += i;
 		}
-		List<Double> copyList = new ArrayList<Double>();
-		copyList.addAll(sample);
+		
+		List<Double> copyList = new ArrayList<Double>(nbObs);
+		for (int i = 0; i < sample.size(); i++) {
+			int nbReplicates = weights != null ? weights.get(i) : 1;
+			for (int j = 0 ; j < nbReplicates; j++) {
+				copyList.add(sample.get(i));
+			}
+		}
 		Collections.sort(copyList);
+		
 		double N = copyList.size();
 		double h = (N + 1d/3) * p + 1d/3;
 		int h_floor = (int) Math.floor(h);
@@ -463,25 +438,60 @@ public final class StatisticalUtility {
 		return q;
 	}
 	
-	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p, int nReal) {
+	private static void checkInputBeforeQuantileEstimation(List<Double> sample, double p, List<Integer> weights) {
 		if (p < 0d || p > 1d)
 			throw new InvalidParameterException("The p argument must range from 0 to 1!");
 		if (sample == null || sample.isEmpty()) {
 			throw new InvalidParameterException("The sample argument should be a non empty list of doubles!");
 		}
+		if (weights != null) {
+			if (weights.size() != sample.size()) {
+				throw new InvalidParameterException("If not null, the weights argument should be a list of the same size as sample!");
+			}
+			if (weights.stream().anyMatch(n -> n <= 0)) {
+				throw new InvalidParameterException("If not null, the weights argument must contain strictly positive values (i.e. > 0)!");
+			}
+		}
+	}
+	
+	/**
+	 * Return an estimated quantile as well as it variability.
+	 * 
+	 * @param sample
+	 * @param p
+	 * @param nReal
+	 * @return
+	 */
+	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p, List<Integer> weights, int nReal) {
+		checkInputBeforeQuantileEstimation(sample, p, weights);
 		if (nReal <= 0) {
 			throw new InvalidParameterException("The nReal argument should be a strictly positive integer (i.e. > 0)!");
 		}
+		
+		List<Integer> indices = new ArrayList<Integer>(sample.size());
+		for (int i = 0; i < sample.size(); i++)
+			indices.add(i);
+		
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		for (int i = 0; i < nReal; i++) {
-			List<Double> bootstrapSample = SamplingUtility.getSample(sample, sample.size(), true);
-			double quantile = StatisticalUtility.getQuantileFromSample(bootstrapSample, p);
+			List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
+			List<Double> bootstrapSample = new ArrayList<Double>(sample.size());
+			List<Integer> bootstrapWeights = null;
+			for (Integer index : selectedIndices) {
+				bootstrapSample.add(sample.get(index));
+				if (weights != null) {
+					if (bootstrapWeights == null) {
+						bootstrapWeights = new ArrayList<Integer>(sample.size());
+					}
+					bootstrapWeights.add(weights.get(index));
+				}
+			}
+			double quantile = internalQuantileEstimationFromSample(bootstrapSample, p, weights, false);	// no checks needed they've been done at the beginning of the method
 			estimate.addRealization(new Matrix(1,1,quantile,0));
 		}
 		return estimate;
 	}
 
-	
 	
 	/**
 	 * Return the quantile of a distribution calculated from the population. <br>
