@@ -19,16 +19,12 @@
 package repicea.stats;
 
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.math.utility.MathUtility;
-import repicea.stats.estimates.MonteCarloEstimate;
-import repicea.stats.sampling.SamplingUtility;
 
 /**
  * This class contains static methods that are useful for statistical regressions.
@@ -382,143 +378,6 @@ public final class StatisticalUtility {
 		}
 	}
 	
-
-	/**
-	 * Return the quantile of a distribution estimated from a sample. <br>
-	 * <br>
-	 * The optional weighting is based on the replication of the original data. Thus, a weight of 4 implies 
-	 * the original value is replicated four times. <br>
-	 * <br>
-	 * The quantile is calculated following the Definition 8 found in <a href=https://doi.org/10.1080/00031305.1996.10473566>
-	 * Hyndman, R. J. and Fan, Y. 1996. Sample quantiles in statistical packages. The American Statistician
-	 * 50(4): 361-365. </a>
-	 * 
-	 * @param sample the sample of the distribution
-	 * @param p the probability of the quantile (between 0 and 1)
-	 * @param weights an optional list of integers representing the weighting (must be positive)
-	 * @return the estimated quantile of the distribution
-	 */
-	public static double getQuantileEstimateFromSample(List<Double> sample, double p, List<Integer> weights) {
-		return internalQuantileEstimationFromSample(sample, p, weights, true);
-	}
-
-	/**
-	 * Internal estimation for quantiles.
-	 * @param sample the sample of the distribution
-	 * @param p the probability of the quantile (between 0 and 1)
-	 * @param weights an optional list of integers representing the weighting (must be positive)
-	 * @param boolean performChecks checks whether the input are correct
-	 * @return a double
-	 */
-	private static double internalQuantileEstimationFromSample(List<Double> sample, double p, List<Integer> weights, boolean performChecks) {
-		if (performChecks) 
-			checkInputBeforeQuantileEstimation(sample, p, weights);
-		int nbObs = sample.size(); // default value
-		if (weights != null) {
-			nbObs = 0;
-			for (Integer i : weights)
-				nbObs += i;
-		}
-		
-		List<Double> copyList = new ArrayList<Double>(nbObs);
-		for (int i = 0; i < sample.size(); i++) {
-			int nbReplicates = weights != null ? weights.get(i) : 1;
-			for (int j = 0 ; j < nbReplicates; j++) {
-				copyList.add(sample.get(i));
-			}
-		}
-		Collections.sort(copyList);
-		
-		double N = copyList.size();
-		double h = (N + 1d/3) * p + 1d/3;
-		int h_floor = (int) Math.floor(h);
-		int h_ceiling = (int) Math.ceil(h);
-		double x_floor = copyList.get(h_floor - 1);
-		double q = x_floor + (h - h_floor) * (copyList.get(h_ceiling - 1) - x_floor);
-		return q;
-	}
-	
-	private static void checkInputBeforeQuantileEstimation(List<Double> sample, double p, List<Integer> weights) {
-		if (p < 0d || p > 1d)
-			throw new InvalidParameterException("The p argument must range from 0 to 1!");
-		if (sample == null || sample.isEmpty()) {
-			throw new InvalidParameterException("The sample argument should be a non empty list of doubles!");
-		}
-		if (weights != null) {
-			if (weights.size() != sample.size()) {
-				throw new InvalidParameterException("If not null, the weights argument should be a list of the same size as sample!");
-			}
-			if (weights.stream().anyMatch(n -> n <= 0)) {
-				throw new InvalidParameterException("If not null, the weights argument must contain strictly positive values (i.e. > 0)!");
-			}
-		}
-	}
-	
-	/**
-	 * Return an estimated quantile as well as it variability.
-	 * 
-	 * @param sample
-	 * @param p
-	 * @param nReal
-	 * @return
-	 */
-	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p, List<Integer> weights, int nReal) {
-		checkInputBeforeQuantileEstimation(sample, p, weights);
-		if (nReal <= 0) {
-			throw new InvalidParameterException("The nReal argument should be a strictly positive integer (i.e. > 0)!");
-		}
-		
-		List<Integer> indices = new ArrayList<Integer>(sample.size());
-		for (int i = 0; i < sample.size(); i++)
-			indices.add(i);
-		
-		MonteCarloEstimate estimate = new MonteCarloEstimate();
-		for (int i = 0; i < nReal; i++) {
-			List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
-			List<Double> bootstrapSample = new ArrayList<Double>(sample.size());
-			List<Integer> bootstrapWeights = null;
-			for (Integer index : selectedIndices) {
-				bootstrapSample.add(sample.get(index));
-				if (weights != null) {
-					if (bootstrapWeights == null) {
-						bootstrapWeights = new ArrayList<Integer>(sample.size());
-					}
-					bootstrapWeights.add(weights.get(index));
-				}
-			}
-			double quantile = internalQuantileEstimationFromSample(bootstrapSample, p, weights, false);	// no checks needed they've been done at the beginning of the method
-			estimate.addRealization(new Matrix(1,1,quantile,0));
-		}
-		return estimate;
-	}
-
-	
-	/**
-	 * Return the quantile of a distribution calculated from the population. <br>
-	 * <br>
-	 * 
-	 * @param population the population
-	 * @param p the probability of the quantile (between 0 and 1)
-	 * @return the calculated quantile of the distribution
-	 */
-	public static double getQuantileFromPopulation(List<Double> population, double p) {
-		if (p < 0d || p > 1d)
-			throw new InvalidParameterException("The p argument must range from 0 to 1!");
-		if (population == null || population.isEmpty()) {
-			throw new InvalidParameterException("The population argument should be a non empty list of doubles!");
-		}
-		List<Double> copyList = new ArrayList<Double>();
-		copyList.addAll(population);
-		Collections.sort(copyList);
-		double N = copyList.size();
-		int h = (int) Math.round(p*N);
-		double q = copyList.get(h - 1);
-		return q;
-	}
-
-	
-	
-	
 	/**
 	 * This method returns the number of combinations.
 	 * @param n the number of units
@@ -538,13 +397,8 @@ public final class StatisticalUtility {
 		}
 	}
 
-//	public static void main(String[] args) {
-//		List<Integer> population = new ArrayList<Integer>();
-//		for (int i = 1; i <= 10; i++) {
-//			population.add(i);
-//		}
-//		List<Object> sample = getSampleFromPopulation(population, 10, true);
-//		System.out.println(sample.toString());
-//	}
-
+	
+	
+	
+	
 }
