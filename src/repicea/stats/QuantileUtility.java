@@ -22,6 +22,8 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import repicea.math.Matrix;
 import repicea.stats.estimates.MonteCarloEstimate;
@@ -32,7 +34,8 @@ import repicea.stats.sampling.SamplingUtility;
  * @author Mathieu Fortin - August 2022
  */
 public class QuantileUtility {
-
+	
+	private final static Object FINAL_TOKEN = new Object();
 
 	/**
 	 * Return the quantile of a distribution estimated from a sample. <br>
@@ -100,14 +103,84 @@ public class QuantileUtility {
 	}
 	
 	/**
+	 * An internal class for speeding up the estimation of the quantile from sample.
+	 * @author Mathieu Fortin - August 2022
+	 */
+	static class InternalWorker extends Thread {
+		final BlockingQueue<Object> queue;
+		final List<Integer> indices;
+		final List<Double> sample;
+		final List<Double> weights;
+		final double p;
+		final MonteCarloEstimate estimate;
+		final Object lock;
+		
+		InternalWorker(String id, 
+				BlockingQueue<Object> queue, 
+				List<Integer> indices, 
+				List<Double> sample,
+				List<Double> weights,
+				double p,
+				MonteCarloEstimate estimate,
+				Object lock) {
+			super(id);
+			this.queue = queue;
+			this.indices = indices;
+			this.sample = sample;
+			this.weights = weights;
+			this.p = p;
+			this.estimate = estimate;
+			this.lock = lock;
+		}
+		
+		@Override
+		public void run() {
+			try {
+				while (!queue.take().equals(FINAL_TOKEN)) {
+					List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
+					List<Double> bootstrapSample = new ArrayList<Double>(sample.size());
+					List<Double> bootstrapWeights = null;
+					for (Integer index : selectedIndices) {
+						bootstrapSample.add(sample.get(index));
+						if (weights != null) {
+							if (bootstrapWeights == null) {
+								bootstrapWeights = new ArrayList<Double>(sample.size());
+							}
+							bootstrapWeights.add(weights.get(index));
+						}
+					}
+					double quantile = weights == null ? 
+							getInternalUnweightedQuantileEstimationFromSample(bootstrapSample, p, false) :	// no checks needed they've been done at the beginning of the method
+								getInternalWeightedQuantileEstimationFromSample(bootstrapSample, p, weights, false);
+					synchronized(lock) {
+						estimate.addRealization(new Matrix(1,1,quantile,0));
+					}
+				}
+			} catch (InterruptedException e) {}
+		}
+	}
+	
+	
+	
+	
+	/**
 	 * Return an estimated quantile as well as it variability.
 	 * 
-	 * @param sample
-	 * @param p
-	 * @param nReal
-	 * @return
+	 * @param sample a list of doubles
+	 * @param p the quantile probability
+	 * @param weights a list of doubles 
+	 * @param nReal the number of bootstrap realizations 
+	 * @return a MonteCarloEstimate
+	 * @throws InterruptedException 
 	 */
-	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, double p, List<Double> weights, int nReal) {
+	public static MonteCarloEstimate getQuantileEstimateFromSample(List<Double> sample, 
+			double p, 
+			List<Double> weights, 
+			int nReal, 
+			int nbThreads) {
+		if (nbThreads < 1 || nbThreads > 10) {
+			throw new InvalidParameterException("The number of threads must be between 1 and 10!");
+		}
 		checkInputBeforeQuantileEstimation(sample, p, weights);
 		if (nReal <= 0) {
 			throw new InvalidParameterException("The nReal argument should be a strictly positive integer (i.e. > 0)!");
@@ -117,26 +190,53 @@ public class QuantileUtility {
 		for (int i = 0; i < sample.size(); i++)
 			indices.add(i);
 		
+		Object lock = new Object();
+		
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
-		for (int i = 0; i < nReal; i++) {
-			List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
-			List<Double> bootstrapSample = new ArrayList<Double>(sample.size());
-			List<Double> bootstrapWeights = null;
-			for (Integer index : selectedIndices) {
-				bootstrapSample.add(sample.get(index));
-				if (weights != null) {
-					if (bootstrapWeights == null) {
-						bootstrapWeights = new ArrayList<Double>(sample.size());
-					}
-					bootstrapWeights.add(weights.get(index));
-				}
-			}
-			double quantile = weights == null ? 
-					getInternalUnweightedQuantileEstimationFromSample(bootstrapSample, p, false) :	// no checks needed they've been done at the beginning of the method
-						getInternalWeightedQuantileEstimationFromSample(bootstrapSample, p, weights, false);
-			estimate.addRealization(new Matrix(1,1,quantile,0));
+		BlockingQueue<Object> queue = new LinkedBlockingQueue<Object>();
+		for (int i = 0; i < nReal; i++) 
+			queue.add(i);
+		List<InternalWorker> workers = new ArrayList<InternalWorker>();
+		for (int k = 0; k < nbThreads; k++) {
+			workers.add(new InternalWorker("Quantile estimator thread " + k, 
+					queue, 
+					indices, 
+					sample,
+					weights,
+					p,
+					estimate,
+					lock));
+			queue.add(FINAL_TOKEN);
 		}
-		return estimate;
+		for (InternalWorker w : workers) 
+			w.start();
+		boolean interrupted = false;
+		for (InternalWorker w : workers) {
+			try {
+				w.join();
+			} catch (InterruptedException e) {
+				interrupted = true;
+			}
+		}		
+//		for (int i = 0; i < nReal; i++) {
+//			List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
+//			List<Double> bootstrapSample = new ArrayList<Double>(sample.size());
+//			List<Double> bootstrapWeights = null;
+//			for (Integer index : selectedIndices) {
+//				bootstrapSample.add(sample.get(index));
+//				if (weights != null) {
+//					if (bootstrapWeights == null) {
+//						bootstrapWeights = new ArrayList<Double>(sample.size());
+//					}
+//					bootstrapWeights.add(weights.get(index));
+//				}
+//			}
+//			double quantile = weights == null ? 
+//					getInternalUnweightedQuantileEstimationFromSample(bootstrapSample, p, false) :	// no checks needed they've been done at the beginning of the method
+//						getInternalWeightedQuantileEstimationFromSample(bootstrapSample, p, weights, false);
+//			estimate.addRealization(new Matrix(1,1,quantile,0));
+//		}
+		return interrupted ? null : estimate;
 	}
 
 	
