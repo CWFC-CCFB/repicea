@@ -76,7 +76,7 @@ class DistanceCalculator extends ArrayList<SpatialPopulationUnitDistance> implem
 			thisUnit.trueDistanceToConspecific = QuantileUtility.getQuantileFromPopulation(distances, p);
 		} else {
 			thisUnit.measuredDistanceToConspecific = QuantileUtility.getQuantileEstimateFromSample(distances, p, null);
-			MonteCarloEstimate estimate = QuantileUtility.getQuantileEstimateFromSample(distances, p, null, 100, 1);
+			MonteCarloEstimate estimate = QuantileUtility.getQuantileEstimateFromSample(distances, p, null, 100);
 			thisUnit.variance = estimate.getVariance().getValueAt(0, 0);
 		}
 	}
