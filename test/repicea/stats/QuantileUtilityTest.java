@@ -25,6 +25,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import repicea.stats.QuantileUtility.WeightedSampleUnit;
+import repicea.stats.estimates.MonteCarloEstimate;
 
 public class QuantileUtilityTest {
 
@@ -172,6 +173,26 @@ public class QuantileUtilityTest {
 		double q1 = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights);
 		double q2 = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, null);
 		Assert.assertEquals("Comparing quantile", q1, q2, 1E-8);
+	}
+
+	@Test
+	public void weightedQuantileEstimateTest1() {
+		List<Double> myList = new ArrayList<Double>();
+		List<Double> myWeights = new ArrayList<Double>();
+		for (double i = 0; i < 2000;  i = i + 2) {
+			myList.add(i * i);
+			myWeights.add(1d);
+		}
+		MonteCarloEstimate est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000, 1);	// first call is to make sure the class is loaded
+		long startTime = System.currentTimeMillis();
+		est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000, 1);
+		double elapsedTime1 = (System.currentTimeMillis() - startTime) * .001;
+//		System.out.println("Elapsed time = " + elapsedTime1 + " sec.");
+		startTime = System.currentTimeMillis();
+		MonteCarloEstimate est2 = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000, 2);
+		double elapsedTime2 = (System.currentTimeMillis() - startTime) * .001;
+//		System.out.println("Elapsed time = " + elapsedTime2 + " sec.");
+		Assert.assertTrue("Two threads are faster than one!", elapsedTime1 > elapsedTime2);
 	}
 
 }
