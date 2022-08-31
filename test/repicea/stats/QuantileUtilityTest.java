@@ -179,20 +179,15 @@ public class QuantileUtilityTest {
 	public void weightedQuantileEstimateTest1() {
 		List<Double> myList = new ArrayList<Double>();
 		List<Double> myWeights = new ArrayList<Double>();
-		for (double i = 0; i < 2000;  i = i + 2) {
+		for (double i = 0; i < 100;  i = i + 2) {
 			myList.add(i * i);
 			myWeights.add(1d);
 		}
-		MonteCarloEstimate est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000, 1);	// first call is to make sure the class is loaded
-		long startTime = System.currentTimeMillis();
-		est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000, 1);
-		double elapsedTime1 = (System.currentTimeMillis() - startTime) * .001;
-//		System.out.println("Elapsed time = " + elapsedTime1 + " sec.");
-		startTime = System.currentTimeMillis();
-		MonteCarloEstimate est2 = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000, 2);
-		double elapsedTime2 = (System.currentTimeMillis() - startTime) * .001;
-//		System.out.println("Elapsed time = " + elapsedTime2 + " sec.");
-		Assert.assertTrue("Two threads are faster than one!", elapsedTime1 > elapsedTime2);
+		MonteCarloEstimate est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000);	// first call is to make sure the class is loaded
+		double mean = est.getMean().getValueAt(0, 0);
+		double variance = est.getVariance().getValueAt(0, 0);
+		Assert.assertEquals("Testing mean", 890.6358666666663, mean, 10);
+		Assert.assertEquals("Testing variance", 137033.9766902726, variance, 1E4);
 	}
 
 }
