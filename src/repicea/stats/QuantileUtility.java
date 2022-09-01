@@ -22,8 +22,6 @@ import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import repicea.math.Matrix;
 import repicea.stats.estimates.MonteCarloEstimate;
@@ -121,22 +119,24 @@ public class QuantileUtility {
 		if (nReal <= 0) {
 			throw new InvalidParameterException("The nReal argument should be a strictly positive integer (i.e. > 0)!");
 		}
+		int n = sample.size();
+//		List<Integer> indices = new ArrayList<Integer>(n);
+//		for (int i = 0; i < n; i++)
+//			indices.add(i);
 		
-		List<Integer> indices = new ArrayList<Integer>(sample.size());
-		for (int i = 0; i < sample.size(); i++)
-			indices.add(i);
+		List<Double> bootstrapSample = new ArrayList<Double>(n);
+		List<Double> bootstrapWeights = new ArrayList<Double>(n);
+		List<Integer> selectedIndices = new ArrayList<Integer>(n);
 		
 		MonteCarloEstimate estimate = new MonteCarloEstimate();
 		for (int i = 0; i < nReal; i++) {
-			List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
-			List<Double> bootstrapSample = new ArrayList<Double>(sample.size());
-			List<Double> bootstrapWeights = null;
+//			List<Integer> selectedIndices = SamplingUtility.getSample(indices, indices.size(), true);
+			SamplingUtility.getSampleIndex(n, n, true, selectedIndices);
+			bootstrapSample.clear();
+			bootstrapWeights.clear();
 			for (Integer index : selectedIndices) {
 				bootstrapSample.add(sample.get(index));
 				if (weights != null) {
-					if (bootstrapWeights == null) {
-						bootstrapWeights = new ArrayList<Double>(sample.size());
-					}
 					bootstrapWeights.add(weights.get(index));
 				}
 			}

@@ -82,11 +82,38 @@ public class SamplingUtility {
 		return frequencyMap;
 	}
 	
-	
-	
-
-	private static List<Integer> getSampleIndex(int sampleSize, int populationSize, boolean withReplacement) {
+	/**
+	 * Return a random sample of observation indices. <br>
+	 * <br>
+	 * The theoretical observations are labeled from 0 to N-1 where N is the population size. 
+	 * 
+	 * @param sampleSize the sample size
+	 * @param populationSize the population size
+	 * @param withReplacement allow sampling with replacement
+	 * @return a List of integers
+	 */
+	public static List<Integer> getSampleIndex(int sampleSize, int populationSize, boolean withReplacement) {
 		List<Integer> sampleIndex = new ArrayList<Integer>();
+		getSampleIndex(sampleSize, populationSize, withReplacement, sampleIndex);
+		return sampleIndex;
+	}
+	
+	/**
+	 * Return a random sample of observation indices. <br>
+	 * <br>
+	 * The theoretical observations are labeled from 0 to N-1 where N is the population size. This
+	 * method is equivalent to the getSampleIndex(int, int, boolean) method except that the return
+	 * object is passed as an argument. Should be preferred in case of multithreading because it avoids
+	 * creating a new array at each call.
+	 * 
+	 * @param sampleSize the sample size
+	 * @param populationSize the population size
+	 * @param withReplacement allow sampling with replacement
+	 * @param sampleIndex the list of randomly drawn indices 
+	 * @return a List of integers
+	 */
+	public static void getSampleIndex(int sampleSize, int populationSize, boolean withReplacement, List<Integer> sampleIndex) {
+		sampleIndex.clear();
 		int index;
 		while (sampleIndex.size() < sampleSize) {
 			index = (int) Math.floor(StatisticalUtility.getRandom().nextDouble() * populationSize);
@@ -94,9 +121,7 @@ public class SamplingUtility {
 				sampleIndex.add(index);
 			}
 		}
-		return sampleIndex;
 	}
-
 	
 	/**
 	 * This method returns a sample from a population drawn without replacement..
