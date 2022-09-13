@@ -186,8 +186,8 @@ public class QuantileUtilityTest {
 		MonteCarloEstimate est = QuantileUtility.getQuantileEstimateFromSample(myList, 0.3, myWeights, 1000);	// first call is to make sure the class is loaded
 		double mean = est.getMean().getValueAt(0, 0);
 		double variance = est.getVariance().getValueAt(0, 0);
-		Assert.assertEquals("Testing mean", 895.6358666666663, mean, 20);
-		Assert.assertEquals("Testing variance", 137033.9766902726, variance, 1.5E4);
+		Assert.assertEquals("Testing mean", 895.6358666666663, mean, 30);
+		Assert.assertEquals("Testing variance", 137033.9766902726, variance, 2.2E4);
 	}
 
 }
