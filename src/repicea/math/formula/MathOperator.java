@@ -18,6 +18,9 @@
  */
 package repicea.math.formula;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The MathOperator class is an abstract class for all operators. Basically, an operator has
  * a left side and a right side component as well as a priority. 
@@ -25,6 +28,13 @@ package repicea.math.formula;
  */
 abstract class MathOperator implements Calculable {
 
+	protected static Map<String, Class<? extends MathOperator>> NamedOperators = new HashMap<String, Class<? extends MathOperator>>();
+	static {
+		NamedOperators.put("exp", Exponential.class);
+		NamedOperators.put("log", Logarithm.class);
+	}
+	
+	
 	protected int priority;
 	protected Calculable leftSide;
 	protected Calculable rightSide;
@@ -57,12 +67,23 @@ abstract class MathOperator implements Calculable {
 			return new MathOperator.Minus();
 		} else if (operator.equals("^")) {
 			return new MathOperator.Power();
+		} else if (operator.equals("exp")) {
+			return new MathOperator.Exponential();
+		} else if (operator.equals("log")) {
+			return new MathOperator.Logarithm();
 		} else {
 			return null;
 		}
 	}
 
-	
+	protected static String getOperatorLongNameIfAny(Calculable operator) {
+		for (String name : NamedOperators.keySet()) {
+			if (operator.getClass().isAssignableFrom(NamedOperators.get(name))) {
+				return name;
+			}
+		}
+		return "";
+	}
 	
 	/**
 	 * A classical plus "+" operator.
@@ -147,5 +168,37 @@ abstract class MathOperator implements Calculable {
 			return Math.pow(leftSide.calculate(), rightSide.calculate());
 		}
 	}
-	
+
+	/**
+	 * A classical exp operator.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	static class Exponential extends MathOperator {
+		
+		protected Exponential() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			return Math.exp(leftSide.calculate());
+		}
+	}
+
+	/**
+	 * A classical ln operator.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	static class Logarithm extends MathOperator {
+		
+		protected Logarithm() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			return Math.log(leftSide.calculate());
+		}
+	}
+
 }

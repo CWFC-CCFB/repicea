@@ -69,7 +69,7 @@ abstract class ExpressionHandler<P> implements Calculable {
 		
 		protected VariableHandler(Map<String, Double> expression, String variable) {
 			super(expression);
-			if (expression.containsKey(variable)) {
+			if (!expression.containsKey(variable)) {
 				throw new InvalidParameterException("The variable " + variable + " is not part of the function!");
 			}
 			this.variable = variable;
@@ -81,5 +81,24 @@ abstract class ExpressionHandler<P> implements Calculable {
 		}
 		
 	}
-	
+
+	static class ParameterHandler extends ExpressionHandler<Map<String, Double>> {
+
+		private final String parameter;
+		
+		protected ParameterHandler(Map<String, Double> parameterMap, String parameter) {
+			super(parameterMap);
+			if (!expression.containsKey(parameter)) {
+				throw new InvalidParameterException("The parameter " + parameter + " is not part of the function!");
+			}
+			this.parameter = parameter;
+		}
+
+		@Override
+		public double calculate() {
+			return expression.get(parameter);
+		}
+		
+	}
+
 }

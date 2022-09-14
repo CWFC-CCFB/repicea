@@ -21,12 +21,15 @@ package repicea.math.formula;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
 import repicea.math.formula.ExpressionHandler.DoubleHandler;
 import repicea.math.formula.ExpressionHandler.MathFormulaHandler;
+import repicea.math.formula.ExpressionHandler.ParameterHandler;
+import repicea.math.formula.ExpressionHandler.VariableHandler;
 
 /**
  * The MathFormula class translates a String expression in a tractable mathematical formula.
@@ -37,11 +40,11 @@ public final class MathFormula implements Calculable {
 	private final static char DOT = new String(".").charAt(0); 
 		
 	private String formula;
-	private List<String> parameters;
-	private List<String> variables;
+	private final Map<String, Double> parameters;
+	private final Map<String, Double> variables;
 	
-	private Map<String, MathFormula> nestedMathFormulas;
-	private Map<String, Double> constants;
+	private final Map<String, MathFormula> nestedMathFormulas;
+	private final Map<String, Double> constants;
 	private Calculable finalCalculable;
 	
 	/**
@@ -50,7 +53,35 @@ public final class MathFormula implements Calculable {
 	 * @param parameters a List of String instances which represent the parameters
 	 * @param variables a List of String instances which represent the variables
 	 */
-	public MathFormula(String formula, List<String> parameters, List<String> variables) {
+	public MathFormula(String formula, LinkedHashMap<String, Double> parameters, LinkedHashMap<String, Double> variables) {
+		if (formula == null || formula.isEmpty()) {
+			throw new InvalidParameterException("The formula cannot be null or empty!");
+		}
+		
+		nestedMathFormulas = new HashMap<String, MathFormula>();
+		constants = new HashMap<String, Double>();
+		
+		this.formula = formula.replace(" ", "").trim();
+		this.parameters = new LinkedHashMap<String, Double>();
+		if (parameters != null) {
+			this.parameters.putAll(parameters);
+		}
+		this.variables = new LinkedHashMap<String, Double>();
+		if (variables != null) {
+			this.variables.putAll(variables);
+		}
+		parseParentheses();
+		checkParametersAndVariables();
+		defineOperators();
+	}
+
+	/**
+	 * Constructor for nested formulas.
+	 * @param formula a String that represents the formula
+	 * @param operator a long named operator if needed (can be null if none)
+	 * @param parentFormula the MathFormula instance that is creating this nested formula
+	 */
+	private MathFormula(String formula, MathOperator operator, MathFormula parentFormula) {
 		if (formula == null) {
 			throw new InvalidParameterException("The formula in this MathFormula instance is null!");
 		}
@@ -58,26 +89,20 @@ public final class MathFormula implements Calculable {
 		nestedMathFormulas = new HashMap<String, MathFormula>();
 		constants = new HashMap<String, Double>();
 		
-		this.formula = formula;
-		if (parameters != null) {
-			this.parameters = parameters;
-		} else {
-			this.parameters = new ArrayList<String>();
-		}
-		if (variables != null) {
-			this.variables = variables;
-		} else {
-			this.variables = new ArrayList<String>();
-		}
-
+		this.formula = formula.replace(" ", "").trim();
+		this.parameters = parentFormula.parameters;
+		this.variables = parentFormula.parameters;
+		
 		parseParentheses();
 		checkParametersAndVariables();
+		this.finalCalculable = operator;
 		defineOperators();
 	}
 
-	
+
 	private void defineOperators() {
 		String formula = this.formula;
+	
 		StringTokenizer tkz = new StringTokenizer(formula, "*/+-^");
 		
 		String leftPart = tkz.nextToken().trim();
@@ -111,9 +136,15 @@ public final class MathFormula implements Calculable {
 					currentMathOperator.setRightSide(rightExpression);
 				}
 			} else {
-				finalCalculable = currentMathOperator;
-				currentMathOperator.setLeftSide(leftExpression);
-				currentMathOperator.setRightSide(rightExpression);
+				if (finalCalculable != null) {
+					currentMathOperator.setLeftSide(leftExpression);
+					currentMathOperator.setRightSide(rightExpression);
+					((MathOperator) finalCalculable).setLeftSide(currentMathOperator);
+				} else {
+					finalCalculable = currentMathOperator;
+					currentMathOperator.setLeftSide(leftExpression);
+					currentMathOperator.setRightSide(rightExpression);
+				}
 			}
 			lastMathOperator = currentMathOperator;
 			leftPart = rightPart;
@@ -125,15 +156,18 @@ public final class MathFormula implements Calculable {
 		}
 
 	}
-
 	
 	private ExpressionHandler<?> getAppropriateExpressionHandler(String expression) {
 		if (constants.containsKey(expression)) {
 			return new DoubleHandler(constants.get(expression));
 		} else if (nestedMathFormulas.containsKey(expression)) {
 			return new MathFormulaHandler(nestedMathFormulas.get(expression));
+		} else if (parameters.containsKey(expression)) {
+			return new ParameterHandler(parameters, expression);		
+		} else if (variables.containsKey(expression)) {
+			return new VariableHandler(variables, expression);
 		} else {
-			return null;		// TODO fix that when everything is working
+			return null;
 		}
 	}
 	
@@ -166,10 +200,18 @@ public final class MathFormula implements Calculable {
 				if (charact.toString().equals(")")) {
 					if (numberOfOpeningParentheses == 0) {
 						String nestedFormula = formula.substring(firstOccurrence + 1, i);
-						MathFormula nestedMathFormula = new MathFormula(nestedFormula, parameters, variables);
+						String longNamedOperator = checkIfLongNamedOperatorBefore(formula, firstOccurrence);
+						
+						MathFormula nestedMathFormula = longNamedOperator != null ?
+								new MathFormula(nestedFormula, MathOperator.getAppropriateMathOperator(longNamedOperator), this) :
+								new MathFormula(nestedFormula, null, this);
+
 						String nestedFormulaID = "$nf" + nestedMathFormulas.size();
 						nestedMathFormulas.put(nestedFormulaID, nestedMathFormula);
-						String newFormula = formula.substring(0, firstOccurrence) + nestedFormulaID + formula.substring(i + 1);
+						int firstCut = longNamedOperator != null ?
+								firstOccurrence - longNamedOperator.length() :
+									firstOccurrence;
+						String newFormula = formula.substring(0, firstCut) + nestedFormulaID + formula.substring(i + 1);
 						formula = newFormula;
 						break;
 					} else {
@@ -189,13 +231,27 @@ public final class MathFormula implements Calculable {
 
 
 	
+	private String checkIfLongNamedOperatorBefore(String thisFormula, int firstOccurrence) {
+		for (String longNamedOperator : MathOperator.NamedOperators.keySet()) {
+			if (firstOccurrence - longNamedOperator.length() > -1) {
+				String thatPossibleOperator = thisFormula.substring(firstOccurrence - longNamedOperator.length(), firstOccurrence);
+				if (longNamedOperator.equals(thatPossibleOperator)) {
+					return longNamedOperator;
+				}
+			}
+		}
+		return null;
+	}
+
+
 	@Override
 	public String toString() {
 		String originalFormula = formula;
 		MathFormula nestedFormula;
 		for (String key : nestedMathFormulas.keySet()) {
 			nestedFormula = nestedMathFormulas.get(key);
-			originalFormula = originalFormula.replace(key, "(" + nestedFormula.toString() + ")");
+			String longOperatorIfAny = MathOperator.getOperatorLongNameIfAny(nestedFormula.finalCalculable);
+			originalFormula = originalFormula.replace(key, longOperatorIfAny +  "(" + nestedFormula.toString() + ")");
 		}
 		for (String key : constants.keySet()) {
 			double d = constants.get(key);
@@ -204,7 +260,15 @@ public final class MathFormula implements Calculable {
 		return originalFormula;
 	}
 	
-	
+	private boolean isTokenKnown(String token) {
+		if (token.startsWith("$"))
+			return true;
+		for (String longNamedOperator : MathOperator.NamedOperators.keySet()) {
+			if (token.startsWith(longNamedOperator + "$"))
+				return true;
+		}
+		return false;
+	}
 
 	private void checkParametersAndVariables() {
 		List<String> constantList = new ArrayList<String>();
@@ -212,11 +276,11 @@ public final class MathFormula implements Calculable {
 		String token;
 		while (tkz.hasMoreTokens()) {
 			token = tkz.nextToken().trim();
-			if (!token.startsWith("$")) {
+			if (!isTokenKnown(token)) {
 				if (isNumeric(token)) {
 					constantList.add(token);
 				} else {
-					if (!parameters.contains(token) && !variables.contains(token)) {
+					if (!parameters.containsKey(token) && !variables.containsKey(token)) {
 						throw new InvalidParameterException("The expression " + token + " has not been defined as parameter or variable!");
 					}
 				}
@@ -262,16 +326,20 @@ public final class MathFormula implements Calculable {
 		return finalCalculable.calculate();
 	}
 
-	
-	
-	@SuppressWarnings("unused")
-	public static void main(String[] args) {
-		List<String> parameters = new ArrayList<String>();
-		parameters.add("alpha");
-		MathFormula mathFormula = new MathFormula("2^(2 + 3)", parameters, null);
-		double results = mathFormula.calculate();
-		System.out.println(mathFormula.toString());
+	public void setParameter(String name, double value) {
+		if (!parameters.containsKey(name) ) {
+			throw new InvalidParameterException("The parameter " + name + " has not been defined!");
+		}
+		parameters.put(name, value);
 	}
+
+	public void setVariable(String name, double value) {
+		if (!variables.containsKey(name) ) {
+			throw new InvalidParameterException("The variable " + name + " has not been defined!");
+		}
+		variables.put(name, value);
+	}
+
 
 
 }

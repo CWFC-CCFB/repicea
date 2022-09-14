@@ -18,8 +18,6 @@
  */
 package repicea.math;
 
-import java.util.Map;
-
 public interface MathematicalFunction extends EvaluableFunction<Double>, DifferentiableMathematicalFunction {
 
 	
@@ -46,15 +44,4 @@ public interface MathematicalFunction extends EvaluableFunction<Double>, Differe
 	 */
 	public boolean isThisParameterValueWithinBounds(int parameterIndex, double parameterValue);
 
-	
-//	/**
-//	 * Provide a deep clone of the parameter bounds. <br>
-//	 * <br>
-//	 * This method is used to propagate the parameter bounds in wrappers. IMPORTANT:
-//	 * it should not be used to set a bound since the method returns a copy of the
-//	 * original bounds. Use the setBound method instead.
-//	 * @return a Map of integers and parameter bounds.
-//	 */
-//	public Map<Integer, ParameterBound> getBounds();
-	
 }
