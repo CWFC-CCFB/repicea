@@ -150,24 +150,12 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	@Override
 	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
 		super.setModelDefinition(modelDefinition, additionalParm);
-		getDataStructure().constructMatrices(modelDefinition);
+		getDataStructure().setModelDefinition(modelDefinition);
+		getDataStructure().constructMatrices();
 		matrixX = getDataStructure().getMatrixX();
 		y = getDataStructure().getVectorY();
 	}
 	
-
-	
-//	@Override
-//	public void setParameters(Matrix beta) {
-//		if (beta == null) {
-//			individualLLK.setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
-//		} else {
-//			individualLLK.setParameters(beta);
-//		}
-//	}
-		
-//	@Override
-//	public Matrix getParameters() {return individualLLK.getParameters();}
 
 	@Override
 	protected Estimator instantiateDefaultEstimator() {
@@ -178,45 +166,6 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	public String toString() {
 		return "Generalized linear model";
 	}
-
-//	/**
-//	 * This method scans the log likelihood function within a range of values for a particular parameter.
-//	 * @param parameterName the index of the parameter
-//	 * @param start the starting value
-//	 * @param end the ending value
-//	 * @param step the step between these two values.
-//	 */
-//	public void gridSearch(int parameterName, double start, double end, double step) {
-//		System.out.println("Initializing grid search...");
-//		ArrayList<LikelihoodValue> likelihoodValues = new ArrayList<LikelihoodValue>();
-//		Matrix originalParameters = getParameters();
-//		double llk;
-//		for (double value = start; value < end + step; value+=step) {
-//			Matrix beta = originalParameters.getDeepClone();
-//			beta.setValueAt(parameterName, 0, value);
-//			setParameters(beta);
-//			completeLLK.reset();
-//			llk = completeLLK.getValue();
-//			likelihoodValues.add(new LikelihoodValue(beta, llk));
-//			REpiceaLogManager.logMessage(MaximumLikelihoodEstimator.LOGGER_NAME, Level.FINER, MaximumLikelihoodEstimator.LOGGER_NAME, "Parameter value : " + value + "; Log-likelihood : " + llk);
-//		}
-//		
-//		Collections.sort(likelihoodValues);
-//		LikelihoodValue lk;
-//		Matrix bestFittingParameters = null;
-//		for (int i = 0; i < likelihoodValues.size(); i++) {
-//			lk = likelihoodValues.get(i);
-//			if (!Double.isNaN(lk.llk)) {
-//				bestFittingParameters = lk.getParameters();
-//				break;
-//			}
-//		}
-//		if (bestFittingParameters == null) {
-//			throw new InvalidParameterException("All the likelihoods of the grid are NaN!");
-//		} else {
-//			setParameters(bestFittingParameters);
-//		}
-//	}
 
 	@Override
 	public int getNumberOfObservations() {return getDataStructure().getNumberOfObservations();}

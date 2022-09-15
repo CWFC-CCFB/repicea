@@ -26,9 +26,9 @@ import java.util.Map;
  * a left side and a right side component as well as a priority. 
  * @author Mathieu Fortin - May 2013
  */
-abstract class MathOperator implements Calculable {
+public abstract class MathOperator implements Calculable {
 
-	protected static Map<String, Class<? extends MathOperator>> NamedOperators = new HashMap<String, Class<? extends MathOperator>>();
+	public static Map<String, Class<? extends MathOperator>> NamedOperators = new HashMap<String, Class<? extends MathOperator>>();
 	static {
 		NamedOperators.put("exp", Exponential.class);
 		NamedOperators.put("log", Logarithm.class);

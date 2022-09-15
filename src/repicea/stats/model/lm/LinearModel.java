@@ -104,7 +104,8 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 
 	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
 		super.setModelDefinition(modelDefinition);
-		dataStruct.constructMatrices(modelDefinition);
+		dataStruct.setModelDefinition(modelDefinition);
+		dataStruct.constructMatrices();
 	}
 
 

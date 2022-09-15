@@ -91,7 +91,7 @@ public final class MathFormula implements Calculable {
 		
 		this.formula = formula.replace(" ", "").trim();
 		this.parameters = parentFormula.parameters;
-		this.variables = parentFormula.parameters;
+		this.variables = parentFormula.variables;
 		
 		parseParentheses();
 		checkParametersAndVariables();
@@ -109,7 +109,7 @@ public final class MathFormula implements Calculable {
 		ExpressionHandler<?> leftExpression = getAppropriateExpressionHandler(leftPart);
 		
 		String rightPart;
-		ExpressionHandler<?> rightExpression;
+		ExpressionHandler<?> rightExpression = null;
 		MathOperator currentMathOperator;
 		MathOperator lastMathOperator = null;
 		
@@ -153,6 +153,8 @@ public final class MathFormula implements Calculable {
 		
 		if (finalCalculable == null) {		// it means there was no operator at all in the formula e.g. ($nf3)
 			finalCalculable = leftExpression;
+		} else if (rightExpression == null) {
+			((MathOperator) finalCalculable).setLeftSide(leftExpression);
 		}
 
 	}
@@ -340,6 +342,9 @@ public final class MathFormula implements Calculable {
 		variables.put(name, value);
 	}
 
+	public List<String> getVariables() {
+		return new ArrayList<String>(variables.keySet());
+	}
 
 
 }

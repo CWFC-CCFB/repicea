@@ -241,7 +241,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		overallDataset.indexFieldType();
 		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
 		dataStruct.setInterceptModel(false); // no intercept
-		dataStruct.constructMatrices("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
+		dataStruct.setModelDefinition("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
+		dataStruct.constructMatrices();
 		return dataStruct;
 	}
 	

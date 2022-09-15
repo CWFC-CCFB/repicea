@@ -30,8 +30,6 @@ public class MathFormulaTest {
 	public void simpleTest1() {
 		MathFormula mathFormula = new MathFormula("2^(2 + 3)", null, null);
 		double result = mathFormula.calculate();
-//		System.out.println(mathFormula.toString());
-//		System.out.println("Result is " + result);
 		Assert.assertEquals("Testing result", Math.pow(2, 2 + 3), result, 1E-15);
 	}
 
@@ -39,8 +37,6 @@ public class MathFormulaTest {
 	public void simpleTest2() {
 		MathFormula mathFormula = new MathFormula("2 - (2 + 3)", null, null);
 		double result = mathFormula.calculate();
-//		System.out.println(mathFormula.toString());
-//		System.out.println("Result is " + result);
 		Assert.assertEquals("Testing result", -3, result, 1E-15);
 	}
 
@@ -49,8 +45,6 @@ public class MathFormulaTest {
 	public void simpleTest3() {
 		MathFormula mathFormula = new MathFormula("2^(2 + (3*.5))", null, null);
 		double result = mathFormula.calculate();
-//		System.out.println(mathFormula.toString());
-//		System.out.println("Result is " + result);
 		Assert.assertEquals("Testing result", Math.pow(2, 2 + (3*.5)), result, 1E-15);
 	}
 
@@ -125,6 +119,23 @@ public class MathFormulaTest {
 		result = mathFormula.calculate();
 		System.out.println("Result is " + result);
 		Assert.assertEquals("Testing result", 2 + Math.log(4), result, 1E-15);
+	}
+
+	@Test
+	public void testWithParameterizedExponential() {
+		LinkedHashMap<String, Double> parameters = new LinkedHashMap<String, Double>();
+		parameters.put("b1", 2d);
+		MathFormula mathFormula = new MathFormula("exp(b1)", 
+				parameters, 
+				null);
+		System.out.println(mathFormula.toString());
+		double result = mathFormula.calculate();
+		System.out.println("Result is " + result);
+		Assert.assertEquals("Testing result", Math.exp(2), result, 1E-15);
+		mathFormula.setParameter("b1", 1d);
+		result = mathFormula.calculate();
+		System.out.println("Result is " + result);
+		Assert.assertEquals("Testing result", Math.exp(1), result, 1E-15);
 	}
 
 }
