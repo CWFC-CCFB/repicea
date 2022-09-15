@@ -47,13 +47,15 @@ abstract class AbstractDataBlockWrapper extends AbstractMathematicalFunction {
 	final List<Integer> indices;
 	
 	AbstractDataBlockWrapper(String blockId, 
-			List<Integer> indices, 
-			HierarchicalStatisticalDataStructure structure, 
+			List<Integer> indices,
+			Matrix vectorY,
+			Matrix matrixX,
+//			HierarchicalStatisticalDataStructure structure, 
 			Matrix overallVarCov) {
 		this.blockId = blockId;
 		this.indices = indices;
-		Matrix matX = structure.getMatrixX().getSubMatrix(indices, null);
-		this.vecY = structure.getVectorY().getSubMatrix(indices, null);
+		Matrix matX = matrixX.getSubMatrix(indices, null);
+		this.vecY = vectorY.getSubMatrix(indices, null);
 		this.timeSinceBeginning = matX.getSubMatrix(0, matX.m_iRows - 1, 1, 1);
 		this.timeToOrigin = matX.getSubMatrix(0, matX.m_iRows - 1, 0, 0).scalarMultiply(-1);
 		this.ageYr = matX.getSubMatrix(0, matX.m_iRows - 1, 0, 0).add(timeSinceBeginning);

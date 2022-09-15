@@ -20,10 +20,15 @@ package repicea.stats.model;
 
 import repicea.math.Matrix;
 
+/**
+ * The log-likelihood of a model given a vector of the response variable and a matrix
+ * of explanatory variables.
+ * @author Mathieu Fortin - July 2022
+ */
 @SuppressWarnings("serial")
 public class CompositeLogLikelihoodWithExplanatoryVariables extends SimpleCompositeLogLikelihood {
 
-	protected final Matrix xValues;
+	protected Matrix xValues;
 	
 	public CompositeLogLikelihoodWithExplanatoryVariables(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
 		super(innerLogLikelihoodFunction, yValues);

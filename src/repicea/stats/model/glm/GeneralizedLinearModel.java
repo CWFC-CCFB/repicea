@@ -122,6 +122,10 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		return new GenericStatisticalDataStructure(dataSet);
 	}
 
+	/**
+	 * Provide the data structure underlying this model instance.
+	 * @return a StatisticalDataStructure instance
+	 */
 	protected StatisticalDataStructure getDataStructure() {
 		return (GenericStatisticalDataStructure) dataStruct;
 	}
@@ -151,9 +155,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {
 		super.setModelDefinition(modelDefinition, additionalParm);
 		getDataStructure().setModelDefinition(modelDefinition);
-		getDataStructure().constructMatrices();
-		matrixX = getDataStructure().getMatrixX();
-		y = getDataStructure().getVectorY();
+		matrixX = getDataStructure().constructMatrixX();
+		y = getDataStructure().constructVectorY();
 	}
 	
 

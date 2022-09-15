@@ -94,11 +94,14 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		double scalingFactor;
 		double currentLlkValue;
 		
+		Matrix newBeta;
+		boolean areParametersWithinBounds;
 		do {
 			fireOptimizerEvent(NewtonRaphsonOptimizer.InnerIterationStarted);
 			scalingFactor = getScalingFactor(numberSubIter);
-			Matrix newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor));
-			if (areParametersWithinBounds(function, newBeta)) {
+			newBeta = originalBeta.add(optimisationStep.scalarMultiply(scalingFactor));
+			areParametersWithinBounds = areParametersWithinBounds(function, newBeta);
+			if (areParametersWithinBounds) {
 				setParameters(function, indicesOfParametersToOptimize, newBeta);
 				currentLlkValue = function.getValue();
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Subiteration : " + numberSubIter + "; Parms = " + newBeta.toString() + "; Log-likelihood : " + currentLlkValue);
@@ -166,7 +169,11 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 		try {
 			while (!convergenceAchieved && iterationID <= maxNumberOfIterations) {
 				iterationID++;
-				Matrix optimisationStep = hessian.getInverseMatrix().multiply(gradient).scalarMultiply(-1d);
+				Matrix inverseHessian = hessian.getInverseMatrix();
+				Matrix optimisationStep = inverseHessian.multiply(gradient).scalarMultiply(-1d);
+				if (Double.isNaN(optimisationStep.getValueAt(0, 0))) {
+					int u = 0;
+				}
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Optimization step at iteration " + iterationID + " = " + optimisationStep.toString());
 
 				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);
@@ -219,6 +226,7 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 
 			return convergenceAchieved;
 		} catch (OptimizationException e) {
+			e.printStackTrace();
 			throw e;
 		} finally {
 			betaVector = currentBeta;

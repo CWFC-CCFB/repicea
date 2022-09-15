@@ -42,23 +42,23 @@ public interface StatisticalDataStructure {
 	 */
 	public void setModelDefinition(String modelDefinition);
 	
-	/**
-	 * This method builds the matrices that are required to fit the model. 
-	 * @throws StatisticalDataException
-	 */
-	public void constructMatrices() throws StatisticalDataException;
+//	/**
+//	 * This method builds the matrices that are required to fit the model. 
+//	 * @throws StatisticalDataException
+//	 */
+//	public void constructMatrices() throws StatisticalDataException;
 	
 	/**
 	 * Return the design matrix of the fixed effects.
 	 * @return a Matrix instance
 	 */
-	public Matrix getMatrixX();
+	public Matrix constructMatrixX();
 
 	/**
 	 * Return the vector of response variables.
 	 * @return a Matrix instance
 	 */
-	public Matrix getVectorY();
+	public Matrix constructVectorY();
 	
 	/**
 	 * This method returns true if the model has an intercept or false otherwise.

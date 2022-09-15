@@ -54,7 +54,7 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 	 * For extended visibility.
 	 */
 	@Override
-	protected StatisticalDataStructure getDataStructure() {
+	public StatisticalDataStructure getDataStructure() {
 		return super.getDataStructure();
 	}
 

@@ -38,6 +38,8 @@ import repicea.stats.model.PredictableModel;
 public class LinearModel extends AbstractStatisticalModel implements PredictableModel, OLSCompatibleModel {
 
 	private final StatisticalDataStructure dataStruct;
+	private Matrix matrixX;
+	private Matrix vectorY;
 	
 	/**
 	 * Constructor.
@@ -105,20 +107,17 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 	protected void setModelDefinition(String modelDefinition) throws StatisticalDataException {
 		super.setModelDefinition(modelDefinition);
 		dataStruct.setModelDefinition(modelDefinition);
-		dataStruct.constructMatrices();
+		vectorY = dataStruct.constructVectorY();
+		matrixX = dataStruct.constructMatrixX();
 	}
 
 
 	@Override
-	public Matrix getMatrixX() {
-		return dataStruct.getMatrixX();
-	}
+	public Matrix getMatrixX() {return matrixX;}
 
 
 	@Override
-	public Matrix getVectorY() {
-		return dataStruct.getVectorY();
-	}
+	public Matrix getVectorY() {return vectorY;}
 
 
 	@Override

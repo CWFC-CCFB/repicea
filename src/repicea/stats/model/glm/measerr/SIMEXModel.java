@@ -26,6 +26,7 @@ import repicea.math.Matrix;
 import repicea.stats.Distribution;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
+import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
@@ -42,31 +43,37 @@ import repicea.stats.model.glm.LinkFunction.Type;
  */
 public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCompatibleModel {
 
-	static class InternalGLM extends GeneralizedLinearModel implements Cloneable {
+	final static class InternalGLM extends GeneralizedLinearModel implements Cloneable {
+		
 		private InternalGLM(GeneralizedLinearModel glm) {
 			super(glm);
 		}
 
+		@Override
+		protected SIMEXDataStructure createDataStructure(DataSet dataSet, Object addParm) {
+			return new SIMEXDataStructure(dataSet);
+		}
+		
 		private InternalGLM(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingParms) {
 			super(dataSet, linkFunctionType, modelDefinition);
 		}
 		
 		@Override
-		protected StatisticalDataStructure getDataStructure() {
-			return super.getDataStructure();
+		protected SIMEXDataStructure getDataStructure() {
+			return (SIMEXDataStructure) super.getDataStructure();
 		}
 
 		@Override
 		public InternalGLM clone() {
 			InternalGLM clone = new InternalGLM(this.getDataStructure().getDataSet(), this.getLinkFunctionType(), this.getModelDefinition(), null);
 			clone.getCompleteLogLikelihood().variance = this.getCompleteLogLikelihood().variance.getDeepClone();
-			clone.getCompleteLogLikelihood().indexVarWithMeasErr = this.getCompleteLogLikelihood().indexVarWithMeasErr;
+//			clone.getCompleteLogLikelihood().indexVarWithMeasErr = this.getCompleteLogLikelihood().indexVarWithMeasErr;
 			return clone;
 		}
 		
 		@Override
 		protected BootstrapCompositeLogLikelihoodWithExplanatoryVariables createCompleteLLK(Object addParm) {
-			return new BootstrapCompositeLogLikelihoodWithExplanatoryVariables(individualLLK, matrixX, y);
+			return new BootstrapCompositeLogLikelihoodWithExplanatoryVariables(individualLLK, y, this);
 		}
 
 		@Override
@@ -75,41 +82,64 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		}
 	}
 	
+	private static final class SIMEXDataStructure extends GenericStatisticalDataStructure {
+
+		Matrix additionalMeasErr;
+		double sqrtFactor;
+		
+		private SIMEXDataStructure(DataSet dataSet) {
+			super(dataSet);
+			additionalMeasErr = new Matrix(dataSet.getNumberOfObservations(), 1);
+			sqrtFactor = 0d;
+		}
+		
+		@Override
+		protected Matrix getVectorOfThisField(String fName) {
+			Matrix originalValue = super.getVectorOfThisField(fName);
+			return originalValue.add(additionalMeasErr.scalarMultiply(sqrtFactor));
+		}
+
+
+	}
 	
 	@SuppressWarnings("serial")
-	protected static class BootstrapCompositeLogLikelihoodWithExplanatoryVariables extends CompositeLogLikelihoodWithExplanatoryVariables {
+	static final class BootstrapCompositeLogLikelihoodWithExplanatoryVariables extends CompositeLogLikelihoodWithExplanatoryVariables {
 
+		final InternalGLM caller;
 		Matrix variance;
 		Matrix std;
-		Matrix xTmp;
-		int indexVarWithMeasErr;
+//		Matrix xTmp;
+//		int indexVarWithMeasErr;
 		
-		public BootstrapCompositeLogLikelihoodWithExplanatoryVariables(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix xValues, Matrix yValues) {
-			super(innerLogLikelihoodFunction, xValues, yValues);
+		private BootstrapCompositeLogLikelihoodWithExplanatoryVariables(IndividualLogLikelihood innerLogLikelihoodFunction, Matrix yValues, InternalGLM caller) {
+			super(innerLogLikelihoodFunction, null, yValues);
+			this.caller = caller;
 		}
 		
 		void generateMeasurementError(double factor) {
-			double sqrtFactor = Math.sqrt(factor);
-			xTmp = this.xValues.getDeepClone();
+			this.caller.getDataStructure().sqrtFactor = Math.sqrt(factor);
 			if (std == null) {
 				std = variance.elementWisePower(0.5);
 			}
-			Matrix additionalMeasErr;
 			if (OverrideVarianceForTest) {
-				additionalMeasErr = StatisticalUtility.drawRandomVector(xTmp.m_iRows, Distribution.Type.GAUSSIAN).scalarMultiply(1.59);
+				this.caller.getDataStructure().additionalMeasErr = StatisticalUtility.drawRandomVector(std.m_iRows, Distribution.Type.GAUSSIAN).scalarMultiply(1.59);
 			} else {
-				additionalMeasErr = std.elementWiseMultiply(StatisticalUtility.drawRandomVector(xTmp.m_iRows, Distribution.Type.GAUSSIAN));
+				this.caller.getDataStructure().additionalMeasErr = std.elementWiseMultiply(StatisticalUtility.drawRandomVector(std.m_iRows, Distribution.Type.GAUSSIAN));
 			}
-			for (int i = 0; i < xTmp.m_iRows; i++) {
-				double currentValue = xTmp.getValueAt(i, indexVarWithMeasErr);
-				xTmp.setValueAt(i, indexVarWithMeasErr, currentValue + additionalMeasErr.getValueAt(i, 0) * sqrtFactor);
-			}
+
+			xValues = this.caller.getDataStructure().constructMatrixX();
+//			xTmp = this.xValues.getDeepClone();
+//			Matrix additionalMeasErr;
+//			for (int i = 0; i < xTmp.m_iRows; i++) {
+//				double currentValue = xTmp.getValueAt(i, indexVarWithMeasErr);
+//				xTmp.setValueAt(i, indexVarWithMeasErr, currentValue + additionalMeasErr.getValueAt(i, 0) * sqrtFactor);
+//			}
 		}
 		
-		protected void setValuesInLikelihoodFunction(int index) {
-			super.setValuesInLikelihoodFunction(index);
-			getOriginalFunction().setVariables(xTmp.getSubMatrix(index, index, 0, xTmp.m_iCols - 1));
-		}
+//		protected void setValuesInLikelihoodFunction(int index) {
+//			super.setValuesInLikelihoodFunction(index);
+//			getOriginalFunction().setVariables(xTmp.getSubMatrix(index, index, 0, xTmp.m_iCols - 1));
+//		}
  
 		
 	}
@@ -117,9 +147,12 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	static boolean OverrideVarianceForTest = false;
 	
 	protected final InternalGLM originalGLM;
+	protected final String varWithMeasErr;
 	int nbBootstrapRealizations = 100;
 	int nbThreads = 2;
 	double[] factors = new double[] {0, .2, .4, .6, .8, 1, 1.2, 1.4, 1.6, 1.8, 2.0};
+	
+	
 	
 	/**
 	 * Constructor.
@@ -137,6 +170,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		int indexVarWithMeasErr = originalGLM.getDataStructure().indexOfThisEffect(varWithMeasErr);
 		if (indexVarWithMeasErr == -1)
 			throw new InvalidParameterException("The effect " + varWithMeasErr + " is not part of the model definition!");
+		this.varWithMeasErr = varWithMeasErr;
 		DataSet ds = originalGLM.getDataStructure().getDataSet();
 		int indexVarianceField = ds.getIndexOfThisField(varianceField);
 		if (indexVarianceField == -1)
@@ -146,7 +180,6 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			varVector.setValueAt(i, 0, ((Number) ds.getObservations().get(i).getValueAt(indexVarianceField)).doubleValue());
 		}
 		this.originalGLM.getCompleteLogLikelihood().variance = varVector;
-		this.originalGLM.getCompleteLogLikelihood().indexVarWithMeasErr = indexVarWithMeasErr;
 	}
 	
 	/**

@@ -24,7 +24,9 @@ import repicea.math.SymmetricMatrix;
 import repicea.math.utility.MatrixUtility;
 
 /**
- * A simple composite log likelihood for distribution models.
+ * A simple composite log likelihood for distribution models. <br>
+ * <br>
+ * There is only a vector of the response variable and no explanatory variables.
  * @author Mathieu Fortin - July 2022
  */
 @SuppressWarnings("serial")

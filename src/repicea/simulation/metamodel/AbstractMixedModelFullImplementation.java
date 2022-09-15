@@ -42,8 +42,8 @@ abstract class AbstractMixedModelFullImplementation extends AbstractModelImpleme
 	}
 
 	@Override
-	protected final AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, structure, varCov);
+	protected final AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, Matrix vectorY, Matrix matrixX, Matrix varCov) {
+		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov);
 	}
 
 	@Override

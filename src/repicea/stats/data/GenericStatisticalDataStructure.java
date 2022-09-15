@@ -44,8 +44,8 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 
 	protected final DataSet dataSet;
 	protected boolean isInterceptModel;
-	protected Matrix vectorY;
-	protected Matrix matrixX;
+//	protected Matrix vectorY;
+//	protected Matrix matrixX;
 	protected final LinkedHashMap<String, MathFormula> effects;
 	protected String yName;
 	
@@ -97,11 +97,92 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	@Override
 	public void setInterceptModel(boolean isInterceptModel) {this.isInterceptModel = isInterceptModel;}
 	
+	protected Matrix getVectorOfThisField(String fName) {
+		return dataSet.getVectorOfThisField(fName);
+	}
+	
 	@Override
-	public Matrix getMatrixX() {return matrixX;}
+	public Matrix constructMatrixX() {
+		Matrix matrixX = null;
+		
+		if (this.isInterceptModel) {
+			matrixX = new Matrix(getNumberOfObservations(), 1, 1, 0);
+		}
+		
+		Vector<String> effectsInThisInteraction = new Vector<String>();
+
+		for (String effectName : effects.keySet()) {
+			Matrix subMatrixX = null;
+			MathFormula formula;
+			if ((formula = effects.get(effectName)) != null) {	// there is a Math Formula behind this effect
+				String fName = formula.getVariables().get(0);
+				Matrix originalValues = getVectorOfThisField(fName);
+				subMatrixX = new Matrix(originalValues.m_iRows, 1);
+				for (int i = 0; i < originalValues.m_iRows; i++) {
+					formula.setVariable(fName, originalValues.getValueAt(i, 0));
+					subMatrixX.setValueAt(i, 0, formula.calculate());
+				}
+			} else {
+				StringTokenizer tkzInclusiveInteraction = new StringTokenizer(effectName, "*");
+				StringTokenizer tkzExclusiveInteraction = new StringTokenizer(effectName, ":");
+				effectsInThisInteraction.clear();
+
+				int numberOfInclusiveInteraction = tkzInclusiveInteraction.countTokens();
+				int numberOfExclusiveInteraction = tkzExclusiveInteraction.countTokens();
+
+				if (numberOfInclusiveInteraction > 1 && numberOfExclusiveInteraction > 1) {
+					throw new StatisticalDataException("Error : symbols * and : are being used at the same time in the model specification!");
+				}
+
+				boolean isAnInclusiveInteraction = numberOfInclusiveInteraction > 1;
+				StringTokenizer selectedTokenizer;
+				if (isAnInclusiveInteraction) {
+					selectedTokenizer = tkzInclusiveInteraction;
+				} else {
+					selectedTokenizer = tkzExclusiveInteraction;
+				}
+
+				while (selectedTokenizer.hasMoreTokens()) {
+					effectsInThisInteraction.add(selectedTokenizer.nextToken());
+				}
+
+				Matrix matrixTmp;
+				for (String effect : effectsInThisInteraction) {
+
+					int indexOfReferenceClass = effect.indexOf("#");
+					String refClass = null;
+					if (indexOfReferenceClass != -1) {
+						refClass = effect.substring(indexOfReferenceClass + 1);
+						effect = effect.substring(0, indexOfReferenceClass);
+					}
+
+//					int indexOfThisField = dataSet.getIndexOfThisField(effect);
+					Class<?> fieldType = dataSet.getFieldTypeOfThisField(effect);
+					if (Number.class.isAssignableFrom(fieldType)) {		// it is either a double or an integer
+						matrixTmp = getVectorOfThisField(effect);
+					} else {
+						matrixTmp = computeDummyVariables(effect, refClass);
+					}
+
+					if (subMatrixX == null) {
+						subMatrixX = matrixTmp;
+					} else {
+						subMatrixX = MatrixUtility.combineMatrices(subMatrixX, matrixTmp);
+					}
+				}
+			}
+
+			if (matrixX == null) {
+				matrixX = subMatrixX;
+			} else {
+				matrixX = matrixX.matrixStack(subMatrixX, false);
+			}
+		}
+		return matrixX;
+	}
 
 	@Override
-	public Matrix getVectorY() {return vectorY;}
+	public Matrix constructVectorY() {return dataSet.getVectorOfThisField(yName);}
 	
 	@Override
 	public void setModelDefinition(String modelDefinition) {
@@ -146,101 +227,6 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 		}
 	}
 	
-	
-	@SuppressWarnings("rawtypes")
-	@Override
-	public void constructMatrices() throws StatisticalDataException {
-		matrixX = null;
-		
-		if (this.isInterceptModel) {
-			matrixX = new Matrix(getNumberOfObservations(), 1, 1, 0);
-		}
-		
-		Vector<String> effectsInThisInteraction = new Vector<String>();
-
-//		List<String> responseAndFixedEffects = ObjectUtility.decomposeUsingToken(modelDefinition, "~"); 
-//		
-//		if (responseAndFixedEffects.size() != 2) {
-//			throw new StatisticalDataException("The model specification is incorrect!");
-//		}
-		
-//		String yName = responseAndFixedEffects.get(0);
-		vectorY = dataSet.getVectorOfThisField(yName);
-//		String modelEffects = responseAndFixedEffects.get(1);
-//
-//		List<String> effectList = ObjectUtility.decomposeUsingToken(modelEffects, "+");
-//		effects.clear();
-
-		for (String effectName : effects.keySet()) {
-			Matrix subMatrixX = null;
-			MathFormula formula;
-			if ((formula = effects.get(effectName)) != null) {	// there is a Math Formula behind this effect
-				String fName = formula.getVariables().get(0);
-				Matrix originalValues = dataSet.getVectorOfThisField(fName);
-				subMatrixX = new Matrix(originalValues.m_iRows, 1);
-				for (int i = 0; i < originalValues.m_iRows; i++) {
-					formula.setVariable(fName, originalValues.getValueAt(i, 0));
-					subMatrixX.setValueAt(i, 0, formula.calculate());
-				}
-			} else {
-				StringTokenizer tkzInclusiveInteraction = new StringTokenizer(effectName, "*");
-				StringTokenizer tkzExclusiveInteraction = new StringTokenizer(effectName, ":");
-				effectsInThisInteraction.clear();
-
-				int numberOfInclusiveInteraction = tkzInclusiveInteraction.countTokens();
-				int numberOfExclusiveInteraction = tkzExclusiveInteraction.countTokens();
-
-				if (numberOfInclusiveInteraction > 1 && numberOfExclusiveInteraction > 1) {
-					throw new StatisticalDataException("Error : symbols * and : are being used at the same time in the model specification!");
-				}
-
-				boolean isAnInclusiveInteraction = numberOfInclusiveInteraction > 1;
-				StringTokenizer selectedTokenizer;
-				if (isAnInclusiveInteraction) {
-					selectedTokenizer = tkzInclusiveInteraction;
-				} else {
-					selectedTokenizer = tkzExclusiveInteraction;
-				}
-
-				while (selectedTokenizer.hasMoreTokens()) {
-					effectsInThisInteraction.add(selectedTokenizer.nextToken());
-				}
-
-				Matrix matrixTmp;
-				for (String effect : effectsInThisInteraction) {
-
-					int indexOfReferenceClass = effect.indexOf("#");
-					String refClass = null;
-					if (indexOfReferenceClass != -1) {
-						refClass = effect.substring(indexOfReferenceClass + 1);
-						effect = effect.substring(0, indexOfReferenceClass);
-					}
-
-					int indexOfThisField = dataSet.getIndexOfThisField(effect);
-					Class fieldType = dataSet.getFieldTypeOfThisField(indexOfThisField);
-//					if (fieldType == Double.class) {
-					if (Number.class.isAssignableFrom(fieldType)) {		// it is either a double or an integer
-						matrixTmp = dataSet.getVectorOfThisField(indexOfThisField);
-					} else {
-						matrixTmp = computeDummyVariables(effect, refClass);
-					}
-
-					if (subMatrixX == null) {
-						subMatrixX = matrixTmp;
-					} else {
-						subMatrixX = MatrixUtility.combineMatrices(subMatrixX, matrixTmp);
-					}
-				}
-			}
-
-			if (matrixX == null) {
-				matrixX = subMatrixX;
-			} else {
-				matrixX = matrixX.matrixStack(subMatrixX, false);
-			}
-		}
-	}
-
 	private MathFormula extractFormulaIfAny(String effectName) {
 		boolean isLongNamedOperator = false;
 		for (String longNamedOperator : MathOperator.NamedOperators.keySet()) {
@@ -282,6 +268,11 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 	
 	@Override
 	public List<String> getEffectList() {
-		return new ArrayList<String>(effects.keySet());
+		List<String> effectList = new ArrayList<String>();
+		for (String key : effects.keySet()) {
+			MathFormula f = effects.get(key);
+			effectList.add(f != null ? f.toString() : key);
+		}
+		return effectList;
 	}
 }

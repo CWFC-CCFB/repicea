@@ -55,11 +55,9 @@ public class SIMEXTest {
 		DataSet dataSet = new DataSet(filename, true);
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
-		glm.getSummary();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(200);
 		s.doEstimation();
-		s.getSummary();
 		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());
 		Estimate<?> estimate = s.getEstimator().getParameterEstimates();
 		Assert.assertEquals("Checking parm estimate 1", -0.1687, estimate.getMean().getValueAt(0, 0), 4E-3);
@@ -68,6 +66,21 @@ public class SIMEXTest {
 		Assert.assertEquals("Checking standard error parm estimate 2", 0.004364, Math.sqrt(estimate.getVariance().getValueAt(1, 1)), 6E-5);
 	}
 	
+	@Test
+	public void multipleOccurrenceOfMeasurementErrorTest() throws Exception {
+ 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific + log(10 + distanceToConspecific)");
+		glm.doEstimation();
+		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
+		s.setNumberOfBootstrapRealizations(200);
+		s.doEstimation();
+		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());
+		Estimate<?> estimate = s.getEstimator().getParameterEstimates();
+		Assert.assertEquals("Checking parm 2", -0.062640, estimate.getMean().getValueAt(1, 0), 2E-3);
+		Assert.assertEquals("Checking standard error parm estimate 2", 0.020396, Math.sqrt(estimate.getVariance().getValueAt(1, 1)), 1E-3);
+	}
+
 	@AfterClass
 	public static void doThat() {
 		SIMEXModel.OverrideVarianceForTest = false;
