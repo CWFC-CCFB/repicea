@@ -35,26 +35,21 @@ import repicea.util.REpiceaLogManager;
 
 public class SIMEXProdTest {
 
-	@BeforeClass
-	public static void doThis() {
+	public static void main(String[] args) throws Exception {
 		Level l = Level.OFF;
 		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		ConsoleHandler ch = new ConsoleHandler();
 		ch.setLevel(l);
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).setLevel(l);
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
-	}
-
-	@Ignore // it takes 5 minutes...
-	@Test
-	public void sugarMapleRecruitmentTest() throws Exception {
- 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("ERSTestFile.csv");
+ 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("OccurrencePartDataSet_ERS.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		String formula = "occurred ~ lnDt + TotalPrcp + logPrcp + LowestTmin + lnPente + hasExpo:cosExpo + dummyDrainage4hydrique + G_F + lnG_F + G_R + lnG_R + distanceToConspecific + G_SpGr + lnG_SpGr + dummyPastDist3OtherNatural + timeSince1970";
+		String formula = "occurred ~ lnDt + DD + logDD + TotalPrcp + logPrcp + LowestTmin + dummyDrainage4hydrique + G_F + lnG_F + lnG_R + occIndex10km + sqr(occIndex10km) + speciesThere + lnG_SpGr + timeSince1970";
+//		String formula = "occurred ~ lnDt + DD + logDD + TotalPrcp + logPrcp + LowestTmin + dummyDrainage4hydrique + G_F + lnG_F + lnG_R + occIndex10km + speciesThere + lnG_SpGr + timeSince1970";
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, formula);
 		glm.doEstimation();
 		System.out.print(glm.getSummary());
-		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
+		SIMEXModel s = new SIMEXModel(glm, "occIndex10km", "occIndex10kmVar");
 		s.setNumberOfBootstrapRealizations(100);
 		s.setNbThreads(4);
 		s.doEstimation();

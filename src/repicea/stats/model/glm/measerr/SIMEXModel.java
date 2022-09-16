@@ -43,21 +43,42 @@ import repicea.stats.model.glm.LinkFunction.Type;
  */
 public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCompatibleModel {
 
-	final static class InternalGLM extends GeneralizedLinearModel implements Cloneable {
+	final class InternalGLM extends GeneralizedLinearModel implements Cloneable {
+		
+		private final class SIMEXDataStructure extends GenericStatisticalDataStructure {
+
+			Matrix additionalMeasErr;
+			double sqrtFactor;
+			
+			private SIMEXDataStructure(DataSet dataSet) {
+				super(dataSet);
+				additionalMeasErr = new Matrix(dataSet.getNumberOfObservations(), 1);
+				sqrtFactor = 0d;
+			}
+			
+			@Override
+			protected Matrix getVectorOfThisField(String fName) {
+				Matrix originalValue = super.getVectorOfThisField(fName);
+				return varWithMeasErr.equals(fName) ?  // we only add the random deviate if this is the field with measurement error
+						originalValue.add(additionalMeasErr.scalarMultiply(sqrtFactor)) :
+							originalValue;
+			}
+		}
+
 		
 		private InternalGLM(GeneralizedLinearModel glm) {
 			super(glm);
+		}
+
+		private InternalGLM(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingParms) {
+			super(dataSet, linkFunctionType, modelDefinition);
 		}
 
 		@Override
 		protected SIMEXDataStructure createDataStructure(DataSet dataSet, Object addParm) {
 			return new SIMEXDataStructure(dataSet);
 		}
-		
-		private InternalGLM(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingParms) {
-			super(dataSet, linkFunctionType, modelDefinition);
-		}
-		
+
 		@Override
 		protected SIMEXDataStructure getDataStructure() {
 			return (SIMEXDataStructure) super.getDataStructure();
@@ -65,9 +86,10 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 
 		@Override
 		public InternalGLM clone() {
-			InternalGLM clone = new InternalGLM(this.getDataStructure().getDataSet(), this.getLinkFunctionType(), this.getModelDefinition(), null);
+			InternalGLM clone = new InternalGLM(this.getDataStructure().getDataSet(), 
+					this.getLinkFunctionType(), 
+					this.getModelDefinition(), null);
 			clone.getCompleteLogLikelihood().variance = this.getCompleteLogLikelihood().variance.getDeepClone();
-//			clone.getCompleteLogLikelihood().indexVarWithMeasErr = this.getCompleteLogLikelihood().indexVarWithMeasErr;
 			return clone;
 		}
 		
@@ -82,25 +104,6 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		}
 	}
 	
-	private static final class SIMEXDataStructure extends GenericStatisticalDataStructure {
-
-		Matrix additionalMeasErr;
-		double sqrtFactor;
-		
-		private SIMEXDataStructure(DataSet dataSet) {
-			super(dataSet);
-			additionalMeasErr = new Matrix(dataSet.getNumberOfObservations(), 1);
-			sqrtFactor = 0d;
-		}
-		
-		@Override
-		protected Matrix getVectorOfThisField(String fName) {
-			Matrix originalValue = super.getVectorOfThisField(fName);
-			return originalValue.add(additionalMeasErr.scalarMultiply(sqrtFactor));
-		}
-
-
-	}
 	
 	@SuppressWarnings("serial")
 	static final class BootstrapCompositeLogLikelihoodWithExplanatoryVariables extends CompositeLogLikelihoodWithExplanatoryVariables {
@@ -161,6 +164,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	 * @param varianceField the field name of the variance of the measurement error
 	 */
 	public SIMEXModel(GeneralizedLinearModel glm, String varWithMeasErr, String varianceField) {
+		this.varWithMeasErr = varWithMeasErr;
 		this.originalGLM = new InternalGLM(glm);
 		try {
 			setModelDefinition(glm.getModelDefinition());
@@ -170,7 +174,6 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		int indexVarWithMeasErr = originalGLM.getDataStructure().indexOfThisEffect(varWithMeasErr);
 		if (indexVarWithMeasErr == -1)
 			throw new InvalidParameterException("The effect " + varWithMeasErr + " is not part of the model definition!");
-		this.varWithMeasErr = varWithMeasErr;
 		DataSet ds = originalGLM.getDataStructure().getDataSet();
 		int indexVarianceField = ds.getIndexOfThisField(varianceField);
 		if (indexVarianceField == -1)

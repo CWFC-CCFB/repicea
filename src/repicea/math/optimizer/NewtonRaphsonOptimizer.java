@@ -171,9 +171,6 @@ public class NewtonRaphsonOptimizer extends AbstractOptimizer {
 				iterationID++;
 				Matrix inverseHessian = hessian.getInverseMatrix();
 				Matrix optimisationStep = inverseHessian.multiply(gradient).scalarMultiply(-1d);
-				if (Double.isNaN(optimisationStep.getValueAt(0, 0))) {
-					int u = 0;
-				}
 				REpiceaLogManager.logMessage(LOGGER_NAME, Level.FINEST, LOGGER_NAME, "Optimization step at iteration " + iterationID + " = " + optimisationStep.toString());
 
 				Matrix originalBeta = extractParameters(function,indicesOfParametersToOptimize);

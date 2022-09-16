@@ -47,6 +47,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 		final InternalGLM model;
 		final Map<Double, MonteCarloEstimate> estimateMap;
 		final Map<Double, MonteCarloEstimate> varianceMap;
+		EstimatorException estimatorException;
 		
 		InternalWorker(int id, InternalGLM model, Map<Double, MonteCarloEstimate> estimateMap, Map<Double, MonteCarloEstimate> varianceMap) {
 			super("InternalWorker no " + id);
@@ -70,7 +71,8 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 					}
 				}
 			} catch (Exception e) {
-				e.printStackTrace();
+				estimatorException = new EstimatorException(e.getMessage());
+				SIMEXEstimator.this.interruptTasks();
 			}
 		}
 	}
@@ -79,10 +81,19 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	private final BlockingQueue<Double> queue;
 	private GaussianEstimate estimate;
 	private boolean convergenceAchieved;
+	private List<InternalWorker> threads;
 	
 	protected SIMEXEstimator(EstimatorCompatibleModel model) {
 		super(model);
 		queue = new LinkedBlockingQueue<Double>();
+	}
+
+	void interruptTasks() {
+		if (threads != null) {
+			for (InternalWorker t : threads) {
+				t.interrupt();
+			}
+		}
 	}
 
 	protected SIMEXModel getModel() {return (SIMEXModel) model;}
@@ -106,78 +117,82 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	public boolean doEstimation() throws EstimatorException {
 		convergenceAchieved = false;
 		estimate = null;
-		try {
-			Map<Double, MonteCarloEstimate> varianceMap = new HashMap<Double, MonteCarloEstimate>();
-			Map<Double, MonteCarloEstimate> estimateMap = new HashMap<Double, MonteCarloEstimate>();
-			List<Thread> threads = new ArrayList<Thread>();
-			for (int id = 1; id <= getModel().nbThreads; id++) {
-				threads.add(new InternalWorker(id, getModel().originalGLM.clone(), estimateMap, varianceMap));
-			}
-			for (Double factor : getModel().factors) {
-				for (int b = 0; b < getModel().nbBootstrapRealizations; b++) {
-					queue.add(factor);	// just one realization for the 0 factor
-					if (factor == 0) {
-						break;
-					}
-				}
-			}
-			for (@SuppressWarnings("unused") Thread t : threads) 
-				queue.add(Double.NaN);
-			for (Thread t : threads)
-				t.join();
-			
-			Matrix epsilon = new Matrix(getModel().factors);
-			// A quadratic extrapolation x = [1, epsilon, epsilon2]
-			Matrix x = new Matrix(epsilon.m_iRows, 1, 1, 0).matrixStack(epsilon, false).matrixStack(epsilon.elementWisePower(2), false);
-			Matrix invXtX_Xt = x.transpose().multiply(x).getInverseMatrix().multiply(x.transpose());
-			// Extrapolation is then at X = [1, -1, 1]
-			Matrix extrapolation = new Matrix(1,3,1,0);
-			extrapolation.setValueAt(0, 1, -1);
-			extrapolation.setValueAt(0, 2, 1);
-			Matrix parameters = null;
-			Matrix variances = null;
-			for (Double d : getModel().factors) {
-				Matrix theseParms = estimateMap.get(d).getMean().transpose();
-				Matrix theseVCov;
-				SymmetricMatrix varianceMapResult = SymmetricMatrix.convertToSymmetricIfPossible(varianceMap.get(d).getMean());
-				if (d == 0) {
-					theseVCov = varianceMapResult.symSquare().transpose(); 
-				} else {
-					Matrix s2_delta = estimateMap.get(d).getVariance();
-					theseVCov = ((SymmetricMatrix) varianceMapResult.subtract(s2_delta)).symSquare().transpose(); 
-				}
-				if (parameters == null) {
-					parameters = theseParms;
-					variances = theseVCov;
-				} else { 
-					parameters = parameters.matrixStack(theseParms, true);
-					variances = variances.matrixStack(theseVCov, true);
-				}
-			}
-//			System.out.println("Parameters = " + parameters.toString());
-			Matrix simexParms = new Matrix(parameters.m_iCols, 1);
-			for (int j = 0; j < parameters.m_iCols; j++) {
-				Matrix y = parameters.getSubMatrix(0, parameters.m_iRows - 1, j, j);
-				Matrix beta = invXtX_Xt.multiply(y);
-				Matrix simexValue = extrapolation.multiply(beta);
-				simexParms.setValueAt(j, 0, simexValue.getValueAt(0, 0));
-			}
-			Matrix simexVCov = new Matrix(variances.m_iCols, 1);
-			for (int j = 0; j < variances.m_iCols; j++) {
-				Matrix y = variances.getSubMatrix(0, variances.m_iRows - 1, j, j);
-				Matrix beta = invXtX_Xt.multiply(y);
-				Matrix simexValue = extrapolation.multiply(beta);
-				simexVCov.setValueAt(j, 0, simexValue.getValueAt(0, 0));
-			}
-			SymmetricMatrix simexVCovSymm = simexVCov.squareSym();
-			estimate = new GaussianEstimate(simexParms, simexVCovSymm);
-			convergenceAchieved = true;
-			return true;
-		} catch(InterruptedException e) {
-			REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME, e.getMessage());
-			return false;
+		Map<Double, MonteCarloEstimate> varianceMap = new HashMap<Double, MonteCarloEstimate>();
+		Map<Double, MonteCarloEstimate> estimateMap = new HashMap<Double, MonteCarloEstimate>();
+		threads = new ArrayList<InternalWorker>();
+		for (int id = 1; id <= getModel().nbThreads; id++) {
+			threads.add(new InternalWorker(id, getModel().originalGLM.clone(), estimateMap, varianceMap));
 		}
- 	}
+		for (Double factor : getModel().factors) {
+			for (int b = 0; b < getModel().nbBootstrapRealizations; b++) {
+				queue.add(factor);	// just one realization for the 0 factor
+				if (factor == 0) {
+					break;
+				}
+			}
+		}
+		for (@SuppressWarnings("unused") InternalWorker t : threads) 
+			queue.add(Double.NaN);
+		for (InternalWorker t : threads)
+			try {
+				t.join();
+			} catch (InterruptedException e) {}
+
+		for (InternalWorker t : threads) {
+			if (t.estimatorException != null) {
+				REpiceaLogManager.logMessage(LOGGER_NAME, Level.SEVERE, LOGGER_NAME, t.estimatorException.getMessage());
+				return false;
+			}
+		}
+
+		Matrix epsilon = new Matrix(getModel().factors);
+		// A quadratic extrapolation x = [1, epsilon, epsilon2]
+		Matrix x = new Matrix(epsilon.m_iRows, 1, 1, 0).matrixStack(epsilon, false).matrixStack(epsilon.elementWisePower(2), false);
+		Matrix invXtX_Xt = x.transpose().multiply(x).getInverseMatrix().multiply(x.transpose());
+		// Extrapolation is then at X = [1, -1, 1]
+		Matrix extrapolation = new Matrix(1,3,1,0);
+		extrapolation.setValueAt(0, 1, -1);
+		extrapolation.setValueAt(0, 2, 1);
+		Matrix parameters = null;
+		Matrix variances = null;
+		for (Double d : getModel().factors) {
+			Matrix theseParms = estimateMap.get(d).getMean().transpose();
+			Matrix theseVCov;
+			SymmetricMatrix varianceMapResult = SymmetricMatrix.convertToSymmetricIfPossible(varianceMap.get(d).getMean());
+			if (d == 0) {
+				theseVCov = varianceMapResult.symSquare().transpose(); 
+			} else {
+				Matrix s2_delta = estimateMap.get(d).getVariance();
+				theseVCov = ((SymmetricMatrix) varianceMapResult.subtract(s2_delta)).symSquare().transpose(); 
+			}
+			if (parameters == null) {
+				parameters = theseParms;
+				variances = theseVCov;
+			} else { 
+				parameters = parameters.matrixStack(theseParms, true);
+				variances = variances.matrixStack(theseVCov, true);
+			}
+		}
+		//			System.out.println("Parameters = " + parameters.toString());
+		Matrix simexParms = new Matrix(parameters.m_iCols, 1);
+		for (int j = 0; j < parameters.m_iCols; j++) {
+			Matrix y = parameters.getSubMatrix(0, parameters.m_iRows - 1, j, j);
+			Matrix beta = invXtX_Xt.multiply(y);
+			Matrix simexValue = extrapolation.multiply(beta);
+			simexParms.setValueAt(j, 0, simexValue.getValueAt(0, 0));
+		}
+		Matrix simexVCov = new Matrix(variances.m_iCols, 1);
+		for (int j = 0; j < variances.m_iCols; j++) {
+			Matrix y = variances.getSubMatrix(0, variances.m_iRows - 1, j, j);
+			Matrix beta = invXtX_Xt.multiply(y);
+			Matrix simexValue = extrapolation.multiply(beta);
+			simexVCov.setValueAt(j, 0, simexValue.getValueAt(0, 0));
+		}
+		SymmetricMatrix simexVCovSymm = simexVCov.squareSym();
+		estimate = new GaussianEstimate(simexParms, simexVCovSymm);
+		convergenceAchieved = true;
+		return true;
+	}
 
 	@Override
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}

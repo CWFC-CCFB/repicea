@@ -258,6 +258,20 @@ public class Matrix implements Serializable, DeepCloneable {
 		return false;
 	}
 
+	/**
+	 * Check if any element is a "Not a Number" (NaN)
+	 * @return true if at least one element is NaN
+	 */
+	public boolean anyElementNaN() {
+		for (int i = 0; i < this.m_iRows; i++) {
+			for (int j = 0; j < this.m_iCols; j++) {
+				if (Double.isNaN(this.getValueAt(i, j)))
+					return true;
+			}
+		}
+		return false;
+	}
+
 	
 	/**
 	 * This method return a vector that contains the diagonal element of this Matrix instance.

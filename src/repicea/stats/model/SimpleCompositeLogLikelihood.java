@@ -67,9 +67,15 @@ public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWr
 	public SymmetricMatrix getHessian() {
 		SymmetricMatrix resultingHessian = new SymmetricMatrix(getOriginalFunction().getNumberOfParameters());
 		for (int i = 0; i < yValues.m_iRows; i++) {
+			if (i == 208) {
+				int u = 0;
+			}
 			setValuesInLikelihoodFunction(i);
-//			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
-			resultingHessian = (SymmetricMatrix) resultingHessian.add(getOriginalFunction().getHessian());
+			Matrix hessianToAdd = getOriginalFunction().getHessian();
+//			if (hessianToAdd.anyElementNaN()) {
+//				throw new UnsupportedOperationException("The hessian contains NaN!");
+//			}
+			resultingHessian = (SymmetricMatrix) resultingHessian.add(hessianToAdd);
 		}
 		return resultingHessian;
 	}

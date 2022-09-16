@@ -32,6 +32,7 @@ public abstract class MathOperator implements Calculable {
 	static {
 		NamedOperators.put("exp", Exponential.class);
 		NamedOperators.put("log", Logarithm.class);
+		NamedOperators.put("sqr", Square.class);
 	}
 	
 	
@@ -71,6 +72,8 @@ public abstract class MathOperator implements Calculable {
 			return new MathOperator.Exponential();
 		} else if (operator.equals("log")) {
 			return new MathOperator.Logarithm();
+		} else if (operator.equals("sqr")) {
+			return new MathOperator.Square();
 		} else {
 			return null;
 		}
@@ -186,7 +189,7 @@ public abstract class MathOperator implements Calculable {
 	}
 
 	/**
-	 * A classical ln operator.
+	 * A classical log operator.
 	 * @author Mathieu Fortin - September 2022
 	 */
 	static class Logarithm extends MathOperator {
@@ -197,8 +200,31 @@ public abstract class MathOperator implements Calculable {
 
 		@Override
 		public double calculate() {
+			double argument = leftSide.calculate();
+			if (argument <= 0d) {
+				throw new UnsupportedOperationException("The MathOperator$Logarithm class has encontered a zero or a negative argument!");
+			}
 			return Math.log(leftSide.calculate());
 		}
 	}
+	
+	/**
+	 * A classical square (power 2) operator.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	static class Square extends MathOperator {
+		
+		protected Square() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			double argument = leftSide.calculate();
+			return argument * argument;
+		}
+	}
+
+
 
 }
