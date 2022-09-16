@@ -18,6 +18,7 @@
  */
 package repicea.stats.data;
 
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -65,10 +66,11 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 	}
 	
 	@Override
-	public void constructMatrices(String modelDefinition) throws StatisticalDataException {
+	public void setModelDefinition(String modelDefinition) {
 		modelDefinition = extractRandomEffects(modelDefinition);
-		super.constructMatrices(modelDefinition);
+		super.setModelDefinition(modelDefinition);
 	}
+
 
 	/**
 	 * This method filters the model definition for sub strings in parentheses. These substrings are then
@@ -77,15 +79,20 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 	 * @return the model definition without the random effects
 	 * @throws StatisticalDataException 
 	 */
-	private String extractRandomEffects(String modelDefinition) throws StatisticalDataException {
+	private String extractRandomEffects(String modelDefinition) {
 		List<String> occurrences = ObjectUtility.extractSequences(modelDefinition, "(", ")");
-		String newModelDefinition = occurrences.remove(0);
-		if (occurrences.size() > 1) {
-			throw new StatisticalDataException("The model definition only supports one random effect statement!");
+		List<String> retainedOccurrences = new ArrayList<String>();
+		for (String possOcc : occurrences) {
+			if (possOcc.contains("|")) {
+				retainedOccurrences.add(possOcc);
+			}
+		}
+		if (retainedOccurrences.size() > 1) {
+			throw new InvalidParameterException("The model definition only supports one random effect statement!");
 		}
 		
-		if (!occurrences.isEmpty()) {
-			for (String randomEffect : occurrences) {
+		if (!retainedOccurrences.isEmpty()) {
+			for (String randomEffect : retainedOccurrences) {
 				recordRandomEffects(randomEffect);
 			}
 			
@@ -104,7 +111,9 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 		}
 
 		
-		return newModelDefinition;
+		return retainedOccurrences.isEmpty() ? // means there is no random effect specification 
+				modelDefinition : 
+					modelDefinition.replace(retainedOccurrences.get(0), "");
 	}
 	
 		
@@ -117,18 +126,17 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 	}
 
 
-
-	protected void recordRandomEffects(String effectName) throws StatisticalDataException {
+	protected void recordRandomEffects(String effectName) {
 		String randomEffectSpec = effectName.replace("(","").replace(")","");
 		List<String> randomEffectComponents = ObjectUtility.decomposeUsingToken(randomEffectSpec, "|");
 		if (randomEffectComponents.size() != 2) {
-			throw new StatisticalDataException("The random effect " + effectName + " is not properly defined!");
+			throw new InvalidParameterException("The random effect " + effectName + " is not properly defined!");
 		}
 		
 		List<String> hierarchicalLevels = ObjectUtility.decomposeUsingToken(randomEffectComponents.get(1), "/");
 		for (String level : hierarchicalLevels) {
 			if (dataSet.getIndexOfThisField(level) == -1) {
-				throw new StatisticalDataException("Field " + level + "does not exist!");
+				throw new InvalidParameterException("Field " + level + "does not exist!");
 			}
 		}
 		
@@ -136,7 +144,7 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 		for (String randomEffect : randomEffectsForTheseLevels) {
 			if (!randomEffect.equals("1")) {
 				if (dataSet.getIndexOfThisField(randomEffect) == -1) {
-					throw new StatisticalDataException("Field " + randomEffect + "does not exist!");
+					throw new InvalidParameterException("Field " + randomEffect + "does not exist!");
 				}
 			}
 		}
@@ -162,7 +170,7 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 		return randomEffectsSpecifications;
 	}
 	
-	protected void setRandomEffectStructure() throws StatisticalDataException {
+	protected void setRandomEffectStructure() {
 		// FIXME it works only for covariates and not for class effect such as species for instance
 		matricesZ.clear();
 		Matrix matrixZ;
@@ -195,7 +203,7 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 	public Map<String, DataBlock> getHierarchicalStructure() {return hierarchicalStructure;}
 
 	@Override
-	public void setHierarchicalStructureLevel(List<String> hierarchicalStructureLevels) throws StatisticalDataException {
+	public void setHierarchicalStructureLevel(List<String> hierarchicalStructureLevels) {
 		hierarchicalStructure.clear();
 		for (int i = 0; i < getNumberOfObservations(); i++) {
 			DataBlock currentBlock = null;
@@ -205,7 +213,7 @@ public class GenericHierarchicalStatisticalDataStructure extends GenericStatisti
 				
 				int index = dataSet.getIndexOfThisField(level);	// first check if the field exists
 				if (index < 0) {
-					throw new StatisticalDataException("Error : This field is not part of the data set : " + level);
+					throw new InvalidParameterException("Error : This field is not part of the data set : " + level);
 				}
 				
 				String levelFieldValue = dataSet.getValueAt(i, index).toString();

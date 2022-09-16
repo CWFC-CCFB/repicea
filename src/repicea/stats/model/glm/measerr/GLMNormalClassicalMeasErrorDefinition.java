@@ -339,7 +339,7 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 	@Override
 	public LinkFunction createLinkFunction(Type linkFunctionType, GLMWithMeasurementError glm) {
 		LinkFunction lf = new LinkFunction(linkFunctionType);
-		int dimension = glm.getDataStructure().getMatrixX().m_iCols;
+		int dimension = glm.getMatrixX().m_iCols;
 		lf.setParameters(new Matrix(dimension, 1));
 		lf.setVariables(new Matrix(1, dimension));
 		return lf;

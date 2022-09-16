@@ -187,7 +187,7 @@ public class QuantileUtilityTest {
 		double mean = est.getMean().getValueAt(0, 0);
 		double variance = est.getVariance().getValueAt(0, 0);
 		Assert.assertEquals("Testing mean", 895.6358666666663, mean, 30);
-		Assert.assertEquals("Testing variance", 137033.9766902726, variance, 2.2E4);
+		Assert.assertEquals("Testing variance", 137033.9766902726, variance, 2.5E4);
 	}
 
 }

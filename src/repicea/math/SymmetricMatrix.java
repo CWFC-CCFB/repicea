@@ -76,6 +76,19 @@ public class SymmetricMatrix extends Matrix implements UnmodifiableMatrix {
 		}
 	}
 
+	
+	@Override
+	public boolean anyElementNaN() {
+		for (int i = 0; i < this.m_iRows; i++) {
+			for (int j = i; j < this.m_iCols; j++) {
+				if (Double.isNaN(this.getValueAt(i, j)))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	
 	@Override
 	public Matrix elementWiseMultiply(Matrix m) {
 		if (isTheSameDimension(m) && m.isSymmetric()) {

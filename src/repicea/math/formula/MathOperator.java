@@ -18,13 +18,24 @@
  */
 package repicea.math.formula;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * The MathOperator class is an abstract class for all operators. Basically, an operator has
  * a left side and a right side component as well as a priority. 
  * @author Mathieu Fortin - May 2013
  */
-abstract class MathOperator implements Calculable {
+public abstract class MathOperator implements Calculable {
 
+	public static Map<String, Class<? extends MathOperator>> NamedOperators = new HashMap<String, Class<? extends MathOperator>>();
+	static {
+		NamedOperators.put("exp", Exponential.class);
+		NamedOperators.put("log", Logarithm.class);
+		NamedOperators.put("sqr", Square.class);
+	}
+	
+	
 	protected int priority;
 	protected Calculable leftSide;
 	protected Calculable rightSide;
@@ -57,12 +68,25 @@ abstract class MathOperator implements Calculable {
 			return new MathOperator.Minus();
 		} else if (operator.equals("^")) {
 			return new MathOperator.Power();
+		} else if (operator.equals("exp")) {
+			return new MathOperator.Exponential();
+		} else if (operator.equals("log")) {
+			return new MathOperator.Logarithm();
+		} else if (operator.equals("sqr")) {
+			return new MathOperator.Square();
 		} else {
 			return null;
 		}
 	}
 
-	
+	protected static String getOperatorLongNameIfAny(Calculable operator) {
+		for (String name : NamedOperators.keySet()) {
+			if (operator.getClass().isAssignableFrom(NamedOperators.get(name))) {
+				return name;
+			}
+		}
+		return "";
+	}
 	
 	/**
 	 * A classical plus "+" operator.
@@ -147,5 +171,60 @@ abstract class MathOperator implements Calculable {
 			return Math.pow(leftSide.calculate(), rightSide.calculate());
 		}
 	}
+
+	/**
+	 * A classical exp operator.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	static class Exponential extends MathOperator {
+		
+		protected Exponential() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			return Math.exp(leftSide.calculate());
+		}
+	}
+
+	/**
+	 * A classical log operator.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	static class Logarithm extends MathOperator {
+		
+		protected Logarithm() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			double argument = leftSide.calculate();
+			if (argument <= 0d) {
+				throw new UnsupportedOperationException("The MathOperator$Logarithm class has encontered a zero or a negative argument!");
+			}
+			return Math.log(leftSide.calculate());
+		}
+	}
 	
+	/**
+	 * A classical square (power 2) operator.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	static class Square extends MathOperator {
+		
+		protected Square() {
+			priority = 2;
+		}
+
+		@Override
+		public double calculate() {
+			double argument = leftSide.calculate();
+			return argument * argument;
+		}
+	}
+
+
+
 }

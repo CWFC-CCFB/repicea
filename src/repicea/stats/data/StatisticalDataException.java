@@ -18,11 +18,13 @@
  */
 package repicea.stats.data;
 
+import java.security.InvalidParameterException;
+
 /**
  * This class handles Exception instance that are specific to the data.
  * @author Mathieu Fortin - October 2011
  */
-public class StatisticalDataException extends Exception {
+public class StatisticalDataException extends InvalidParameterException {
 	
 	private static final long serialVersionUID = 20110616L;
 	

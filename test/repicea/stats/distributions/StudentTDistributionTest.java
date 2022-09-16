@@ -98,7 +98,7 @@ public class StudentTDistributionTest {
 		double expectedQuantile025 = -2.228139 * Math.sqrt(20) + 10;
 		double expectedQuantile975 = 2.228139 * Math.sqrt(20) + 10;
 		Assert.assertEquals("Testing the mean", expectedMean, actualMean, 1E-2);
-		Assert.assertEquals("Testing the variance", expectedVariance, actualVariance, 5E-2);
+		Assert.assertEquals("Testing the variance", expectedVariance, actualVariance, 6E-2);
 		Assert.assertEquals("Testing quantile 0.025", quantile025, expectedQuantile025, 5E-2);
 		Assert.assertEquals("Testing quantile 0.975", quantile975, expectedQuantile975, 5E-2);
 	}

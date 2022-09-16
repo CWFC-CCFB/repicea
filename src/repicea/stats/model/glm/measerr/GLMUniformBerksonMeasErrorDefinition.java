@@ -48,7 +48,7 @@ abstract class GLMUniformBerksonMeasErrorDefinition extends AbstractGLMMeasError
 		}
 
 		Matrix setMeasErrorDefinition(GLMUniformBerksonMeasErrorDefinition errDef) {
-			Matrix errBounds = new Matrix(matrixX.m_iRows, 2);
+			Matrix errBounds = new Matrix(getNumberOfObservations(), 2);
 			if (errDef.lowerBoundVar != null) {
 				if (!dataSet.getFieldNames().contains(errDef.lowerBoundVar)) {
 					throw new InvalidParameterException("The lowerBoundVar argument in the measurement error definition is not in the dataset!");

@@ -24,7 +24,9 @@ import repicea.math.SymmetricMatrix;
 import repicea.math.utility.MatrixUtility;
 
 /**
- * A simple composite log likelihood for distribution models.
+ * A simple composite log likelihood for distribution models. <br>
+ * <br>
+ * There is only a vector of the response variable and no explanatory variables.
  * @author Mathieu Fortin - July 2022
  */
 @SuppressWarnings("serial")
@@ -65,9 +67,15 @@ public class SimpleCompositeLogLikelihood extends AbstractMathematicalFunctionWr
 	public SymmetricMatrix getHessian() {
 		SymmetricMatrix resultingHessian = new SymmetricMatrix(getOriginalFunction().getNumberOfParameters());
 		for (int i = 0; i < yValues.m_iRows; i++) {
+			if (i == 208) {
+				int u = 0;
+			}
 			setValuesInLikelihoodFunction(i);
-//			MatrixUtility.add(resultingHessian, getOriginalFunction().getHessian());
-			resultingHessian = (SymmetricMatrix) resultingHessian.add(getOriginalFunction().getHessian());
+			Matrix hessianToAdd = getOriginalFunction().getHessian();
+//			if (hessianToAdd.anyElementNaN()) {
+//				throw new UnsupportedOperationException("The hessian contains NaN!");
+//			}
+			resultingHessian = (SymmetricMatrix) resultingHessian.add(hessianToAdd);
 		}
 		return resultingHessian;
 	}

@@ -61,9 +61,11 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 
 		DataBlockWrapper(String blockId, 
 				List<Integer> indices, 
-				HierarchicalStatisticalDataStructure structure, 
+				Matrix vectorY,
+				Matrix matrixX,
+//				HierarchicalStatisticalDataStructure structure, 
 				Matrix overallVarCov) {
-			super(blockId, indices, structure, overallVarCov);
+			super(blockId, indices, vectorY, matrixX, overallVarCov);
 			Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
 			Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
 			this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
@@ -154,10 +156,12 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		}
 
 		dataBlockWrappers = new ArrayList<AbstractDataBlockWrapper>();
+		Matrix vectorY = structure.constructVectorY();
+		Matrix matrixX = structure.constructMatrixX();
 		for (String k : formattedMap.keySet()) {
 			DataBlock db = formattedMap.get(k);
 			List<Integer> indices = db.getIndices();
-			dataBlockWrappers.add(createWrapper(k, indices, structure, varCov));
+			dataBlockWrappers.add(createWrapper(k, indices, vectorY, matrixX, varCov));
 		}
 		
 		finalDataSet = structure.getDataSet();
@@ -165,8 +169,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		mh.setSimulationParameters(metaModel.mhSimParms);
 	}
 
-	protected AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, HierarchicalStatisticalDataStructure structure, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, structure, varCov);
+	protected AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, Matrix vectorY, Matrix matrixX, Matrix varCov) {
+		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov);
 	}
 	
 	private Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
@@ -241,7 +245,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		overallDataset.indexFieldType();
 		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
 		dataStruct.setInterceptModel(false); // no intercept
-		dataStruct.constructMatrices("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
+		dataStruct.setModelDefinition("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
+//		dataStruct.constructMatrices();
 		return dataStruct;
 	}
 	

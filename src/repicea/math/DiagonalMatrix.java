@@ -30,6 +30,15 @@ public class DiagonalMatrix extends SymmetricMatrix {
 		return mainArray;
 	}
 
+	@Override
+	public boolean anyElementNaN() {
+		for (int i = 0; i < this.m_iRows; i++) {
+			if (Double.isNaN(this.getValueAt(i, i)))
+				return true;
+		}
+		return false;
+	}
+
 	
 	@Override
 	public final void setValueAt(int i, int j, double value) {
