@@ -77,7 +77,7 @@ public class SIMEXTest {
 		s.doEstimation();
 		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());
 		Estimate<?> estimate = s.getEstimator().getParameterEstimates();
-		Assert.assertEquals("Checking parm 2", -0.062640, estimate.getMean().getValueAt(1, 0), 2E-3);
+		Assert.assertEquals("Checking parm 2", -0.062640, estimate.getMean().getValueAt(1, 0), 3E-3);
 		Assert.assertEquals("Checking standard error parm estimate 2", 0.020396, Math.sqrt(estimate.getVariance().getValueAt(1, 1)), 1E-3);
 	}
 
