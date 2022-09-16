@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.InvalidParameterException;
 
 /**
  * This class just contains static methods that facilitates the handling of the files.
@@ -76,6 +77,28 @@ public class FileUtility {
 
 		}
 
+	}
+
+	/**
+	 * Replace the extension by a new one. <br>
+	 * <br>
+	 * If the filename does not have an extension, the new extension is simply added to the 
+	 * filename. 
+	 * @param filename the original filename
+	 * @param newExtension the new extension without the not (ie. exe and not .exe)
+	 * @return the filename with the new extension
+	 */
+	public static String replaceExtensionBy(String filename, String newExtension) {
+		if (filename == null || newExtension == null) {
+			throw new InvalidParameterException("The filename and the newExtension arguments must be non null!");
+		}
+		int indexLastDot = filename.lastIndexOf(".");
+		if (indexLastDot == -1) {
+			return filename.concat("." + newExtension);
+		} else {
+			return filename.substring(0, indexLastDot).concat("." + newExtension);
+		}
+		
 	}
 
 }
