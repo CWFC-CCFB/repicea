@@ -20,16 +20,26 @@ package repicea.simulation.processsystem;
 
 import java.awt.Point;
 import java.awt.event.WindowEvent;
+import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.SwingUtilities;
+
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaGUITestRobot;
+import repicea.gui.UIControlManager;
+import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.dnd.LocatedEvent;
+import repicea.simulation.processsystem.SystemManagerDialog.MessageID;
 import repicea.util.ObjectUtility;
 
 public class ProcessSystemTest {
@@ -156,6 +166,40 @@ public class ProcessSystemTest {
 		dlg.setVisible(false);
 		dlg.dispose();
 		t.join();
+	}
+
+	
+	@Test
+	public void testSVNExportHappyPath() throws Exception {
+		SystemManager man = new SystemManager();
+		SystemManagerDialog dlg = man.getUI(null);
+		
+		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
+		Thread t = robot.showWindow(man);
+		
+		robot.clickThisButton(UIControlManager.CommonMenuTitle.File.name()); 
+		
+		Runnable toRun = new Runnable() {
+			public void run() {
+				try {
+					robot.clickThisButton(MessageID.ExportToSVG.name());
+				} catch (InvocationTargetException | InterruptedException e) {} 
+			}
+		};
+		robot.startGUI(toRun, JDialog.class);
+
+		String filename = System.getProperty("java.io.tmpdir") + "exportFluxConfiguration.svg";
+		File f = new File(filename);
+		if (f.exists())
+			f.delete();
+		robot.fillThisTextField("Filename", filename);
+		
+		robot.clickThisButton(CommonControlID.Save.name(), REpiceaAWTProperty.SVGFileSaved);
+		
+		Assert.assertTrue("Testing if svg export file exists", f.exists());
+
+		robot.clickThisButton(UIControlManager.CommonMenuTitle.File.name()); 
+		robot.clickThisButton(UIControlManager.CommonControlID.Close.name());
 	}
 
 

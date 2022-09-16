@@ -34,10 +34,9 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 
-import org.apache.commons.io.FilenameUtils;
-
 import com.cedarsoftware.util.io.JsonWriter;
 
+import repicea.io.FileUtility;
 import repicea.io.Saveable;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
@@ -576,7 +575,7 @@ public class MetaModel implements Saveable {
 		MetaDataHelper helper = new MetaDataHelper(); 
 		MetaModelMetaData data = helper.generate();
 				
-		FileOutputStream os = new FileOutputStream(FilenameUtils.removeExtension(filename).concat(".json"));
+		FileOutputStream os = new FileOutputStream(FileUtility.replaceExtensionBy(filename, "json"));
 		
 		Map<String, Object> options = new HashMap<String, Object>();
 		options.put(JsonWriter.PRETTY_PRINT, true);
