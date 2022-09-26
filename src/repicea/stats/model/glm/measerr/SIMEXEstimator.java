@@ -20,6 +20,7 @@ package repicea.stats.model.glm.measerr;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -82,6 +83,9 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	private GaussianEstimate estimate;
 	private boolean convergenceAchieved;
 	private List<InternalWorker> threads;
+	
+	DataSet parmsObsDataSet;
+	DataSet parmsPredDataSet;
 	
 	protected SIMEXEstimator(EstimatorCompatibleModel model) {
 		super(model);
@@ -147,12 +151,8 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 
 		Matrix epsilon = new Matrix(getModel().factors);
 		// A quadratic extrapolation x = [1, epsilon, epsilon2]
-		Matrix x = new Matrix(epsilon.m_iRows, 1, 1, 0).matrixStack(epsilon, false).matrixStack(epsilon.elementWisePower(2), false);
+		Matrix x = new Matrix(epsilon.m_iRows, 1, 1, 0).matrixStack(epsilon, false).matrixStack(epsilon.elementWisePower(2d), false);
 		Matrix invXtX_Xt = x.transpose().multiply(x).getInverseMatrix().multiply(x.transpose());
-		// Extrapolation is then at X = [1, -1, 1]
-		Matrix extrapolation = new Matrix(1,3,1,0);
-		extrapolation.setValueAt(0, 1, -1);
-		extrapolation.setValueAt(0, 2, 1);
 		Matrix parameters = null;
 		Matrix variances = null;
 		for (Double d : getModel().factors) {
@@ -173,15 +173,41 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 				variances = variances.matrixStack(theseVCov, true);
 			}
 		}
+		
+		this.getModel().getEffectList();
+		
 		//			System.out.println("Parameters = " + parameters.toString());
 		Matrix simexParms = new Matrix(parameters.m_iCols, 1);
+		parmsObsDataSet = new DataSet(Arrays.asList(new String[] {"parmID", "obs", "zeta"}));
+		parmsPredDataSet = new DataSet(Arrays.asList(new String[] {"parmID", "pred", "zeta"}));
+		int nbRows = (int) Math.ceil((getMaxFactor() + 1) / .01);
+		Matrix epsilonPred = new Matrix(nbRows, 1, -1, .01);
+		Matrix xPred = new Matrix(nbRows, 1, 1, 0).matrixStack(epsilonPred, false).matrixStack(epsilonPred.elementWisePower(2d), false);
+		Object[] record;
 		for (int j = 0; j < parameters.m_iCols; j++) {
 			Matrix y = parameters.getSubMatrix(0, parameters.m_iRows - 1, j, j);
+			for (int i = 0; i < parameters.m_iRows; i++) {
+				record = new Object[3];
+				int jj = model.isInterceptModel() ? j - 1 : j;
+				record[0] = jj == -1 ? "intercept" : model.getEffectList().get(jj);
+				record[1] = y.getValueAt(i, 0);	// observed
+				record[2] = epsilon.getValueAt(i, 0); // zeta value
+				parmsObsDataSet.addObservation(record);
+			}
 			Matrix beta = invXtX_Xt.multiply(y);
-			Matrix simexValue = extrapolation.multiply(beta);
+			Matrix simexValue = xPred.multiply(beta);
 			simexParms.setValueAt(j, 0, simexValue.getValueAt(0, 0));
+			for (int i = 0; i < xPred.m_iRows; i++) {
+				record = new Object[3];
+				int jj = model.isInterceptModel() ? j - 1 : j;
+				record[0] = jj == -1 ? "intercept" : model.getEffectList().get(jj);
+				record[1] = simexValue.getValueAt(i, 0);	// predicted
+				record[2] = epsilonPred.getValueAt(i, 0); // zeta value
+				parmsPredDataSet.addObservation(record);
+			}
 		}
 		Matrix simexVCov = new Matrix(variances.m_iCols, 1);
+		Matrix extrapolation = xPred.getSubMatrix(0, 0, 0, xPred.m_iCols - 1);
 		for (int j = 0; j < variances.m_iCols; j++) {
 			Matrix y = variances.getSubMatrix(0, variances.m_iRows - 1, j, j);
 			Matrix beta = invXtX_Xt.multiply(y);
@@ -194,6 +220,15 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 		return true;
 	}
 
+	private double getMaxFactor() {
+		double max = 0d;
+		for (double d : this.getModel().factors) {
+			if (d > max)
+				max = d;
+		}
+		return max;
+	}
+	
 	@Override
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}
 
