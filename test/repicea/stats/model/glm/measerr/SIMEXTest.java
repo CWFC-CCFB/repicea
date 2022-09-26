@@ -77,7 +77,7 @@ public class SIMEXTest {
 		s.doEstimation();
 		Assert.assertTrue("Checking if successfully extrapolated", s.getEstimator().isConvergenceAchieved());
 		Estimate<?> estimate = s.getEstimator().getParameterEstimates();
-		Assert.assertEquals("Checking parm 2", -0.062640, estimate.getMean().getValueAt(1, 0), 3E-3);
+		Assert.assertEquals("Checking parm 2", -0.062640, estimate.getMean().getValueAt(1, 0), 5E-3);
 		Assert.assertEquals("Checking standard error parm estimate 2", 0.020396, Math.sqrt(estimate.getVariance().getValueAt(1, 1)), 1E-3);
 	}
 
@@ -86,4 +86,23 @@ public class SIMEXTest {
 		SIMEXModel.OverrideVarianceForTest = false;
 	}
 
+	@Test
+	public void predDataSetTest() throws Exception {
+ 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		glm.doEstimation();
+		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
+		s.setNumberOfBootstrapRealizations(100);
+		s.doEstimation();
+		DataSet dsPred = s.getPredictedParameterEstimates();
+		Assert.assertTrue("Testing that the dataset is not null", dsPred != null);
+		int index = dsPred.getIndexOfThisField("pred");
+		double parmValue = Double.parseDouble(dsPred.getObservations().get(0).getValueAt(index).toString());
+		Estimate<?> estimate = s.getEstimator().getParameterEstimates();
+		Assert.assertEquals("Checking parm estimate 1", estimate.getMean().getValueAt(0, 0), parmValue, 1E-8);
+	}
+
+	
+	
 }

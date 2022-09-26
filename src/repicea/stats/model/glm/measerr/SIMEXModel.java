@@ -248,7 +248,8 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	 * Return a copy of the current factors.<br>
 	 * <br>
 	 * Changing the resulting array has no impact since it is a copy of the original. To change the
-	 * factors, please use the setFactors() method.
+	 * factors, use the setFactors() method instead.
+	 * 
 	 * @return an array of doubles
 	 */
 	public double[] getFactors() {
@@ -279,5 +280,33 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 
 	@Override
 	public int getNumberOfObservations() {return originalGLM.getNumberOfObservations();}
-	
+
+	/**
+	 * Provide a dataset with the observed parameter estimates for each level of inflated variance. <br>
+	 * <br>
+	 * This dataset is only available if the estimator has converged. If not, the method returns null.
+	 * @return a DataSet instance (or null if the estimator has not converged)
+	 */
+	public DataSet getObservedParameterEstimates() {
+		return getEstimator().isConvergenceAchieved() ?
+			((SIMEXEstimator) getEstimator()).parmsObsDataSet :
+				null;
+	}
+
+	/**
+	 * Provide a dataset with the predicted parameter estimates for each level of inflated variance. <br>
+	 * <br>
+	 * The predicted parameter estimates result from the regression of the observed parameter estimates
+	 * against the level of inflated variance. The predictions are generated for the range -1 to the maximum
+	 * of the factors, by 0.01. <br>
+	 * <br>
+	 * This dataset is only available if the estimator has converged. If not, the method returns null.
+	 * @return a DataSet instance (or null if the estimator has not converged)
+	 */
+	public DataSet getPredictedParameterEstimates() {
+		return getEstimator().isConvergenceAchieved() ?
+			((SIMEXEstimator) getEstimator()).parmsPredDataSet :
+				null;
+	}
+
 }
