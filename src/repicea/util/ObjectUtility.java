@@ -268,13 +268,13 @@ public final class ObjectUtility {
 		List<String> occurrences = new ArrayList<String>();
 		int beginsWithIndex;
 		int endsWithIndex;
-		while ((beginsWithIndex = originalString.indexOf(beginsWith)) != -1 
-			&& (endsWithIndex = originalString.indexOf(endsWith)) != -1) {
-			if (endsWithIndex > beginsWithIndex) {
+		while ((beginsWithIndex = originalString.indexOf(beginsWith)) != -1 && 
+				(endsWithIndex = originalString.indexOf(endsWith, beginsWithIndex + beginsWith.length())) != -1) {
+//			if (endsWithIndex > beginsWithIndex) {
 				String occurrence = originalString.substring(beginsWithIndex, endsWithIndex + 1);
 				occurrences.add(occurrence);
 				originalString = originalString.replace(occurrence, "");
-			}
+//			}
 		}
 		occurrences.add(0, originalString);
 		return occurrences;

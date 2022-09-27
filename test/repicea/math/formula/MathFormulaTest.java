@@ -18,6 +18,7 @@
  */
 package repicea.math.formula;
 
+import java.security.InvalidParameterException;
 import java.util.LinkedHashMap;
 
 import org.junit.Assert;
@@ -48,16 +49,6 @@ public class MathFormulaTest {
 		Assert.assertEquals("Testing result", Math.pow(2, 2 + (3*.5)), result, 1E-15);
 	}
 
-//	@Test
-//	public void testWithParameters() {
-//		MathFormula mathFormula = new MathFormula("2^(2 + (3*b1))", 
-//				Arrays.asList(new String[] {"b1"}), 
-//				null);
-//		System.out.println(mathFormula.toString());
-//		double result = mathFormula.calculate();
-//		System.out.println("Result is " + result);
-////		Assert.assertEquals("Testing result", Math.pow(2, 2 + (3*.5)), result, 1E-15);
-//	}
 	
 	@Test
 	public void testWithExponential1() {
@@ -136,6 +127,25 @@ public class MathFormulaTest {
 		result = mathFormula.calculate();
 		System.out.println("Result is " + result);
 		Assert.assertEquals("Testing result", Math.exp(1), result, 1E-15);
+	}
+
+	@Test
+	public void testWithNestedLongNamedOperators() {
+		MathFormula mathFormula = new MathFormula("2 + log(exp(2 + 3))", 
+				null, 
+				null);
+		System.out.println(mathFormula.toString());
+		double result = mathFormula.calculate();
+		System.out.println("Result is " + result);
+		Assert.assertEquals("Testing result", 2 + 5, result, 1E-15);
+	}
+
+	@Test
+	public void testWithUnknownLongNamedOperator() {
+		try {
+			new MathFormula("2 + offset(2 + 3)", null, null);
+			Assert.fail("The MathFormula instance should have thrown an Exception!");
+		} catch(InvalidParameterException e) {}
 	}
 
 }
