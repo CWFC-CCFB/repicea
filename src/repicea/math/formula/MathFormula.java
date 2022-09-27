@@ -82,8 +82,8 @@ public final class MathFormula implements Calculable {
 	 * @param parentFormula the MathFormula instance that is creating this nested formula
 	 */
 	private MathFormula(String formula, MathOperator operator, MathFormula parentFormula) {
-		if (formula == null) {
-			throw new InvalidParameterException("The formula in this MathFormula instance is null!");
+		if (formula == null || formula.isEmpty()) {
+			throw new InvalidParameterException("The formula argument should be non null and non empty!");
 		}
 		
 		nestedMathFormulas = new HashMap<String, MathFormula>();

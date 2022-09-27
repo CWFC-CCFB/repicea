@@ -244,7 +244,11 @@ public class DataSet implements Saveable, REpiceaUIObject {
 	
 	@SuppressWarnings("rawtypes")
 	protected Class getFieldTypeOfThisField(String fieldName) {
-		return getFieldTypeOfThisField(getIndexOfThisField(fieldName));
+		int index = getIndexOfThisField(fieldName);
+		if (index == -1) 
+			throw new InvalidParameterException("Field " + fieldName + " cannot be found in the dataset!");
+		else 
+			return getFieldTypeOfThisField(getIndexOfThisField(fieldName));
 	}
 	
 

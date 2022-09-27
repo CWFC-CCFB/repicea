@@ -20,9 +20,11 @@ package repicea.stats.model.glm;
 
 import static org.junit.Assert.assertEquals;
 
+import java.security.InvalidParameterException;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.Level;
 
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -56,6 +58,16 @@ public class GLModelTest {
 		glm.doEstimation();
 		double actualLlk = glm.getCompleteLogLikelihood().getValue();
 		assertEquals(expectedLlk, actualLlk, 1E-5);
+	}
+
+	@Test
+    public void TestWithOffset() throws Exception {
+		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		try {
+			new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ offset(TIGES_ID) + diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+			Assert.fail("The GeneralizedLinearModel instance should have thrown an Exception!");
+		} catch(InvalidParameterException e) {}
 	}
 
 }

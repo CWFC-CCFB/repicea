@@ -156,7 +156,6 @@ public class GenericStatisticalDataStructure implements StatisticalDataStructure
 						effect = effect.substring(0, indexOfReferenceClass);
 					}
 
-//					int indexOfThisField = dataSet.getIndexOfThisField(effect);
 					Class<?> fieldType = dataSet.getFieldTypeOfThisField(effect);
 					if (Number.class.isAssignableFrom(fieldType)) {		// it is either a double or an integer
 						matrixTmp = getVectorOfThisField(effect);
