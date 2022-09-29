@@ -28,12 +28,13 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
-import repicea.stats.data.StatisticalDataStructure;
+import repicea.stats.estimates.Estimate;
 import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 import repicea.stats.estimators.Estimator;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.PredictableModel;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 
@@ -41,8 +42,53 @@ import repicea.stats.model.glm.LinkFunction.Type;
  * This class implements the SIMEX method.
  * @author Mathieu Fortin - August 2022
  */
-public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCompatibleModel {
+public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCompatibleModel, PredictableModel {
 
+	/**
+	 * A fake GLM just to produce the predictions relying on the SIMEX parameter estimates.
+	 * @author Mathieu Fortin - September 2022
+	 */
+	final class PredGLM extends GeneralizedLinearModel {
+
+		/**
+		 * A fake estimator for the generalized linear model that is used to 
+		 * generate the predictions.
+		 * @author Mathieu Fortin - September 2022
+		 */
+		final class FakeEstimator implements Estimator {
+
+			Estimate<?> parameterEstimates;
+			
+			@Override
+			public boolean doEstimation() throws EstimatorException {return true;}
+
+			@Override
+			public boolean isConvergenceAchieved() {return true;}
+
+			@Override
+			public Estimate<?> getParameterEstimates() {return parameterEstimates;}
+
+			@Override
+			public DataSet getParameterEstimatesReport() {return null;}
+
+			@Override
+			public DataSet getConvergenceStatusReport() {return null;}
+			
+		}
+		
+		protected PredGLM(GeneralizedLinearModel glm) {
+			super(glm);
+			this.setEstimator(new FakeEstimator());
+		}
+
+		@Override
+		public FakeEstimator getEstimator() {
+			return (FakeEstimator) super.getEstimator();
+		}
+
+	}
+	
+	
 	final class InternalGLM extends GeneralizedLinearModel implements Cloneable {
 		
 		private final class SIMEXDataStructure extends GenericStatisticalDataStructure {
@@ -65,11 +111,21 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			}
 		}
 
-		
+		/**
+		 * Main constructor.
+		 * @param glm
+		 */
 		private InternalGLM(GeneralizedLinearModel glm) {
 			super(glm);
 		}
 
+		/**
+		 * Constructor for clones.
+		 * @param dataSet
+		 * @param linkFunctionType
+		 * @param modelDefinition
+		 * @param startingParms
+		 */
 		private InternalGLM(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingParms) {
 			super(dataSet, linkFunctionType, modelDefinition);
 		}
@@ -150,6 +206,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	static boolean OverrideVarianceForTest = false;
 	
 	protected final InternalGLM originalGLM;
+	protected final PredGLM predGLM;
 	protected final String varWithMeasErr;
 	int nbBootstrapRealizations = 100;
 	int nbThreads = 2;
@@ -166,6 +223,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	public SIMEXModel(GeneralizedLinearModel glm, String varWithMeasErr, String varianceField) {
 		this.varWithMeasErr = varWithMeasErr;
 		this.originalGLM = new InternalGLM(glm);
+		this.predGLM = new PredGLM(glm);
 		try {
 			setModelDefinition(glm.getModelDefinition());
 		} catch (StatisticalDataException e) {
@@ -308,5 +366,11 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 			((SIMEXEstimator) getEstimator()).parmsPredDataSet :
 				null;
 	}
+
+	@Override
+	public Matrix getPredicted() {return predGLM.getPredicted();}
+
+	@Override
+	public Matrix getResiduals() {return predGLM.getResiduals();}
 
 }
