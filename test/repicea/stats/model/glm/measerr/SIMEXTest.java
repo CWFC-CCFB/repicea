@@ -26,6 +26,7 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import repicea.math.Matrix;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
@@ -87,7 +88,7 @@ public class SIMEXTest {
 	}
 
 	@Test
-	public void predDataSetTest() throws Exception {
+	public void checkingPredParmsDataSetTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
@@ -103,6 +104,20 @@ public class SIMEXTest {
 		Assert.assertEquals("Checking parm estimate 1", estimate.getMean().getValueAt(0, 0), parmValue, 1E-8);
 	}
 
-	
+	@Test
+	public void checkingSIMEXPredictionsTest() throws Exception {
+ 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		glm.doEstimation();
+		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
+		s.setNumberOfBootstrapRealizations(100);
+		s.doEstimation();
+		Matrix pred = s.getPredicted();
+		Assert.assertTrue("Testing that the dataset is not null", pred != null);
+		double predValue = pred.getValueAt(0, 0);
+		Assert.assertEquals("Checking parm estimate 1", 0.054082156776618984, predValue, 3E-3);
+	}
+
 	
 }

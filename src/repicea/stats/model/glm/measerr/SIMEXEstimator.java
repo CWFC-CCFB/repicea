@@ -80,7 +80,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 
 
 	private final BlockingQueue<Double> queue;
-	private GaussianEstimate estimate;
+	private GaussianEstimate parameterEstimates;
 	private boolean convergenceAchieved;
 	private List<InternalWorker> threads;
 	
@@ -120,7 +120,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	@Override
 	public boolean doEstimation() throws EstimatorException {
 		convergenceAchieved = false;
-		estimate = null;
+		parameterEstimates = null;
 		Map<Double, MonteCarloEstimate> varianceMap = new HashMap<Double, MonteCarloEstimate>();
 		Map<Double, MonteCarloEstimate> estimateMap = new HashMap<Double, MonteCarloEstimate>();
 		threads = new ArrayList<InternalWorker>();
@@ -215,7 +215,8 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 			simexVCov.setValueAt(j, 0, simexValue.getValueAt(0, 0));
 		}
 		SymmetricMatrix simexVCovSymm = simexVCov.squareSym();
-		estimate = new GaussianEstimate(simexParms, simexVCovSymm);
+		parameterEstimates = new GaussianEstimate(simexParms, simexVCovSymm);
+		getModel().predGLM.getEstimator().parameterEstimates = parameterEstimates;
 		convergenceAchieved = true;
 		return true;
 	}
@@ -233,7 +234,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	public boolean isConvergenceAchieved() {return convergenceAchieved;}
 
 	@Override
-	public Estimate<?> getParameterEstimates() {return estimate;}
+	public Estimate<?> getParameterEstimates() {return parameterEstimates;}
 
 	@Override
 	public DataSet getConvergenceStatusReport() {
