@@ -24,8 +24,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.BlockingDeque;
+import java.util.concurrent.LinkedBlockingDeque;
 import java.util.logging.Level;
 
 import repicea.math.Matrix;
@@ -62,13 +62,26 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 		public void run() {
 			try {
 				while (!this.isInterrupted()) {
-					double factor = queue.take();
-					if (Double.isNaN(factor))
+					Object o = queue.takeFirst();
+					if (o.equals(finalToken)) {
 						break;
-					model.getCompleteLogLikelihood().generateMeasurementError(factor);
-					model.doEstimation();
-					if (model.getEstimator().isConvergenceAchieved()) {
-						addRealizationToEstimate(estimateMap, varianceMap, factor, model);
+					} else {
+						double factor = (Double) o;
+						model.getCompleteLogLikelihood().generateMeasurementError(factor);
+						if (refParms != null) {
+							model.setParameters(refParms);
+						} 
+						model.doEstimation();
+						if (model.getEstimator().isConvergenceAchieved()) {
+							addRealizationToEstimate(estimateMap, varianceMap, factor, model);
+							if (factor == 0d) {
+								refParms = model.getEstimator().getParameterEstimates().getMean();
+							}
+						} else {
+							queue.addFirst(factor);		// else we put the factor back into the map to make sure that this realization 
+														// is going to converge at some point MF20221004
+						}
+						
 					}
 				}
 			} catch (Exception e) {
@@ -78,18 +91,20 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 		}
 	}
 
+	private final Object finalToken = new Object();
 
-	private final BlockingQueue<Double> queue;
+	private final BlockingDeque<Object> queue;
 	private GaussianEstimate parameterEstimates;
 	private boolean convergenceAchieved;
 	private List<InternalWorker> threads;
 	
 	DataSet parmsObsDataSet;
 	DataSet parmsPredDataSet;
+	private Matrix refParms;
 	
 	protected SIMEXEstimator(EstimatorCompatibleModel model) {
 		super(model);
-		queue = new LinkedBlockingQueue<Double>();
+		queue = new LinkedBlockingDeque<Object>();
 	}
 
 	void interruptTasks() {
@@ -136,7 +151,7 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 			}
 		}
 		for (@SuppressWarnings("unused") InternalWorker t : threads) 
-			queue.add(Double.NaN);
+			queue.add(finalToken);
 		for (InternalWorker t : threads)
 			try {
 				t.join();
