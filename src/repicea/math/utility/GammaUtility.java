@@ -141,6 +141,36 @@ public class GammaUtility {
 		/* should never get here */
 		throw new InvalidParameterException("Unable to reach convergence for z = " + z);
 	}
+
+	/**
+	 * Compute the first derivative of the gamma function. <br>
+	 * <br>
+	 * The calculation is based on the digamma function.
+	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
+	 * @param d
+	 * @return the first derivative (a double)
+	 */
+	public static double gammaFirstDerivative(double d) {
+		return gamma(d) * digamma(d);
+	}
+	
+	
+	/**
+	 * Compute an approximation of the digamma function. <br>
+	 * <br>
+	 * The approximation is calculated as ln(d) - 1/2d.
+	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
+	 * @param d a strictly positive double 
+	 * @return a double
+	 */
+	public static double digamma(double d) {
+		if (d <= 0d) {
+			throw new InvalidParameterException("The digamma function is not defined for values smaller than or equal to 0!");
+		}
+		return Math.log(d) - 1d /(2*d);
+	}
+	
+	
 	
 //	public static void main(String[] args) {
 //		double fake = C;
