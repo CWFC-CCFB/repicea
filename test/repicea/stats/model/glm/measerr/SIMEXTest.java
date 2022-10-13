@@ -31,6 +31,7 @@ import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
@@ -54,7 +55,7 @@ public class SIMEXTest {
 	public void simpleTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(200);
@@ -71,7 +72,7 @@ public class SIMEXTest {
 	public void multipleOccurrenceOfMeasurementErrorTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific + log(10 + distanceToConspecific)");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific + log(10 + distanceToConspecific)");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(200);
@@ -91,7 +92,7 @@ public class SIMEXTest {
 	public void checkingPredParmsDataSetTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(100);
@@ -108,7 +109,7 @@ public class SIMEXTest {
 	public void checkingSIMEXPredictionsTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(100);

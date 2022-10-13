@@ -31,6 +31,7 @@ import org.junit.Test;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.FGMCopulaGLModelTest;
 import repicea.util.ObjectUtility;
@@ -54,7 +55,7 @@ public class GLModelTest {
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
 		DataSet dataSet = new DataSet(filename, true);
 		
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 		glm.doEstimation();
 		double actualLlk = glm.getCompleteLogLikelihood().getValue();
 		assertEquals(expectedLlk, actualLlk, 1E-5);
@@ -65,7 +66,7 @@ public class GLModelTest {
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
 		DataSet dataSet = new DataSet(filename, true);
 		try {
-			new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ offset(TIGES_ID) + diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+			new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ offset(TIGES_ID) + diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 			Assert.fail("The GeneralizedLinearModel instance should have thrown an Exception!");
 		} catch(InvalidParameterException e) {}
 	}

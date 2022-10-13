@@ -18,7 +18,7 @@
  */
 package repicea.stats.model.glm.copula;
 
-import java.text.NumberFormat;
+import java.security.InvalidParameterException;
 
 import repicea.math.Matrix;
 import repicea.math.optimizer.AbstractOptimizer.OptimizationException;
@@ -27,6 +27,7 @@ import repicea.stats.data.GenericHierarchicalSpatialDataStructure;
 import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 
 /**
@@ -50,6 +51,9 @@ public class FGMCopulaGLModel extends GeneralizedLinearModel {
 	 */
 	public FGMCopulaGLModel(GeneralizedLinearModel glm, CopulaExpression copula) throws StatisticalDataException, OptimizationException {
 		super(glm);
+		if (glm.getDistribution() != GLMDistribution.Bernoulli) {
+			throw new InvalidParameterException("The FGM copula only supports the Bernoulli distribution!");
+		}
 		if (!glm.getEstimator().isConvergenceAchieved()) {
 			glm.doEstimation();
 		} else {

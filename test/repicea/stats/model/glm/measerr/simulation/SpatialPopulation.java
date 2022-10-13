@@ -25,6 +25,7 @@ import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.model.glm.GeneralizedLinearModel;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.measerr.SIMEXModel;
 import repicea.stats.sampling.SamplingUtility;
@@ -100,7 +101,7 @@ class SpatialPopulation extends AbstractPopulation<SpatialPopulationUnit> {
 				ds.save(PATH + "sample" + realID++ + ".csv");
 		} catch(Exception e) {}
 		
-		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel pre_glm = new GeneralizedLinearModel(ds,  GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		pre_glm.doEstimation();
 //		pre_glm.getSummary();
 //		GLMWithMeasurementError glm = new GLMWithMeasurementError(ds, 

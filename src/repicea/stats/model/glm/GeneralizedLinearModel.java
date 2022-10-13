@@ -35,6 +35,7 @@ import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.PredictableModel;
 import repicea.stats.model.WrappedIndividualLogLikelihood;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.LinkFunction.Type;
 
 /**
@@ -48,7 +49,8 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	private final StatisticalDataStructure dataStruct;
 	private final CompositeLogLikelihoodWithExplanatoryVariables completeLLK;
 	protected final IndividualLogLikelihood individualLLK;
-	protected final LinkFunction lf;
+//	protected final LinkFunction lf;
+	protected final Family family;
 	protected Matrix matrixX;		// reference
 	protected Matrix y;				// reference
 	
@@ -59,24 +61,30 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	/**
 	 * General constructor
 	 * @param dataSet the fitting data
-	 * @param linkFunctionType the type of ling function (Logit, CLogLog, ...)
+	 * @param d a Distribution enum that defines the distribution of the response variable
+	 * @param linkFunctionType the type of link function (Logit, CLogLog, ...)
 	 * @param modelDefinition a String that defines the dependent variable and the effects of the model
 	 * @param startingBeta the starting values of the parameters
 	 */
-	public GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingBeta) {
-		this(dataSet, linkFunctionType, modelDefinition, null, startingBeta, null);
+	public GeneralizedLinearModel(DataSet dataSet, GLMDistribution d, Type linkFunctionType, String modelDefinition, Matrix startingBeta) {
+		this(dataSet, d, linkFunctionType, modelDefinition, null, startingBeta, null);
 	}
 	
 	/**
 	 * Generic private constructor.
 	 * @param dataSet
+	 * @param d a Distribution enum that defines the distribution of the response variable
 	 * @param linkFunctionType
 	 * @param modelDefinition
 	 * @param llk
 	 * @param startingBeta
 	 */
-	protected GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta, Object additionalParm) {
+	protected GeneralizedLinearModel(DataSet dataSet, GLMDistribution d, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta, Object additionalParm) {
 		super();
+//		if (!d.isAcceptedType(linkFunctionType)) {
+//			throw new InvalidParameterException("The distribution " + d.name() + " does not support the link function " + linkFunctionType.name());
+//		}
+//		this.distribution = d;
 		dataStruct = createDataStructure(dataSet, additionalParm);
 
 		// then define the model effects and retrieve matrix X and vector y
@@ -86,7 +94,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 			System.out.println("Unable to define this model : " + modelDefinition);
 			e.printStackTrace();
 		}
-		lf = createLinkFunction(linkFunctionType, additionalParm);
+		family = createFamily(d, linkFunctionType, additionalParm);
 		if (llk != null) {
 			individualLLK = llk;
 		} else {
@@ -103,18 +111,25 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	/**
 	 * Constructor using a vector of 0s as starting values for the parameters
 	 * @param dataSet the fitting data
-	 * @param linkFunctionType the type of ling function (Logit, CLogLog, ...)
+	 * @param d a Distribution enum that defines the distribution of the response variable
+	 * @param linkFunctionType the type of link function (Logit, CLogLog, ...)
 	 * @param modelDefinition a String that defines the dependent variable and the effects of the model
 	 */
-	public GeneralizedLinearModel(DataSet dataSet, Type linkFunctionType, String modelDefinition) {
-		this(dataSet, linkFunctionType, modelDefinition, null);
+	public GeneralizedLinearModel(DataSet dataSet, GLMDistribution d, Type linkFunctionType, String modelDefinition) {
+		this(dataSet, d, linkFunctionType, modelDefinition, null);
 	}
 
 	/**
 	 * Constructor for derived class.
 	 */
 	protected GeneralizedLinearModel(GeneralizedLinearModel glm) {
-		this(glm.getDataStructure().getDataSet(), glm.getLinkFunctionType(), glm.getModelDefinition(), glm.individualLLK, null, null);
+		this(glm.getDataStructure().getDataSet(), 
+				glm.family.dist, 
+				glm.family.lf.getType(), 
+				glm.getModelDefinition(), 
+				glm.individualLLK, 
+				null, 
+				null);
 	}
 
 
@@ -134,22 +149,34 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		return new CompositeLogLikelihoodWithExplanatoryVariables(individualLLK, matrixX, y);
 	}
 
-	protected LinkFunction createLinkFunction(Type linkFunctionType, Object addParm) {
-		return new LinkFunction(linkFunctionType);
+	protected Family createFamily(GLMDistribution d, Type linkFunctionType, Object addParm) {
+		return Family.createFamily(d, linkFunctionType, null);
+//		return new LinkFunction(linkFunctionType);
 	}
 
 	protected IndividualLogLikelihood createIndividualLLK(Object addParm) {
-		return new WrappedIndividualLogLikelihood(new LikelihoodGLM(lf));
+		if (family.dist == GLMDistribution.Bernoulli) {
+			return new WrappedIndividualLogLikelihood(new BernoulliIndividualLikelihood(family.lf));
+		} else {
+			throw new InvalidParameterException("The distribution " + family.dist.name() + " is not supported yet!"); // TODO MF20221013 should be removed after the implementation of the negative binomial.
+		}
 	}
 
+	/**
+	 * Provide the distribution of the response variable.
+	 * @return a Distribution enum
+	 */
+	public GLMDistribution getDistribution() {return family.dist;}
+	
 	/**
 	 * This method returns the type of the link function.
 	 * @return a LinkFunction.Type enum variable
 	 */
 	public LinkFunction.Type getLinkFunctionType() {
-		return lf.getType();
+		return getLinkFunction().getType();
 	}
 	
+	protected LinkFunction getLinkFunction() {return family.lf;}
 
 	@Override
 	protected void setModelDefinition(String modelDefinition, Object additionalParm) throws StatisticalDataException {

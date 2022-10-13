@@ -13,6 +13,7 @@ import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.stats.model.glm.copula.CopulaLibrary.DistanceLinkFunctionCopulaExpression;
@@ -42,7 +43,7 @@ public class FGMCopulaGLModelTest {
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
 		DataSet dataSet = new DataSet(filename, true);
 		
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 		
 		try {
 			CopulaExpression copula = new CopulaLibrary.SimpleCopulaExpression(0.0, "IDENT");
@@ -70,7 +71,7 @@ public class FGMCopulaGLModelTest {
 		String filename = ObjectUtility.getPackagePath(FGMCopulaGLModelTest.class).concat("donneesR_min.csv");
 		DataSet dataSet = new DataSet(filename, true);
 		
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 		
 		try {
 			CopulaExpression distanceCopula = new CopulaLibrary.DistanceLinkFunctionCopulaExpression(Type.Log, "IDENT", "X + Y", -.15);		// no intercept in the linear expression

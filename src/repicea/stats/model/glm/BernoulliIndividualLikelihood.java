@@ -27,11 +27,11 @@ import repicea.stats.model.IndividualLikelihood;
  * @author Mathieu Fortin - July 2022
  */
 @SuppressWarnings("serial")
-public class LikelihoodGLM extends IndividualLikelihood {
+public class BernoulliIndividualLikelihood extends IndividualLikelihood {
 
 	protected final LinkFunction linkFunction;
 	
-	public LikelihoodGLM(LinkFunction linkFunction) {
+	public BernoulliIndividualLikelihood(LinkFunction linkFunction) {
 		super(linkFunction.getOriginalFunction());
 		this.linkFunction = linkFunction;
 	}
