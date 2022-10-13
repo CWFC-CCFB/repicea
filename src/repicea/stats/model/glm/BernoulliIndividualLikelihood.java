@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-statistics library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge-Epicea
  *
@@ -23,7 +23,7 @@ import repicea.math.SymmetricMatrix;
 import repicea.stats.model.IndividualLikelihood;
 
 /**
- * This class simply handles the exponent y and 1-y of the likelihood function.  
+ * This class simply handles the likelihood of a Bernoulli outcome.
  * @author Mathieu Fortin - July 2022
  */
 @SuppressWarnings("serial")
