@@ -36,6 +36,10 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 		public List<String> getEffectList();
 		
 		public int getNumberOfObservations();
+		
+		public default List<String> getOtherParameters() {
+			return new ArrayList<String>();
+		}
 
 	}
 
@@ -70,27 +74,31 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 		boolean isWithIntercept = model.isInterceptModel();
 		for (int i = 0; i < parameterEstimates.m_iRows; i++) {
 			int j = isWithIntercept ? i - 1 : i;
+			String name;
 			if (j < model.getEffectList().size()) {	// otherwise we might be dealing with additional parameters like shape or scale parameters
-				record[0] = j == -1 ? "intercept" : model.getEffectList().get(j);
-				record[1] = parameterEstimates.getValueAt(i, 0);
-				record[2] = varianceAvailable ? std.getValueAt(i, 0) : Double.NaN;
-				double z = varianceAvailable ? parameterEstimates.getValueAt(i, 0) / std.getValueAt(i, 0) : Double.NaN;
-				record[3] = z;
-				double significanceLevel = varianceAvailable ? GaussianUtility.getCumulativeProbability(Math.abs(z), true) * 2: Double.NaN;
-				record[4] = significanceLevel;
-				String symbol = "";
-				if (!Double.isNaN(significanceLevel)) {
-					if (significanceLevel <= 0.01) {
-						symbol = "**";
-					} else if (significanceLevel <= 0.05) {
-						symbol = "*";
-					} else if (significanceLevel <= 0.10) {
-						symbol = ".";
-					}
-				}
-				record[5] = symbol;
-				dataSet.addObservation(record);
+				name = j == -1 ? "intercept" : model.getEffectList().get(j);
+			} else {
+				name = model.getOtherParameters().get(j - model.getEffectList().size());
 			}
+			record[0] = name;
+			record[1] = parameterEstimates.getValueAt(i, 0);
+			record[2] = varianceAvailable ? std.getValueAt(i, 0) : Double.NaN;
+			double z = varianceAvailable ? parameterEstimates.getValueAt(i, 0) / std.getValueAt(i, 0) : Double.NaN;
+			record[3] = z;
+			double significanceLevel = varianceAvailable ? GaussianUtility.getCumulativeProbability(Math.abs(z), true) * 2: Double.NaN;
+			record[4] = significanceLevel;
+			String symbol = "";
+			if (!Double.isNaN(significanceLevel)) {
+				if (significanceLevel <= 0.01) {
+					symbol = "**";
+				} else if (significanceLevel <= 0.05) {
+					symbol = "*";
+				} else if (significanceLevel <= 0.10) {
+					symbol = ".";
+				}
+			}
+			record[5] = symbol;
+			dataSet.addObservation(record);
 		}
 		return dataSet;
 	}

@@ -167,6 +167,13 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 		return new GenericStatisticalDataStructure(dataSet);
 	}
 
+	@Override
+	public List<String> getOtherParameters() {
+		List<String> names = new ArrayList<String>();
+		names.addAll(family.dist.additionalParmNames);
+		return names;
+	}
+
 	/**
 	 * Provide the data structure underlying this model instance.
 	 * @return a StatisticalDataStructure instance
@@ -194,7 +201,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 			indLk = new NegativeBinomialIndividualLikelihood(family.lf);
 			break;
 		default:
-			throw new InvalidParameterException("The distribution " + family.dist.name() + " is not supported yet!"); // TODO MF20221013 should be removed after the implementation of the negative binomial.
+			throw new InvalidParameterException("The distribution " + family.dist.name() + " is not supported yet!"); 
 		}
 		return new WrappedIndividualLogLikelihood(indLk);
 	}

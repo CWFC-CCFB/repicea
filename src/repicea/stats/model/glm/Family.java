@@ -35,18 +35,21 @@ import repicea.math.Matrix;
 public class Family {
 
 	public static enum GLMDistribution {
-		Bernoulli(0, new ArrayList<Double>(), LinkFunction.Type.Logit, LinkFunction.Type.CLogLog) ,
-		NegativeBinomial(1, Arrays.asList(new Double[] {1d}), LinkFunction.Type.Log);
+		Bernoulli(0, new ArrayList<String>(), new ArrayList<Double>(), LinkFunction.Type.Logit, LinkFunction.Type.CLogLog) ,
+		NegativeBinomial(1, Arrays.asList(new String[] {"Theta"}), Arrays.asList(new Double[] {1d}), LinkFunction.Type.Log);
 				
 		private final List<LinkFunction.Type> acceptedTypes;
 		protected final int nbAdditionalParms;
 		private final ArrayList<Double> startingValues;
+		protected final ArrayList<String> additionalParmNames;
 		
-		GLMDistribution(int nbAddParms, List<Double> values, LinkFunction.Type... types) {
+		GLMDistribution(int nbAddParms, List<String> names, List<Double> values, LinkFunction.Type... types) {
 			nbAdditionalParms = nbAddParms;
 			acceptedTypes = new ArrayList<LinkFunction.Type>();
 			startingValues = new ArrayList<Double>();
 			startingValues.addAll(values);
+			additionalParmNames = new ArrayList<String>();
+			additionalParmNames.addAll(names);
 			if (types != null) {
 				for (LinkFunction.Type t : types) {
 					acceptedTypes.add(t);

@@ -77,7 +77,7 @@ public class GLModelTest {
 		DataSet dataSet = new DataSet(filename, true);
 		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.NegativeBinomial, Type.Log, "y ~ dt + G_F + G_R + speciesThere");
 		glm.doEstimation();
-//		System.out.println(glm.getSummary());
+		System.out.println(glm.getSummary());
 		Assert.assertTrue("Testing if convergence was achieved", glm.getEstimator().isConvergenceAchieved());
 		double parmEst_intercept = glm.getParameters().getValueAt(0, 0);
 		double expected = 0.250792010984403;
