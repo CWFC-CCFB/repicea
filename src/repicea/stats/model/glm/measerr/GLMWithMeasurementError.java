@@ -27,6 +27,8 @@ import repicea.stats.data.StatisticalDataException;
 import repicea.stats.data.StatisticalDataStructure;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
+import repicea.stats.model.glm.Family;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction;
 import repicea.stats.model.glm.LinkFunction.Type;
@@ -41,7 +43,7 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 	protected final GLMMeasErrorDefinition measError;
 	
 	public GLMWithMeasurementError(DataSet dataSet, String modelDefinition, Matrix startingValues, GLMMeasErrorDefinition measError) {
-		super(dataSet, Type.CLogLog, modelDefinition, null, startingValues, measError);
+		super(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, modelDefinition, null, startingValues, measError);
 		this.measError = measError;
 		this.setConvergenceCriterion(1E-6);
 	}
@@ -58,7 +60,10 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 		return super.getDataStructure();
 	}
 
-	LinkFunction getLinkFunction() {return lf;}
+	/*
+	 * Just for extended visibility
+	 */
+	protected LinkFunction getLinkFunction() {return super.getLinkFunction();}
 	
 	IndividualLogLikelihood getIndividualLogLikelihood() {return individualLLK;}
 	
@@ -85,9 +90,12 @@ public class GLMWithMeasurementError extends GeneralizedLinearModel {
 	}
 
 	@Override
-	protected LinkFunction createLinkFunction(Type linkFunctionType, Object addParm) {
+	protected Family createFamily(GLMDistribution d, Type linkFunctionType, Object addParm) {
 		LinkFunction lf = ((GLMMeasErrorDefinition) addParm).createLinkFunction(linkFunctionType, this);
-		return lf != null ? lf : super.createLinkFunction(linkFunctionType, addParm);
+		Family f = lf != null ? 
+				Family.createFamily(d, lf) :
+					super.createFamily(d, linkFunctionType, null);
+		return f;
 	}
 
 	@Override 

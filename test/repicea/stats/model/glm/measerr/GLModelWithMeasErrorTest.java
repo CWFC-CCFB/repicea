@@ -29,6 +29,7 @@ import repicea.math.optimizer.AbstractOptimizer.LineSearchMethod;
 import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
@@ -109,7 +110,7 @@ public class GLModelWithMeasErrorTest {
     public void TestGLModelWithClassicalMeasurementError() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		glm.getSummary();
 		GLMWithMeasurementError glmWithMeasError = new GLMWithMeasurementError(dataSet, "y ~ distanceToConspecific",

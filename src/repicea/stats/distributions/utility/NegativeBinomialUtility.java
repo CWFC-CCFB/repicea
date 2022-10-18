@@ -21,8 +21,33 @@ package repicea.stats.distributions.utility;
 import java.security.InvalidParameterException;
 
 import repicea.math.utility.GammaUtility;
+import repicea.math.utility.MathUtility;
 
 public class NegativeBinomialUtility {
+	
+	/**
+	 * This method returns the mass probability from a negative binomial distribution for a particular integer. It follows the 
+	 * SAS parameterization.
+	 * @see<a href=http://support.sas.com/documentation/cdl/en/statug/63033/HTML/default/viewer.htm#statug_genmod_sect030.htm> 
+	 * SAS online documentation </a>
+	 * @param y the count (must be equal to or greater than 0)
+	 * @param mean the mean of the distribution
+	 * @param dispersion the dispersion parameter
+	 * @return a mass probability
+	 */
+	@Deprecated
+	static double getMassProbabilityOLD(int y, double mean, double dispersion) {
+		if (y < 0) {
+			throw new InvalidParameterException("The binomial distribution is designed for integer equals to or greater than 0!");
+		}
+		double prob = 0.0;
+		double dispersionTimesMean = dispersion * mean;
+		double inverseDispersion = 1/dispersion;
+
+		prob = Math.exp(GammaUtility.logGamma(y + inverseDispersion) - GammaUtility.logGamma(y + 1.0) - GammaUtility.logGamma(inverseDispersion)) 
+				*  Math.pow(dispersionTimesMean,y) / (Math.pow(1+dispersionTimesMean,y + inverseDispersion));
+		return prob;
+	}
 	
 	/**
 	 * This method returns the mass probability from a negative binomial distribution for a particular integer. It follows the 
@@ -42,8 +67,9 @@ public class NegativeBinomialUtility {
 		double dispersionTimesMean = dispersion * mean;
 		double inverseDispersion = 1/dispersion;
 
-		prob = Math.exp(GammaUtility.logGamma(y + inverseDispersion) - GammaUtility.logGamma(y + 1.0) - GammaUtility.logGamma(inverseDispersion)) 
+		prob = GammaUtility.gamma(y + inverseDispersion) / (MathUtility.Factorial(y) * GammaUtility.gamma(inverseDispersion)) 
 				*  Math.pow(dispersionTimesMean,y) / (Math.pow(1+dispersionTimesMean,y + inverseDispersion));
 		return prob;
 	}
+
 }

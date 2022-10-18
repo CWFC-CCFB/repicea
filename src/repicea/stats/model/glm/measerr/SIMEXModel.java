@@ -19,6 +19,7 @@
 package repicea.stats.model.glm.measerr;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +36,7 @@ import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.PredictableModel;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 
@@ -126,8 +128,8 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		 * @param modelDefinition
 		 * @param startingParms
 		 */
-		private InternalGLM(DataSet dataSet, Type linkFunctionType, String modelDefinition, Matrix startingParms) {
-			super(dataSet, linkFunctionType, modelDefinition);
+		private InternalGLM(DataSet dataSet, GLMDistribution d, Type linkFunctionType, String modelDefinition, Matrix startingParms) {
+			super(dataSet, d, linkFunctionType, modelDefinition);
 		}
 
 		@Override
@@ -143,6 +145,7 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 		@Override
 		public InternalGLM clone() {
 			InternalGLM clone = new InternalGLM(this.getDataStructure().getDataSet(), 
+					this.getDistribution(),
 					this.getLinkFunctionType(), 
 					this.getModelDefinition(), null);
 			clone.getCompleteLogLikelihood().variance = this.getCompleteLogLikelihood().variance.getDeepClone();
@@ -312,6 +315,13 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	 */
 	public double[] getFactors() {
 		return Arrays.copyOf(factors, factors.length);
+	}
+	
+	@Override
+	public List<String> getOtherParameterNames() {
+		List<String> names = new ArrayList<String>();
+		names.addAll(this.originalGLM.getOtherParameterNames());
+		return names;
 	}
 	
 	@Override

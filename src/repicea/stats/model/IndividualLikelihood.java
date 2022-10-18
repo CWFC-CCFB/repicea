@@ -31,7 +31,7 @@ import repicea.math.Matrix;
 public abstract class IndividualLikelihood extends AbstractMathematicalFunctionWrapper implements Likelihood {
 
 	protected Matrix observedValues;
-
+	
 	protected IndividualLikelihood(MathematicalFunction originalFunction) {
 		super(originalFunction);
 	}
@@ -46,6 +46,5 @@ public abstract class IndividualLikelihood extends AbstractMathematicalFunctionW
 	 
 	@Override
 	public abstract Matrix getPredictionVector();
-	
 
 }

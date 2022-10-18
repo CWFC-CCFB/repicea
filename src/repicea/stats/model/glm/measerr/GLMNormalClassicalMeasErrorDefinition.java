@@ -39,7 +39,7 @@ import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.Likelihood;
 import repicea.stats.model.WrappedIndividualLogLikelihood;
-import repicea.stats.model.glm.LikelihoodGLM;
+import repicea.stats.model.glm.BernoulliIndividualLikelihood;
 import repicea.stats.model.glm.LinkFunction;
 import repicea.stats.model.glm.LinkFunction.Type;
 
@@ -221,7 +221,7 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 	private List<Double> wVector;
 	private List<Double> varianceVector;
 	
-	private LikelihoodGLM originalModelLikelihood;
+	private BernoulliIndividualLikelihood originalModelLikelihood;
 	private AlteredGaussianFunction errorModelLikelihood;
 	private MathematicalFunction xDistribution;
 	private final String varianceField;
@@ -309,7 +309,7 @@ public class GLMNormalClassicalMeasErrorDefinition extends AbstractGLMMeasErrorD
 
 	@Override
 	public IndividualLogLikelihood createIndividualLogLikelihoodFromModel(GLMWithMeasurementError glm) {
-		originalModelLikelihood = new LikelihoodGLM(glm.getLinkFunction());
+		originalModelLikelihood = new BernoulliIndividualLikelihood(glm.getLinkFunction());
 		InternalMathematicalFunctionWrapper wrapper1 = new InternalMathematicalFunctionWrapper(originalModelLikelihood, 
 				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfParameters() - 1),
 				InternalMathematicalFunctionWrapper.produceListFromTo(0, originalModelLikelihood.getNumberOfVariables() - 1)); 

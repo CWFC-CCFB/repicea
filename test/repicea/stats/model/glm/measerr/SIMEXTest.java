@@ -31,6 +31,7 @@ import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.GeneralizedLinearModel;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
@@ -40,7 +41,7 @@ public class SIMEXTest {
 
 	
 	@BeforeClass
-	public static void doThis() {
+	public static void doThisBefore() {
 		Level l = Level.OFF;
 		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		ConsoleHandler ch = new ConsoleHandler();
@@ -49,12 +50,12 @@ public class SIMEXTest {
 		REpiceaLogManager.getLogger(MaximumLikelihoodEstimator.LOGGER_NAME).addHandler(ch);		
 		SIMEXModel.OverrideVarianceForTest = true;
 	}
-
+	
 	@Test
 	public void simpleTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(200);
@@ -71,7 +72,7 @@ public class SIMEXTest {
 	public void multipleOccurrenceOfMeasurementErrorTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific + log(10 + distanceToConspecific)");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific + log(10 + distanceToConspecific)");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(200);
@@ -83,7 +84,7 @@ public class SIMEXTest {
 	}
 
 	@AfterClass
-	public static void doThat() {
+	public static void doThatAfter() {
 		SIMEXModel.OverrideVarianceForTest = false;
 	}
 
@@ -91,7 +92,7 @@ public class SIMEXTest {
 	public void checkingPredParmsDataSetTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(100);
@@ -108,7 +109,7 @@ public class SIMEXTest {
 	public void checkingSIMEXPredictionsTest() throws Exception {
  		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("sample0.csv");
 		DataSet dataSet = new DataSet(filename, true);
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, "y ~ distanceToConspecific");
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, "y ~ distanceToConspecific");
 		glm.doEstimation();
 		SIMEXModel s = new SIMEXModel(glm, "distanceToConspecific", "variance");
 		s.setNumberOfBootstrapRealizations(100);
@@ -118,6 +119,41 @@ public class SIMEXTest {
 		double predValue = pred.getValueAt(0, 0);
 		Assert.assertEquals("Checking parm estimate 1", 0.054082156776618984, predValue, 3E-3);
 	}
+	
+	@Test
+	public void checkingSIMEXWithNegativeBinomial() throws Exception {
+		boolean before = SIMEXModel.OverrideVarianceForTest;
+		SIMEXModel.OverrideVarianceForTest = false;
+ 		String filename = ObjectUtility.getPackagePath(GLModelWithMeasErrorTest.class).concat("recruitEPR.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, 
+				GLMDistribution.NegativeBinomial, 
+				Type.Log, "y ~ TotalPrcp + G_F + G_R + occIndex10km + timeSince1970");
+		glm.doEstimation();
+		System.out.println(glm.getSummary());
+		SIMEXModel s = new SIMEXModel(glm, "occIndex10km", "occIndex10kmVar");
+		s.setNumberOfBootstrapRealizations(200);
+		s.doEstimation();
+		System.out.println(s.getSummary());
+		Matrix pred = s.getPredicted();
+		Assert.assertTrue("Testing that the dataset is not null", pred != null);
+		double parmEst = s.getParameters().getValueAt(0, 0);
+		Assert.assertEquals("Checking parm estimate: intercept", -2.86, parmEst, 2E-1);
+		parmEst = s.getParameters().getValueAt(1, 0);
+		Assert.assertEquals("Checking parm estimate: TotalPrcp", 0.00155, parmEst, 2E-4);
+		parmEst = s.getParameters().getValueAt(2, 0);
+		Assert.assertEquals("Checking parm estimate: G_F", -0.1165, parmEst, 2E-3);
+		parmEst = s.getParameters().getValueAt(3, 0);
+		Assert.assertEquals("Checking parm estimate: G_R", -0.0713, parmEst, 2E-3);
+		parmEst = s.getParameters().getValueAt(4, 0);
+		Assert.assertEquals("Checking parm estimate: occIndex10km", 3.37, parmEst, 2E-1);
+		parmEst = s.getParameters().getValueAt(5, 0);
+		Assert.assertEquals("Checking parm estimate: timeSince1970", 0.0450, parmEst, 2E-3);
+		parmEst = s.getParameters().getValueAt(6, 0);
+		Assert.assertEquals("Checking parm estimate: theta", 1.83, parmEst, 1E-1);
+		SIMEXModel.OverrideVarianceForTest = before; 
+	}
+
 
 	
 }

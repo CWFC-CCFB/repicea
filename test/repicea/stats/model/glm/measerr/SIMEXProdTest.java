@@ -29,6 +29,7 @@ import repicea.math.optimizer.NewtonRaphsonOptimizer;
 import repicea.stats.data.DataSet;
 import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.model.glm.GeneralizedLinearModel;
+import repicea.stats.model.glm.Family.GLMDistribution;
 import repicea.stats.model.glm.LinkFunction.Type;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaLogManager;
@@ -46,7 +47,7 @@ public class SIMEXProdTest {
 		DataSet dataSet = new DataSet(filename, true);
 		String formula = "occurred ~ lnDt + DD + logDD + TotalPrcp + logPrcp + LowestTmin + dummyDrainage4hydrique + G_F + lnG_F + lnG_R + occIndex10km + sqr(occIndex10km) + speciesThere + lnG_SpGr + timeSince1970";
 //		String formula = "occurred ~ lnDt + DD + logDD + TotalPrcp + logPrcp + LowestTmin + dummyDrainage4hydrique + G_F + lnG_F + lnG_R + occIndex10km + speciesThere + lnG_SpGr + timeSince1970";
-		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, Type.CLogLog, formula);
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.CLogLog, formula);
 		glm.doEstimation();
 		System.out.print(glm.getSummary());
 		SIMEXModel s = new SIMEXModel(glm, "occIndex10km", "occIndex10kmVar");

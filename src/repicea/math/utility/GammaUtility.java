@@ -40,8 +40,6 @@ public class GammaUtility {
 			throw new InvalidParameterException("The gamma function does not support null or negative values!");
 		}
 	   	double result;
-//	    double[] c = new double[]{0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313, 
-//	    		-176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7};
 
 	    if (z < 0.5) {
 	    	result = Math.PI / (Math.sin(Math.PI*z) * gamma(1-z));
@@ -142,6 +140,82 @@ public class GammaUtility {
 		}
 		/* should never get here */
 		throw new InvalidParameterException("Unable to reach convergence for z = " + z);
+	}
+
+	/**
+	 * Compute the first derivative of the gamma function. <br>
+	 * <br>
+	 * The calculation is based on the digamma function.
+	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
+	 * @param d
+	 * @return the first derivative (a double)
+	 */
+	public static double gammaFirstDerivative(double d) {
+		return gamma(d) * digamma(d);
+	}
+	
+	
+	/**
+	 * Compute an approximation of the digamma function. <br>
+	 * <br>
+	 * The approximation is calculated as ln(d) - 1/2d.
+	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
+	 * @param d a strictly positive double 
+	 * @return a double
+	 */
+	public static double digamma(double d) {
+		if (d <= 0d) {
+			throw new InvalidParameterException("The digamma function is not defined for values smaller than or equal to 0!");
+		}
+		double d_star = d;
+		double corrTerm = 0;
+		while(d_star < 6) {
+			corrTerm += 1/d_star;
+			d_star += 1;
+		}
+		double result = getDigammaExpansion(d_star) - corrTerm;
+		return result;
+	}
+	
+	
+	private static double getDigammaExpansion(double z) {
+		double z2 = z*z;
+		double z4 = z2*z2;
+		double z6 = z4*z2;
+		return Math.log(z) - 1d/(2*z) - 1d/(12*z2) + 1d/(120*z4) - 1d/(252*z4*z2) + 1d/(240*z4*z4) -
+				1d/(132*z6*z4) + 691d/(32760*z6*z6) - 1d/(12*z6*z6*z2);
+	}
+	
+	
+	/**
+	 * Compute an approximation of the digamma function. <br>
+	 * <br>
+	 * The approximation is calculated as ln(d) - 1/2d.
+	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
+	 * @param d a strictly positive double 
+	 * @return a double
+	 */
+	public static double trigamma(double d) {
+		if (d <= 0d) {
+			throw new InvalidParameterException("The digamma function is not defined for values smaller than or equal to 0!");
+		}
+		double d_star = d;
+		double corrTerm = 0;
+		while(d_star < 6) {
+			corrTerm += -1/(d_star*d_star);
+			d_star += 1;
+		}
+		double expansion = getTrigammaExpansion(d_star); 
+		double result = expansion - corrTerm;
+		return result;
+	}
+
+	private static double getTrigammaExpansion(double z) {
+		double z2 = z*z;
+		double z4 = z2*z2;
+		double z6 = z4*z2;
+		return 1d/z + 1d/(2*z2) + 1d/(6*z2*z) - 1d/(30*z4*z) + 1d/(42*z6*z) - 1d/(30*z6*z2*z) + 
+				5d/(66*z6*z4*z) - 691/(2730*z6*z6*z) + 7d/(6*z6*z6*z2*z); 
 	}
 	
 //	public static void main(String[] args) {
