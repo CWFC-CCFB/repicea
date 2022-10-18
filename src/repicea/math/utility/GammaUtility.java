@@ -167,10 +167,56 @@ public class GammaUtility {
 		if (d <= 0d) {
 			throw new InvalidParameterException("The digamma function is not defined for values smaller than or equal to 0!");
 		}
-		return Math.log(d) - 1d /(2*d);
+		double d_star = d;
+		double corrTerm = 0;
+		while(d_star < 6) {
+			corrTerm += 1/d_star;
+			d_star += 1;
+		}
+		double result = getDigammaExpansion(d_star) - corrTerm;
+		return result;
 	}
 	
 	
+	private static double getDigammaExpansion(double z) {
+		double z2 = z*z;
+		double z4 = z2*z2;
+		double z6 = z4*z2;
+		return Math.log(z) - 1d/(2*z) - 1d/(12*z2) + 1d/(120*z4) - 1d/(252*z4*z2) + 1d/(240*z4*z4) -
+				1d/(132*z6*z4) + 691d/(32760*z6*z6) - 1d/(12*z6*z6*z2);
+	}
+	
+	
+	/**
+	 * Compute an approximation of the digamma function. <br>
+	 * <br>
+	 * The approximation is calculated as ln(d) - 1/2d.
+	 * @see<a href=https://en.wikipedia.org/wiki/Digamma_function> Digamma function </a>
+	 * @param d a strictly positive double 
+	 * @return a double
+	 */
+	public static double trigamma(double d) {
+		if (d <= 0d) {
+			throw new InvalidParameterException("The digamma function is not defined for values smaller than or equal to 0!");
+		}
+		double d_star = d;
+		double corrTerm = 0;
+		while(d_star < 6) {
+			corrTerm += -1/(d_star*d_star);
+			d_star += 1;
+		}
+		double expansion = getTrigammaExpansion(d_star); 
+		double result = expansion - corrTerm;
+		return result;
+	}
+
+	private static double getTrigammaExpansion(double z) {
+		double z2 = z*z;
+		double z4 = z2*z2;
+		double z6 = z4*z2;
+		return 1d/z + 1d/(2*z2) + 1d/(6*z2*z) - 1d/(30*z4*z) + 1d/(42*z6*z) - 1d/(30*z6*z2*z) + 
+				5d/(66*z6*z4*z) - 691/(2730*z6*z6*z) + 7d/(6*z6*z6*z2*z); 
+	}
 	
 //	public static void main(String[] args) {
 //		double fake = C;
