@@ -20,9 +20,12 @@ package repicea.stats.model.glm;
 
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.List;
 
+import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
+import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;
@@ -32,6 +35,7 @@ import repicea.stats.estimators.MaximumLikelihoodEstimator;
 import repicea.stats.estimators.MaximumLikelihoodEstimator.MaximumLikelihoodCompatibleModel;
 import repicea.stats.model.AbstractStatisticalModel;
 import repicea.stats.model.CompositeLogLikelihoodWithExplanatoryVariables;
+import repicea.stats.model.IndividualLikelihood;
 import repicea.stats.model.IndividualLogLikelihood;
 import repicea.stats.model.PredictableModel;
 import repicea.stats.model.WrappedIndividualLogLikelihood;
@@ -42,9 +46,31 @@ import repicea.stats.model.glm.LinkFunction.Type;
  * This class implements generalized linear models. 
  * @author Mathieu Fortin - August 2011
  */
+@SuppressWarnings("serial")
 public class GeneralizedLinearModel extends AbstractStatisticalModel implements MaximumLikelihoodCompatibleModel, PredictableModel {
 
+	static abstract class GLMIndividualLikelihood extends IndividualLikelihood {
 
+		protected final List<Integer> additionalParameterIndices;
+
+		protected GLMIndividualLikelihood(MathematicalFunction originalFunction) {
+			super(originalFunction);
+			additionalParameterIndices = new ArrayList<Integer>();
+		}
+		
+		/**
+		 * Record an index as one of an additional parameter. <br>
+		 * <br>
+		 * For instance, this method can be used to record the index of the dispersion 
+		 * parameter in a negative binomial regression. 
+		 * 
+		 * @param index
+		 */
+		void recordAdditionalParameterIndex(int index) {
+			additionalParameterIndices.add(index);
+		}
+
+	}
 	
 	private final StatisticalDataStructure dataStruct;
 	private final CompositeLogLikelihoodWithExplanatoryVariables completeLLK;
@@ -77,7 +103,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	 * @param linkFunctionType
 	 * @param modelDefinition
 	 * @param llk
-	 * @param startingBeta
+	 * @param startingBeta a Matrix of starting parameters for the fixed effects
 	 */
 	protected GeneralizedLinearModel(DataSet dataSet, GLMDistribution d, Type linkFunctionType, String modelDefinition, IndividualLogLikelihood llk, Matrix startingBeta, Object additionalParm) {
 		super();
@@ -101,12 +127,16 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 			individualLLK = createIndividualLLK(additionalParm);
 		}
 		completeLLK = createCompleteLLK(additionalParm);
-		if (startingBeta == null) {
-			setParameters(new Matrix(matrixX.m_iCols, 1));		// default starting parameters at 0
-		} else {
-			setParameters(startingBeta);
+		Matrix startingParms = startingBeta == null ?
+				d.getStartingParms(matrixX.m_iCols) :
+					d.getStartingParms(startingBeta);
+		for (int i = matrixX.m_iCols; i < startingParms.m_iRows; i++) {
+			GLMIndividualLikelihood glmLk = ((GLMIndividualLikelihood) ((WrappedIndividualLogLikelihood) individualLLK).getOriginalFunction());
+			glmLk.recordAdditionalParameterIndex(i);
 		}
+		setParameters(startingParms);
 	}
+	
 	
 	/**
 	 * Constructor using a vector of 0s as starting values for the parameters
@@ -155,11 +185,18 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	}
 
 	protected IndividualLogLikelihood createIndividualLLK(Object addParm) {
-		if (family.dist == GLMDistribution.Bernoulli) {
-			return new WrappedIndividualLogLikelihood(new BernoulliIndividualLikelihood(family.lf));
-		} else {
+		GLMIndividualLikelihood indLk;
+		switch(family.dist) {
+		case Bernoulli:
+			indLk = new BernoulliIndividualLikelihood(family.lf);
+			break;
+		case NegativeBinomial:
+			indLk = new NegativeBinomialIndividualLikelihood(family.lf);
+			break;
+		default:
 			throw new InvalidParameterException("The distribution " + family.dist.name() + " is not supported yet!"); // TODO MF20221013 should be removed after the implementation of the negative binomial.
 		}
+		return new WrappedIndividualLogLikelihood(indLk);
 	}
 
 	/**

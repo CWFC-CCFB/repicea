@@ -20,9 +20,11 @@ package repicea.stats.model.glm;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import repicea.math.MathematicalFunction;
+import repicea.math.Matrix;
 
 /**
  * The Family class defines the distribution of the response 
@@ -33,13 +35,18 @@ import repicea.math.MathematicalFunction;
 public class Family {
 
 	public static enum GLMDistribution {
-		Bernoulli(LinkFunction.Type.Logit, LinkFunction.Type.CLogLog) ,
-		NegativeBinomial(LinkFunction.Type.Log);
+		Bernoulli(0, new ArrayList<Double>(), LinkFunction.Type.Logit, LinkFunction.Type.CLogLog) ,
+		NegativeBinomial(1, Arrays.asList(new Double[] {1d}), LinkFunction.Type.Log);
 				
 		private final List<LinkFunction.Type> acceptedTypes;
+		protected final int nbAdditionalParms;
+		private final ArrayList<Double> startingValues;
 		
-		GLMDistribution(LinkFunction.Type... types) {
+		GLMDistribution(int nbAddParms, List<Double> values, LinkFunction.Type... types) {
+			nbAdditionalParms = nbAddParms;
 			acceptedTypes = new ArrayList<LinkFunction.Type>();
+			startingValues = new ArrayList<Double>();
+			startingValues.addAll(values);
 			if (types != null) {
 				for (LinkFunction.Type t : types) {
 					acceptedTypes.add(t);
@@ -50,6 +57,25 @@ public class Family {
 		boolean isAcceptedType(LinkFunction.Type t) {
 			return acceptedTypes.contains(t);
 		}
+		
+		private Matrix getAdditionalParmsStartingValues() {
+			if (startingValues != null && !startingValues.isEmpty())
+				return new Matrix(startingValues);
+			else
+				return null;
+		}
+		
+		protected Matrix getStartingParms(int nbFixedEffectParms) {
+			return getStartingParms(new Matrix(nbFixedEffectParms, 1));
+		}
+		
+		protected Matrix getStartingParms(Matrix fixedEffectParms) {
+			Matrix addParms = getAdditionalParmsStartingValues();
+			return addParms != null ?
+					fixedEffectParms.matrixStack(addParms, true) :
+						fixedEffectParms;
+		}
+
 	}
 
 	protected final GLMDistribution dist;

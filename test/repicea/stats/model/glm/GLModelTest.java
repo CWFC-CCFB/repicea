@@ -40,8 +40,8 @@ import repicea.util.REpiceaLogManager;
 public class GLModelTest {
 
 	@BeforeClass
-	public static void doThis() {
-		Level l = Level.OFF;
+	public static void doThisBefore() {
+		Level l = Level.WARNING;
 		NewtonRaphsonOptimizer.LOGGER_NAME = MaximumLikelihoodEstimator.LOGGER_NAME;
 		ConsoleHandler ch = new ConsoleHandler();
 		ch.setLevel(l);
@@ -69,6 +69,35 @@ public class GLModelTest {
 			new GeneralizedLinearModel(dataSet, GLMDistribution.Bernoulli, Type.Logit, "coupe ~ offset(TIGES_ID) + diffdhp + marchand:diffdhp + marchand:diffdhp2 +  essence");
 			Assert.fail("The GeneralizedLinearModel instance should have thrown an Exception!");
 		} catch(InvalidParameterException e) {}
+	}
+
+	@Test
+    public void TestWithNegBinomial() throws Exception {
+		String filename = ObjectUtility.getPackagePath(GLModelTest.class).concat("recruitERS.csv");
+		DataSet dataSet = new DataSet(filename, true);
+		GeneralizedLinearModel glm = new GeneralizedLinearModel(dataSet, GLMDistribution.NegativeBinomial, Type.Log, "y ~ dt + G_F + G_R + speciesThere");
+		glm.doEstimation();
+//		System.out.println(glm.getSummary());
+		Assert.assertTrue("Testing if convergence was achieved", glm.getEstimator().isConvergenceAchieved());
+		double parmEst_intercept = glm.getParameters().getValueAt(0, 0);
+		double expected = 0.250792010984403;
+		Assert.assertEquals("Testing parameter estimate: intercept", expected, parmEst_intercept, 1E-8);
+		double parmEst_dt = glm.getParameters().getValueAt(1, 0);
+		expected = 0.06509727794589154;
+		Assert.assertEquals("Testing parameter estimate: dt", expected, parmEst_dt, 1E-8);
+		double parmEst_GF = glm.getParameters().getValueAt(2, 0);
+		expected = -0.05175664359330031;
+		Assert.assertEquals("Testing parameter estimate: G_F", expected, parmEst_GF, 1E-8);
+		double parmEst_GR = glm.getParameters().getValueAt(3, 0);
+		expected = -0.11805966012849123;
+		Assert.assertEquals("Testing parameter estimate: G_R", expected, parmEst_GR, 1E-8);
+		double parmEst_speciesThere = glm.getParameters().getValueAt(4, 0);
+		expected = 0.4911558058634061;
+		Assert.assertEquals("Testing parameter estimate: speciesThere", expected, parmEst_speciesThere, 1E-8);
+		double parmEst_dispersion = glm.getParameters().getValueAt(5, 0);
+		expected = 1.2474827482825246;
+		Assert.assertEquals("Testing parameter estimate: dispersion", expected, parmEst_dispersion, 1E-8);
+		
 	}
 
 }

@@ -20,14 +20,14 @@ package repicea.stats.model.glm;
 
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.model.IndividualLikelihood;
+import repicea.stats.model.glm.GeneralizedLinearModel.GLMIndividualLikelihood;
 
 /**
  * This class simply handles the likelihood of a Bernoulli outcome.
  * @author Mathieu Fortin - July 2022
  */
 @SuppressWarnings("serial")
-public class BernoulliIndividualLikelihood extends IndividualLikelihood {
+public class BernoulliIndividualLikelihood extends GLMIndividualLikelihood {
 
 	protected final LinkFunction linkFunction;
 	
