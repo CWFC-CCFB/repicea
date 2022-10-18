@@ -168,7 +168,7 @@ public class GeneralizedLinearModel extends AbstractStatisticalModel implements 
 	}
 
 	@Override
-	public List<String> getOtherParameters() {
+	public List<String> getOtherParameterNames() {
 		List<String> names = new ArrayList<String>();
 		names.addAll(family.dist.additionalParmNames);
 		return names;

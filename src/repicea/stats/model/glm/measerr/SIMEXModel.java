@@ -19,6 +19,7 @@
 package repicea.stats.model.glm.measerr;
 
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -314,6 +315,13 @@ public class SIMEXModel extends AbstractStatisticalModel implements EstimatorCom
 	 */
 	public double[] getFactors() {
 		return Arrays.copyOf(factors, factors.length);
+	}
+	
+	@Override
+	public List<String> getOtherParameterNames() {
+		List<String> names = new ArrayList<String>();
+		names.addAll(this.originalGLM.getOtherParameterNames());
+		return names;
 	}
 	
 	@Override

@@ -204,7 +204,13 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 			for (int i = 0; i < parameters.m_iRows; i++) {
 				record = new Object[3];
 				int jj = model.isInterceptModel() ? j - 1 : j;
-				record[0] = jj == -1 ? "intercept" : model.getEffectList().get(jj);
+				String name;
+				if (jj < model.getEffectList().size()) {
+					name = jj == -1 ? "intercept" : model.getEffectList().get(jj);
+				} else {
+					name = model.getOtherParameterNames().get(jj - model.getEffectList().size());
+				}
+				record[0] = name;
 				record[1] = y.getValueAt(i, 0);	// observed
 				record[2] = epsilon.getValueAt(i, 0); // zeta value
 				parmsObsDataSet.addObservation(record);
@@ -215,7 +221,13 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 			for (int i = 0; i < xPred.m_iRows; i++) {
 				record = new Object[3];
 				int jj = model.isInterceptModel() ? j - 1 : j;
-				record[0] = jj == -1 ? "intercept" : model.getEffectList().get(jj);
+				String name;
+				if (jj < model.getEffectList().size()) {
+					name = jj == -1 ? "intercept" : model.getEffectList().get(jj);
+				} else {
+					name = model.getOtherParameterNames().get(jj - model.getEffectList().size());
+				}
+				record[0] = name;
 				record[1] = simexValue.getValueAt(i, 0);	// predicted
 				record[2] = epsilonPred.getValueAt(i, 0); // zeta value
 				parmsPredDataSet.addObservation(record);

@@ -37,7 +37,7 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 		
 		public int getNumberOfObservations();
 		
-		public default List<String> getOtherParameters() {
+		public default List<String> getOtherParameterNames() {
 			return new ArrayList<String>();
 		}
 
@@ -78,7 +78,7 @@ public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> impl
 			if (j < model.getEffectList().size()) {	// otherwise we might be dealing with additional parameters like shape or scale parameters
 				name = j == -1 ? "intercept" : model.getEffectList().get(j);
 			} else {
-				name = model.getOtherParameters().get(j - model.getEffectList().size());
+				name = model.getOtherParameterNames().get(j - model.getEffectList().size());
 			}
 			record[0] = name;
 			record[1] = parameterEstimates.getValueAt(i, 0);

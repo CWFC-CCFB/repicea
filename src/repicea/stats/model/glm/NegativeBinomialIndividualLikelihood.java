@@ -40,6 +40,22 @@ public final class NegativeBinomialIndividualLikelihood extends GLMIndividualLik
 	}
 
 	@Override
+	public void setParameters(Matrix beta) {
+		for (int i = 0; i < beta.m_iRows; i++) {
+			setParameterValue(i, beta.getValueAt(i, 0));
+		}
+	}
+
+	@Override
+	public Matrix getParameters() {
+		Matrix beta = new Matrix(getNumberOfParameters(), 1);
+		for (int i = 0; i < getNumberOfParameters(); i++) {
+			beta.setValueAt(i, 0, getParameterValue(i));
+		}
+		return beta;
+	}
+	
+	@Override
 	public void setParameterValue(int index, double value) {
 		if (additionalParameterIndices.contains(index)) {
 			scale.setValueAt(0, 0, value);
