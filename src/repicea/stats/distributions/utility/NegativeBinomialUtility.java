@@ -66,7 +66,7 @@ public class NegativeBinomialUtility {
 		double prob = 0.0;
 		double dispersionTimesMean = dispersion * mean;
 		double inverseDispersion = 1/dispersion;
-
+		
 		prob = GammaUtility.gamma(y + inverseDispersion) / (MathUtility.Factorial(y) * GammaUtility.gamma(inverseDispersion)) 
 				*  Math.pow(dispersionTimesMean,y) / (Math.pow(1+dispersionTimesMean,y + inverseDispersion));
 		return prob;

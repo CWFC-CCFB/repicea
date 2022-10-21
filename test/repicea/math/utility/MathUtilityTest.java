@@ -26,27 +26,27 @@ public class MathUtilityTest {
 
 	@Test
 	public void testSimpleFactorials() {
-		long actual = MathUtility.Factorial(5);
-		Assert.assertEquals("Testing factorial 5", 120, actual);
+		double actual = MathUtility.Factorial(5);
+		Assert.assertEquals("Testing factorial 5", 120, actual, 1E-8);
 
 		actual = MathUtility.Factorial(0);
-		Assert.assertEquals("Testing factorial 0", 1, actual); 
+		Assert.assertEquals("Testing factorial 0", 1, actual, 1E-8); 
 		
 		actual = MathUtility.Factorial(10);
-		Assert.assertEquals("Testing factorial 10", 3628800, actual);
+		Assert.assertEquals("Testing factorial 10", 3628800, actual, 1E-8);
 	}
 	
 	
 	@Test
 	public void testFactorialRatios() {
-		long actual = MathUtility.FactorialRatio(5, 3);
-		Assert.assertEquals("Testing 5!/3!", 20, actual);
+		double actual = MathUtility.FactorialRatio(5, 3);
+		Assert.assertEquals("Testing 5!/3!", 20, actual, 1E-8);
 		
 		actual = MathUtility.FactorialRatio(10, 7);
-		Assert.assertEquals("Testing 10!/7!", 720, actual);
+		Assert.assertEquals("Testing 10!/7!", 720, actual, 1E-8);
 
 		actual = MathUtility.FactorialRatio(1, 0);
-		Assert.assertEquals("Testing 1!/0!", 1, actual);
+		Assert.assertEquals("Testing 1!/0!", 1, actual, 1E-8);
 	}
 
 }

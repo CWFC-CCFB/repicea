@@ -390,11 +390,13 @@ public final class StatisticalUtility {
 		} else if (d > n) {
 			throw new InvalidParameterException("Parameters d must be equal to or smaller than parameter n!");
 		}
+		Double r; 
 		if (n - d > d) {
-			return MathUtility.FactorialRatio(n, n - d) / MathUtility.Factorial(d);
+			r = MathUtility.FactorialRatio(n, n - d) / MathUtility.Factorial(d);
 		} else {
-			return MathUtility.FactorialRatio(n, d) / MathUtility.Factorial(n - d);
+			r= MathUtility.FactorialRatio(n, d) / MathUtility.Factorial(n - d);
 		}
+		return r.longValue();
 	}
 
 	

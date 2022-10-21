@@ -48,6 +48,14 @@ public class NegativeBinomialUtilityTest {
 		System.out.println("Performance: Reference time = " + elapsedTimeReference + " - New method = " + elapsedTimeNewMethod);
 		Assert.assertTrue("Testing that the new method is faster", elapsedTimeNewMethod < elapsedTimeReference);
 	}
+	
+	
+	@Test
+	public void simpleValueTest2() {
+		double observed = NegativeBinomialUtility.getMassProbability(22, 1, 1);
+		double observed2 = NegativeBinomialUtility.getMassProbabilityOLD(22, 1, 1);
+		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
+	}
 
 	
 	

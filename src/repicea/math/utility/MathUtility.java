@@ -54,15 +54,15 @@ public class MathUtility {
 	/**
 	 * This method returns the factorial of parameter i.
 	 * @param i an integer
-	 * @return the result as an integer
+	 * @return the result as a double
 	 */
-	public static long Factorial(int i) {
+	public static double Factorial(int i) {
 		if (i < 0) {
 			throw new InvalidParameterException("Parameter i must be equal to or greater than 0!");
 		} else  if (i==0) {
 			return 1;
 		} else {
-			long result = 1;
+			double result = 1;
 			for (int j = 1; j <= i; j++) {
 				result *= j;
 			}
@@ -74,9 +74,9 @@ public class MathUtility {
 	/**
 	 * This method returns the ratio of two factorial factorial of parameter i.
 	 * @param i an integer
-	 * @return the result as an integer
+	 * @return the result as a double
 	 */
-	public static long FactorialRatio(int i, int j) {
+	public static double FactorialRatio(int i, int j) {
 		if (i < 0 || j < 0) {
 			throw new InvalidParameterException("Parameters i and j must be equal to or greater than 0!");
 		} else if (j > i) {
@@ -85,7 +85,7 @@ public class MathUtility {
 			if (j == 0) {
 				j = 1;
 			}
-			long result = 1;
+			double result = 1;
 			for (int k = i; k > j; k--) {
 				result *= k;
 			}
