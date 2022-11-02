@@ -21,6 +21,10 @@ package repicea.stats.distributions.utility;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.math.Matrix;
+import repicea.stats.StatisticalUtility;
+import repicea.stats.estimates.MonteCarloEstimate;
+
 
 public class NegativeBinomialUtilityTest {
 
@@ -57,7 +61,54 @@ public class NegativeBinomialUtilityTest {
 		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
 	}
 
+	@Test
+	public void zeroValueFasterImplementationTest() {
+		double observed = NegativeBinomialUtility.getMassProbability(0, 1, 1);
+		double observed2 = NegativeBinomialUtility.getMassProbabilityOLD(0, 1, 1);
+		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
+	}
 	
-	
+	@Test
+	public void quantileTest1() {
+		int observed = NegativeBinomialUtility.getQuantile(0.5, 1, .8);
+		Assert.assertEquals("Testing a quantile", 1, observed);
+	}
+
+	@Test
+	public void meanTest1() {
+		double mu = 1d;
+		double theta = .8;
+		MonteCarloEstimate est = new MonteCarloEstimate();
+		int nbRealizations = 50000;
+		for (int i = 0; i < nbRealizations; i++) {
+			int observed = NegativeBinomialUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(),
+					mu, 
+					theta);
+			est.addRealization(new Matrix(1,1,observed,0));
+		}
+		double mean = est.getMean().getValueAt(0, 0);
+		double variance = est.getVariance().getValueAt(0, 0);
+		Assert.assertEquals("Testing the mean", mu, mean, 1E-2);
+		Assert.assertEquals("Testing the variance", mu + theta*mu*mu, variance, 3E-2);
+	}
+
+
+	@Test
+	public void meanTest2() {
+		double mu = 1.5;
+		double theta = .5;
+		MonteCarloEstimate est = new MonteCarloEstimate();
+		int nbRealizations = 50000;
+		for (int i = 0; i < nbRealizations; i++) {
+			int observed = NegativeBinomialUtility.getQuantile(StatisticalUtility.getRandom().nextDouble(),
+					mu, 
+					theta);
+			est.addRealization(new Matrix(1,1,observed,0));
+		}
+		double mean = est.getMean().getValueAt(0, 0);
+		double variance = est.getVariance().getValueAt(0, 0);
+		Assert.assertEquals("Testing the mean", mu, mean, 1E-2);
+		Assert.assertEquals("Testing the variance", mu + theta*mu*mu, variance, 3E-2);
+	}
 
 }

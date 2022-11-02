@@ -25,7 +25,6 @@ import java.util.List;
 
 import repicea.math.MathematicalFunction;
 import repicea.math.Matrix;
-import repicea.math.SymmetricMatrix;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.GenericStatisticalDataStructure;
 import repicea.stats.data.StatisticalDataException;

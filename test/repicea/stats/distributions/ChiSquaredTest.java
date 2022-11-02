@@ -24,7 +24,7 @@ import org.junit.Test;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 
-public class ChiSquaredUtilityTest {
+public class ChiSquaredTest {
 
 	@Test
 	public void randomGenerationTestForUnivariateChiSquared() {
