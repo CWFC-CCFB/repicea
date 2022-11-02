@@ -57,6 +57,12 @@ public class NegativeBinomialUtilityTest {
 		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
 	}
 
+	@Test
+	public void zeroValueFasterImplementationTest() {
+		double observed = NegativeBinomialUtility.getMassProbability(0, 1, 1);
+		double observed2 = NegativeBinomialUtility.getMassProbabilityOLD(0, 1, 1);
+		Assert.assertEquals("Testing the two methods", observed, observed2, 1E-8);
+	}
 	
 	
 
