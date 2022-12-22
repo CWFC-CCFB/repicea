@@ -82,7 +82,7 @@ public class MetaModel implements Saveable {
 						if (firstElement) {
 							// fill in data that is constant 	
 							data.growth.nbRealizations = result.getNbRealizations();
-							data.growth.climateChangeOption = ((Enum)result.climateChangeScenario).name();
+							data.growth.climateChangeOption = ((Enum<?>)result.climateChangeScenario).name();
 							data.growth.growthModel = result.growthModel;							
 						}
 						
@@ -246,10 +246,9 @@ public class MetaModel implements Saveable {
 		}
 		if (canBeAdded) {
 			scriptResults.put(initialAge, result);
-			model = null; // so that converge is set to false by default	
+			model = null; // so that convergence is set to false by default	
 		} else {
-			throw new InvalidParameterException(
-					"The result parameter is not compatible with previous results in the map!");
+			throw new InvalidParameterException("The result parameter is not compatible with previous results in the map!");
 		}
 	}
 
@@ -276,8 +275,7 @@ public class MetaModel implements Saveable {
 			model = new ChapmanRichardsDerivativeModelWithRandomEffectImplementation(outputType, this);
 			break;
 		default:
-			throw new InvalidParameterException(
-					"This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
+			throw new InvalidParameterException("This ModelImplEnum " + modelImplEnum.name() + " has not been implemented yet!");
 		}
 		return model;
 	}
@@ -581,7 +579,8 @@ public class MetaModel implements Saveable {
 		options.put(JsonWriter.PRETTY_PRINT, true);
 		options.put(JsonWriter.DATE_FORMAT, JsonWriter.ISO_DATE_TIME_FORMAT+"Z");
 		JsonWriter jw = new JsonWriter(os, options);
-		jw.write(data);		
+		jw.write(data);	
+		jw.close();
 	}
 
 	/**
@@ -623,6 +622,26 @@ public class MetaModel implements Saveable {
 		} else {
 			System.out.println("The model has not been fitted yet!");
 			return null;
+		}
+	}
+
+	/**
+	 * Check if the variance is available throughout the ScriptResult instances. <br>
+	 * <br>
+	 * It returns false if the scriptResults map is empty or at least one ScriptResult instance does 
+	 * not have its variance field.
+	 * @return a boolean
+	 */
+	boolean isVarianceAvailable() {
+		if (scriptResults.isEmpty()) {
+			return false;
+		} else {
+			for (ScriptResult sr : scriptResults.values()) {
+				if (!sr.isVarianceAvailable()) {
+					return false;
+				}
+			}
+			return true;
 		}
 	}
 }

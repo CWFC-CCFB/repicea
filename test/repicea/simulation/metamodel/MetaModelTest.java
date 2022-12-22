@@ -98,8 +98,12 @@ public class MetaModelTest {
 //		ConsoleHandler sh = new ConsoleHandler();
 //		sh.setLevel(Level.FINE);
 //		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
-		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
-		FileHandler sh = new FileHandler(outputPath + File.separator + "metamodel.log");
+//		try {
+			String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
+			FileHandler sh = new FileHandler(outputPath + File.separator + "metamodel.log");
+//		} else {
+//			sh = new FileHandler()
+//		}
 		sh.setLevel(Level.FINE);
 		sh.setFormatter(new SimpleFormatter());
 		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);

@@ -63,7 +63,6 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 				List<Integer> indices, 
 				Matrix vectorY,
 				Matrix matrixX,
-//				HierarchicalStatisticalDataStructure structure, 
 				Matrix overallVarCov) {
 			super(blockId, indices, vectorY, matrixX, overallVarCov);
 			Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
@@ -122,7 +121,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected int indexCorrelationParameter;
 	private DataSet finalDataSet;
-
+	protected final boolean isVarianceErrorTermAvailable;
+	
 	/**
 	 * Internal constructor.
 	 * @param outputType the desired outputType to be modelled
@@ -143,6 +143,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		this.stratumGroup = stratumGroup;
 		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType, scriptResults);
 		Matrix varCov = getVarCovReady(outputType, scriptResults);
+		isVarianceErrorTermAvailable = metaModel.isVarianceAvailable();
 
 		this.outputType = outputType;
 		Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
@@ -251,7 +252,10 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 	
 	/**
-	 * Format the variance-covariance matrix of the residual error term. 
+	 * Format the variance-covariance matrix of the residual error term. <br>
+	 * <br>
+	 * If the model does not provide the variance associated with the predictions,
+	 * this method returns null.
 	 * @param outputType the desired outputType to be modelled
 	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 * @return
@@ -260,7 +264,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		Matrix varCov = null;
 		for (int initAgeYr : scriptResults.keySet()) {
 			ScriptResult r = scriptResults.get(initAgeYr);
-			Matrix varCovI = r.getTotalVariance(outputType);
+			Matrix varCovI = r.computeVarCovErrorTerm(outputType);
 			if (varCov == null) {
 				varCov = varCovI;
 			} else {
