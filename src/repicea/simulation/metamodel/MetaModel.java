@@ -600,14 +600,14 @@ public class MetaModel implements Saveable {
 		return metaModel;
 	}
 
-	public void printSummary() {
-		DataSet d = getSummary();
-		if (d != null) {
-			System.out.println(model.getSummary());
-		}
-	}
+//	public void printSummary() {
+//		DataSet d = getSummary();
+//		if (d != null) {
+//			System.out.println(model.getSummary());
+//		}
+//	}
 
-	public DataSet getSummary() {
+	public String getSummary() {
 		if (hasConverged()) {
 			return model.getSummary();
 		} else {

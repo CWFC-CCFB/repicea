@@ -330,4 +330,7 @@ public class WeibullModel extends AbstractStatisticalModel implements MaximumLik
 		return "Weibull model";
 	}
 
+	@Override
+	public List<String> getOtherParameterNames() {return new ArrayList<String>();}
+
 }

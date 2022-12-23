@@ -347,8 +347,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 
 	void fitModel() {
-		mh.fitModel();
-		if (mh.hasConverged()) {
+		mh.doEstimation();
+		if (mh.isConvergenceAchieved()) {
 			setParameters(mh.getFinalParameterEstimates());
 			setParmsVarCov(mh.getParameterCovarianceMatrix());
 			
@@ -369,26 +369,27 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 	
 
-	boolean hasConverged() {return mh.hasConverged();}
+	boolean hasConverged() {return mh.isConvergenceAchieved();}
 	
 	@Override
 	public final void run() {
 		fitModel();
 	}
 	
-	DataSet getSummary() {
-		if (hasConverged()) {
-			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
-			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
-			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
-			for (int i = 0; i < parameters.m_iRows; i++) {
-				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
-			}
-			return d;
-		} else {
-			System.out.println("The model has not converged!");
-			return null;
-		}
+	String getSummary() {
+		return mh.getReport();
+//		if (hasConverged()) {
+//			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
+//			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
+//			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
+//			for (int i = 0; i < parameters.m_iRows; i++) {
+//				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
+//			}
+//			return d;
+//		} else {
+//			System.out.println("The model has not converged!");
+//			return null;
+//		}
 	}
 	
 	DataSet getFinalDataSet() {
@@ -406,5 +407,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		return Math.exp(getLogLikelihoodForThisBlock(m, i));
 	}
 	
+	@Override
+	public int getNumberOfObservations() {return finalDataSet.getNumberOfObservations();}
+
 	
 }

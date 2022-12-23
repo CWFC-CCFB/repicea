@@ -19,6 +19,8 @@
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
@@ -93,5 +95,18 @@ class ChapmanRichardsModelImplementation extends AbstractModelImplementation {
 		return derivatives;
 	}
 
+
+	@Override
+	public boolean isInterceptModel() {return false;}
+
+	@Override
+	public List<String> getEffectList() {
+		return Arrays.asList(new String[] {"b1","b2","b3"});
+	}
+
+	@Override
+	public List<String> getOtherParameterNames() {
+		return Arrays.asList(new String[] {"rho"});
+	}
 
 }

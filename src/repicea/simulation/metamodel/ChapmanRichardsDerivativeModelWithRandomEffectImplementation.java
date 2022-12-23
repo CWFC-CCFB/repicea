@@ -19,6 +19,8 @@
 package repicea.simulation.metamodel;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
@@ -106,6 +108,26 @@ class ChapmanRichardsDerivativeModelWithRandomEffectImplementation extends Abstr
 				b1 * exp * b3 * Math.pow(root, b3 - 1) * exp * ageYr);
 		derivatives.setValueAt(2, 0, b1 * exp * Math.pow(root, b3) * Math.log(root));
 		return derivatives;
+	}
+
+	@Override
+	public boolean isInterceptModel() {return false;}
+
+	@Override
+	public List<String> getEffectList() {
+		return Arrays.asList(new String[] {"b1","b2","b3"});
+	}
+
+	@Override
+	public List<String> getOtherParameterNames() {
+		List<String> parameters = new ArrayList<String>();
+		parameters.add("rho");
+		parameters.add("sigma2_u");
+		int nbRandomEffects = mh.getFinalParameterEstimates().m_iRows - getEffectList().size() - 2;
+		for (int i = 1; i <= nbRandomEffects; i++) {
+			parameters.add("u_" + i);
+		}
+		return parameters;
 	}
 
 	

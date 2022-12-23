@@ -20,12 +20,13 @@ package repicea.stats.mcmc;
 
 import repicea.math.Matrix;
 import repicea.stats.distributions.GaussianDistribution;
+import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 
 /**
  * Ensure the compatibility with the Metropolis-Hastings algorithm.
  * @author Mathieu Fortin - November 2021
  */
-public interface MetropolisHastingsCompatibleModel {
+public interface MetropolisHastingsCompatibleModel extends EstimatorCompatibleModel {
 
 	/**
 	 * Return the log-likelihood of the parameters. <br>

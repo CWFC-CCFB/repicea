@@ -263,18 +263,6 @@ class SIMEXEstimator extends AbstractEstimator<EstimatorCompatibleModel> {
 	@Override
 	public Estimate<?> getParameterEstimates() {return parameterEstimates;}
 
-	@Override
-	public DataSet getConvergenceStatusReport() {
-		List<String> fieldNames = new ArrayList<String>();
-		fieldNames.add("Element");
-		fieldNames.add("Value");
-		DataSet dataSet = new DataSet(fieldNames);
-		Object[] record = new Object[2];
-		record[0] = "Converged";
-		record[1] = isConvergenceAchieved();
-		dataSet.addObservation(record);
-		return dataSet;
-	}
 	
 	@Override
 	public String getReport() {

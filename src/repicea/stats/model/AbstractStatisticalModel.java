@@ -30,7 +30,6 @@ import repicea.util.REpiceaLogManager;
  * basic features for a StatisticalModel, namely a data structure, a log-likelihood function and an
  * optimizer.
  * @author Mathieu Fortin - August 2011
- * @param <D> a StatisticalDataStructure-derived class
  */
 public abstract class AbstractStatisticalModel implements StatisticalModel {
 

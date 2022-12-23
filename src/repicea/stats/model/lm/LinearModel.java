@@ -18,6 +18,7 @@
  */
 package repicea.stats.model.lm;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import repicea.math.Matrix;
@@ -132,5 +133,9 @@ public class LinearModel extends AbstractStatisticalModel implements Predictable
 
 	@Override
 	public List<String> getEffectList() {return dataStruct.getEffectList();}
+
+
+	@Override
+	public List<String> getOtherParameterNames() {return new ArrayList<String>();}
 	
 }
