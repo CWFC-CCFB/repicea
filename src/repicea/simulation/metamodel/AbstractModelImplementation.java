@@ -53,29 +53,37 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 	 * @author Mathieu Fortin - November 2021
 	 */
 	@SuppressWarnings("serial")
-	class DataBlockWrapper extends AbstractDataBlockWrapper {
+	final class DataBlockWrapper extends AbstractDataBlockWrapper {
 
-		final Matrix varCovFullCorr;
+		Matrix varCovFullCorr;
 		final Matrix distances;
 		Matrix invVarCov;
 		double lnConstant;
+		final int nbPlots;
 
 		DataBlockWrapper(String blockId, 
 				List<Integer> indices, 
 				Matrix vectorY,
 				Matrix matrixX,
-				Matrix overallVarCov) {
+				Matrix overallVarCov,
+				int nbPlots) {
 			super(blockId, indices, vectorY, matrixX, overallVarCov);
-			Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
-			Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
-			this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
-			distances = new Matrix(varCovFullCorr.m_iRows, 1, 1, 1);
+			if (AbstractModelImplementation.this.isVarianceErrorTermAvailable) { 
+				Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
+				Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
+				this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
+			}
+			this.nbPlots = nbPlots;
+			distances = new Matrix(this.indices.size(), 1, 1, 1);
 		}
 
 		@Override
 		void updateCovMat(Matrix parameters) {
+			if (!AbstractModelImplementation.this.isVarianceErrorTermAvailable) {	// The residual variance is then a parameter to be estimated
+				double resVariance = AbstractModelImplementation.this.getParameters().getValueAt(AbstractModelImplementation.this.indexResidualErrorVariance, 0);
+				this.varCovFullCorr = new Matrix(indices.size(), indices.size(), resVariance / nbPlots, 0); 
+			}
 			double rhoParm = parameters.getValueAt(indexCorrelationParameter, 0);	
-//			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
 			SymmetricMatrix corrMat = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, rhoParm}), TypeMatrixR.POWER, distances);
 			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
 
@@ -111,6 +119,8 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		EnumMap.put(ChapmanRichardsDerivativeModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
 	}
 	
+	static boolean EstimateResidualVariance = false;  
+	
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
 	protected final String outputType;
 	protected final String stratumGroup;
@@ -143,7 +153,7 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		this.stratumGroup = stratumGroup;
 		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType, scriptResults);
 		Matrix varCov = getVarCovReady(outputType, scriptResults);
-		isVarianceErrorTermAvailable = metaModel.isVarianceAvailable();
+		isVarianceErrorTermAvailable = metaModel.isVarianceAvailable() && !AbstractModelImplementation.EstimateResidualVariance;
 
 		this.outputType = outputType;
 		Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
@@ -162,7 +172,9 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		for (String k : formattedMap.keySet()) {
 			DataBlock db = formattedMap.get(k);
 			List<Integer> indices = db.getIndices();
-			dataBlockWrappers.add(createWrapper(k, indices, vectorY, matrixX, varCov));
+			int age = Integer.parseInt(k.substring(0, k.indexOf("_")));
+			int nbPlots = scriptResults.get(age).nbPlots;
+			dataBlockWrappers.add(createWrapper(k, indices, vectorY, matrixX, varCov, nbPlots));
 		}
 		
 		finalDataSet = structure.getDataSet();
@@ -170,8 +182,22 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		mh.setSimulationParameters(metaModel.mhSimParms);
 	}
 
-	protected AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, Matrix vectorY, Matrix matrixX, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov);
+	private Map<String, Integer> getNbPlotsMap(Map<Integer, ScriptResult> scriptResults) {
+		Map<String, Integer> nbPlotsMap = new HashMap<String, Integer>();
+		for (Integer age : scriptResults.keySet()) {
+			int nbPlots = scriptResults.get(age).nbPlots;
+			nbPlotsMap.put(age.toString(), nbPlots);
+		}
+		return nbPlotsMap;
+	}
+
+	protected final AbstractDataBlockWrapper createWrapper(String k, 
+			List<Integer> indices, 
+			Matrix vectorY, 
+			Matrix matrixX, 
+			Matrix varCov, 
+			int nbPlots) {
+		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov, nbPlots);
 	}
 	
 	private Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
@@ -247,7 +273,6 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
 		dataStruct.setInterceptModel(false); // no intercept
 		dataStruct.setModelDefinition("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
-//		dataStruct.constructMatrices();
 		return dataStruct;
 	}
 	
@@ -377,23 +402,6 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 	public final void run() {
 		doEstimation();
 	}
-	
-//	@Override
-//	public String getSummary() {
-//		return mh.getReport();
-////		if (hasConverged()) {
-////			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
-////			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
-////			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
-////			for (int i = 0; i < parameters.m_iRows; i++) {
-////				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
-////			}
-////			return d;
-////		} else {
-////			System.out.println("The model has not converged!");
-////			return null;
-////		}
-//	}
 	
 	DataSet getFinalDataSet() {
 		return finalDataSet;

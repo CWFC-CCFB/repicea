@@ -41,10 +41,15 @@ abstract class AbstractMixedModelFullImplementation extends AbstractModelImpleme
 		super(outputType, metaModel);
 	}
 
-	@Override
-	protected final AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, Matrix vectorY, Matrix matrixX, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov);
-	}
+//	@Override
+//	protected final AbstractDataBlockWrapper createWrapper(String k, 
+//			List<Integer> indices, 
+//			Matrix vectorY, 
+//			Matrix matrixX, 
+//			Matrix varCov, 
+//			int nbPlots) {
+//		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov, nbPlots);
+//	}
 
 	@Override
 	protected double getLogLikelihoodForThisBlock(Matrix parameters, int i) {

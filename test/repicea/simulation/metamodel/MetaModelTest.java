@@ -97,6 +97,7 @@ public class MetaModelTest {
 	}
 
 	public static void main(String[] args) throws IOException {
+//		AbstractModelImplementation.EstimateResidualVariance = true;
 		REpiceaTranslator.setCurrentLanguage(Language.English);
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
 		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).setLevel(Level.FINE);
@@ -112,11 +113,11 @@ public class MetaModelTest {
 		
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		List<String> vegPotList = new ArrayList<String>();
-		vegPotList.add("MS2");
+//		vegPotList.add("MS2");
 //		vegPotList.add("RE1");
 //		vegPotList.add("RE2");
 //		vegPotList.add("RE3");
-//		vegPotList.add("RS2");
+		vegPotList.add("RS2");
 //		vegPotList.add("RS3");
 		
 		List<String> outputTypes = new ArrayList<String>();

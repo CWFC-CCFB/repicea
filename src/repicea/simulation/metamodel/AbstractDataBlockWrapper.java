@@ -24,7 +24,6 @@ import java.util.List;
 import repicea.math.AbstractMathematicalFunction;
 import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
-import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.integral.GaussHermiteQuadrature;
 
 /**
