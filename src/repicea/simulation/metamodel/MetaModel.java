@@ -42,11 +42,12 @@ import repicea.math.Matrix;
 import repicea.math.SymmetricMatrix;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
+import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.stats.StatisticalUtility;
 import repicea.stats.data.DataSet;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.estimates.GaussianEstimate;
-import repicea.stats.mcmc.MetropolisHastingsParameters;
+import repicea.stats.estimators.mcmc.MetropolisHastingsParameters;
 import repicea.util.REpiceaLogManager;
 
 
@@ -57,60 +58,72 @@ import repicea.util.REpiceaLogManager;
  * @author Mathieu Fortin - December 2020
  */
 public class MetaModel implements Saveable {
-	
-		public class MetaDataHelper {
-						
-			public MetaDataHelper() {
-			}
-			
-			public MetaModelMetaData generate() {
-				
-				MetaModelMetaData data = new MetaModelMetaData();
-				
-				data.growth.geoDomain = MetaModel.this.geoDomain;
-				data.growth.dataSource = MetaModel.this.dataSource;
-				
-				if (!MetaModel.this.scriptResults.isEmpty()) {						
-				
-					List<Integer> srKeys = new ArrayList<Integer>(MetaModel.this.scriptResults.keySet());
-					
-					Collections.sort(srKeys);
-					
-					boolean firstElement = true;
-					for (Integer key : srKeys) {
-						ScriptResult result = MetaModel.this.scriptResults.get(key);
-						if (firstElement) {
-							// fill in data that is constant 	
-							data.growth.nbRealizations = result.getNbRealizations();
-							data.growth.climateChangeOption = ((Enum<?>)result.climateChangeScenario).name();
-							data.growth.growthModel = result.growthModel;							
-						}
-						
-						// DateYrFieldName && upscaling
-						List<Integer> temp = new ArrayList<Integer>();					 
-						for (int i = 0; i < result.getDataSet().getNumberOfObservations(); i++) {
-							if (i == 0)
-								data.growth.upscaling.put(key, (String)result.getDataSet().getValueAt(i, ScriptResult.VarianceEstimatorType));
-								
-							Integer value = (Integer)result.getDataSet().getValueAt(i, ScriptResult.DateYrFieldName); 
-							if (!temp.contains(value))
-								temp.add(value);							
-						}
-						data.growth.dataSourceYears.put(key, temp);
-						
-						// nbPlots
-						data.growth.nbPlots.put(key, result.nbPlots);													
+		
+	static {
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.mcmc.MetropolisHastingsParameters",
+				"repicea.stats.estimators.mcmc.MetropolisHastingsParameters");
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.mcmc.MetropolisHastingsAlgorithm",
+				"repicea.stats.estimators.mcmc.MetropolisHastingsAlgorithm");
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.mcmc.MetropolisHastingsPriorHandler",
+				"repicea.stats.estimators.mcmc.MetropolisHastingsPriorHandler");
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.mcmc.MetropolisHastingsSample",
+				"repicea.stats.estimators.mcmc.MetropolisHastingsSample");
+	}
+
+
+	public class MetaDataHelper {
+
+		public MetaDataHelper() {
+		}
+
+		public MetaModelMetaData generate() {
+
+			MetaModelMetaData data = new MetaModelMetaData();
+
+			data.growth.geoDomain = MetaModel.this.geoDomain;
+			data.growth.dataSource = MetaModel.this.dataSource;
+
+			if (!MetaModel.this.scriptResults.isEmpty()) {						
+
+				List<Integer> srKeys = new ArrayList<Integer>(MetaModel.this.scriptResults.keySet());
+
+				Collections.sort(srKeys);
+
+				boolean firstElement = true;
+				for (Integer key : srKeys) {
+					ScriptResult result = MetaModel.this.scriptResults.get(key);
+					if (firstElement) {
+						// fill in data that is constant 	
+						data.growth.nbRealizations = result.getNbRealizations();
+						data.growth.climateChangeOption = ((Enum<?>)result.climateChangeScenario).name();
+						data.growth.growthModel = result.growthModel;							
 					}
+
+					// DateYrFieldName && upscaling
+					List<Integer> temp = new ArrayList<Integer>();					 
+					for (int i = 0; i < result.getDataSet().getNumberOfObservations(); i++) {
+						if (i == 0)
+							data.growth.upscaling.put(key, (String)result.getDataSet().getValueAt(i, ScriptResult.VarianceEstimatorType));
+
+						Integer value = (Integer)result.getDataSet().getValueAt(i, ScriptResult.DateYrFieldName); 
+						if (!temp.contains(value))
+							temp.add(value);							
+					}
+					data.growth.dataSourceYears.put(key, temp);
+
+					// nbPlots
+					data.growth.nbPlots.put(key, result.nbPlots);													
 				}
-				
-				data.fit.timeStamp = MetaModel.this.lastFitTimeStamp;
-				data.fit.outputType = MetaModel.this.model.getSelectedOutputType();
-				data.fit.fitModel = MetaModel.this.model.getModelImplementation().toString();
-				data.fit.stratumGroup = MetaModel.this.stratumGroup;			
-				
-				return data;
 			}
-		}	
+
+			data.fit.timeStamp = MetaModel.this.lastFitTimeStamp;
+			data.fit.outputType = MetaModel.this.model.getSelectedOutputType();
+			data.fit.fitModel = MetaModel.this.model.getModelImplementation().toString();
+			data.fit.stratumGroup = MetaModel.this.stratumGroup;			
+
+			return data;
+		}
+	}	
 		
 	
 	static {
@@ -124,8 +137,7 @@ public class MetaModel implements Saveable {
 
 
 	public static enum ModelImplEnum {
-		SimpleSlope(true), SimplifiedChapmanRichards(true), ChapmanRichards(true),
-		ChapmanRichardsWithRandomEffect(false), ChapmanRichardsDerivative(true),
+		ChapmanRichards(true), ChapmanRichardsWithRandomEffect(false), ChapmanRichardsDerivative(true),
 		ChapmanRichardsDerivativeWithRandomEffect(false);
 
 		private static List<ModelImplEnum> ModelsWithoutRandomEffects;
@@ -256,12 +268,6 @@ public class MetaModel implements Saveable {
 			throws StatisticalDataException {
 		AbstractModelImplementation model;
 		switch (modelImplEnum) {
-		case SimpleSlope:
-			model = new SimpleSlopeModelImplementation(outputType, this);
-			break;
-		case SimplifiedChapmanRichards:
-			model = new SimplifiedChapmanRichardsModelImplementation(outputType, this);
-			break;
 		case ChapmanRichards:
 			model = new ChapmanRichardsModelImplementation(outputType, this);
 			break;

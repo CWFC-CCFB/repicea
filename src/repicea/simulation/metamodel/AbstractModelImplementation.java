@@ -38,14 +38,15 @@ import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.mcmc.MetropolisHastingsAlgorithm;
-import repicea.stats.mcmc.MetropolisHastingsCompatibleModel;
+import repicea.stats.estimators.mcmc.MetropolisHastingsAlgorithm;
+import repicea.stats.estimators.mcmc.MetropolisHastingsCompatibleModel;
+import repicea.stats.model.StatisticalModel;
 
 /**
  * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
  * @author Mathieu Fortin - September 2021
  */
-abstract class AbstractModelImplementation implements MetropolisHastingsCompatibleModel, Runnable {
+abstract class AbstractModelImplementation implements StatisticalModel, MetropolisHastingsCompatibleModel, Runnable {
 
 	/**
 	 * A nested class to handle blocks of repeated measurements.
@@ -104,8 +105,6 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	
 	private static final Map<Class<? extends AbstractModelImplementation>, ModelImplEnum> EnumMap = new HashMap<Class<? extends AbstractModelImplementation>, ModelImplEnum>();
 	static {
-		EnumMap.put(SimpleSlopeModelImplementation.class, ModelImplEnum.SimpleSlope);
-		EnumMap.put(SimplifiedChapmanRichardsModelImplementation.class, ModelImplEnum.SimplifiedChapmanRichards);
 		EnumMap.put(ChapmanRichardsModelImplementation.class, ModelImplEnum.ChapmanRichards);
 		EnumMap.put(ChapmanRichardsModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsWithRandomEffect);
 		EnumMap.put(ChapmanRichardsDerivativeModelImplementation.class, ModelImplEnum.ChapmanRichardsDerivative);
@@ -120,6 +119,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	private Matrix parmsVarCov;
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected int indexCorrelationParameter;
+	protected int indexResidualErrorVariance;
 	private DataSet finalDataSet;
 	protected final boolean isVarianceErrorTermAvailable;
 	
@@ -305,7 +305,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 
 	}
 	
-	Matrix getParameters() {
+	@Override
+	public Matrix getParameters() {
 		return parameters;
 	}
 	
@@ -346,7 +347,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		return stratumGroup + " Implementation " + getModelImplementation().name();
 	}
 
-	void fitModel() {
+	@Override
+	public void doEstimation() {
 		mh.doEstimation();
 		if (mh.isConvergenceAchieved()) {
 			setParameters(mh.getFinalParameterEstimates());
@@ -373,27 +375,33 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	
 	@Override
 	public final void run() {
-		fitModel();
+		doEstimation();
 	}
 	
-	String getSummary() {
-		return mh.getReport();
-//		if (hasConverged()) {
-//			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
-//			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
-//			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
-//			for (int i = 0; i < parameters.m_iRows; i++) {
-//				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
-//			}
-//			return d;
-//		} else {
-//			System.out.println("The model has not converged!");
-//			return null;
-//		}
-	}
+//	@Override
+//	public String getSummary() {
+//		return mh.getReport();
+////		if (hasConverged()) {
+////			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
+////			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
+////			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
+////			for (int i = 0; i < parameters.m_iRows; i++) {
+////				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
+////			}
+////			return d;
+////		} else {
+////			System.out.println("The model has not converged!");
+////			return null;
+////		}
+//	}
 	
 	DataSet getFinalDataSet() {
 		return finalDataSet;
+	}
+
+	@Override
+	public MetropolisHastingsAlgorithm getEstimator() {
+		return mh;
 	}
 	
 	@Override
@@ -410,5 +418,10 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	@Override
 	public int getNumberOfObservations() {return finalDataSet.getNumberOfObservations();}
 
+	public abstract String getModelDefinition();
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

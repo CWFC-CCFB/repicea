@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.mcmc;
+package repicea.stats.estimators.mcmc;
 
 import java.io.File;
 import java.io.IOException;
@@ -412,12 +412,9 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 						mcmcEstimate.addRealization(sample.parms);
 					}
 
-//					parameters = mcmcEstimate.getMean();
-//					parmsVarCov = mcmcEstimate.getVariance();
 					List<MetropolisHastingsSample> tempSample = new ArrayList<MetropolisHastingsSample>();
 					tempSample.addAll(finalMetropolisHastingsSampleSelection);
 					Collections.sort(tempSample);
-//					lnProbY = getLnProbY(tempSample.get(tempSample.size() - 1).parms, finalMetropolisHastingsSampleSelection, samplingDist);
 					this.lpml = calculateLogPseudomarginalLikelihood();
 					REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 					converged = true;
@@ -437,7 +434,6 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 		for (int i = 0; i < nbSubjects; i++) {
 			double sum = 0;
 			for (MetropolisHastingsSample s : finalMetropolisHastingsSampleSelection) {
-//				double lk_i = model.getLikelihoodOfThisSubject(s.parms, i) * priors.getProbabilityDensityOfThisRandomEffect(s.parms, i);
 				double lk_i = model.getLikelihoodOfThisSubject(s.parms, i);
 				sum += 1d / lk_i;
 			}
@@ -459,5 +455,18 @@ public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHa
 	public MonteCarloEstimate getParameterEstimates() {
 		return isConvergenceAchieved() ? mcmcEstimate : null;
 	}
+	
+	@Override
+	public DataSet getConvergenceStatusReport() {
+		DataSet ds = super.getConvergenceStatusReport();
+		Object[] record = new Object[2];
+		record[0] = "Log Pseudomarginal Likelihood";
+		record[1] = lpml;
+		ds.addObservation(record);
+		return ds;
+	}
+
+
+	
 	
 }

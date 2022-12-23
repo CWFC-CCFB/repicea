@@ -16,34 +16,26 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.mcmc;
+package repicea.stats.estimators.mcmc;
 
-import repicea.math.Matrix;
+public class MetropolisHastingsParameters {
 
-class MetropolisHastingsSample implements Comparable<MetropolisHastingsSample> {
+	public int nbBurnIn = 10000;
+	public int nbRealizations = 500000 + nbBurnIn;
+	public int nbInternalIter = 100000;
+	public int oneEach = 50;
+	public int nbInitialGrid = 10000;	
 
-	final Matrix parms;
-	final double llk;
-	
-	MetropolisHastingsSample(Matrix parms, double lk) {
-		this.parms = parms;
-		this.llk = lk;
-	}
+	public MetropolisHastingsParameters() {}
 
 	@Override
-	public int compareTo(MetropolisHastingsSample arg0) {
-		if (llk > arg0.llk) {
-			return 1;
-		} else if (llk < arg0.llk) {
-			return -1;
-		} else {
-			return 0;
+	public MetropolisHastingsParameters clone() {
+		try {
+			return (MetropolisHastingsParameters) super.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+			return null;
 		}
 	}
 
-	@Override
-	public String toString() {
-		return "LLK=" + llk + ", " + parms.toString();
-	}
-	
 }

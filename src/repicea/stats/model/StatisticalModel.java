@@ -42,7 +42,14 @@ public interface StatisticalModel {
 	/**
 	 * This method returns the results of the fit on screen.
 	 */
-	public String getSummary();
+	public default String getSummary() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(toString() + System.lineSeparator());
+		sb.append("Model definition : " + getModelDefinition() + System.lineSeparator() + System.lineSeparator());
+		sb.append(getEstimator().getReport() + System.lineSeparator());
+		return sb.toString();
+	}
+
 	
 	/**
 	 * This method computes the parameter estimates.

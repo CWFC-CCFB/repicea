@@ -24,6 +24,7 @@ import java.util.List;
 
 import repicea.math.Matrix;
 import repicea.stats.data.StatisticalDataException;
+import repicea.stats.distributions.ContinuousDistribution;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.distributions.UniformDistribution;
 
@@ -49,12 +50,6 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 
 	@Override
 	public GaussianDistribution getStartingParmEst(double coefVar) {
-		Matrix parmEst = new Matrix(4,1);
-		parmEst.setValueAt(0, 0, 1000d);
-		parmEst.setValueAt(1, 0, 0.02);
-		parmEst.setValueAt(2, 0, 2d);
-		parmEst.setValueAt(3, 0, .92);
-		
 		fixedEffectsParameterIndices = new ArrayList<Integer>();
 		fixedEffectsParameterIndices.add(0);
 		fixedEffectsParameterIndices.add(1);
@@ -62,10 +57,31 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 
 		this.indexCorrelationParameter = 3;
 
+		int lastIndex;
+		if (!isVarianceErrorTermAvailable) {
+			indexResidualErrorVariance = 4;
+			lastIndex = 4;
+		} else {
+			lastIndex = 3;
+		}
+
+		Matrix parmEst = new Matrix(lastIndex + 1,1);
+		parmEst.setValueAt(0, 0, 1000d);
+		parmEst.setValueAt(1, 0, 0.02);
+		parmEst.setValueAt(2, 0, 2d);
+		parmEst.setValueAt(indexCorrelationParameter, 0, .92);
+		if (!isVarianceErrorTermAvailable) {
+			parmEst.setValueAt(indexResidualErrorVariance, 0, 250d);
+		}
+
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0, 2000), 0);
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.00001, 0.05), 1);
 		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.8, 6), 2);
-		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), 3);
+		mh.getPriorHandler().addFixedEffectDistribution(new UniformDistribution(0.80, 0.995), indexCorrelationParameter);
+		if (!isVarianceErrorTermAvailable) {
+			ContinuousDistribution resVariancePrior = new UniformDistribution(0, 5000);
+			mh.getPriorHandler().addFixedEffectDistribution(resVariancePrior, indexResidualErrorVariance);
+		}
 
 		Matrix varianceDiag = new Matrix(parmEst.m_iRows,1);
 		for (int i = 0; i < varianceDiag.m_iRows; i++) {
@@ -104,7 +120,16 @@ class ChapmanRichardsDerivativeModelImplementation extends AbstractModelImplemen
 
 	@Override
 	public List<String> getOtherParameterNames() {
-		return Arrays.asList(new String[] {"rho"});
+		List<String> parameters = new ArrayList<String>();
+		parameters.add("rho");
+		if (!isVarianceErrorTermAvailable)
+			parameters.add("sigma2_res");
+		return parameters;
+	}
+
+	@Override
+	public String getModelDefinition() {
+		return "y ~ b1*exp(-b2*t)*(1-exp(-b2*t))^b3";
 	}
 
 }
