@@ -38,44 +38,52 @@ import repicea.stats.data.HierarchicalStatisticalDataStructure;
 import repicea.stats.data.Observation;
 import repicea.stats.data.StatisticalDataException;
 import repicea.stats.distributions.GaussianDistribution;
-import repicea.stats.mcmc.MetropolisHastingsAlgorithm;
-import repicea.stats.mcmc.MetropolisHastingsCompatibleModel;
+import repicea.stats.estimators.mcmc.MetropolisHastingsAlgorithm;
+import repicea.stats.estimators.mcmc.MetropolisHastingsCompatibleModel;
+import repicea.stats.model.StatisticalModel;
 
 /**
  * A package class to handle the different types of meta-models (e.g. Chapman-Richards and others).
  * @author Mathieu Fortin - September 2021
  */
-abstract class AbstractModelImplementation implements MetropolisHastingsCompatibleModel, Runnable {
+abstract class AbstractModelImplementation implements StatisticalModel, MetropolisHastingsCompatibleModel, Runnable {
 
 	/**
 	 * A nested class to handle blocks of repeated measurements.
 	 * @author Mathieu Fortin - November 2021
 	 */
 	@SuppressWarnings("serial")
-	class DataBlockWrapper extends AbstractDataBlockWrapper {
+	final class DataBlockWrapper extends AbstractDataBlockWrapper {
 
-		final Matrix varCovFullCorr;
+		Matrix varCovFullCorr;
 		final Matrix distances;
 		Matrix invVarCov;
 		double lnConstant;
+		final int nbPlots;
 
 		DataBlockWrapper(String blockId, 
 				List<Integer> indices, 
 				Matrix vectorY,
 				Matrix matrixX,
-//				HierarchicalStatisticalDataStructure structure, 
-				Matrix overallVarCov) {
+				Matrix overallVarCov,
+				int nbPlots) {
 			super(blockId, indices, vectorY, matrixX, overallVarCov);
-			Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
-			Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
-			this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
-			distances = new Matrix(varCovFullCorr.m_iRows, 1, 1, 1);
+			if (AbstractModelImplementation.this.isVarianceErrorTermAvailable) { 
+				Matrix varCovTmp = overallVarCov.getSubMatrix(indices, indices);
+				Matrix stdDiag = correctVarCov(varCovTmp).diagonalVector().elementWisePower(0.5);
+				this.varCovFullCorr = stdDiag.multiply(stdDiag.transpose());
+			}
+			this.nbPlots = nbPlots;
+			distances = new Matrix(this.indices.size(), 1, 1, 1);
 		}
 
 		@Override
 		void updateCovMat(Matrix parameters) {
+			if (!AbstractModelImplementation.this.isVarianceErrorTermAvailable) {	// The residual variance is then a parameter to be estimated
+				double resVariance = AbstractModelImplementation.this.getParameters().getValueAt(AbstractModelImplementation.this.indexResidualErrorVariance, 0);
+				this.varCovFullCorr = new Matrix(indices.size(), indices.size(), resVariance / nbPlots, 0); 
+			}
 			double rhoParm = parameters.getValueAt(indexCorrelationParameter, 0);	
-//			Matrix corrMat = StatisticalUtility.constructRMatrix(distances, 1d, rhoParm, TypeMatrixR.POWER);
 			SymmetricMatrix corrMat = StatisticalUtility.constructRMatrix(Arrays.asList(new Double[] {1d, rhoParm}), TypeMatrixR.POWER, distances);
 			Matrix varCov = varCovFullCorr.elementWiseMultiply(corrMat);
 
@@ -105,13 +113,13 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	
 	private static final Map<Class<? extends AbstractModelImplementation>, ModelImplEnum> EnumMap = new HashMap<Class<? extends AbstractModelImplementation>, ModelImplEnum>();
 	static {
-		EnumMap.put(SimpleSlopeModelImplementation.class, ModelImplEnum.SimpleSlope);
-		EnumMap.put(SimplifiedChapmanRichardsModelImplementation.class, ModelImplEnum.SimplifiedChapmanRichards);
 		EnumMap.put(ChapmanRichardsModelImplementation.class, ModelImplEnum.ChapmanRichards);
 		EnumMap.put(ChapmanRichardsModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsWithRandomEffect);
 		EnumMap.put(ChapmanRichardsDerivativeModelImplementation.class, ModelImplEnum.ChapmanRichardsDerivative);
 		EnumMap.put(ChapmanRichardsDerivativeModelWithRandomEffectImplementation.class, ModelImplEnum.ChapmanRichardsDerivativeWithRandomEffect);
 	}
+	
+	static boolean EstimateResidualVariance = false;  
 	
 	protected final List<AbstractDataBlockWrapper> dataBlockWrappers;
 	protected final String outputType;
@@ -121,8 +129,10 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	private Matrix parmsVarCov;
 	protected List<Integer> fixedEffectsParameterIndices;
 	protected int indexCorrelationParameter;
+	protected int indexResidualErrorVariance;
 	private DataSet finalDataSet;
-
+	protected final boolean isVarianceErrorTermAvailable;
+	
 	/**
 	 * Internal constructor.
 	 * @param outputType the desired outputType to be modelled
@@ -143,6 +153,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		this.stratumGroup = stratumGroup;
 		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType, scriptResults);
 		Matrix varCov = getVarCovReady(outputType, scriptResults);
+		isVarianceErrorTermAvailable = metaModel.isVarianceAvailable() && !AbstractModelImplementation.EstimateResidualVariance;
 
 		this.outputType = outputType;
 		Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
@@ -161,7 +172,9 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		for (String k : formattedMap.keySet()) {
 			DataBlock db = formattedMap.get(k);
 			List<Integer> indices = db.getIndices();
-			dataBlockWrappers.add(createWrapper(k, indices, vectorY, matrixX, varCov));
+			int age = Integer.parseInt(k.substring(0, k.indexOf("_")));
+			int nbPlots = scriptResults.get(age).nbPlots;
+			dataBlockWrappers.add(createWrapper(k, indices, vectorY, matrixX, varCov, nbPlots));
 		}
 		
 		finalDataSet = structure.getDataSet();
@@ -169,8 +182,22 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		mh.setSimulationParameters(metaModel.mhSimParms);
 	}
 
-	protected AbstractDataBlockWrapper createWrapper(String k, List<Integer> indices, Matrix vectorY, Matrix matrixX, Matrix varCov) {
-		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov);
+	private Map<String, Integer> getNbPlotsMap(Map<Integer, ScriptResult> scriptResults) {
+		Map<String, Integer> nbPlotsMap = new HashMap<String, Integer>();
+		for (Integer age : scriptResults.keySet()) {
+			int nbPlots = scriptResults.get(age).nbPlots;
+			nbPlotsMap.put(age.toString(), nbPlots);
+		}
+		return nbPlotsMap;
+	}
+
+	protected final AbstractDataBlockWrapper createWrapper(String k, 
+			List<Integer> indices, 
+			Matrix vectorY, 
+			Matrix matrixX, 
+			Matrix varCov, 
+			int nbPlots) {
+		return new DataBlockWrapper(k, indices, vectorY, matrixX, varCov, nbPlots);
 	}
 	
 	private Matrix generatePredictions(AbstractDataBlockWrapper dbw, double randomEffect, boolean includePredVariance) {
@@ -246,12 +273,14 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		HierarchicalStatisticalDataStructure dataStruct = new GenericHierarchicalStatisticalDataStructure(overallDataset, false);	// no sorting
 		dataStruct.setInterceptModel(false); // no intercept
 		dataStruct.setModelDefinition("Estimate ~ initialAgeYr + timeSinceInitialDateYr + (1 | initialAgeYr/OutputType)");
-//		dataStruct.constructMatrices();
 		return dataStruct;
 	}
 	
 	/**
-	 * Format the variance-covariance matrix of the residual error term. 
+	 * Format the variance-covariance matrix of the residual error term. <br>
+	 * <br>
+	 * If the model does not provide the variance associated with the predictions,
+	 * this method returns null.
 	 * @param outputType the desired outputType to be modelled
 	 * @param scriptResults a Map containing the ScriptResult instances of the growth simulation
 	 * @return
@@ -260,7 +289,7 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		Matrix varCov = null;
 		for (int initAgeYr : scriptResults.keySet()) {
 			ScriptResult r = scriptResults.get(initAgeYr);
-			Matrix varCovI = r.getTotalVariance(outputType);
+			Matrix varCovI = r.computeVarCovErrorTerm(outputType);
 			if (varCov == null) {
 				varCov = varCovI;
 			} else {
@@ -301,7 +330,8 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 
 	}
 	
-	Matrix getParameters() {
+	@Override
+	public Matrix getParameters() {
 		return parameters;
 	}
 	
@@ -342,9 +372,10 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		return stratumGroup + " Implementation " + getModelImplementation().name();
 	}
 
-	void fitModel() {
-		mh.fitModel();
-		if (mh.hasConverged()) {
+	@Override
+	public void doEstimation() {
+		mh.doEstimation();
+		if (mh.isConvergenceAchieved()) {
 			setParameters(mh.getFinalParameterEstimates());
 			setParmsVarCov(mh.getParameterCovarianceMatrix());
 			
@@ -365,30 +396,20 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 	}
 	
 
-	boolean hasConverged() {return mh.hasConverged();}
+	boolean hasConverged() {return mh.isConvergenceAchieved();}
 	
 	@Override
 	public final void run() {
-		fitModel();
-	}
-	
-	DataSet getSummary() {
-		if (hasConverged()) {
-			DataSet d = new DataSet(Arrays.asList(new String[] {"Parameter", "Value", "StdErr"}));
-			d.addObservation(new Object[]{"Model implementation", getModelImplementation().name(), ""});
-			d.addObservation(new Object[] {"Log pseudomarginal likelihood", mh.getLogPseudomarginalLikelihood(), ""});
-			for (int i = 0; i < parameters.m_iRows; i++) {
-				d.addObservation(new Object[] {"Beta" + i, parameters.getValueAt(i, 0), Math.sqrt(parmsVarCov.getValueAt(i, i))});
-			}
-			return d;
-		} else {
-			System.out.println("The model has not converged!");
-			return null;
-		}
+		doEstimation();
 	}
 	
 	DataSet getFinalDataSet() {
 		return finalDataSet;
+	}
+
+	@Override
+	public MetropolisHastingsAlgorithm getEstimator() {
+		return mh;
 	}
 	
 	@Override
@@ -402,5 +423,13 @@ abstract class AbstractModelImplementation implements MetropolisHastingsCompatib
 		return Math.exp(getLogLikelihoodForThisBlock(m, i));
 	}
 	
+	@Override
+	public int getNumberOfObservations() {return finalDataSet.getNumberOfObservations();}
+
+	public abstract String getModelDefinition();
 	
+	@Override
+	public String toString() {
+		return getClass().getSimpleName();
+	}
 }

@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.mcmc;
+package repicea.stats.estimators.mcmc;
 
 import java.io.File;
 import java.io.IOException;
@@ -32,22 +32,24 @@ import repicea.io.javacsv.CSVField;
 import repicea.io.javacsv.CSVWriter;
 import repicea.math.Matrix;
 import repicea.stats.StatisticalUtility;
+import repicea.stats.data.DataSet;
 import repicea.stats.distributions.GaussianDistribution;
 import repicea.stats.estimates.MonteCarloEstimate;
+import repicea.stats.estimators.AbstractEstimator;
 import repicea.util.REpiceaLogManager;
 
 /**
  * An implementation of the MCMC Metropolis-Hastings algorithm.
  * @author Mathieu Fortin - September 2021
  */
-public class MetropolisHastingsAlgorithm {
+public class MetropolisHastingsAlgorithm  extends AbstractEstimator<MetropolisHastingsCompatibleModel> {
 		
 	private String loggerName;
 	private String loggerPrefix;
 	
 	protected MetropolisHastingsParameters simParms;
 	protected final MetropolisHastingsPriorHandler priors;
-	protected final MetropolisHastingsCompatibleModel model;
+//	protected final MetropolisHastingsCompatibleModel model;
 	private Matrix parameters;
 	private Matrix parmsVarCov;
 	protected double lpml;
@@ -55,6 +57,7 @@ public class MetropolisHastingsAlgorithm {
 	protected List<MetropolisHastingsSample> finalMetropolisHastingsSampleSelection;
 	private boolean converged;
 	protected int indexCorrelationParameter;
+	private MonteCarloEstimate mcmcEstimate;
 
 	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model, String loggerName, String loggerPrefix) {
 		this(model);
@@ -63,13 +66,13 @@ public class MetropolisHastingsAlgorithm {
 	}
 	
 	public MetropolisHastingsAlgorithm(MetropolisHastingsCompatibleModel model) {
+		super(model);
 		simParms = new MetropolisHastingsParameters();
 		priors = new MetropolisHastingsPriorHandler();
-		this.model = model; 
 	}
 
 	public void exportMetropolisHastingsSample(String filename) throws IOException {
-		if (hasConverged() && finalMetropolisHastingsSampleSelection != null) {
+		if (isConvergenceAchieved() && finalMetropolisHastingsSampleSelection != null) {
 			CSVWriter writer = null;
 			for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 				if (writer == null) {
@@ -142,15 +145,42 @@ public class MetropolisHastingsAlgorithm {
 //		return lnProbY2;
 //	}
 
+	/**
+	 * Return the final parameter estimates. <br>
+	 * <br>
+	 * Convergence must be achieved. If the parameters member has not been set, it is then
+	 * set on the fly to avoid recalculating the mean from the MonteCarloEstimate every time.
+	 * @return a Matrix
+	 */
 	public Matrix getFinalParameterEstimates() {
-		return parameters;
+		if (isConvergenceAchieved()) {
+			if (parameters == null) 
+				parameters = mcmcEstimate.getMean();
+			return parameters;
+		} else {
+			return null;
+		}
 	}
 	
+	/**
+	 * Return the estimated variance-covariance of the final parameter estimates. <br>
+	 * <br>
+	 * Convergence must be achieved. If the variance-covariance member has not been set, it is then
+	 * set on the fly to avoid recalculating it from the MonteCarloEstimate every time.
+	 * @return a Matrix
+	 */
 	public Matrix getParameterCovarianceMatrix() {
-		return parmsVarCov;
+		if (isConvergenceAchieved()) {
+			if (parmsVarCov == null) 
+				parmsVarCov = mcmcEstimate.getVariance();
+			return parmsVarCov;
+		} else {
+			return null;
+		}
 	}
 	
-	public boolean hasConverged() {
+	@Override
+	public boolean isConvergenceAchieved() {
 		return converged;
 	}
 	
@@ -357,12 +387,14 @@ public class MetropolisHastingsAlgorithm {
 	private void reset() {
 		parameters = null;
 		parmsVarCov = null;
+		mcmcEstimate = null;
 //		lnProbY = 0;
 		finalMetropolisHastingsSampleSelection = null;
 		converged = false;
 	}
 	
-	public void fitModel() {
+	@Override
+	public boolean doEstimation() {
 		reset();
 		double coefVar = 0.01;
 		try {
@@ -375,17 +407,14 @@ public class MetropolisHastingsAlgorithm {
 				completed = generateMetropolisSample(mhSample, samplingDist);
 				if (completed) {
 					finalMetropolisHastingsSampleSelection = retrieveFinalSample(mhSample);
-					MonteCarloEstimate mcmcEstimate = new MonteCarloEstimate();
+					mcmcEstimate = new MonteCarloEstimate();
 					for (MetropolisHastingsSample sample : finalMetropolisHastingsSampleSelection) {
 						mcmcEstimate.addRealization(sample.parms);
 					}
 
-					parameters = mcmcEstimate.getMean();
-					parmsVarCov = mcmcEstimate.getVariance();
 					List<MetropolisHastingsSample> tempSample = new ArrayList<MetropolisHastingsSample>();
 					tempSample.addAll(finalMetropolisHastingsSampleSelection);
 					Collections.sort(tempSample);
-//					lnProbY = getLnProbY(tempSample.get(tempSample.size() - 1).parms, finalMetropolisHastingsSampleSelection, samplingDist);
 					this.lpml = calculateLogPseudomarginalLikelihood();
 					REpiceaLogManager.logMessage(getLoggerName(), Level.FINE, getLogMessagePrefix(), "Final sample had " + finalMetropolisHastingsSampleSelection.size() + " sets of parameters.");
 					converged = true;
@@ -395,6 +424,7 @@ public class MetropolisHastingsAlgorithm {
 			e1.printStackTrace();
 			converged = false;
 		} 
+		return converged;
 	}
 	
 
@@ -404,7 +434,6 @@ public class MetropolisHastingsAlgorithm {
 		for (int i = 0; i < nbSubjects; i++) {
 			double sum = 0;
 			for (MetropolisHastingsSample s : finalMetropolisHastingsSampleSelection) {
-//				double lk_i = model.getLikelihoodOfThisSubject(s.parms, i) * priors.getProbabilityDensityOfThisRandomEffect(s.parms, i);
 				double lk_i = model.getLikelihoodOfThisSubject(s.parms, i);
 				sum += 1d / lk_i;
 			}
@@ -417,59 +446,27 @@ public class MetropolisHastingsAlgorithm {
 	}
 	
 	public double getLogPseudomarginalLikelihood() {
-		if (hasConverged()) 
+		if (isConvergenceAchieved()) 
 			return lpml;
 		else return Double.NaN;
 	}
+
+	@Override
+	public MonteCarloEstimate getParameterEstimates() {
+		return isConvergenceAchieved() ? mcmcEstimate : null;
+	}
 	
-//	private double getLnProbY(Matrix point, 
-//			List<MetropolisHastingsSample> posteriorSamples, 
-//			MetropolisHastingsSampler samplingDist) {
-//		double parmsPriorLogDensity = priors.getLogProbabilityDensity(point);
-//		double marginalLlkOfThisPoint = model.getMarginalLogLikelihood(point) + 
-////				priors.getLogProbabilityDensityOfRandomEffects(point) +
-//				parmsPriorLogDensity;
-//		double sumIntegrand = 0;
-//		double densityFromSamplingDist = 0;
-//		for (MetropolisHastingsSample s : posteriorSamples) {
-//			samplingDist.setMean(s.parms);
-//			double marginalLlkOfThisSample = model.getMarginalLogLikelihood(s.parms);
-//			double ratio = Math.exp(marginalLlkOfThisPoint - marginalLlkOfThisSample);
-//			if (ratio > 1d) {
-//				ratio = 1;
-//			}
-//			densityFromSamplingDist = samplingDist.getMarginalProbabilityDensity(point); 
-//			sumIntegrand += ratio * densityFromSamplingDist;
-//		}
-//		sumIntegrand /= posteriorSamples.size();
-//		
-//		samplingDist.setMean(point);
-//		double sumRatio = 0d;
-//		int nbRealizations = posteriorSamples.size();
-//		for (int j = 0; j < nbRealizations; j++) {
-//			Matrix newParms = samplingDist.getRandomRealization();
-//			parmsPriorLogDensity = priors.getLogProbabilityDensity(newParms);
-//			double ratio;
-//			if (parmsPriorLogDensity > Double.NEGATIVE_INFINITY) {
-//				double llk = model.getMarginalLogLikelihood(newParms) + 
-////						priors.getLogProbabilityDensityOfRandomEffects(newParms) +
-//						parmsPriorLogDensity;
-//				ratio = Math.exp(llk - marginalLlkOfThisPoint);
-//				if (ratio > 1d) {
-//					ratio = 1d;
-//				}
-//			} else {
-//				ratio = 0d;
-//			}
-//			sumRatio += ratio;
-//		}
-//		sumRatio /= nbRealizations;
-//		double pi_theta_y = sumIntegrand / sumRatio;
-//		double log_m_hat = marginalLlkOfThisPoint - Math.log(pi_theta_y);
-//		return log_m_hat;
-//	}
+	@Override
+	public DataSet getConvergenceStatusReport() {
+		DataSet ds = super.getConvergenceStatusReport();
+		Object[] record = new Object[2];
+		record[0] = "Log Pseudomarginal Likelihood";
+		record[1] = lpml;
+		ds.addObservation(record);
+		return ds;
+	}
 
 
 	
-
+	
 }

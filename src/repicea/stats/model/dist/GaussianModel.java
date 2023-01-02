@@ -144,4 +144,7 @@ public class GaussianModel extends AbstractStatisticalModel implements MaximumLi
 		return "Gaussian model";
 	}
 
+	@Override
+	public List<String> getOtherParameterNames() {return new ArrayList<String>();}
+
 }

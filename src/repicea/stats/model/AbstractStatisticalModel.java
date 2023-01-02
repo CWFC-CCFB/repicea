@@ -30,7 +30,6 @@ import repicea.util.REpiceaLogManager;
  * basic features for a StatisticalModel, namely a data structure, a log-likelihood function and an
  * optimizer.
  * @author Mathieu Fortin - August 2011
- * @param <D> a StatisticalDataStructure-derived class
  */
 public abstract class AbstractStatisticalModel implements StatisticalModel {
 
@@ -92,14 +91,6 @@ public abstract class AbstractStatisticalModel implements StatisticalModel {
 		}
 	}
 
-	@Override
-	public String getSummary() {
-		StringBuilder sb = new StringBuilder();
-		sb.append(toString() + System.lineSeparator());
-		sb.append("Model definition : " + getModelDefinition() + System.lineSeparator() + System.lineSeparator());
-		sb.append(estimator.getReport() + System.lineSeparator());
-		return sb.toString();
-	}
 
 	@Override
 	public String getModelDefinition() {return modelDefinition;}

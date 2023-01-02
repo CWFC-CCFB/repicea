@@ -18,6 +18,9 @@
  */
 package repicea.stats.estimators;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import repicea.stats.data.DataSet;
 import repicea.stats.estimates.Estimate;
 
@@ -36,6 +39,11 @@ public interface Estimator {
 		}
 	}
 	
+	/**
+	 * Run the estimation process. 
+	 * @return true if the estimation was successful or false otherwise
+	 * @throws EstimatorException
+	 */
 	public boolean doEstimation() throws EstimatorException;
 
 	/**
@@ -60,7 +68,17 @@ public interface Estimator {
 	 * Produces a DataSet instance with the convergence status.
 	 * @return a DataSet instance
 	 */
-	public DataSet getConvergenceStatusReport();
+	public default DataSet getConvergenceStatusReport() {
+		List<String> fieldNames = new ArrayList<String>();
+		fieldNames.add("Element");
+		fieldNames.add("Value");
+		DataSet dataSet = new DataSet(fieldNames);
+		Object[] record = new Object[2];
+		record[0] = "Converged";
+		record[1] = isConvergenceAchieved();
+		dataSet.addObservation(record);
+		return dataSet;
+	}
 
 	
 	/**
@@ -70,7 +88,7 @@ public interface Estimator {
 	 */
 	public default String getReport() {
 		if (!isConvergenceAchieved()) {
-			return "The log-likelihood function has not been or cannot be optimized.";
+			return "The convergence has not been achieved.";
 		} else {
 			StringBuilder sb = new StringBuilder();
 			DataSet convergenceDataset = getConvergenceStatusReport();
@@ -79,7 +97,7 @@ public interface Estimator {
 			sb.append(parameterDataset.toString() + System.lineSeparator());
 			return sb.toString();
 		}
-
 	}
 
+	
 }

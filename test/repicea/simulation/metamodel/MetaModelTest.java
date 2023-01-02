@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
@@ -32,9 +33,12 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaLogManager;
+import repicea.util.REpiceaTranslator;
+import repicea.util.REpiceaTranslator.Language;
 
 public class MetaModelTest {
 
@@ -93,25 +97,28 @@ public class MetaModelTest {
 	}
 
 	public static void main(String[] args) throws IOException {
+//		AbstractModelImplementation.EstimateResidualVariance = true;
+		REpiceaTranslator.setCurrentLanguage(Language.English);
         System.setProperty("java.util.logging.SimpleFormatter.format", "%1$tY-%1$tm-%1$td %1$tH:%1$tM:%1$tS %4$-6s %5$s%6$s%n");
 		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).setLevel(Level.FINE);
-//		ConsoleHandler sh = new ConsoleHandler();
+		ConsoleHandler sh = new ConsoleHandler();
 //		sh.setLevel(Level.FINE);
 //		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
-		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
-		FileHandler sh = new FileHandler(outputPath + File.separator + "metamodel.log");
+//		String outputPath = "C:\\Users\\matforti\\Documents\\7_Developpement\\ModellingProjects\\Quebec\\ProcessedData\\UAF02664\\metaModels";
+		String outputPath = ObjectUtility.getPackagePath(MetaModelTest.class);
+//		FileHandler sh = new FileHandler(outputPath + "metamodel.log");
 		sh.setLevel(Level.FINE);
 		sh.setFormatter(new SimpleFormatter());
 		REpiceaLogManager.getLogger(MetaModelManager.LoggerName).addHandler(sh);
 		
 		String path = ObjectUtility.getPackagePath(MetaModelTest.class);
 		List<String> vegPotList = new ArrayList<String>();
-		vegPotList.add("MS2");
-		vegPotList.add("RE1");
-		vegPotList.add("RE2");
-		vegPotList.add("RE3");
+//		vegPotList.add("MS2");
+//		vegPotList.add("RE1");
+//		vegPotList.add("RE2");
+//		vegPotList.add("RE3");
 		vegPotList.add("RS2");
-		vegPotList.add("RS3");
+//		vegPotList.add("RS3");
 		
 		List<String> outputTypes = new ArrayList<String>();
 		outputTypes.add("AliveVolume_AllSpecies");
@@ -129,7 +136,7 @@ public class MetaModelTest {
 //				m.save(path + "QC_FMU02664_" + vegPot + "_NoChange_AliveVolume_AllSpecies.zml");
 				m.exportMetropolisHastingsSample(outputPath + File.separator + vegPot + "_" + outputType + "MHSample.csv");
 				m.exportFinalDataSet(outputPath + File.separator + vegPot + "_" + outputType + ".csv");
-				m.getSummary().save(outputPath + File.separator + vegPot + "_" + outputType + "Summary.csv");
+				System.out.println(m.getSummary());
 				m.getModelComparison().save(outputPath + File.separator + vegPot + "_" + outputType + "ModelComparison.csv");
 			}
 		}

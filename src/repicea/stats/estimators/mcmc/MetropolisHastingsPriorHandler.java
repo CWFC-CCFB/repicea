@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.stats.mcmc;
+package repicea.stats.estimators.mcmc;
 
 import java.util.ArrayList;
 import java.util.Arrays;

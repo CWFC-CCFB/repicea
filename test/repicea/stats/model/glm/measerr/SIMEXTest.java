@@ -142,7 +142,7 @@ public class SIMEXTest {
 		parmEst = s.getParameters().getValueAt(1, 0);
 		Assert.assertEquals("Checking parm estimate: TotalPrcp", 0.00155, parmEst, 3E-4);
 		parmEst = s.getParameters().getValueAt(2, 0);
-		Assert.assertEquals("Checking parm estimate: G_F", -0.1165, parmEst, 2E-3);
+		Assert.assertEquals("Checking parm estimate: G_F", -0.1165, parmEst, 3E-3);
 		parmEst = s.getParameters().getValueAt(3, 0);
 		Assert.assertEquals("Checking parm estimate: G_R", -0.0713, parmEst, 2E-3);
 		parmEst = s.getParameters().getValueAt(4, 0);

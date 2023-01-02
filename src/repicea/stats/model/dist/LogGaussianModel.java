@@ -144,4 +144,7 @@ public class LogGaussianModel extends AbstractStatisticalModel implements Maximu
 		return "Log-Gaussian model";
 	}
 
+	@Override
+	public List<String> getOtherParameterNames() {return new ArrayList<String>();}
+
 }

@@ -28,18 +28,37 @@ import repicea.stats.estimators.AbstractEstimator.EstimatorCompatibleModel;
 
 public abstract class AbstractEstimator<P extends EstimatorCompatibleModel> implements Estimator {
 
-	
+	/**
+	 * An interface that ensures the model instance can provide enough information.
+	 * @author Mathieu Fortin - December 2022
+	 */
 	public interface EstimatorCompatibleModel {
 		
+		/**
+		 * Does the model have an intercept.
+		 * @return a boolean
+		 */
 		public boolean isInterceptModel();
 		
+		/**
+		 * Return the effect names or in case of nonlinear model, the parameter names.
+		 * @return a List of strings
+		 */
 		public List<String> getEffectList();
 		
+		/**
+		 * The number of observations in the dataset
+		 * @return an integer
+		 */
 		public int getNumberOfObservations();
 		
-		public default List<String> getOtherParameterNames() {
-			return new ArrayList<String>();
-		}
+		/**
+		 * Return the names of the other parameters (e.g. dispersion in case of negative binomial). <br>
+		 * <br>
+		 * By default, it should return an empty list.
+		 * @return a List of String
+		 */
+		public List<String> getOtherParameterNames();
 
 	}
 
