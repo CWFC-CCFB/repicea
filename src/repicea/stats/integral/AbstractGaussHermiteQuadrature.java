@@ -25,12 +25,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import repicea.math.EvaluableFunction;
-import repicea.stats.integral.AbstractGaussQuadrature.NumberOfPoints;
+import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.stats.integral.GaussHermiteQuadrature.GaussHermiteQuadratureCompatibleFunction;
 
 @SuppressWarnings("serial")
 public abstract class AbstractGaussHermiteQuadrature extends AbstractGaussQuadrature {
+
+	static {
+		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.integral.GaussQuadrature$NumberOfPoints", "repicea.stats.integral.AbstractGaussQuadrature$NumberOfPoints");
+	}
 
 	protected static Map<NumberOfPoints, Set<QuadratureNode>> NODE_MAP = new HashMap<NumberOfPoints, Set<QuadratureNode>>();
 	static {

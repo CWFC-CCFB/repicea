@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
 import java.util.logging.Level;
 import java.util.logging.SimpleFormatter;
 
@@ -33,7 +32,6 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaLogManager;
@@ -54,7 +52,6 @@ public class MetaModelTest {
 		XmlSerializerChangeMonitor.registerClassNameChange("repicea.simulation.metamodel.RichardsChapmanModelWithRandomEffectImplementation$DataBlockWrapper", 
 				"repicea.simulation.metamodel.ChapmanRichardsModelWithRandomEffectImplementation$DataBlockWrapper");				
 		XmlSerializerChangeMonitor.registerEnumNameChange("repicea.simulation.metamodel.MetaModel$ModelImplEnum", "RichardsChapmanWithRandomEffect", "ChapmanRichardsWithRandomEffect");
-		XmlSerializerChangeMonitor.registerClassNameChange("repicea.stats.integral.GaussQuadrature$NumberOfPoints", "repicea.stats.integral.AbstractGaussQuadrature$NumberOfPoints");
 	}
 	
 	static MetaModel MetaModelInstance;
@@ -80,7 +77,7 @@ public class MetaModelTest {
 		int actualNbOfRecords = MetaModelInstance.getFinalDataSet().getNumberOfObservations();
 		Assert.assertEquals("Testing final dataset size", 60, actualNbOfRecords);
 	}
-
+	
 	@Test
 	public void testingOutputTypes() throws Exception {
 		List<String> outputTypes = MetaModelInstance.getPossibleOutputTypes();
