@@ -152,8 +152,8 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		}
 		this.stratumGroup = stratumGroup;
 		HierarchicalStatisticalDataStructure structure = getDataStructureReady(outputType, scriptResults);
-		Matrix varCov = getVarCovReady(outputType, scriptResults);
 		isVarianceErrorTermAvailable = metaModel.isVarianceAvailable() && !AbstractModelImplementation.EstimateResidualVariance;
+		Matrix varCov = getVarCovReady(outputType, scriptResults);
 
 		this.outputType = outputType;
 		Map<String, DataBlock> formattedMap = new LinkedHashMap<String, DataBlock>();
@@ -182,14 +182,14 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 		mh.setSimulationParameters(metaModel.mhSimParms);
 	}
 
-	private Map<String, Integer> getNbPlotsMap(Map<Integer, ScriptResult> scriptResults) {
-		Map<String, Integer> nbPlotsMap = new HashMap<String, Integer>();
-		for (Integer age : scriptResults.keySet()) {
-			int nbPlots = scriptResults.get(age).nbPlots;
-			nbPlotsMap.put(age.toString(), nbPlots);
-		}
-		return nbPlotsMap;
-	}
+//	private Map<String, Integer> getNbPlotsMap(Map<Integer, ScriptResult> scriptResults) {
+//		Map<String, Integer> nbPlotsMap = new HashMap<String, Integer>();
+//		for (Integer age : scriptResults.keySet()) {
+//			int nbPlots = scriptResults.get(age).nbPlots;
+//			nbPlotsMap.put(age.toString(), nbPlots);
+//		}
+//		return nbPlotsMap;
+//	}
 
 	protected final AbstractDataBlockWrapper createWrapper(String k, 
 			List<Integer> indices, 
@@ -286,17 +286,21 @@ abstract class AbstractModelImplementation implements StatisticalModel, Metropol
 	 * @return
 	 */
 	private Matrix getVarCovReady(String outputType, Map<Integer, ScriptResult> scriptResults) {
-		Matrix varCov = null;
-		for (int initAgeYr : scriptResults.keySet()) {
-			ScriptResult r = scriptResults.get(initAgeYr);
-			Matrix varCovI = r.computeVarCovErrorTerm(outputType);
-			if (varCov == null) {
-				varCov = varCovI;
-			} else {
-				varCov = varCov.matrixDiagBlock(varCovI);
+		if (this.isVarianceErrorTermAvailable) {
+			Matrix varCov = null;
+			for (int initAgeYr : scriptResults.keySet()) {
+				ScriptResult r = scriptResults.get(initAgeYr);
+				Matrix varCovI = r.computeVarCovErrorTerm(outputType);
+				if (varCov == null) {
+					varCov = varCovI;
+				} else {
+					varCov = varCov.matrixDiagBlock(varCovI);
+				}
 			}
+			return varCov;
+		} else {
+			return null;
 		}
-		return varCov;
 	}
 
 

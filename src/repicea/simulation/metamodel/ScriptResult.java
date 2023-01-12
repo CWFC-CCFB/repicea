@@ -36,7 +36,6 @@ import repicea.stats.data.Observation;
 public class ScriptResult {	
 	
 	public static final String DateYrFieldName = "DateYr";	
-	public static final String NbRealizationsFieldName = "NbRealizations";
 	public static final String TimeSinceInitialDateYrFieldName = "timeSinceInitialDateYr";
 	public static final String OutputTypeFieldName = "OutputType";
 	public static final String EstimateFieldName = "Estimate";
@@ -52,9 +51,11 @@ public class ScriptResult {
 	
 	/**
 	 * Constructor.
-	 * @param nbRealizations
-	 * @param dataset
-	 * @param outputTypes
+	 * @param nbRealizations the number of realizations (0 if deterministic or >0 if stochastic)
+	 * @param nbPlots the number of plots used in the projection
+	 * @param climateChangeScenario a ClimateChangeScenario enum
+	 * @param growthModel the model name
+	 * @param dataset a DataSet instance containing the projection for a group of plots
 	 */
 	public ScriptResult(int nbRealizations, 
 			int nbPlots,
@@ -91,7 +92,6 @@ public class ScriptResult {
 	 */
 	public static DataSet createEmptyDataSet() {
 		return new DataSet(Arrays.asList(new String[] {DateYrFieldName,
-				NbRealizationsFieldName, 
 				TimeSinceInitialDateYrFieldName,
 				OutputTypeFieldName, 
 				EstimateFieldName, 
@@ -107,15 +107,12 @@ public class ScriptResult {
 	 */
 	public static DataSet createEmptyReducedDataSet() {
 		return new DataSet(Arrays.asList(new String[] {DateYrFieldName,
-				NbRealizationsFieldName, 
 				TimeSinceInitialDateYrFieldName,
 				OutputTypeFieldName, 
 				EstimateFieldName}));
 	}
 
 	public int getNbRealizations() {return nbRealizations;}
-	
-	public int getNbPlots() {return nbPlots;} 
 	
 	public ClimateChangeScenario getClimateChangeScenario() {return climateChangeScenario;}
 	
@@ -137,30 +134,29 @@ public class ScriptResult {
 	 * Sort the dataset and create the variance-covariance matrix of the error term.
 	 * <br>
 	 * The current implementation assumes the variance-covariance matrix is a diagonal matrix.
-	 * If the DataSet instance does not have a variance field, the variance-covariance matrix
-	 * is then returned as a diagonal matrix with its diagonal element being equal to 1/n (n is 
-	 * the number of plots in this ScriptResult instance).
+	 * If the DataSet instance does not have a variance field, it returns null.
 	 * @param outputType a string defining the output type we are interested in (e.g. volume_alive_allspecies)
 	 * @return a Matrix
 	 */
 	protected Matrix computeVarCovErrorTerm(String outputType) {
-		int outputFieldTypeIndex = getDataSet().getFieldNames().indexOf(OutputTypeFieldName);
-		List<Observation> selectedObservations = new ArrayList<Observation>();
-		for (Observation o : getDataSet().getObservations()) {
-			if (o.toArray()[outputFieldTypeIndex].equals(outputType)) {
-				selectedObservations.add(o);
+		if (isVarianceAvailable()) {
+			int outputFieldTypeIndex = getDataSet().getFieldNames().indexOf(OutputTypeFieldName);
+			List<Observation> selectedObservations = new ArrayList<Observation>();
+			for (Observation o : getDataSet().getObservations()) {
+				if (o.toArray()[outputFieldTypeIndex].equals(outputType)) {
+					selectedObservations.add(o);
+				}
 			}
+			int nbObs = selectedObservations.size();
+			int varianceIndex = getDataSet().getFieldNames().indexOf(TotalVarianceFieldName);
+			DiagonalMatrix mat = new DiagonalMatrix(nbObs);
+			for (int i = 0; i < nbObs; i++) {
+				mat.setValueAt(i, i, (Double) selectedObservations.get(i).toArray()[varianceIndex]);
+			}
+			return mat;
+		} else {
+			return  null;
 		}
-		int nbObs = selectedObservations.size();
-		boolean isVarianceAvailable = isVarianceAvailable();
-		int varianceIndex = getDataSet().getFieldNames().indexOf(TotalVarianceFieldName);
-		DiagonalMatrix mat = new DiagonalMatrix(nbObs);
-		for (int i = 0; i < nbObs; i++) {
-			mat.setValueAt(i, i, isVarianceAvailable ? 
-					(Double) selectedObservations.get(i).toArray()[varianceIndex] :
-						1d / nbPlots);
-		}
-		return mat;
 	}
 	
 	/**
