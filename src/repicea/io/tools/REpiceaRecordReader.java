@@ -28,13 +28,13 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 
 import repicea.app.AbstractGenericTask;
+import repicea.app.UseModeProvider.UseMode;
 import repicea.gui.UIControlManager;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
-import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog.REpiceaProgressBarDialogParameters;
+import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.io.FormatReader;
 import repicea.io.tools.ImportFieldElement.FieldType;
-import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 

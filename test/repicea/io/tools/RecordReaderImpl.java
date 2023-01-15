@@ -24,10 +24,10 @@ import java.util.concurrent.CancellationException;
 
 import javax.swing.UIManager;
 
+import repicea.app.UseModeProvider.UseMode;
 import repicea.io.ImportTest;
 import repicea.io.tools.ImportFieldElement.FieldType;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
-import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
