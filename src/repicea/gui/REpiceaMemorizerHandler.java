@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.serial;
+package repicea.gui;
 
 import java.awt.Component;
 import java.awt.Container;
@@ -28,14 +28,14 @@ import java.awt.event.ComponentListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.ArrayList;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.swing.AbstractButton;
 
-import repicea.gui.OwnedWindow;
-import repicea.gui.REpiceaAWTProperty;
-import repicea.gui.Resettable;
-import repicea.gui.SynchronizedListening;
+import repicea.serial.Memorizable;
+import repicea.serial.MemorizerPackage;
 import repicea.serial.xml.XmlList;
+import repicea.serial.xml.XmlMarshaller;
 import repicea.serial.xml.XmlUnmarshaller;
 
 public class REpiceaMemorizerHandler implements ActionListener, SynchronizedListening, Resettable {
@@ -90,6 +90,49 @@ public class REpiceaMemorizerHandler implements ActionListener, SynchronizedList
 
 		}
 	}
+	
+	static class MemorizerWorker extends Thread {
+		
+		protected static final MemorizerPackage ShutDownMemorizerPackage = new MemorizerPackage();
+
+		private final LinkedBlockingDeque<MemorizerPackage> queue;
+
+		private final REpiceaMemorizerHandler handler;
+		
+		protected MemorizerWorker(String name, REpiceaMemorizerHandler handler) {
+			setName(name);
+			this.handler = handler;
+			queue = new LinkedBlockingDeque<MemorizerPackage>();
+		}
+
+		@Override
+		public void run() {
+			int numberOfFailures = 0;
+			boolean stop = false;
+			do {
+				try {
+					MemorizerPackage originalMp = queue.takeLast();
+					queue.clear();
+					if (System.identityHashCode(originalMp) == System.identityHashCode(ShutDownMemorizerPackage)) {
+						stop = true;
+					} else {
+						XmlMarshaller marshaller = new XmlMarshaller();
+						XmlList list = marshaller.marshall(originalMp);
+						handler.registerMemorizerPackage(list);
+					}
+				} catch (InterruptedException e) {
+					numberOfFailures++;
+					e.printStackTrace();
+				}
+			} while (numberOfFailures < 10 && !stop);
+		}
+
+		protected void addToQueue(MemorizerPackage mp) {
+			queue.addLast(mp);
+		}
+		
+	}
+
 	
 	private MemorizerPackage convertToMemorizerPackage(XmlList list) {
 		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();

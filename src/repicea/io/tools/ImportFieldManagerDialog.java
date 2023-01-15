@@ -68,7 +68,7 @@ import repicea.io.FormatField;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
 import repicea.lang.REpiceaSystem;
-import repicea.net.BrowserCaller;
+import repicea.util.BrowserCaller;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 

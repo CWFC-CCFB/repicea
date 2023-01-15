@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.net;
+package repicea.util;
 
 import java.lang.reflect.Method;
 
@@ -27,7 +27,7 @@ import java.lang.reflect.Method;
 public class BrowserCaller {
 	
 	/**
-	* Method to Open the Broser with Given URL
+	* Method to Open the Browser with Given URL
 	* @param url
 	*/
 	@SuppressWarnings({ "rawtypes", "unchecked" })

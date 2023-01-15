@@ -42,6 +42,7 @@ import repicea.gui.CommonGuiUtility;
 import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaDialog;
+import repicea.gui.REpiceaMemorizerHandler;
 import repicea.gui.Resettable;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
@@ -52,7 +53,6 @@ import repicea.io.REpiceaIOFileHandlerUI;
 import repicea.io.REpiceaOSVGFileHandlerUI;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.Memorizable;
-import repicea.serial.REpiceaMemorizerHandler;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 

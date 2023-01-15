@@ -58,7 +58,7 @@ import repicea.gui.genericwindows.REpiceaProgressBarDialog.REpiceaProgressBarDia
 import repicea.io.GFileFilter;
 import repicea.io.tools.REpiceaExportTool.InternalSwingWorkerForRecordSet;
 import repicea.lang.MemoryWatchDog.ExpectedMemoryCapacityException;
-import repicea.net.BrowserCaller;
+import repicea.util.BrowserCaller;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
