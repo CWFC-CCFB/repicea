@@ -16,7 +16,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
-import repicea.math.Matrix;
 import repicea.util.ObjectUtility;
 
 public class XmlSerializationTest {
@@ -754,38 +753,7 @@ public class XmlSerializationTest {
 
 		Assert.assertEquals("Testing deserialized array list size", 2, deserializedList.size());
 	}
-	
-	@Test
-	public void deserializationOfAMatrix() throws FileNotFoundException, XmlMarshallException {
-		String pathname = ObjectUtility.getPackagePath(getClass()) + "serializedMatrix.xml";
-//		Matrix myMatrix = new Matrix(2,4);
-//		XmlSerializer serializer = new XmlSerializer(pathname);
-//		serializer.writeObject(myMatrix);
 		
-		XmlDeserializer deserializer = new XmlDeserializer(pathname);
-		Matrix myDeserializedMatrix = (Matrix) deserializer.readObject();
-
-		Assert.assertEquals("Testing deserialized matrix nb rows", 2, myDeserializedMatrix.m_iRows);
-		Assert.assertEquals("Testing deserialized matrix nb cols", 4, myDeserializedMatrix.m_iCols);
-	}
-	
-	@Test
-	public void serializationWithAndWithoutCompression() throws XmlMarshallException {
-		Matrix mat = new Matrix(100,100);
-		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedWithCompression.xml";
-		XmlSerializer ser1 = new XmlSerializer(filename1);
-		ser1.writeObject(mat);
-		File file1 = new File(filename1);
-		long file1size = file1.length();
-		String filename2 = ObjectUtility.getPackagePath(getClass()) + "serializedWithoutCompression.xml";
-		XmlSerializer ser2 = new XmlSerializer(filename2, false);
-		ser2.writeObject(mat);
-		File file2 = new File(filename2);
-		long file2size = file2.length();
-		double ratio = (double) file2size / file1size; 
-		Assert.assertTrue("Testing compression ratio", ratio > 75);
-	}
-	
 	@Test
 	public void serializationLinkedHashMap() throws XmlMarshallException {
 		Map<String, Double> linkedHashMap = new LinkedHashMap<String, Double>();

@@ -27,8 +27,9 @@ import javax.swing.event.CellEditorListener;
 import javax.swing.event.ChangeEvent;
 import javax.swing.table.DefaultTableModel;
 
-import repicea.stats.data.DataSet;
-import repicea.stats.data.Observation;
+import repicea.data.Record;
+import repicea.data.Table;
+
 
 /**
  * The REpiceaTableModel is the model for the REpiceaTable class.
@@ -37,7 +38,7 @@ import repicea.stats.data.Observation;
 @SuppressWarnings("serial")
 public class REpiceaTableModel extends DefaultTableModel implements CellEditorListener {
 
-	private DataSet dataSet;
+	private Table dataSet;
 	private final List<Class<?>> columnClass;
 	private final Map<Integer, Boolean> vetos;
 
@@ -47,11 +48,11 @@ public class REpiceaTableModel extends DefaultTableModel implements CellEditorLi
 		vetos = new HashMap<Integer, Boolean>();
 	}
 
-	public REpiceaTableModel(DataSet dataSet) {
+	public REpiceaTableModel(Table dataSet) {
 		this(dataSet.getFieldNames().toArray(new String[] {}));
 		this.dataSet = dataSet;
-		for (Observation obs : this.dataSet.getObservations()) {
-			addRow(obs.toArray());
+		for (Record obs : this.dataSet.getRecords()) {
+			addRow(obs.getContentArray());
 		}
 	}
 	

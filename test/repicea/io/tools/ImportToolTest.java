@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.app.UseModeProvider.UseMode;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaGUITestRobot;
 import repicea.gui.genericwindows.REpiceaSimpleListDialog;
@@ -16,7 +17,6 @@ import repicea.io.ImportTest;
 import repicea.lang.REpiceaSystem;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializerChangeMonitor;
-import repicea.simulation.UseModeProvider.UseMode;
 import repicea.util.ObjectUtility;
 
 public class ImportToolTest {

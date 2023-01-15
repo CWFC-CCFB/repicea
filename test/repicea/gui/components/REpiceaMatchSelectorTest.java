@@ -24,10 +24,9 @@ import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;
 
-import repicea.gui.REpiceaAWTEvent;
+import repicea.app.UseModeProvider.UseMode;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaGUITestRobot;
-import repicea.simulation.covariateproviders.treelevel.TreeStatusProvider.StatusClass;
 
 public class REpiceaMatchSelectorTest {
 
@@ -75,10 +74,10 @@ public class REpiceaMatchSelectorTest {
 	
 	@Test
 	public void cancelOkTest() throws Exception {
-		REpiceaMatchSelector<StatusClass> selector = new REpiceaMatchSelector<StatusClass>(new String[]{"a","b","c","d","e","f"},
-				StatusClass.values(), 
+		REpiceaMatchSelector<UseMode> selector = new REpiceaMatchSelector<UseMode>(new String[]{"a","b","c","d","e","f"},
+				UseMode.values(), 
 				-1, 
-				new String[]{"string", "status"});
+				new String[]{"string", "usemode"});
 		REpiceaMatchSelectorDialog dlg = selector.getUI(null);
 //		Runnable toRun = new Runnable() {
 //			@Override
@@ -97,13 +96,13 @@ public class REpiceaMatchSelectorTest {
 		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
 
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
-		for (StatusClass sc : StatusClass.values()) {
+		for (UseMode sc : UseMode.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
 		}
 		
 		REpiceaMatchSelector<MyComplexObjectClass> selector2 = new REpiceaMatchSelector<MyComplexObjectClass>(new String[]{"a","b","c","d","e","f"},
 				complexObjects.toArray(new MyComplexObjectClass[]{}), 
-				new String[]{"string", "status", "index"});
+				new String[]{"string", "usemode", "index"});
 		dlg = selector2.getUI(null);
 		
 		t = robot.showWindow(selector2);
@@ -119,7 +118,7 @@ public class REpiceaMatchSelectorTest {
 	@Test
 	public void changeValueTest() throws Exception {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
-		for (StatusClass sc : StatusClass.values()) {
+		for (UseMode sc : UseMode.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
 		}
 		
@@ -135,8 +134,8 @@ public class REpiceaMatchSelectorTest {
 		robot.letDispatchThreadProcess();
 		MyComplexObjectClass match = selector.matchMap.get("b");
 		
-		Assert.assertEquals("Testing the match", StatusClass.alive.name(), match.name);
-		Assert.assertEquals("Testing the match index", StatusClass.alive.ordinal(), match.index);
+		Assert.assertEquals("Testing the match", UseMode.GUI_MODE.name(), match.name);
+		Assert.assertEquals("Testing the match index", UseMode.GUI_MODE.ordinal(), match.index);
 		
 		robot.clickThisButton("Ok", REpiceaAWTProperty.WindowsJustSetToInvisible);
 		dlg.dispose();

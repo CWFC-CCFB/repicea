@@ -3,7 +3,7 @@ package repicea;
 import org.junit.Assert;
 import org.junit.Test;
 
-import repicea.simulation.UseModeProvider;
+import repicea.app.UseModeProvider;
 
 public class ProductionEnvironmentTest {
 	
