@@ -51,9 +51,6 @@ sourceSets {
 // make sure to set Java Compiler > Errors Warnings > Deprecated and Restricted API > Forbidden reference to WARNING instead of ERROR
 dependencies {
     implementation 'com.cedarsoftware:json-io:4.13.0'
-    implementation group: 'org.apache.xmlgraphics', name: 'batik-svggen', version: '1.14'
-	implementation group: 'org.apache.xmlgraphics', name: 'batik-dom', version: '1.14'
-	implementation group: 'org.apache.xmlgraphics', name: 'batik-codec', version: '1.14'
  //    implementation 'org.apache.xmlgraphics:batik-all:1.14'	
     implementation 'net.sf.ucanaccess:ucanaccess:5.0.1'
     
