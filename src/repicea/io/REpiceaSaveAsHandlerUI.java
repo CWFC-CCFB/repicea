@@ -45,7 +45,7 @@ public abstract class REpiceaSaveAsHandlerUI {
 	private final List<FileFilter> fileFilters;
 	
 	
-	REpiceaSaveAsHandlerUI(Component component, FileFilter... fFilters) {
+	protected REpiceaSaveAsHandlerUI(Component component, FileFilter... fFilters) {
 		this.component = component;
 		if (fFilters != null) {
 			fileFilters = Arrays.asList(fFilters);
