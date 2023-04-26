@@ -1,3 +1,7 @@
+<!-- badges: start -->
+[![Java CI](https://github.com/CWFC-CCFB/repicea/actions/workflows/gradle.yml/badge.svg)](https://github.com/CWFC-CCFB/repicea/actions/workflows/gradle.yml)
+<!-- badges: end -->
+
 Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
 
 Email: mathieu.fortin.re@gmail.com
