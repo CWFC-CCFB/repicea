@@ -19,7 +19,6 @@ public class JSONConfigurationTest {
 		try {
 			local = new JSONConfiguration(JSONfilename);			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			Assert.assertTrue(false);
 			return;
@@ -41,7 +40,6 @@ public class JSONConfigurationTest {
 		try {
 			local = new JSONConfiguration(JSONfilename);			
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 			Assert.assertTrue(false);
 			return;
