@@ -34,9 +34,10 @@ jobs:
     - name: Setup Gradle
       uses: gradle/gradle-build-action@v2
 
-    - name: Execute Gradle 'integrationTest' task
+    - name: Execute Gradle 'integrationTest' task on Linux
       if: ${{ matrix.os == 'ubuntu-latest' }}
       run: xvfb-run ./gradlew integrationTest
-      
+
+    - name: Execute Gradle 'integrationTest' task on other OS
       if: ${{ matrix.os != 'ubuntu-latest' }}
       run: ./gradlew integrationTest  
