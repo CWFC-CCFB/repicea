@@ -29,24 +29,26 @@ import repicea.lang.REpiceaSystem;
 
 /**
  * This class has a design similar to the SwingWorker class. It embeds a process that is to be a Java process. The 
- * commands in the constructor majes it possible to specified the runnable jar and its options. </br>
- * </br>
- * An exemple of an instance of this class could be</br>
- * </br>
- * {@code List<String> commands = new ArrayList<String>();}</br>
- * {@code commands.add("myJar.jar");}</br>
- * {@code JavaProcess jp = new JavaProcess(commands);} </br>
- * {@code jp.execute();} </br>
- * {@code int outValueFromRemoteJVM = jp.get();} </br>
- *  </br>
- * The method get() waits for the process to end. The result is actually the output value of the remote Java Virtual Machine (JVM), which is usually
- * 0 if the process ended properly. The class is designed to be run only once. Additional calls of the execute() method
+ * commands in the constructor majes it possible to specified the runnable jar and its options. <p>
+ * 
+ * An exemple of an instance of this class could be<p>
+ * 
+ * <code>
+ * List&#60;String&#62; commands = new ArrayList&#60;String&#62;();<br>
+ * commands.add("myJar.jar");<br>
+ * JavaProcess jp = new JavaProcess(commands);<br>
+ * jp.execute();<br>
+ * int outValueFromRemoteJVM = jp.get();<br>
+ * </code><p>
+ * 
+ * The {@code get} method waits for the process to end. The result is actually the output value of the remote Java Virtual Machine (JVM), 
+ * which is 0 if the process ended properly. The class is designed to be run only once. Additional calls of the execute() method
  * will not result in the instantiation of a new independent Java process. As in the SwingWorker class, this class also
- * send PropertyChangeEvent to eventual listeners that can be added through the addPropertyChangeListener method. </br>
- * </br>
+ * send PropertyChangeEvent to eventual listeners that can be added through the addPropertyChangeListener method. <p>
+ * 
  * Objects can be sent to the process using the method sendObjectToProcess(). The objects are sent asynchronously and may not be sent is the process
- * ends before. The incoming stream, ie. the output stream of the remote JVM, is sent to the PropertyChangeListener instances using the "MessageReceived" property. </br>
- * </br>
+ * ends before. The incoming stream, ie. the output stream of the remote JVM, is sent to the PropertyChangeListener instances using the "MessageReceived" property. <p>
+ * 
  * Finally, the class implements the Serializable interface. Actually, only some fields are serializable. A JavaProcess instance can be serialized either before or after 
  * executing the process, but not during its execution.
  * 

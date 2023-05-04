@@ -200,7 +200,8 @@ abstract class AbstractIndependentProcess implements IndependentProcess {
 
 	/**
 	 * This method creates the proper Process instance according to the derived class. 
-	 * @return a Process object
+	 * @return a Process instance 
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected abstract Process createIndependentProcess() throws IOException;
 

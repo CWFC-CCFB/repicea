@@ -28,7 +28,7 @@ public interface REpiceaMatchComplexObject<E>  {
 
 	/**
 	 * Return the number of fields contain in this object
-	 * @return
+	 * @return an integer
 	 */
 	public int getNbAdditionalFields();
 

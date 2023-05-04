@@ -129,8 +129,8 @@ public class DnDPanel<D extends REpiceaUIObject> extends REpiceaScrollPane imple
 
 	/**
 	 * Returns the absolute point by adding the offset of upper left corner of the viewport position.
-	 * @param arg0
-	 * @return
+	 * @param arg0 a LocatedEvent instance
+	 * @return a Point instance
 	 */
 	protected Point getAbsoluteLocationFromDropEvent(LocatedEvent arg0) {
 		Point dropPoint = arg0.getLocation();

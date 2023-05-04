@@ -117,7 +117,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 
 	/**
 	 * This method adds a potential treatment to the list of available treatments
-	 * @param enumValues an array of enum variable 
+	 * @param values an array of enum variable 
 	 */
 	protected void addMatches(E[] values) {
 		for (E value : values) {
@@ -278,7 +278,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 
 	/**
 	 * This method returns the match corresponding to the parameter.
-	 * @param obj
+	 * @param obj the Object instance for which we want the match
 	 * @return an Object of class E
 	 */
 	public E getMatch(Object obj) {

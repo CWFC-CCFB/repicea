@@ -107,7 +107,7 @@ public class DatabaseConnectionManager {
  	 * This method removes the user from the ConnectionUsers Map and
  	 * eventually closes the connection if there is no user left.
  	 * @param user the Object instance that uses this connection
- 	 * @throws SQLException
+ 	 * @throws SQLException if a database access error has occurred
  	 */
  	public static void removeUser(Object user) throws SQLException {
  		lock();

@@ -48,7 +48,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	/**
 	 * General constructor for files.
 	 * @param filename the filename.
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected FormatReader(String filename) throws IOException {
 		this.filename = filename;
@@ -86,7 +86,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	/**
 	 * This method opens the stream depending on its nature (a resource or a file)
 	 * @return an InputStream instance
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected final InputStream openStream() throws IOException {
 		InputStream in;
@@ -139,6 +139,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	/**
 	 * This method returns the next record in the file.
 	 * @return an array of Object instances
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public Object[] nextRecord() throws IOException {
 		return nextRecord(0);
@@ -148,6 +149,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	 * This method skips some lines and then reads a record in the file;
 	 * @param skipThisNumberOfLines the number of lines to skip before reading the observation
 	 * @return an Array of Object instances
+ 	 * @throws IOException if an I/O error has occurred
 	 */
 	public abstract Object[] nextRecord(int skipThisNumberOfLines) throws IOException;
 	
@@ -155,7 +157,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	 * This method selects the appropriate FormatReader class.
 	 * @param fileSpec a list of specification for the file to open (e.g. the filename, the table, etc...)
 	 * @return a FormatReader instance
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public static FormatReader createFormatReader(String... fileSpec) throws IOException {
 		try {

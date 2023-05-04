@@ -49,7 +49,7 @@ public class SQLWriter extends FormatWriter<SQLHeader> {
 	 * @param dataBaseFile the file that represents the database
 	 * @param table the table in which the data are to be written
 	 * @param appendTable a boolean, with true meaning that the new record is appended to previous record
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public SQLWriter(File dataBaseFile, String table, boolean appendTable) throws IOException {
 		super(dataBaseFile, true);		// append the database by default

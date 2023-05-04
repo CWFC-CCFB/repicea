@@ -58,7 +58,7 @@ public class REpiceaAppVersion {
 	
 	/**
 	 * Return the version number. Typically, 1.1.819. The last number represents the revision.
-	 * @return
+	 * @return a String
 	 */
 	public final String getVersion() {return version;}
 	

@@ -50,14 +50,17 @@ public class JSONConfiguration {
 	}
 	
 	/**
-	 * This constructor creates a deep copy of the given object
+	 * This constructor creates a deep copy of the given object.
+	 * @param object the JSONConfiguration instance to be cloned.
 	 */
 	public JSONConfiguration(JSONConfiguration object) {
 		data = (LinkedHashMap<String, Object>) ObjectUtility.copyMap(object.data);		
 	}
 	
 	/**
-	 * This constructor loads the given filename into data
+	 * This constructor loads the given filename into data.
+	 * @param filename the path to the file that contains the configuration.
+	 * @throws FileNotFoundException if the file cannot be found.
 	 */
 	public JSONConfiguration(String filename) throws FileNotFoundException {
 		this();
@@ -65,7 +68,9 @@ public class JSONConfiguration {
 	}
 	
 	/**
-	 * This method loads the given filename into data
+	 * This method loads the given filename into data.
+	 * @param filename the path to the file that contains the configuration.
+	 * @throws FileNotFoundException if the file cannot be found.
 	 */
 	public void load(String filename) throws FileNotFoundException {
 		FileInputStream stream = new FileInputStream(filename);
@@ -117,7 +122,7 @@ public class JSONConfiguration {
 	 * 
 	 * @param key The complete key including its path, i.e. "level1/level2/thisparam" where thisparam is the key located in a section 
 	 * called level2 located in a section called level1 located at the root of the JSON file
-	 * @param defaultValue The default value to be returned if the key is not found.  
+	 * @param value The value to be set in the map.  
 	 */
 	public void put(String key, Object value) {		
 		put(key, value, data);
@@ -129,6 +134,7 @@ public class JSONConfiguration {
 	 * If no separator is found in the key, it puts the value in the current level.
 	 *  
 	 * @param key The key including its path for the current hierarchical level, i.e. "level2/thisparam" if level1 was already processed  
+	 * @param value The value to be set in the map.  
 	 * @param submap The map corresponding to the hierarchical level into which to store the value.
 	 * @see put(String key, Object value)
 	 */

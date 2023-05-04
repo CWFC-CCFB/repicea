@@ -63,9 +63,9 @@ public class XmlSerializer {
 	
 	
 	/**
-	 * This method writes an object to the xml file.
+	 * This method writes an object to the XML file.
 	 * @param obj any Object instance
-	 * @throws XmlMarshallException 
+	 * @throws XmlMarshallException if a marshal error has occurred
 	 */
 	@SuppressWarnings("unchecked")
 	public void writeObject(Object obj) throws XmlMarshallException {

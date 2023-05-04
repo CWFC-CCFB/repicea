@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CancellationException;
 
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
@@ -52,21 +51,23 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * The REpiceaExportTool class is an abstract class that can save a file from particular record sets.
  * The UI interface of this class also provides an export option list and a file selection panel. The export 
  * options are defined in the abstract method defineExportOptions() while the record sets are built through the
- * createRecordSets(List<Enum> selectedExportOptions) method. By default, the format is dbf, the user can select 
- * other format though. </br>
- * </br>
+ * createRecordSets(List&#60;Enum&#62; selectedExportOptions) method. By default, the format is dbf, the user can select 
+ * other format though. <p>
+ *
  * Each record set is given a worker that computes the record and passes them to an associated thread that write
  * them down in a file. The first worker has a queue from which the saving thread picks the records. Consequently,
  * the exportRecordSets method returns a series of empty REpiceaRecordSet instances. If the saving is disabled 
  * through the setSaveFileEnabled method, then the exportRecordSets method returns a series of complete 
- * REpiceaRecordSet instances. </br>
- * </br>
+ * REpiceaRecordSet instances. <p>
+ * 
  * To use this class, first define a derived class that implements the two abstract methods. To export a dbf file,
- * first instantiate an object of the derived class. Then use the three following method: </br>
- * </br>
- * {@code setFilename(myFile);} </br>
- * {@code setSelectedOptions(mySelectedOptions);} </br>
- * {@code exportRecordSets();} </br>
+ * first instantiate an object of the derived class. Then use the three following method: <p>
+ * 
+ * <code>
+ * setFilename(myFile);<br>
+ * setSelectedOptions(mySelectedOptions);<br>
+ * exportRecordSets();<br>
+ * </code>
  * 
  * @author Mathieu Fortin - April 2016 
  * @author Mathieu Fortin - refactoring September 2020 
@@ -419,10 +420,10 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	 * list of two or more Enum will throw an exception. The multiple selection mode can be enabled 
 	 * through the setMultipleSelection method.
 	 * @param selectedOptions a set of Enum variables that should be among the available export options
-	 * @throws Exception
+	 * @throws IOException if one of selected options is not available
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setSelectedOptions(List<Enum> selectedOptions) throws Exception {
+	public void setSelectedOptions(List<Enum> selectedOptions) throws IOException {
 		selectedExportOptions.clear();
 		for (Enum selectedOption : selectedOptions) {
 			if (availableExportOptions.contains(selectedOption)) {
@@ -432,7 +433,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 				}
 			} else {
 				selectedExportOptions.clear();
-				throw new Exception("This export option is not compatible!");
+				throw new IOException("This export option is not compatible!");
 			}
 		}
 	}
@@ -464,7 +465,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	/**
 	 * If set to true, the export tool does not delete the file but rather it appends the records
 	 * to the existing file.
-	 * @param appendFileEnabled
+	 * @param appendFileEnabled true to append the file 
 	 */
 	public void setAppendFileEnabled(boolean appendFileEnabled) {this.appendFileEnabled = appendFileEnabled;}	
 	
@@ -478,8 +479,7 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 
 	/**
 	 * This method sets the filename of the output file.
-	 * @param filename a String
-	 * @throws IOException if the file type is unknown
+	 * @param filename the name of the output file
 	 */
 	public void setFilename(String filename) {
 		if (!filename.trim().isEmpty() && GFileFilter.getFileType(filename) == FileType.UNKNOWN) {
@@ -545,16 +545,11 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	 * REpiceaRecordSet instance. These are empty because the saving thread picks all the records
 	 * to write them into a file. If the saving is disabled, then the REpiceaRecordSet instances are
 	 * full.
-	 * @throws Exception
+	 * @throws Exception if an error has occurred
  	 * @return a Map with the selected options (keys) and their associated record sets (values)
 	 */
 	@SuppressWarnings("rawtypes")
 	public Map<Enum, REpiceaRecordSet> exportRecordSets() throws Exception {
-//		Map<Enum, REpiceaRecordSet> outputMap = new HashMap<Enum, REpiceaRecordSet>();
-//		for (Enum selectedOutputOption : selectedExportOptions) {
-//			outputMap.put(selectedOutputOption, createRecordSet(selectedOutputOption));
-//		}
-//		return outputMap;
 		return createRecordSets(selectedExportOptions);
 	}
 	

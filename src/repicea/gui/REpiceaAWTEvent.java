@@ -37,8 +37,7 @@ public class REpiceaAWTEvent extends AWTEvent {
 	
 	/**
 	 * Constructor.
-	 * @param source the source of the event
-	 * @param message a message 
+	 * @param property the REpiceaAWTProperty instance that defines this event
 	 */
 	public REpiceaAWTEvent(REpiceaAWTProperty property) {
 		super(REpiceaToolKit.getInstance(), REPICEA_EVENT_MASK);
@@ -48,7 +47,7 @@ public class REpiceaAWTEvent extends AWTEvent {
 	/**
 	 * Constructor.
 	 * @param source the source of the event
-	 * @param message a message 
+	 * @param property the REpiceaAWTProperty instance that defines this event
 	 */
 	public REpiceaAWTEvent(Object source, REpiceaAWTProperty property) {
 		super(source, REPICEA_EVENT_MASK);

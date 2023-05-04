@@ -70,7 +70,6 @@ public class XmlDeserializer {
 	/**
 	 * Constructor.
 	 * @param is an InputStream instance from which the object is deserialized
-	 * @throws FileNotFoundException
 	 */
 	public XmlDeserializer(InputStream is) {
 		this.is = is;
@@ -81,7 +80,7 @@ public class XmlDeserializer {
 	/**
 	 * This method returns the object that has been deserialized.
 	 * @return an Object instance
-	 * @throws XmlMarshallException 
+	 * @throws XmlMarshallException if an XML marshalling error has occurred
 	 */
 	public Object readObject() throws XmlMarshallException {
 		JAXBContext jaxbContext;
@@ -94,7 +93,6 @@ public class XmlDeserializer {
 	 			try {	// we first assume that the file is compressed
 	 				FileInputStream fis = new FileInputStream(file);
 	 				iis = new InflaterInputStream(fis);
-//		 			obj = jaxbUnmarshaller.unmarshal(file);
 		 			obj = jaxbUnmarshaller.unmarshal(iis);
 	 			} catch (UnmarshalException e) {
 	 				if (iis != null) { // we try to close the inflater and we move on to an uncompressed file

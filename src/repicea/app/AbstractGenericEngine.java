@@ -151,7 +151,7 @@ public abstract class AbstractGenericEngine {
 		}
 	}
 	
-	protected Logger logger;
+	protected LoggerConsole logger;
 	protected LinkedBlockingQueue<GenericTask> queue;
 	protected List<String> tasksDone;
 	private InternalWorker worker;
@@ -266,7 +266,7 @@ public abstract class AbstractGenericEngine {
 	/**
 	 * This method locks the engine while the interface can be doing something else.
 	 * @param millisec the number of milliseconds to wait
-	 * @throws InterruptedException
+	 * @throws InterruptedException if the lock is somehow interrupted
 	 */
 	protected void lockEngine(long millisec) throws InterruptedException {
 		synchronized(lock) {
@@ -281,7 +281,7 @@ public abstract class AbstractGenericEngine {
 	/**
 	 * This method locks the engine while the interface can be doing something else. The engine 
 	 * can be locked only if the executing thread is not the internal worker.
-	 * @throws InterruptedException
+	 * @throws InterruptedException if the lock is somehow interrupted
 	 */
 	protected void lockEngine() throws InterruptedException {
 		if (Thread.currentThread() != worker) {

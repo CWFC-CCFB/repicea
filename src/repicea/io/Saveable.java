@@ -25,7 +25,7 @@ public interface Saveable {
 	/**
 	 * This method saves the records in a file denominated by the filename parameter.
  	 * @param filename the name of the file 
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public void save(String filename) throws IOException;
 	

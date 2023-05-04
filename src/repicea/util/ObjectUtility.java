@@ -43,8 +43,8 @@ public final class ObjectUtility {
 	
 
 	/**
-	 * This method makes it possible to clone a Map type object
-	 * @param oMap
+	 * Clone a Map type object
+	 * @param oMap the Map to be cloned
 	 * @return the cloned map
 	 */
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -349,11 +349,11 @@ public final class ObjectUtility {
 	}
 
 	
-	
 	/**
 	 * This method converts a List of T instance into a Vector of the
 	 * same instances
 	 * @param list a List object
+	 * @param <T> the class of the objects contained in the list
 	 * @return a Vector object
 	 */
 	public static <T> Vector<T> convertFromListToVector(List<T> list) {

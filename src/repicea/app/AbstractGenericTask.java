@@ -120,7 +120,7 @@ public abstract class AbstractGenericTask extends SwingWorker<Boolean, Object> i
 	/**
 	 * This method is the inner part of the doInBackground method. 
 	 * It should be defined in derived classes.
-	 * @throws Exception 
+	 * @throws Exception if an error has occurred
 	 */
 	protected abstract void doThisJob() throws Exception;
 

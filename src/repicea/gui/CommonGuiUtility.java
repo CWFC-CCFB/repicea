@@ -175,7 +175,6 @@ public class CommonGuiUtility {
 	 * @param fileFilters a Vector of FileFilter instances
 	 * @param dialogType either JFileChooser.SAVE_DIALOG or JFileChooser.OPEN_DIALOG
 	 * @return a FileChooserOutput instance
-	 * @throws IOException if the dialog type is not recognized
 	 */
 	public static FileChooserOutput browseAction(Component owner,
 								int fileSelectionMode, 
@@ -194,7 +193,6 @@ public class CommonGuiUtility {
 	 * @param dialogType either JFileChooser.SAVE_DIALOG or JFileChooser.OPEN_DIALOG
 	 * @param fsv a FileSystemView instance
 	 * @return a FileChooserOutput instance (can be null)
-	 * @throws IOException if the dialog type is not recognized
 	 */
 	public static FileChooserOutput browseAction(Component owner,
 								int fileSelectionMode, 
@@ -300,6 +298,7 @@ public class CommonGuiUtility {
 	/**
 	 * This static method asks the user if he/she wants to write over an
 	 * existing file.
+	 * @param owner the parent component
 	 * @return true if the user accepts or false otherwise
 	 */
 	public static boolean popupWriteOverWarningDialog(Component owner) {

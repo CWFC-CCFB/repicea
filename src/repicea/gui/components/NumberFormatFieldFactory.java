@@ -358,6 +358,7 @@ public class NumberFormatFieldFactory {
 	 * This method returns JFormattedNumericField instances with some bounds and number type (integer or double).
 	 * @param type a Type enum instance (Integer or Double)
 	 * @param range a Range enum instance (Negative, StrictlyNegative, Positive, StrictlyPositive, All)
+	 * @param nullAllowed true to allow null values
 	 * @return a JFormattedTextField instance
 	 */
 	public static JFormattedNumericField createNumberFormatField(Type type, Range range, boolean nullAllowed) {
@@ -370,6 +371,7 @@ public class NumberFormatFieldFactory {
 	 * @param numberOfColumns the number of columns in the text field
 	 * @param type a Type enum instance (Integer or Double)
 	 * @param range a Range enum instance (Negative, StrictlyNegative, Positive, StrictlyPositive, All)
+	 * @param nullAllowed true to allow null values
 	 * @return a JFormattedTextField instance
 	 */
 	public static JFormattedNumericField createNumberFormatField(int numberOfColumns, Type type, Range range, boolean nullAllowed) {

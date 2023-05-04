@@ -39,9 +39,9 @@ public class GExportFieldDetails {
 	
 	/**
 	 * Constructor
-	 * Requires the field name and its value. The type is automatically set through a "instanceof" function
-	 * @param name
-	 * @param value
+	 * Requires the field name and its value. The type is automatically set through a "instanceof" method.
+	 * @param name the field name
+	 * @param value the value of the field
 	 */
 	public GExportFieldDetails(String name, Object value) {
 		this.fieldName = name;

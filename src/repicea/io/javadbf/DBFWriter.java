@@ -64,7 +64,7 @@ public class DBFWriter extends FormatWriter<DBFHeader> {
 	/**
 	 *	Creates a DBFWriter which can append to records to an existing DBF file.
 	 *	@param dbfFile The file passed in should be a valid DBF file.
-	 *	@exception Throws DBFException if the passed in file does exist but not a valid DBF file, or if an IO error occurs.
+	 *	@throws DBFException if the passed in file does exist but not a valid DBF file, or if an IO error occurs.
 	 *	@deprecated The append option is automatically determined in this writer depending on whether the file exists. This 
 	 * feature is unsafe. The constructor with the append parameter is preferable to this one.
 	 */
@@ -104,7 +104,7 @@ public class DBFWriter extends FormatWriter<DBFHeader> {
 	 	Creates a DBFWriter which can append to records to an existing DBF file.
 		@param dbfFile The file passed in should be a valid DBF file.
 		@param append true if the file is to be appended
-		@exception Throws IOException if the passed in file does exist but not a valid DBF file, or if an IO error occurs.
+		@throws IOException if the passed in file does exist but not a valid DBF file, or if an IO error occurs.
 	 */
 	public DBFWriter(File dbfFile, boolean append) throws IOException {
 		super(dbfFile, append);
@@ -170,7 +170,9 @@ public class DBFWriter extends FormatWriter<DBFHeader> {
 	
 	/**
 	 * Sets fields. 
-	 * @deprecated Use the setFields(Vector<FormatField> fields) method instead
+	 * @param fields an array of DBFField instances
+	 * @throws IOException if an I/O error has occurred
+	 * @deprecated Use the setFields(Vector&#60;FormatField&#62; fields) method instead
 	 */
 	@Deprecated
 	public void setFields(DBFField[] fields) throws IOException {
@@ -284,7 +286,9 @@ public class DBFWriter extends FormatWriter<DBFHeader> {
 	}
 
 	/**
-	 *	Writes the set data to the OutputStream.
+	 * Writes the set data to the OutputStream.
+	 * @param out the OutputStream instance to which the data are sent
+	 * @throws DBFException if an error has occurred
 	 */
 	public void write(OutputStream out) throws DBFException {
 

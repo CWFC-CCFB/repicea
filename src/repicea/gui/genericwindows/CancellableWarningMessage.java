@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea library.
+ *
+ * Copyright (C) 2009-2012 Mathieu Fortin for Rouge Epicea.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.gui.genericwindows;
 
 import java.awt.BorderLayout;
@@ -25,8 +43,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 
 
 /**
- * This dialog shows a warning when the projection exceeds a particular numbers of steps
- * It is possible to disable this warning through check box
+ * This dialog shows a warning. It is possible to disable this warning through check box.
  * Author Mathieu Fortin - August 2009
  */
 @SuppressWarnings("serial")
@@ -60,6 +77,8 @@ public class CancellableWarningMessage extends REpiceaDialog implements ActionLi
 		
 	/**	
 	 * Constructor.
+	 * @param parent the parent dialog
+	 * @param message the message to be displayed
 	 */
 	public CancellableWarningMessage(JDialog parent, String message) {
 		super(parent);

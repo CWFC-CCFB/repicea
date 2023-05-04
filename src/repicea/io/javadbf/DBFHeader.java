@@ -105,7 +105,7 @@ public class DBFHeader extends FormatHeader<DBFField> {
 	/**
 	 * This method writes the header in the data file denominated by the DataOutput instance.
 	 * @param dataOutput a DataOutput instance
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected void write(DataOutput dataOutput) throws IOException {
 

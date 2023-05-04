@@ -39,6 +39,7 @@ import repicea.io.FormatReader;
 	Object are as follows:
 
 	<table>
+	<caption>Corresponding types</caption>
 	<tr>
 		<th>xBase Type</th><th>Java Type</th>
 	</tr>
@@ -77,7 +78,7 @@ public class DBFReader extends FormatReader<DBFHeader> {
 		header information can be quried there on. And it will 
 		be ready to return the first row.
 		@param filename the filename where the data is read from.	
-	 * @throws IOException 
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public DBFReader(String filename) throws IOException {
 		super(filename);

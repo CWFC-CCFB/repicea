@@ -177,7 +177,8 @@ public class REpiceaTabbedPane extends JTabbedPane implements ActionListener {
 	
 	/**
 	 * General constructor.
-	 * @param closeTabEnabled
+	 * @param closeTabEnabled A boolean to enable the close tab option. When enabled, a "x" symbol appears in each tab. 
+	 * Clicking on it allows to close the tab.
 	 */
 	public REpiceaTabbedPane(boolean closeTabEnabled) {
 		this.closeTabEnabled = closeTabEnabled;

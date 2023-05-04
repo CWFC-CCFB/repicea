@@ -68,7 +68,6 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 	}
 
 	
-//	private final IOUserInterface component;
 	private final IOUserInterfaceableObject componentOwner;
 	private final AbstractButton saveButton;
 	private final AbstractButton saveAsButton;
@@ -82,9 +81,9 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 	 * 
 	 * @param component Must be a Component instance implementing the IOUserInterface
 	 * @param componentOwner an IOUserInterfaceableObject instance
-	 * @param saveButton
-	 * @param saveAsButton
-	 * @param loadButton
+	 * @param saveButton the AbstractButton instance that stands for the "Save" action
+	 * @param saveAsButton the AbstractButton instance that stands for the "Save as" action
+	 * @param loadButton the AbstractButton instance that stands for the "Load" action
 	 */
 	public REpiceaIOFileHandlerUI(IOUserInterface component, 
 			IOUserInterfaceableObject componentOwner,

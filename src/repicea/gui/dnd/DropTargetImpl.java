@@ -44,7 +44,7 @@ public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetLi
 	/**
 	 * Constructor 1.
 	 * @param comp a Container instance that implements AcceptableDropContainer
-	 * @param classToBeAccepted
+	 * @param classToBeAccepted the class of the object to be accepted in the drop container
 	 * @param dragType an integer (see DnDConstants)
 	 * @param acceptedSources a List of Component from which the drag may come (can be null)
 	 */
@@ -62,7 +62,7 @@ public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetLi
 	/**
 	 * Constructor 2.
 	 * @param comp a Container instance that implements AcceptableDropContainer
-	 * @param classToBeAccepted
+	 * @param classToBeAccepted the class of the object to be accepted in the drop container
 	 * @param acceptedSources a List of Component from which the drag may come (can be null)
 	 */
 	@SuppressWarnings("rawtypes")
@@ -74,7 +74,7 @@ public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetLi
 	/**
 	 * Constructor 3.
 	 * @param comp a Container instance that implements AcceptableDropContainer
-	 * @param classToBeAccepted
+	 * @param classToBeAccepted the class of the object to be accepted in the drop container
 	 */
 	@SuppressWarnings("rawtypes")
 	public DropTargetImpl(AcceptableDropComponent<P> comp, Class classToBeAccepted) {
@@ -84,7 +84,7 @@ public class DropTargetImpl<P> extends DropTargetAdapter implements DropTargetLi
 	/**
 	 * Constructor 4.
 	 * @param comp a Container instance that implements AcceptableDropContainer
-	 * @param classToBeAccepted
+	 * @param classToBeAccepted the class of the object to be accepted in the drop container
 	 * @param dragType an integer (see DnDConstants)
 	 */
 	@SuppressWarnings("rawtypes")

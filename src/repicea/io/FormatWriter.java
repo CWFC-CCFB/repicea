@@ -67,7 +67,7 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	/**
 	 * This method sets the fields in the header.
 	 * @param formatHeader a H instance
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public void setFields(FormatHeader<FormatField> formatHeader) throws IOException {
 		setFields(formatHeader.getFieldList());
@@ -77,7 +77,7 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	/**
 	 * This method sets the fields in the header.
 	 * @param fields a Vector of FormatField instances
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	@SuppressWarnings("unchecked")
 	public void setFields(List<FormatField> fields) throws IOException {
@@ -100,14 +100,14 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	/**
 	 * This method writes a record in the output file.
 	 * @param record an Array of object to be written in the output file
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public abstract void addRecord(Object[] record) throws IOException;
 	
 	/**
 	 * This method validates the record before adding it to the output file.
-	 * @param record
-	 * @throws IOException
+	 * @param record an array of Object instances
+	 * @throws IOException if an I/O error has occurred
 	 */
 	protected void validateRecord(Object[] record) throws IOException {
 		if (getHeader().getNumberOfFields() == 0) {
@@ -129,7 +129,7 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	 * @param append true if the file is to be appended or false otherwise
 	 * @param fileSpec a series of string, the first being at least the name of the output file, the second can be the table if exporting in a database for example
 	 * @return a FormatWriter instance
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public static FormatWriter<? extends FormatHeader<? extends FormatField>> createFormatWriter(boolean append, String... fileSpec) throws IOException {
 		try {

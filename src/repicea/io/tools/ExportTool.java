@@ -50,17 +50,21 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 
 
 /**
- * The ExportTool class is an abstract class that can save a file from particular record sets.
+ * The ExportTool class is an abstract class that can save a file from particular record sets.<p>
+ * 
  * The UI interface of this class also provides an export option list and a file selection panel. The export options are 
  * defined in the abstract method defineExportOptions() while the record sets are built through the
- * setRecordSet(Enum selectedExportOption) method. By default, the format is dbf, the user can select other format though. </br>
+ * setRecordSet(Enum selectedExportOption) method. By default, the format is dbf, the user can select other format though.<p>
+ * 
  * To use this class, first define a derived class that implements the two abstract methods. To export a dbf file,
- * first instantiate an object of the derived class. Then use the three following method: </br>
- * </br>
- * {@code setFilename(myFile);} </br>
- * {@code setSelectedOptions(mySelectedOptions);} </br>
- * {@code createRecordSets();} </br>
- * {@code save();} </br>
+ * first instantiate an object of the derived class. Then use the following methods:<p>
+ * 
+ * <code>
+ * setFilename(myFile);<br>
+ * setSelectedOptions(mySelectedOptions);<br>
+ * createRecordSets();<br>
+ * save();
+ * </code>
  * @author Mathieu Fortin - January 2011
  */
 @Deprecated
@@ -328,17 +332,17 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 	 * This method sets the export options. If the selectedOption Enum variable is not part of the 
 	 * available export options, an exception is thrown.
 	 * @param selectedOptions a set of Enum variables that should be among the available export options
-	 * @throws Exception
+	 * @throws IOException if a selected option is not found in the available export options
 	 */
 	@SuppressWarnings("rawtypes")
-	public void setSelectedOptions(Set<Enum> selectedOptions) throws Exception {
+	public void setSelectedOptions(Set<Enum> selectedOptions) throws IOException {
 		selectedExportOptions.clear();
 		for (Enum selectedOption : selectedOptions) {
 			if (availableExportOptions.contains(selectedOption)) {
 				selectedExportOptions.add(selectedOption);
 			} else {
 				selectedExportOptions.clear();
-				throw new Exception("This export option is not compatible!");
+				throw new IOException("This export option is not compatible!");
 			}
 		}
 		recordSets.clear();
@@ -351,11 +355,11 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 	 * This method sets the export option in case only one option is selected. The use of
 	 * the setSelectedOptions is preferred to this method.
 	 * @param selectedOption an Enum variable that represents the selected option
-	 * @throws Exception
+	 * @throws IOException if a selected option is not found in the available export options
 	 */
 	@SuppressWarnings("rawtypes")
 	@Deprecated
-	public void setSelectedOption(Enum selectedOption) throws Exception {
+	public void setSelectedOption(Enum selectedOption) throws IOException {
 		Set<Enum> options = new HashSet<Enum>();
 		options.add(selectedOption);
 		setSelectedOptions(options);
@@ -393,7 +397,6 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 	/**
 	 * This method sets the filename of the output file.
 	 * @param filename a String
-	 * @throws IOException if the file type is unknown
 	 */
 	public void setFilename(String filename) {
 		if (!filename.trim().isEmpty() && GFileFilter.getFileType(filename) == FileType.UNKNOWN) {
@@ -426,10 +429,10 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 	
 	/**
 	 * This method save the record set into a dbf file. The filename must have been set previously.
-	 * @throws Exception
+	 * @throws Exception if an error has occurred
 	 */
 	@SuppressWarnings("rawtypes")
-	public void save() throws Exception {
+	public void save() throws Exception{
 		for (Enum selectedOutputOption : selectedExportOptions) {
 			File file;
 			if (selectedExportOptions.size() == 1) {
@@ -493,7 +496,7 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 	
 	/**
 	 * This method creates the different record sets depending on the selected export options.
-	 * @throws Exception
+	 * @throws Exception if an error has occurred
 	 */
 	@SuppressWarnings("rawtypes")
 	public void createRecordSets() throws Exception {

@@ -35,10 +35,21 @@ import repicea.io.GExportFieldDetails;
 import repicea.io.GFileFilter;
 import repicea.io.GFileFilter.FileType;
 
+/**
+ * A writer for CSV file.
+ * @author Mathieu Fortin - 2012
+ */
 public class CSVWriter extends FormatWriter<CSVHeader> {
 	
 	private BufferedWriter bufferedWriter;
 	
+	/**
+	 * Constructor.
+	 * @param csvFile the File instance that represents the CSV file.
+	 * @param append true to append the file
+	 * @param token the token ("," or ";")
+	 * @throws IOException if an I/O error has occurred
+	 */
 	public CSVWriter(File csvFile, boolean append, String token) throws IOException {
 		super(csvFile, append);
 		if (GFileFilter.getFileType(getFilename()) != FileType.CSV) {
@@ -63,9 +74,9 @@ public class CSVWriter extends FormatWriter<CSVHeader> {
 
 	/**
 	 * CSVWriter constructor using the default splitter ";".
-	 * @param csvFile
-	 * @param append
-	 * @throws IOException
+	 * @param csvFile the File instance that represents the CSV file.
+	 * @param append true to append the file
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public CSVWriter(File csvFile, boolean append) throws IOException {
 		this(csvFile, append, null);

@@ -31,13 +31,13 @@ import javax.swing.SwingUtilities;
 import repicea.gui.REpiceaUIObject;
 
 /**
- * The Logger class includes a JTextArea instance in which any OutputStream can write.
+ * The LoggerConsole class includes a JTextArea instance in which any OutputStream can write.
  * The class also implements the UserInterfaceable interface, which means it returns 
  * a JScrollPane that contains the JTextArea.
  * @author Mathieu Fortin - October 2012
  */
 @Deprecated
-public class Logger extends OutputStream implements Runnable, REpiceaUIObject {
+public class LoggerConsole extends OutputStream implements Runnable, REpiceaUIObject {
 
 	private JScrollPane guiInterface;
 	private JTextArea textArea;
@@ -47,8 +47,9 @@ public class Logger extends OutputStream implements Runnable, REpiceaUIObject {
 	
 	/**
 	 * Constructor.
+	 * @param nbRows the number of rows in the text area.
 	 */
-	public Logger(int nbRows) {
+	public LoggerConsole(int nbRows) {
 		writer = new StringWriter();
 		textArea = new JTextArea();
 		textArea.setFont(new Font("Monospaced", Font.PLAIN, 12));
@@ -61,7 +62,7 @@ public class Logger extends OutputStream implements Runnable, REpiceaUIObject {
 	/**
 	 * Default constructor with 40 rows.
 	 */
-	public Logger() {
+	public LoggerConsole() {
 		this(40);
 	}
 	

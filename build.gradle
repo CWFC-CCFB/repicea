@@ -11,6 +11,7 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'maven-publish'
+apply plugin: 'signing'
 
 group = 'org'
 version = project.version
@@ -106,7 +107,7 @@ check.dependsOn integrationTest
 jar {	
 	 manifest {
         attributes("Built-By": "Mathieu Fortin and Jean-Francois Lavoie",
-        		   "Specification-Title": "REpicea Utilitaries",
+        		   "Specification-Title": "REpicea Tools",
 	       		   "Specification-Version": project.version,                   
                    "Specification-Vendor": "REpicea",
                    "Implementation-Title": "repicea",
@@ -136,9 +137,51 @@ task install(type: Copy) {
 	into "${installDir}"
 }
 
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+
 publishing {
     publications {
         repicea(MavenPublication) {
+        	pom {
+        		group = 'io.github.CWFC-CCFB'
+        		name = 'REpicea Tools'
+//        		packaging = 'jar'
+        		description = 'A series of tools to facilite the design of applications, I/O of data, XML serialization and multiprocessing'
+        		url = 'https://github.com/CWFC-CCFB/repicea'
+        		properties = [
+        			packaging: "jar"
+	       		]
+        		licenses {
+        			license {
+        				name = 'GNU Lesser General Public License 2.1'
+        				url  = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.html'
+        			}
+        		}
+        		developers {
+        			developer {
+        				id = 'matfortin'
+        				name = 'Mathieu Fortin'
+        				email = 'mathieu.fortin.re@gmail.com'
+        			}
+        		}
+        	}	
             from components.java
         }
     }

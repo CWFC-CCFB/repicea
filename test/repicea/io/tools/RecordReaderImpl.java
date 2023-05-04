@@ -199,7 +199,7 @@ public class RecordReaderImpl extends REpiceaRecordReader {
 	int nbRecordsRead = 0;
 	
 	
-	private static List<ImportFieldElement> defineFields() throws Exception {
+	private static List<ImportFieldElement> defineFields() {
 		List<ImportFieldElement> importFields = new ArrayList<ImportFieldElement>();
 		importFields.add(new ImportFieldElement(FieldID.STRATUM,
 												MessageID.DescStratumName.toString (),
@@ -318,7 +318,7 @@ public class RecordReaderImpl extends REpiceaRecordReader {
 	}
 
 	@Override
-	protected List<ImportFieldElement> defineFieldsToImport() throws Exception {
+	protected List<ImportFieldElement> defineFieldsToImport() {
 		return RecordReaderImpl.defineFields();
 	}
 

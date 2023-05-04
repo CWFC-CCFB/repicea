@@ -35,8 +35,8 @@ public class LocatedEvent extends EventObject {
 	/**
 	 * Constructor for LocatedEvent object with absolute location. Typically, these objects are not
 	 * directly created through the GUI, but rather automatically created through an action.
-	 * @param source
-	 * @param location
+	 * @param source the Object that produced the event
+	 * @param location the Point instance representing the location of the event
 	 */
 	public LocatedEvent(Object source, Point location) {
 		this(source, location, true);

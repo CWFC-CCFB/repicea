@@ -66,7 +66,7 @@ public final class XmlUnmarshaller {
 	
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public Object unmarshall(XmlList xmlList) throws Exception {
+	public Object unmarshall(XmlList xmlList) throws ReflectiveOperationException, XmlMarshallException {
 		Class<?> clazz = XmlMarshallingUtilities.getClass(xmlList);
 		int referenceHashCode = xmlList.refHashCode;
 		if (hasObjectBeenRegistered(clazz, referenceHashCode)) {		// if the object has already been registered it is returned

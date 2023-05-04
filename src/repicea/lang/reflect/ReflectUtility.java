@@ -97,7 +97,7 @@ public class ReflectUtility {
 	/**
 	 * This method returns true if the class is primitive or 
 	 * a wrapper for a primitive.
-	 * @param clazz
+	 * @param clazz the class we want to know whether it is a primitive 
 	 * @return a boolean
 	 */
 	public static boolean isPrimitive(Class<?> clazz) {
@@ -126,11 +126,14 @@ public class ReflectUtility {
 	
 	/**
 	 * This method is used to convert an array of particular class into an array of another
-	 * class. Typically, it could be used to convert an array of Object into an array of double
+	 * class. <p>
+	 * 
+	 * Typically, it is used to convert an array of Object into an array of double
 	 * if all the elements of the original array are instances of double.
-	 * @param currentArray
-	 * @param clazz
-	 * @return an Object 
+	 * 
+	 * @param currentArray the array to be converted
+	 * @param clazz the class the objects of the array must be converted to
+	 * @return an Object the new array with converted values
 	 */
 	public static Object convertArrayType(Object[] currentArray, Class<?> clazz) {
 		if (currentArray == null || currentArray.length == 0) {

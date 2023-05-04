@@ -42,6 +42,7 @@ public abstract class REpiceaFrame extends JFrame implements REpiceaWindow, Acti
 
 	/**
 	 * Protected constructor with owner.
+	 * @param parent the parent window if any
 	 */
 	protected REpiceaFrame(Window parent) {
 		super();

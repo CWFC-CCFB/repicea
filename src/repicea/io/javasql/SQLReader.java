@@ -42,7 +42,7 @@ public class SQLReader extends FormatReader<SQLHeader> {
 	 * General constructor.
 	 * @param dataBaseUrl the database URL
 	 * @param table the table to be read
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public SQLReader(String dataBaseUrl, String table) throws IOException {
 		super(dataBaseUrl);

@@ -22,27 +22,25 @@ package repicea.lang;
  * This class is used to control the memory before a OutOfMemoryError object is thrown. The class only has one static method that checks
  * the available memory. If the available memory is below a given threshold, the method throws a ExpectedMemoryCapacityException. This kind
  * of exception is derived from RunTimeException. Consequently, there is no need for the method that implements checkAvailabmeMemory() to throw
- * Exception. </br>
- * </br>
+ * Exception. <p>
+ * 
  * The threshold can be set either in terms of percentage of the total memory (through MAXIMUM_PROPORTION_USED public static member) or in 
  * terms of minimum free space available in MegaBytes (through MINIMUM_FREE_SPACE public static member). By default, MAXIMUM_PROPORTION_USED is set to 0.9 and 
- * MINIMUM_FREE_SPACE is set to 10. </br>
- * </br>
- * Example of code: </br>
- * </br>
- * <code>public void myMethod() { 
- * <blockquote>	try {
- * <blockquote>
- * 		MemoryWatchDog.checkAvailableMemory() </br>
- * 		...</blockquote>
+ * MINIMUM_FREE_SPACE is set to 10. <p>
+ * 
+ * Example of code: 
+ * <pre>
+ * <code>
+ * public void myMethod() {
+ * 	try {
+ * 		MemoryWatchDog.checkAvailableMemory() 
+ * 		...
  * 	} catch (Exception e)
- * <blockquote>
  * 		System.out.println(e.getMessage());
- * </blockquote>
  * 	}
- * </blockquote>
- * } </br> </code>
- * </blockquote>
+ * }
+ * </code>
+ * </pre> 
  *
  * @author Mathieu Fortin - March 2011
  */
@@ -88,7 +86,7 @@ public class MemoryWatchDog {
 	 * Checks if the available memory is still above the threshold is used. If not, the garbage collector is called and the
 	 * test is run again. If the available memory is still below the threshold after calling the garbage collector, an ExpectedMemoryCapacityException is thrown.
 	 * @return the number of Mg still available
-	 * @throws a ExpectedMemoryCapacityException object
+	 * @throws ExpectedMemoryCapacityException if the maximum memory capacity has been reached
 	 */
 	public static double checkAvailableMemory() throws ExpectedMemoryCapacityException {
 		double currentUsedMemory = checkUsedMemory();

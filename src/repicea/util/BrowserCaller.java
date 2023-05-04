@@ -28,7 +28,7 @@ public class BrowserCaller {
 	
 	/**
 	* Method to Open the Browser with Given URL
-	* @param url
+	* @param url the URL to open in the browser
 	*/
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public static void openUrl(String url){

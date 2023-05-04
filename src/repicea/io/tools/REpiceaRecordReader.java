@@ -20,11 +20,13 @@ package repicea.io.tools;
 
 import java.awt.Window;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UnknownFormatConversionException;
 import java.util.concurrent.CancellationException;
 
 import repicea.app.AbstractGenericTask;
@@ -57,7 +59,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 		}
 		
 		@Override
-		protected void doThisJob() throws Exception {
+		protected void doThisJob() throws IOException {
 			if (getName() != null && !getName().isEmpty()) {
 				Thread.currentThread().setName(getName());
 			}
@@ -141,7 +143,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 					message = MessageID.ErrorWhileReading.toString() + importFieldManager.getFileSpecifications()[0] + " " + MessageID.AtLine.toString() + lineCounter;
 				}
 				e.printStackTrace();
-				throw new Exception(message);
+				throw new IOException(message);
 			} finally {
 				if (reader != null) {
 					reader.close();
@@ -232,6 +234,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	/**
 	 * This method initializes the RecordInstantiator object in GUI mode.
 	 * @param guiOwner a Window instance that can be null if the dialog has no owner
+	 * @param useMode a UseMode enum to determine whether the GUI features should be enabled
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
@@ -290,6 +293,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	
 	/**
 	 * This method initializes the RecordInstantiator object in GUI mode with no owner.
+	 * @param useMode a UseMode enum to determine whether the GUI features should be enabled
 	 * @param fileSpec the specifications of the file to be imported (e.g. filename, table, etc...)
 	 * @throws Exception a CancellationException is thrown if the user cancels the dialog
 	 */
@@ -324,7 +328,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 
 	/**
 	 * This method reads all the records of the dataset.
-	 * @throws Exception
+	 * @throws Exception if an error has occurred
 	 */
 	public void readAllRecords() throws Exception {
 		readRecordsForThisGroupId(-1);
@@ -334,7 +338,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 	 * This method reads the records that correspond to the group ID. If the group ID is not found,
 	 * the method read all the records by default.
 	 * @param groupId a integer that corresponds to the group ID
-	 * @throws Exception
+	 * @throws Exception if an error has occurred
 	 */
 	@SuppressWarnings("deprecation")
 	public void readRecordsForThisGroupId(int groupId) throws Exception {
@@ -401,16 +405,15 @@ public abstract class REpiceaRecordReader implements Serializable {
 	/**
 	 * This method defines the fields to be imported. It is to be defined in the derived classes.
 	 * @return a List of ImportFieldElement instances
-	 * @throws Exception
 	 */
-	protected abstract List<ImportFieldElement> defineFieldsToImport() throws Exception;
+	protected abstract List<ImportFieldElement> defineFieldsToImport();
 	
 	/**
 	 * This method checks if the input values of the current record are of the appropriate format.
 	 * @param oArray the line record
-	 * @throws Exception
+	 * @throws UnknownFormatConversionException if one of the fields has an unknown type (other than double, integer, and string) 
 	 */
-	protected void checkInputFieldsFormat(Object[] oArray) throws Exception {
+	protected void checkInputFieldsFormat(Object[] oArray) throws UnknownFormatConversionException {
 		List<ImportFieldElement> oVecImport = getImportFieldManager().getFields(); 	// reference on the vector of field element in the SuccesDBFImport object
 		for (int i = 0; i < oVecImport.size(); i++) {				
 			if (oArray[i] != null) { // if the oArray[i] == null, it means either the field has not been associated or the field is empty in the DBF file
@@ -439,7 +442,7 @@ public abstract class REpiceaRecordReader implements Serializable {
 						}
 						break;
 					default:
-						throw new Exception("Unknown field type");
+						throw new UnknownFormatConversionException("The field format should be one of the following: double, integer, or string!");
 					}
 				}
 			}
@@ -476,7 +479,17 @@ public abstract class REpiceaRecordReader implements Serializable {
 	protected abstract Enum defineGroupFieldEnum(); 
 
 	/**
-	 * This method read the line record and set the values in the appropriate fields. To be defined in derived classes.
+	 * Read the line record and set the values in the appropriate fields. <p>
+	 * 
+	 * This method is called in the {@code doThisJob} method. Before calling this method, the Object instances
+	 * that compose the oArray parameter are checked and converted to the appropriate type through the 
+	 * {@code checkInputFieldsFormat} method. The lineCounter parameter is passed to this method for 
+	 * convenience. 
+	 * 
+	 * @param oArray an array of Object instances 
+	 * @param lineCounter the line in the file that corresponds to the record being read
+	 * @throws VariableValueException if the value being read in a field is inconsistent
+	 * @throws Exception if an error has occurred
 	 */
 	protected abstract void readLineRecord(Object[] oArray, int lineCounter) throws VariableValueException, Exception;
 

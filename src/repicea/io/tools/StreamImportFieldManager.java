@@ -120,9 +120,9 @@ public class StreamImportFieldManager extends ImportFieldManager {
 	 * Constructor. Takes the recordReader object and extracts all the ImportFieldElement. 
 	 * Then it sets the fields in the header of the QueueReader to match the ImportFieldElement.
 	 * @param recordReader a REpiceaRecordReader instance
-	 * @throws Exception
+	 * @throws IOException if an I/O error has occurred
 	 */
-	public StreamImportFieldManager(REpiceaRecordReader recordReader) throws Exception {
+	public StreamImportFieldManager(REpiceaRecordReader recordReader) throws IOException {
 		super(recordReader.defineFieldsToImport(), QueueReader.NOT_USING_FILES);
 		QueueReaderHeader header = getFormatReader().getHeader();
 		groupFieldEnum = recordReader.defineGroupFieldEnum();

@@ -92,9 +92,10 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * General constructor. 
 	 * @param vector a vector defining the fields requested (i.e. ImportFieldElement instances)
 	 * @param fileSpec the filename of the file to be read and the other specifications such as the table for instance
+	 * @throws IOException if an I/O error has occurred
 	 */
 	@SuppressWarnings("rawtypes")
-	public ImportFieldManager(List<ImportFieldElement> vector, String... fileSpec) throws Exception {
+	public ImportFieldManager(List<ImportFieldElement> vector, String... fileSpec) throws IOException {
 		ifeFilename = "";
 		importFieldElementMap = new HashMap<Enum<?>, List<ImportFieldElement>>();
 		for (ImportFieldElement elem : vector) {
@@ -241,6 +242,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 	/**
 	 * This method provides the vector of ImportFieldElement objects.
+	 * @return a List of ImportFieldElement instances
 	 */
 	@SuppressWarnings("rawtypes")
 	public List<ImportFieldElement> getFields() {
@@ -365,10 +367,11 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * This method returns an ImportFieldManager loaded from the filename parameter.
 	 * @param ifeFilename the file that contains the vector of ImportFieldElement
 	 * @param fileSpec the file to be read and all the required specifications such as the table for instance
-	 * @throws XmlMarshallException 
-	 * @throws FileNotFoundException 
+	 * @return an ImportFieldManager instance
+	 * @throws IOException if an I/O error has occurred
+	 * @throws XmlMarshallException if a marshal error has occurred
 	 */
-	public static ImportFieldManager createImportFieldManager(String ifeFilename, String... fileSpec) throws IOException, XmlMarshallException {
+	public static ImportFieldManager createImportFieldManager(String ifeFilename, String... fileSpec) throws XmlMarshallException, IOException  {
 		ImportFieldManager ifm = new ImportFieldManager();
 		Map<Enum<?>, List<ImportFieldElement>> oMap = ImportFieldManager.loadImportFieldElementMap(ifeFilename);
 		ifm.importFieldElementMap = oMap;

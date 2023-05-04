@@ -60,6 +60,7 @@ public interface IndependentProcess extends Serializable, Runnable, Future<Integ
 	/**
 	 * This method makes it possible to send a Serializable object to the independent process, typically a callback process.
 	 * @param obj a Serializable object
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public void sendObjectToProcess(Serializable obj) throws IOException;
 

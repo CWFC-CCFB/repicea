@@ -67,7 +67,7 @@ public abstract class IndependentProcessIncomingCommunicationWorker extends Thre
 
 	/**
 	 * This method handles the received object.
-	 * @param obj
+	 * @param obj the incoming Object instance
 	 */
 	protected abstract void whatShouldIDoWithThisObject(Object obj);
 	

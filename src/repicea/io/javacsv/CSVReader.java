@@ -35,7 +35,7 @@ public class CSVReader extends FormatReader<CSVHeader> {
 	/**
 	 * Constructor with default encoding
 	 * @param filename the file to read
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public CSVReader(String filename) throws IOException {
 		this(filename, null);
@@ -45,7 +45,7 @@ public class CSVReader extends FormatReader<CSVHeader> {
 	 * Constructor with specific encoding
 	 * @param filename the file to read
 	 * @param charset the encoding
-	 * @throws IOException
+	 * @throws IOException if an I/O error has occurred
 	 */
 	public CSVReader(String filename, Charset charset) throws IOException {
 		super(filename);
