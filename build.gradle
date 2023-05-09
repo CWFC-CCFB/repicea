@@ -5,16 +5,14 @@
 
 plugins {
     id 'com.palantir.git-version' version '3.0.0'
+    id 'maven-publish'
+    id 'signing'
 }
 
 apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
-apply plugin: 'maven-publish'
-apply plugin: 'signing'
 
-group = 'org'
-version = project.version
 
 java {
   toolchain {
@@ -73,6 +71,7 @@ dependencies {
 compileJava {
 	project.version= gitVersion() 
 	println "Building " + rootProject.name + " " + project.version
+	println "Installation directory " + "../externallibraries/" + rootProject.name
 }
 
 test {
@@ -103,21 +102,22 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
+configurations.compileOnly.canBeResolved = true
 
 jar {	
 	 manifest {
         attributes("Built-By": "Mathieu Fortin and Jean-Francois Lavoie",
         		   "Specification-Title": "REpicea Tools",
 	       		   "Specification-Version": project.version,                   
-                   "Specification-Vendor": "REpicea",
+                   "Specification-Vendor": "CWFC-CCFB",
                    "Implementation-Title": "repicea",
                    "Implementation-Version": project.version,
-                   "Implementation-Vendor": "REpicea",
+                   "Implementation-Vendor": "CWFC-CCFB",
                    )
     }
     
 	into ('/') {
-		from files(['./README.txt', './COPYING.LESSER.txt'])			
+		from files(['./README.md', './LICENSE.md'])			
 	}
 	
 	// include all java files from main sourceset into the jar file (resources are already included)
@@ -125,44 +125,30 @@ jar {
 }
 
 task deleteInstallFolder(type: Delete) {
-  delete "${installDir}"  
+  delete "../externallibraries/" + rootProject.name
 }
+
+configurations.implementation.canBeResolved=true
 
 task install(type: Copy) {
 	description = 'Copies the output jar to installation folder.'
 	group = 'build'
-	dependsOn jar,deleteInstallFolder,integrationTest
-	from configurations.default
+	dependsOn deleteInstallFolder,integrationTest
+	from configurations.implementation
 	from jar
-	into "${installDir}"
+	into "../externallibraries/" + rootProject.name
 }
-
-task javadocJar(type: Jar) {
-    classifier = 'javadoc'
-    from javadoc
-}
-
-task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
 
 publishing {
     publications {
         repicea(MavenPublication) {
-        	pom {
-        		group = 'io.github.CWFC-CCFB'
+/*        	groupId = "io.github.cwfc-ccfb"
+        	artefactId = 'repicea'
+        	version = "1.1"
+*/          from components.java
+/*        	pom {
         		name = 'REpicea Tools'
-//        		packaging = 'jar'
+				group = 'io.github.cwfc-ccfb'
         		description = 'A series of tools to facilite the design of applications, I/O of data, XML serialization and multiprocessing'
         		url = 'https://github.com/CWFC-CCFB/repicea'
         		properties = [
@@ -179,11 +165,16 @@ publishing {
         				id = 'matfortin'
         				name = 'Mathieu Fortin'
         				email = 'mathieu.fortin.re@gmail.com'
+        			}        
+        			developer {
+        				id = 'jflavoie'
+        				name = 'Jean-Francois Lavoie'
+        				email = 'atmailjfl@gmail.com'
         			}
         		}
+        		
         	}	
-            from components.java
-        }
+*/       }
     }
 
     repositories {
@@ -193,6 +184,7 @@ publishing {
         }
     }
 }
+
 
 publishRepiceaPublicationToMavenLocal {
 	dependsOn integrationTest

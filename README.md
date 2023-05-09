@@ -3,9 +3,9 @@
 <!-- badges: end -->
 
 Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+Copyright (C) 2021-2023 His Majesty the King in right of Canada (authors: Mathieu Fortin and Jean-Francois Lavoie (CWFC-CCFB, Canadian Forest Service)
 
 Email: mathieu.fortin.re@gmail.com
-
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
