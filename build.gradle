@@ -14,10 +14,35 @@ apply plugin: 'eclipse'
 apply plugin: 'idea'
 
 
+task sourcesJar(type: Jar) {
+	 archiveClassifier = 'sources'
+	 manifest {
+        attributes("Built-By": "Mathieu Fortin and Jean-Francois Lavoie",
+        		   "Specification-Title": "REpicea Tools sources",
+	       		   "Specification-Version": project.version,                   
+                   "Specification-Vendor": "CWFC-CCFB",
+                   "Implementation-Title": "repicea",
+                   "Implementation-Version": project.version,
+                   "Implementation-Vendor": "CWFC-CCFB",
+                   )
+    }
+   	duplicatesStrategy = DuplicatesStrategy.EXCLUDE		// to avoid duplicate files
+    
+	into ('/') {
+		from files(['./README.md', './LICENSE.md'])			
+	}
+	
+	// include all java files from main sourceset into the jar file (resources are already included)
+	from sourceSets.main.java
+	from sourceSets.main.resources		
+}
+
 java {
   toolchain {
     languageVersion.set(JavaLanguageVersion.of(8))
   }
+  withSourcesJar()
+  withJavadocJar()
 }
 
 repositories {
@@ -138,36 +163,6 @@ task install(type: Copy) {
 	from jar
 	into "../externallibraries/" + rootProject.name
 }
-
-
-task sourcesJar(type: Jar) {
-	 archiveClassifier = 'sources'
-	 manifest {
-        attributes("Built-By": "Mathieu Fortin and Jean-Francois Lavoie",
-        		   "Specification-Title": "REpicea Tools sources",
-	       		   "Specification-Version": project.version,                   
-                   "Specification-Vendor": "CWFC-CCFB",
-                   "Implementation-Title": "repicea",
-                   "Implementation-Version": project.version,
-                   "Implementation-Vendor": "CWFC-CCFB",
-                   )
-    }
-   	duplicatesStrategy = DuplicatesStrategy.EXCLUDE		// to avoid duplicate files
-    
-	into ('/') {
-		from files(['./README.md', './LICENSE.md'])			
-	}
-	
-	// include all java files from main sourceset into the jar file (resources are already included)
-	from sourceSets.main.java
-	from sourceSets.main.resources		
-}
-
-java {
-  withSourcesJar()
-  withJavadocJar()
-}
-
 
 publishing {
     publications {
