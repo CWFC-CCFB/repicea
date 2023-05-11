@@ -188,8 +188,8 @@ public class DBFField extends FormatField {
 	 * @param value the name of the field
 	 * @deprecated This method is depricated as of version 0.3.3.1 and is replaced by {@link #setName( String)}.
 	 */
+	@Deprecated
 	public void setFieldName( String value) {
-
 		setName( value);
 	}
 

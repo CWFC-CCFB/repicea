@@ -38,9 +38,6 @@ task sourcesJar(type: Jar) {
 }
 
 java {
-/*  toolchain {
-    languageVersion.set(JavaLanguageVersion.of(8))
-  }*/
   withSourcesJar()
   withJavadocJar()
 }
@@ -142,6 +139,14 @@ task integrationTest(type: Test) {
 	description = 'Runs the integration tests (unit tests run using the produced JAR file)'
     group = 'verification'
 	dependsOn jar
+
+    if(JavaVersion.current() == JavaVersion.VERSION_17 ||
+    	JavaVersion.current() == JavaVersion.VERSION_18 ||
+    	JavaVersion.current() == JavaVersion.VERSION_19 ||
+    	JavaVersion.current() == JavaVersion.VERSION_20) {
+ 		jvmArgs '---add-opens java.base/java.util=ALL-UNNAMED'   
+	}
+
 	
 	include '**/*.class'
 	
@@ -150,14 +155,13 @@ task integrationTest(type: Test) {
         
     // set classpath to test classes + test dependencies + JAR
     classpath = project.sourceSets.test.output + configurations.testRuntimeClasspath + files(jar.archiveFile) 
+	    
     outputs.upToDateWhen { false }
     mustRunAfter test
     maxHeapSize = "2048m"
 }
 
 check.dependsOn integrationTest
-//configurations.compileOnly.canBeResolved = true
-//configurations.implementation.canBeResolved=true
 
 task deleteInstallFolder(type: Delete) {
   delete "../externallibraries/" + rootProject.name

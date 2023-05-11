@@ -167,6 +167,7 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 	 * @param setIndeterminate set the progress bar to the indeterminate mode
 	 * @deprecated Use the constructor with REpiceaProgressBarDialogParameters instead
 	 */
+	@Deprecated
 	@SuppressWarnings("rawtypes")
 	public REpiceaProgressBarDialog(String titleString, String labelString, SwingWorker jobToRun, boolean setIndeterminate) {
 		this(null, titleString, labelString, jobToRun, setIndeterminate);

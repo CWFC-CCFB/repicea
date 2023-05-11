@@ -99,7 +99,7 @@ public class REpiceaTableModel extends DefaultTableModel implements CellEditorLi
 		for (int i = 0; i < getColumnCount(); i++) {
 			Class<?> clazz = columnClass.get(i);
 			if (clazz.equals(Integer.class)) {
-				record[i] = new Integer(0);
+				record[i] = (int) 0;
 			} else if (clazz.equals(Double.class)) {
 				record[i] = 0.;
 			} else if (clazz.isEnum()) {
