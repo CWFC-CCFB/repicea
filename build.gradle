@@ -144,7 +144,7 @@ task integrationTest(type: Test) {
     	JavaVersion.current() == JavaVersion.VERSION_18 ||
     	JavaVersion.current() == JavaVersion.VERSION_19 ||
     	JavaVersion.current() == JavaVersion.VERSION_20) {
- 		jvmArgs '---add-opens java.base/java.util=ALL-UNNAMED'   
+ 		jvmArgs '--add-opens java.base/java.util=ALL-UNNAMED'   
 	}
 
 	
