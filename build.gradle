@@ -38,9 +38,9 @@ task sourcesJar(type: Jar) {
 }
 
 java {
-  toolchain {
+/*  toolchain {
     languageVersion.set(JavaLanguageVersion.of(8))
-  }
+  }*/
   withSourcesJar()
   withJavadocJar()
 }
@@ -78,6 +78,14 @@ sourceSets {
 		
 		output.resourcesDir = "$buildDir/classes/java/$name"
     }               
+}
+
+configurations {
+	repiceaImplementation {
+		extendsFrom implementation
+		description = 'Main implementation'
+		canBeResolved = true
+	}
 }
 
 // make sure to set the compliance to Java 1.8 in the project properties if the Java version is later than 1.8
@@ -148,8 +156,8 @@ task integrationTest(type: Test) {
 }
 
 check.dependsOn integrationTest
-configurations.compileOnly.canBeResolved = true
-configurations.implementation.canBeResolved=true
+//configurations.compileOnly.canBeResolved = true
+//configurations.implementation.canBeResolved=true
 
 task deleteInstallFolder(type: Delete) {
   delete "../externallibraries/" + rootProject.name
@@ -159,7 +167,7 @@ task install(type: Copy) {
 	description = 'Copies the output jar to installation folder.'
 	group = 'build'
 	dependsOn deleteInstallFolder,integrationTest
-	from configurations.implementation
+	from configurations.repiceaImplementation
 	from jar
 	into "../externallibraries/" + rootProject.name
 }
