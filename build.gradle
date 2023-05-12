@@ -140,13 +140,7 @@ jar {
 
 
 task integrationTest(type: Test) {
-/*    if(JavaVersion.current() == JavaVersion.VERSION_17 ||
-    	JavaVersion.current() == JavaVersion.VERSION_18 ||
-    	JavaVersion.current() == JavaVersion.VERSION_19 ||
-    	JavaVersion.current() == JavaVersion.VERSION_20) {
- 		jvmArgs = ['--add-opens', 'java.base/java.util=ALL-UNNAMED']   
-	}
-*/	description = 'Runs the integration tests (unit tests run using the produced JAR file)'
+	description = 'Runs the integration tests (unit tests run using the produced JAR file)'
     group = 'verification'
 	dependsOn jar
 
