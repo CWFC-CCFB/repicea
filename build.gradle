@@ -203,6 +203,11 @@ publishing {
         			}
         		}
         		
+                scm {
+          			connection = 'scm:git:https://github.com/CWFC-CCFB/repicea'
+          			developerConnection = 'scm:git:https://github.com/CWFC-CCFB/repicea'
+          			url = 'https://github.com/CWFC-CCFB/repicea'
+        		}
 		     }	
         }
     }
