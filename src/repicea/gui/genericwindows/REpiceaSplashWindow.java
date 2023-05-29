@@ -27,6 +27,7 @@ import java.awt.FontMetrics;
 import java.awt.Image;
 import java.io.File;
 import java.io.InputStream;
+import java.security.InvalidParameterException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -39,13 +40,11 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
-import repicea.app.REpiceaAppVersion;
-
 
 /**
  * GenericSplashWindow - A welcome window to show acknowledgements and logo
  * Stays visible during the specified time in the constructor.
- * @author Jean-Fran�ois Lavoie and Mathieu Fortin  - May 2009
+ * @author Jean-Francois Lavoie and Mathieu Fortin  - May 2009
  */
 @SuppressWarnings("serial")
 public class REpiceaSplashWindow extends JDialog {
@@ -69,43 +68,55 @@ public class REpiceaSplashWindow extends JDialog {
 	}
 
 	protected Timer splashTimer;
-	protected String imagePath;
-	private String bottomMessage;
+	protected final String imagePath;
+	private final String bottomMessage;
+	private final int fontSize;
+	private final int imageWidth;
+	
 	
 	/**
 	 * The constructor requires a file that contains a logo and a number of seconds.
 	 * @param imagePath a file that contains the logo to be displayed
 	 * @param nbSec a double that represents the number of seconds the logo appears on screen.
 	 * @param parent the parent component which can be null
+	 * @deprecated Use the constructor REpiceaSplashWindow(String imagePath, double nbSec, Component parent, int imageWidth, String bottomMessage, int fontSize) instead
 	 */
-	public REpiceaSplashWindow (String imagePath, double nbSec, Component parent) {
-		this.imagePath = imagePath;
-		try  {
-			splashWindow(parent);
-			splashTimer = new Timer();
-			int nbMMSec = (int) (nbSec * 1000);
-			splashTimer.schedule(new ToDoTask(this), nbMMSec) ;
-			pack();
-			setVisible(true);
-		} catch (Exception e) {
-			System.out.println("Unable to initialize the splash window!");
-			if (isVisible()) {
-				dispose();
-			}
-		} 
+	@Deprecated
+	public REpiceaSplashWindow(String imagePath, double nbSec, Component parent) {
+		this(imagePath, nbSec, parent, -1, null, 10);
 	}
 
-	
 	/**
 	 * The constructor requires a file that contains a logo and a number of seconds.
 	 * @param imagePath a file that contains the logo to be displayed
 	 * @param nbSec a double that represents the number of seconds the logo appears on screen.
 	 * @param parent the parent component which can be null
-	 * @param bottomMessage a message to appear just below the splashwindow
+	 * @param bottomMessage a message to appear just below the splash window
+	 * @deprecated Use the constructor REpiceaSplashWindow(String imagePath, double nbSec, Component parent, int imageWidth, String bottomMessage, int fontSize) instead
+	 */ 
+	@Deprecated
+	public REpiceaSplashWindow(String imagePath, double nbSec, Component parent, String bottomMessage) {
+		this(imagePath, nbSec, parent, -1, bottomMessage, 10);
+	}
+
+	/**
+	 * The constructor requires a file that contains a logo and a number of seconds.
+	 * @param imagePath a file that contains the logo to be displayed
+	 * @param nbSec a double that represents the number of seconds the logo appears on screen.
+	 * @param parent the parent component which can be null
+	 * @param imageWidth an integer to set the splash window width, if set to a negative value the original width is used
+	 * @param bottomMessage a message to be displayed below the splash window (if null, no message will be displayed)
+	 * @param fontSize the font size of the message below the splash window
 	 */
-	public REpiceaSplashWindow (String imagePath, double nbSec, Component parent, String bottomMessage) {
+	public REpiceaSplashWindow(String imagePath, double nbSec, Component parent, int imageWidth, String bottomMessage, int fontSize) {
+		if (nbSec <= 0) 
+			throw new InvalidParameterException("The nbSec parameter must be greater than 0!");
+		if (fontSize <= 0) 
+			throw new InvalidParameterException("The size parameter must be greater than 0!");
 		this.imagePath = imagePath;
 		this.bottomMessage = bottomMessage;
+		this.fontSize = fontSize;
+		this.imageWidth = imageWidth;
 		try  {
 			splashWindow(parent);
 			splashTimer = new Timer();
@@ -129,10 +140,10 @@ public class REpiceaSplashWindow extends JDialog {
 		if (new File(imagePath).exists()) {
 			icon = new ImageIcon(this.imagePath.toString());		 
 		} else {
-//			InputStream in = ClassLoader.getSystemResourceAsStream(imagePath);
 			InputStream in = getClass().getResourceAsStream("/" + imagePath);
 			Image image = ImageIO.read(in);
-			icon = new ImageIcon(image);
+			Image resizedImage = image.getScaledInstance(imageWidth, -1, Image.SCALE_DEFAULT); // -1 to keep the proportion between height and width
+			icon = new ImageIcon(resizedImage);
 		}
 	
 		JLabel image = new JLabel(icon);
@@ -153,7 +164,7 @@ public class REpiceaSplashWindow extends JDialog {
 		
 		if (bottomMessage != null) {
 			JLabel label = new JLabel(bottomMessage);
-			Font myFont = new Font("Serif", Font.ITALIC, 10);
+			Font myFont = new Font("Serif", Font.ITALIC, fontSize);
 			label.setFont(myFont);
 			JPanel bottomPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
 			bottomPanel.add(label);

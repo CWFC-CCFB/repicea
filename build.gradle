@@ -48,7 +48,6 @@ java {
 
 repositories {
     mavenCentral()
-    mavenLocal()
 }
 
 println "Using java version " + JavaVersion.current()
@@ -227,10 +226,6 @@ publishing {
 
 signing {
     sign publishing.publications.repicea
-}
-
-publishRepiceaPublicationToMavenLocal {
-	dependsOn jar
 }
 
 publishRepiceaPublicationToLocalFileRepository {
