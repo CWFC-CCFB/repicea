@@ -79,12 +79,6 @@ public class REpiceaMatchSelectorTest {
 				-1, 
 				new String[]{"string", "usemode"});
 		REpiceaMatchSelectorDialog dlg = selector.getUI(null);
-//		Runnable toRun = new Runnable() {
-//			@Override
-//			public void run() {
-//				selector.showUI(null);
-//			}
-//		};
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
 		Thread t = robot.showWindow(selector);

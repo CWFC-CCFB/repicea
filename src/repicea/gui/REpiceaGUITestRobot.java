@@ -19,7 +19,6 @@
 package repicea.gui;
 
 import java.awt.Component;
-import java.awt.Container;
 import java.awt.Window;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
@@ -31,7 +30,6 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.swing.AbstractButton;
-import javax.swing.JMenu;
 import javax.swing.SwingUtilities;
 import javax.swing.text.JTextComponent;
 
@@ -40,8 +38,8 @@ import repicea.gui.REpiceaToolKit.WindowTrackerListener;
 
 
 /**
- * A class to perform tests on the GUI. <br>
- * <br>
+ * A class to perform tests on the GUI. <p>
+ * 
  * IMPORTANT: The method shutdown must be called when the robot is no longer needed.
  * @author Mathieu Fortin - March 2022
  */
@@ -64,43 +62,8 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		REpiceaToolKit.removeREpiceaEventListener(this);
 	}
 	
-	/**
-	 * Find a component corresponding to this name within the component. <br>
-	 * <br> 
-	 * The method scans recursively the component if it is an instance of the Container class.
-	 * @param comp a Component instance
-	 * @param name the name of the Component instance we are looking for
-	 * @return the Component.
-	 */
-	private static Component findComponentWithThisName(Component comp, String name) {
-		if (comp == null)
-			return null;
-		if  (name == null)
-			throw new InvalidParameterException("The name must be non null!");
-
-		if (name.equals(comp.getName())) {
-			return comp;
-		} else if (comp instanceof JMenu) {
-			JMenu m = (JMenu) comp;
-			for (int i = 0; i < m.getItemCount(); i ++) {
-				Component resultingC = findComponentWithThisName(m.getItem(i), name);
-				if (resultingC != null) {
-					return resultingC;
-				}
-			}
-		} else if (comp instanceof Container) {
-			for (Component c : ((Container) comp).getComponents()) {
-				Component resultingC = findComponentWithThisName(c, name);
-				if (resultingC != null) {
-					return resultingC;
-				}
-			}
-		}
-		return null;
-	}
 	
-	
-	private Window getLastVisibleWindow() {
+	protected Window getLastVisibleWindow() {
 		List<WeakReference<Window>> emptyReferences = new ArrayList<WeakReference<Window>>();
 		for (int i = windows.size() - 1; i >= 0; i--) {
 			WeakReference<Window> ref = windows.get(i);
@@ -114,13 +77,26 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		return null;
 	}
 	
+	/**
+	 * Find a component with a particular name in the last visible window.
+	 * @param name the name of the component
+	 * @return the component or null if no component bears this name
+	 */
 	public Component findComponentWithThisName(String name) { 
-		return findComponentWithThisName(getLastVisibleWindow(), name);
+		return CommonGuiUtility.findComponentWithThisName(getLastVisibleWindow(), name);
 	}
 	
+	/**
+	 * Click on the button with this name. <p>
+	 * If the property parameter is not null, then the robot waits for a particular property.
+	 * @param buttonName the name of the button.
+	 * @param property an REpiceaAWTProperty instance (can be null)
+	 * @throws InterruptedException if the thread has been interrupted
+	 * @throws InvocationTargetException if the target cannot be invoked
+	 */
 	public void clickThisButton(String buttonName, REpiceaAWTProperty property) throws InterruptedException, InvocationTargetException {
 		repiceaEventQueue.clear();
-		Object o = findComponentWithThisName(getLastVisibleWindow(), buttonName);
+		Object o = CommonGuiUtility.findComponentWithThisName(getLastVisibleWindow(), buttonName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + buttonName);
 		if (!(o instanceof AbstractButton)) 
@@ -138,13 +114,26 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		}
 	}
 	
+	/**
+	 * Click on the button with this name. <p>
+	 * @param buttonName the name of the button.
+	 * @throws InterruptedException if the thread has been interrupted
+	 * @throws InvocationTargetException if the target cannot be invoked
+	 */
 	public void clickThisButton(String buttonName) throws InterruptedException, InvocationTargetException {
 		clickThisButton(buttonName, (REpiceaAWTProperty) null);
 	}
 
+	/**
+	 * Click on the button with this name and wait for a particular window type to show up. <p>
+	 * @param buttonName the name of the button.
+	 * @param windowToExpect a Window instance that is expected once the button is clicked
+	 * @throws InterruptedException if the thread has been interrupted
+	 * @throws InvocationTargetException if the target cannot be invoked
+	 */
 	public void clickThisButton(String buttonName,  Class<? extends Window> windowToExpect) throws InterruptedException, InvocationTargetException {
 		windowQueue.clear();
-		Object o = findComponentWithThisName(getLastVisibleWindow(), buttonName);
+		Object o = CommonGuiUtility.findComponentWithThisName(getLastVisibleWindow(), buttonName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + buttonName);
 		if (!(o instanceof AbstractButton)) 
@@ -166,10 +155,17 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		while(!property.equals(repiceaEventQueue.take().property)) {}
 	}
 
-
+	/**
+	 * Fill a particular text field. 
+	 *
+	 * @param textFieldName the name of the text field
+	 * @param fillingString the text to put in this field
+	 * @throws InterruptedException if the thread has been interrupted
+	 * @throws InvocationTargetException if the setText method in the JTextComponent fails
+	 */
 	public void fillThisTextField(String textFieldName, String fillingString) throws InterruptedException, InvocationTargetException {
 		repiceaEventQueue.clear();
-		Object o = findComponentWithThisName(getLastVisibleWindow(), textFieldName);
+		Object o = CommonGuiUtility.findComponentWithThisName(getLastVisibleWindow(), textFieldName);
 		if (o == null) 
 			throw new InvalidParameterException("Unable to find the component with name: " + textFieldName);
 		if (!(o instanceof JTextComponent)) 
@@ -183,7 +179,13 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		letDispatchThreadProcess();
 	}
 
-	
+	/**
+	 * Start a dialog or a frame in a different thread to let the robot work in the current thread.
+	 * @param toRun a Runnable that starts the dialog or the frame
+	 * @param classToExpect the type of Window instance that is expected
+	 * @return a Thread instance
+	 * @throws InterruptedException if the thread is interrupted
+	 */
 	public Thread startGUI(Runnable toRun, Class<? extends Window> classToExpect) throws InterruptedException {
 		windowQueue.clear();
 		Thread t = new Thread(toRun, "REpiceaGUIRobot");
@@ -192,6 +194,12 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		return t;
 	}
 	
+	/**
+	 * Show a window in a different thread to let the robot work in the current thread
+	 * @param showable a REpiceaShowableUIWithParent instance (this instance must return a Window type instance when the getUI method is called)
+	 * @return a Thread instance
+	 * @throws InterruptedException if the Thread is interrupted
+	 */
 	public Thread showWindow(REpiceaShowableUIWithParent showable) throws InterruptedException {
 		windowQueue.clear();
 		Component w = showable.getUI(null); 

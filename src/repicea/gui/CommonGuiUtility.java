@@ -24,10 +24,12 @@ import java.awt.FlowLayout;
 import java.awt.Image;
 import java.awt.Window;
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
+import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 import javax.swing.AbstractButton;
@@ -39,6 +41,7 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -58,7 +61,6 @@ import repicea.gui.UIControlManager.CommonControlID;
 import repicea.util.ExtendedFileFilter;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
-import repicea.util.REpiceaTranslator.Language;
 import repicea.util.REpiceaTranslator.TextableEnum;
 
 /**
@@ -72,72 +74,37 @@ public class CommonGuiUtility {
 	 * is to show in the GUI.
 	 * @author Mathieu Fortin - March 2013
 	 */
-	private static class ErrorMessage implements Runnable {
+	private static class SimpleMessage implements Runnable {
 
-		private String message;
-		private Component parent;
+		private static Map<Integer, UIControlManager.InformationMessageTitle> availableMessageTypes = new HashMap<Integer, UIControlManager.InformationMessageTitle>();
+		static {
+			availableMessageTypes.put(JOptionPane.ERROR_MESSAGE, UIControlManager.InformationMessageTitle.Error);
+			availableMessageTypes.put(JOptionPane.WARNING_MESSAGE, UIControlManager.InformationMessageTitle.Warning);
+			availableMessageTypes.put(JOptionPane.INFORMATION_MESSAGE, UIControlManager.InformationMessageTitle.Information);
+		}
 		
-		private ErrorMessage(String message, Component parent) {
+		private final String message;
+		private final Component parent;
+		private final int messageType;
+		
+		private SimpleMessage(String message, int messageType, Component parent) {
 			this.message = message;
 			this.parent = parent;
+			if (!availableMessageTypes.containsKey(messageType)) {
+				throw new InvalidParameterException("The message type is not recognized! Should be either JOptionPane.ERROR_MESSAGE, JOptionPane.WARNING_MESSAGE or JOptionPane.INFORMATION_MESSAGE.");
+			}
+			this.messageType = messageType;
 		}
 		
 		@Override
 		public void run() {
-			JOptionPane.showMessageDialog(parent,
-					message, 
-					UIControlManager.InformationMessageTitle.Error.toString(), 
-					JOptionPane.ERROR_MESSAGE);
+			JOptionPane pane = new JOptionPane(message, messageType);
+			List<JButton> buttons = CommonGuiUtility.mapComponents(pane, JButton.class);
+			CommonGuiUtility.nameAbstractButtonsGivenTheirText(buttons);
+			pane.createDialog(parent, availableMessageTypes.get(messageType).toString()).setVisible(true);
 		}
 	}
-	
-	/**
-	 * This private class handles an error message as well as the owner of the JOptionPane.showMessageDialog that 
-	 * is to show in the GUI.
-	 * @author Mathieu Fortin - March 2013
-	 */
-	private static class WarningMessage implements Runnable {
 
-		private String message;
-		private Component parent;
-		
-		private WarningMessage(String message, Component parent) {
-			this.message = message;
-			this.parent = parent;
-		}
-		
-		@Override
-		public void run() {
-			JOptionPane.showMessageDialog(parent,
-					message, 
-					UIControlManager.InformationMessageTitle.Warning.toString(), 
-					JOptionPane.WARNING_MESSAGE);
-		}
-	}
-	
-	/**
-	 * This private class handles an error message as well as the owner of the JOptionPane.showMessageDialog that 
-	 * is to show in the GUI.
-	 * @author Mathieu Fortin - March 2013
-	 */
-	private static class InformationMessage implements Runnable {
-
-		private String message;
-		private Component parent;
-		
-		private InformationMessage(String message, Component parent) {
-			this.message = message;
-			this.parent = parent;
-		}
-		
-		@Override
-		public void run() {
-			JOptionPane.showMessageDialog(parent,
-					message, 
-					UIControlManager.InformationMessageTitle.Information.toString(), 
-					JOptionPane.INFORMATION_MESSAGE);
-		}
-	}
 
 
 	/**
@@ -167,6 +134,17 @@ public class CommonGuiUtility {
 	}
 	
 	
+	private static void nameAbstractButtonsGivenTheirText(List<? extends AbstractButton> buttons) {
+		if (buttons == null) {
+			throw new InvalidParameterException("The buttons parameter cannot be null!");
+		}
+		for (AbstractButton b : buttons) {
+			b.setName(b.getText());
+		}
+	}
+	
+	
+
 	/**
 	 * This method instantiates a JFileChooser and returns the result in the FileChooserOutput object.
 	 * @param owner a Component object that calls this JFileChooser
@@ -278,15 +256,16 @@ public class CommonGuiUtility {
 	}
 	
 	static void findAndAdaptButtonOfThisKind(Container fc, TextableEnum controlID) {
-		List<Component> buttons = CommonGuiUtility.mapComponents(fc, JButton.class);
-		for (Component c : buttons) {
-			if (REpiceaTranslator.getString(controlID).equals(((JButton) c).getText())) {
+		List<JButton> buttons = CommonGuiUtility.mapComponents(fc, JButton.class);
+		for (JButton c : buttons) {
+			if (REpiceaTranslator.getString(controlID).equals(c.getText())) {
 				if (controlID instanceof Enum)
-					((JButton) c).setName(((Enum) controlID).name());
+					c.setName(((Enum) controlID).name());
 				if (controlID instanceof CommonControlID) {
 					Icon icon = ((CommonControlID) controlID).getIcon();
-					if (icon != null) 
-						((JButton) c).setIcon(icon);
+					if (icon != null) {
+						c.setIcon(icon);
+					}
 				}
 			}
 		}
@@ -386,7 +365,7 @@ public class CommonGuiUtility {
 	 * @param parent the Container instance that is the parent of this error message (can be null)
 	 */
 	public static void showErrorMessage(String message, Component parent) {
-		SwingUtilities.invokeLater(new ErrorMessage(message, parent));
+		SwingUtilities.invokeLater(new SimpleMessage(message, JOptionPane.ERROR_MESSAGE, parent));
 	}
 
 	/**
@@ -395,7 +374,7 @@ public class CommonGuiUtility {
 	 * @param parent the Container instance that is the parent of this error message (can be null)
 	 */
 	public static void showInformationMessage(String message, Component parent) {
-		SwingUtilities.invokeLater(new InformationMessage(message, parent));
+		SwingUtilities.invokeLater(new SimpleMessage(message, JOptionPane.INFORMATION_MESSAGE, parent));
 	}
 
 	/**
@@ -404,22 +383,24 @@ public class CommonGuiUtility {
 	 * @param parent the Container instance that is the parent of this error message (can be null)
 	 */
 	public static void showWarningMessage(String message, Component parent) {
-		SwingUtilities.invokeLater(new WarningMessage(message, parent));
+		SwingUtilities.invokeLater(new SimpleMessage(message, JOptionPane.WARNING_MESSAGE, parent));
 	}
 
 	/**
-	 * This method scans a container for all the instances of a particular class that
-	 * extends the class parameter.
+	 * Scan a container for all the instances of a particular class that
+	 * extends the Component class.
+	 * @param <T> a Class that extends the Component class
 	 * @param container a Container instance
-	 * @param clazz a Class instance that extends Component
+	 * @param clazz a T instance 
 	 * @return a List of Component instances
 	 */
-	public static List<Component> mapComponents(Container container, Class<? extends Component> clazz) {
-		List<Component> textComponents = new ArrayList<Component>();
+	@SuppressWarnings("unchecked")
+	public static <T extends Component> List<T>   mapComponents(Container container, Class<T> clazz) {
+		List<T> textComponents = new ArrayList<T>();
 		Component[] components = container.getComponents();
 		for (Component component : components) {
 			if (clazz.isAssignableFrom(component.getClass())) {
-				textComponents.add(component);
+				textComponents.add((T) component);
 			} else if (component instanceof Container) {
 				textComponents.addAll(mapComponents((Container) component, clazz));
 			}
@@ -428,16 +409,51 @@ public class CommonGuiUtility {
 	}
 
 	/**
-	 * This method is a recursive method that enables/disables all the buttons in a container.
+	 * A recursive method that enables/disables all the buttons in a container.
+	 * @param <T> a Class that extends the Component class
 	 * @param container a Container instance
 	 * @param clazz a Class instance that extends Component
 	 * @param enabled a boolean
 	 */
-	public static void enableThoseComponents(Container container, Class<? extends Component> clazz, boolean enabled) {
-		List<Component> componentList = CommonGuiUtility.mapComponents(container, clazz);
+	public static <T extends Component> void enableThoseComponents(Container container, Class<T> clazz, boolean enabled) {
+		List<T> componentList = CommonGuiUtility.mapComponents(container, clazz);
 		for (Component comp : componentList) {
 			comp.setEnabled(enabled);
 		}
+	}
+
+	/**
+	 * Find a component corresponding to this name within the component. <p>
+	 * The method scans recursively the component if it is an instance of the Container class.
+	 * @param comp a Component instance
+	 * @param name the name of the Component instance we are looking for
+	 * @return the Component instance or null if no component bears this name
+	 */
+	public static Component findComponentWithThisName(Component comp, String name) {
+		if (comp == null)
+			return null;
+		if  (name == null)
+			throw new InvalidParameterException("The name must be non null!");
+
+		if (name.equals(comp.getName())) {
+			return comp;
+		} else if (comp instanceof JMenu) {
+			JMenu m = (JMenu) comp;
+			for (int i = 0; i < m.getItemCount(); i ++) {
+				Component resultingC = findComponentWithThisName(m.getItem(i), name);
+				if (resultingC != null) {
+					return resultingC;
+				}
+			}
+		} else if (comp instanceof Container) {
+			for (Component c : ((Container) comp).getComponents()) {
+				Component resultingC = findComponentWithThisName(c, name);
+				if (resultingC != null) {
+					return resultingC;
+				}
+			}
+		}
+		return null;
 	}
 
 	
@@ -470,7 +486,6 @@ public class CommonGuiUtility {
 	 */
 	public static ImageIcon retrieveIcon(Class<?> clazz, String iconName) {
 		String iconPath = ObjectUtility.getRelativePackagePath(clazz) + iconName;
-//		InputStream iconInputStream = ClassLoader.getSystemResourceAsStream(iconPath);
 		InputStream iconInputStream = CommonGuiUtility.class.getResourceAsStream("/" + iconPath);
 		try {
 			Image image = ImageIO.read(iconInputStream);
@@ -497,9 +512,14 @@ public class CommonGuiUtility {
 		return convertedFilename;
 	}
 	
+	
+	
+	
+	
 	static public void main(String[] args) {
-		REpiceaTranslator.setCurrentLanguage(Language.French);
-		CommonGuiUtility.browseAction(null, JFileChooser.FILES_ONLY, null, null, JFileChooser.SAVE_DIALOG);
+//		REpiceaTranslator.setCurrentLanguage(Language.French);
+//		CommonGuiUtility.browseAction(null, JFileChooser.FILES_ONLY, null, null, JFileChooser.SAVE_DIALOG);
+		CommonGuiUtility.showErrorMessage("Test1", null);
 	}
 
 	
