@@ -25,7 +25,7 @@ import java.util.jar.Manifest;
 
 public class JarUtility {
 	
-	private static final String JAR_FILE_PREFIX = "jar:file:";
+	private static final String JAR_FILE_PREFIX = "file:";
 
 	/**
 	 * Return a boolean that indicates whether the class is embedded in a Jar file or not.
@@ -33,10 +33,6 @@ public class JarUtility {
 	 * @return a boolean true means the class is in a jar file or false otherwise
 	 */
 	public static boolean isEmbeddedInJar(Class<?> clazz) {
-//		String className = clazz.getSimpleName();
-//		URL resourceURL = clazz.getResource(className + ".class");
-//		String resourcePath = resourceURL.toString();
-//		return resourcePath.startsWith("jar:");
 		return getJarFileImInIfAny(clazz) != null;
 	}
 
@@ -49,10 +45,11 @@ public class JarUtility {
 	public static String getJarFileImInIfAny(Class<?> clazz) {
 		String className = clazz.getSimpleName();
 		URL resourceURL = clazz.getResource(className + ".class");
-		String resourcePath = resourceURL.toString();
+		String resourcePath = resourceURL.getPath();
 		if (resourcePath.startsWith(JAR_FILE_PREFIX)) {
 			int indexMark = resourcePath.indexOf("!");
-			return resourcePath.substring(JAR_FILE_PREFIX.length(), indexMark);	// we remove the jar: prefix here
+			String filename = resourcePath.substring(JAR_FILE_PREFIX.length(), indexMark);	// we remove the jar: prefix here
+			return filename.replace("%20", " ");		// we convert %20 to space 
 		} else {
 			return null;
 		}
