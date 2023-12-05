@@ -116,12 +116,22 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 		}
 
 	}
+
 	
+	/**
+	 * Implement the parameters of the REpiceaProgressBarDialog class.
+	 */
 	public static class REpiceaProgressBarDialogParameters {
 		final String labelString;
 		final SwingWorker<?,?> jobToRun;
 		final boolean isIndeterminate;
 		
+		/**
+		 * Constructor.
+		 * @param labelString the label to be displayed in the dialog
+		 * @param jobToRun the SwingWorker instance to be executed
+		 * @param isIndeterminate true to set the progress bar in the indeterminate mode
+		 */
 		public REpiceaProgressBarDialogParameters(String labelString, SwingWorker<?,?> jobToRun, boolean isIndeterminate) {
 			if (labelString == null) {
 				throw new InvalidParameterException("The labelString parameter cannot be null!");
@@ -184,8 +194,6 @@ public class REpiceaProgressBarDialog extends REpiceaDialog implements PropertyC
 		super(owner);
 		init(titleString, parms);
 	}
-
-	
 	
 	private void init(String titleString, List<REpiceaProgressBarDialogParameters> parms) {
 		this.titleString = titleString;

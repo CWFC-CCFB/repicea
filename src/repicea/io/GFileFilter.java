@@ -46,6 +46,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 		HTML("Hypertext Markup Language (*.html)", "Langage Hypertext Markup (*.html)"),
 		TXT("Text File (*.txt)", "Fichier texte  (*.txt)"),
 		SVG("Scalable Vector Graphics file (*.svg)", "Fichier Scalable Vector Graphics (*.svg)"),
+		JSON("JavaScript Object Notation (*.json)", "Format JavaScript Object Notation (*.json)"),
 		UNKNOWN("","");
 
 		private static Map<FileType, GFileFilter> FileFilterMap;
@@ -78,6 +79,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 				FileFilterMap.put(TXT, GFileFilter.TXT);
 				FileFilterMap.put(MDB,  GFileFilter.MDB);
 				FileFilterMap.put(SVG,  GFileFilter.SVG);
+				FileFilterMap.put(JSON, GFileFilter.JSON);
 			}
 			return FileFilterMap;
 		}
@@ -102,6 +104,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 	public final static GFileFilter HTML = new GFileFilter(".html", FileType.HTML);
 	public final static GFileFilter TXT = new GFileFilter(".txt", FileType.TXT);
 	public final static GFileFilter SVG = new GFileFilter(".svg", FileType.SVG);
+	public final static GFileFilter JSON = new GFileFilter(".json", FileType.JSON);
 	
 	
 	private String extension;
