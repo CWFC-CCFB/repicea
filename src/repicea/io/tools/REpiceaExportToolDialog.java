@@ -45,7 +45,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.AutomatedHelper;
 import repicea.gui.CommonGuiUtility;
@@ -55,7 +54,8 @@ import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog;
 import repicea.gui.genericwindows.REpiceaProgressBarDialog.REpiceaProgressBarDialogParameters;
-import repicea.io.GFileFilter;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilterList;
 import repicea.io.tools.REpiceaExportTool.InternalSwingWorkerForRecordSet;
 import repicea.lang.MemoryWatchDog.ExpectedMemoryCapacityException;
 import repicea.util.BrowserCaller;
@@ -401,9 +401,7 @@ public class REpiceaExportToolDialog extends REpiceaDialog implements ActionList
 			}
 		} else if (arg0.getSource().equals(browse)) {
 			try {
-				List<FileFilter> fileFilters = new ArrayList<FileFilter>();
-				fileFilters.add(GFileFilter.CSV);
-				fileFilters.add(GFileFilter.DBF);
+				REpiceaFileFilterList fileFilters = new REpiceaFileFilterList(REpiceaFileFilter.CSV, REpiceaFileFilter.DBF);
 				FileChooserOutput fco = CommonGuiUtility.browseAction(this, 
 						JFileChooser.FILES_ONLY, 
 						getCaller().getFilename(), 

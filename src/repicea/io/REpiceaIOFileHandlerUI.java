@@ -25,13 +25,10 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import javax.swing.AbstractButton;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 
 import repicea.app.SettingMemory;
 import repicea.gui.CommonGuiUtility;
@@ -90,7 +87,7 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 			AbstractButton saveButton,
 			AbstractButton saveAsButton,
 			AbstractButton loadButton) {
-		super((Component) component, componentOwner.getFileFilter());
+		super((Component) component, componentOwner.getFileFilters());
 		this.component.addPropertyChangeListener(this);
 		this.componentOwner = componentOwner;
 		getIOUserInterface().firePropertyChange(REpiceaAWTProperty.DisconnectAutoShutdown, null, this);
@@ -122,8 +119,7 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 			} else {
 				filename = componentOwner.getFilename();
 			}
-			List<FileFilter> fileFilters = new ArrayList<FileFilter>();
-			fileFilters.add(componentOwner.getFileFilter());
+			REpiceaFileFilterList fileFilters = new REpiceaFileFilterList(componentOwner.getFileFilters());
 			
 			FileChooserOutput fileChooserOutput = CommonGuiUtility.browseAction((Component) component,
 					JFileChooser.FILES_ONLY, 
@@ -254,7 +250,7 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 	 * @param window a REpiceaWindow window
 	 */
 	public static void RefreshTitle(IOUserInterfaceableObject caller, REpiceaWindow window) {
-		if (caller.getFilename() != null && !caller.getFilename().isEmpty() && caller.getFileFilter().accept(new File(caller.getFilename()))) {
+		if (caller.getFilename() != null && !caller.getFilename().isEmpty() && caller.getFileFilters().accept(new File(caller.getFilename()))) {
 			String title = CommonGuiUtility.convertFilenameForLabel(caller.getFilename(), 45);
 			window.setTitle(UIControlManager.getTitle(((Window) window).getClass()) + " - " + title);
 		} else {

@@ -35,14 +35,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.filechooser.FileFilter;
-
 import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.FormatField;
 import repicea.io.FormatHeader;
 import repicea.io.FormatReader;
-import repicea.io.GFileFilter;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilterList;
 import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 import repicea.io.tools.StreamImportFieldManager.QueueReader;
 import repicea.lang.REpiceaSystem;
@@ -119,7 +118,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		setFileSpecifications(fileSpec); 
 		
 		if (new File(fileSpec[0]).exists() && new File(fileSpec[0]).isFile()) {
-			String potentialIfeFilename = fileSpec[0].substring(0, fileSpec[0].lastIndexOf(".")).concat(GFileFilter.IFE.getExtension());
+			String potentialIfeFilename = fileSpec[0].substring(0, fileSpec[0].lastIndexOf(".")).concat(REpiceaFileFilter.IFE.getExtension());
 			if (new File(potentialIfeFilename).exists() && new File(potentialIfeFilename).isFile()) {
 				try {
 					load(potentialIfeFilename);
@@ -452,7 +451,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 
 	@Override
-	public FileFilter getFileFilter() {return GFileFilter.IFE;}
+	public REpiceaFileFilterList getFileFilters() {return new REpiceaFileFilterList(REpiceaFileFilter.IFE);}
 
 
 	@Override

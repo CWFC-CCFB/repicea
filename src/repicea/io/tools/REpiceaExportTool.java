@@ -40,8 +40,8 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
 import repicea.io.GExportRecord;
-import repicea.io.GFileFilter;
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.REpiceaRecordSet;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -482,8 +482,8 @@ public abstract class REpiceaExportTool implements REpiceaShowableUIWithParent, 
 	 * @param filename the name of the output file
 	 */
 	public void setFilename(String filename) {
-		if (!filename.trim().isEmpty() && GFileFilter.getFileType(filename) == FileType.UNKNOWN) {
-			filename += GFileFilter.CSV.getExtension();
+		if (!filename.trim().isEmpty() && REpiceaFileFilter.getFileType(filename) == FileType.UNKNOWN) {
+			filename += REpiceaFileFilter.CSV.getExtension();
 		} 
 		this.filename = filename;
 	}

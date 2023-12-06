@@ -25,7 +25,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.security.InvalidParameterException;
-import java.util.List;
 
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -34,13 +33,13 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.CommonGuiUtility;
 import repicea.gui.CommonGuiUtility.FileChooserOutput;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
+import repicea.io.REpiceaFileFilterList;
 
 /**
  * The GenericChooseFileDialog class implements a simple dialog that allows the user to select either
@@ -55,7 +54,7 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 	private JButton browse;
 	private JTextField textField;
 	private int fileSelectionMode;
-	private List<FileFilter> fileFilters;
+	private REpiceaFileFilterList fileFilters;
 	private boolean isValidated;
 	private String message;
 	
@@ -90,7 +89,7 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 			String title, 
 			String message, 
 			String defaultPath,
-			List<FileFilter> fileFilters,
+			REpiceaFileFilterList fileFilters,
 			int fileSelectionMode) {
 		super(parent);
 		this.message = message;
@@ -250,7 +249,12 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 
 	
 //	public static void main(String[] args) {
-//		GenericChooseFileDialog gcfd = new GenericChooseFileDialog(null, "titre", "message", "", null, JFileChooser.FILES_ONLY, false);
+//		GenericChooseFileDialog gcfd = new GenericChooseFileDialog(null, 
+//				"titre", 
+//				"message", 
+//				"", 
+//				new REpiceaFileFilterList(REpiceaFileFilter.JSON, REpiceaFileFilter.XML), 
+//				JFileChooser.FILES_ONLY);
 //		gcfd.setVisible(true);
 //		System.exit(0);
 //	}

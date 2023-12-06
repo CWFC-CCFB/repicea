@@ -33,7 +33,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
  * This class implements the method for any file filter.
  * @author Mathieu Fortin - August 2010
  */
-public class GFileFilter extends FileFilter implements ExtendedFileFilter {
+public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter {
 
 	public static enum FileType implements TextableEnum {
 		DBF("dBase IV file (*.dbf)", "Fichier dBase IV (*.dbf)"), 
@@ -49,7 +49,7 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 		JSON("JavaScript Object Notation (*.json)", "Format JavaScript Object Notation (*.json)"),
 		UNKNOWN("","");
 
-		private static Map<FileType, GFileFilter> FileFilterMap;
+		private static Map<FileType, REpiceaFileFilter> FileFilterMap;
 		
 		
 		FileType(String englishText, String frenchText) {
@@ -66,20 +66,20 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 			return REpiceaTranslator.getString(this);
 		}
 		
-		private static Map<FileType, GFileFilter> getFileFilterMap() {
+		private static Map<FileType, REpiceaFileFilter> getFileFilterMap() {
 			if (FileFilterMap == null) {
-				FileFilterMap = new HashMap<FileType, GFileFilter>();
-				FileFilterMap.put(ACCDB, GFileFilter.ACCDB);
-				FileFilterMap.put(DBF, GFileFilter.DBF);
-				FileFilterMap.put(CSV, GFileFilter.CSV);
-				FileFilterMap.put(IFE, GFileFilter.IFE);
-				FileFilterMap.put(XML, GFileFilter.XML);
-				FileFilterMap.put(JAVACLASS, GFileFilter.JAVACLASS);
-				FileFilterMap.put(HTML, GFileFilter.HTML);
-				FileFilterMap.put(TXT, GFileFilter.TXT);
-				FileFilterMap.put(MDB,  GFileFilter.MDB);
-				FileFilterMap.put(SVG,  GFileFilter.SVG);
-				FileFilterMap.put(JSON, GFileFilter.JSON);
+				FileFilterMap = new HashMap<FileType, REpiceaFileFilter>();
+				FileFilterMap.put(ACCDB, REpiceaFileFilter.ACCDB);
+				FileFilterMap.put(DBF, REpiceaFileFilter.DBF);
+				FileFilterMap.put(CSV, REpiceaFileFilter.CSV);
+				FileFilterMap.put(IFE, REpiceaFileFilter.IFE);
+				FileFilterMap.put(XML, REpiceaFileFilter.XML);
+				FileFilterMap.put(JAVACLASS, REpiceaFileFilter.JAVACLASS);
+				FileFilterMap.put(HTML, REpiceaFileFilter.HTML);
+				FileFilterMap.put(TXT, REpiceaFileFilter.TXT);
+				FileFilterMap.put(MDB,  REpiceaFileFilter.MDB);
+				FileFilterMap.put(SVG,  REpiceaFileFilter.SVG);
+				FileFilterMap.put(JSON, REpiceaFileFilter.JSON);
 			}
 			return FileFilterMap;
 		}
@@ -88,29 +88,29 @@ public class GFileFilter extends FileFilter implements ExtendedFileFilter {
 		 * This method returns the GFileFilter instance associated with this FileType.
 		 * @return a GFileFilter or null if the FileType is UNKNOWN
 		 */
-		public GFileFilter getFileFilter() {
+		public REpiceaFileFilter getFileFilter() {
 			return getFileFilterMap().get(this);
 		}
 		
 	} 
 	
-	public final static GFileFilter DBF = new GFileFilter(".dbf", FileType.DBF);
-	public final static GFileFilter CSV = new GFileFilter(".csv", FileType.CSV);
-	public final static GFileFilter IFE = new GFileFilter(".ife", FileType.IFE);
-	public final static GFileFilter MDB = new GFileFilter(".mdb", FileType.MDB);
-	public final static GFileFilter ACCDB = new GFileFilter(".accdb", FileType.ACCDB);
-	public final static GFileFilter XML = new GFileFilter(".xml", FileType.XML);
-	public final static GFileFilter JAVACLASS = new GFileFilter(".class", FileType.JAVACLASS);
-	public final static GFileFilter HTML = new GFileFilter(".html", FileType.HTML);
-	public final static GFileFilter TXT = new GFileFilter(".txt", FileType.TXT);
-	public final static GFileFilter SVG = new GFileFilter(".svg", FileType.SVG);
-	public final static GFileFilter JSON = new GFileFilter(".json", FileType.JSON);
+	public final static REpiceaFileFilter DBF = new REpiceaFileFilter(".dbf", FileType.DBF);
+	public final static REpiceaFileFilter CSV = new REpiceaFileFilter(".csv", FileType.CSV);
+	public final static REpiceaFileFilter IFE = new REpiceaFileFilter(".ife", FileType.IFE);
+	public final static REpiceaFileFilter MDB = new REpiceaFileFilter(".mdb", FileType.MDB);
+	public final static REpiceaFileFilter ACCDB = new REpiceaFileFilter(".accdb", FileType.ACCDB);
+	public final static REpiceaFileFilter XML = new REpiceaFileFilter(".xml", FileType.XML);
+	public final static REpiceaFileFilter JAVACLASS = new REpiceaFileFilter(".class", FileType.JAVACLASS);
+	public final static REpiceaFileFilter HTML = new REpiceaFileFilter(".html", FileType.HTML);
+	public final static REpiceaFileFilter TXT = new REpiceaFileFilter(".txt", FileType.TXT);
+	public final static REpiceaFileFilter SVG = new REpiceaFileFilter(".svg", FileType.SVG);
+	public final static REpiceaFileFilter JSON = new REpiceaFileFilter(".json", FileType.JSON);
 	
 	
 	private String extension;
 	private FileType fileType;
 	
-	private GFileFilter(String extension, FileType fileType) {
+	private REpiceaFileFilter(String extension, FileType fileType) {
 		super();
 		this.extension = extension;
 		this.fileType = fileType;
