@@ -1,8 +1,10 @@
 <!-- badges: start -->
 [![Java CI](https://github.com/CWFC-CCFB/repicea/actions/workflows/gradle.yml/badge.svg)](https://github.com/CWFC-CCFB/repicea/actions/workflows/gradle.yml)
+[![License: LGPL v3](https://img.shields.io/badge/License-LGPL_v3-blue.svg)](https://www.gnu.org/licenses/lgpl-3.0)
 <!-- badges: end -->
 
 Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
+
 Copyright (C) 2021-2023 His Majesty the King in right of Canada (authors: Mathieu Fortin and Jean-Francois Lavoie (CWFC-CCFB, Canadian Forest Service)
 
 Email: mathieu.fortin.re@gmail.com
