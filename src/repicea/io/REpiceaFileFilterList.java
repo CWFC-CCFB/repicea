@@ -33,11 +33,10 @@ public class REpiceaFileFilterList extends ArrayList<FileFilter>{
 	 * @param filters a series of REpiceaFileFilter instances
 	 */
 	public REpiceaFileFilterList(FileFilter... filters) {
-		if (filters == null || filters.length == 0) {
-			throw new InvalidParameterException("The filters argument cannot be null or empty!");
-		}
-		for (FileFilter f : filters) {
-			add(f);
+		if (filters != null) {
+			for (FileFilter f : filters) {
+				add(f);
+			}
 		}
 	}
 	
@@ -46,18 +45,17 @@ public class REpiceaFileFilterList extends ArrayList<FileFilter>{
 	 * @param filters a REpiceaFileFilterList instance
 	 */
 	public REpiceaFileFilterList(REpiceaFileFilterList filters) {
-		if (filters == null || filters.isEmpty()) {
-			throw new InvalidParameterException("The filters argument cannot be null or empty!");
-		}
-		for (FileFilter f : filters) {
-			add(f);
+		if (filters != null) {
+			for (FileFilter f : filters) {
+				add(f);
+			}
 		}
 	}
 
 	/**
 	 * Check if any of the FileFilter instance accepts this file.
-	 * @param f
-	 * @return
+	 * @param f a File instance
+	 * @return true any FileFilter instance can accept the file
 	 */
 	public boolean accept(File f) {
 		for (FileFilter filter : this) {

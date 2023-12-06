@@ -47,16 +47,16 @@ import repicea.io.REpiceaFileFilterList;
  * @author Mathieu Fortin - November 2012
  */
 @SuppressWarnings("serial")
-public class GenericChooseFileDialog extends REpiceaDialog implements ActionListener {
+public class REpiceaGenericChooseFileDialog extends REpiceaDialog implements ActionListener {
 
-	private JButton ok;
-	private JButton cancel;
-	private JButton browse;
-	private JTextField textField;
-	private int fileSelectionMode;
-	private REpiceaFileFilterList fileFilters;
+	private final JButton ok;
+	private final JButton cancel;
+	private final JButton browse;
+	private final JTextField textField;
+	private final int fileSelectionMode;
+	private final REpiceaFileFilterList fileFilters;
 	private boolean isValidated;
-	private String message;
+	private final String message;
 	
 	
 	/**
@@ -67,7 +67,7 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 	 * @param defaultPath the default file 
 	 * @param fileSelectionMode either JFileChooser.FILES_ONLY (default), JFileChooser.DIRECTORIES_ONLY or JFileChooser.FILES_AND_DIRECTORIES
 	 */
-	public GenericChooseFileDialog(Window parent,
+	public REpiceaGenericChooseFileDialog(Window parent,
 			String title, 
 			String message, 
 			String defaultPath,
@@ -85,7 +85,7 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 	 * @param fileFilters a List of FileFilter instances (can be null)
 	 * @param fileSelectionMode either JFileChooser.FILES_ONLY (default), JFileChooser.DIRECTORIES_ONLY or JFileChooser.FILES_AND_DIRECTORIES
 	 */
-	public GenericChooseFileDialog(Window parent,
+	public REpiceaGenericChooseFileDialog(Window parent,
 			String title, 
 			String message, 
 			String defaultPath,
@@ -94,7 +94,7 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 		super(parent);
 		this.message = message;
 		isValidated = false;
-		if (fileFilters != null) {
+		if (fileFilters != null && !fileFilters.isEmpty()) {
 			this.fileFilters = fileFilters;
 		} else {
 			this.fileFilters = null;
@@ -130,16 +130,7 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 		textFieldPanel.add(Box.createHorizontalGlue());
 		textFieldPanel.add(browse);
 		
-//		JPanel mainPanel = new JPanel();
-//		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-//		mainPanel.add(Box.createVerticalStrut(5));
-//		mainPanel.add(labelPanel);
-//		mainPanel.add(Box.createVerticalStrut(5));
-//		mainPanel.add(textFieldPanel);
-//		mainPanel.add(Box.createVerticalStrut(5));
-		
 		JPanel mainPanel = new JPanel(new BorderLayout());
-//		mainPanel.add(labelPanel, BorderLayout.NORTH);
 		mainPanel.add(textFieldPanel, BorderLayout.CENTER);
 		
 		getContentPane().add(labelPanel, BorderLayout.NORTH);
@@ -249,11 +240,11 @@ public class GenericChooseFileDialog extends REpiceaDialog implements ActionList
 
 	
 //	public static void main(String[] args) {
-//		GenericChooseFileDialog gcfd = new GenericChooseFileDialog(null, 
+//		REpiceaGenericChooseFileDialog gcfd = new REpiceaGenericChooseFileDialog(null, 
 //				"titre", 
 //				"message", 
 //				"", 
-//				new REpiceaFileFilterList(REpiceaFileFilter.JSON, REpiceaFileFilter.XML), 
+//				new REpiceaFileFilterList(), 
 //				JFileChooser.FILES_ONLY);
 //		gcfd.setVisible(true);
 //		System.exit(0);
