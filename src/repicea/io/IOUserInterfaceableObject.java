@@ -18,8 +18,6 @@
  */
 package repicea.io;
 
-import javax.swing.filechooser.FileFilter;
-
 /**
  * The IOUserInterfaceableObject should be implemented by any object whose UI offers the save/saveas/load options.
  * @author Mathieu Fortin - April 2014
@@ -27,10 +25,10 @@ import javax.swing.filechooser.FileFilter;
 public interface IOUserInterfaceableObject extends Saveable, Loadable {
 	
 	/**
-	 * This method returns the appropriate FileFilter instance for this class.
-	 * @return a FileFilter instance
+	 * This method returns the appropriate FileFilter instances for this class.
+	 * @return a REpiceaFileFilterList instance
 	 */
-	public FileFilter getFileFilter();
+	public REpiceaFileFilterList getFileFilters();
 
 	/**
 	 * This method returns the filename of the parameters.

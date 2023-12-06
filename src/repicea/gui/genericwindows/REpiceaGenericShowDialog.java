@@ -30,7 +30,7 @@ import javax.swing.text.html.HTMLEditorKit;
 import javax.swing.text.html.StyleSheet;
 
 import repicea.gui.REpiceaDialog;
-import repicea.io.GFileFilter;
+import repicea.io.REpiceaFileFilter;
 
 @SuppressWarnings("serial")
 public abstract class REpiceaGenericShowDialog extends REpiceaDialog {
@@ -66,7 +66,7 @@ public abstract class REpiceaGenericShowDialog extends REpiceaDialog {
 			}
 			editorPane.setEditable(false);		
 			StyledEditorKit kit;
-			if (filePath.endsWith(GFileFilter.HTML.getExtension())) {
+			if (filePath.endsWith(REpiceaFileFilter.HTML.getExtension())) {
 				kit = new HTMLEditorKit();		// HTML kit for rendering of the HTML file
 				StyleSheet styleSheet = new StyleSheet();	
 				styleSheet.importStyleSheet(urlAddress);		// The style sheet is set to the one defined in the HTML file

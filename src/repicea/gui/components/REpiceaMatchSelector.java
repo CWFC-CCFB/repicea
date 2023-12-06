@@ -33,11 +33,11 @@ import java.util.TreeMap;
 
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
-import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.REpiceaShowableUIWithParent;
-import repicea.io.GFileFilter.FileType;
 import repicea.io.IOUserInterfaceableObject;
+import repicea.io.REpiceaFileFilter.FileType;
+import repicea.io.REpiceaFileFilterList;
 import repicea.serial.Memorizable;
 import repicea.serial.MemorizerPackage;
 import repicea.serial.xml.XmlDeserializer;
@@ -251,7 +251,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 
 
 	@Override
-	public FileFilter getFileFilter() {return FileType.XML.getFileFilter();}
+	public REpiceaFileFilterList getFileFilters() {return new REpiceaFileFilterList(FileType.XML.getFileFilter());}
 
 
 	@Override

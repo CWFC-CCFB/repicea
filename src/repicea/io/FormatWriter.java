@@ -23,7 +23,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.javacsv.CSVWriter;
 import repicea.io.javadbf.DBFWriter;
 import repicea.io.javasql.SQLWriter;
@@ -133,7 +133,7 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	 */
 	public static FormatWriter<? extends FormatHeader<? extends FormatField>> createFormatWriter(boolean append, String... fileSpec) throws IOException {
 		try {
-			FileType f = GFileFilter.getFileType(fileSpec[0]);
+			FileType f = REpiceaFileFilter.getFileType(fileSpec[0]);
 			if (f == FileType.DBF) {
 				return new DBFWriter(new File(fileSpec[0]), append);
 			} else if (f == FileType.CSV) {

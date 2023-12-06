@@ -24,7 +24,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
 import repicea.io.javasql.SQLReader;
@@ -161,7 +161,7 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 	 */
 	public static FormatReader createFormatReader(String... fileSpec) throws IOException {
 		try {
-			FileType f = GFileFilter.getFileType(fileSpec[0]);
+			FileType f = REpiceaFileFilter.getFileType(fileSpec[0]);
 			if (f == FileType.DBF) {
 				return new DBFReader(fileSpec[0]);
 			} else if (f == FileType.CSV) {

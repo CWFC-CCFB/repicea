@@ -21,7 +21,6 @@ package repicea.io;
 import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import javax.swing.JFileChooser;
@@ -29,8 +28,8 @@ import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileFilter;
 
 import repicea.gui.CommonGuiUtility;
-import repicea.gui.UIControlManager;
 import repicea.gui.CommonGuiUtility.FileChooserOutput;
+import repicea.gui.UIControlManager;
 import repicea.util.REpiceaTranslator;
 
 /**
@@ -42,16 +41,15 @@ import repicea.util.REpiceaTranslator;
 public abstract class REpiceaSaveAsHandlerUI {
 
 	protected final Component component;
-	private final List<FileFilter> fileFilters;
+	private final REpiceaFileFilterList fileFilters;
 	
 	
-	protected REpiceaSaveAsHandlerUI(Component component, FileFilter... fFilters) {
+	protected REpiceaSaveAsHandlerUI(Component component, REpiceaFileFilterList fFilters) {
 		this.component = component;
+		this.fileFilters = new REpiceaFileFilterList(fFilters);
 		if (fFilters != null) {
-			fileFilters = Arrays.asList(fFilters);
-		} else {
-			fileFilters = new ArrayList<FileFilter>();
-		}
+			fileFilters.addAll(fFilters);
+		} 
 	}
 
 	protected String getFilename() {

@@ -183,7 +183,7 @@ public class ImportTest {
 	 */
 	@SuppressWarnings("unchecked")
 	public static void ReaderAndWriterReadTheSameTest(String filename) throws IOException {
-		GFileFilter fileFilter = GFileFilter.getFileType(filename).getFileFilter();
+		REpiceaFileFilter fileFilter = REpiceaFileFilter.getFileType(filename).getFileFilter();
 		String[] inputSpec = new String[2];
 		String[] outputSpec = new String[2];
 
@@ -192,7 +192,7 @@ public class ImportTest {
 		String outputFilename = filePath + "tmp" + fileFilter.getExtension();
 		inputSpec[0] = inputFilename;
 		outputSpec[0] = outputFilename;
-		if (fileFilter.equals(GFileFilter.ACCDB)) {
+		if (fileFilter.equals(REpiceaFileFilter.ACCDB)) {
 			String targetPath = REpiceaSystem.getJavaIOTmpDir() + "tmp.accdb";
 			if (!FileUtility.copy(inputFilename, targetPath)) {
 				throw new IOException("Unable to copy the database file to tmp directory!");
@@ -202,7 +202,7 @@ public class ImportTest {
 			inputSpec[1] = "TEST6152";
 			outputSpec[0] = targetPath;
 			outputSpec[1] = "copy";
-		} else if (fileFilter.equals(GFileFilter.MDB)) {
+		} else if (fileFilter.equals(REpiceaFileFilter.MDB)) {
 			String targetPath = REpiceaSystem.getJavaIOTmpDir() + "tmp.mdb";
 			if (!FileUtility.copy(inputFilename, targetPath)) {
 				throw new IOException("Unable to copy the database file to tmp directory!");

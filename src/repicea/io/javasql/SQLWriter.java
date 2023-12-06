@@ -30,8 +30,8 @@ import java.util.List;
 import repicea.io.FormatField;
 import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
-import repicea.io.GFileFilter;
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilter.FileType;
 
 /**
  * The SQLWriter class is an extension of the FormatWriter class, which is designed to write tables in MS Access
@@ -55,7 +55,7 @@ public class SQLWriter extends FormatWriter<SQLHeader> {
 		super(dataBaseFile, true);		// append the database by default
 		this.table = table;
 		
-		FileType f = GFileFilter.getFileType(getFilename());
+		FileType f = REpiceaFileFilter.getFileType(getFilename());
 		if (f != FileType.ACCDB && f != FileType.MDB) {
 			throw new IOException("SQLWriter.c. The file is not a .accdb or a .mdb file");
 		}

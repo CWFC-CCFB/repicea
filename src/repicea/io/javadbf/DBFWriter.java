@@ -28,8 +28,8 @@ import java.util.List;
 import repicea.io.FormatField;
 import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
-import repicea.io.GFileFilter;
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilter.FileType;
 
 /**
 	An object of this class can create a DBF file.
@@ -108,7 +108,7 @@ public class DBFWriter extends FormatWriter<DBFHeader> {
 	 */
 	public DBFWriter(File dbfFile, boolean append) throws IOException {
 		super(dbfFile, append);
-		if (GFileFilter.getFileType(getFilename()) != FileType.DBF) {
+		if (REpiceaFileFilter.getFileType(getFilename()) != FileType.DBF) {
 			throw new IOException("DBFWriter.c. The file is not a .dbf file");
 		}
 

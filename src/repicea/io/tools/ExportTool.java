@@ -42,8 +42,8 @@ import repicea.io.FormatHeader;
 import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
 import repicea.io.GExportRecord;
-import repicea.io.GFileFilter;
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.GRecordSet;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -399,7 +399,7 @@ public abstract class ExportTool implements REpiceaShowableUIWithParent, CaretLi
 	 * @param filename a String
 	 */
 	public void setFilename(String filename) {
-		if (!filename.trim().isEmpty() && GFileFilter.getFileType(filename) == FileType.UNKNOWN) {
+		if (!filename.trim().isEmpty() && REpiceaFileFilter.getFileType(filename) == FileType.UNKNOWN) {
 			filename += "." + FileType.DBF.name().toLowerCase();
 		} 
 		this.filename = filename;

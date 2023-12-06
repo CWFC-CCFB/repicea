@@ -27,8 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import repicea.io.GFileFilter;
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilter.FileType;
 
 /**
  * The DatabaseConnectionManager ensures that only one connection is made
@@ -139,7 +139,7 @@ public class DatabaseConnectionManager {
 		try {
 //			ClassLoader.getSystemClassLoader().loadClass("net.ucanaccess.jdbc.UcanaccessDriver");
 //			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
-			FileType f = GFileFilter.getFileType(dataBaseUrl);
+			FileType f = REpiceaFileFilter.getFileType(dataBaseUrl);
 			if (f == FileType.ACCDB || f == FileType.MDB) {
 				String connectionString = "jdbc:ucanaccess://" + dataBaseUrl;
 				String user = System.getProperty("user.name");

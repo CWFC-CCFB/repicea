@@ -32,8 +32,8 @@ import java.util.List;
 import repicea.io.FormatField;
 import repicea.io.FormatWriter;
 import repicea.io.GExportFieldDetails;
-import repicea.io.GFileFilter;
-import repicea.io.GFileFilter.FileType;
+import repicea.io.REpiceaFileFilter;
+import repicea.io.REpiceaFileFilter.FileType;
 
 /**
  * A writer for CSV file.
@@ -52,7 +52,7 @@ public class CSVWriter extends FormatWriter<CSVHeader> {
 	 */
 	public CSVWriter(File csvFile, boolean append, String token) throws IOException {
 		super(csvFile, append);
-		if (GFileFilter.getFileType(getFilename()) != FileType.CSV) {
+		if (REpiceaFileFilter.getFileType(getFilename()) != FileType.CSV) {
 			throw new IOException("CSVWriter.c. The file is not a .csv file");
 		}
 		setFormatHeader(new CSVHeader(token));

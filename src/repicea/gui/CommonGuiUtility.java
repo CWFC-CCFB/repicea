@@ -58,6 +58,7 @@ import javax.swing.table.JTableHeader;
 import javax.swing.text.JTextComponent;
 
 import repicea.gui.UIControlManager.CommonControlID;
+import repicea.io.REpiceaFileFilterList;
 import repicea.util.ExtendedFileFilter;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
@@ -157,7 +158,7 @@ public class CommonGuiUtility {
 	public static FileChooserOutput browseAction(Component owner,
 								int fileSelectionMode, 
 								String originalFilename,
-								List<FileFilter> fileFilters,
+								REpiceaFileFilterList fileFilters,
 								int dialogType) {
 		return CommonGuiUtility.browseAction(owner, fileSelectionMode, originalFilename, fileFilters, dialogType, null);
 	}
@@ -175,7 +176,7 @@ public class CommonGuiUtility {
 	public static FileChooserOutput browseAction(Component owner,
 								int fileSelectionMode, 
 								String originalFilename,
-								List<FileFilter> fileFilters,
+								REpiceaFileFilterList fileFilters,
 								int dialogType,
 								FileSystemView fsv) {
 
