@@ -32,7 +32,6 @@ public interface Mappable {
 	/**
 	 * Provide a LinkedHashMap instance that ensures a proper
 	 * JSON or CSV representation of this object.
-	 * @param id a String
 	 * @return a LinkedHashMap instance
 	 */
 	public LinkedHashMap<String, Object> getMapRepresentation();
