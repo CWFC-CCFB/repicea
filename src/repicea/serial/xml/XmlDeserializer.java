@@ -19,18 +19,16 @@
 package repicea.serial.xml;
 
 import java.io.BufferedInputStream;
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
-import java.security.InvalidParameterException;
 import java.util.zip.InflaterInputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.UnmarshalException;
 import javax.xml.bind.Unmarshaller;
 
-import repicea.lang.REpiceaSystem;
+import repicea.serial.AbstractDeserializer;
+import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
 
 /**
@@ -38,32 +36,15 @@ import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
  * XMLSerializer class.
  * @author Mathieu Fortin - October 2012
  */
-public class XmlDeserializer { 
+public final class XmlDeserializer extends AbstractDeserializer { 
 
-	static {
-		if (REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.7")) {
-			XmlSerializerChangeMonitor.registerClassNameChange("java.util.HashMap$Entry", "java.util.AbstractMap$SimpleEntry");
-		}
-	}
-	
-	
-	private static enum ReadMode {File, InputStream}
-	
-	private File file;
-	private InputStream is;
-	private final ReadMode readMode;
-	
 	
 	/**
 	 * Constructor.
 	 * @param filename the file from which the object is deserialized
 	 */
 	public XmlDeserializer(String filename) {
-		file = new File(filename);
-		if (!file.isFile()) {
-			throw new InvalidParameterException("The file is either a directory or does not exist!");
-		}
-		readMode = ReadMode.File;
+		super(filename);
 	}
 
 	
@@ -72,17 +53,12 @@ public class XmlDeserializer {
 	 * @param is an InputStream instance from which the object is deserialized
 	 */
 	public XmlDeserializer(InputStream is) {
-		this.is = is;
-		readMode = ReadMode.InputStream;
+		super(is);
 	}
 	
-	
-	/**
-	 * This method returns the object that has been deserialized.
-	 * @return an Object instance
-	 * @throws XmlMarshallException if an XML marshalling error has occurred
-	 */
-	public Object readObject() throws XmlMarshallException {
+
+	@Override
+	public Object readObject() throws UnmarshallingException {
 		JAXBContext jaxbContext;
 		try {
 			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
@@ -120,12 +96,12 @@ public class XmlDeserializer {
 				unmarshalledObj = ((FakeList) unmarshalledObj).get(0);
 			}
 	 		return unmarshalledObj;
-		} catch (XmlMarshallException e1) {
+		} catch (UnmarshallingException e1) {
 			e1.printStackTrace();
 			throw e1;
 		} catch (Exception e2) {
 			e2.printStackTrace();
-			throw new XmlMarshallException(e2);
+			throw new UnmarshallingException(e2);
 		}
 	}
 

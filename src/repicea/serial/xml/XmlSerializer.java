@@ -18,14 +18,15 @@
  */
 package repicea.serial.xml;
 
-import java.io.File;
 import java.io.FileOutputStream;
-import java.security.InvalidParameterException;
 import java.util.zip.DeflaterOutputStream;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
+import repicea.serial.AbstractSerializer;
+import repicea.serial.MarshallingException;
+import repicea.serial.MarshallingUtilities;
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
 
 /**
@@ -33,23 +34,15 @@ import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
  * OutputStream instances are also handled by this class.
  * @author Mathieu Fortin - Octobre 2012
  */
-public class XmlSerializer { 
+public final class XmlSerializer extends AbstractSerializer { 
 
-	private File file;
-	private final boolean enableCompression;
-	
-	
 	/**
 	 * Constructor.
-	 * @param filename the xml file that serves as output
+	 * @param filename the file that serves as output
 	 * @param enableCompression true to use compression or false otherwise
 	 */
 	public XmlSerializer(String filename, boolean enableCompression) {
-		this.enableCompression = enableCompression;
-		file = new File(filename);
-		if (file.isDirectory()) {
-			throw new InvalidParameterException("The filename parameter denotes a directory!");
-		}
+		super(filename, enableCompression);
 	}
 
 	
@@ -62,17 +55,12 @@ public class XmlSerializer {
 	}
 	
 	
-	/**
-	 * This method writes an object to the XML file.
-	 * @param obj any Object instance
-	 * @throws XmlMarshallException if a marshal error has occurred
-	 */
 	@SuppressWarnings("unchecked")
-	public void writeObject(Object obj) throws XmlMarshallException {
+	public void writeObject(Object obj) throws MarshallingException {
 		DeflaterOutputStream dos = null;
 		try {
 			XmlMarshaller marshaller = new XmlMarshaller();
-			if (XmlMarshallingUtilities.isStringOrPrimitive(obj)) { // then we embed the object into a wrapper
+			if (MarshallingUtilities.isStringOrPrimitive(obj)) { // then we embed the object into a wrapper
 				FakeList wrapper = new FakeList();
 				wrapper.add(obj);
 				obj = wrapper;
@@ -89,7 +77,7 @@ public class XmlSerializer {
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new XmlMarshallException(e);
+			throw new MarshallingException(e);
 		} finally {
 			if (dos != null) {
 				try {
@@ -101,12 +89,5 @@ public class XmlSerializer {
 		}
 		
 	}
-
-//	@Override
-//	public void close() {
-//		e.close();
-//	}
-
-	
 	
 }

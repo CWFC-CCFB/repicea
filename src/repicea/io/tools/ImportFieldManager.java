@@ -45,8 +45,8 @@ import repicea.io.REpiceaFileFilterList;
 import repicea.io.tools.ImportFieldElement.ImportFieldElementIDCard;
 import repicea.io.tools.StreamImportFieldManager.QueueReader;
 import repicea.lang.REpiceaSystem;
+import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlDeserializer;
-import repicea.serial.xml.XmlMarshallException;
 import repicea.serial.xml.XmlSerializer;
 
 
@@ -165,6 +165,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 */
 	public String[] getFileSpecifications() {return fileSpec;}
 	
+	@SuppressWarnings("rawtypes")
 	protected FormatReader instantiateFormatReader() throws IOException {
 		return FormatReader.createFormatReader(getFileSpecifications());
 	}
@@ -368,9 +369,9 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * @param fileSpec the file to be read and all the required specifications such as the table for instance
 	 * @return an ImportFieldManager instance
 	 * @throws IOException if an I/O error has occurred
-	 * @throws XmlMarshallException if a marshal error has occurred
+	 * @throws UnmarshallingException if a marshalling error has occurred
 	 */
-	public static ImportFieldManager createImportFieldManager(String ifeFilename, String... fileSpec) throws XmlMarshallException, IOException  {
+	public static ImportFieldManager createImportFieldManager(String ifeFilename, String... fileSpec) throws UnmarshallingException, IOException  {
 		ImportFieldManager ifm = new ImportFieldManager();
 		Map<Enum<?>, List<ImportFieldElement>> oMap = ImportFieldManager.loadImportFieldElementMap(ifeFilename);
 		ifm.importFieldElementMap = oMap;
@@ -380,7 +381,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	}
 	
 	@SuppressWarnings({ "unchecked" })
-	private static Map<Enum<?>, List<ImportFieldElement>> loadImportFieldElementMap(String ifeFilename) throws IOException, XmlMarshallException {
+	private static Map<Enum<?>, List<ImportFieldElement>> loadImportFieldElementMap(String ifeFilename) throws IOException, UnmarshallingException {
 		XmlDeserializer decoder = new XmlDeserializer(ifeFilename);
 		Object obj = decoder.readObject();
 		return (Map<Enum<?>, List<ImportFieldElement>>) obj;

@@ -1,3 +1,21 @@
+/*
+ * This file is part of the repicea-util library.
+ *
+ * Copyright (C) 2009-2012 Mathieu Fortin for Rouge Epicea.
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This library is distributed with the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied
+ * warranty of MERCHANTABILITY or FITNESS FOR A
+ * PARTICULAR PURPOSE. See the GNU Lesser General Public
+ * License for more details.
+ *
+ * Please see the license at http://www.gnu.org/copyleft/lesser.html.
+ */
 package repicea.serial.xml;
 
 import java.awt.Window;
@@ -16,12 +34,15 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.serial.MarshallingException;
+import repicea.serial.SerializerChangeMonitor;
+import repicea.serial.UnmarshallingException;
 import repicea.util.ObjectUtility;
 
 public class XmlSerializationTest {
 	
 	static {
-		XmlSerializerChangeMonitor.registerClassNameChange("repicea.serial.xml.XmlSerializationTest$OriginalFakeClass", "repicea.serial.xml.XmlSerializationTest$FakeClassForSerializationTest");
+		SerializerChangeMonitor.registerClassNameChange("repicea.serial.xml.XmlSerializationTest$OriginalFakeClass", "repicea.serial.xml.XmlSerializationTest$FakeClassForSerializationTest");
 	}
 	
 	
@@ -226,7 +247,7 @@ public class XmlSerializationTest {
 	}
 	
 	@Test
-	public void serializationOfProblematicCharacters() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfProblematicCharacters() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] problematicCharacters = new String[5];
 		problematicCharacters[0] = "<";
 		problematicCharacters[1] = ">";
@@ -250,7 +271,7 @@ public class XmlSerializationTest {
 	}
 	
 	@Test
-	public void serializationOfProblematicCharacters2() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfProblematicCharacters2() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String problematicCharacters = "<>>>&1DEZF3&D";
 		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
 		XmlSerializer serializer = new XmlSerializer(pathname);
@@ -266,7 +287,7 @@ public class XmlSerializationTest {
 
 	
 	@Test
-	public void serializationDeserializationOfASimpleObject() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfASimpleObject() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClass ah = new FakeClass(arguments);
@@ -284,7 +305,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationDeserializationOfObjectWithTransientFields() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfObjectWithTransientFields() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClassWithStaticField ah = new FakeClassWithStaticField(arguments);
@@ -302,7 +323,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationDeserializationOfObjectWithList() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfObjectWithList() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClassWithList ah = new FakeClassWithList(arguments);
@@ -320,7 +341,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationDeserializationOfExtendedMap() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfExtendedMap() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClassDerivingFromMap ah = new FakeClassDerivingFromMap();
@@ -341,7 +362,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void serializationOfEmptyLists() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfEmptyLists() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		FakeClassWithEmptyList list1 = new FakeClassWithEmptyList();
 		FakeClassWithEmptyList list2 = new FakeClassWithEmptyList();
 		
@@ -363,7 +384,7 @@ public class XmlSerializationTest {
 
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void serializationOfEmptyLists2() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfEmptyLists2() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		FakeClassWithEmptyList list1 = new FakeClassWithEmptyList();
 		FakeClassWithEmptyList list2 = new FakeClassWithEmptyList();
 		list2.list = list1.list;
@@ -388,7 +409,7 @@ public class XmlSerializationTest {
 	
 	
 	@Test
-	public void serializationDeserializationOfAnSimpleObjectWithInputStream() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfAnSimpleObjectWithInputStream() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClass ah = new FakeClass(arguments);
@@ -410,7 +431,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationDeserializationOfObjectWithTransientFieldsWithInputStream() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfObjectWithTransientFieldsWithInputStream() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClassWithStaticField ah = new FakeClassWithStaticField(arguments);
@@ -432,7 +453,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationDeserializationOfObjectWithListWithInputStream() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfObjectWithListWithInputStream() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClassWithList ah = new FakeClassWithList(arguments);
@@ -454,7 +475,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationDeserializationOfExtendedMapWithInputStream() throws FileNotFoundException, XmlMarshallException {
+	public void serializationDeserializationOfExtendedMapWithInputStream() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String[] arguments = new String[1];
 		arguments[0] = "Test"; 
 		FakeClassDerivingFromMap ah = new FakeClassDerivingFromMap();
@@ -479,7 +500,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void serializationOfEmptyListsWithInputStream() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfEmptyListsWithInputStream() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		FakeClassWithEmptyList list1 = new FakeClassWithEmptyList();
 		FakeClassWithEmptyList list2 = new FakeClassWithEmptyList();
 		
@@ -505,7 +526,7 @@ public class XmlSerializationTest {
 
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void serializationOfEmptyLists2WithInputStream() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfEmptyLists2WithInputStream() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		FakeClassWithEmptyList list1 = new FakeClassWithEmptyList();
 		FakeClassWithEmptyList list2 = new FakeClassWithEmptyList();
 		list2.list = list1.list;
@@ -536,7 +557,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void serializationOfClassObject() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfClassObject() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		Class clazz = FakeClassForSerializationTest.class;
 
 		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
@@ -555,7 +576,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings("rawtypes")
 	@Test
-	public void serializationOfAFormerClassObject() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfAFormerClassObject() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		Class clazz = FakeClassForSerializationTest.class;
 
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "formerOriginalFakeClassObj.xml";
@@ -570,7 +591,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void serializationHashMap() throws FileNotFoundException, XmlMarshallException {
+	public void serializationHashMap() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		HashMap<Integer, Double> originalHashMap = new HashMap<Integer, Double>();
 		originalHashMap.put(1, 2d);
 		
@@ -587,7 +608,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void serializationConcurrentHashMap() throws FileNotFoundException, XmlMarshallException {
+	public void serializationConcurrentHashMap() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		ConcurrentHashMap<Integer, Double> originalConcurrentHashMap = new ConcurrentHashMap<Integer, Double>();
 		originalConcurrentHashMap.put(1, 2d);
 		
@@ -603,7 +624,7 @@ public class XmlSerializationTest {
 	}
 	
 	@Test
-	public void serializationObject() throws FileNotFoundException, XmlMarshallException {
+	public void serializationObject() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		Object obj = new Object();
 		
 		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
@@ -617,7 +638,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationOfPrimitive() throws FileNotFoundException, XmlMarshallException {
+	public void serializationOfPrimitive() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		String pathname = ObjectUtility.getPackagePath(getClass()) + "serObj.xml";
 		XmlSerializer serializer = new XmlSerializer(pathname);
 		serializer.writeObject(4d);
@@ -630,7 +651,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void testListOfClasses() throws FileNotFoundException, XmlMarshallException {
+	public void testListOfClasses() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		List<Class> myClasses = new ArrayList<Class>();
 		myClasses.add(Double.class);
 		myClasses.add(Double.class);
@@ -648,7 +669,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void testListOfArrays() throws FileNotFoundException, XmlMarshallException {
+	public void testListOfArrays() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		List myClasses = new ArrayList();
 		int[] myArray = new int[1];
 		myArray[0] = 18;
@@ -672,7 +693,7 @@ public class XmlSerializationTest {
 	
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Test
-	public void deserializationOfHashMapInJava7() throws FileNotFoundException, XmlMarshallException {
+	public void deserializationOfHashMapInJava7() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		
 		System.out.println("Java version : " + System.getProperty("java.version"));
 		
@@ -707,7 +728,7 @@ public class XmlSerializationTest {
 	
 	
 	@Test
-	public void deserializationOfDerivedHashMapClassWithOverridenPutMethod() throws FileNotFoundException, XmlMarshallException {
+	public void deserializationOfDerivedHashMapClassWithOverridenPutMethod() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		
 		Map<String, Double> originalHashMap = new FakeClassDerivingFromMapAndOverringPut();
 		
@@ -722,7 +743,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void deserializationOfDerivedArrayListClassWithOverridenAddMethod() throws FileNotFoundException, XmlMarshallException {
+	public void deserializationOfDerivedArrayListClassWithOverridenAddMethod() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		
 		List<String> originalList = new FakeClassDerivingFromListAndOverringAdd();
 		
@@ -740,7 +761,7 @@ public class XmlSerializationTest {
 	 * Just to make sure the error message is displayed only once.
 	 */
 	@Test
-	public void deserializationOfDerivedArrayListClassWithOverridenAddMethod2() throws FileNotFoundException, XmlMarshallException {
+	public void deserializationOfDerivedArrayListClassWithOverridenAddMethod2() throws FileNotFoundException, MarshallingException, UnmarshallingException {
 		
 		List<String> originalList = new FakeClassDerivingFromListAndOverringAdd();
 		
@@ -755,7 +776,7 @@ public class XmlSerializationTest {
 	}
 		
 	@Test
-	public void serializationLinkedHashMap() throws XmlMarshallException {
+	public void serializationLinkedHashMap() throws MarshallingException, UnmarshallingException {
 		Map<String, Double> linkedHashMap = new LinkedHashMap<String, Double>();
 		linkedHashMap.put("entry1", 2d);
 		linkedHashMap.put("entry2", 4d);
@@ -769,7 +790,7 @@ public class XmlSerializationTest {
 	}
 
 	@Test
-	public void serializationArraysArrayList() throws XmlMarshallException {
+	public void serializationArraysArrayList() throws MarshallingException, UnmarshallingException {
 		List<String> myList = Arrays.asList(new String[] {"patate", "chou", "carotte"});
 		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedArraysArrayList.zml";
 		XmlSerializer ser1 = new XmlSerializer(filename1);

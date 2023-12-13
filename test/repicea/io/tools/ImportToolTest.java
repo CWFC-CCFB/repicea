@@ -15,14 +15,14 @@ import repicea.gui.genericwindows.REpiceaSimpleListDialog;
 import repicea.io.FileUtility;
 import repicea.io.ImportTest;
 import repicea.lang.REpiceaSystem;
+import repicea.serial.SerializerChangeMonitor;
 import repicea.serial.xml.XmlDeserializer;
-import repicea.serial.xml.XmlSerializerChangeMonitor;
 import repicea.util.ObjectUtility;
 
 public class ImportToolTest {
 
 	static {
-		XmlSerializerChangeMonitor.registerClassNameChange("repicea.test.tools.TestRecordReader$FieldID", "repicea.io.tools.RecordReaderImpl$FieldID");
+		SerializerChangeMonitor.registerClassNameChange("repicea.test.tools.TestRecordReader$FieldID", "repicea.io.tools.RecordReaderImpl$FieldID");
 	}
 
 	@SuppressWarnings("unchecked")

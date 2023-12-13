@@ -23,6 +23,9 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
 import repicea.lang.reflect.ReflectUtility;
+import repicea.serial.AbstractMarshaller;
+import repicea.serial.MarshallingUtilities;
+import repicea.serial.SerializableEntry;
 
 /**
  * The XmlEntry is the basic representation of a field in an object.
@@ -30,7 +33,7 @@ import repicea.lang.reflect.ReflectUtility;
  */
 @XmlType
 @XmlRootElement
-final class XmlEntry {
+final class XmlEntry implements SerializableEntry {
 	
 	@XmlElement
 	String fieldName;
@@ -40,21 +43,13 @@ final class XmlEntry {
 	
 	XmlEntry() {}
 	
-	XmlEntry(XmlMarshaller marshaller, String fieldName, Object value) {
+	XmlEntry(AbstractMarshaller<XmlEntry, ?> marshaller, String fieldName, Object value) {
 		this.fieldName = fieldName;
 		if (value != null) {
-			if (!value.getClass().isPrimitive() && !ReflectUtility.PrimitiveWrappers.contains(value.getClass())) {			// not a primitive
-//				if (!value.getClass().equals(String.class)) {		// not a String
-//					if (value.getClass().getSuperclass() != null) {	// not a simple Object instance
-//						value = marshaller.marshall(value);
-//					}
-//				}
-				if (!XmlMarshallingUtilities.isStringOrPrimitive(value)) {
+			if (!ReflectUtility.PrimitiveWrappers.contains(value.getClass()) && !MarshallingUtilities.isStringOrPrimitive(value)) {	// not a primitive
 					value = marshaller.marshall(value);
-				}
 			}
 		}
-		
 		this.value = value;
 	}
 	
@@ -69,5 +64,9 @@ final class XmlEntry {
 		return fieldName + "; " + valueString;
 	}
 
+	@Override
+	public Object getValue() {return value;}
 
+	@Override
+	public String getFieldName() {return fieldName;}
 }

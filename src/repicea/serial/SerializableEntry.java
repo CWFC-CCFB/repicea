@@ -19,20 +19,21 @@
  */
 package repicea.serial;
 
-import java.util.LinkedHashMap;
-
 /**
- * The Mappable interface ensures the instance can be expressed 
- * as a Map containing the members and their values. <p>
- * This interface is useful for JSON serialization.
+ * Ensures the entry can provide the information required for serialization.
  * @author Mathieu Fortin - December 2023
  */
-public interface Mappable {
+public interface SerializableEntry {
 
 	/**
-	 * Provide a LinkedHashMap instance that ensures a proper
-	 * JSON or CSV representation of this object.
-	 * @return a LinkedHashMap instance
+	 * The value of this entry.
+	 * @return an Object instance
 	 */
-	public LinkedHashMap<String, Object> getMapRepresentation();
+	public Object getValue();
+	
+	/**
+	 * The field name associated to this entry.
+	 * @return a String 
+	 */
+	public String getFieldName();
 }

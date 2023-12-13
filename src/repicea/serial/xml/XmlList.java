@@ -25,13 +25,15 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
+import repicea.serial.SerializableList;
+
 /**
  * The XmlList class is the basic serialization for any object.
  * @author Mathieu Fortin - November 2012
  */
 @XmlType
 @XmlRootElement
-public class XmlList {
+public class XmlList implements SerializableList<XmlEntry> {
 	
 	@XmlElement
 	String className;
@@ -62,19 +64,34 @@ public class XmlList {
 		refHashCode = System.identityHashCode(root);
 	}
 	
-	void add(XmlEntry entry) {
+	@Override
+	public void add(XmlEntry entry) {
 		list.add(entry);
 	}
 	
-	void addAll(List<XmlEntry> entries) {
+	@Override
+	public void addAll(List<XmlEntry> entries) {
 		list.addAll(entries);
 	}
 	
-	List<XmlEntry> getEntries() {
+	@Override
+	public List<XmlEntry> getEntries() {
 		return list;
 	}
 
 	@Override
 	public String toString() {return className + refHashCode;}
+
+	@Override
+	public boolean isArray() {return isArray;}
+
+	@Override
+	public int getRefHashCode() {return refHashCode;}
+
+	@Override
+	public boolean isPrimitive() {return isPrimitive;}
+
+	@Override
+	public String getClassName() {return className;}
 
 }

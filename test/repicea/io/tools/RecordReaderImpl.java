@@ -27,7 +27,7 @@ import javax.swing.UIManager;
 import repicea.app.UseModeProvider.UseMode;
 import repicea.io.ImportTest;
 import repicea.io.tools.ImportFieldElement.FieldType;
-import repicea.serial.xml.XmlSerializerChangeMonitor;
+import repicea.serial.SerializerChangeMonitor;
 import repicea.util.ObjectUtility;
 import repicea.util.REpiceaTranslator;
 import repicea.util.REpiceaTranslator.TextableEnum;
@@ -40,7 +40,7 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class RecordReaderImpl extends REpiceaRecordReader {
 
 	static {
-		XmlSerializerChangeMonitor.registerClassNameChange("repicea.test.tools.TestRecordReader$FieldID", "repicea.io.tools.RecordReaderImpl$FieldID");
+		SerializerChangeMonitor.registerClassNameChange("repicea.test.tools.TestRecordReader$FieldID", "repicea.io.tools.RecordReaderImpl$FieldID");
 	}
 	
 	

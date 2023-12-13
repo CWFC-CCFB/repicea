@@ -18,97 +18,44 @@
  */
 package repicea.serial.xml;
 
-import java.lang.reflect.Array;
-import java.lang.reflect.Field;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import repicea.serial.AbstractMarshaller;
 
 /**
  * The XmlMarshaller class handles the serialization of any object into XmlList and XmlEntry objects.
  * @author Mathieu Fortin - November 2012
  */
-public final class XmlMarshaller {
+public final class XmlMarshaller extends AbstractMarshaller<XmlEntry, XmlList>{
 
-	private Map<Class<?>, Set<Integer>> registeredObjects;
-	
-	public XmlMarshaller() {
-		registeredObjects = new HashMap<Class<?>, Set<Integer>>();
-	}
-	
-	private void registerObject(Object obj) {
-		if (!registeredObjects.containsKey(obj.getClass())) {
-			registeredObjects.put(obj.getClass(), new HashSet<Integer>());
-		}
-		Set<Integer> hashCodes = registeredObjects.get(obj.getClass());
-		int hashCode = System.identityHashCode(obj);
-		hashCodes.add(hashCode);
-	}
-	
-	private boolean hasObjectBeenRegistered(Object obj) {
-		if (registeredObjects.containsKey(obj.getClass())) {
-			int hashCode = System.identityHashCode(obj);
-			return registeredObjects.get(obj.getClass()).contains(hashCode); 
-		} else {
-			return false;
-		}
-	}
-
-	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	public XmlList marshall(Object obj) {
-		XmlList xmlObj = new XmlList(obj);
-		if (!hasObjectBeenRegistered(obj)) {
-			registerObject(obj);
-//			System.out.println("Serializing this class : " + obj.getClass().getSimpleName());
-			if (xmlObj.isArray) {
-				int length = Array.getLength(obj);
-				for (int i = 0; i < length; i++) {
-					xmlObj.add(new XmlEntry(this, ((Integer) i).toString(), Array.get(obj, i)));
-				}
-			} else if (obj instanceof Enum) {				// enum case: just the name is saved
-				xmlObj.add(new XmlEntry(this, "name", ((Enum<?>) obj).name()));
-			} else if (obj instanceof Class) {
-				xmlObj.add(new XmlEntry(this, "class", ((Class) obj).getName()));
-			} else if (obj instanceof Map) {				
-				Set<Entry> entries = ((Map) obj).entrySet();
-				xmlObj.add(new XmlEntry(this, "entries", entries.toArray()));
-				List<Field> selectedObjectFields = XmlMarshallingUtilities.retrieveAllNonStaticAndNonTransientFieldFromClass(obj.getClass());
-				xmlObj.addAll(formatToXmlEntries(selectedObjectFields, obj));
-			} else if (obj instanceof Collection) {				
-				xmlObj.add(new XmlEntry(this, "entries", ((Collection) obj).toArray()));
-				List<Field> selectedObjectFields = XmlMarshallingUtilities.retrieveAllNonStaticAndNonTransientFieldFromClass(obj.getClass());
-				xmlObj.addAll(formatToXmlEntries(selectedObjectFields, obj));
-			} else {
-				List<Field> selectedObjectFields = XmlMarshallingUtilities.retrieveAllNonStaticAndNonTransientFieldFromClass(obj.getClass());
-				xmlObj.addAll(formatToXmlEntries(selectedObjectFields, obj));
-			}
-		}
-		return xmlObj;
-	}
-	
+	static final String EntriesTag = "entries";
 		
-	private List<XmlEntry> formatToXmlEntries(List<Field> fields, Object root) {
-		List<XmlEntry> entries = new ArrayList<XmlEntry>();
-		for (Field field : fields) {
-			String fieldName = field.getName();
-			field.setAccessible(true);
-			Object value = null;
-			try {
-				value = field.get(root);
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			}
-			entries.add(new XmlEntry(this, fieldName, value));
-		}
-		return entries;
+	@Override
+	protected XmlEntry createSerializableEntryObject(String fieldName, Object value) {
+		return new XmlEntry(this, fieldName, value);
 	}
+
+	@Override
+	protected XmlList createSerializableListObject(Object o) {
+		return new XmlList(o);
+	}
+
+	@Override
+	protected String getEntriesTag() {return EntriesTag;}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void addMapEntriesToThisObject(XmlList objToBeSerialized, Set<Entry> entries) {
+		objToBeSerialized.add(createSerializableEntryObject(getEntriesTag(), entries.toArray()));
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	protected void addCollectionEntriesToThisObject(XmlList objToBeSerialized, Collection coll) {
+		objToBeSerialized.add(createSerializableEntryObject(getEntriesTag(), coll.toArray()));
+	}
+
 
 }

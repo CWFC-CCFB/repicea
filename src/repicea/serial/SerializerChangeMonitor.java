@@ -1,5 +1,5 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge Epicea.
  *
@@ -16,17 +16,17 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.serial.xml;
+package repicea.serial;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The XmlSerializerChangeMonitor records all the changes in package and class names. During
- * the unmarshalling, the XmlDeserializer checks if the name read in the file has been changed.
+ * The SerializerChangeMonitor records all the changes in package and class names. During
+ * the unmarshalling, the deserializer checks if the name read in the file has been changed.
  * @author Mathieu Fortin - November 2012
  */
-public class XmlSerializerChangeMonitor {
+public class SerializerChangeMonitor {
 
 	static Map<String, String> ClassNameChangeMap = new HashMap<String, String>();
 	static Map<String, Map<String, String>> EnumNameChangeMap = new HashMap<String, Map<String, String>>();

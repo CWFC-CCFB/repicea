@@ -18,17 +18,11 @@
  */
 package repicea.serial.xml;
 
-import java.awt.Component;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import repicea.lang.REpiceaSystem;
-import repicea.lang.reflect.ReflectUtility;
+import repicea.serial.MarshallingException;
+import repicea.serial.UnmarshallingException;
 
 /**
  * The XmlMarshallingUtilities class provides static methods for marshalling and unmarshalling.
@@ -50,109 +44,7 @@ public class XmlMarshallingUtilities {
 	static final class FakeList extends ArrayList {}
 	
 	
-	/**
-	 * This method drops all the component, static or transient fields. 
-	 * <br>If the mother class is a Collection or a Map then the transient fields are allowed.</br>
-	 * @param superClass the super class of the original class
-	 * @param fields the original list of fields
-	 * @return a List of fields
-	 */
-	private static List<Field> dropOutStaticAndComponentFields(Class<?> superClass, List<Field> fields) {
-		List<Field> selectedFields = new ArrayList<Field>();
-		for (Field field : fields) {
-			int fieldModifier = field.getModifiers();
-			if (!Modifier.isStatic(fieldModifier)) { 
-				field.setAccessible(true);
-				Class<?> clazz = field.getType();
-				if (!Component.class.isAssignableFrom(clazz)) {
-					selectedFields.add(field);
-				}
-			}
-		}
-		return selectedFields;
-	}
-	
-	
-	
-	private static List<Field> retrieveAllNonStaticFieldsFromClass(Class<?> clazz) {
-		List<Field> fields = ReflectUtility.retrieveAllFieldsFromClass(clazz);
-		return dropOutStaticAndComponentFields(clazz, fields);
-	}
 
-	
-	static List<Field> retrieveAllNonStaticAndNonTransientFieldFromClass(Class<?> clazz) {
-		List<Field> fields = new ArrayList<Field>();
-		for (Field field : retrieveAllNonStaticFieldsFromClass(clazz)){
-			if (!Modifier.isTransient(field.getModifiers())) {
-				fields.add(field);
-			}
-		}
-		return fields;
-	}
-	
-	
-	static Map<String, Field> getFieldMapFromClass(Class<?> clazz) {
-		List<Field> fields = retrieveAllNonStaticFieldsFromClass(clazz);
-		Map<String, Field> fieldMap = new HashMap<String, Field>();
-		for (Field field : fields) {
-			fieldMap.put(field.getName(), field);
-		}
-		return fieldMap;
-	}
-	
-	/**
-	 * This method retrieves the closest constructor with no argument in this class.
-	 * @param clazz the Class instance
-	 * @return a Contructor instance
-	 */
-	static Constructor<?> getEmptyConstructor(Class<?> clazz) {
-		do {
-			try {
-				Constructor<?> constructor = clazz.getDeclaredConstructor(new Class[]{});
-				return constructor;
-			} catch (Exception e) {}
-		} while ((clazz = clazz.getSuperclass()) != null);
-		return null;
-	}
-
-	static Class<?> getClass(XmlList xmlList) throws ClassNotFoundException {
-		if (xmlList.isPrimitive) {
-			return ReflectUtility.PrimitiveTypeMap.get(xmlList.className);
-		} else {
-			return Class.forName(getClassName(xmlList.className));
-		}
-	}
-	
-	/**
-	 * This method returns the new class name if it has been changed.
-	 * @param originalClassName the original class name
-	 * @return a String
-	 */
-	public static String getClassName(String originalClassName) {
-		String className = originalClassName;
-		String changedName = XmlSerializerChangeMonitor.ClassNameChangeMap.get(className);
-		if (changedName != null) {
-			className = changedName;
-		} 
-		return className;
-	}
-	
-	/**
-	 * This method returns the new enum name if it has been changed.
-	 * @param enumClass the name of the enum class
-	 * @param originalEnumName the original name of the enum variable
-	 * @return a String
-	 */
-	protected static String getEnumName(String enumClass, String originalEnumName) {
-		String enumName = originalEnumName;
-		if (XmlSerializerChangeMonitor.EnumNameChangeMap.containsKey(enumClass)) {
-			String changedName = XmlSerializerChangeMonitor.EnumNameChangeMap.get(enumClass).get(enumName);
-			if (changedName != null) {
-				enumName = changedName;
-			} 
-		}
-		return enumName;
-	}
 
 	
 	/**
@@ -161,9 +53,10 @@ public class XmlMarshallingUtilities {
 	 * @param obj an Object instance
 	 * @return a deep copy of the object
 	 * @throws ReflectiveOperationException if an reflection error has occurred
-	 * @throws XmlMarshallException  if a marshal error has occurred
+	 * @throws MarshallingException if a marshalling error has occurred
+	 * @throws UnmarshallingException if an unmarshalling error has occurred
 	 */
-	public static Object createDeepCopyOf(Object obj) throws XmlMarshallException, ReflectiveOperationException {
+	public static Object createDeepCopyOf(Object obj) throws ReflectiveOperationException, MarshallingException, UnmarshallingException {
 		XmlMarshaller xmlMarshaller = new XmlMarshaller();
 		XmlList marshalledObject = xmlMarshaller.marshall(obj);
 		XmlUnmarshaller xmlUnmarshaller = new XmlUnmarshaller();
@@ -183,24 +76,6 @@ public class XmlMarshallingUtilities {
 		return new XmlMarshallComparator().compareTheseTwoObjects(obj1, obj2);
 	}
 	
-	/**
-	 * This method returns true if the object is either a String or a primitive type
-	 * @param obj the instance to be checked
-	 * @return a boolean
-	 */
-	static boolean isStringOrPrimitive(Object obj) {
-		return obj.getClass().equals(String.class) || obj.getClass().isPrimitive();
-	}
 	
-	static XmlList getNextEntryFromJava7MapEntry(XmlList list) {
-		if (list.className.equals("java.util.HashMap$Entry") && REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.7")) {
-			for (XmlEntry entry : list.list) {
-				if (entry.fieldName.equals("next") && entry.value instanceof XmlList) {
-					return (XmlList) entry.value;
-				}
-			}
-		} 
-		return null;
-	}
 	
 }

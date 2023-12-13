@@ -38,10 +38,11 @@ import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.IOUserInterfaceableObject;
 import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.REpiceaFileFilterList;
+import repicea.serial.MarshallingException;
 import repicea.serial.Memorizable;
 import repicea.serial.MemorizerPackage;
+import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlDeserializer;
-import repicea.serial.xml.XmlMarshallException;
 import repicea.serial.xml.XmlSerializer;
 
 /**
@@ -217,8 +218,8 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 		XmlSerializer serializer = new XmlSerializer(filename);
 		try {
 			serializer.writeObject(this);
-		} catch (XmlMarshallException e) {
-			throw new IOException("A XmlMarshallException occurred while saving the file!");
+		} catch (MarshallingException e) {
+			throw new IOException("A MarshallingException occurred while saving the file!");
 		}
 	}
 	
@@ -244,8 +245,8 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 			newloadedInstance = (REpiceaMatchSelector<E>) deserializer.readObject();
 			unpackMemorizerPackage(newloadedInstance.getMemorizerPackage());
 			setFilename(filename);
-		} catch (XmlMarshallException e) {
-			throw new IOException("A XmlMarshallException occurred while loading the file!");
+		} catch (UnmarshallingException e) {
+			throw new IOException("A UnmarshallException occurred while loading the file!");
 		}
 	}
 
