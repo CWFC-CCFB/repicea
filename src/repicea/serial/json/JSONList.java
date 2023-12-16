@@ -33,10 +33,10 @@ import repicea.serial.SerializableList;
 @SuppressWarnings("serial")
 public final class JSONList extends LinkedHashMap<String, Object> implements SerializableList<JSONEntry> {
 
-	static final String IsArrayTag = "isArray";
-	static final String ClassNameTag = "className";
-	static final String IsPrimitiveTag = "isPrimitive";
-	static final String RefHashCodeTag = "refHashCode";
+	static final String IsArrayTag = "@isArray";
+	static final String ClassNameTag = "@className";
+	static final String IsPrimitiveTag = "@isPrimitive";
+	static final String RefHashCodeTag = "@refHashCode";
 	static final List<String> InformationFields = Arrays.asList(new String[] {IsArrayTag, ClassNameTag, IsPrimitiveTag, RefHashCodeTag});
 
 	JSONList(Object root) {

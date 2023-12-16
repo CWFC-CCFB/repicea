@@ -34,7 +34,7 @@ import repicea.serial.AbstractMarshaller;
  */
 public final class JSONMarshaller extends AbstractMarshaller<JSONEntry, JSONList> {
 
-	static final String EntriesTag = "entries";
+	static final String EntriesTag = "@entries";
 	
 //	@SuppressWarnings({ "serial", "rawtypes" })
 //	static class MapEntryWrapper extends ArrayList<Entry> {	// TODO Fix the serialization of this class in the marshal method below
