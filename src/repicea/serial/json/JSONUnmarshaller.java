@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import repicea.lang.reflect.ReflectUtility;
 import repicea.serial.AbstractUnmarshaller;
@@ -79,7 +81,7 @@ public final class JSONUnmarshaller extends AbstractUnmarshaller<JSONEntry, JSON
 						issueWarning(clazz, "add");
 					};
 					for (Object listEntry : listEntries) {
-						((Collection) newInstance).add(listEntry);  // FIXME this does not work if the add method has been overriden
+						((Collection) newInstance).add(listEntry);  
 					}
 				} catch (Exception e) {
 					throw new UnmarshallingException(e);
@@ -90,14 +92,15 @@ public final class JSONUnmarshaller extends AbstractUnmarshaller<JSONEntry, JSON
 		}
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	protected Object unmarshalMapOrCollectionEntries(JSONEntry entry) throws ReflectiveOperationException, UnmarshallingException {
 		if (entry.getValue() instanceof LinkedHashMap) {	// it was a map
 			LinkedHashMap currentLinkedHashMap = (LinkedHashMap) entry.getValue();
 			LinkedHashMap<Object, Object> formattedLinkedHashMap = new LinkedHashMap<Object, Object>();
-			for (Object key : currentLinkedHashMap.keySet()) {
-				Object value = currentLinkedHashMap.get(key);
+			for (Entry mapEntry : (Set<Entry>) currentLinkedHashMap.entrySet()) {
+				Object key = mapEntry.getKey();
+				Object value = mapEntry.getValue();
 				Object newKey = MarshallingUtilities.isStringOrPrimitive(key) || ReflectUtility.PrimitiveWrappers.contains(key.getClass()) ? 
 						key : 
 							unmarshall((JSONList) key);

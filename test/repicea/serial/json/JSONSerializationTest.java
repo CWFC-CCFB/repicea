@@ -21,6 +21,7 @@ package repicea.serial.json;
 import java.awt.Window;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
@@ -754,7 +755,7 @@ public class JSONSerializationTest {
 		Map<String, Double> linkedHashMap = new LinkedHashMap<String, Double>();
 		linkedHashMap.put("entry1", 2d);
 		linkedHashMap.put("entry2", 4d);
-		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedHashMap.zml";
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedHashMap.json";
 		JSONSerializer ser1 = new JSONSerializer(filename1);
 		ser1.writeObject(linkedHashMap);
 		JSONDeserializer deserializer = new JSONDeserializer(filename1);
@@ -766,7 +767,7 @@ public class JSONSerializationTest {
 	@Test
 	public void serializationArraysArrayList() throws MarshallingException, UnmarshallingException {
 		List<String> myList = Arrays.asList(new String[] {"patate", "chou", "carotte"});
-		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedArraysArrayList.zml";
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedArraysArrayList.json";
 		JSONSerializer ser1 = new JSONSerializer(filename1);
 		ser1.writeObject(myList);
 		JSONDeserializer deserializer = new JSONDeserializer(filename1);
@@ -774,6 +775,23 @@ public class JSONSerializationTest {
 		for (int i = 0; i < myList.size(); i++) {
 			Assert.assertEquals("Testing entry " + i, myList.get(i),  desList.get(i));
 		}
+	}
+	
+	@Test
+	public void serializationLinkedHashMap2() throws IOException {
+		Map<Object, Object> linkedHashMap = new LinkedHashMap<Object, Object>();
+		linkedHashMap.put(new FakeClassWithList(new String[] {"allo", "patate"}), new FakeClassDerivingFromMap());
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedHashMap2.json";
+		JSONSerializer ser1 = new JSONSerializer(filename1);
+		ser1.writeObject(linkedHashMap);
+		JSONDeserializer deserializer = new JSONDeserializer(filename1);
+		Map<Object,Object> desLinkedHashMap = (LinkedHashMap) deserializer.readObject();
+		for (Object key : desLinkedHashMap.keySet()) {
+			Object value = desLinkedHashMap.get(key);
+			Assert.assertTrue("Checking if instance is not null", value != null);
+			Assert.assertTrue("Checking if instance is of FakeClassDerivingFromMap class", value instanceof FakeClassDerivingFromMap);
+		}
+
 	}
 
 }
