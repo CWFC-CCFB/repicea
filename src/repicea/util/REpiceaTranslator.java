@@ -111,12 +111,12 @@ public class REpiceaTranslator {
 	
 
 	/**
-	 * This method sets the different strings for an element, i.e. a control, label or message.
+	 * Set the different strings for an element, i.e. a control, label or message.
 	 * @param element the TextableEnum that represents the control, label or message
 	 * @param englishText a String
 	 * @param frenchText a String
 	 */
-	public static void setString(TextableEnum element, String englishText, String frenchText) {
+	public static synchronized void setString(TextableEnum element, String englishText, String frenchText) {
 		strings.get(Language.English).put(element, englishText);
 		strings.get(Language.French).put(element, frenchText);
 	}
@@ -128,11 +128,6 @@ public class REpiceaTranslator {
 	 */
 	public static String getString(TextableEnum messageID) {
 		return REpiceaTranslator.getTranslation(messageID, getCurrentLanguage());
-//		String message = strings.get(currentLanguage).get(messageID);
-//		if (message == null) {
-//			message = "";
-//		}
-//		return message;
 	}
 	
 	/**
