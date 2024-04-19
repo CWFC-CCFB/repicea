@@ -428,9 +428,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 		
 		Object ahCopy = deserializer.readObject();
 		
@@ -450,9 +448,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 		
 		Object ahCopy = deserializer.readObject();
 		
@@ -472,9 +468,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 
 		Object ahCopy = deserializer.readObject();
 		
@@ -495,9 +489,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 
 		Object ahCopy = deserializer.readObject();
 		
@@ -523,9 +515,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(toSerialize);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 
 		List ahCopy = (List) deserializer.readObject();
 		FakeClassWithEmptyList list1b = (FakeClassWithEmptyList) ahCopy.get(0);
@@ -550,9 +540,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(toSerialize);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 		
 		List ahCopy = (List) deserializer.readObject();
 		FakeClassWithEmptyList list1b = (FakeClassWithEmptyList) ahCopy.get(0);
@@ -575,9 +563,7 @@ public class JSONSerializationTest {
 		serializer.writeObject(clazz);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.json";
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 		
 		Class deserializedClass = (Class) deserializer.readObject();
 		Assert.assertEquals("Are the unique hashcodes the same?", true, clazz.equals(deserializedClass));
@@ -590,8 +576,7 @@ public class JSONSerializationTest {
 		Class clazz = FakeClassForSerializationTest.class;
 
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "formerOriginalFakeClassObj.json";
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		JSONDeserializer deserializer = new JSONDeserializer(is);
+		JSONDeserializer deserializer = new JSONDeserializer(relativePathname);
 		
 		Class deserializedClass = (Class) deserializer.readObject();
 		Assert.assertEquals("Are the unique hashcodes the same?", true, clazz.equals(deserializedClass));

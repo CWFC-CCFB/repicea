@@ -20,10 +20,12 @@
 package repicea.serial;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
 
 import repicea.lang.REpiceaSystem;
+import repicea.serial.xml.XmlDeserializer;
 
 /**
  * An asbtract class for deserializers.
@@ -46,29 +48,29 @@ public abstract class AbstractDeserializer {
 	
 	
 	/**
-	 * Constructor.
+	 * Constructor.<p>
+	 * 
+	 * The deserializer can work with files or streams. It first tries to 
+	 * locate the physical file represented by the argument filename. If it
+	 * fails, it then tries to find the resource and to get it as a stream. 
+	 * 
 	 * @param filename the file from which the object is deserialized
 	 */
 	protected AbstractDeserializer(String filename) {
-		file = new File(filename);
-		if (!file.isFile()) {
-			throw new InvalidParameterException("The file is either a directory or does not exist!");
+		File f = new File(filename);
+		if (f.isFile()) {
+			file = f;
+			is = null;
+			readMode = ReadMode.File;
+		} else {
+			file = null;
+			is = getClass().getResourceAsStream("/" + filename);
+			if (is == null) {
+				throw new InvalidParameterException("The filename is not a file and cannot be converted into a stream!");
+			}
+			readMode = ReadMode.InputStream;
 		}
-		is = null;
-		readMode = ReadMode.File;
 	}
-
-	
-	/**
-	 * Constructor.
-	 * @param is an InputStream instance from which the object is deserialized
-	 */
-	protected AbstractDeserializer(InputStream is) {
-		this.is = is;
-		file = null;
-		readMode = ReadMode.InputStream;
-	}
-	
 	
 	/**
 	 * This method returns the object that has been deserialized.

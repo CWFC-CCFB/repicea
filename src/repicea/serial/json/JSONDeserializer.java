@@ -32,18 +32,20 @@ import com.cedarsoftware.util.io.JsonReader;
 import repicea.serial.AbstractDeserializer;
 import repicea.serial.UnmarshallingException;
 
+/**
+ * A class to deserialize object that were previously serialized
+ * using the JSONSerializer.
+ * @author Mathieu Fortin 2023
+ */
 public final class JSONDeserializer extends AbstractDeserializer {
 
 	/**
-	 * Constructor.
-	 * @param is an InputStream instance from which the object is deserialized
-	 */
-	public JSONDeserializer(InputStream is) {
-		super(is);
-	}
-	
-	/**
-	 * Constructor.
+	 * Constructor.<p>
+	 * 
+	 * The deserializer can work with files or streams. It first tries to 
+	 * locate the physical file represented by the argument filename. If it
+	 * fails, it then tries to find the resource and to get it as a stream. 
+	 * 
 	 * @param filename the file from which the object is deserialized
 	 */
 	public JSONDeserializer(String filename) {
