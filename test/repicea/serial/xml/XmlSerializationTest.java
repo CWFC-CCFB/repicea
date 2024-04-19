@@ -418,9 +418,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 		
 		Object ahCopy = deserializer.readObject();
 		
@@ -440,9 +438,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 		
 		Object ahCopy = deserializer.readObject();
 		
@@ -462,9 +458,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 
 		Object ahCopy = deserializer.readObject();
 		
@@ -485,9 +479,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(ah);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 
 		Object ahCopy = deserializer.readObject();
 		
@@ -513,9 +505,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(toSerialize);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 
 		List ahCopy = (List) deserializer.readObject();
 		FakeClassWithEmptyList list1b = (FakeClassWithEmptyList) ahCopy.get(0);
@@ -540,9 +530,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(toSerialize);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 		
 		List ahCopy = (List) deserializer.readObject();
 		FakeClassWithEmptyList list1b = (FakeClassWithEmptyList) ahCopy.get(0);
@@ -565,9 +553,7 @@ public class XmlSerializationTest {
 		serializer.writeObject(clazz);
 		
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "serObj.xml";
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 		
 		Class deserializedClass = (Class) deserializer.readObject();
 		Assert.assertEquals("Are the unique hashcodes the same?", true, clazz.equals(deserializedClass));
@@ -580,9 +566,7 @@ public class XmlSerializationTest {
 		Class clazz = FakeClassForSerializationTest.class;
 
 		String relativePathname = ObjectUtility.getRelativePackagePath(getClass()) + "formerOriginalFakeClassObj.xml";
-//		InputStream is = ClassLoader.getSystemResourceAsStream(relativePathname);
-		InputStream is = getClass().getResourceAsStream("/" + relativePathname);
-		XmlDeserializer deserializer = new XmlDeserializer(is);
+		XmlDeserializer deserializer = new XmlDeserializer(relativePathname);
 		
 		Class deserializedClass = (Class) deserializer.readObject();
 		Assert.assertEquals("Are the unique hashcodes the same?", true, clazz.equals(deserializedClass));

@@ -20,7 +20,6 @@ package repicea.serial.xml;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
-import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 
 import javax.xml.bind.JAXBContext;
@@ -40,22 +39,17 @@ public final class XmlDeserializer extends AbstractDeserializer {
 
 	
 	/**
-	 * Constructor.
+	 * Constructor.<p>
+	 * 
+	 * The deserializer can work with files or streams. It first tries to 
+	 * locate the physical file represented by the argument filename. If it
+	 * fails, it then tries to find the resource and to get it as a stream. 
+	 * 
 	 * @param filename the file from which the object is deserialized
 	 */
 	public XmlDeserializer(String filename) {
 		super(filename);
 	}
-
-	
-	/**
-	 * Constructor.
-	 * @param is an InputStream instance from which the object is deserialized
-	 */
-	public XmlDeserializer(InputStream is) {
-		super(is);
-	}
-	
 
 	@Override
 	public Object readObject() throws UnmarshallingException {
