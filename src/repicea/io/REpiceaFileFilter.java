@@ -47,6 +47,7 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 		TXT("Text File (*.txt)", "Fichier texte  (*.txt)"),
 		SVG("Scalable Vector Graphics file (*.svg)", "Fichier Scalable Vector Graphics (*.svg)"),
 		JSON("JavaScript Object Notation (*.json)", "Format JavaScript Object Notation (*.json)"),
+		XLSX("Microsoft Excel Spreadsheet (*.xlsx)", "Tableur Excel (*.xlsx)"),
 		UNKNOWN("","");
 
 		private static Map<FileType, REpiceaFileFilter> FileFilterMap;
@@ -80,6 +81,7 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 				FileFilterMap.put(MDB,  REpiceaFileFilter.MDB);
 				FileFilterMap.put(SVG,  REpiceaFileFilter.SVG);
 				FileFilterMap.put(JSON, REpiceaFileFilter.JSON);
+				FileFilterMap.put(XLSX, REpiceaFileFilter.XLSX);
 			}
 			return FileFilterMap;
 		}
@@ -105,6 +107,7 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 	public final static REpiceaFileFilter TXT = new REpiceaFileFilter(".txt", FileType.TXT);
 	public final static REpiceaFileFilter SVG = new REpiceaFileFilter(".svg", FileType.SVG);
 	public final static REpiceaFileFilter JSON = new REpiceaFileFilter(".json", FileType.JSON);
+	public final static REpiceaFileFilter XLSX = new REpiceaFileFilter(".xlsx", FileType.XLSX);
 	
 	
 	private String extension;
