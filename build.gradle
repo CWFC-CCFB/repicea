@@ -150,7 +150,6 @@ task integrationTest(type: Test) {
         
     // set classpath to test classes + test dependencies + JAR
     classpath = project.sourceSets.test.output + configurations.testRuntimeClasspath + files(jar.archiveFile) 
-	    
     outputs.upToDateWhen { false }
     mustRunAfter test
     maxHeapSize = "2048m"

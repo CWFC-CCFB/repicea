@@ -30,6 +30,8 @@ import java.util.logging.Logger;
  */
 public class REpiceaLogManager {
 	
+	private static Logger MAIN_LOGGER = null;
+	
 	private static final Map<String, Logger> LoggerMap = new HashMap<String, Logger>();
 	
 	/**
@@ -45,7 +47,29 @@ public class REpiceaLogManager {
 		if (!LoggerMap.containsKey(loggerName)) {
 			LoggerMap.put(loggerName, Logger.getLogger(loggerName));	// ensure the logger is not just a weak reference in the LogManager singleton
 		}
-		return LoggerMap.get(loggerName);
+		Logger thisLogger = LoggerMap.get(loggerName);
+		if (MAIN_LOGGER != null && !thisLogger.equals(MAIN_LOGGER) && thisLogger.getParent() != MAIN_LOGGER) {
+			thisLogger.setParent(MAIN_LOGGER);
+		}
+		return thisLogger;
+	}
+	
+	/**
+	 * Set the main logger.<p>
+	 * 
+	 * The main logger is automatically set as the parent of other loggers.
+	 * @param l a Logger instance
+	 */
+	public static void setMainLogger(Logger l) {
+		MAIN_LOGGER = l;
+	}
+	
+	/**
+	 * Provide the current main logger.
+	 * @return a Logger instance
+	 */
+	public static Logger getMainLogger() {
+		return MAIN_LOGGER;
 	}
 	
 	/**
