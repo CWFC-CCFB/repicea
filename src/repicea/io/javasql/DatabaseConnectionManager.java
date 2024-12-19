@@ -134,11 +134,17 @@ public class DatabaseConnectionManager {
 	 * @param dataBaseUrl the url of the MS-ACCESS database
 	 * @return a Connection instance
 	 * @throws IOException
+	 * @throws ClassNotFoundException 
 	 */
 	private static Connection getConnectionFromThisMSACCESSDataBase(String dataBaseUrl) throws IOException {
 		try {
 //			ClassLoader.getSystemClassLoader().loadClass("net.ucanaccess.jdbc.UcanaccessDriver");
-//			Class.forName("net.ucanaccess.jdbc.UcanaccessDriver");
+//			try {
+//				Class.forName("org.hsqldb.jdbc.JDBCDriver");
+//			} catch (ClassNotFoundException e) {
+//				throw new IOException(e);
+//			}
+			
 			FileType f = REpiceaFileFilter.getFileType(dataBaseUrl);
 			if (f == FileType.ACCDB || f == FileType.MDB) {
 				String connectionString = "jdbc:ucanaccess://" + dataBaseUrl;

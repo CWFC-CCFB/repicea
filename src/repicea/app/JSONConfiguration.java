@@ -21,11 +21,10 @@ package repicea.app;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
-import com.cedarsoftware.util.io.JsonObject;
-import com.cedarsoftware.util.io.JsonReader;
+import com.cedarsoftware.io.JsonIo;
 
 import repicea.util.ObjectUtility;
 
@@ -34,27 +33,28 @@ import repicea.util.ObjectUtility;
  * This is particularly useful for configuration files.  It can be used with JSONConfigurationGlobal
  * to store a particular configuration into a global singleton acessible anywhere in the application.
  * 
- * @author Jean-François Lavoie - September 2021
+ * @author Jean-Francois Lavoie - September 2021
  * @see JSONConfigurationGlobal
  */
 public class JSONConfiguration {
 				
-	private LinkedHashMap<String, Object> data;
+	private Map<Object, Object> data;
 	static private final String Separator = "/";
 	
 	/**
 	 * This constructor creates an empty data map only
 	 */
 	public JSONConfiguration() {
-		data = new LinkedHashMap<String, Object>();
+		data = new LinkedHashMap<Object, Object>();
 	}
 	
 	/**
 	 * This constructor creates a deep copy of the given object.
 	 * @param object the JSONConfiguration instance to be cloned.
 	 */
+	@SuppressWarnings("unchecked")
 	public JSONConfiguration(JSONConfiguration object) {
-		data = (LinkedHashMap<String, Object>) ObjectUtility.copyMap(object.data);		
+		data = ObjectUtility.copyMap(object.data);		
 	}
 	
 	/**
@@ -74,7 +74,7 @@ public class JSONConfiguration {
 	 */
 	public void load(String filename) throws FileNotFoundException {
 		FileInputStream stream = new FileInputStream(filename);
-		data = new LinkedHashMap<String, Object>(JsonReader.jsonToMaps(stream, null));
+		data = JsonIo.toObjects(stream, null, null);
 	}
 	
 	/**
@@ -100,18 +100,18 @@ public class JSONConfiguration {
 	 * @return the value located at the location pointed by key, or defaultValue if this location is empty
 	 * @see get(String key, Object defaultValue)
 	 */
-	private Object get(String key, Object defaultValue, LinkedHashMap<String, Object> submap) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	private Object get(String key, Object defaultValue, Map<Object,Object> submap) {
 		int index = key.indexOf(Separator);
 		if (index == -1) {				
 			Object value = submap.get(key);
-			if (value == null) 
+			if (value == null) {
 				return defaultValue;
-			
+			}
 			return value;
-		}
-		else {			
-			LinkedHashMap<String, Object> nextSubmap = (LinkedHashMap<String, Object>)submap.get(key.substring(0, index));
-			
+		} else {			
+			String subKey = key.substring(0, index);
+			Map<Object, Object> nextSubmap = (Map) submap.get(subKey);
 			return nextSubmap == null ? defaultValue : get(key.substring(index + 1), defaultValue, nextSubmap);
 		}
 	}
@@ -138,20 +138,21 @@ public class JSONConfiguration {
 	 * @param submap The map corresponding to the hierarchical level into which to store the value.
 	 * @see put(String key, Object value)
 	 */
-	private void put(String key, Object value, LinkedHashMap<String, Object> submap) {
+	private void put(String key, Object value, Map<Object,Object> submap) {
 		int index = key.indexOf(Separator);
 		if (index == -1) {	
 			submap.put(key, value);
 		}
 		else {
-			String subkey = key.substring(index + 1);
-			LinkedHashMap<String, Object> nextSubmap = (LinkedHashMap<String, Object>)submap.get(key.substring(0, index));
+			String subKey = key.substring(index + 1);
+//			Object o = submap.get(key.substring(0, index));
+			Map<Object,Object> nextSubmap = (Map) submap.get(key.substring(0, index));
 			if (nextSubmap == null) {
-				nextSubmap = new LinkedHashMap<String, Object>();
+				nextSubmap = new LinkedHashMap<Object, Object>();
 				submap.put(key.substring(0, index), nextSubmap);
 			}				
 			
-			put(subkey, value, nextSubmap);
+			put(subKey, value, nextSubmap);
 		}
 	}
 }

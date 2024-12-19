@@ -21,9 +21,8 @@ package repicea.serial.xml;
 import java.io.FileOutputStream;
 import java.util.zip.DeflaterOutputStream;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.Marshaller;
 import repicea.serial.AbstractSerializer;
 import repicea.serial.MarshallingException;
 import repicea.serial.MarshallingUtilities;

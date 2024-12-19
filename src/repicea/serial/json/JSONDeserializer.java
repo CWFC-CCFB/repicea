@@ -27,7 +27,8 @@ import java.io.InputStream;
 import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipException;
 
-import com.cedarsoftware.util.io.JsonReader;
+import com.cedarsoftware.io.JsonIo;
+import com.cedarsoftware.io.JsonReader;
 
 import repicea.serial.AbstractDeserializer;
 import repicea.serial.UnmarshallingException;
@@ -106,7 +107,7 @@ public final class JSONDeserializer extends AbstractDeserializer {
 	 				jsonStr = getStringFromInputStream(bis);
 	 			}
 	 		}
-	 		JSONList obj  = (JSONList) JsonReader.jsonToJava(jsonStr);
+	 		JSONList obj  = JsonIo.toObjects(jsonStr, null, JSONList.class);
 	 		JSONUnmarshaller unmarshaller = new JSONUnmarshaller();
 	 		return unmarshaller.unmarshall(obj);
 		} catch (UnmarshallingException e1) {

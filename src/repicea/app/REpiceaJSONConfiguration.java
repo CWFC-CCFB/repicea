@@ -24,7 +24,7 @@ package repicea.app;
  * its key locations into static constant Strings.  The application should use those strings instead
  * of hardcoding a path
  * 
- * @author Jean-François Lavoie - September 2021
+ * @author Jean-Francois Lavoie - September 2021
  * @see JSONConfigurationGlobal
  */
 public class REpiceaJSONConfiguration {

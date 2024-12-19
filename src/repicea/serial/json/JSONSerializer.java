@@ -22,7 +22,8 @@ package repicea.serial.json;
 import java.io.FileOutputStream;
 import java.util.zip.DeflaterOutputStream;
 
-import com.cedarsoftware.util.io.JsonWriter;
+import com.cedarsoftware.io.JsonIo;
+import com.cedarsoftware.io.JsonWriter;
 
 import repicea.serial.AbstractSerializer;
 import repicea.serial.MarshallingException;
@@ -58,13 +59,8 @@ public final class JSONSerializer extends AbstractSerializer {
 		DeflaterOutputStream dos = null;
 		try {
 			JSONMarshaller marshaller = new JSONMarshaller();
-//			if (MarshallingUtilities.isStringOrPrimitive(obj)) { // then we embed the object into a wrapper
-//				FakeList wrapper = new FakeList();
-//				wrapper.add(obj);
-//				obj = wrapper;
-//			}
 			Object protoJSONObject = marshaller.marshall(obj);
-			String toJSONString = JsonWriter.objectToJson(protoJSONObject);
+			String toJSONString = JsonIo.toJson(protoJSONObject, null);
 
 			if (enableCompression) {
 				fos = new FileOutputStream(file);

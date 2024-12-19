@@ -26,7 +26,7 @@ package repicea.app;
  * This allows the file format to change over time without having to modify all the accesses to the JSONConfiguration
  * object throughout the application.  
  * 
- * @author Jean-François Lavoie - September 2021
+ * @author Jean-Francois Lavoie - September 2021
  * @see JSONConfiguration
  * @see REpiceaJSONConfiguration
  */

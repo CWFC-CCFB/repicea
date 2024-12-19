@@ -22,10 +22,9 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.util.zip.InflaterInputStream;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.UnmarshalException;
-import javax.xml.bind.Unmarshaller;
-
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.UnmarshalException;
+import jakarta.xml.bind.Unmarshaller;
 import repicea.serial.AbstractDeserializer;
 import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;

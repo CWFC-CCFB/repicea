@@ -5,7 +5,7 @@
 
 Copyright (C) 2009-2021 Mathieu Fortin for Rouge Epicea.
 
-Copyright (C) 2021-2023 His Majesty the King in right of Canada (authors: Mathieu Fortin and Jean-Francois Lavoie (CWFC-CCFB, Canadian Forest Service)
+Copyright (C) 2021-2024 His Majesty the King in right of Canada (authors: Mathieu Fortin and Jean-Francois Lavoie (CWFC-CCFB, Canadian Forest Service)
 
 Email: mathieu.fortin.re@gmail.com
 
@@ -22,8 +22,8 @@ License for more details.
 
 Please see the license at http://www.gnu.org/copyleft/lesser.html.
 
-This library uses some icons from the GTK library which are protected 
-by a GNU Lesser General Public License. 
+This library is compiled under Java 11. It uses some icons from the 
+GTK library which are protected by a GNU Lesser General Public License. 
 
 This library relies on 
 * (integrated into the repicea library) the JavaDBF library (copyright anil@linuxense.com) which is licensed under GNU Lesser General Public License.
