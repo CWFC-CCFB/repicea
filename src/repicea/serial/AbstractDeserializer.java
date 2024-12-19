@@ -20,12 +20,10 @@
 package repicea.serial;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.InvalidParameterException;
 
 import repicea.lang.REpiceaSystem;
-import repicea.serial.xml.XmlDeserializer;
 
 /**
  * An asbtract class for deserializers.

@@ -39,9 +39,6 @@ import repicea.serial.UnmarshallingException;
 public final class JSONUnmarshaller extends AbstractUnmarshaller<JSONEntry, JSONList> {
 
 	@Override
-	protected void performPostMarshallingActionIfAny(Object newInstance) {}
-
-	@Override
 	protected String getEntriesTag() {return JSONMarshaller.EntriesTag;}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

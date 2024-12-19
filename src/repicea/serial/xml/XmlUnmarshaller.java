@@ -32,12 +32,6 @@ import repicea.serial.UnmarshallingException;
  */
 public final class XmlUnmarshaller extends AbstractUnmarshaller<XmlEntry, XmlList>{
 
-	@Override
-	protected void performPostMarshallingActionIfAny(Object newInstance) {
-		if (newInstance instanceof PostXmlUnmarshalling) {
-			((PostXmlUnmarshalling) newInstance).postUnmarshallingAction();
-		}
-	}
 
 	@Override
 	protected String getEntriesTag() {return XmlMarshaller.EntriesTag;}

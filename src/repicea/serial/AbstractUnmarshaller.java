@@ -190,7 +190,11 @@ public abstract class AbstractUnmarshaller<P extends SerializableEntry, L extend
 	 */
 	protected abstract String getEntriesTag();
 	
-	protected abstract void performPostMarshallingActionIfAny(Object newInstance);
+	protected void performPostMarshallingActionIfAny(Object newInstance) {
+		if (newInstance instanceof PostUnmarshalling) {
+			((PostUnmarshalling) newInstance).postUnmarshallingAction();
+		}
+	}
 	
 	protected abstract Object unmarshalMapOrCollectionEntries(P entry) throws ReflectiveOperationException, UnmarshallingException;
 	
