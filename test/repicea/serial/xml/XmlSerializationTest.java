@@ -793,7 +793,7 @@ public class XmlSerializationTest {
 	public void test29serializationOfPrimitiveTypes() throws MarshallingException, UnmarshallingException {
 		List<Object> myList = Arrays.asList(new Object[] {(byte) 1, (short) 2, (int) 3, (long) 4, (float) 4.2, (char) 125, (double) 4.5, true, "patate"});
 		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedPrimitives.zml";
-		XmlSerializer ser1 = new XmlSerializer(filename1, false);
+		XmlSerializer ser1 = new XmlSerializer(filename1);
 		ser1.writeObject(myList);
 		XmlDeserializer deserializer = new XmlDeserializer(filename1);
 		List<String> desList = (List) deserializer.readObject();

@@ -54,7 +54,7 @@ public final class XmlDeserializer extends AbstractDeserializer {
 	@Override
 	public Object readObject() throws UnmarshallingException {
 		try {
-			XmlHandler handler = new XmlHandler();
+			XmlReaderHandler handler = new XmlReaderHandler();
 			SAXParserFactory factory = SAXParserFactory.newInstance();
 			SAXParser saxParser = factory.newSAXParser();
 	 		InflaterInputStream iis = null;
@@ -97,54 +97,6 @@ public final class XmlDeserializer extends AbstractDeserializer {
 			throw new UnmarshallingException(e2);
 		}
 	}
-
-//	@Override
-//	public Object readObject() throws UnmarshallingException {
-//		JAXBContext jaxbContext;
-//		try {
-//			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
-//	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-//	 		Object obj = null;
-//	 		InflaterInputStream iis = null;
-//	 		if (readMode == ReadMode.File) {
-//	 			try {	// we first assume that the file is compressed
-//	 				FileInputStream fis = new FileInputStream(file);
-//	 				iis = new InflaterInputStream(fis);
-//		 			obj = jaxbUnmarshaller.unmarshal(iis);
-//	 			} catch (UnmarshalException e) {
-//	 				if (iis != null) { // we try to close the inflater and we move on to an uncompressed file
-//	 					try {
-//	 						iis.close();
-//	 					} catch (Exception e2) {}
-//	 				}
-//		 			obj = jaxbUnmarshaller.unmarshal(file);
-//	 			}
-//	 		} else {
-//	 			BufferedInputStream bis = new BufferedInputStream(is);
-//	 			bis.mark(10000);	// we mark the buffered input stream for eventual reset in the case the file is not compress
-//	 			iis = new InflaterInputStream(bis); 
-//	 			try { // we first assume the stream comes from a compressed file
-//		 			obj = jaxbUnmarshaller.unmarshal(iis);
-//	 			} catch (Exception e) {
-//	 				bis.reset();	// we reset the stream to beginning
-//		 			obj = jaxbUnmarshaller.unmarshal(bis); // we now assume the stream comes from an uncompressed file
-//	 			}
-//	 		}
-//	 		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();
-//	 		Object unmarshalledObj = null;
-//			unmarshalledObj = unmarshaller.unmarshall((XmlList) obj);
-//			if (unmarshalledObj instanceof FakeList) {	// this was a simple object or a String then
-//				unmarshalledObj = ((FakeList) unmarshalledObj).get(0);
-//			}
-//	 		return unmarshalledObj;
-//		} catch (UnmarshallingException e1) {
-//			e1.printStackTrace();
-//			throw e1;
-//		} catch (Exception e2) {
-//			e2.printStackTrace();
-//			throw new UnmarshallingException(e2);
-//		}
-//	}
 
 	
 }

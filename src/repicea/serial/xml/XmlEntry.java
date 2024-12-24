@@ -18,9 +18,6 @@
  */
 package repicea.serial.xml;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import repicea.serial.AbstractMarshaller;
 import repicea.serial.MarshallingUtilities;
 import repicea.serial.ReflectUtility;
@@ -30,14 +27,10 @@ import repicea.serial.SerializableEntry;
  * The XmlEntry is the basic representation of a field in an object.
  * @author Mathieu Fortin - November 2012
  */
-@XmlType
-@XmlRootElement
 final class XmlEntry implements SerializableEntry {
 	
-	@XmlElement
 	String fieldName;
 	
-	@XmlElement
 	Object value;
 	
 	XmlEntry() {}

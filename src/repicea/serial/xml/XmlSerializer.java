@@ -19,10 +19,9 @@
 package repicea.serial.xml;
 
 import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.util.zip.DeflaterOutputStream;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.Marshaller;
 import repicea.serial.AbstractSerializer;
 import repicea.serial.MarshallingException;
 import repicea.serial.MarshallingUtilities;
@@ -55,7 +54,7 @@ public final class XmlSerializer extends AbstractSerializer {
 	
 	@SuppressWarnings("unchecked")
 	public void writeObject(Object obj) throws MarshallingException {
-		DeflaterOutputStream dos = null;
+		OutputStream os = null;
 		try {
 			XmlMarshaller marshaller = new XmlMarshaller();
 			if (MarshallingUtilities.isStringOrPrimitive(obj)) { // then we embed the object into a wrapper
@@ -63,23 +62,21 @@ public final class XmlSerializer extends AbstractSerializer {
 				wrapper.add(obj);
 				obj = wrapper;
 			}
-			Object xmlObject = marshaller.marshall(obj);
-			JAXBContext jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
-			Marshaller jabxMarshaller = jaxbContext.createMarshaller();
-			if (enableCompression) {
-				FileOutputStream fos = new FileOutputStream(file);
-				dos = new DeflaterOutputStream(fos);
-				jabxMarshaller.marshal(xmlObject, dos);
-			} else {
-				jabxMarshaller.marshal(xmlObject, file);
-			}
+			XmlList xmlObject = marshaller.marshall(obj);
+			FileOutputStream fos = new FileOutputStream(file);
+			os = enableCompression ?
+					new DeflaterOutputStream(fos) :
+						fos;
+			XmlWriterHandler handler = new XmlWriterHandler(xmlObject);
+			String xmlString = handler.sb.toString(); 
+			os.write(xmlString.getBytes());
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new MarshallingException(e);
 		} finally {
-			if (dos != null) {
+			if (os != null) {
 				try {
-					dos.close();
+					os.close();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}

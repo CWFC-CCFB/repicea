@@ -32,18 +32,18 @@ import org.xml.sax.helpers.DefaultHandler;
  * the XmlSerializer class.
  * @author Mathieu Fortin - December 2024
  */
-class XmlHandler extends DefaultHandler {
+final class XmlReaderHandler extends DefaultHandler {
 
-	private static final String XMLLIST_TAG = "xmlList";
-	private static final String CLASSNAME_TAG = "className";
-	private static final String REFHASHCODE_TAG = "refHashCode";
-	private static final String ISARRAY_TAG = "isArray";
-	private static final String ISPRIMITIVE_TAG = "isPrimitive";
+	static final String XMLLIST_TAG = "xmlList";
+	static final String CLASSNAME_TAG = "className";
+	static final String REFHASHCODE_TAG = "refHashCode";
+	static final String ISARRAY_TAG = "isArray";
+	static final String ISPRIMITIVE_TAG = "isPrimitive";
 	
-	private static final String LIST_TAG = "list";
+	static final String LIST_TAG = "list";
 
-	private static final String FIELDNAME_TAG = "fieldName";
-	private static final String VALUE_TAG = "value";
+	static final String FIELDNAME_TAG = "fieldName";
+	static final String VALUE_TAG = "value";
 
 	private XmlList root;
 	private List<XmlList> xmlLists;
@@ -187,7 +187,7 @@ class XmlHandler extends DefaultHandler {
 					types.remove(types.size() - 1);
 					break;
 				case "xs:unsignedShort":
-					getLatestXmlEntry().value = (char) Integer.parseInt(sb.toString());
+					getLatestXmlEntry().value = sb.toString().charAt(0);
 					types.remove(types.size() - 1);
 					break;
 					

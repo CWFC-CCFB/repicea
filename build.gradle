@@ -94,7 +94,7 @@ dependencies {
     implementation group: 'com.cedarsoftware', name:'json-io', version: '[4.30.0,)'
     implementation group: 'io.github.spannm', name:'ucanaccess', version: '[5.1.2,)'
     
- 	implementation group: 'com.sun.xml.bind', name:'jaxb-ri', version: '[2.3.5,)'   
+// 	implementation group: 'com.sun.xml.bind', name:'jaxb-ri', version: '[2.3.5,)'   
     
     testImplementation "junit:junit:4.13.2"    
 }
