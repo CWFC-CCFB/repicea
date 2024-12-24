@@ -38,7 +38,6 @@ import sun.reflect.ReflectionFactory;
  * @param <P> a class that implements the SerializableEntry interface
  * @param <L> a class that implements the SerializableList interface
  */
-@SuppressWarnings("restriction")
 public abstract class AbstractUnmarshaller<P extends SerializableEntry, L extends SerializableList<P>> {
 	
 	@SuppressWarnings("rawtypes")
@@ -121,18 +120,11 @@ public abstract class AbstractUnmarshaller<P extends SerializableEntry, L extend
 				if (fieldEntry == null) {
 					throw new UnmarshallingException("The class field cannot be found!");
 				}
-//				String className = MarshallingUtilities.getClassName(objToBeDeserialized.getEntries().get(0).getValue().toString());
 				String className = MarshallingUtilities.getClassName(fieldEntry.getValue().toString());
-//				if (className.equals("false")) {
-//					int u = 0;
-//				}
 				Object newInstance = Class.forName(className);
 				registerObject(clazz, objToBeDeserialized.getRefHashCode(), newInstance);
 				return newInstance;
 			} else {													// any other case
-//				if (clazz.getName().equals("java.util.Arrays$ArrayList")) {
-//					int u = 0;
-//				}
 				Constructor<?> emptyCstor = MarshallingUtilities.getEmptyConstructor(clazz);
 				Constructor<?> cstor = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(clazz, emptyCstor);
 				cstor.setAccessible(true);

@@ -21,9 +21,9 @@ package repicea.serial.xml;
 import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 import jakarta.xml.bind.annotation.XmlType;
-import repicea.lang.reflect.ReflectUtility;
 import repicea.serial.AbstractMarshaller;
 import repicea.serial.MarshallingUtilities;
+import repicea.serial.ReflectUtility;
 import repicea.serial.SerializableEntry;
 
 /**

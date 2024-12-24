@@ -16,7 +16,7 @@
  *
  * Please see the license at http://www.gnu.org/copyleft/lesser.html.
  */
-package repicea.lang.reflect;
+package repicea.serial;
 
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
