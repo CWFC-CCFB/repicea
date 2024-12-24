@@ -43,7 +43,6 @@ public final class XmlSerializer extends AbstractSerializer {
 	public XmlSerializer(String filename, boolean enableCompression) {
 		super(filename, enableCompression);
 	}
-
 	
 	/**
 	 * Constructor with compression.
