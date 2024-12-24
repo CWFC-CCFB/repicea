@@ -29,9 +29,3 @@ This library relies on
 * (integrated into the repicea library) the JavaDBF library (copyright anil@linuxense.com) which is licensed under GNU Lesser General Public License.
 * the json-io library (Copyright (c) 2007 Cedar Software LLC.m) (https://github.com/jdereg/json-io) which is licensed under Apache License version 2.0
 * the ucanaccess library version 5.0.0 (https://sourceforge.net/projects/ucanaccess/) which is licensed under Apache License, Version 2.0
-
-It may also require the jabx library version 2.3.2 (Copyright (c) 2017 Oracle and/or its affiliates, 
-https://eclipse-ee4j.github.io/jaxb-ri/) if the JVM is running under Java 11 or 13. 
-The jabx library is protected by the Eclipse Distribution License 
-(see https://www.eclipse.org/org/documents/edl-v10.php).
-
