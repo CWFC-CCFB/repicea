@@ -21,32 +21,22 @@ package repicea.serial.xml;
 import java.util.LinkedList;
 import java.util.List;
 
-import jakarta.xml.bind.annotation.XmlElement;
-import jakarta.xml.bind.annotation.XmlRootElement;
-import jakarta.xml.bind.annotation.XmlType;
 import repicea.serial.SerializableList;
 
 /**
  * The XmlList class is the basic serialization for any object.
  * @author Mathieu Fortin - November 2012
  */
-@XmlType
-@XmlRootElement
 public class XmlList implements SerializableList<XmlEntry> {
 	
-	@XmlElement
 	String className;
 	
-	@XmlElement
 	int refHashCode;
 	
-	@XmlElement
 	boolean isArray;
 
-	@XmlElement
 	boolean isPrimitive;
 	
-	@XmlElement
 	List<XmlEntry> list = new LinkedList<XmlEntry>();
 
 	XmlList() {}

@@ -29,7 +29,6 @@ import java.util.List;
 import java.util.Map;
 
 import repicea.lang.REpiceaSystem;
-import repicea.lang.reflect.ReflectUtility;
 
 /**
  * A class of static methods for marshalling.

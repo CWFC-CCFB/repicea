@@ -19,9 +19,9 @@
  */
 package repicea.serial.json;
 
-import repicea.lang.reflect.ReflectUtility;
 import repicea.serial.AbstractMarshaller;
 import repicea.serial.MarshallingUtilities;
+import repicea.serial.ReflectUtility;
 import repicea.serial.SerializableEntry;
 
 /**

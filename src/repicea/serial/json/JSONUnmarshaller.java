@@ -27,9 +27,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
-import repicea.lang.reflect.ReflectUtility;
 import repicea.serial.AbstractUnmarshaller;
 import repicea.serial.MarshallingUtilities;
+import repicea.serial.ReflectUtility;
 import repicea.serial.UnmarshallingException;
 
 /**

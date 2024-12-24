@@ -6,6 +6,8 @@ import java.util.Arrays;
 import org.junit.Assert;
 import org.junit.Test;
 
+import repicea.serial.ReflectUtility;
+
 public class ArrayConversionTest {
 
 	

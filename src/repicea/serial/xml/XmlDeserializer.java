@@ -22,9 +22,9 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.util.zip.InflaterInputStream;
 
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.UnmarshalException;
-import jakarta.xml.bind.Unmarshaller;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 import repicea.serial.AbstractDeserializer;
 import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
@@ -50,41 +50,41 @@ public final class XmlDeserializer extends AbstractDeserializer {
 		super(filename);
 	}
 
+	
 	@Override
 	public Object readObject() throws UnmarshallingException {
-		JAXBContext jaxbContext;
 		try {
-			jaxbContext = JAXBContext.newInstance(XmlMarshallingUtilities.boundedClasses);
-	 		Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-	 		Object obj = null;
+			XmlReaderHandler handler = new XmlReaderHandler();
+			SAXParserFactory factory = SAXParserFactory.newInstance();
+			SAXParser saxParser = factory.newSAXParser();
 	 		InflaterInputStream iis = null;
 	 		if (readMode == ReadMode.File) {
 	 			try {	// we first assume that the file is compressed
 	 				FileInputStream fis = new FileInputStream(file);
 	 				iis = new InflaterInputStream(fis);
-		 			obj = jaxbUnmarshaller.unmarshal(iis);
-	 			} catch (UnmarshalException e) {
+	 				saxParser.parse(iis, handler);
+	 			} catch (Exception e) {
 	 				if (iis != null) { // we try to close the inflater and we move on to an uncompressed file
 	 					try {
 	 						iis.close();
 	 					} catch (Exception e2) {}
 	 				}
-		 			obj = jaxbUnmarshaller.unmarshal(file);
+	 				saxParser.parse(file, handler);
 	 			}
 	 		} else {
 	 			BufferedInputStream bis = new BufferedInputStream(is);
 	 			bis.mark(10000);	// we mark the buffered input stream for eventual reset in the case the file is not compress
 	 			iis = new InflaterInputStream(bis); 
 	 			try { // we first assume the stream comes from a compressed file
-		 			obj = jaxbUnmarshaller.unmarshal(iis);
+	 				saxParser.parse(iis, handler);
 	 			} catch (Exception e) {
 	 				bis.reset();	// we reset the stream to beginning
-		 			obj = jaxbUnmarshaller.unmarshal(bis); // we now assume the stream comes from an uncompressed file
+	 				saxParser.parse(bis, handler);
 	 			}
 	 		}
 	 		XmlUnmarshaller unmarshaller = new XmlUnmarshaller();
 	 		Object unmarshalledObj = null;
-			unmarshalledObj = unmarshaller.unmarshall((XmlList) obj);
+			unmarshalledObj = unmarshaller.unmarshall(handler.getRoot());
 			if (unmarshalledObj instanceof FakeList) {	// this was a simple object or a String then
 				unmarshalledObj = ((FakeList) unmarshalledObj).get(0);
 			}
@@ -98,4 +98,5 @@ public final class XmlDeserializer extends AbstractDeserializer {
 		}
 	}
 
+	
 }
