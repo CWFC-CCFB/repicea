@@ -40,7 +40,7 @@ task sourcesJar(type: Jar) {
 
 java {
   toolchain { 
-        languageVersion = JavaLanguageVersion.of(11)
+        languageVersion = JavaLanguageVersion.of(8)
   }
   withSourcesJar()
   withJavadocJar()
@@ -92,10 +92,7 @@ configurations {
 // make sure to set Java Compiler > Errors Warnings > Deprecated and Restricted API > Forbidden reference to WARNING instead of ERROR
 dependencies {
     implementation group: 'com.cedarsoftware', name:'json-io', version: '[4.30.0,)'
-    implementation group: 'io.github.spannm', name:'ucanaccess', version: '[5.1.2,)'
-    
-// 	implementation group: 'com.sun.xml.bind', name:'jaxb-ri', version: '[2.3.5,)'   
-    
+	implementation group: 'net.sf.ucanaccess', name: 'ucanaccess', version: '5.0.1'    
     testImplementation "junit:junit:4.13.2"    
 }
 
