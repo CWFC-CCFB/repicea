@@ -66,7 +66,7 @@ public class REpiceaMatchSelectorTest {
 		}
 
 		@Override
-		public MyComplexObjectClass copy() {
+		public MyComplexObjectClass getDeepClone() {
 			return new MyComplexObjectClass(name, index);
 		}
 		
