@@ -221,7 +221,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 	 * Impose a thread sleep on the current thread. <p>
 	 * A pause lasts 200 ms.
 	 * @param nbPause the number of pauses.
-	 * @throws InterruptedException
+	 * @throws InterruptedException if the current thread is interrupted
 	 */
 	public static void letDispatchThreadProcess(int nbPause) throws InterruptedException {
 		if (nbPause > 10 || nbPause < 1) {
@@ -233,7 +233,7 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 	/**
 	 * Impose a thread sleep on the current thread. <p>
 	 * A pause lasts 200 ms.
-	 * @throws InterruptedException
+	 * @throws InterruptedException if the current thread is interrupted
 	 */
 	public static void letDispatchThreadProcess() throws InterruptedException {
 		letDispatchThreadProcess(1);

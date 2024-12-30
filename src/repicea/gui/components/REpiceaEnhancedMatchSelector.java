@@ -289,10 +289,12 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	 * This method returns the match corresponding to the parameter.
 	 * @param thisEnum the enum variable standing for the category
 	 * @param obj the Object instance for which we want the match
-	 * @return an Object of class E
+	 * @return an Object of class E or null if there is no match map for thisEnum.
 	 */
 	public E getMatch(Enum<?> thisEnum, Object obj) {
-		return matchMap.get(thisEnum).get(obj);
+		return matchMap.containsKey(thisEnum) ? 
+			matchMap.get(thisEnum).get(obj) :
+				null;
 	}
 	
 }

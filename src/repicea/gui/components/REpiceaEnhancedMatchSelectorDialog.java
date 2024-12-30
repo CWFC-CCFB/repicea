@@ -30,6 +30,7 @@ import java.util.Map;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -40,6 +41,7 @@ import javax.swing.JTabbedPane;
 import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaControlPanel;
 import repicea.gui.REpiceaDialog;
+import repicea.gui.REpiceaMemorizerHandler;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.UIControlManager.CommonMenuTitle;
@@ -87,7 +89,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 		saveAs = UIControlManager.createCommonMenuItem(CommonControlID.SaveAs);
 
 		new REpiceaIOFileHandlerUI(this, caller, save, saveAs, load);
-
+		new REpiceaMemorizerHandler(this);
 		tables = new HashMap<Enum<?>, REpiceaTable>();
 		tableModels = new HashMap<Enum<?>, REpiceaMatchMapTableModel>();
 		
@@ -199,13 +201,16 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 		pane.add(Box.createVerticalStrut(10));
 		tabbedPane = new JTabbedPane();
 		for (Enum<?> thisEnum : caller.matchMap.keySet()) {
-			tabbedPane.add(thisEnum.toString(), new JScrollPane(getTable(thisEnum)));
+			tabbedPane.add(thisEnum.toString(), getPanelToBeEmbeddedInTab(thisEnum));
 		}
 		pane.add(createSimplePanel(tabbedPane, 10));
 		pane.add(Box.createVerticalStrut(10));
 		return pane;
 	}
 	
+	protected JComponent getPanelToBeEmbeddedInTab(Enum<?> thisEnum) {
+		return new JScrollPane(getTable(thisEnum));
+	}
 	
 	protected JPanel createSimplePanel(Component comp, int margin) {
 		JPanel pane = new JPanel();
@@ -236,7 +241,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	 */
 	protected void refreshTitle() {
 		String filename = caller.getFilename();
-		if (filename.isEmpty()) {
+		if (filename == null || filename.isEmpty()) {
 			setTitle(getTitleForThisDialog());
 		} else {
 			if (filename.length() > 40) {

@@ -86,12 +86,14 @@ public class REpiceaEnhancedMatchSelectorTest {
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
 		Thread t = robot.showWindow(selector);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
+		
 		robot.clickThisButton("Cancel", REpiceaAWTProperty.WindowsJustSetToInvisible);
 		dlg.dispose();
 		t.join();
 		
-		Assert.assertEquals("Testing if the dialog has been properly cancelled", true, dlg.hasBeenCancelled());
-		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
+		Assert.assertTrue("Testing if the dialog has been properly cancelled", dlg.hasBeenCancelled());
+		Assert.assertTrue("Testing if the dialog window has been shut down", !dlg.isVisible());
 
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (UseMode sc : UseMode.values()) {
@@ -109,13 +111,13 @@ public class REpiceaEnhancedMatchSelectorTest {
 		dlg.dispose();
 		t.join();
 		robot.shutdown();
-		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
-		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
+		Assert.assertTrue("Testing if the dialog has been properly accepted", !dlg.hasBeenCancelled());
+		Assert.assertTrue("Testing if the dialog window has been shut down", !dlg.isVisible());
 		System.out.println("Test cancelOkTest successfully carried out!");
 	}
 
 	@Test
-	public void changeValueTest() throws Exception {
+	public void changeValueThenOkTest() throws Exception {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (UseMode sc : UseMode.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
@@ -129,6 +131,8 @@ public class REpiceaEnhancedMatchSelectorTest {
 		
 		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
 		Thread t = robot.showWindow(selector);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
+		
 		dlg.tabbedPane.setSelectedIndex(1);
 		robot.letDispatchThreadProcess();
 		REpiceaTableModel model = (REpiceaTableModel) dlg.getTable(Language.French).getModel();
@@ -143,9 +147,56 @@ public class REpiceaEnhancedMatchSelectorTest {
 		dlg.dispose();
 		t.join();
 		robot.shutdown();
-		Assert.assertEquals("Testing if the dialog has been properly accepted", false, dlg.hasBeenCancelled());
-		Assert.assertEquals("Testing if the dialog window has been shut down", true, !dlg.isVisible());
-		System.out.println("Test changeValue successfully carried out!");
+		
+		Assert.assertTrue("Testing if the dialog has been properly accepted", !dlg.hasBeenCancelled());
+		Assert.assertTrue("Testing if the dialog window has been shut down", !dlg.isVisible());
+		
+		match = selector.matchMap.get(Language.French).get("b");
+		Assert.assertEquals("Testing the match", UseMode.GUI_MODE.name(), match.name);
+		Assert.assertEquals("Testing the match index", UseMode.GUI_MODE.ordinal(), match.index);
+		
+		System.out.println("Test changeValueThenOk successfully carried out!");
+	}
+
+	@Test
+	public void changeValueThenCancelTest() throws Exception {
+		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
+		for (UseMode sc : UseMode.values()) {
+			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
+		}
+		
+		REpiceaEnhancedMatchSelector<MyComplexObjectClass> selector = new REpiceaEnhancedMatchSelector<MyComplexObjectClass>(Arrays.asList(Language.values()),
+				new String[]{"a","b","c","d","e","f"},
+				complexObjects.toArray(new MyComplexObjectClass[]{}), 
+				new String[]{"string", "status", "index"});
+		REpiceaEnhancedMatchSelectorDialog dlg = selector.getUI(null);
+		
+		REpiceaGUITestRobot robot = new REpiceaGUITestRobot();
+		Thread t = robot.showWindow(selector);
+		REpiceaGUITestRobot.letDispatchThreadProcess();
+		
+		dlg.tabbedPane.setSelectedIndex(1);
+		robot.letDispatchThreadProcess();
+		REpiceaTableModel model = (REpiceaTableModel) dlg.getTable(Language.French).getModel();
+		model.setValueAt(complexObjects.get(0), 1, 1);
+		robot.letDispatchThreadProcess();
+		MyComplexObjectClass match = selector.matchMap.get(Language.French).get("b");
+		
+		Assert.assertEquals("Testing the match", UseMode.GUI_MODE.name(), match.name);
+		Assert.assertEquals("Testing the match index", UseMode.GUI_MODE.ordinal(), match.index);
+		
+		robot.clickThisButton("Cancel", REpiceaAWTProperty.WindowsJustSetToInvisible);
+		dlg.dispose();
+		t.join();
+		robot.shutdown();
+		Assert.assertTrue("Testing if the dialog has been properly cancelled", dlg.hasBeenCancelled());
+		Assert.assertTrue("Testing if the dialog window has been shut down", !dlg.isVisible());
+		
+		match = selector.matchMap.get(Language.French).get("b");
+		Assert.assertEquals("Testing the match", UseMode.PURE_SCRIPT_MODE.name(), match.name);
+		Assert.assertEquals("Testing the match index", UseMode.PURE_SCRIPT_MODE.ordinal(), match.index);
+
+		System.out.println("Test changeValueThenCancel successfully carried out!");
 	}
 
 }
