@@ -36,6 +36,7 @@ import javax.swing.JScrollPane;
 import repicea.gui.OwnedWindow;
 import repicea.gui.REpiceaControlPanel;
 import repicea.gui.REpiceaDialog;
+import repicea.gui.REpiceaMemorizerHandler;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.UIControlManager.CommonMenuTitle;
@@ -72,7 +73,7 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 		saveAs = UIControlManager.createCommonMenuItem(CommonControlID.SaveAs);
 
 		new REpiceaIOFileHandlerUI(this, caller, save, saveAs, load);
-		
+		new REpiceaMemorizerHandler(this);
 		tableModel = new REpiceaTableModel(columnNames);
 		tableModel.setEditableVetos(0, true);
 		table = new REpiceaTable(tableModel, false); // false : adding or deleting rows is disabled
@@ -203,7 +204,7 @@ public class REpiceaMatchSelectorDialog<E> extends REpiceaDialog implements IOUs
 	 */
 	protected void refreshTitle() {
 		String filename = caller.getFilename();
-		if (filename.isEmpty()) {
+		if (filename == null || filename.isEmpty()) {
 			setTitle(getTitleForThisDialog());
 		} else {
 			if (filename.length() > 40) {
