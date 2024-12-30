@@ -93,12 +93,12 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 		tables = new HashMap<Enum<?>, REpiceaTable>();
 		tableModels = new HashMap<Enum<?>, REpiceaMatchMapTableModel>();
 		
-		for (Enum<?> thisEnum : caller.potentialMatches.keySet()) {
+		for (Enum<?> thisEnum : caller.potentialMatchesMap.keySet()) {
 			REpiceaMatchMapTableModel tableModel = new REpiceaMatchMapTableModel(columnNames, thisEnum);
 			tableModel.setEditableVetos(0, true);
 			REpiceaTable table = new REpiceaTable(tableModel, false); // false : adding or deleting rows is disabled
 			table.putClientProperty("terminateEditOnFocusLost", true);
-			Object[] possibleTreatments =  caller.potentialMatches.get(thisEnum).toArray();
+			Object[] possibleTreatments =  caller.potentialMatchesMap.get(thisEnum).toArray();
 			table.setDefaultEditor(Object.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
 			table.setRowSelectionAllowed(false);
 			tables.put(thisEnum, table);
@@ -142,8 +142,8 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
 	public void refreshInterface() {
-		for (Enum<?> thisEnum : caller.matchMap.keySet()) {
-			Map<Object, ?> matchesForThisEnum = caller.matchMap.get(thisEnum);
+		for (Enum<?> thisEnum : caller.matchMaps.keySet()) {
+			Map<Object, ?> matchesForThisEnum = caller.matchMaps.get(thisEnum);
 			REpiceaMatchMapTableModel tableModel = tableModels.get(thisEnum);
 			tableModel.removeAll();
 			List<Object> l = new ArrayList<Object>();
@@ -200,7 +200,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 
 		pane.add(Box.createVerticalStrut(10));
 		tabbedPane = new JTabbedPane();
-		for (Enum<?> thisEnum : caller.matchMap.keySet()) {
+		for (Enum<?> thisEnum : caller.matchMaps.keySet()) {
 			tabbedPane.add(thisEnum.toString(), getPanelToBeEmbeddedInTab(thisEnum));
 		}
 		pane.add(createSimplePanel(tabbedPane, 10));

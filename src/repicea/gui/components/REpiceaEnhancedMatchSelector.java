@@ -64,13 +64,13 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 											Memorizable {
 
 	
-	protected final Map<Enum<?>, Map<Object, E>> matchMap;
-	protected final Map<Enum<?>, List<E>> potentialMatches;
+	protected final Map<Enum<?>, Map<Object, E>> matchMaps;
+	protected final Map<Enum<?>, List<E>> potentialMatchesMap;
 	protected String filename;
 	protected transient REpiceaEnhancedMatchSelectorDialog<E> guiInterface;
-	protected final Object[] columnNames;
+	protected Object[] columnNames;
 	
-	protected Map<Enum<?>, Map<Object, Map<E, E>>> potentialMatchesByKey;
+	protected Map<Enum<?>, Map<Object, Map<E, E>>> potentialMatchesByKeyMap;
 	
 	
 	
@@ -86,13 +86,13 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	 */
 	@SuppressWarnings("unchecked")
 	public REpiceaEnhancedMatchSelector(List<Enum<?>> categories, Object[] toBeMatched, E[] potentialMatchArray, int defaultMatchId, Object[] columnNames) {
-		potentialMatches = new HashMap<Enum<?>, List<E>>();
+		potentialMatchesMap = new HashMap<Enum<?>, List<E>>();
 		for (Enum<?> thisEnum : categories) {
 			List<E> thisEnumList = new ArrayList<E>();
-			potentialMatches.put(thisEnum, thisEnumList);
+			potentialMatchesMap.put(thisEnum, thisEnumList);
 			addMatches(thisEnum, potentialMatchArray);		// remove duplicates
 		}
-		List<E> listOfPotentialMatches = potentialMatches.values().iterator().next();
+		List<E> listOfPotentialMatches = potentialMatchesMap.values().iterator().next();
 		int defaultMatchIndex = listOfPotentialMatches.size() - 1; // default match is the last one
 		if (defaultMatchId >= 0 && defaultMatchId < listOfPotentialMatches.size()) { // however if the defaultMatchId is appropriate this can be overriden
 			defaultMatchIndex = defaultMatchId;
@@ -110,16 +110,21 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		
 		instantiatePotentialMatchesByKey(categories, toBeMatched);
 
-		matchMap = new LinkedHashMap<Enum<?>, Map<Object, E>>();
+		matchMaps = new LinkedHashMap<Enum<?>, Map<Object, E>>();
 		for (Enum<?> thisEnum : categories) {
 			Map<Object, E> innerMap = new TreeMap<Object, E>();
-			matchMap.put(thisEnum, innerMap);
+			matchMaps.put(thisEnum, innerMap);
 			for (Object s : toBeMatched) {
 				Map<E, E> tmpMap = getMatchesForThisKey(thisEnum, s);
 				E defaultMatchForThisKey = tmpMap.get(defaultMatch);
 				innerMap.put(s, defaultMatchForThisKey);
 			}
 		}
+	}
+	
+	private REpiceaEnhancedMatchSelector() {
+		matchMaps = new LinkedHashMap<Enum<?>, Map<Object, E>>();
+		potentialMatchesMap = new HashMap<Enum<?>, List<E>>();
 	}
 
 	/**
@@ -140,7 +145,7 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	 * @param values an array of enum variable 
 	 */
 	protected void addMatches(Enum<?> thisEnum, E[] values) {
-		List<E> thisEnumList = potentialMatches.get(thisEnum);
+		List<E> thisEnumList = potentialMatchesMap.get(thisEnum);
 		for (E value : values) {
 			if (!thisEnumList.contains(value)) {
 				thisEnumList.add(value);
@@ -148,7 +153,7 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		}
 	}
 	
-	protected List<E> getPotentialMatches(Enum<?> thisEnum) {return potentialMatches.get(thisEnum);}
+	protected List<E> getPotentialMatches(Enum<?> thisEnum) {return potentialMatchesMap.get(thisEnum);}
 	
 	@Override
 	public REpiceaEnhancedMatchSelectorDialog<E> getUI(Container parent) {
@@ -174,14 +179,14 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	
 	@SuppressWarnings("unchecked")
 	private void instantiatePotentialMatchesByKey(List<Enum<?>> categories, Object[] toBeMatched) {
-		potentialMatchesByKey = new HashMap<Enum<?>, Map<Object, Map<E, E>>>();
+		potentialMatchesByKeyMap = new HashMap<Enum<?>, Map<Object, Map<E, E>>>();
 		for (Enum<?> thisEnum : categories) {
 			Map<Object, Map<E,E>> innerMap = new HashMap<Object, Map<E, E>>();
-			potentialMatchesByKey.put(thisEnum, innerMap);
+			potentialMatchesByKeyMap.put(thisEnum, innerMap);
 			for (Object obj : toBeMatched) {
 				Map<E, E> individualInstancesMap = new HashMap<E, E>();
 				innerMap.put(obj, individualInstancesMap);
-				for (E e : potentialMatches.get(thisEnum)) {
+				for (E e : potentialMatchesMap.get(thisEnum)) {
 					if (e instanceof REpiceaMatchComplexObject) {
 						individualInstancesMap.put(e, ((REpiceaMatchComplexObject<E>) e).getDeepClone());
 					} else {
@@ -194,7 +199,7 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	
 	
 	private Map<E, E> getMatchesForThisKey(Enum<?> thisEnum, Object key) {
-		return potentialMatchesByKey.get(thisEnum).get(key);
+		return potentialMatchesByKeyMap.get(thisEnum).get(key);
 	}
 	
 	
@@ -209,7 +214,7 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 					E m = (E) model.getValueAt(e.getLastRow(), 1);
 					Map<E,E> potentialMatchesForThisKey = getMatchesForThisKey(model.enumForThisTableModel, s);
 					E trueMatch = potentialMatchesForThisKey.get(m);
-					matchMap.get(model.enumForThisTableModel).put(s, trueMatch);
+					matchMaps.get(model.enumForThisTableModel).put(s, trueMatch);
 					getUI(null).doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
 					model.setValueAt(trueMatch, e.getLastRow(), 1);
 					System.out.println("New match : " + s + " = " + trueMatch.toString());
@@ -258,7 +263,19 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		}
 	}
 
-
+	/**
+	 * Load an instance of this class from a file.
+	 * @param filename the filename 
+	 * @return An REpiceaEnhancedMatchSelector instance
+	 * @throws IOException if an I/O error occurs
+	 */
+	@SuppressWarnings("rawtypes")
+	public static REpiceaEnhancedMatchSelector<?> Load(String filename) throws IOException {
+		REpiceaEnhancedMatchSelector<?> newInstance = new REpiceaEnhancedMatchSelector();
+		newInstance.load(filename);
+		return newInstance;
+	}
+	
 	@Override
 	public REpiceaFileFilterList getFileFilters() {return new REpiceaFileFilterList(FileType.XML.getFileFilter());}
 
@@ -270,8 +287,10 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	@Override
 	public MemorizerPackage getMemorizerPackage() {
 		MemorizerPackage mp = new MemorizerPackage();
-		mp.add((Serializable) matchMap);
-		mp.add((Serializable) potentialMatches);
+		mp.add((Serializable) matchMaps);
+		mp.add((Serializable) potentialMatchesMap);
+		mp.add(columnNames);
+		mp.add((Serializable) potentialMatchesByKeyMap);
 		return mp;
 	}
 
@@ -279,10 +298,12 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void unpackMemorizerPackage(MemorizerPackage wasMemorized) {
-		matchMap.clear();
-		matchMap.putAll((Map) wasMemorized.get(0));
-		potentialMatches.clear();
-		potentialMatches.putAll((Map) wasMemorized.get(1));
+		matchMaps.clear();
+		matchMaps.putAll((Map) wasMemorized.get(0));
+		potentialMatchesMap.clear();
+		potentialMatchesMap.putAll((Map) wasMemorized.get(1));
+		columnNames = (Object[]) wasMemorized.get(2);
+		potentialMatchesByKeyMap = (Map) wasMemorized.get(3);
 	}
 
 	/**
@@ -292,8 +313,8 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	 * @return an Object of class E or null if there is no match map for thisEnum.
 	 */
 	public E getMatch(Enum<?> thisEnum, Object obj) {
-		return matchMap.containsKey(thisEnum) ? 
-			matchMap.get(thisEnum).get(obj) :
+		return matchMaps.containsKey(thisEnum) ? 
+			matchMaps.get(thisEnum).get(obj) :
 				null;
 	}
 	
