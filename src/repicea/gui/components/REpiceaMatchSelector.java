@@ -21,7 +21,6 @@ package repicea.gui.components;
 import java.awt.Container;
 import java.awt.Window;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
@@ -156,15 +155,15 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 		potentialMatchesByKey = new HashMap<Object, Map<E, E>>();
 		for (Object obj : toBeMatched) {
 			Map<E, E> individualInstancesMap = new HashMap<E, E>();
+			potentialMatchesByKey.put(obj, individualInstancesMap);
 			for (E e : potentialMatches) {
 				E copy;
 				if (e instanceof REpiceaMatchComplexObject) {
-					copy = (E) ((REpiceaMatchComplexObject) e).copy();
+					copy = ((REpiceaMatchComplexObject<E>) e).getDeepClone();
 				} else {
 					copy = e;
 				}
 				individualInstancesMap.put(e, copy);
-				potentialMatchesByKey.put(obj, individualInstancesMap);
 			}
 		}
 	}

@@ -20,11 +20,14 @@ package repicea.gui.components;
 
 import java.util.List;
 
+import repicea.util.DeepCloneable;
+
 /**
- * The REpiceaMatchComplexObject allows to use complex object in the REpiceaMatchSelector class.
+ * The REpiceaMatchComplexObject allows to use of object more complex 
+ * than simple enums in the REpiceaMatchSelector class.
  * @author Mathieu Fortin - February 2021
  */
-public interface REpiceaMatchComplexObject<E>  {
+public interface REpiceaMatchComplexObject<E> extends DeepCloneable<E>  {
 
 	/**
 	 * Return the number of fields contain in this object
@@ -45,9 +48,4 @@ public interface REpiceaMatchComplexObject<E>  {
 	 */
 	public void setValueAt(int indexOfThisAdditionalField, Object value);
 	
-	/**
-	 * Return a clone of this object
-	 * @return an instance of class E
-	 */
-	public E copy();
 }

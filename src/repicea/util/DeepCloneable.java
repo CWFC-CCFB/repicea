@@ -20,14 +20,15 @@ package repicea.util;
 
 /**
  * This interface ensures the clone is a deep copy of the original instance. 
+ * @param <E> the class of object to be returned.
  * @author Mathieu Fortin - July 2012
  */
-public interface DeepCloneable {
+public interface DeepCloneable<E> {
 
 	/**
 	 * This method returns a deep clone of the object.
 	 * @return an Object instance
 	 */
-	public Object getDeepClone();
+	public E getDeepClone();
 	
 }

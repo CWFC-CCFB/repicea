@@ -217,11 +217,28 @@ public class REpiceaGUITestRobot implements WindowTrackerListener, REpiceaEventL
 		return t;
 	}
 
-	
-	public static void letDispatchThreadProcess() throws InterruptedException {
-		Thread.sleep(WAIT_TIME_BETWEEN_INSTRUCTIONS);
+	/**
+	 * Impose a thread sleep on the current thread. <p>
+	 * A pause lasts 200 ms.
+	 * @param nbPause the number of pauses.
+	 * @throws InterruptedException if the current thread is interrupted
+	 */
+	public static void letDispatchThreadProcess(int nbPause) throws InterruptedException {
+		if (nbPause > 10 || nbPause < 1) {
+			throw new InvalidParameterException("The nbPause argument must be an integer between 1 and 10!");
+		}
+		Thread.sleep(nbPause * WAIT_TIME_BETWEEN_INSTRUCTIONS);
 	}
-	
+
+	/**
+	 * Impose a thread sleep on the current thread. <p>
+	 * A pause lasts 200 ms.
+	 * @throws InterruptedException if the current thread is interrupted
+	 */
+	public static void letDispatchThreadProcess() throws InterruptedException {
+		letDispatchThreadProcess(1);
+	}
+
 	@Override
 	public void receiveThisWindow(Window retrievedWindow) {
 		windows.add(new WeakReference<Window>(retrievedWindow));
