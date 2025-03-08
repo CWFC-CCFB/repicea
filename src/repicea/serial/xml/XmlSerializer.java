@@ -1,7 +1,9 @@
 /*
- * This file is part of the repicea-util library.
+ * This file is part of the repicea library.
  *
  * Copyright (C) 2009-2012 Mathieu Fortin for Rouge Epicea.
+ * Copyright (C) 2025 His Majesty the King in right of Canada
+ * Author: Mathieu Fortin, Canadian Forest Service
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -28,9 +30,10 @@ import repicea.serial.MarshallingUtilities;
 import repicea.serial.xml.XmlMarshallingUtilities.FakeList;
 
 /**
- * The XMLSerializer class handles the serialization process for any Object. The
- * OutputStream instances are also handled by this class.
- * @author Mathieu Fortin - Octobre 2012
+ * The XMLSerializer class handles the serialization of any object.<p>
+ * The serialization converts the object into XmlList and XmlEntry instances,
+ * which are then serialized under a compressed XML format. 
+ * @author Mathieu Fortin - Octobre 2012, March 2025
  */
 public final class XmlSerializer extends AbstractSerializer { 
 
@@ -69,7 +72,7 @@ public final class XmlSerializer extends AbstractSerializer {
 						fos;
 			XmlWriterHandler handler = new XmlWriterHandler(xmlObject);
 			String xmlString = handler.sb.toString(); 
-			os.write(xmlString.getBytes());
+			os.write(xmlString.getBytes("UTF-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new MarshallingException(e);
