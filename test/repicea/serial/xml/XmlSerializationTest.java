@@ -824,4 +824,17 @@ public class XmlSerializationTest {
 
 	}
 
+	@Test
+	public void test31serializationOfSpecialCharacters() throws MarshallingException, UnmarshallingException {
+		List<Object> myList = Arrays.asList("tête", "épaule", "flûte");
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedSpecialChars.zml";
+		XmlSerializer ser1 = new XmlSerializer(filename1);
+		ser1.writeObject(myList);
+		XmlDeserializer deserializer = new XmlDeserializer(filename1);
+		List<String> desList = (List) deserializer.readObject();
+		for (int i = 0; i < myList.size(); i++) {
+			Assert.assertEquals("Testing entry " + i, myList.get(i),  desList.get(i));
+		}
+	}
+
 }
