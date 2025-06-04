@@ -38,10 +38,10 @@ public class REpiceaTranslator {
 		 */
 		public void setText(String englishText, String frenchText);
 	}
-
+	
 	public static enum Language {
 		English(Locale.ENGLISH, "English", "en"),
-		French(Locale.FRANCE, "Fran\u00E7ais", "fr");
+		French(Locale.FRENCH, "Fran\u00E7ais", "fr");
 		
 		private static Map<String, Language> CodeMap;
 		
@@ -88,18 +88,27 @@ public class REpiceaTranslator {
 		}
 	}
 
+	private static Language currentLanguage; 
+	private static Locale currentLocale = Locale.getDefault();
+
 	static {			// sets the default language
-		Locale locale = Locale.getDefault();
+		findMatchForThisLocale(currentLocale);
+	}
+
+	static void findMatchForThisLocale(Locale locale) {
+		boolean matchFound = false;
 		for (Language language : Language.values()) {
 			if (locale.getLanguage().equals(language.getLocale().getLanguage())) {
+				matchFound = true;
 				REpiceaTranslator.setCurrentLanguage(language);
 				break;
 			}
+		}
+		if (!matchFound) {
 			REpiceaTranslator.setCurrentLanguage(Language.English);		// default option if not language matches
 		}
 	}
-
-	private static Language currentLanguage; 
+	
 	
 		
 	private static Map<Language, Map<TextableEnum, String>> strings = new HashMap<Language, Map<TextableEnum, String>>();
@@ -152,7 +161,13 @@ public class REpiceaTranslator {
 	 * This method returns the current language of the UIControlManager.
 	 * @return a Language enum variable
 	 */
-	public static Language getCurrentLanguage() {return currentLanguage;}
+	public static Language getCurrentLanguage() {
+		if (!Locale.getDefault().equals(currentLocale)) {
+			currentLocale = Locale.getDefault();
+			findMatchForThisLocale(currentLocale);
+		}
+		return currentLanguage;
+	}
 
 
 	/**
