@@ -91,7 +91,7 @@ configurations {
 // make sure to set the compliance to Java 1.8 in the project properties if the Java version is later than 1.8
 // make sure to set Java Compiler > Errors Warnings > Deprecated and Restricted API > Forbidden reference to WARNING instead of ERROR
 dependencies {
-    implementation group: 'com.cedarsoftware', name:'json-io', version: '[4.30.0,)'
+    implementation group: 'com.cedarsoftware', name:'json-io', version: '4.30.0'
 	implementation group: 'net.sf.ucanaccess', name: 'ucanaccess', version: '5.0.1'    
     testImplementation "junit:junit:4.13.2"    
 }
