@@ -72,7 +72,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 	private enum NO_LEVEL {NoLevel}
 	
-	private Map<Enum<?>, List<ImportFieldElement>> importFieldElementMap; 
+	private final Map<Enum<?>, List<ImportFieldElement>> importFieldElementMap; 
 	private List<Enum<?>> importFieldElementIndex;
 
 	private Enum<?> stratumFieldEnum;
@@ -128,10 +128,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	}
 	
 
-	/**
-	 * Protected constructor for deserialization.
-	 */
-	protected ImportFieldManager() {}
 	
 	/**
 	 * Provide the number of records in the file. <br>
@@ -371,12 +367,15 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * @throws IOException if an I/O error has occurred
 	 * @throws UnmarshallingException if a marshalling error has occurred
 	 */
-	public static ImportFieldManager createImportFieldManager(String ifeFilename, String... fileSpec) throws UnmarshallingException, IOException  {
-		ImportFieldManager ifm = new ImportFieldManager();
-		Map<Enum<?>, List<ImportFieldElement>> oMap = ImportFieldManager.loadImportFieldElementMap(ifeFilename);
-		ifm.importFieldElementMap = oMap;
-		ifm.setFileSpecifications(fileSpec);
-		ifm.ifeFilename = ifeFilename;
+	public static ImportFieldManager createImportFieldManager(REpiceaRecordReader recordReader, 
+			String ifeFilename, 
+			String... fileSpec) throws UnmarshallingException, IOException  {
+		ImportFieldManager ifm = new ImportFieldManager(recordReader.defineFieldsToImport(), fileSpec);
+		ifm.load(ifeFilename);
+//		Map<Enum<?>, List<ImportFieldElement>> oMap = ImportFieldManager.loadImportFieldElementMap(ifeFilename);
+//		ifm.importFieldElementMap = oMap;
+//		ifm.setFileSpecifications(fileSpec);
+//		ifm.ifeFilename = ifeFilename;
 		return ifm;
 	}
 	
@@ -480,6 +479,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * when deserializing.
 	 * @return a FormatReader type instance
 	 */
-	public FormatReader getFormatReader() {return formatReader;}
+	public FormatReader<?> getFormatReader() {return formatReader;}
 	
 }

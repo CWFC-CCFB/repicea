@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import repicea.app.UseModeProvider.UseMode;
@@ -40,7 +39,7 @@ public class ImportToolTest {
 		}
 
 		RecordReaderImpl recordReader = new RecordReaderImpl();
-		ImportFieldManager ifm = ImportFieldManager.createImportFieldManager(testIfe, targetPath, "TEST6152");
+		ImportFieldManager ifm = ImportFieldManager.createImportFieldManager(recordReader, testIfe, targetPath, "TEST6152");
 		recordReader.initInScriptMode(ifm);
 		List<String> strataList = recordReader.getGroupList();
 //		XmlSerializer serializer = new XmlSerializer(results);
@@ -69,7 +68,7 @@ public class ImportToolTest {
 		String results = ObjectUtility.getPackagePath(RecordReaderImpl.class) + "result1.xml";
 				
 		RecordReaderImpl recordReader = new RecordReaderImpl();
-		ImportFieldManager ifm = ImportFieldManager.createImportFieldManager(testIfe, sourcePath);
+		ImportFieldManager ifm = ImportFieldManager.createImportFieldManager(recordReader, testIfe, sourcePath);
 		recordReader.initInScriptMode(ifm);
 		List<String> strataList = recordReader.getGroupList();
 //		XmlSerializer serializer = new XmlSerializer(results);
