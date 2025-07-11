@@ -361,6 +361,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 	/**
 	 * This method returns an ImportFieldManager loaded from the filename parameter.
+	 * @param recordReader an REpiceaRecordReader instance which provides the list of fields to be read
 	 * @param ifeFilename the file that contains the vector of ImportFieldElement
 	 * @param fileSpec the file to be read and all the required specifications such as the table for instance
 	 * @return an ImportFieldManager instance
