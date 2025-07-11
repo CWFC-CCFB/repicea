@@ -72,7 +72,7 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 	private enum NO_LEVEL {NoLevel}
 	
-	private Map<Enum<?>, List<ImportFieldElement>> importFieldElementMap; 
+	private final Map<Enum<?>, List<ImportFieldElement>> importFieldElementMap; 
 	private List<Enum<?>> importFieldElementIndex;
 
 	private Enum<?> stratumFieldEnum;
@@ -88,31 +88,13 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	private transient boolean popupInGuiInterfaceEnabled = false;
 	
 	/**
-	 * General constructor. 
+	 * Constructor for GUI mode. 
 	 * @param vector a vector defining the fields requested (i.e. ImportFieldElement instances)
 	 * @param fileSpec the filename of the file to be read and the other specifications such as the table for instance
 	 * @throws IOException if an I/O error has occurred
 	 */
-	@SuppressWarnings("rawtypes")
 	public ImportFieldManager(List<ImportFieldElement> vector, String... fileSpec) throws IOException {
-		ifeFilename = "";
-		importFieldElementMap = new HashMap<Enum<?>, List<ImportFieldElement>>();
-		for (ImportFieldElement elem : vector) {
-			Enum level = ((LevelProviderEnum) elem.fieldID).getFieldLevel();
-			if (level != null) {
-				if (!importFieldElementMap.containsKey(level)) {
-					importFieldElementMap.put(level, new ArrayList<ImportFieldElement>());
-				}
-				importFieldElementMap.get(level).add(elem);
-			} else {				// no level specified
-				if (!importFieldElementMap.containsKey(NO_LEVEL.NoLevel)) {
-					importFieldElementMap.put(NO_LEVEL.NoLevel, new ArrayList<ImportFieldElement>());
-				}
-				importFieldElementMap.get(NO_LEVEL.NoLevel).add(elem);
-				
-			}
-		}
-		
+		this(vector);
 		loadDefaultValues();
 		
 		setFileSpecifications(fileSpec); 
@@ -127,11 +109,28 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 		}
 	}
 	
-
-	/**
-	 * Protected constructor for deserialization.
-	 */
-	protected ImportFieldManager() {}
+	private ImportFieldManager(List<ImportFieldElement> vector) {
+		if (vector == null || vector.isEmpty()) {
+			throw new InvalidParameterException("The vector argument cannot be null nor empty!");
+		}
+		ifeFilename = "";
+		importFieldElementMap = new HashMap<Enum<?>, List<ImportFieldElement>>();
+		for (ImportFieldElement elem : vector) {
+			Enum<?> level = ((LevelProviderEnum) elem.fieldID).getFieldLevel();
+			if (level != null) {
+				if (!importFieldElementMap.containsKey(level)) {
+					importFieldElementMap.put(level, new ArrayList<ImportFieldElement>());
+				}
+				importFieldElementMap.get(level).add(elem);
+			} else {				// no level specified
+				if (!importFieldElementMap.containsKey(NO_LEVEL.NoLevel)) {
+					importFieldElementMap.put(NO_LEVEL.NoLevel, new ArrayList<ImportFieldElement>());
+				}
+				importFieldElementMap.get(NO_LEVEL.NoLevel).add(elem);
+				
+			}
+		}
+	}
 	
 	/**
 	 * Provide the number of records in the file. <br>
@@ -365,16 +364,19 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 
 	/**
 	 * This method returns an ImportFieldManager loaded from the filename parameter.
+	 * @param recordReader an REpiceaRecordReader instance which provides the list of fields to be read
 	 * @param ifeFilename the file that contains the vector of ImportFieldElement
 	 * @param fileSpec the file to be read and all the required specifications such as the table for instance
 	 * @return an ImportFieldManager instance
 	 * @throws IOException if an I/O error has occurred
 	 * @throws UnmarshallingException if a marshalling error has occurred
 	 */
-	public static ImportFieldManager createImportFieldManager(String ifeFilename, String... fileSpec) throws UnmarshallingException, IOException  {
-		ImportFieldManager ifm = new ImportFieldManager();
+	public static ImportFieldManager createImportFieldManager(REpiceaRecordReader recordReader, 
+			String ifeFilename, 
+			String... fileSpec) throws UnmarshallingException, IOException  {
+		ImportFieldManager ifm = new ImportFieldManager(recordReader.defineFieldsToImport());
 		Map<Enum<?>, List<ImportFieldElement>> oMap = ImportFieldManager.loadImportFieldElementMap(ifeFilename);
-		ifm.importFieldElementMap = oMap;
+		ifm.importMap(oMap);
 		ifm.setFileSpecifications(fileSpec);
 		ifm.ifeFilename = ifeFilename;
 		return ifm;
@@ -430,6 +432,13 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	@Override
 	public void load(String filename) throws IOException {
 		Map<Enum<?>, List<ImportFieldElement>> loadedMap = ImportFieldManager.loadImportFieldElementMap(filename);
+		importMap(loadedMap);
+		synchonizeImportFieldElementsWithAvailableFields();
+		ifeFilename = filename;
+	}
+
+	
+	private void importMap(Map<Enum<?>, List<ImportFieldElement>> loadedMap) {
 		for (Enum<?> enumVar : importFieldElementMap.keySet()) {
 			List<ImportFieldElement> loadedImportFieldElements = loadedMap.get(enumVar);
 			List<ImportFieldElement> importFieldElements = importFieldElementMap.get(enumVar);
@@ -445,11 +454,8 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 				}
 			}
 		}
-
-		synchonizeImportFieldElementsWithAvailableFields();
-		ifeFilename = filename;
 	}
-
+	
 
 	@Override
 	public REpiceaFileFilterList getFileFilters() {return new REpiceaFileFilterList(REpiceaFileFilter.IFE);}
@@ -480,6 +486,6 @@ public class ImportFieldManager implements Serializable, IOUserInterfaceableObje
 	 * when deserializing.
 	 * @return a FormatReader type instance
 	 */
-	public FormatReader getFormatReader() {return formatReader;}
+	public FormatReader<?> getFormatReader() {return formatReader;}
 	
 }
