@@ -18,6 +18,7 @@
  */
 package repicea.gui.components;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +30,7 @@ import org.junit.Test;
 import repicea.app.UseModeProvider.UseMode;
 import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaGUITestRobot;
+import repicea.util.ObjectUtility;
 
 public class REpiceaMatchSelectorTest {
 
@@ -75,7 +77,7 @@ public class REpiceaMatchSelectorTest {
 	}
 	
 	@Test
-	public void cancelOkTest() throws Exception {
+	public void test01cancelOk() throws Exception {
 		REpiceaMatchSelector<UseMode> selector = new REpiceaMatchSelector<UseMode>(new String[]{"a","b","c","d","e","f"},
 				UseMode.values(), 
 				-1, 
@@ -112,7 +114,7 @@ public class REpiceaMatchSelectorTest {
 	}
 
 	@Test
-	public void changeValueTestThenOk() throws Exception {
+	public void test02ChangeValueThenOk() throws Exception {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (UseMode sc : UseMode.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
@@ -146,7 +148,7 @@ public class REpiceaMatchSelectorTest {
 	}
 
 	@Test
-	public void changeValueTestThenCancel() throws Exception {
+	public void test03ChangeValueThenCancel() throws Exception {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (UseMode sc : UseMode.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
@@ -187,7 +189,7 @@ public class REpiceaMatchSelectorTest {
 	}
 
 	@Test
-	public void changeValueTwiceTestThenCancel() throws Exception {
+	public void test04ChangeValueTwiceThenCancel() throws Exception {
 		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
 		for (UseMode sc : UseMode.values()) {
 			complexObjects.add(new MyComplexObjectClass(sc.name(), sc.ordinal()));
@@ -237,4 +239,18 @@ public class REpiceaMatchSelectorTest {
 		System.out.println("Test changeValueTestThenCancel successfully carried out!");
 	}
 
+	@Test
+	public void test05Load() throws IOException {
+		String[] firstColumn = new String[]{"g","b","c","h","e","f"};
+		REpiceaMatchSelector<UseMode> selector = new REpiceaMatchSelector<UseMode>(firstColumn,
+				UseMode.values(), 
+				-1, 
+				new String[]{"string", "usemode"});
+		String filename = ObjectUtility.getRelativePackagePath(REpiceaMatchSelectorTest.class) + "testMatch.xml";
+		selector.load(filename);
+		Assert.assertEquals("Check map size", firstColumn.length, selector.matchMap.size());
+		for (String k : firstColumn) {
+			Assert.assertTrue("Check if match map contains key", selector.matchMap.containsKey(k));
+		}
+	}
 }

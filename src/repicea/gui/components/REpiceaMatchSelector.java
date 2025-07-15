@@ -77,6 +77,9 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
 	public REpiceaMatchSelector(Object[] toBeMatched, E[] potentialMatchArray, int defaultMatchId, Object[] columnNames) {
+		if (toBeMatched == null || toBeMatched.length == 0) {
+			throw new InvalidParameterException("The toBeMatch argument must be a non null and non empty array of objects!");
+		}
 		potentialMatches = new ArrayList<E>();
 		addMatches(potentialMatchArray);		// remove duplicates
 		int defaultMatchIndex = potentialMatches.size() - 1; // default match is the last one
@@ -260,10 +263,15 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void unpackMemorizerPackage(MemorizerPackage wasMemorized) {
-		matchMap.clear();
-		matchMap.putAll((Map) wasMemorized.get(0));
+		Map<Object, E> incomingMap = (Map) wasMemorized.get(0);
+		for (Object key : matchMap.keySet()) {
+			if (incomingMap.containsKey(key)) {
+				matchMap.put(key, incomingMap.get(key));
+			}
+		}
 		potentialMatches.clear();
 		potentialMatches.addAll((List) wasMemorized.get(1));
+		potentialMatchesByKey = null;
 	}
 
 	/**
