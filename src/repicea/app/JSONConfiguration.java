@@ -19,13 +19,17 @@
 
 package repicea.app;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import com.cedarsoftware.io.JsonIo;
 
+import repicea.io.Loadable;
 import repicea.util.ObjectUtility;
 
 /**
@@ -36,7 +40,7 @@ import repicea.util.ObjectUtility;
  * @author Jean-Francois Lavoie - September 2021
  * @see JSONConfigurationGlobal
  */
-public class JSONConfiguration {
+public class JSONConfiguration implements Loadable {
 				
 	private Map<Object, Object> data;
 	static private final String Separator = "/";
@@ -62,7 +66,7 @@ public class JSONConfiguration {
 	 * @param filename the path to the file that contains the configuration.
 	 * @throws FileNotFoundException if the file cannot be found.
 	 */
-	public JSONConfiguration(String filename) throws FileNotFoundException {
+	public JSONConfiguration(String filename) throws IOException {
 		this();
 		load(filename);
 	}
@@ -72,9 +76,16 @@ public class JSONConfiguration {
 	 * @param filename the path to the file that contains the configuration.
 	 * @throws FileNotFoundException if the file cannot be found.
 	 */
-	public void load(String filename) throws FileNotFoundException {
-		FileInputStream stream = new FileInputStream(filename);
-		data = JsonIo.toObjects(stream, null, null);
+	@Override
+	public void load(String filename) throws IOException {
+		File f = new File(filename);
+		InputStream is = f.exists() ? 
+				new FileInputStream(filename) :
+					getClass().getResourceAsStream("/" + filename);			
+		if (is == null) {
+			throw new IOException("The application configuration cannot be read as a file or a resource!");
+		} 
+		data = JsonIo.toObjects(is, null, null);
 	}
 	
 	/**
@@ -138,6 +149,7 @@ public class JSONConfiguration {
 	 * @param submap The map corresponding to the hierarchical level into which to store the value.
 	 * @see put(String key, Object value)
 	 */
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	private void put(String key, Object value, Map<Object,Object> submap) {
 		int index = key.indexOf(Separator);
 		if (index == -1) {	

@@ -1,0 +1,4 @@
+{
+	"cacheCleanupPeriodSec" : 60,
+	"cacheCleanupEntryExpiresAfterSec" : 600	
+}

@@ -68,4 +68,10 @@ public class JarUtility {
 		return m;
 	}
 
+//	public static void main(String[] args) throws IOException {
+//		String filename = "C:\\Users\\matforti\\7_Developpement\\JavaProjects\\CFSStandGrowth\\build\\libs\\CFSStandGrowth-1.6.8.dirty.war";
+//		Manifest m = getManifestFromThisJarFile(filename);
+//		int u = 0;
+//		
+//	}
 }
