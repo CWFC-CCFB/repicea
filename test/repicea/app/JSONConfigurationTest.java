@@ -1,6 +1,6 @@
 package repicea.app;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 
 import org.junit.Assert;
 //import org.junit.Ignore;
@@ -11,16 +11,16 @@ import repicea.util.ObjectUtility;
 public class JSONConfigurationTest {
 	
 	@Test
-	public void configConstructorTest() {
+	public void test01ConfigConstructor() {
 		String JSONfilename = ObjectUtility.getPackagePath(getClass()) + "processConfig.json";		
 		
 		JSONConfiguration local; 
 		
 		try {
 			local = new JSONConfiguration(JSONfilename);			
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-			Assert.assertTrue(false);
+			Assert.fail();
 			return;
 		}				
 		
@@ -32,16 +32,16 @@ public class JSONConfigurationTest {
 	}
 	
 	@Test
-	public void configDelayedLoadTest() {
+	public void test02ConfigDelayedLoadTest() {
 		String JSONfilename = ObjectUtility.getPackagePath(getClass()) + "processConfig.json";		
 		
 		JSONConfiguration local; 
 		
 		try {
 			local = new JSONConfiguration(JSONfilename);			
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-			Assert.assertTrue(false);
+			Assert.fail();
 			return;
 		}						
 		
@@ -53,7 +53,7 @@ public class JSONConfigurationTest {
 	}
 	
 	@Test
-	public void globalConfigDeepCopyTest() {
+	public void test03GlobalConfigDeepCopy() {
 		String JSONfilename = ObjectUtility.getPackagePath(getClass()) + "processConfig.json";		
 		
 		JSONConfiguration local;
@@ -61,9 +61,9 @@ public class JSONConfigurationTest {
 		try {
 			local = new JSONConfiguration(JSONfilename);			
 			JSONConfigurationGlobal.setInstance(local);
-		} catch (FileNotFoundException e) {
+		} catch (IOException e) {
 			e.printStackTrace();
-			Assert.assertTrue(false);
+			Assert.fail();
 			return;
 		}				
 		
@@ -83,7 +83,7 @@ public class JSONConfigurationTest {
 	}
 	
 	@Test
-	public void keyStoreHierarchicalTest() {
+	public void test04KeyStoreHierarchical() {
 					
 		JSONConfiguration local = new JSONConfiguration();
 		
@@ -96,7 +96,7 @@ public class JSONConfigurationTest {
 	}
 	
 	@Test
-	public void globalReferenceKeyStoreTest() {
+	public void test05GlobalReferenceKeyStore() {
 		
 		final String storedValue = "The answer is 42";
 		
@@ -108,4 +108,28 @@ public class JSONConfigurationTest {
 		
 		Assert.assertEquals("Ensure that the retrieved key is equal to the stored value", storedValue, retrieved);						
 	}
+	
+	@Test
+	public void test05JarEmbeddedConfig() {
+
+		String JSONfilename = ObjectUtility.getRelativePackagePath(JSONConfiguration.class) + "uselessFakeConfig.json";		
+		
+		JSONConfiguration local;
+		
+		try {
+			local = new JSONConfiguration(JSONfilename);			
+			JSONConfigurationGlobal.setInstance(local);
+		} catch (IOException e) {
+			e.printStackTrace();
+			Assert.fail();
+			return;
+		}				
+
+		local = JSONConfigurationGlobal.getInstance();
+		Object value = local.get("cacheCleanupEntryExpiresAfterSec", null);
+		Assert.assertTrue("Testing if the value is a long", value.getClass().equals(Long.class));
+		Assert.assertEquals("Testing the value", 600L, value);
+		
+	}
+
 }
