@@ -307,12 +307,16 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	}
 
 	/**
-	 * This method returns the match corresponding to the parameter.
+	 * Provide the match corresponding to the parameter.<p>
+	 * This method is synchronized since the underlying maps are
+	 * LinkedHashMap and TreeMap instances. The LinkedHashMap.get
+	 * method is known to induce structure changes in the map and 
+	 * therefore, there is a possibility of concurrent changes.
 	 * @param thisEnum the enum variable standing for the category
 	 * @param obj the Object instance for which we want the match
 	 * @return an Object of class E or null if there is no match map for thisEnum.
 	 */
-	public E getMatch(Enum<?> thisEnum, Object obj) {
+	public synchronized E getMatch(Enum<?> thisEnum, Object obj) {
 		return matchMaps.containsKey(thisEnum) ? 
 			matchMaps.get(thisEnum).get(obj) :
 				null;
