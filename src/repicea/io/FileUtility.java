@@ -137,8 +137,8 @@ public class FileUtility {
 	
 	/**
 	 * Compress a file.
-	 * @param originalFilename the name of the file to be compressed (including the absolute path)
-	 * @param compressedFilename the name of the file once compressed (including the absolute path)
+	 * @param compressedFilename the name of the compressed file (including the absolute path)
+	 * @param newFilename the name of the file once decompressed (including the absolute path)
 	 * @throws IOException if an I/O exception occurs
 	 */
 	public static void unzip(String compressedFilename, String newFilename) throws IOException {
