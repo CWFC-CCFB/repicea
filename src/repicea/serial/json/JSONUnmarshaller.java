@@ -101,8 +101,8 @@ public final class JSONUnmarshaller extends AbstractUnmarshaller<JSONEntry, JSON
 				Object newKey = MarshallingUtilities.isStringOrPrimitive(key) || ReflectUtility.PrimitiveWrappers.contains(key.getClass()) ? 
 						key : 
 							unmarshall((JSONList) key);
-				Object newValue = MarshallingUtilities.isStringOrPrimitive(value) || ReflectUtility.PrimitiveWrappers.contains(value.getClass())
-						? value : 
+				Object newValue = MarshallingUtilities.isStringOrPrimitive(value) || ReflectUtility.PrimitiveWrappers.contains(value.getClass()) ? 
+						value : 
 							unmarshall((JSONList) value);
 				formattedLinkedHashMap.put(newKey, newValue);
 			}

@@ -21,7 +21,9 @@ package repicea.serial.xml;
 
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -44,6 +46,14 @@ final class XmlReaderHandler extends DefaultHandler {
 
 	static final String FIELDNAME_TAG = "fieldName";
 	static final String VALUE_TAG = "value";
+	
+	static final Map<String, String> DOUBLE_SPECIAL_VALUES = new HashMap<String, String>();
+	static {
+		DOUBLE_SPECIAL_VALUES.put("-INF", "-Infinity");
+		DOUBLE_SPECIAL_VALUES.put("INF", "Infinity");
+	}
+
+	
 
 	private XmlList root;
 	private List<XmlList> xmlLists;
@@ -123,6 +133,7 @@ final class XmlReaderHandler extends DefaultHandler {
 	
 	@Override
 	public void endElement(String uri, String localName, String qName) throws SAXException {
+		String valueStr;
 		switch (qName) {
 		case CLASSNAME_TAG:
 			String className = sb.toString();
@@ -159,11 +170,19 @@ final class XmlReaderHandler extends DefaultHandler {
 					types.remove(types.size() - 1);
 					break;
 				case "xs:double":
-					getLatestXmlEntry().value = Double.parseDouble(sb.toString());
+					valueStr = sb.toString();
+					valueStr = DOUBLE_SPECIAL_VALUES.containsKey(valueStr) ?
+							DOUBLE_SPECIAL_VALUES.get(valueStr) :
+								valueStr;
+					getLatestXmlEntry().value = Double.parseDouble(valueStr);
 					types.remove(types.size() - 1);
 					break;
 				case "xs:float":
-					getLatestXmlEntry().value = Float.parseFloat(sb.toString());
+					valueStr = sb.toString();
+					valueStr = DOUBLE_SPECIAL_VALUES.containsKey(valueStr) ?
+							DOUBLE_SPECIAL_VALUES.get(valueStr) :
+								valueStr;
+					getLatestXmlEntry().value = Float.parseFloat(valueStr);
 					types.remove(types.size() - 1);
 					break;
 				case "xs:string":

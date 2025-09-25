@@ -21,12 +21,12 @@ package repicea.io;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.javacsv.CSVWriter;
 import repicea.io.javadbf.DBFWriter;
-import repicea.io.javasql.SQLWriter;
 
 
 /**
@@ -138,10 +138,8 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 				return new DBFWriter(new File(fileSpec[0]), append);
 			} else if (f == FileType.CSV) {
 				return new CSVWriter(new File(fileSpec[0]), append);
-			} else if (f == FileType.ACCDB || f == FileType.MDB) {
-				return new SQLWriter(new File(fileSpec[0]), fileSpec[1], append);
 			} else {
-				throw new IOException("Unknown file format!");
+				throw new IOException("Unknown file format! Currently supported files are: " + Arrays.asList(new FileType[] {FileType.CSV, FileType.DBF}));
 			}
 		} catch (IOException e) {
 			throw e;
@@ -155,4 +153,8 @@ public abstract class FormatWriter<H extends FormatHeader> implements Closeable 
 	 * @return a FormatField instance
 	 */
 	public abstract FormatField convertGExportFieldDetailsToFormatField(GExportFieldDetails details);
+	
+	public static void main(String[] args) throws IOException {
+		createFormatWriter(false, "blabla");
+	}
 }

@@ -23,11 +23,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.javacsv.CSVReader;
 import repicea.io.javadbf.DBFReader;
-import repicea.io.javasql.SQLReader;
 
 /**
  * Format reader is a general class for all the format-specific readers 
@@ -166,10 +166,8 @@ public abstract class FormatReader<H extends FormatHeader> implements Closeable 
 				return new DBFReader(fileSpec[0]);
 			} else if (f == FileType.CSV) {
 				return new CSVReader(fileSpec[0]);
-			} else if (f == FileType.ACCDB || f == FileType.MDB) {
-				return new SQLReader(fileSpec[0], fileSpec[1]);
 			} else {
-				throw new IOException("Unknown file format!");
+				throw new IOException("Unknown file format! Currently supported files are: " + Arrays.asList(new FileType[] {FileType.CSV, FileType.DBF}));
 			}
 		} catch (IOException e) {
 			throw e;

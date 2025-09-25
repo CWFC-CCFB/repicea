@@ -837,4 +837,15 @@ public class XmlSerializationTest {
 		}
 	}
 
+	@Test
+	public void test32deserializationOfInfiniteValuesUnderWeirdFormat() throws MarshallingException, UnmarshallingException {
+		List<Object> myList = Arrays.asList(Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+		String filename1 = ObjectUtility.getPackagePath(getClass()) + "serializedSpecialDoubles.xml";
+		XmlDeserializer deserializer = new XmlDeserializer(filename1);
+		List<String> desList = (List) deserializer.readObject();
+		for (int i = 0; i < myList.size(); i++) {
+			Assert.assertEquals("Testing entry " + i, myList.get(i),  desList.get(i));
+		}
+	}
+	
 }

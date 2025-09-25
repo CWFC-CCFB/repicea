@@ -39,8 +39,8 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 		DBF("dBase IV file (*.dbf)", "Fichier dBase IV (*.dbf)"), 
 		CSV("delimited text file (*.csv)", "Fichier texte d\u00E9limit\u00E9 (*.csv)"),
 		IFE("ImportFieldElements file (*.ife)",	"Fichier ImportFieldElements (*.ife)"),
-		ACCDB("Microsoft Access 2007 DataBase (*.accdb", "Base de donn\u00E9e Microsoft Access 2007 (*.accdb)"),
-		MDB("Microsoft Access DataBase (*.mdb", "Base de donn\u00E9e Microsoft Access (*.mdb)"),
+//		ACCDB("Microsoft Access 2007 DataBase (*.accdb", "Base de donn\u00E9e Microsoft Access 2007 (*.accdb)"),
+//		MDB("Microsoft Access DataBase (*.mdb)", "Base de donn\u00E9e Microsoft Access (*.mdb)"),
 		XML("XML file (*.xml)", "Fichier XML (*.xml)"),
 		JAVACLASS("Java class file (*.class)", "Fichier de classe Java (*.class)"),
 		HTML("Hypertext Markup Language (*.html)", "Langage Hypertext Markup (*.html)"),
@@ -70,7 +70,7 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 		private static Map<FileType, REpiceaFileFilter> getFileFilterMap() {
 			if (FileFilterMap == null) {
 				FileFilterMap = new HashMap<FileType, REpiceaFileFilter>();
-				FileFilterMap.put(ACCDB, REpiceaFileFilter.ACCDB);
+//				FileFilterMap.put(ACCDB, REpiceaFileFilter.ACCDB);
 				FileFilterMap.put(DBF, REpiceaFileFilter.DBF);
 				FileFilterMap.put(CSV, REpiceaFileFilter.CSV);
 				FileFilterMap.put(IFE, REpiceaFileFilter.IFE);
@@ -78,7 +78,7 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 				FileFilterMap.put(JAVACLASS, REpiceaFileFilter.JAVACLASS);
 				FileFilterMap.put(HTML, REpiceaFileFilter.HTML);
 				FileFilterMap.put(TXT, REpiceaFileFilter.TXT);
-				FileFilterMap.put(MDB,  REpiceaFileFilter.MDB);
+//				FileFilterMap.put(MDB,  REpiceaFileFilter.MDB);
 				FileFilterMap.put(SVG,  REpiceaFileFilter.SVG);
 				FileFilterMap.put(JSON, REpiceaFileFilter.JSON);
 				FileFilterMap.put(XLSX, REpiceaFileFilter.XLSX);
@@ -99,8 +99,8 @@ public class REpiceaFileFilter extends FileFilter implements ExtendedFileFilter 
 	public final static REpiceaFileFilter DBF = new REpiceaFileFilter(".dbf", FileType.DBF);
 	public final static REpiceaFileFilter CSV = new REpiceaFileFilter(".csv", FileType.CSV);
 	public final static REpiceaFileFilter IFE = new REpiceaFileFilter(".ife", FileType.IFE);
-	public final static REpiceaFileFilter MDB = new REpiceaFileFilter(".mdb", FileType.MDB);
-	public final static REpiceaFileFilter ACCDB = new REpiceaFileFilter(".accdb", FileType.ACCDB);
+//	public final static REpiceaFileFilter MDB = new REpiceaFileFilter(".mdb", FileType.MDB);
+//	public final static REpiceaFileFilter ACCDB = new REpiceaFileFilter(".accdb", FileType.ACCDB);
 	public final static REpiceaFileFilter XML = new REpiceaFileFilter(".xml", FileType.XML);
 	public final static REpiceaFileFilter JAVACLASS = new REpiceaFileFilter(".class", FileType.JAVACLASS);
 	public final static REpiceaFileFilter HTML = new REpiceaFileFilter(".html", FileType.HTML);

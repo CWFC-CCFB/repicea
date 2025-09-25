@@ -87,4 +87,6 @@ public final class JSONList extends LinkedHashMap<String, Object> implements Ser
 	@Override
 	public String getClassName() {return get(ClassNameTag).toString();}
 
+	
+	
 }

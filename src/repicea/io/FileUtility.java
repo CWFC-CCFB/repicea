@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.InvalidParameterException;
+import java.util.zip.DeflaterOutputStream;
+import java.util.zip.InflaterInputStream;
 
 /**
  * This class just contains static methods that facilitates the handling of the files.
@@ -99,6 +101,69 @@ public class FileUtility {
 			return filename.substring(0, indexLastDot).concat("." + newExtension);
 		}
 		
+	}
+
+	/**
+	 * Compress a file.
+	 * @param originalFilename the name of the file to be compressed (including the absolute path)
+	 * @param compressedFilename the name of the file once compressed (including the absolute path)
+	 * @throws IOException if an I/O exception occurs
+	 */
+	public static void zip(String originalFilename, String compressedFilename) throws IOException {
+		if (originalFilename == null || compressedFilename == null) {
+			throw new InvalidParameterException("The originalFilename and compressedFilename arguments cannot be null!");
+		}
+		File f1 = new File(originalFilename);
+		FileInputStream fis = new FileInputStream(f1);
+		
+		File f2 = new File(compressedFilename);
+		if (f2.exists()) {
+			if (!f2.delete()) {
+				fis.close();
+				throw new IOException("The compressed file already exists and cannot be deleted!");
+			}
+		}
+		FileOutputStream fos = new FileOutputStream(f2);
+		DeflaterOutputStream dos = new DeflaterOutputStream(fos);
+		byte[] byteArray = new byte[10000];
+		int len;
+		while ((len = fis.read(byteArray)) != -1) {
+			dos.write(byteArray, 0, len);
+		}
+		dos.close();
+		fis.close();
+	}
+	
+	
+	/**
+	 * Compress a file.
+	 * @param originalFilename the name of the file to be compressed (including the absolute path)
+	 * @param compressedFilename the name of the file once compressed (including the absolute path)
+	 * @throws IOException if an I/O exception occurs
+	 */
+	public static void unzip(String compressedFilename, String newFilename) throws IOException {
+		if (newFilename == null || compressedFilename == null) {
+			throw new InvalidParameterException("The compressedFilename and newFilename arguments cannot be null!");
+		}
+		File f1 = new File(compressedFilename);
+		FileInputStream fis = new FileInputStream(f1);
+		InflaterInputStream iis = new InflaterInputStream(fis);
+		
+		File f2 = new File(newFilename);
+		if (f2.exists()) {
+			if (!f2.delete()) {
+				fis.close();
+				throw new IOException("The file " + newFilename + " already exists and cannot be deleted!");
+			}
+		}
+		FileOutputStream fos = new FileOutputStream(f2);
+		byte[] byteArray = new byte[10000];
+		int len;
+		while ((len = iis.read(byteArray)) != -1) {
+			fos.write(byteArray, 0, len);
+		}
+		fos.close();
+		fis.close();
 	}
 
 }

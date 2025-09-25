@@ -28,7 +28,6 @@ import java.util.zip.InflaterInputStream;
 import java.util.zip.ZipException;
 
 import com.cedarsoftware.io.JsonIo;
-import com.cedarsoftware.io.JsonReader;
 
 import repicea.serial.AbstractDeserializer;
 import repicea.serial.UnmarshallingException;

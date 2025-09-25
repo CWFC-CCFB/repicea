@@ -23,7 +23,6 @@ import java.io.FileOutputStream;
 import java.util.zip.DeflaterOutputStream;
 
 import com.cedarsoftware.io.JsonIo;
-import com.cedarsoftware.io.JsonWriter;
 
 import repicea.serial.AbstractSerializer;
 import repicea.serial.MarshallingException;
@@ -34,7 +33,6 @@ import repicea.serial.MarshallingException;
  */
 public final class JSONSerializer extends AbstractSerializer {
 
-	
 	/**
 	 * Constructor.
 	 * @param filename the file that serves as output
