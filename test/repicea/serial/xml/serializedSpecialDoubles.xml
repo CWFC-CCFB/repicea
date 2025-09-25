@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xmlList>
+	<className>java.util.Arrays$ArrayList</className>
+	<refHashCode>457233904</refHashCode>
+	<isArray>false</isArray>
+	<isPrimitive>false</isPrimitive>
+	<list>
+		<fieldName>entries</fieldName>
+		<value xsi:type="xmlList">
+			<className>java.lang.Object</className>
+			<refHashCode>245672235</refHashCode>
+			<isArray>true</isArray>
+			<isPrimitive>false</isPrimitive>
+			<list>
+				<fieldName>0</fieldName>
+				<value xsi:type="xs:double">-INF</value>
+			</list>
+			<list>
+				<fieldName>1</fieldName>
+				<value xsi:type="xs:double">INF</value>
+			</list>
+		</value>
+	</list>
+	<list>
+		<fieldName>a</fieldName>
+		<value xsi:type="xmlList">
+			<className>java.lang.Object</className>
+			<refHashCode>1012570586</refHashCode>
+			<isArray>true</isArray>
+			<isPrimitive>false</isPrimitive>
+			<list>
+				<fieldName>0</fieldName>
+				<value xsi:type="xs:double">-INF</value>
+			</list>
+			<list>
+				<fieldName>1</fieldName>
+				<value xsi:type="xs:double">INF</value>
+			</list>
+		</value>
+	</list>
+</xmlList>
