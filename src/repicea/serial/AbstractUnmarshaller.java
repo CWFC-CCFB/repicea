@@ -127,7 +127,9 @@ public abstract class AbstractUnmarshaller<P extends SerializableEntry, L extend
 			} else {													// any other case
 				Constructor<?> emptyCstor = MarshallingUtilities.getEmptyConstructor(clazz);
 				Constructor<?> cstor = ReflectionFactory.getReflectionFactory().newConstructorForSerialization(clazz, emptyCstor);
-				cstor.setAccessible(true);
+				if (!cstor.isAccessible()) {
+					cstor.setAccessible(true);
+				}
 				Object newInstance = cstor.newInstance(new Object[]{});
 				registerObject(clazz, objToBeDeserialized.getRefHashCode(), newInstance);
 				Map<String, Field> fieldsToFill = MarshallingUtilities.getFieldMapFromClass(clazz);
