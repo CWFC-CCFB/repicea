@@ -70,9 +70,10 @@ public final class XmlSerializer extends AbstractSerializer {
 			os = enableCompression ?
 					new DeflaterOutputStream(fos) :
 						fos;
-			XmlWriterHandler handler = new XmlWriterHandler(xmlObject);
-			String xmlString = handler.sb.toString(); 
-			os.write(xmlString.getBytes("UTF-8"));
+			new XmlWriterHandler(xmlObject, os);
+//			XmlWriterHandler handler = new XmlWriterHandler(xmlObject, os);
+//			String xmlString = handler.sb.toString(); 
+//			os.write(xmlString.getBytes("UTF-8"));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw new MarshallingException(e);
