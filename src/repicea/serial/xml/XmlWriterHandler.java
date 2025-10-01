@@ -19,6 +19,9 @@
  */
 package repicea.serial.xml;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.security.InvalidParameterException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -62,95 +65,64 @@ final class XmlWriterHandler {
 		SPECIAL_CHARACTERS.put("\"", "&quot;");
 	}
 
-//	final XMLStreamWriter xsw;
-	
-//	XmlWriterHandler(XMLStreamWriter xsw, XmlList root) throws XMLStreamException {
-//		this.xsw = xsw;	
-//		this.xsw.writeStartDocument();
-//		this.xsw.writeStartElement(XmlReaderHandler.XMLLIST_TAG);
-//		processList(root);
-//		this.xsw.writeEndElement();
-//		this.xsw.writeEndDocument();
-//	}
-//	
-//	void processList(XmlList xmlList) throws XMLStreamException {
-//		xsw.writeStartElement(XmlReaderHandler.CLASSNAME_TAG);
-//		xsw.writeCharacters(xmlList.className);
-//		xsw.writeEndElement();
-//		xsw.writeStartElement(XmlReaderHandler.REFHASHCODE_TAG);
-//		xsw.writeCharacters(xmlList.refHashCode + "");
-//		xsw.writeEndElement();
-//		xsw.writeStartElement(XmlReaderHandler.ISARRAY_TAG);
-//		xsw.writeCharacters(xmlList.isArray + "");
-//		xsw.writeEndElement();
-//		xsw.writeStartElement(XmlReaderHandler.ISPRIMITIVE_TAG);
-//		xsw.writeCharacters(xmlList.isPrimitive + "");
-//		xsw.writeEndElement();
-//		for (XmlEntry entry : xmlList.list) {
-//			processEntry(entry);
-//		}
-//	}
-//	
-//	
-//	
-//	void processEntry(XmlEntry entry) throws XMLStreamException {
-//		xsw.writeStartElement(XmlReaderHandler.LIST_TAG);
-//		xsw.writeStartElement(XmlReaderHandler.FIELDNAME_TAG);
-//		xsw.writeCharacters(entry.fieldName);
-//		xsw.writeEndElement();
-//		if (entry.value != null) {
-//			xsw.writeStartElement(XmlReaderHandler.VALUE_TAG);
-//			Class<?> clazz = entry.value.getClass();
-//			String type = XMLTYPEMAP.get(clazz);
-//			if (type == null) {
-//				throw new XMLStreamException("Class " + clazz.getName() + " does not have any associated type!");
-//			}
-//			xsw.writeAttribute("xsi:type", type);
-//			if (entry.value instanceof XmlList) {
-//				processList((XmlList) entry.value);
-//			} else {
-//				xsw.writeCharacters(entry.value.toString());
-//			}
-//			xsw.writeEndElement();
-//		}
-//		xsw.writeEndElement();
-//	}
-	
+	static final int BUFFER_SIZE = 10000;
 	final StringBuilder sb;
+	final OutputStream os;
 	
-	XmlWriterHandler(XmlList root) throws XMLStreamException {
+	XmlWriterHandler(XmlList root, OutputStream os) throws XMLStreamException, IOException {
+		if (os == null) {
+			throw new InvalidParameterException("The os argument cannot be null!");
+		}
+		this.os = os;
 		sb = new StringBuilder();
-		sb.append("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
+		addStringToStringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>");
 		processOpeningTag(XmlReaderHandler.XMLLIST_TAG);
 		processList(root);
 		processClosingTag(XmlReaderHandler.XMLLIST_TAG);
+		triggerWriteToOutput();
 	}
 
-	void processSimpleTag(String tag, Object value) {
+	void processSimpleTag(String tag, Object value) throws XMLStreamException {
 		processOpeningTag(tag);
-		sb.append(value.toString());
+		addStringToStringBuilder(value.toString());
 		processClosingTag(tag);
-		
 	}
 
-	void processOpeningTag(String tag, String attribute) {
-		sb.append("<");
-		sb.append(tag);
-		if (attribute != null) {
-			sb.append(" ");
-			sb.append(attribute);
+	void triggerWriteToOutput() throws XMLStreamException {
+		String xmlString = sb.toString();
+		try {
+			os.write(xmlString.getBytes("UTF-8"));
+		} catch (Exception e) {
+			throw new XMLStreamException(e.getMessage());
 		}
-		sb.append(">");
+	}
+	
+	void addStringToStringBuilder(String str) throws XMLStreamException {
+		sb.append(str);
+		if (sb.length() > BUFFER_SIZE) {
+			triggerWriteToOutput();
+			sb.delete(0, sb.length());
+		}
+	}
+	
+	void processOpeningTag(String tag, String attribute) throws XMLStreamException {
+		addStringToStringBuilder("<");
+		addStringToStringBuilder(tag);
+		if (attribute != null) {
+			addStringToStringBuilder(" ");
+			addStringToStringBuilder(attribute);
+		}
+		addStringToStringBuilder(">");
 	}
 
-	void processOpeningTag(String tag) {
+	void processOpeningTag(String tag) throws XMLStreamException {
 		processOpeningTag(tag, null);
 	}
 
-	void processClosingTag(String tag) {
-		sb.append("</");
-		sb.append(tag);
-		sb.append(">");
+	void processClosingTag(String tag)  throws XMLStreamException{
+		addStringToStringBuilder("</");
+		addStringToStringBuilder(tag);
+		addStringToStringBuilder(">");
 	}
 	
 	void processList(XmlList xmlList) throws XMLStreamException {
@@ -177,9 +149,9 @@ final class XmlWriterHandler {
 				processList((XmlList) entry.value);
 			} else {
 				if (clazz.equals(String.class)) {
-					sb.append(changeSpecialCharactersIfNeedBe((String) entry.value));
+					addStringToStringBuilder(changeSpecialCharactersIfNeedBe((String) entry.value));
 				} else {
-					sb.append(entry.value.toString());
+					addStringToStringBuilder(entry.value.toString());
 				}
 			}
 			processClosingTag(XmlReaderHandler.VALUE_TAG);

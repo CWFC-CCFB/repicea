@@ -36,6 +36,7 @@ import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
 
+import repicea.lang.REpiceaSystem;
 import repicea.serial.MarshallingException;
 import repicea.serial.SerializerChangeMonitor;
 import repicea.serial.UnmarshallingException;
@@ -847,5 +848,48 @@ public class XmlSerializationTest {
 			Assert.assertEquals("Testing entry " + i, myList.get(i),  desList.get(i));
 		}
 	}
+	
+	@Test
+	public void test33SerializerMemoryHeap() throws MarshallingException, UnmarshallingException {
+		Random r = new Random();
+		List<Double[]> collection = new ArrayList<Double[]>();
+		for (int i = 0; i < 1000000; i++) {
+			Double[] record = new Double[10];
+			for (int j = 0; j < record.length; j++) {
+				record[j] = r.nextDouble();
+				collection.add(record);
+			}
+		}
+		System.out.println("Current memory load " + REpiceaSystem.getCurrentMemoryLoadMb() + " Mb.");
+		String filename = ObjectUtility.getPackagePath(getClass()) + "testMemoryLoad.zml";
+		System.out.println("Saving copy list...");
+		XmlSerializer serializer = new XmlSerializer(filename);
+		serializer.writeObject(collection);
+		System.out.println("Done.");
+		
+		
+		System.out.println("Reading copy list...");
+		XmlDeserializer deser = new XmlDeserializer(filename);
+		List<Double[]> copyList = (List) deser.readObject();
+		System.out.println("Done.");
+		int ii = 0;
+		for (int i = 0; i < 100; i++) {
+			Double[] refRecord = collection.get(i);
+			Double[] actualRecord = copyList.get(i);
+			Assert.assertTrue("Testing the record is not empty" , refRecord.length > 0);
+			Assert.assertEquals("Testing record length", 
+					refRecord.length,
+					actualRecord.length);
+			for (int j = 0; j < refRecord.length; j++) {
+				Assert.assertEquals("Testing record value at i=" + i + " and j=" + j,
+						refRecord[j],
+						actualRecord[j],
+						1E-8);
+				ii++;
+			}
+		}
+		System.out.println("Tested " + ii + " double values!");
+	}
+
 	
 }
