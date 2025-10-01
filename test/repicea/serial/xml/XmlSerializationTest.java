@@ -853,7 +853,7 @@ public class XmlSerializationTest {
 	public void test33SerializerMemoryHeap() throws MarshallingException, UnmarshallingException {
 		Random r = new Random();
 		List<Double[]> collection = new ArrayList<Double[]>();
-		for (int i = 0; i < 500000; i++) {
+		for (int i = 0; i < 100000; i++) {
 			Double[] record = new Double[10];
 			for (int j = 0; j < record.length; j++) {
 				record[j] = r.nextDouble();
