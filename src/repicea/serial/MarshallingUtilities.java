@@ -24,7 +24,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,14 +38,17 @@ public class MarshallingUtilities {
 
 	/**
 	 * This method drops all the component, static or transient fields. 
+	 * <br>If the mother class is a Collection or a Map then the transient fields are allowed.</br>
+	 * @param superClass the super class of the original class
 	 * @param fields the original list of fields
 	 * @return a List of fields
 	 */
-	private static List<Field> dropOutStaticTransientAndComponentFields(List<Field> fields) {
+	private static List<Field> dropOutStaticAndComponentFields(Class<?> superClass, List<Field> fields) {
 		List<Field> selectedFields = new ArrayList<Field>();
 		for (Field field : fields) {
 			int fieldModifier = field.getModifiers();
-			if (!Modifier.isStatic(fieldModifier) && !Modifier.isTransient(field.getModifiers())) { 
+			if (!Modifier.isStatic(fieldModifier)) { 
+				field.setAccessible(true);
 				Class<?> clazz = field.getType();
 				if (!Component.class.isAssignableFrom(clazz)) {
 					selectedFields.add(field);
@@ -56,45 +58,34 @@ public class MarshallingUtilities {
 		return selectedFields;
 	}
 	
-//	private static List<Field> retrieveAllNonStaticFieldsFromClass(Class<?> clazz) {
-//	}
+	private static List<Field> retrieveAllNonStaticFieldsFromClass(Class<?> clazz) {
+		List<Field> fields = ReflectUtility.retrieveAllFieldsFromClass(clazz);
+		return dropOutStaticAndComponentFields(clazz, fields);
+	}
 
 	/**
-	 * Retrieve all non static and non transient fields from a class. <p>
-	 * This method is called during the marshalling.
+	 * Retrieve all non static and non transient fields from a class.
 	 * @param clazz a Class object
 	 * @return a List of Field instances
 	 */
 	static List<Field> retrieveAllNonStaticAndNonTransientFieldFromClass(Class<?> clazz) {
-		return dropOutStaticTransientAndComponentFields(retrieveAllFieldsFromClass(clazz));
-	}
-	
-	/**
-	 * This static method returns all the fields from a class including those
-	 * inherited.<p>
-	 * However, it omits private and protected fields from class in base packages.
-	 * @param clazz a Class object
-	 * @return a List of Field instances
-	 */
-	static List<Field> retrieveAllFieldsFromClass(Class<?> clazz) {
 		List<Field> fields = new ArrayList<Field>();
-		do {
-			Field[] fieldFromThisClass = clazz.getDeclaredFields();
-			fields.addAll(Arrays.asList(fieldFromThisClass));
-		} while ((clazz = clazz.getSuperclass()) != null);
+		for (Field field : retrieveAllNonStaticFieldsFromClass(clazz)){
+			if (!Modifier.isTransient(field.getModifiers())) {
+				fields.add(field);
+			}
+		}
 		return fields;
 	}
+	
 
-	
-	
 	/**
-	 * Retrieve all non static and non transient fields from a class. <p>
-	 * This method is called during the unmarshalling.
+	 * Retrieve all non static and non transient fields from a class.
 	 * @param clazz a Class object
 	 * @return a Map whose field names are the keys and the fields are the values
 	 */
 	static Map<String, Field> getFieldMapFromClass(Class<?> clazz) {
-		List<Field> fields = retrieveAllNonStaticAndNonTransientFieldFromClass(clazz);
+		List<Field> fields = retrieveAllNonStaticFieldsFromClass(clazz);
 		Map<String, Field> fieldMap = new HashMap<String, Field>();
 		for (Field field : fields) {
 			fieldMap.put(field.getName(), field);
@@ -136,7 +127,7 @@ public class MarshallingUtilities {
 	 * @param originalClassName the original class name
 	 * @return a String
 	 */
-	static String getClassName(String originalClassName) {
+	public static String getClassName(String originalClassName) {
 		String className = originalClassName;
 		String changedName = SerializerChangeMonitor.ClassNameChangeMap.get(className);
 		if (changedName != null) {
@@ -165,7 +156,7 @@ public class MarshallingUtilities {
 	 * @param originalEnumName the original name of the enum variable
 	 * @return a String
 	 */
-	static String getEnumName(String enumClass, String originalEnumName) {
+	public static String getEnumName(String enumClass, String originalEnumName) {
 		String enumName = originalEnumName;
 		if (SerializerChangeMonitor.EnumNameChangeMap.containsKey(enumClass)) {
 			String changedName = SerializerChangeMonitor.EnumNameChangeMap.get(enumClass).get(enumName);
@@ -177,7 +168,7 @@ public class MarshallingUtilities {
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
-	static <L extends SerializableList> L getNextEntryFromJava7MapEntry(L list) {
+	public static <L extends SerializableList> L getNextEntryFromJava7MapEntry(L list) {
 		if (list.getClassName().equals("java.util.HashMap$Entry") && REpiceaSystem.isCurrentJVMLaterThanThisVersion("1.7")) {
 			for (Object ent : list.getEntries()) {
 				SerializableEntry entry = (SerializableEntry) ent;
