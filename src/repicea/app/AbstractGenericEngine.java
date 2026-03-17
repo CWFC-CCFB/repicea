@@ -151,6 +151,7 @@ public abstract class AbstractGenericEngine {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected LoggerConsole logger;
 	protected LinkedBlockingQueue<GenericTask> queue;
 	protected List<String> tasksDone;
@@ -194,12 +195,15 @@ public abstract class AbstractGenericEngine {
 		} else {
 			String taskName = task.getName();
 			Exception failureCause = task.getFailureReason();
-			String errorType = "";
+			String errorType = "Unknown";
+			String errorMessage = ""; 
 			if (failureCause != null) {
 				errorType = failureCause.getClass().getSimpleName();
 				failureCause.printStackTrace();
+				errorMessage = failureCause.getMessage();
 			}
-			message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType;
+			message = MessageID.ErrorMessage.toString() + taskName + " : " + errorType + 
+					(errorMessage.isEmpty() ? "" : System.lineSeparator() + errorMessage);
 		}
 		
 		if (this instanceof REpiceaUIObject && ((REpiceaUIObject) this).isVisible()) {
