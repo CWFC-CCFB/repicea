@@ -25,15 +25,18 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent.EventType;
 
 import repicea.gui.components.NumberFormatFieldFactory.JFormattedNumericField;
+import repicea.gui.components.NumberFormatFieldFactory.NumberFieldDocument.NumberFieldEvent;
+import repicea.gui.components.NumberFormatFieldFactory.NumberFieldListener;
 
 /**
  * The REpiceaCellEditor is the CellEditor class for REpiceaTable.
  * @author Mathieu Fortin - January 2015
  */
 @SuppressWarnings("serial")
-public class REpiceaCellEditor extends DefaultCellEditor {
+public class REpiceaCellEditor extends DefaultCellEditor implements NumberFieldListener {
 
 	private int row;
 	private int column;
@@ -42,6 +45,13 @@ public class REpiceaCellEditor extends DefaultCellEditor {
 	public REpiceaCellEditor(JTextField component, REpiceaTableModel tableModel) {
 		super(component);
 		this.tableModel = tableModel;
+		addCellEditorListener(tableModel);
+	}
+
+	public REpiceaCellEditor(JFormattedNumericField component, REpiceaTableModel tableModel) {
+		super(component);
+		this.tableModel = tableModel;
+		component.addNumberFieldListener(this);
 		addCellEditorListener(tableModel);
 	}
 
@@ -58,19 +68,33 @@ public class REpiceaCellEditor extends DefaultCellEditor {
 	}
 
 	protected void setValue() {
-		Component component = getComponent();
-		if (component != null && component.getClass().isAssignableFrom(JFormattedNumericField.class)) {
-			Number value = ((JFormattedNumericField) component).getValue();
-			tableModel.setValueAt(value, row, column);
-		}
-
+		tableModel.setValueAt(getCellEditorValue(), row, column);
 	}
 
+	@Override
+	public Object getCellEditorValue() {
+		Component component = getComponent();
+		if (component != null) {
+			if (JFormattedNumericField.class.isAssignableFrom(component.getClass())) {
+				Number value = ((JFormattedNumericField) component).getValue();
+				return value;
+			}
+		} 
+		return super.getCellEditorValue();
+	}
+	
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 		this.row = row;
 		this.column = column;
 		return super.getTableCellEditorComponent(table, value, isSelected, row, column);
+	}
+
+	@Override
+	public void numberChanged(NumberFieldEvent e) {
+		if (e.getType() == EventType.CHANGE) {
+			setValue();
+		}
 	}
 
 }

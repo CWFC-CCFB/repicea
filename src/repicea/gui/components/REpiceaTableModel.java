@@ -84,7 +84,12 @@ public class REpiceaTableModel extends DefaultTableModel implements CellEditorLi
 	}
 
 	@Override
-	public void editingCanceled(ChangeEvent e) {}
+	public void setValueAt(Object value, int row, int column) {
+		if (!getValueAt(row, column).equals(value)) {
+			super.setValueAt(value, row, column);
+		}
+	}
+	
 
 	@Override
 	public void editingStopped(ChangeEvent e) {
@@ -135,6 +140,9 @@ public class REpiceaTableModel extends DefaultTableModel implements CellEditorLi
 			removeRow(0);
 		}
 	}
+
+	@Override
+	public void editingCanceled(ChangeEvent e) {}
 
 
 }

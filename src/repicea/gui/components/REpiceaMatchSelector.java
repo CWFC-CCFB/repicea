@@ -30,9 +30,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-
 import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.IOUserInterfaceableObject;
 import repicea.io.REpiceaFileFilter.FileType;
@@ -52,7 +49,6 @@ import repicea.serial.xml.XmlSerializer;
  * @param <E> the class of the object to be matched with the key
  */
 public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent, 
-											TableModelListener, 
 											IOUserInterfaceableObject, 
 											Memorizable {
 
@@ -76,6 +72,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	 * the array is selected as default match
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
+	@SuppressWarnings("rawtypes")
 	public REpiceaMatchSelector(Object[] toBeMatched, E[] potentialMatchArray, int defaultMatchId, Object[] columnNames) {
 		if (toBeMatched == null || toBeMatched.length == 0) {
 			throw new InvalidParameterException("The toBeMatch argument must be a non null and non empty array of objects!");
@@ -154,6 +151,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	}
 
 	
+	@SuppressWarnings("unchecked")
 	private void instantiatePotentialMatchesByKey(Object[] toBeMatched) {
 		potentialMatchesByKey = new HashMap<Object, Map<E, E>>();
 		for (Object obj : toBeMatched) {
@@ -172,7 +170,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 	}
 	
 	
-	private Map<E, E> getMatchesForThisKey(Object key) {
+	protected Map<E, E> getMatchesForThisKey(Object key) {
 		if (potentialMatchesByKey == null) {	// if true, we have to ensure backward compatibility
 			Set<Object> keys = this.matchMap.keySet();	
 			instantiatePotentialMatchesByKey(keys.toArray());
@@ -180,40 +178,6 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 		return potentialMatchesByKey.get(key);
 	}
 	
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void tableChanged(TableModelEvent e) {
-		if (e.getType() == TableModelEvent.UPDATE) {
-			if (e.getSource() instanceof REpiceaTableModel) {
-				REpiceaTableModel model = (REpiceaTableModel) e.getSource();
-				if (e.getColumn() == 1) {	// the event occurred in the match object
-					String s = (String) model.getValueAt(e.getLastRow(), 0);
-					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					Map<E,E> potentialMatchesForThisKey = getMatchesForThisKey(s);
-					E trueMatch = potentialMatchesForThisKey.get(m);
-					matchMap.put(s, trueMatch);
-					getUI(null).doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
-					model.setValueAt(trueMatch, e.getLastRow(), 1);
-					System.out.println("New match : " + s + " = " + trueMatch.toString());
-					if (trueMatch instanceof REpiceaMatchComplexObject) { // means there is more information in the match object and we need to update the table
-						int currentColumn = 2;
-						for (Object o : ((REpiceaMatchComplexObject) trueMatch).getAdditionalFields()) { // set the values that correspond to the new match
-							model.setValueAt(o, e.getLastRow(), currentColumn++);
-						}
-					}
-					getUI(null).listenTo(); // finally re-enable the listeners
-				} else { // it comes from the additional columns
-//					String s = (String) model.getValueAt(e.getLastRow(), 0);
-					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					((REpiceaMatchComplexObject) m).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
-							guiInterface.getTable().getValueAt(e.getLastRow(), e.getColumn()));
-				}
-			}
-		}
-	}
-
-
 	@Override
 	public void save(String filename) throws IOException {
 		setFilename(filename);

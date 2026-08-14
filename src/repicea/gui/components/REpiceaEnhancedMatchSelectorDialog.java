@@ -37,8 +37,11 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import repicea.gui.OwnedWindow;
+import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaControlPanel;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaMemorizerHandler;
@@ -58,7 +61,9 @@ import repicea.serial.Memorizable;
  * @author Mathieu Fortin - December 2024
  */
 @SuppressWarnings("serial")
-public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, OwnedWindow {
+public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, 
+																					TableModelListener, 
+																					OwnedWindow {
 
 	final static class REpiceaMatchMapTableModel extends REpiceaTableModel {
 		final Enum<?> enumForThisTableModel;
@@ -69,7 +74,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 		}
 	}
 
-	private final REpiceaEnhancedMatchSelector<?> caller;
+	private final REpiceaEnhancedMatchSelector<E> caller;
 	private Map<Enum<?>, REpiceaTable> tables;
 	private Map<Enum<?>, REpiceaMatchMapTableModel> tableModels;
 	private final JMenuItem load;
@@ -100,6 +105,8 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 			table.putClientProperty("terminateEditOnFocusLost", true);
 			Object[] possibleTreatments =  caller.potentialMatchesMap.get(thisEnum).toArray();
 			table.setDefaultEditor(Object.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
+			table.setDefaultEditor(Integer.class, new REpiceaCellEditor(NumberFormatFieldFactory.createNumberFormatField(NumberFormatFieldFactory.Type.Integer, NumberFormatFieldFactory.Range.All, false), tableModel));
+			table.setDefaultEditor(Double.class, new REpiceaCellEditor(NumberFormatFieldFactory.createNumberFormatField(NumberFormatFieldFactory.Type.Double, NumberFormatFieldFactory.Range.All, false), tableModel));
 			table.setRowSelectionAllowed(false);
 			tables.put(thisEnum, table);
 			tableModels.put(thisEnum, tableModel);
@@ -165,14 +172,14 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public void listenTo() {
 		for (REpiceaMatchMapTableModel tableModel : tableModels.values()) {
-			tableModel.addTableModelListener(caller);
+			tableModel.addTableModelListener(this);
 		}
 	}
 
 	@Override
 	public void doNotListenToAnymore() {
 		for (REpiceaMatchMapTableModel tableModel : tableModels.values()) {
-			tableModel.removeTableModelListener(caller);
+			tableModel.removeTableModelListener(this);
 		}
 	}
 
@@ -257,6 +264,11 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public void synchronizeUIWithOwner() {
 		doNotListenToAnymore();
+		for (REpiceaTable table : this.tables.values()) {
+			if (table.isEditing()) {
+				table.getCellEditor().stopCellEditing();
+			}
+		}
 		refreshInterface();
 		refreshTitle();
 		listenTo();
@@ -265,6 +277,39 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public Memorizable getWindowOwner() {
 		return caller;
+	}
+
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public void tableChanged(TableModelEvent e) {
+		if (e.getType() == TableModelEvent.UPDATE) {
+			if (e.getSource() instanceof REpiceaMatchMapTableModel) {
+				REpiceaMatchMapTableModel model = (REpiceaMatchMapTableModel) e.getSource();
+				if (e.getColumn() == 1) {	// the event occurred in the match object
+					String s = (String) model.getValueAt(e.getLastRow(), 0);
+					E m = (E) model.getValueAt(e.getLastRow(), 1);
+					Map<E,E> potentialMatchesForThisKey = caller.getMatchesForThisKey(model.enumForThisTableModel, s);
+					E trueMatch = potentialMatchesForThisKey.get(m);
+					caller.matchMaps.get(model.enumForThisTableModel).put(s, trueMatch);
+					doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
+					model.setValueAt(trueMatch, e.getLastRow(), 1);
+					System.out.println("New match : " + s + " = " + trueMatch.toString());
+					if (trueMatch instanceof REpiceaMatchComplexObject) { // means there is more information in the match object and we need to update the table
+						int currentColumn = 2;
+						for (Object o : ((REpiceaMatchComplexObject<E>) trueMatch).getAdditionalFields()) { // set the values that correspond to the new match
+							model.setValueAt(o, e.getLastRow(), currentColumn++);
+						}
+					}
+					listenTo(); // finally re-enable the listeners
+				} else { // it comes from the additional columns
+					E m = (E) model.getValueAt(e.getLastRow(), 1);
+					((REpiceaMatchComplexObject<E>) m).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
+							getTable(model.enumForThisTableModel).getValueAt(e.getLastRow(), e.getColumn()));
+				}
+				firePropertyChange(REpiceaAWTProperty.ActionPerformed, "", "table updated");
+			}
+		}
 	}
 
 }

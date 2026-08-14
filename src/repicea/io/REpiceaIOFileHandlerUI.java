@@ -25,10 +25,14 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.util.Arrays;
 
 import javax.swing.AbstractButton;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 
 import repicea.app.SettingMemory;
 import repicea.gui.CommonGuiUtility;
@@ -69,7 +73,7 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 	private final AbstractButton saveButton;
 	private final AbstractButton saveAsButton;
 	private final AbstractButton loadButton;
-	
+	private int userReplyToPromptAfterChange; 
 	private boolean hasChanged;
 
 	/**
@@ -206,6 +210,14 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 	@Override
 	public void actionPerformed(ActionEvent evt) {
 		if (evt.getSource().equals(loadButton)) {
+			if (hasChanged) {
+				int userReply = promptUserBecauseFileHasChanged();
+				if (userReply == 0) {
+					if (saveAsAction()) {	// answer is yes but possibility to come back if the file chooser is cancelled
+						component.setVisible(false);
+					}
+				}
+			}
 			loadAction();
 		} else if (evt.getSource().equals(saveButton)) {
 			saveAction();
@@ -214,15 +226,51 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 		}
 	}
 
+	private int promptUserBecauseFileHasChanged() {
+		JButton yesButton = UIControlManager.createCommonButton(UIControlManager.CommonControlID.Yes);
+		JButton noButton = UIControlManager.createCommonButton(UIControlManager.CommonControlID.No);
+		Object[] options = new Object[] {yesButton, noButton};
+		
+		ActionListener listener = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				JButton sourceButton = (JButton) e.getSource();
+				userReplyToPromptAfterChange = Arrays.asList(options).indexOf(sourceButton);
+
+				// Close the parent dialog automatically when a button is pressed
+				JDialog dialog = (JDialog) SwingUtilities.getAncestorOfClass(JDialog.class, sourceButton);
+				if (dialog != null) {
+					dialog.dispose();
+				}
+			}
+		};
+
+		for (Object b : options) {
+			((JButton) b).addActionListener(listener);
+		}
+		
+		JOptionPane.showOptionDialog((Component) component,
+				REpiceaTranslator.getString(MessageID.ParamsHaveChanged),
+				REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning),
+				JOptionPane.YES_NO_OPTION,
+				JOptionPane.INFORMATION_MESSAGE,
+				null, 
+				options,
+				null);
+		
+		
+//		int userReply = JOptionPane.showConfirmDialog((Component) component, 
+//				REpiceaTranslator.getString(MessageID.ParamsHaveChanged),
+//				REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning),
+//				JOptionPane.YES_NO_OPTION);
+		return userReplyToPromptAfterChange;
+	}
 
 	@Override
 	public void propertyChange(PropertyChangeEvent arg0) {
 		if (arg0.getPropertyName().equals(REpiceaAWTProperty.WindowAcceptedConfirmed.name())) {
 			if (hasChanged) {
-				int userReply = JOptionPane.showConfirmDialog((Component) component, 
-						REpiceaTranslator.getString(MessageID.ParamsHaveChanged),
-						REpiceaTranslator.getString(UIControlManager.InformationMessageTitle.Warning),
-						JOptionPane.YES_NO_OPTION);
+				int userReply = promptUserBecauseFileHasChanged();
 				if (userReply == 0) {
 					if (saveAsAction()) {	// answer is yes but possibility to come back if the file chooser is cancelled
 						component.setVisible(false);

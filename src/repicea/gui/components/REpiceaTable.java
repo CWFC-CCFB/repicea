@@ -18,6 +18,7 @@
  */
 package repicea.gui.components;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -27,6 +28,9 @@ import java.util.List;
 import javax.swing.JMenuItem;
 import javax.swing.JTable;
 
+import repicea.gui.CommonGuiUtility;
+import repicea.gui.REpiceaAWTProperty;
+import repicea.gui.REpiceaDialog;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.popup.REpiceaPopupListener;
@@ -66,12 +70,17 @@ public class REpiceaTable extends JTable implements ActionListener {
 	public REpiceaTable(REpiceaTableModel model) {
 		this(model, true);
 	}
-	
+
+	private void fireChange(String message) {
+		REpiceaDialog dlg = (REpiceaDialog) CommonGuiUtility.getParentComponent((Component) this, REpiceaDialog.class);
+		dlg.firePropertyChange(REpiceaAWTProperty.ActionPerformed, "", message);
+	}
 	
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if (arg0.getSource().equals(addItem)) {
 			((REpiceaTableModel) getModel()).addDefaultRecord();
+			fireChange("Item added");
 		} else if (arg0.getSource().equals(deleteItem)) {
 			List<Integer> rowIndices = new ArrayList<Integer>();
 			for (int index : getSelectedRows()) {
@@ -81,6 +90,7 @@ public class REpiceaTable extends JTable implements ActionListener {
 			while (!rowIndices.isEmpty()) {
 				((REpiceaTableModel) getModel()).removeRow(rowIndices.remove(rowIndices.size()-1));
 			}
+			fireChange("Item deleted");
 		}
 	}
 }

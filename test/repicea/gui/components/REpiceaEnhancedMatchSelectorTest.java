@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JDialog;
+
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -89,7 +91,7 @@ public class REpiceaEnhancedMatchSelectorTest {
 			return false;
 		}
 	}
-	
+
 	@Test
 	public void cancelOkTest() throws Exception {
 		REpiceaEnhancedMatchSelector<UseMode> selector = new REpiceaEnhancedMatchSelector<UseMode>(Arrays.asList(Language.values()),
@@ -157,8 +159,21 @@ public class REpiceaEnhancedMatchSelectorTest {
 		
 		Assert.assertEquals("Testing the match", UseMode.GUI_MODE.name(), match.name);
 		Assert.assertEquals("Testing the match index", UseMode.GUI_MODE.ordinal(), match.index);
+
+		Runnable toRun = new Runnable() {
+			@Override
+			public void run() {
+				try { 
+					robot.clickThisButton("Ok");
+				} catch (Exception e) {}
+			}
+		};
 		
-		robot.clickThisButton("Ok", REpiceaAWTProperty.WindowsJustSetToInvisible);
+		robot.startGUI(toRun, JDialog.class);
+		robot.letDispatchThreadProcess();
+		robot.clickThisButton("No", REpiceaAWTProperty.WindowsJustSetToInvisible);
+		robot.letDispatchThreadProcess();
+		
 		dlg.dispose();
 		t.join();
 		robot.shutdown();

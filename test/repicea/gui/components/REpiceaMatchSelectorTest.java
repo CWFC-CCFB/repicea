@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
 import org.junit.Assert;
@@ -135,7 +136,19 @@ public class REpiceaMatchSelectorTest {
 		Assert.assertEquals("Testing the match", UseMode.GUI_MODE.name(), match.name);
 		Assert.assertEquals("Testing the match index", UseMode.GUI_MODE.ordinal(), match.index);
 		
-		robot.clickThisButton("Ok", REpiceaAWTProperty.WindowsJustSetToInvisible);
+		Runnable toRun = new Runnable() {
+			@Override
+			public void run() {
+				try { 
+					robot.clickThisButton("Ok");
+				} catch (Exception e) {}
+			}
+		};
+		
+		robot.startGUI(toRun, JDialog.class);
+		robot.letDispatchThreadProcess();
+		robot.clickThisButton("No", REpiceaAWTProperty.WindowsJustSetToInvisible);
+
 		dlg.dispose();
 		t.join();
 		robot.shutdown();
