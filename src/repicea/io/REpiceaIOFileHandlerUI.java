@@ -213,9 +213,7 @@ public class REpiceaIOFileHandlerUI extends REpiceaSaveAsHandlerUI implements Ac
 			if (hasChanged) {
 				int userReply = promptUserBecauseFileHasChanged();
 				if (userReply == 0) {
-					if (saveAsAction()) {	// answer is yes but possibility to come back if the file chooser is cancelled
-						component.setVisible(false);
-					}
+					saveAsAction();
 				}
 			}
 			loadAction();
