@@ -158,12 +158,7 @@ public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent,
 			Map<E, E> individualInstancesMap = new HashMap<E, E>();
 			potentialMatchesByKey.put(obj, individualInstancesMap);
 			for (E e : potentialMatches) {
-				E copy;
-				if (e instanceof REpiceaMatchComplexObject) {
-					copy = ((REpiceaMatchComplexObject<E>) e).getDeepClone();
-				} else {
-					copy = e;
-				}
+				E copy = e;
 				individualInstancesMap.put(e, copy);
 			}
 		}

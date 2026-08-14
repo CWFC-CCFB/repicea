@@ -25,12 +25,14 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
+import repicea.app.UseModeProvider.UseMode;
 import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.IOUserInterfaceableObject;
 import repicea.io.REpiceaFileFilter.FileType;
@@ -41,6 +43,7 @@ import repicea.serial.MemorizerPackage;
 import repicea.serial.UnmarshallingException;
 import repicea.serial.xml.XmlDeserializer;
 import repicea.serial.xml.XmlSerializer;
+import repicea.util.REpiceaTranslator.Language;
 
 /**
  * The REpiceaEnhancedMatchSelector class is similar to the
@@ -49,111 +52,119 @@ import repicea.serial.xml.XmlSerializer;
  * specified in the constructor.
  * @author Mathieu Fortin - December 2024
  *
- * @param <E> the class of the object to be matched with the key, 
+ * @param <K> the class of the key of the REpiceaMatch instance
+ * @param <V> the class of the value to which the key is matched (typically an Enum)
  * could be either an Enum or a REpiceaMatchComplexObject-derived class
  * 
  * @see REpiceaMatchComplexObject
  */
-public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithParent, 
+public class REpiceaEnhancedMatchSelector<K,V> implements REpiceaShowableUIWithParent, 
 											IOUserInterfaceableObject, 
 											Memorizable {
 
 	
-	protected final Map<Enum<?>, Map<Object, E>> matchMaps;
-	protected final Map<Enum<?>, List<E>> potentialMatchesMap;
+	protected final Map<Enum<?>, Map<K, REpiceaMatch<K, V>>> matchMaps;
+	protected final Map<Enum<?>, List<V>> potentialMatchesMap;
 	protected String filename;
-	protected transient REpiceaEnhancedMatchSelectorDialog<E> guiInterface;
-	protected Object[] columnNames;
-	
-	protected Map<Enum<?>, Map<Object, Map<E, E>>> potentialMatchesByKeyMap;
-	
+	protected transient REpiceaEnhancedMatchSelectorDialog guiInterface;
+	protected final ArrayList<String> columnNames;
 	
 	
 	/**
 	 * Official constructor.
 	 * @param categories a List of Enum variables defining the categories
-	 * @param toBeMatched an array of strings to be matched
-	 * @param potentialMatchArray an array of enum variables
-	 * @param defaultMatchId an integer which refers to the index in the potential match array. The object at this location in the potential match array
+	 * @param toBeMatched an array of REpiceaMatch instances
+	 * @param acceptableValues an array of the acceptable values
+	 * @param defaultValueMatch an integer which refers to the index in the potential match array. The object at this location in the potential match array
 	 * is used as a default match. If the value is negative or goes beyond the length of the array, the last value of
 	 * the array is selected as default match
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
-	@SuppressWarnings("unchecked")
-	public REpiceaEnhancedMatchSelector(List<Enum<?>> categories, Object[] toBeMatched, E[] potentialMatchArray, int defaultMatchId, Object[] columnNames) {
-		potentialMatchesMap = new HashMap<Enum<?>, List<E>>();
+	public REpiceaEnhancedMatchSelector(
+			List<Enum<?>> categories, 
+			REpiceaMatch<K,V>[] toBeMatched,
+			V[] acceptableValues, 
+			int defaultValueMatch, 
+			String[] columnNames) {
+		this();
 		for (Enum<?> thisEnum : categories) {
-			List<E> thisEnumList = new ArrayList<E>();
+			List<V> thisEnumList = new ArrayList<V>();
 			potentialMatchesMap.put(thisEnum, thisEnumList);
-			addMatches(thisEnum, potentialMatchArray);		// remove duplicates
+			addMatches(thisEnum, acceptableValues);		// remove duplicates
 		}
-		List<E> listOfPotentialMatches = potentialMatchesMap.values().iterator().next();
+		List<V> listOfPotentialMatches = potentialMatchesMap.values().iterator().next();
 		int defaultMatchIndex = listOfPotentialMatches.size() - 1; // default match is the last one
-		if (defaultMatchId >= 0 && defaultMatchId < listOfPotentialMatches.size()) { // however if the defaultMatchId is appropriate this can be overriden
-			defaultMatchIndex = defaultMatchId;
+		if (defaultValueMatch >= 0 && defaultValueMatch < listOfPotentialMatches.size()) { // however if the defaultMatchId is appropriate this can be overriden
+			defaultMatchIndex = defaultValueMatch;
 		}
+		V defaultValue = listOfPotentialMatches.get(defaultMatchIndex);
 		
-		int expectedNbCols = 2;
-		E defaultMatch = listOfPotentialMatches.get(defaultMatchIndex);
-		if (defaultMatch instanceof REpiceaMatchComplexObject) {
-			expectedNbCols = 2 + ((REpiceaMatchComplexObject<E>) defaultMatch).getNbAdditionalFields();
-		}
+		int expectedNbCols = 2 + toBeMatched[0].getNbAdditionalFields();
 		if (expectedNbCols != columnNames.length) {
 			throw new InvalidParameterException("The number of column names is inconsistent!");
 		}
-		this.columnNames = columnNames;
 		
-		instantiatePotentialMatchesByKey(categories, toBeMatched);
+		this.columnNames.addAll(Arrays.asList(columnNames));
+		
+//		instantiatePotentialMatchesByKey(categories, toBeMatched);
 
-		matchMaps = new LinkedHashMap<Enum<?>, Map<Object, E>>();
 		for (Enum<?> thisEnum : categories) {
-			Map<Object, E> innerMap = new TreeMap<Object, E>();
-			matchMaps.put(thisEnum, innerMap);
-			for (Object s : toBeMatched) {
-				Map<E, E> tmpMap = getMatchesForThisKey(thisEnum, s);
-				E defaultMatchForThisKey = tmpMap.get(defaultMatch);
-				innerMap.put(s, defaultMatchForThisKey);
+			matchMaps.put(thisEnum, new TreeMap<K, REpiceaMatch<K, V>>());
+			for (REpiceaMatch<K,V> s : toBeMatched) {
+				REpiceaMatch<K,V> clone = s.getDeepClone();
+				clone.setValue(defaultValue);
+				matchMaps.get(thisEnum).put(clone.getKey(), clone);
 			}
 		}
 	}
 	
-	private REpiceaEnhancedMatchSelector() {
-		matchMaps = new LinkedHashMap<Enum<?>, Map<Object, E>>();
-		potentialMatchesMap = new HashMap<Enum<?>, List<E>>();
-	}
 
 	/**
 	 * Constructor with the default match being the last entry of the potential match array.
 	 * @param categories a List of Enum variables defining the categories
-	 * @param toBeMatched an array of strings to be matched
-	 * @param potentialMatchArray an array of enum variables
+	 * @param toBeMatched an array of REpiceaMatch instances
+	 * @param acceptableValues an array of the acceptable values
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
-	public REpiceaEnhancedMatchSelector(List<Enum<?>> categories, Object[] toBeMatched, E[] potentialMatchArray, Object[] columnNames) {
-		this(categories, toBeMatched, potentialMatchArray, -1, columnNames);
+	public REpiceaEnhancedMatchSelector(List<Enum<?>> categories, 
+			REpiceaMatch<K,V>[] toBeMatched,
+			V[] acceptableValues, 
+			String[] columnNames) {
+		this(categories, toBeMatched, acceptableValues, -1, columnNames);
 	}
 
 
+	/**
+	 * Default contructor for loading from scratch.
+	 */
+	public REpiceaEnhancedMatchSelector() {
+		potentialMatchesMap = new HashMap<Enum<?>, List<V>>();
+		columnNames = new ArrayList<String>();
+		matchMaps = new LinkedHashMap<Enum<?>, Map<K, REpiceaMatch<K, V>>>();
+	}
+
+	
+	
 	/**
 	 * Add a potential treatment to the list of available treatments.
 	 * @param thisEnum the enum variable standing for the category
 	 * @param values an array of enum variable 
 	 */
-	protected void addMatches(Enum<?> thisEnum, E[] values) {
-		List<E> thisEnumList = potentialMatchesMap.get(thisEnum);
-		for (E value : values) {
+	protected void addMatches(Enum<?> thisEnum, V[] values) {
+		List<V> thisEnumList = potentialMatchesMap.get(thisEnum);
+		for (V value : values) {
 			if (!thisEnumList.contains(value)) {
 				thisEnumList.add(value);
 			}
 		}
 	}
 	
-	protected List<E> getPotentialMatches(Enum<?> thisEnum) {return potentialMatchesMap.get(thisEnum);}
+	protected List<V> getPotentialMatches(Enum<?> thisEnum) {return potentialMatchesMap.get(thisEnum);}
 	
 	@Override
-	public REpiceaEnhancedMatchSelectorDialog<E> getUI(Container parent) {
+	public REpiceaEnhancedMatchSelectorDialog getUI(Container parent) {
 		if (guiInterface == null) {
-			guiInterface = new REpiceaEnhancedMatchSelectorDialog<E>(this, (Window) parent, columnNames);
+			guiInterface = new REpiceaEnhancedMatchSelectorDialog(this, (Window) parent, columnNames.toArray());
 		}
 		return guiInterface;
 	}
@@ -171,32 +182,6 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		getUI(parent).setVisible(true);
 	}
 
-	
-	@SuppressWarnings("unchecked")
-	private void instantiatePotentialMatchesByKey(List<Enum<?>> categories, Object[] toBeMatched) {
-		potentialMatchesByKeyMap = new HashMap<Enum<?>, Map<Object, Map<E, E>>>();
-		for (Enum<?> thisEnum : categories) {
-			Map<Object, Map<E,E>> innerMap = new HashMap<Object, Map<E, E>>();
-			potentialMatchesByKeyMap.put(thisEnum, innerMap);
-			for (Object obj : toBeMatched) {
-				Map<E, E> individualInstancesMap = new HashMap<E, E>();
-				innerMap.put(obj, individualInstancesMap);
-				for (E e : potentialMatchesMap.get(thisEnum)) {
-					if (e instanceof REpiceaMatchComplexObject) {
-						individualInstancesMap.put(e, ((REpiceaMatchComplexObject<E>) e).getDeepClone());
-					} else {
-						individualInstancesMap.put(e, e);
-					}
-				}
-			}
-		}
-	}
-	
-	
-	protected Map<E, E> getMatchesForThisKey(Enum<?> thisEnum, Object key) {
-		return potentialMatchesByKeyMap.get(thisEnum).get(key);
-	}
-	
 	@Override
 	public void save(String filename) throws IOException {
 		setFilename(filename);
@@ -215,9 +200,9 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	@Override
 	public void load(String filename) throws IOException {
 		XmlDeserializer deserializer = new XmlDeserializer(filename);
-		REpiceaEnhancedMatchSelector<E> newloadedInstance;
+		REpiceaEnhancedMatchSelector<K,V> newloadedInstance;
 		try {
-			newloadedInstance = (REpiceaEnhancedMatchSelector<E>) deserializer.readObject();
+			newloadedInstance = (REpiceaEnhancedMatchSelector<K,V>) deserializer.readObject();
 			unpackMemorizerPackage(newloadedInstance.getMemorizerPackage());
 			setFilename(filename);
 		} catch (UnmarshallingException e) {
@@ -232,8 +217,8 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	 * @throws IOException if an I/O error occurs
 	 */
 	@SuppressWarnings("rawtypes")
-	public static REpiceaEnhancedMatchSelector<?> Load(String filename) throws IOException {
-		REpiceaEnhancedMatchSelector<?> newInstance = new REpiceaEnhancedMatchSelector();
+	public static REpiceaEnhancedMatchSelector<?, ?> Load(String filename) throws IOException {
+		REpiceaEnhancedMatchSelector<?,?> newInstance = new REpiceaEnhancedMatchSelector();
 		newInstance.load(filename);
 		return newInstance;
 	}
@@ -252,7 +237,7 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		mp.add((Serializable) matchMaps);
 		mp.add((Serializable) potentialMatchesMap);
 		mp.add(columnNames);
-		mp.add((Serializable) potentialMatchesByKeyMap);
+//		mp.add((Serializable) potentialMatchesByKeyMap);
 		return mp;
 	}
 
@@ -264,8 +249,9 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		matchMaps.putAll((Map) wasMemorized.get(0));
 		potentialMatchesMap.clear();
 		potentialMatchesMap.putAll((Map) wasMemorized.get(1));
-		columnNames = (Object[]) wasMemorized.get(2);
-		potentialMatchesByKeyMap = (Map) wasMemorized.get(3);
+		columnNames.clear();
+		columnNames.addAll((List) wasMemorized.get(2));
+//		potentialMatchesByKeyMap = (Map) wasMemorized.get(3);
 	}
 
 	/**
@@ -278,10 +264,86 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	 * @param obj the Object instance for which we want the match
 	 * @return an Object of class E or null if there is no match map for thisEnum.
 	 */
-	public synchronized E getMatch(Enum<?> thisEnum, Object obj) {
-		return matchMaps.containsKey(thisEnum) ? 
-			matchMaps.get(thisEnum).get(obj) :
-				null;
+	public synchronized REpiceaMatch<K,V> getMatch(Enum<?> thisEnum, K obj) {
+		return matchMaps.containsKey(thisEnum) ? matchMaps.get(thisEnum).get(obj) : null;
 	}
+	
+	
+	
+	
+	
+	static class MyComplexObjectClass implements REpiceaMatch<String, UseMode> {
+
+		UseMode name;
+		int index;
+		String key;
+		
+		MyComplexObjectClass(String key, UseMode name, int index) {
+			this.name = name;
+			this.index = index;
+			this.key = key;
+		}
+		
+		@Override
+		public int getNbAdditionalFields() {
+			return 1;
+		}
+
+		@Override
+		public List<Object> getAdditionalFields() {
+			List<Object> myList = new ArrayList<Object>();
+			myList.add(index);
+			return myList;
+		}
+
+		@Override
+		public void setValueAt(int indexOfThisAdditionalField, Object value) {
+			if (indexOfThisAdditionalField == 0) {
+				this.index = (Integer) value;
+			}
+		}
+
+		@Override
+		public UseMode getValue() {
+			return name;
+		}
+
+		@Override
+		public REpiceaMatch<String, UseMode> getDeepClone() {
+			return new MyComplexObjectClass(key, name, index);
+		}
+
+		@Override
+		public String getKey() {
+			return key;
+		}
+
+		@Override
+		public void setValue(UseMode value) {
+			name = value;
+		}
+
+		
+	}
+
+	
+	public static void main(String[] args) {
+		List<MyComplexObjectClass> complexObjects = new ArrayList<MyComplexObjectClass>();
+		int i = 0;
+		for (UseMode sc : UseMode.values()) {
+			complexObjects.add(new MyComplexObjectClass(("a" + i++), sc, sc.ordinal()));
+		}
+		REpiceaEnhancedMatchSelector<String, UseMode> selector = new REpiceaEnhancedMatchSelector<String, UseMode>(Arrays.asList(Language.values()),
+				complexObjects.toArray(new MyComplexObjectClass[]{}), 
+				UseMode.values(),
+				new String[]{"string", "status", "index"});
+		selector.showUI(null);
+	}
+
+	
+	
+	
+	
+	
 	
 }

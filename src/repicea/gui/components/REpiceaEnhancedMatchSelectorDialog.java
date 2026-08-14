@@ -61,7 +61,7 @@ import repicea.serial.Memorizable;
  * @author Mathieu Fortin - December 2024
  */
 @SuppressWarnings("serial")
-public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, 
+public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements IOUserInterface, 
 																					TableModelListener, 
 																					OwnedWindow {
 
@@ -74,7 +74,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 		}
 	}
 
-	private final REpiceaEnhancedMatchSelector<E> caller;
+	private final REpiceaEnhancedMatchSelector<?, ?> caller;
 	private Map<Enum<?>, REpiceaTable> tables;
 	private Map<Enum<?>, REpiceaMatchMapTableModel> tableModels;
 	private final JMenuItem load;
@@ -85,7 +85,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	protected final REpiceaControlPanel controlPanel;
 	JTabbedPane tabbedPane;
 	
-	protected REpiceaEnhancedMatchSelectorDialog(REpiceaEnhancedMatchSelector<E> caller, Window parent, Object[] columnNames) {
+	protected REpiceaEnhancedMatchSelectorDialog(REpiceaEnhancedMatchSelector<?, ?> caller, Window parent, Object[] columnNames) {
 		super(parent);
 		windowSettings = new WindowSettings(REpiceaSystem.getJavaIOTmpDir() + getClass().getSimpleName()+ ".ser", this);
 		this.caller = caller;
@@ -124,7 +124,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	
 	protected void init() {}
 	
-	protected REpiceaEnhancedMatchSelector<?> getCaller() {return caller;}
+	protected REpiceaEnhancedMatchSelector<?,?> getCaller() {return caller;}
 	
 	@Override
 	public void cancelAction() {
@@ -150,21 +150,18 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public void refreshInterface() {
 		for (Enum<?> thisEnum : caller.matchMaps.keySet()) {
-			Map<Object, ?> matchesForThisEnum = caller.matchMaps.get(thisEnum);
 			REpiceaMatchMapTableModel tableModel = tableModels.get(thisEnum);
+			Map<?, REpiceaMatch<?,?>> matchesForThisEnum = (Map) caller.matchMaps.get(thisEnum);
 			tableModel.removeAll();
 			List<Object> l = new ArrayList<Object>();
 			for (Object s : matchesForThisEnum.keySet()) {
 				l.clear();
-				Object currentMatch = matchesForThisEnum.get(s);
-				l.add(s);
-				l.add(currentMatch);
-				if (currentMatch instanceof REpiceaMatchComplexObject) {
-					l.addAll(((REpiceaMatchComplexObject) currentMatch).getAdditionalFields());
-				}
+				REpiceaMatch<?,?> currentMatch = matchesForThisEnum.get(s);
+				l.add(currentMatch.getKey());
+				l.add(currentMatch.getValue());
+				l.addAll(currentMatch.getAdditionalFields());
 				tableModel.addRow(l.toArray());
 			}
-			
 		}
 		super.refreshInterface();
 	}
@@ -280,32 +277,22 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	}
 
 	
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public void tableChanged(TableModelEvent e) {
 		if (e.getType() == TableModelEvent.UPDATE) {
 			if (e.getSource() instanceof REpiceaMatchMapTableModel) {
 				REpiceaMatchMapTableModel model = (REpiceaMatchMapTableModel) e.getSource();
+				String key = (String) model.getValueAt(e.getLastRow(), 0);
+				REpiceaMatch match = (REpiceaMatch) caller.matchMaps.get(model.enumForThisTableModel).get(key);
 				if (e.getColumn() == 1) {	// the event occurred in the match object
-					String s = (String) model.getValueAt(e.getLastRow(), 0);
-					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					Map<E,E> potentialMatchesForThisKey = caller.getMatchesForThisKey(model.enumForThisTableModel, s);
-					E trueMatch = potentialMatchesForThisKey.get(m);
-					caller.matchMaps.get(model.enumForThisTableModel).put(s, trueMatch);
-					doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
-					model.setValueAt(trueMatch, e.getLastRow(), 1);
-					System.out.println("New match : " + s + " = " + trueMatch.toString());
-					if (trueMatch instanceof REpiceaMatchComplexObject) { // means there is more information in the match object and we need to update the table
-						int currentColumn = 2;
-						for (Object o : ((REpiceaMatchComplexObject<E>) trueMatch).getAdditionalFields()) { // set the values that correspond to the new match
-							model.setValueAt(o, e.getLastRow(), currentColumn++);
-						}
-					}
-					listenTo(); // finally re-enable the listeners
+					Object value = model.getValueAt(e.getLastRow(), 1);
+					match.setValue(value);
+					System.out.println("New match : " + key + " = " + value.toString());
 				} else { // it comes from the additional columns
-					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					((REpiceaMatchComplexObject<E>) m).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
-							getTable(model.enumForThisTableModel).getValueAt(e.getLastRow(), e.getColumn()));
+					Object newValue = getTable(model.enumForThisTableModel).getValueAt(e.getLastRow(), e.getColumn());
+					match.setValueAt(e.getColumn() - 2, newValue);  // first two columns are the key and the match 
+					System.out.println("New match : " + key + " (column " + e.getColumn() + ") set to " + newValue.toString());
 				}
 				firePropertyChange(REpiceaAWTProperty.ActionPerformed, "", "table updated");
 			}
