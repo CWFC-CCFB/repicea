@@ -56,8 +56,7 @@ import repicea.serial.Memorizable;
  *
  */
 @SuppressWarnings("serial")
-@Deprecated
-class REpiceaMatchSelectorDialog<E extends Enum<?>> extends REpiceaDialog implements IOUserInterface, 
+public class REpiceaMatchSelectorDialog<E extends Enum<?>> extends REpiceaDialog implements IOUserInterface, 
 																			TableModelListener,
 																			OwnedWindow {
 	

@@ -49,7 +49,7 @@ import repicea.serial.xml.XmlSerializer;
  * @param <E> an enum class that should be matched with the key
  */
 @Deprecated
-class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableUIWithParent, 
+public class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableUIWithParent, 
 											IOUserInterfaceableObject, 
 											Memorizable {
 
@@ -73,7 +73,6 @@ class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableUIWithPa
 	 * the array is selected as default match
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
-	@SuppressWarnings("rawtypes")
 	public REpiceaMatchSelector(Object[] toBeMatched, E[] potentialMatchArray, int defaultMatchId, Object[] columnNames) {
 		if (toBeMatched == null || toBeMatched.length == 0) {
 			throw new InvalidParameterException("The toBeMatch argument must be a non null and non empty array of objects!");
@@ -87,9 +86,9 @@ class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableUIWithPa
 		
 		int expectedNbCols = 2;
 		E defaultMatch = potentialMatches.get(defaultMatchIndex);
-		if (defaultMatch instanceof REpiceaMatchComplexObject) {
-			expectedNbCols = 2 + ((REpiceaMatchComplexObject) defaultMatch).getNbAdditionalFields();
-		}
+//		if (defaultMatch instanceof REpiceaMatchComplexObject) {
+//			expectedNbCols = 2 + ((REpiceaMatchComplexObject) defaultMatch).getNbAdditionalFields();
+//		}
 		if (expectedNbCols != columnNames.length) {
 			throw new InvalidParameterException("The number of column names is inconsistent!");
 		}
