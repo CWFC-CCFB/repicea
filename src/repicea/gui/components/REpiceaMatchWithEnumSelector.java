@@ -78,7 +78,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	protected final Map<Enum<?>, List<V>> potentialMatchesMap;
 	protected String filename;
 	protected transient REpiceaMatchWithEnumSelectorDialog guiInterface;
-	protected final ArrayList<String> columnNames;
+	protected Object[] columnNames;
 	
 	
 	/**
@@ -94,7 +94,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	public REpiceaMatchWithEnumSelector(List<Enum<?>> categories, 
 			REpiceaMatchWithEnumObject<K,V>[] toBeMatched,
 			int defaultValueMatch, 
-			String[] columnNames) {
+			Object[] columnNames) {
 		this();
 		V[] acceptableValues = (V[]) toBeMatched[0].getValue().getClass().getEnumConstants();
 		for (Enum<?> thisEnum : categories) {
@@ -114,7 +114,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 			throw new InvalidParameterException("The number of column names is inconsistent!");
 		}
 		
-		this.columnNames.addAll(Arrays.asList(columnNames));
+		this.columnNames = columnNames;
 		
 //		instantiatePotentialMatchesByKey(categories, toBeMatched);
 
@@ -139,7 +139,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	 */
 	public REpiceaMatchWithEnumSelector(REpiceaMatchWithEnumObject<K,V>[] toBeMatched,
 			int defaultValueMatch, 
-			String[] columnNames) {
+			Object[] columnNames) {
 		this(Arrays.asList(DefaultSingleCategory.values()), toBeMatched, defaultValueMatch, columnNames);
 	}
 
@@ -152,7 +152,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	 */
 	public REpiceaMatchWithEnumSelector(List<Enum<?>> categories, 
 			REpiceaMatchWithEnumObject<K,V>[] toBeMatched,
-			String[] columnNames) {
+			Object[] columnNames) {
 		this(categories, toBeMatched, -1, columnNames);
 	}
 
@@ -162,7 +162,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	 * @param columnNames an array of object (Strings or Enum) for column titles
 	 */
 	public REpiceaMatchWithEnumSelector(REpiceaMatchWithEnumObject<K,V>[] toBeMatched,
-			String[] columnNames) {
+			Object[] columnNames) {
 		this(Arrays.asList(DefaultSingleCategory.values()), toBeMatched, -1, columnNames);
 	}
 
@@ -172,7 +172,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	 */
 	private REpiceaMatchWithEnumSelector() {
 		potentialMatchesMap = new HashMap<Enum<?>, List<V>>();
-		columnNames = new ArrayList<String>();
+		columnNames = new String[] {};
 		matchMaps = new LinkedHashMap<Enum<?>, Map<K, REpiceaMatchWithEnumObject<K, V>>>();
 	}
 
@@ -197,7 +197,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 	@Override
 	public REpiceaMatchWithEnumSelectorDialog getUI(Container parent) {
 		if (guiInterface == null) {
-			guiInterface = new REpiceaMatchWithEnumSelectorDialog(this, (Window) parent, columnNames.toArray());
+			guiInterface = new REpiceaMatchWithEnumSelectorDialog(this, (Window) parent, columnNames);
 		}
 		return guiInterface;
 	}
@@ -282,8 +282,7 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 		matchMaps.putAll((Map) wasMemorized.get(0));
 		potentialMatchesMap.clear();
 		potentialMatchesMap.putAll((Map) wasMemorized.get(1));
-		columnNames.clear();
-		columnNames.addAll((List) wasMemorized.get(2));
+		columnNames = (Object[]) wasMemorized.get(2);
 //		potentialMatchesByKeyMap = (Map) wasMemorized.get(3);
 	}
 
