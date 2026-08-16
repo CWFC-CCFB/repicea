@@ -28,7 +28,7 @@ import repicea.util.DeepCloneable;
  * than simple enums in the REpiceaMatchSelector class.
  * @author Mathieu Fortin - February 2021
  */
-public interface REpiceaMatch<K,V> extends DeepCloneable<REpiceaMatch<K,V>> {
+public interface REpiceaMatchWithEnumObject<K, V extends Enum<?>> extends DeepCloneable<REpiceaMatchWithEnumObject<K, V>> {
 
 	/**
 	 * Return the number of fields contain in this object
@@ -49,10 +49,9 @@ public interface REpiceaMatch<K,V> extends DeepCloneable<REpiceaMatch<K,V>> {
 	 */
 	public void setValueAt(int indexOfThisAdditionalField, Object value);
 
-	
 	public V getValue();
 
-	public K getKey();
-
 	public void setValue(V value);
+	
+	public K getKey();
 }

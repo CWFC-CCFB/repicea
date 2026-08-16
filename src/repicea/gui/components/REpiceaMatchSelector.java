@@ -46,9 +46,10 @@ import repicea.serial.xml.XmlSerializer;
  * a user interface that displays a table in which the user can make the different matches.
  * @author Mathieu Fortin - July 2017
  *
- * @param <E> the class of the object to be matched with the key
+ * @param <E> an enum class that should be matched with the key
  */
-public class REpiceaMatchSelector<E> implements REpiceaShowableUIWithParent, 
+@Deprecated
+class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableUIWithParent, 
 											IOUserInterfaceableObject, 
 											Memorizable {
 

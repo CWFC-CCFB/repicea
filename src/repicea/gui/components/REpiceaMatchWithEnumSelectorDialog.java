@@ -61,7 +61,7 @@ import repicea.serial.Memorizable;
  * @author Mathieu Fortin - December 2024
  */
 @SuppressWarnings("serial")
-public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements IOUserInterface, 
+public class REpiceaMatchWithEnumSelectorDialog extends REpiceaDialog implements IOUserInterface, 
 																					TableModelListener, 
 																					OwnedWindow {
 
@@ -74,7 +74,7 @@ public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements
 		}
 	}
 
-	private final REpiceaEnhancedMatchSelector<?, ?> caller;
+	private final REpiceaMatchWithEnumSelector<?, ?> caller;
 	private Map<Enum<?>, REpiceaTable> tables;
 	private Map<Enum<?>, REpiceaMatchMapTableModel> tableModels;
 	private final JMenuItem load;
@@ -85,7 +85,7 @@ public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements
 	protected final REpiceaControlPanel controlPanel;
 	JTabbedPane tabbedPane;
 	
-	protected REpiceaEnhancedMatchSelectorDialog(REpiceaEnhancedMatchSelector<?, ?> caller, Window parent, Object[] columnNames) {
+	protected REpiceaMatchWithEnumSelectorDialog(REpiceaMatchWithEnumSelector<?, ?> caller, Window parent, Object[] columnNames) {
 		super(parent);
 		windowSettings = new WindowSettings(REpiceaSystem.getJavaIOTmpDir() + getClass().getSimpleName()+ ".ser", this);
 		this.caller = caller;
@@ -124,7 +124,7 @@ public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements
 	
 	protected void init() {}
 	
-	protected REpiceaEnhancedMatchSelector<?,?> getCaller() {return caller;}
+	protected REpiceaMatchWithEnumSelector<?,?> getCaller() {return caller;}
 	
 	@Override
 	public void cancelAction() {
@@ -151,12 +151,12 @@ public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements
 	public void refreshInterface() {
 		for (Enum<?> thisEnum : caller.matchMaps.keySet()) {
 			REpiceaMatchMapTableModel tableModel = tableModels.get(thisEnum);
-			Map<?, REpiceaMatch<?,?>> matchesForThisEnum = (Map) caller.matchMaps.get(thisEnum);
+			Map<?, REpiceaMatchWithEnumObject<?,?>> matchesForThisEnum = (Map) caller.matchMaps.get(thisEnum);
 			tableModel.removeAll();
 			List<Object> l = new ArrayList<Object>();
 			for (Object s : matchesForThisEnum.keySet()) {
 				l.clear();
-				REpiceaMatch<?,?> currentMatch = matchesForThisEnum.get(s);
+				REpiceaMatchWithEnumObject<?,?> currentMatch = matchesForThisEnum.get(s);
 				l.add(currentMatch.getKey());
 				l.add(currentMatch.getValue());
 				l.addAll(currentMatch.getAdditionalFields());
@@ -284,9 +284,9 @@ public class REpiceaEnhancedMatchSelectorDialog extends REpiceaDialog implements
 			if (e.getSource() instanceof REpiceaMatchMapTableModel) {
 				REpiceaMatchMapTableModel model = (REpiceaMatchMapTableModel) e.getSource();
 				String key = (String) model.getValueAt(e.getLastRow(), 0);
-				REpiceaMatch match = (REpiceaMatch) caller.matchMaps.get(model.enumForThisTableModel).get(key);
+				REpiceaMatchWithEnumObject match = (REpiceaMatchWithEnumObject) caller.matchMaps.get(model.enumForThisTableModel).get(key);
 				if (e.getColumn() == 1) {	// the event occurred in the match object
-					Object value = model.getValueAt(e.getLastRow(), 1);
+					Enum<?> value = (Enum) model.getValueAt(e.getLastRow(), 1);
 					match.setValue(value);
 					System.out.println("New match : " + key + " = " + value.toString());
 				} else { // it comes from the additional columns

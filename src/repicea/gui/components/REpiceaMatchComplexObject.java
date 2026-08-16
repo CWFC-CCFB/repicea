@@ -27,7 +27,8 @@ import repicea.util.DeepCloneable;
  * than simple enums in the REpiceaMatchSelector class.
  * @author Mathieu Fortin - February 2021
  */
-public interface REpiceaMatchComplexObject<E> extends DeepCloneable<E>  {
+@Deprecated
+interface REpiceaMatchComplexObject<E> extends DeepCloneable<E>  {
 
 	/**
 	 * Return the number of fields contain in this object

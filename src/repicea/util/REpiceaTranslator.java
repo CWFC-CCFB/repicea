@@ -36,7 +36,9 @@ public class REpiceaTranslator {
 		 * @param englishText a String
 		 * @param frenchText a String
 		 */
-		public void setText(String englishText, String frenchText);
+		public default void setText(String englishText, String frenchText) {
+			REpiceaTranslator.setString(this, englishText, frenchText);
+		}
 	}
 	
 	public static enum Language {
