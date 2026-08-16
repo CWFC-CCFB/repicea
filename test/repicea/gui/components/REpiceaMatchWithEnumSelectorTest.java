@@ -280,7 +280,7 @@ public class REpiceaMatchWithEnumSelectorTest {
 		REpiceaTableModel model = (REpiceaTableModel) dlg.getTable(REpiceaMatchWithEnumSelector.DefaultSingleCategory.SingleCategory).getModel();
 		model.setValueAt(UseMode.PURE_SCRIPT_MODE, 1, 1);
 		REpiceaGUITestRobot.letDispatchThreadProcess();
-		MyREpiceaMatchWithEnum2 match = (MyREpiceaMatchWithEnum2) selector.getMatch(REpiceaMatchWithEnumSelector.DefaultSingleCategory.SingleCategory, "b");
+		MyREpiceaMatchWithEnum2 match = (MyREpiceaMatchWithEnum2) selector.getMatch("b");
 		
 		Assert.assertEquals("Testing the match", match.getValue(), UseMode.PURE_SCRIPT_MODE);
 		

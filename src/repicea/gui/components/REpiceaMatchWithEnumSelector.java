@@ -301,7 +301,21 @@ public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpice
 		return matchMaps.containsKey(thisEnum) ? matchMaps.get(thisEnum).get(obj) : null;
 	}
 	
-	
+	/**
+	 * Provide the match corresponding to the parameter.<p>
+	 * This method is synchronized since the underlying maps are
+	 * LinkedHashMap and TreeMap instances. The LinkedHashMap.get
+	 * method is known to induce structure changes in the map and 
+	 * therefore, there is a possibility of concurrent changes.
+	 * @param obj the Object instance for which we want the match
+	 * @return an Object of class E or null if there is no match map for thisEnum.
+	 */
+	public REpiceaMatchWithEnumObject<K,V> getMatch(K obj) {
+		if (!matchMaps.containsKey(DefaultSingleCategory.SingleCategory)) {
+			throw new UnsupportedOperationException("The match map does not contain a unique default category!");
+		}
+		return matchMaps.get(DefaultSingleCategory.SingleCategory).get(obj);
+	}
 	
 	
 	

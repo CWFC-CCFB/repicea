@@ -48,6 +48,7 @@ import repicea.gui.REpiceaMemorizerHandler;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.UIControlManager.CommonMenuTitle;
+import repicea.gui.components.REpiceaMatchWithEnumSelector.DefaultSingleCategory;
 import repicea.gui.WindowSettings;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
@@ -197,7 +198,14 @@ public class REpiceaMatchWithEnumSelectorDialog extends REpiceaDialog implements
 	}
 
 	protected REpiceaTable getTable(Enum<?> thisEnum) {return tables.get(thisEnum);}
-	
+
+	protected REpiceaTable getTable() {
+		if (!tables.containsKey(DefaultSingleCategory.SingleCategory)) {
+			throw new UnsupportedOperationException("The tables member does not contain a unique default category!");
+		}
+		return tables.get(DefaultSingleCategory.SingleCategory);
+	}
+
 	protected JPanel getMainPanel() {
 		JPanel pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
