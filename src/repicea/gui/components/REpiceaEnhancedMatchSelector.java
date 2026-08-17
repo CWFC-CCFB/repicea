@@ -19,8 +19,6 @@
  */
 package repicea.gui.components;
 
-import java.awt.Container;
-import java.awt.Window;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
@@ -31,11 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-
-import repicea.gui.REpiceaShowableUIWithParent;
-import repicea.gui.components.REpiceaEnhancedMatchSelectorDialog.REpiceaMatchMapTableModel;
 import repicea.io.IOUserInterfaceableObject;
 import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.REpiceaFileFilterList;
@@ -57,17 +50,15 @@ import repicea.serial.xml.XmlSerializer;
  * could be either an Enum or a REpiceaMatchComplexObject-derived class
  * 
  * @see REpiceaMatchComplexObject
+ * @deprecated Use the REpiceaMatchWithEnumSelector instead.
  */
-public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithParent, 
-											TableModelListener, 
-											IOUserInterfaceableObject, 
-											Memorizable {
+@Deprecated
+public class REpiceaEnhancedMatchSelector<E> implements IOUserInterfaceableObject, Memorizable {
 
 	
 	protected final Map<Enum<?>, Map<Object, E>> matchMaps;
 	protected final Map<Enum<?>, List<E>> potentialMatchesMap;
 	protected String filename;
-	protected transient REpiceaEnhancedMatchSelectorDialog<E> guiInterface;
 	protected Object[] columnNames;
 	
 	protected Map<Enum<?>, Map<Object, Map<E, E>>> potentialMatchesByKeyMap;
@@ -155,26 +146,6 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 	
 	protected List<E> getPotentialMatches(Enum<?> thisEnum) {return potentialMatchesMap.get(thisEnum);}
 	
-	@Override
-	public REpiceaEnhancedMatchSelectorDialog<E> getUI(Container parent) {
-		if (guiInterface == null) {
-			guiInterface = new REpiceaEnhancedMatchSelectorDialog<E>(this, (Window) parent, columnNames);
-		}
-		return guiInterface;
-	}
-
-	@Override
-	public boolean isVisible() {
-		if (guiInterface != null && guiInterface.isVisible()) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public void showUI(Window parent) {
-		getUI(parent).setVisible(true);
-	}
 
 	
 	@SuppressWarnings("unchecked")
@@ -197,44 +168,10 @@ public class REpiceaEnhancedMatchSelector<E> implements REpiceaShowableUIWithPar
 		}
 	}
 	
-	
-	private Map<E, E> getMatchesForThisKey(Enum<?> thisEnum, Object key) {
+	protected Map<E, E> getMatchesForThisKey(Enum<?> thisEnum, Object key) {
 		return potentialMatchesByKeyMap.get(thisEnum).get(key);
 	}
 	
-	
-	@SuppressWarnings("unchecked")
-	@Override
-	public void tableChanged(TableModelEvent e) {
-		if (e.getType() == TableModelEvent.UPDATE) {
-			if (e.getSource() instanceof REpiceaMatchMapTableModel) {
-				REpiceaMatchMapTableModel model = (REpiceaMatchMapTableModel) e.getSource();
-				if (e.getColumn() == 1) {	// the event occurred in the match object
-					String s = (String) model.getValueAt(e.getLastRow(), 0);
-					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					Map<E,E> potentialMatchesForThisKey = getMatchesForThisKey(model.enumForThisTableModel, s);
-					E trueMatch = potentialMatchesForThisKey.get(m);
-					matchMaps.get(model.enumForThisTableModel).put(s, trueMatch);
-					getUI(null).doNotListenToAnymore();	// first remove the listeners to avoid looping indefinitely
-					model.setValueAt(trueMatch, e.getLastRow(), 1);
-					System.out.println("New match : " + s + " = " + trueMatch.toString());
-					if (trueMatch instanceof REpiceaMatchComplexObject) { // means there is more information in the match object and we need to update the table
-						int currentColumn = 2;
-						for (Object o : ((REpiceaMatchComplexObject<E>) trueMatch).getAdditionalFields()) { // set the values that correspond to the new match
-							model.setValueAt(o, e.getLastRow(), currentColumn++);
-						}
-					}
-					getUI(null).listenTo(); // finally re-enable the listeners
-				} else { // it comes from the additional columns
-					E m = (E) model.getValueAt(e.getLastRow(), 1);
-					((REpiceaMatchComplexObject<E>) m).setValueAt(e.getColumn() - 2,  // first two columns are the key and the match 
-							guiInterface.getTable(model.enumForThisTableModel).getValueAt(e.getLastRow(), e.getColumn()));
-				}
-			}
-		}
-	}
-
-
 	@Override
 	public void save(String filename) throws IOException {
 		setFilename(filename);

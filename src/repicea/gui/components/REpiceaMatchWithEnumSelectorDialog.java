@@ -37,14 +37,18 @@ import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import repicea.gui.OwnedWindow;
+import repicea.gui.REpiceaAWTProperty;
 import repicea.gui.REpiceaControlPanel;
 import repicea.gui.REpiceaDialog;
 import repicea.gui.REpiceaMemorizerHandler;
 import repicea.gui.UIControlManager;
 import repicea.gui.UIControlManager.CommonControlID;
 import repicea.gui.UIControlManager.CommonMenuTitle;
+import repicea.gui.components.REpiceaMatchWithEnumSelector.DefaultSingleCategory;
 import repicea.gui.WindowSettings;
 import repicea.io.IOUserInterface;
 import repicea.io.REpiceaIOFileHandlerUI;
@@ -58,7 +62,9 @@ import repicea.serial.Memorizable;
  * @author Mathieu Fortin - December 2024
  */
 @SuppressWarnings("serial")
-public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog implements IOUserInterface, OwnedWindow {
+public class REpiceaMatchWithEnumSelectorDialog extends REpiceaDialog implements IOUserInterface, 
+																					TableModelListener, 
+																					OwnedWindow {
 
 	final static class REpiceaMatchMapTableModel extends REpiceaTableModel {
 		final Enum<?> enumForThisTableModel;
@@ -69,7 +75,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 		}
 	}
 
-	private final REpiceaEnhancedMatchSelector<?> caller;
+	private final REpiceaMatchWithEnumSelector<?, ?> caller;
 	private Map<Enum<?>, REpiceaTable> tables;
 	private Map<Enum<?>, REpiceaMatchMapTableModel> tableModels;
 	private final JMenuItem load;
@@ -80,7 +86,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	protected final REpiceaControlPanel controlPanel;
 	JTabbedPane tabbedPane;
 	
-	protected REpiceaEnhancedMatchSelectorDialog(REpiceaEnhancedMatchSelector<E> caller, Window parent, Object[] columnNames) {
+	protected REpiceaMatchWithEnumSelectorDialog(REpiceaMatchWithEnumSelector<?, ?> caller, Window parent, Object[] columnNames) {
 		super(parent);
 		windowSettings = new WindowSettings(REpiceaSystem.getJavaIOTmpDir() + getClass().getSimpleName()+ ".ser", this);
 		this.caller = caller;
@@ -100,6 +106,8 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 			table.putClientProperty("terminateEditOnFocusLost", true);
 			Object[] possibleTreatments =  caller.potentialMatchesMap.get(thisEnum).toArray();
 			table.setDefaultEditor(Object.class, new REpiceaCellEditor(new JComboBox<Object>(possibleTreatments), tableModel));
+			table.setDefaultEditor(Integer.class, new REpiceaCellEditor(NumberFormatFieldFactory.createNumberFormatField(NumberFormatFieldFactory.Type.Integer, NumberFormatFieldFactory.Range.All, false), tableModel));
+			table.setDefaultEditor(Double.class, new REpiceaCellEditor(NumberFormatFieldFactory.createNumberFormatField(NumberFormatFieldFactory.Type.Double, NumberFormatFieldFactory.Range.All, false), tableModel));
 			table.setRowSelectionAllowed(false);
 			tables.put(thisEnum, table);
 			tableModels.put(thisEnum, tableModel);
@@ -117,7 +125,7 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	
 	protected void init() {}
 	
-	protected REpiceaEnhancedMatchSelector<?> getCaller() {return caller;}
+	protected REpiceaMatchWithEnumSelector<?,?> getCaller() {return caller;}
 	
 	@Override
 	public void cancelAction() {
@@ -143,21 +151,21 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public void refreshInterface() {
 		for (Enum<?> thisEnum : caller.matchMaps.keySet()) {
-			Map<Object, ?> matchesForThisEnum = caller.matchMaps.get(thisEnum);
 			REpiceaMatchMapTableModel tableModel = tableModels.get(thisEnum);
+			Map<?, REpiceaMatchWithEnumObject<?,?>> matchesForThisEnum = (Map) caller.matchMaps.get(thisEnum);
 			tableModel.removeAll();
 			List<Object> l = new ArrayList<Object>();
 			for (Object s : matchesForThisEnum.keySet()) {
 				l.clear();
-				Object currentMatch = matchesForThisEnum.get(s);
-				l.add(s);
-				l.add(currentMatch);
-				if (currentMatch instanceof REpiceaMatchComplexObject) {
-					l.addAll(((REpiceaMatchComplexObject) currentMatch).getAdditionalFields());
+				REpiceaMatchWithEnumObject<?,?> currentMatch = matchesForThisEnum.get(s);
+				l.add(currentMatch.getKey());
+				l.add(currentMatch.getValue());
+				List<Object> additionalFields = currentMatch.getAdditionalFields();
+				if (additionalFields != null && !additionalFields.isEmpty()) {
+					l.addAll(currentMatch.getAdditionalFields());
 				}
 				tableModel.addRow(l.toArray());
 			}
-			
 		}
 		super.refreshInterface();
 	}
@@ -165,14 +173,14 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public void listenTo() {
 		for (REpiceaMatchMapTableModel tableModel : tableModels.values()) {
-			tableModel.addTableModelListener(caller);
+			tableModel.addTableModelListener(this);
 		}
 	}
 
 	@Override
 	public void doNotListenToAnymore() {
 		for (REpiceaMatchMapTableModel tableModel : tableModels.values()) {
-			tableModel.removeTableModelListener(caller);
+			tableModel.removeTableModelListener(this);
 		}
 	}
 
@@ -193,7 +201,14 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	}
 
 	protected REpiceaTable getTable(Enum<?> thisEnum) {return tables.get(thisEnum);}
-	
+
+	protected REpiceaTable getTable() {
+		if (!tables.containsKey(DefaultSingleCategory.SingleCategory)) {
+			throw new UnsupportedOperationException("The tables member does not contain a unique default category!");
+		}
+		return tables.get(DefaultSingleCategory.SingleCategory);
+	}
+
 	protected JPanel getMainPanel() {
 		JPanel pane = new JPanel();
 		pane.setLayout(new BoxLayout(pane, BoxLayout.Y_AXIS));
@@ -257,6 +272,11 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public void synchronizeUIWithOwner() {
 		doNotListenToAnymore();
+		for (REpiceaTable table : this.tables.values()) {
+			if (table.isEditing()) {
+				table.getCellEditor().stopCellEditing();
+			}
+		}
 		refreshInterface();
 		refreshTitle();
 		listenTo();
@@ -265,6 +285,29 @@ public class REpiceaEnhancedMatchSelectorDialog<E> extends REpiceaDialog impleme
 	@Override
 	public Memorizable getWindowOwner() {
 		return caller;
+	}
+
+	
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public void tableChanged(TableModelEvent e) {
+		if (e.getType() == TableModelEvent.UPDATE) {
+			if (e.getSource() instanceof REpiceaMatchMapTableModel) {
+				REpiceaMatchMapTableModel model = (REpiceaMatchMapTableModel) e.getSource();
+				String key = (String) model.getValueAt(e.getLastRow(), 0);
+				REpiceaMatchWithEnumObject match = (REpiceaMatchWithEnumObject) caller.matchMaps.get(model.enumForThisTableModel).get(key);
+				if (e.getColumn() == 1) {	// the event occurred in the match object
+					Enum<?> value = (Enum) model.getValueAt(e.getLastRow(), 1);
+					match.setValue(value);
+					System.out.println("New match : " + key + " = " + value.toString());
+				} else { // it comes from the additional columns
+					Object newValue = getTable(model.enumForThisTableModel).getValueAt(e.getLastRow(), e.getColumn());
+					match.setValueAt(e.getColumn() - 2, newValue);  // first two columns are the key and the match 
+					System.out.println("New match : " + key + " (column " + e.getColumn() + ") set to " + newValue.toString());
+				}
+				firePropertyChange(REpiceaAWTProperty.ActionPerformed, "", "table updated");
+			}
+		}
 	}
 
 }
