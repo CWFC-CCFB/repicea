@@ -34,11 +34,15 @@ public interface REpiceaMatchWithEnumObject<K, V extends Enum<?>> extends DeepCl
 	 * Return the number of fields contain in this object
 	 * @return an integer
 	 */
-	public int getNbAdditionalFields();
+	public default int getNbAdditionalFields() {
+		List<Object> addFields = this.getAdditionalFields();
+		return addFields == null ? 0 : addFields.size();
+	};
 
 	/**
-	 * Return the values of the additional field
-	 * @return a List of instances
+	 * Return the values of the additional fields.
+	 * 
+	 * @return a List of instances or null if there are no additional fields
 	 */
 	public List<Object> getAdditionalFields();
 	

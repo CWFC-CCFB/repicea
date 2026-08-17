@@ -28,7 +28,7 @@ import repicea.util.DeepCloneable;
  * @author Mathieu Fortin - February 2021
  */
 @Deprecated
-interface REpiceaMatchComplexObject<E> extends DeepCloneable<E>  {
+public interface REpiceaMatchComplexObject<E> extends DeepCloneable<E>  {
 
 	/**
 	 * Return the number of fields contain in this object

@@ -63,6 +63,15 @@ import repicea.util.REpiceaTranslator.TextableEnum;
 public class REpiceaMatchWithEnumSelector<K,V extends Enum<?>> implements REpiceaShowableUIWithParent, 
 											IOUserInterfaceableObject, 
 											Memorizable {
+	
+	
+	@SuppressWarnings("serial")
+	public static class RequiredCodeException extends RuntimeException {
+		public RequiredCodeException(String message) {
+			super(message);
+		}
+	}
+
 
 	public enum DefaultSingleCategory implements TextableEnum { 
 		SingleCategory("Default", "D\u00E9faut");

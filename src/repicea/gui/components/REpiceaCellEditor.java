@@ -92,9 +92,7 @@ public class REpiceaCellEditor extends DefaultCellEditor implements NumberFieldL
 
 	@Override
 	public void numberChanged(NumberFieldEvent e) {
-		if (e.getType() == EventType.CHANGE) {
-			setValue();
-		}
+		setValue();
 	}
 
 }

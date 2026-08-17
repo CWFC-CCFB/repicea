@@ -160,7 +160,10 @@ public class REpiceaMatchWithEnumSelectorDialog extends REpiceaDialog implements
 				REpiceaMatchWithEnumObject<?,?> currentMatch = matchesForThisEnum.get(s);
 				l.add(currentMatch.getKey());
 				l.add(currentMatch.getValue());
-				l.addAll(currentMatch.getAdditionalFields());
+				List<Object> additionalFields = currentMatch.getAdditionalFields();
+				if (additionalFields != null && !additionalFields.isEmpty()) {
+					l.addAll(currentMatch.getAdditionalFields());
+				}
 				tableModel.addRow(l.toArray());
 			}
 		}

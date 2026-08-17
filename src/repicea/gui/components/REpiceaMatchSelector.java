@@ -18,8 +18,6 @@
  */
 package repicea.gui.components;
 
-import java.awt.Container;
-import java.awt.Window;
 import java.io.IOException;
 import java.io.Serializable;
 import java.security.InvalidParameterException;
@@ -30,7 +28,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
-import repicea.gui.REpiceaShowableUIWithParent;
 import repicea.io.IOUserInterfaceableObject;
 import repicea.io.REpiceaFileFilter.FileType;
 import repicea.io.REpiceaFileFilterList;
@@ -47,17 +44,17 @@ import repicea.serial.xml.XmlSerializer;
  * @author Mathieu Fortin - July 2017
  *
  * @param <E> an enum class that should be matched with the key
+ * 
+ * @deprecated Should now use the REpiceaMatchWithEnumSelector class.
  */
 @Deprecated
-public class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableUIWithParent, 
-											IOUserInterfaceableObject, 
+public class REpiceaMatchSelector<E extends Enum<?>> implements IOUserInterfaceableObject, 
 											Memorizable {
 
 	
 	protected final Map<Object, E> matchMap;
 	protected final List<E> potentialMatches;
 	protected String filename;
-	protected transient REpiceaMatchSelectorDialog<E> guiInterface;
 	protected final Object[] columnNames;
 	
 	protected Map<Object, Map<E, E>> potentialMatchesByKey;
@@ -129,29 +126,6 @@ public class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableU
 	
 	protected List<E> getPotentialMatches() {return potentialMatches;}
 	
-	@Override
-	public REpiceaMatchSelectorDialog<E> getUI(Container parent) {
-		if (guiInterface == null) {
-			guiInterface = new REpiceaMatchSelectorDialog<E>(this, (Window) parent, columnNames);
-		}
-		return guiInterface;
-	}
-
-	@Override
-	public boolean isVisible() {
-		if (guiInterface != null && guiInterface.isVisible()) {
-			return true;
-		}
-		return false;
-	}
-
-	@Override
-	public void showUI(Window parent) {
-		getUI(parent).setVisible(true);
-	}
-
-	
-	@SuppressWarnings("unchecked")
 	private void instantiatePotentialMatchesByKey(Object[] toBeMatched) {
 		potentialMatchesByKey = new HashMap<Object, Map<E, E>>();
 		for (Object obj : toBeMatched) {
@@ -163,8 +137,7 @@ public class REpiceaMatchSelector<E extends Enum<?>> implements REpiceaShowableU
 			}
 		}
 	}
-	
-	
+		
 	protected Map<E, E> getMatchesForThisKey(Object key) {
 		if (potentialMatchesByKey == null) {	// if true, we have to ensure backward compatibility
 			Set<Object> keys = this.matchMap.keySet();	
